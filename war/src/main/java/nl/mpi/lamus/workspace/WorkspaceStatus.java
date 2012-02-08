@@ -1,4 +1,4 @@
-package nl.mpi.lamus2.workspace;
+package nl.mpi.lamus.workspace;
 
 public enum WorkspaceStatus {
 

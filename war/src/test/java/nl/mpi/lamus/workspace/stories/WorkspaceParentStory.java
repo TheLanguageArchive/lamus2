@@ -1,4 +1,4 @@
-package nl.mpi.lamus2.workspace.stories;
+package nl.mpi.lamus.workspace.stories;
 
 import static org.jbehave.core.reporters.Format.CONSOLE;
 import static org.jbehave.core.reporters.Format.TXT;
