@@ -49,30 +49,41 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(datasource);
         this.insertWorkspace = new SimpleJdbcInsert(datasource)
                 .withTableName("workspace")
-                .usingGeneratedKeyColumns("workspaceid")
+                .usingGeneratedKeyColumns("workspace_id")
                 .usingColumns(
-                    "userid",
-                    "topnodeid",
-                    "startdate",
-                    "enddate",
-                    "sessionstartdate",
-                    "sessionenddate",
-                    "usedstoragespace",
-                    "maxstoragespace",
+                    "user_id",
+                    "top_node_id",
+                    "start_date",
+                    "end_date",
+                    "session_start_date",
+                    "session_end_date",
+                    "used_storage_space",
+                    "max_storage_space",
                     "status",
                     "message",
-                    "archiveinfo");
+                    "archive_info");
+        //TODO Inject table and column names
     }
     
 
     public void addWorkspace(Workspace workspace) {
+        
+        Timestamp endDate = null;
+        if(workspace.getEndDate() != null) {
+            endDate = new Timestamp(workspace.getEndDate().getTime());
+        }
+        Timestamp sessionEndDate = null;
+        if(workspace.getSessionEndDate() != null) {
+            sessionEndDate = new Timestamp(workspace.getSessionEndDate().getTime());
+        }
+        
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
                 .addValue("start_date", new Timestamp(workspace.getStartDate().getTime()))
-                .addValue("end_date", new Timestamp(workspace.getEndDate().getTime()))
+                .addValue("end_date", endDate)
                 .addValue("session_start_date", new Timestamp(workspace.getSessionStartDate().getTime()))
-                .addValue("session_end_date", new Timestamp(workspace.getSessionEndDate().getTime()))
+                .addValue("session_end_date", sessionEndDate)
                 .addValue("used_storage_space", workspace.getUsedStorageSpace())
                 .addValue("max_storage_space", workspace.getMaxStorageSpace())
                 .addValue("status", workspace.getStatus().toString())
