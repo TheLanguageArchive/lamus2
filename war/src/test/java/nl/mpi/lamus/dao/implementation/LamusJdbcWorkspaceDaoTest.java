@@ -61,30 +61,18 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     @Before
     public void setUp() throws Exception {
         
-        String scriptPath = "nl/mpi/lamus/dao/implementation/hsql_CreateTables.sql";
-        executeSqlScript(scriptPath, false);
+//        String scriptPath = "nl/mpi/lamus/dao/implementation/hsql_CreateTables.sql";
+//        executeSqlScript(scriptPath, false);
         
     }
     
     @After
     public void tearDown() {
         
-        String scriptPath = "nl/mpi/lamus/dao/implementation/hsql_DropTables.sql";
-        executeSqlScript(scriptPath, false);
+//        String scriptPath = "nl/mpi/lamus/dao/implementation/hsql_DropTables.sql";
+//        executeSqlScript(scriptPath, false);
     }
 
-    /**
-     * Test of setDataSource method, of class JdbcWorkspaceDao.
-     */
-    @Test
-    public void testSetDataSource() {
-        System.out.println("setDataSource");
-        DataSource datasource = null;
-        LamusJdbcWorkspaceDao instance = new LamusJdbcWorkspaceDao();
-        instance.setDataSource(datasource);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
 
     /**
      * Test of addWorkspace method, of class JdbcWorkspaceDao.
@@ -95,47 +83,50 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
         Date now = Calendar.getInstance().getTime();
         Workspace insertedWorkspace = new LamusWorkspace("testUser", 0L, 10000L);
-//        insertedWorkspace.setArchiveInfo("/blabla/blabla");
+        insertedWorkspace.setTopNodeID(10);
+        insertedWorkspace.setArchiveInfo("/blabla/blabla");
         
         workspaceDao.addWorkspace(insertedWorkspace);
         
         assertEquals(1, countRowsInTable("workspace"));
-
         assertEquals(1, insertedWorkspace.getWorkspaceID());
-        
+
         String sql = "SELECT * FROM workspace WHERE workspace_id = ?";        
-//        Workspace queriedWorkspace = simpleJdbcTemplate.queryForObject(sql, Workspace.class, insertedWorkspace.getWorkspaceID());
         
         Workspace queriedWorkspace = simpleJdbcTemplate.queryForObject(
                 sql,
                 new RowMapper<Workspace>() {
                   public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
-                      Workspace workspace = new LamusWorkspace();
-                      workspace.setWorkspaceID(rs.getInt("workspace_id"));
-                      workspace.setUserID(rs.getString("userid"));
-                      workspace.setTopNodeID(rs.getInt("topnodeid"));
-                      workspace.setStartDate(new Date(rs.getTimestamp("startdate").getTime()));
-                      workspace.setEndDate(new Date(rs.getTimestamp("enddate").getTime()));
-                      workspace.setSessionStartDate(new Date(rs.getTimestamp("sessionstartdate").getTime()));
-                      workspace.setSessionEndDate(new Date(rs.getTimestamp("sessionenddate").getTime()));
-                      workspace.setUsedStorageSpace(rs.getLong("used_storage_space"));
-                      workspace.setMaxStorageSpace(rs.getLong("max_storage_space"));
-                      workspace.setStatus(WorkspaceStatus.valueOf(rs.getString("status")));
-                      workspace.setMessage(rs.getString("message"));
-                      workspace.setArchiveInfo(rs.getString("archive_info"));
+                      
+                      Date endDate = null;
+                      if(rs.getTimestamp("end_date") != null) {
+                          endDate = new Date(rs.getTimestamp("end_date").getTime());
+                      }
+                      Date sessionEndDate = null;
+                      if(rs.getTimestamp("session_end_date") != null) {
+                          sessionEndDate = new Date(rs.getTimestamp("session_end_date").getTime());
+                      }
+                      
+                      Workspace workspace = new LamusWorkspace(
+                              rs.getInt("workspace_id"),
+                              rs.getString("user_id"),
+                              rs.getInt("top_node_id"),
+                              new Date(rs.getTimestamp("start_date").getTime()),
+                              endDate,
+                              new Date(rs.getTimestamp("session_start_date").getTime()),
+                              sessionEndDate,
+                              rs.getLong("used_storage_space"),
+                              rs.getLong("max_storage_space"),
+                              WorkspaceStatus.valueOf(rs.getString("status")),
+                              rs.getString("message"),
+                              rs.getString("archive_info"));
                       return workspace;
                   }
                 },
                 new Object[] { insertedWorkspace.getWorkspaceID() });
         
-//        Workspace queriedWorkspace = simpleJdbcTemplate.queryForObject(
-//                sql, ParameterizedBeanPropertyRowMapper.newInstance(Workspace.class), new Object[] { insertedWorkspace.getWorkspaceID() });
         
-        
-        //TODO implement equals in WorkspaceImpl
         assertEquals(insertedWorkspace, queriedWorkspace);
-        
-//                throw new UnsupportedOperationException("needs to be updated");
     }
 
     

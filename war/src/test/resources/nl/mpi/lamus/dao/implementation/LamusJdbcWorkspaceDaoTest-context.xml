@@ -2,24 +2,34 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
             http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context-spring-context-3.1.xsd">
+            http://www.springframework.org/schema/context-spring-context-3.1.xsd
+            http://www.springframework.org/schema/jdbc
+            http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd">
 
     <bean id="workspaceDao" class="nl.mpi.lamus.dao.implementation.LamusJdbcWorkspaceDao">
-        <property name="dataSource" ref="dataSource" />
+        <property name="dataSource" ref="embeddedDataSource" />
     </bean>
 
-    <bean id="dataSource"  class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+<!--    <bean id="dataSource"  class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
         <property name="url" value="jdbc:hsqldb:mem:workspacetest" />
         <property name="username" value="sa" />
         <property name="password" value="" />
-    </bean>
+    </bean>-->
+    
+    <jdbc:embedded-database id="embeddedDataSource" type="HSQL" />
+    
+    <jdbc:initialize-database data-source="embeddedDataSource" enabled="true">
+        <jdbc:script location="nl/mpi/lamus/dao/implementation/hsql_DropTables.sql" />
+        <jdbc:script location="nl/mpi/lamus/dao/implementation/hsql_CreateTables.sql" />
+    </jdbc:initialize-database>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="embeddedDataSource"/>
     </bean>
 
 </beans>

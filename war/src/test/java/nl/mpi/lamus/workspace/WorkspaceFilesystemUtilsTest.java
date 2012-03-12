@@ -49,7 +49,7 @@ public class WorkspaceFilesystemUtilsTest {
     @Test
     public void testCreateWorkspaceDirectory() {
         
-        
+        fail("The test case is a prototype.");
         
     }
 }
