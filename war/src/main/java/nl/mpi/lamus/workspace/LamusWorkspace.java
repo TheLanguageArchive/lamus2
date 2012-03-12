@@ -39,10 +39,6 @@ public class LamusWorkspace implements Workspace {
     private String message;
     private String archiveInfo;
     
-    public LamusWorkspace() {
-        
-    }
-    
     public LamusWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
         this.userID = userID;
         this.usedStorageSpace = usedStorageSpace;
@@ -52,6 +48,23 @@ public class LamusWorkspace implements Workspace {
         this.sessionStartDate = now;
         this.status = WorkspaceStatus.INITIALISING;
         //TODO set message, etc
+    }
+    
+    public LamusWorkspace(int workspaceID, String userID, int topNodeID,
+            Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
+            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
+        this.workspaceID = workspaceID;
+        this.userID = userID;
+        this.topNodeID = topNodeID;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.sessionStartDate = sessionStartDate;
+        this.sessionEndDate = sessionEndDate;
+        this.usedStorageSpace = usedStorageSpace;
+        this.maxStorageSpace = maxStorageSpace;
+        this.status = status;
+        this.message = message;
+        this.archiveInfo = archiveInfo;
     }
     
     public int getWorkspaceID() {
