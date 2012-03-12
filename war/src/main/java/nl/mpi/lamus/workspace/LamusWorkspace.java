@@ -79,35 +79,67 @@ public class LamusWorkspace implements Workspace {
     }
 
     public Date getStartDate() {
-        return (Date) this.startDate.clone();
+        Date toReturn = null;
+        if(this.startDate != null) {
+            toReturn = (Date) this.startDate.clone();
+        }
+        return toReturn;
     }
     
     public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+        Date toSet = null;
+        if(startDate != null) {
+            toSet = (Date) startDate.clone();
+        }
+        this.startDate = toSet;
     }
 
     public Date getEndDate() {
-        return (Date) this.endDate.clone();
+        Date toReturn = null;
+        if(this.endDate != null) {
+            toReturn = (Date) this.endDate.clone();
+        }
+        return toReturn;
     }
     
     public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+        Date toSet = null;
+        if(endDate != null) {
+            toSet = (Date) endDate.clone();
+        }
+        this.endDate = toSet;
     }
 
     public Date getSessionStartDate() {
-        return (Date) this.sessionStartDate.clone();
+        Date toReturn = null;
+        if(this.sessionStartDate != null) {
+            toReturn = (Date) this.sessionStartDate.clone();
+        }
+        return toReturn;
     }
     
     public void setSessionStartDate(Date sessionStartDate) {
-        this.sessionStartDate = sessionStartDate;
+        Date toSet = null;
+        if(sessionStartDate != null) {
+            toSet = (Date) sessionStartDate.clone();
+        }
+        this.sessionStartDate = toSet;
     }
 
     public Date getSessionEndDate() {
-        return (Date) this.sessionEndDate.clone();
+        Date toReturn = null;
+        if(this.sessionEndDate != null) {
+            toReturn = (Date) this.sessionEndDate.clone();
+        }
+        return toReturn;
     }
     
     public void setSessionEndDate(Date sessionEndDate) {
-        this.sessionEndDate = sessionEndDate;
+        Date toSet = null;
+        if(sessionEndDate != null) {
+            toSet = (Date) sessionEndDate.clone();
+        }
+        this.sessionEndDate = toSet;
     }
     
     public void updateStartDates() {
