@@ -79,7 +79,7 @@ public class LamusWorkspace implements Workspace {
     }
 
     public Date getStartDate() {
-        return this.startDate;
+        return (Date) this.startDate.clone();
     }
     
     public void setStartDate(Date startDate) {
@@ -87,7 +87,7 @@ public class LamusWorkspace implements Workspace {
     }
 
     public Date getEndDate() {
-        return this.endDate;
+        return (Date) this.endDate.clone();
     }
     
     public void setEndDate(Date endDate) {
@@ -95,7 +95,7 @@ public class LamusWorkspace implements Workspace {
     }
 
     public Date getSessionStartDate() {
-        return this.sessionStartDate;
+        return (Date) this.sessionStartDate.clone();
     }
     
     public void setSessionStartDate(Date sessionStartDate) {
@@ -103,7 +103,7 @@ public class LamusWorkspace implements Workspace {
     }
 
     public Date getSessionEndDate() {
-        return this.sessionEndDate;
+        return (Date) this.sessionEndDate.clone();
     }
     
     public void setSessionEndDate(Date sessionEndDate) {
