@@ -1,0 +1,3 @@
+DROP TABLE workspace IF EXISTS;
+DROP TABLE node IF EXISTS;
+DROP TABLE node_link IF EXISTS;
