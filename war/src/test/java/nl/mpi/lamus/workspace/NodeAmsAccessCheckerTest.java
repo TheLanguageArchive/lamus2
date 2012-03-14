@@ -16,7 +16,6 @@
 package nl.mpi.lamus.workspace;
 
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.Node;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -24,6 +23,7 @@ import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.*;
 
 /**
@@ -111,4 +111,24 @@ public class NodeAmsAccessCheckerTest {
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
         assertFalse("Result should be false when the selected top node is locked.", result);
     }
+    
+    /**
+     * Test of canCreateWorkspace method, of class NodeAccessCheckerImpl.
+     */
+    @Test
+    public void returnsTrueIfNodeIsNotLocked() {
+        
+        final String userID = "someUser";
+        final int archiveNodeID = 10;
+        
+        context.checking(new Expectations() {{
+            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
+            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeID); will(returnValue(true));
+            oneOf (mockWorkspaceDao).isNodeLocked(archiveNodeID); will(returnValue(false));
+        }});
+        
+        boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
+        assertTrue("Result should be false when the selected top node is locked.", result);
+    }
+    
 }
