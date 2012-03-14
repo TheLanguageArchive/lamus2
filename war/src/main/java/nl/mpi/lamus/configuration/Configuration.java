@@ -13,43 +13,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.configuration;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import nl.mpi.lamus.ams.AmsBridge;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceFilesystemUtilsTest {
+public interface Configuration {
     
-    public WorkspaceFilesystemUtilsTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
     
-    @Before
-    public void setUp() {
-    }
+    public AmsBridge getAmsBridge();
     
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
-     */
-    @Test
-    public void testCreateWorkspaceDirectory() {
-        
-        fail("The test case is a prototype.");
-        
-    }
+    public void setAmsBridge(AmsBridge amsBridge);
+    
+    public long getDefaultMaxStorageSpace();
+    
+    public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
+    
+    public int getTotalNumberOfDaysAllowedUntilExpiry();
+    
+    public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
+    
+    public String getWorkspaceBaseDirectory();
 }

@@ -264,6 +264,14 @@ public class LamusWorkspace implements Workspace {
     
     @Override
     public String toString() {
-        throw new UnsupportedOperationException("not yet implemented");
+        
+        String stringResult = "Workspace ID: " + this.workspaceID + ", User ID: " + this.userID +
+                ", Top Node ID: " + this.topNodeID + ", Start Date: " + this.startDate +
+                ", End Date: " + this.endDate + ", Session Start Date: " + this.sessionStartDate +
+                ", Session End Date: " + this.sessionEndDate + ", Used Storage Space: " + this.usedStorageSpace +
+                ", Max Storage Space: " + this.maxStorageSpace + ", Status: " + this.status +
+                ", Message: " + this.message + ", Archive Info: " + this.archiveInfo;
+        
+        return stringResult;
     }
 }

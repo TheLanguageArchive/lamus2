@@ -51,7 +51,7 @@ public class NodeAmsAccessCheckerTest {
     
     @Before
     public void setUp() {
-        nodeAccessChecker = new NodeAmsAccessChecker(mockArchiveObjectsDB, mockAmsBridge, mockWorkspaceDao);
+        nodeAccessChecker = new LamusNodeAccessChecker(mockArchiveObjectsDB, mockAmsBridge, mockWorkspaceDao);
     }
     
     @After
@@ -66,14 +66,13 @@ public class NodeAmsAccessCheckerTest {
         
         final String userID = "someUser";
         final int archiveNodeID = 10;
-        final Node archiveNode = new Node(NodeIdUtils.TONODEID(archiveNodeID), 0, "cmdi", "someNode", "some node");
         
         context.checking(new Expectations() {{
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(false));
         }});
         
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
-        assertFalse(result);
+        assertFalse("Result should be false when the selected top node is external.", result);
     }
     
     /**
@@ -91,7 +90,7 @@ public class NodeAmsAccessCheckerTest {
         }});
         
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
-        assertFalse(result);
+        assertFalse("Result should be false when the current user does not have write access in the selected top node.", result);
     }
     
     /**
@@ -110,6 +109,6 @@ public class NodeAmsAccessCheckerTest {
         }});
         
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
-        assertFalse(result);
+        assertFalse("Result should be false when the selected top node is locked.", result);
     }
 }

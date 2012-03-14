@@ -1,7 +1,8 @@
-package nl.mpi.lamus;
+package nl.mpi.lamus.configuration.implementation;
 
 
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.configuration.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /*
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class Configuration {
+public class LamusConfiguration implements Configuration {
     
     private AmsBridge amsBridge;
     /** ingest request storage quota, default 10 GB */
@@ -37,13 +38,13 @@ public class Configuration {
     private int numberOfDaysOfInactivityAllowedSinceLastWarningEmail = 30;
     
     
-    private final static Configuration instance = new Configuration();
+    private final static LamusConfiguration instance = new LamusConfiguration();
     
-    private Configuration() {
+    private LamusConfiguration() {
         
     }
     
-    public static Configuration getInstance() {
+    public static LamusConfiguration getInstance() {
         return instance;
     }
     
@@ -72,6 +73,11 @@ public class Configuration {
     
     public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail() {
         return this.numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
+    }
+
+    public String getWorkspaceBaseDirectory() {
+        //TODO load this from properties/context
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

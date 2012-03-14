@@ -18,11 +18,14 @@ package nl.mpi.lamus.dao.implementation;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.LamusWorkspace;
 import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.WorkspaceNode;
 import nl.mpi.lamus.workspace.WorkspaceNodeImpl;
+import nl.mpi.lamus.workspace.WorkspaceStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -94,7 +97,46 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
 
     public Workspace getWorkspace(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        String queryWorkspaceSql = "select * from workspace where workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        RowMapper<Workspace> mapper = new RowMapper<Workspace>() {
+          public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
+              Date endDate = null;
+              if(rs.getTimestamp("end_date") != null) {
+                  endDate = new Date(rs.getTimestamp("end_date").getTime());
+              }
+              Date sessionEndDate = null;
+              if(rs.getTimestamp("session_end_date") != null) {
+                  sessionEndDate = new Date(rs.getTimestamp("session_end_date").getTime());
+              }
+              
+              Workspace workspace = new LamusWorkspace(
+                      rs.getInt("workspace_id"),
+                      rs.getString("user_id"),
+                      rs.getInt("top_node_id"),
+                      new Date(rs.getTimestamp("start_date").getTime()),
+                      endDate,
+                      new Date(rs.getTimestamp("session_start_date").getTime()),
+                      sessionEndDate,
+                      rs.getLong("used_storage_space"),
+                      rs.getLong("max_storage_space"),
+                      WorkspaceStatus.valueOf(rs.getString("status")),
+                      rs.getString("message"),
+                      rs.getString("archive_info"));
+              return workspace;
+          }
+        };
+        
+        Workspace workspaceToReturn;
+        try {
+            workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, mapper);
+        } catch(EmptyResultDataAccessException ex) {
+            return null;
+        }
+        
+        return workspaceToReturn;
     }
 
     public boolean isNodeLocked(int archiveNodeID) {

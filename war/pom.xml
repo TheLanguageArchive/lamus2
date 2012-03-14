@@ -45,7 +45,6 @@
             <version>2.6.0-RC2</version>
         </dependency>
         
-        
         <!-- ANOTHER VERSION OF THE DRIVER????? -->
         <dependency>
             <groupId>postgresql</groupId>

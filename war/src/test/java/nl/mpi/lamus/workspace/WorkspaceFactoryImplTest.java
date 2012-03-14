@@ -15,8 +15,8 @@
  */
 package nl.mpi.lamus.workspace;
 
-import nl.mpi.lamus.Configuration;
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.configuration.Configuration;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -30,13 +30,10 @@ import org.junit.*;
 public class WorkspaceFactoryImplTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    @Mock private Workspace mockWorkspace;
     @Mock private AmsBridge mockAmsBridge;
+    @Mock private Configuration mockConfiguration;
     private int archiveTopNodeID;
     private String userID;
-//    private int usedStorageSpace;
-//    private int maxStorageSpace;
-//    private String archiveInfo;
     private WorkspaceFactory factory; 
     
     public WorkspaceFactoryImplTest() {
@@ -54,10 +51,7 @@ public class WorkspaceFactoryImplTest {
     public void setUp() {
         archiveTopNodeID = 10;
         userID = "testUser";
-        factory = new WorkspaceFactoryImpl(mockAmsBridge);
-//        usedStorageSpace = 0;
-//        maxStorageSpace = 100000;
-//        archiveInfo = "/archive/info|info";
+        factory = new WorkspaceFactoryImpl(mockAmsBridge, mockConfiguration);
     }
     
     @After
@@ -82,11 +76,11 @@ public class WorkspaceFactoryImplTest {
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
         
-        assertNotNull(testWorkspace);
-        assertTrue(testWorkspace instanceof Workspace);
+        assertNotNull("Returned workspace should not be null.", testWorkspace);
+        assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof Workspace);
         //TODO assert if the workspace object contains the expected values
-        assertEquals(expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
-        assertEquals(expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
+        assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
+        assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
     }
     
     /**
@@ -98,21 +92,22 @@ public class WorkspaceFactoryImplTest {
     @Test
     public void workspaceObjectIsCreatedWithDefaultUsedStorageSpace() {
         
+        final long valueNotDefined = -1L;
         final long expectedUsedStorageSpace = 0L;
         final long expectedMaxStorageSpace = 10000000000L;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(-1L));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(valueNotDefined));
             oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
         
-        assertNotNull(testWorkspace);
-        assertTrue(testWorkspace instanceof Workspace);
+        assertNotNull("Returned workspace should not be null.", testWorkspace);
+        assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof Workspace);
         //TODO assert if the workspace object contains the expected values
-        assertEquals(expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
-        assertEquals(expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
+        assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
+        assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
     }
 
     /**
@@ -124,21 +119,23 @@ public class WorkspaceFactoryImplTest {
     @Test
     public void workspaceObjectIsCreatedWithDefaultMaxStorageSpace() {
         
+        final long valueNotDefined = -1L;
         final long expectedUsedStorageSpace = 10000000L;
-        final long expectedMaxStorageSpace = Configuration.getInstance().getDefaultMaxStorageSpace();
+        final long expectedMaxStorageSpace = 90000000L;
         
         context.checking(new Expectations() {{
             oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(-1L));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(valueNotDefined));
+            oneOf (mockConfiguration).getDefaultMaxStorageSpace(); will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
         
-        assertNotNull(testWorkspace);
-        assertTrue(testWorkspace instanceof Workspace);
+        assertNotNull("Returned workspace should not be null.", testWorkspace);
+        assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof Workspace);
         //TODO assert if the workspace object contains the expected values
-        assertEquals(expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
-        assertEquals(expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
+        assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
+        assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
     }
     
 }

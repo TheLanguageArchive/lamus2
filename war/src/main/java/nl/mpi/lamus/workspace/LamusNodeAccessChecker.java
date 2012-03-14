@@ -24,13 +24,13 @@ import nl.mpi.lamus.dao.WorkspaceDao;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class NodeAmsAccessChecker implements NodeAccessChecker {
+public class LamusNodeAccessChecker implements NodeAccessChecker {
 
     private final ArchiveObjectsDB archiveObjectsDB;
     private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;
     
-    NodeAmsAccessChecker(ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
+    LamusNodeAccessChecker(ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
         this.archiveObjectsDB = archiveObjectsDB;
         this.amsBridge = amsBridge;
         this.workspaceDao = workspaceDao;

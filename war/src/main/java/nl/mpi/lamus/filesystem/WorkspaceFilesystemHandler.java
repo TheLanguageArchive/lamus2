@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.filesystem;
 
+import java.io.File;
 import nl.mpi.lamus.workspace.Workspace;
 
 /**
@@ -23,6 +24,6 @@ import nl.mpi.lamus.workspace.Workspace;
  */
 public interface WorkspaceFilesystemHandler {
     
-    public boolean createWorkspaceDirectory(Workspace workspace);
+    public File createWorkspaceDirectory(Workspace workspace);
     
 }

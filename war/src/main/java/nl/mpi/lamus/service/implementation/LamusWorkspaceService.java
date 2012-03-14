@@ -16,6 +16,7 @@
 package nl.mpi.lamus.service.implementation;
 
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.NodeAccessChecker;
 import nl.mpi.lamus.workspace.Workspace;
@@ -30,11 +31,14 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final NodeAccessChecker nodeAccessChecker;
     private final WorkspaceFactory workspaceFactory;
     private final WorkspaceDao workspaceDao;
+    private final WorkspaceFilesystemHandler workspaceFilesystemHandler;
 
-    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceFactory factory, WorkspaceDao workspaceDao) {
+    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceFactory factory,
+            WorkspaceDao workspaceDao, WorkspaceFilesystemHandler workspaceFilesystemHandler) {
         this.workspaceFactory = factory;
         this.nodeAccessChecker = accessChecker;
         this.workspaceDao = workspaceDao;
+        this.workspaceFilesystemHandler = workspaceFilesystemHandler;
     }
     
     
@@ -61,7 +65,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         workspaceDao.addWorkspace(newWorkspace);
         
         //TODO create workspace directories
-        
+        workspaceFilesystemHandler.createWorkspaceDirectory(newWorkspace);
         
         
         //TODO start exploring the nodes in the filesystem - WorkspaceImporter - what about having a super class for both threads (importer/exported)?

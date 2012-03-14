@@ -18,7 +18,9 @@ package nl.mpi.lamus.service.implementation;
 import java.net.MalformedURLException;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.LamusWorkspace;
 import nl.mpi.lamus.workspace.NodeAccessChecker;
 import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.WorkspaceFactory;
@@ -40,7 +42,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private NodeAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceFactory mockWorkspaceFactory;
     @Mock private WorkspaceDao mockWorkspaceDao;
-    @Mock private Workspace mockWorkspace;
+    @Mock private WorkspaceFilesystemHandler mockWorkspaceFilesystemHandler;
     
     
     public LamusWorkspaceServiceTest() {
@@ -56,7 +58,7 @@ public class LamusWorkspaceServiceTest {
     
     @Before
     public void setUp() {
-        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceFactory, mockWorkspaceDao);
+        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceFilesystemHandler);
     }
     
     @After
@@ -77,7 +79,7 @@ public class LamusWorkspaceServiceTest {
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeID);
-        assertNull(result);
+        assertNull("Returned workspace should be null when it cannot be created.", result);
     }
     
     /**
@@ -88,16 +90,20 @@ public class LamusWorkspaceServiceTest {
         
         final int archiveNodeID = 10;
         final String userID = "someUser";
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
             oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(true));
             //allow other calls
-            oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(mockWorkspace));
-            oneOf (mockWorkspaceDao).addWorkspace(mockWorkspace);
+            oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
+            oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf (mockWorkspaceFilesystemHandler).createWorkspaceDirectory(newWorkspace);
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeID);
-        assertNotNull(result);
+        assertNotNull("Returned workspace should not be null when it can be created", result);
     }
     
     
