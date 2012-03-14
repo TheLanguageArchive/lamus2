@@ -62,14 +62,12 @@ public class LamusWorkspaceFilesystemHandlerTest {
      * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
      */
     @Test
-    public void testCreateWorkspaceDirectory() {
-        
-        // get path of the base directory for lamus workspaces
-        // create the directory for this particular workspace (named after the workspace id)
+    public void workspaceDirectoryHasToBeCreated() {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
         final File baseDirectory = testFolder.newFolder("workspace_base_directory");
+        File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
         
         context.checking(new Expectations() {{
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
@@ -77,7 +75,30 @@ public class LamusWorkspaceFilesystemHandlerTest {
         
         File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
         
-        assertTrue("Workspace directory wasn't created", new File(baseDirectory, "" + testWorkspace.getWorkspaceID()).exists());
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
+        assertNotNull("Returned workspace should not be null.", result);
+    }
+    
+    /**
+     * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
+     */
+    @Test
+    public void workspaceDirectoryAlreadyExists() {
+        
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setWorkspaceID(1);
+        final File baseDirectory = testFolder.newFolder("workspace_base_directory");
+        File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
+        workspaceDirectory.mkdirs();
+        
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
+        }});
+        
+        File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
+
         assertNotNull("Returned workspace should not be null.", result);
     }
 }
