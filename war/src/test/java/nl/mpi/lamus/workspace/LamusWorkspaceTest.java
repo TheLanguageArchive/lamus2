@@ -96,6 +96,33 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'message' is not the expected one.", this.message, testWorkspace.getMessage());
         assertEquals("Value for 'archiveInfo' is not the expected one.", this.archiveInfo, testWorkspace.getArchiveInfo());
     }
+    
+    /**
+     * 
+     */
+    @Test
+    public void constructorWithAllParametersClonesDateObjects() {
+        
+        Calendar localCalendar = Calendar.getInstance();
+        Date localTestDate = localCalendar.getTime();
+        
+        Workspace testWorkspace = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, localTestDate, localTestDate, localTestDate, localTestDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        localCalendar.add(Calendar.HOUR, 2);
+        localTestDate.setTime(localCalendar.getTimeInMillis());
+        
+        assertFalse("Changing the 'startDate' object used to create the workspace should not change the value inside the workspace object.",
+                localTestDate.equals(testWorkspace.getStartDate()));
+        assertNotSame("Changing the 'endDate' object used to create the workspace should not change the value inside the workspace object.",
+                localTestDate.equals(testWorkspace.getEndDate()));
+        assertNotSame("Changing the 'sessionStartDate' object used to create the workspace should not change the value inside the workspace object.",
+                localTestDate.equals(testWorkspace.getSessionStartDate()));
+        assertNotSame("Changing the 'sessionEDate' object used to create the workspace should not change the value inside the workspace object.",
+                localTestDate.equals(testWorkspace.getSessionEndDate()));
+    }
 
     /**
      * Test of equals method, of class LamusWorkspace.
@@ -181,44 +208,6 @@ public class LamusWorkspaceTest {
      * 
      */
     @Test
-    public void getSessionStartDateReturnsEqualButNotSameObject() {
-        
-        Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
-                this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
-        
-        assertEquals("Retrieved value for 'sessionStartDate' does not match the inserted one.", this.testDate, testWorkspace.getSessionStartDate());
-        assertNotSame("The 'sessionStartDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
-                this.testDate, testWorkspace.getSessionStartDate());
-    }
-    
-    /**
-     * 
-     */
-    @Test
-    public void setSessionStartDateSetsProperlyEqualButNotSameObject() {
-        
-        Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
-                this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
-        
-        Calendar newCalendar = Calendar.getInstance();
-        newCalendar.add(Calendar.HOUR, -1);
-        Date newDate = newCalendar.getTime();
-        testWorkspace.setSessionStartDate(newDate);
-        
-        assertFalse("Value for 'sessionStartDate' originally used should not match the current value.", this.testDate.equals(testWorkspace.getSessionStartDate()));
-        assertEquals("Retrieved value for 'sessionStartDate' does not match the one used in the 'set' method.", newDate, testWorkspace.getSessionStartDate());
-        assertNotSame("The 'sessionStartDate' object used in the 'set' method and the one retrieved should be clones and not the exact same object.",
-                newDate, testWorkspace.getSessionStartDate());
-    }
-    
-    /**
-     * 
-     */
-    @Test
     public void getEndDateReturnsEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
@@ -251,6 +240,44 @@ public class LamusWorkspaceTest {
         assertEquals("Retrieved value for 'endDate' does not match the one used in the 'set' method.", newDate, testWorkspace.getEndDate());
         assertNotSame("The 'endDate' object used in the 'set' method and the one retrieved should be clones and not the exact same object.",
                 newDate, testWorkspace.getEndDate());
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void getSessionStartDateReturnsEqualButNotSameObject() {
+        
+        Workspace testWorkspace = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        assertEquals("Retrieved value for 'sessionStartDate' does not match the inserted one.", this.testDate, testWorkspace.getSessionStartDate());
+        assertNotSame("The 'sessionStartDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
+                this.testDate, testWorkspace.getSessionStartDate());
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void setSessionStartDateSetsProperlyEqualButNotSameObject() {
+        
+        Workspace testWorkspace = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        Calendar newCalendar = Calendar.getInstance();
+        newCalendar.add(Calendar.HOUR, -1);
+        Date newDate = newCalendar.getTime();
+        testWorkspace.setSessionStartDate(newDate);
+        
+        assertFalse("Value for 'sessionStartDate' originally used should not match the current value.", this.testDate.equals(testWorkspace.getSessionStartDate()));
+        assertEquals("Retrieved value for 'sessionStartDate' does not match the one used in the 'set' method.", newDate, testWorkspace.getSessionStartDate());
+        assertNotSame("The 'sessionStartDate' object used in the 'set' method and the one retrieved should be clones and not the exact same object.",
+                newDate, testWorkspace.getSessionStartDate());
     }
     
     /**

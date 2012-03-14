@@ -56,10 +56,18 @@ public class LamusWorkspace implements Workspace {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.sessionStartDate = sessionStartDate;
-        this.sessionEndDate = sessionEndDate;
+        if(startDate != null) {
+            this.startDate = (Date) startDate.clone();
+        }
+        if(endDate != null) {
+            this.endDate = (Date) endDate.clone();
+        }
+        if(sessionStartDate != null) {
+            this.sessionStartDate = (Date) sessionStartDate.clone();
+        }
+        if(sessionEndDate != null) {
+            this.sessionEndDate = (Date) sessionEndDate.clone();
+        }
         this.usedStorageSpace = usedStorageSpace;
         this.maxStorageSpace = maxStorageSpace;
         this.status = status;
