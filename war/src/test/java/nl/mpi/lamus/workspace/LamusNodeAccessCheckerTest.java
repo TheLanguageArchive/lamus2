@@ -86,7 +86,7 @@ public class LamusNodeAccessCheckerTest {
         
         context.checking(new Expectations() {{
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
-            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeID); will(returnValue(false));
+            oneOf (mockAmsBridge).hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(false));
         }});
         
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
@@ -104,7 +104,7 @@ public class LamusNodeAccessCheckerTest {
         
         context.checking(new Expectations() {{
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
-            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeID); will(returnValue(true));
+            oneOf (mockAmsBridge).hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
             oneOf (mockWorkspaceDao).isNodeLocked(archiveNodeID); will(returnValue(true));
         }});
         
@@ -123,7 +123,7 @@ public class LamusNodeAccessCheckerTest {
         
         context.checking(new Expectations() {{
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
-            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeID); will(returnValue(true));
+            oneOf (mockAmsBridge).hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
             oneOf (mockWorkspaceDao).isNodeLocked(archiveNodeID); will(returnValue(false));
         }});
         

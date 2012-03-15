@@ -41,7 +41,7 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
         if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {
             return false;
         }
-        if(!this.amsBridge.hasWriteAccess(userID, archiveNodeID)) {
+        if(!this.amsBridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID))) {
             return false;
         }
         

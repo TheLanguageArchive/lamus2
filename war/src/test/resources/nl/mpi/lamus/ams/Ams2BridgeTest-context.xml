@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+    <bean id="testAms2Bridge" class="nl.mpi.lamus.ams.Ams2Bridge">
+<!--        <property name="mPrincipalSrv" ref="principalSrv" />
+        <property name="mAuthenticationSrv" ref="integratedAuthenticationSrv" />
+        <property name="mAuthorizationSrv" ref="authorizationSrv" />
+        <property name="mFabricSrv" ref="fabricSrv" />
+        <property name="mLicenseSrv" ref="licenseSrv" />
+        <property name="mRuleSrv" ref="ruleSrv" />-->
+        <constructor-arg ref="principalSrv" />
+        <constructor-arg ref="integratedAuthenticationSrv" />
+        <constructor-arg ref="authorizationSrv" />
+        <constructor-arg ref="fabricSrv" />
+        <constructor-arg ref="licenseSrv" />
+        <constructor-arg ref="ruleSrv" />
+    </bean>
+
+</beans>

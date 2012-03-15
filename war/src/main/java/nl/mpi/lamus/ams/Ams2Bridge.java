@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import nl.mpi.common.util.Text;
 import nl.mpi.common.util.spring.SpringContextLoader;
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lat.ams.Constants;
 import nl.mpi.lat.ams.model.NodeAuth;
@@ -48,17 +49,17 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	private final static Log LOG = LogFactory.getLog(Ams2Bridge.class);
 	
 	/** provides access to principals' data */
-	private PrincipalService			mPrincipalSrv;
+	private PrincipalService		mPrincipalSrv;
 	/** handles authentication */
-	private AuthenticationService	mAuthenticationSrv;
+	private AuthenticationService           mAuthenticationSrv;
 	/** handles authorization */
-	private AdvAuthorizationService	mAuthorizationSrv;
+	private AdvAuthorizationService         mAuthorizationSrv;
 	/** handles access to node data from corpusstrutcture db */
 	private FabricService			mFabricSrv;
 	/** handles license management */
 	private LicenseService			mLicenseSrv;
 	/** handles rule management*/
-	private RuleService				mRuleSrv;
+	private RuleService			mRuleSrv;
 	
         
         private String baseURL;
@@ -70,10 +71,22 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * default constructor,
 	 * no special configuration <=> loads default settings
 	 */
-	public Ams2Bridge() {
-		// load defaults
-		this.initServices(null, null, null, null, null, null, null);
-	}
+//            public Ams2Bridge() {
+//		// load defaults
+////		this.initServices(null, null, null, null, null, null, null);
+//	}
+            
+           
+            public Ams2Bridge(PrincipalService principalSrv, AuthenticationService authenticationSrv,
+                    AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
+                    LicenseService licenseSrv, RuleService ruleSrv) {
+                this.mPrincipalSrv = principalSrv;
+                this.mAuthenticationSrv = authenticationSrv;
+                this.mAuthorizationSrv = authorizationSrv;
+                this.mFabricSrv = fabricSrv;
+                this.mLicenseSrv = licenseSrv;
+                this.mRuleSrv = ruleSrv;
+            }
 	
 	
 	/**
@@ -85,10 +98,10 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param authenticationSrv name of the (spring-bean) service which implements {@link AuthenticationService}
 	 * @see #initServices(String, String, String, String)
 	 */
-	public Ams2Bridge(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
-			String licenseSrv, String ruleSrv) {
-		this.initServices(springConfigPaths, authorizationSrv, principalSrv, authenticationSrv, fabricSrv, licenseSrv, ruleSrv);
-	}
+//	public Ams2Bridge(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
+//			String licenseSrv, String ruleSrv) {
+//		this.initServices(springConfigPaths, authorizationSrv, principalSrv, authenticationSrv, fabricSrv, licenseSrv, ruleSrv);
+//	}
 
 	
 	/**
@@ -108,32 +121,32 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
 	 * @param authenticationSrv name of the (spring-bean) service which implements {@link AuthenticationService}
 	 */
-	private void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
-			String licenseSrv, String ruleSrv) {
-		SpringContextLoader spring = new SpringContextLoader();
-		spring.init(Text.notEmpty(springConfigPaths) 
-				? springConfigPaths 
-				: "spring-ams2-core.xml");
-
-		// load services: use given values if exist (not empty) otherwise defaults
-		this.setAuthorizationSrv((AdvAuthorizationService) spring.getBean(
-				Text.notEmpty(authorizationSrv) ? authorizationSrv : Constants.BEAN_AUTHORIZATION_SRV));
-		
-		this.setPrincipalSrv((PrincipalService) spring.getBean(
-				Text.notEmpty(principalSrv) ? principalSrv : Constants.BEAN_PRINCIPAL_SRV));
-		
-		this.setAuthenticationSrv((AuthenticationService) spring.getBean(
-				Text.notEmpty(authenticationSrv) ? authenticationSrv : Constants.BEAN_INTEGRATED_AUTHENTICATION_SRV));
-		
-		this.setFabricSrv((FabricService) spring.getBean(
-				Text.notEmpty(fabricSrv) ? fabricSrv : Constants.BEAN_FABRIC_SRV));
-		
-		this.setLicenseSrv((LicenseService) spring.getBean(
-				Text.notEmpty(licenseSrv) ? licenseSrv : Constants.BEAN_LICENSE_SRV));
-		
-		this.setRuleSrv((RuleService) spring.getBean(
-				Text.notEmpty(ruleSrv) ? ruleSrv : Constants.BEAN_RULE_SRV));
-	}
+//	private void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
+//			String licenseSrv, String ruleSrv) {
+//		SpringContextLoader spring = new SpringContextLoader();
+//		spring.init(Text.notEmpty(springConfigPaths) 
+//				? springConfigPaths 
+//				: "spring-ams2-core.xml");
+//
+//		// load services: use given values if exist (not empty) otherwise defaults
+//		this.setAuthorizationSrv((AdvAuthorizationService) spring.getBean(
+//				Text.notEmpty(authorizationSrv) ? authorizationSrv : Constants.BEAN_AUTHORIZATION_SRV));
+//		
+//		this.setPrincipalSrv((PrincipalService) spring.getBean(
+//				Text.notEmpty(principalSrv) ? principalSrv : Constants.BEAN_PRINCIPAL_SRV));
+//		
+//		this.setAuthenticationSrv((AuthenticationService) spring.getBean(
+//				Text.notEmpty(authenticationSrv) ? authenticationSrv : Constants.BEAN_INTEGRATED_AUTHENTICATION_SRV));
+//		
+//		this.setFabricSrv((FabricService) spring.getBean(
+//				Text.notEmpty(fabricSrv) ? fabricSrv : Constants.BEAN_FABRIC_SRV));
+//		
+//		this.setLicenseSrv((LicenseService) spring.getBean(
+//				Text.notEmpty(licenseSrv) ? licenseSrv : Constants.BEAN_LICENSE_SRV));
+//		
+//		this.setRuleSrv((RuleService) spring.getBean(
+//				Text.notEmpty(ruleSrv) ? ruleSrv : Constants.BEAN_RULE_SRV));
+//	}
 	
 	
 	/**
@@ -265,7 +278,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	public void close(String reason) {
 		// unimplemented: db access control handled by hibernate
 		LOG.debug("closing ams2Bridge due to " + reason);
-		this.getFabricSrv().close();
+                if(this.getFabricSrv() != null) {
+                    this.getFabricSrv().close();
+                }
 	}
 	
 	
@@ -289,11 +304,12 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	/**
 	 * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String, nl.mpi.util.OurURL)
 	 */
-	public boolean hasWriteAccess(String userId, int nodeId/* OurURL ourl*/) {
+	public boolean hasWriteAccess(String userId, String nodeIdStr/* OurURL ourl*/) {
 //		if (ourl.toString().indexOf("/sessions/")!=-1) return true;
 		LatPrincipal user = this.getPrincipalSrv().getUser(userId);
 //		NodeID target = this.toNodeID(ourl);
-                NodeID target = new NodeIDImpl(nodeId);
+//                NodeID target = new NodeIDImpl(nodeId);
+                NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
 		return this.getAuthorizationSrv().isWriteable(user, target);
 	}
 	

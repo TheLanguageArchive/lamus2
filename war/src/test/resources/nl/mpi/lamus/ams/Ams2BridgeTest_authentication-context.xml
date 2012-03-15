@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+
+	<!--
+		** authentication services *****************************************
+	-->
+
+    <bean id="integratedAuthenticationSrv"
+              class="nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv">
+        <property name="services"><null/></property>
+    </bean>
+
+    <bean id="principalSrv" class="nl.mpi.lat.ams.service.impl.PrincipalSrv"
+              parent="damlrSrv">
+        <property name="pcplDao"><null/></property>
+        <property name="userDao"><null/></property>
+        <property name="groupDao"><null/></property>
+        <property name="encryptionSrv"><null/></property>
+    </bean>
+
+    <bean id="damlrSrv" class="nl.mpi.lat.ams.service.impl.DamLrSrv">
+        <property name="defaultHostingInstitute"><null/></property>
+        <property name="defaultHostingService"><null/></property>
+        <property name="defaultFedID"><null/></property>
+        <property name="defaultDelimiter"><null/></property>
+        <property name="useFederateID" value="false" />
+        <property name="damlrLdapApi"><null/></property>
+        <property name="ldapEnabled" value="false" />
+    </bean>
+
+        
+</beans>

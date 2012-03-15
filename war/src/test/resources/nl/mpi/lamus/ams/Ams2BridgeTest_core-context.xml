@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<!-- ** core services *************************************************** -->
+	
+	<bean id="abstractAuthSrv" class="nl.mpi.lat.ams.service.impl.AbstractAuthorizationSrv" 
+		abstract="true" >
+		<property name="nodeAuthDao"><null/></property>
+		<property name="nodeAuthStaledDao"><null/></property>
+		<property name="nodeLicenseStaledDao"><null/></property>
+		<property name="fabricSrv"><null/></property>
+		<property name="licenseSrv"><null/></property>
+		<property name="ruleSrv"><null/></property>
+                <property name="principalSrv"><null/></property>
+	</bean>
+	
+	<bean id="authorizationSrv" class="nl.mpi.lat.ams.service.impl.AmsAuthorizationSrv" 
+		parent="abstractAuthSrv" >
+		<property name="ruleEvaluationSrv"><null/></property>
+	</bean>
+	
+	<bean id="licenseSrv" class="nl.mpi.lat.ams.service.impl.LicenseSrv" >
+		<property name="licenseDao"><null/></property>
+		<property name="nodeLicenseDao"><null/></property>
+		<property name="licenseRootDir"><null/></property>
+	</bean>
+	
+	<bean id="ruleSrv" class="nl.mpi.lat.ams.service.impl.RuleSrv" >
+		<property name="ruleDao"><null/></property>
+	</bean>
+	
+	<bean id="fabricSrv" class="nl.mpi.latimpl.fabric.FabricSrv" >
+		<property name="structDB"><null/></property>
+		<property name="archObjDB"><null/></property>
+		<property name="versionDB"><null/></property>
+	</bean>
+
+</beans>

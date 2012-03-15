@@ -56,7 +56,7 @@ public interface AmsBridge {
 	 * @param ourl destined resource to check 
 	 * @return true/false according to whether given user (uid) has write access to given resource
 	 */
-	public boolean hasWriteAccess(String userId, int nodeId/*OurURL ourl*/);
+	public boolean hasWriteAccess(String userId, String nodeIdStr/*OurURL ourl*/);
 	
 	/**
 	 * sets the used-storage-space for the given user(uid) on the given resource(ourl)
