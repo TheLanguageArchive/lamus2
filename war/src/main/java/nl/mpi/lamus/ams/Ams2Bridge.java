@@ -3,21 +3,16 @@ package nl.mpi.lamus.ams;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLConnection;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import nl.mpi.corpusstructure.UnknownNodeException;
-import nl.mpi.util.OurURL;
 import nl.mpi.common.util.Text;
 import nl.mpi.common.util.spring.SpringContextLoader;
+import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lat.ams.Constants;
 import nl.mpi.lat.ams.model.NodeAuth;
 import nl.mpi.lat.ams.model.NodeLicense;
@@ -36,6 +31,9 @@ import nl.mpi.lat.fabric.Node;
 import nl.mpi.lat.fabric.NodeID;
 import nl.mpi.latimpl.core.LatServiceImpl;
 import nl.mpi.latimpl.fabric.NodeIDImpl;
+import nl.mpi.util.OurURL;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * $Id$
@@ -110,7 +108,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
 	 * @param authenticationSrv name of the (spring-bean) service which implements {@link AuthenticationService}
 	 */
-	public void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
+	private void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
 			String licenseSrv, String ruleSrv) {
 		SpringContextLoader spring = new SpringContextLoader();
 		spring.init(Text.notEmpty(springConfigPaths) 
@@ -429,7 +427,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 				LOG.warn("no ams-url configured, access rights will not be updated");
 				return;
 			}
-			StringBuffer amsurl = new StringBuffer();
+			StringBuilder amsurl = new StringBuilder();
 			amsurl.append(this.baseURL).append("/").append(this.recalcURL);
 			if(Text.notEmpty(recalcDomainMpiID) && Text.notEmpty(this.recalcParam)) {
 				amsurl.append("?").append(this.recalcParam).append("=")
@@ -447,8 +445,8 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 			servletConnection.setRequestProperty("Content-Type", "text");
 			InputStream instr = servletConnection.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(instr));
-			StringBuffer reply = new StringBuffer("ams2 recalculation call replied:\n");
-			String line = null;
+			StringBuilder reply = new StringBuilder("ams2 recalculation call replied:\n");
+			String line;
 			while((line = reader.readLine()) != null) {
 				reply.append(line);
 			}
@@ -509,7 +507,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	private void copyNodePcpls(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
 		
 		List<NodeAuth> oldNodePcpls = getAuthorizationSrv().getNodeAuths(oldNodeId);
-		List<NodeAuth> newNodePcpls = new Vector<NodeAuth>();
+		List<NodeAuth> newNodePcpls = new ArrayList<NodeAuth>();
 		
 		for(NodeAuth nodePcpl : oldNodePcpls) {
 			NodeAuth newNodePcpl = getAuthorizationSrv().newNodeAuth();
@@ -567,7 +565,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 */
 	private void copyNodeLicenses(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
 		List<NodeLicense> oldNodeLicenses = getLicenseSrv().getNodeLicenses(oldNodeId);
-		List<NodeLicense> newNodeLicenses = new Vector<NodeLicense>();
+		List<NodeLicense> newNodeLicenses = new ArrayList<NodeLicense>();
 		
 		for(NodeLicense nodeLicense : oldNodeLicenses) {
 			NodeLicense newNodeLicense = getLicenseSrv().newNodeLicense();
@@ -602,7 +600,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	private void setDefaultRulesForVersionedNode(LatUser user, Node node,
 			List<LatPrincipal> oldNodeDomainManagers, List<LatPrincipal> oldNodeDomainCurators, List<LatPrincipal> oldNodeDomainEditors) {
 		
-		List<LatPrincipal> everybody = new Vector<LatPrincipal>();
+		List<LatPrincipal> everybody = new ArrayList<LatPrincipal>();
 		everybody.add(getPrincipalSrv().getEverybody());
 		setRules(user, node.getID(), everybody, NodePcplRule.NATURE_CONSTRAINT, NodePcplRule.PRIORITY_FORBID, getRuleSrv().getRuleForbid());
 		

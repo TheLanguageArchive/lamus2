@@ -1,7 +1,5 @@
 package nl.mpi.lamus.ams;
 
-import nl.mpi.util.OurURL;
-
 /**
  * $Id$
  *

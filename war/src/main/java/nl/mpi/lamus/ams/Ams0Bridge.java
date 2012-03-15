@@ -1,10 +1,9 @@
 package nl.mpi.lamus.ams;
 
+import nl.mpi.latimpl.core.LatServiceImpl;
+import nl.mpi.util.OurURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import nl.mpi.util.OurURL;
-import nl.mpi.latimpl.core.LatServiceImpl;
 
 /**
  * $Id$
@@ -99,7 +98,7 @@ public class Ams0Bridge extends LatServiceImpl implements AmsBridge {
 	 * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String, nl.mpi.util.OurURL, long)
 	 */
 	public void setUsedStorageSpace(String uid, int nodeID, /*OurURL ourl,*/ long val) {
-		StringBuffer msg = new StringBuffer("miming setUsedStorageSpace for ");
+		StringBuilder msg = new StringBuilder("miming setUsedStorageSpace for ");
 		msg.append(uid);
 		msg.append(" on ").append(nodeID/*ourl*/);
 		msg.append(" to ").append(val);
