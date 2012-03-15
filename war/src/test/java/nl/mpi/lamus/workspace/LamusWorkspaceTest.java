@@ -101,6 +101,23 @@ public class LamusWorkspaceTest {
      * 
      */
     @Test
+    public void constructorWithAllParametersReceivesNullDates() {
+        
+        Workspace testWorkspace = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, null, null, null, null,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        assertNull("Value retrieved for 'startDate' should be null.", testWorkspace.getStartDate());
+        assertNull("Value retrieved for 'sessionStartDate' should be null.", testWorkspace.getSessionStartDate());
+        assertNull("Value retrieved for 'endDate' should be null.", testWorkspace.getEndDate());
+        assertNull("Value retrieved for 'sessionEndDate' should be null.", testWorkspace.getSessionEndDate());
+    }
+    
+    /**
+     * 
+     */
+    @Test
     public void constructorWithAllParametersClonesDateObjects() {
         
         Calendar localCalendar = Calendar.getInstance();
