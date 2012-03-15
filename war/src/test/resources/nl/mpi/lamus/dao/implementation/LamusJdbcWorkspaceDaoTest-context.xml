@@ -13,13 +13,6 @@
     <bean id="workspaceDao" class="nl.mpi.lamus.dao.implementation.LamusJdbcWorkspaceDao">
         <property name="dataSource" ref="embeddedDataSource" />
     </bean>
-
-<!--    <bean id="dataSource"  class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-        <property name="url" value="jdbc:hsqldb:mem:workspacetest" />
-        <property name="username" value="sa" />
-        <property name="password" value="" />
-    </bean>-->
     
     <jdbc:embedded-database id="embeddedDataSource" type="HSQL" />
     

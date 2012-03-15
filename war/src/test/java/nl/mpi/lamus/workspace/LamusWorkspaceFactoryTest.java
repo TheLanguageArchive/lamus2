@@ -27,7 +27,7 @@ import org.junit.*;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceFactoryImplTest {
+public class LamusWorkspaceFactoryTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     @Mock private AmsBridge mockAmsBridge;
@@ -36,7 +36,7 @@ public class WorkspaceFactoryImplTest {
     private String userID;
     private WorkspaceFactory factory; 
     
-    public WorkspaceFactoryImplTest() {
+    public LamusWorkspaceFactoryTest() {
     }
 
     @BeforeClass
@@ -51,7 +51,7 @@ public class WorkspaceFactoryImplTest {
     public void setUp() {
         archiveTopNodeID = 10;
         userID = "testUser";
-        factory = new WorkspaceFactoryImpl(mockAmsBridge, mockConfiguration);
+        factory = new LamusWorkspaceFactory(mockAmsBridge, mockConfiguration);
     }
     
     @After

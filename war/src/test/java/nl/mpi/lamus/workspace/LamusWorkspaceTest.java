@@ -17,8 +17,8 @@ package nl.mpi.lamus.workspace;
 
 import java.util.Calendar;
 import java.util.Date;
-import org.junit.*;
 import static org.junit.Assert.*;
+import org.junit.*;
 
 /**
  *

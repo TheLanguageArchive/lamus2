@@ -21,11 +21,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.LamusWorkspace;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceNode;
-import nl.mpi.lamus.workspace.WorkspaceNodeImpl;
-import nl.mpi.lamus.workspace.WorkspaceStatus;
+import nl.mpi.lamus.workspace.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -146,7 +142,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
             public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
-                WorkspaceNode node = new WorkspaceNodeImpl();
+                WorkspaceNode node = new LamusWorkspaceNode();
                 node.setWorkspaceNodeID(rs.getInt("workspace_node_id"));
                 return node;
             }

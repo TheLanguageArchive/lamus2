@@ -22,7 +22,7 @@ import nl.mpi.lamus.configuration.Configuration;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceFactoryImpl implements WorkspaceFactory {
+public class LamusWorkspaceFactory implements WorkspaceFactory {
     
     private AmsBridge amsBridge;
     private Configuration configuration;
@@ -30,7 +30,7 @@ public class WorkspaceFactoryImpl implements WorkspaceFactory {
     /**
      * 
      */
-    WorkspaceFactoryImpl(AmsBridge amsBridge, Configuration configuration) {
+    LamusWorkspaceFactory(AmsBridge amsBridge, Configuration configuration) {
         this.amsBridge = amsBridge;
         this.configuration = configuration;
     }

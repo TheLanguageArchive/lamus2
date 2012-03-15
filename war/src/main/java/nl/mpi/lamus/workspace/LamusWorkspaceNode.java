@@ -18,14 +18,12 @@ package nl.mpi.lamus.workspace;
 import java.net.URI;
 import java.net.URL;
 import java.util.Set;
-import nl.mpi.lamus.workspace.WorkspaceNode;
-import nl.mpi.lamus.workspace.WorkspaceNodeStatus;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceNodeImpl implements WorkspaceNode {
+public class LamusWorkspaceNode implements WorkspaceNode {
     
     private int workspaceNodeID;
     private int workspaceID;
@@ -50,99 +48,99 @@ public class WorkspaceNodeImpl implements WorkspaceNode {
     }
 
     public int getWorkspaceID() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.workspaceID;
     }
     
     public void setWorkspaceID(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.workspaceID = workspaceID;
     }
 
     public int getArchiveNodeID() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.archiveNodeID;
     }
     
     public void setArchiveNodeID(int archiveNodeID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.archiveNodeID = archiveNodeID;
     }
 
     public URI getProfileSchemaURI() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.profileSchemaURI;
     }
     
     public void setProfileSchemaURI(URI profileSchemaURI) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.profileSchemaURI = profileSchemaURI;
     }
 
     public String getName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.name;
     }
 
     public void setName(String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.name = name;
     }
 
     public String getTitle() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.title;
     }
 
     public void setTitle(String title) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.title = title;
     }
 
     public URL getWorkspaceURL() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.workspaceURL;
     }
     
     public void setWorkspaceURL(URL workspaceURL) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.workspaceURL = workspaceURL;
     }
 
     public URL getArchiveURL() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.archiveURL;
     }
     
     public void setArchiveURL(URL archiveURL) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.archiveURL = archiveURL;
     }
 
     public URL getOriginURL() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.originURL;
     }
     
     public void setOriginURL(URL originURL) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.originURL = originURL;
     }
 
     public WorkspaceNodeStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.status;
     }
 
     public void setStatus(WorkspaceNodeStatus status) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.status = status;
     }
 
     public String getPid() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.pid;
     }
 
     public void setPid(String pid) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.pid = pid;
     }
 
     public String getFormat() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.format;
     }
     
     public void setFormat(String format) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.format = format;
     }
 
     public Set<Integer> getParentNodes() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.parentNodes;
     }
 
     public void setParentNodes(Set<Integer> parentNodes) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.parentNodes = parentNodes;
     }
     
 }

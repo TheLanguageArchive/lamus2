@@ -16,7 +16,6 @@
 package nl.mpi.lamus.service.implementation;
 
 import java.net.MalformedURLException;
-import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
 import nl.mpi.lamus.service.WorkspaceService;

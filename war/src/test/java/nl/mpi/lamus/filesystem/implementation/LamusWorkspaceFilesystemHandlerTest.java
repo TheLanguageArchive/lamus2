@@ -23,7 +23,8 @@ import nl.mpi.lamus.workspace.Workspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 

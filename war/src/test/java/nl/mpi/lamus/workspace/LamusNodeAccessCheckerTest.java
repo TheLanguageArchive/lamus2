@@ -30,7 +30,7 @@ import org.junit.*;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class NodeAmsAccessCheckerTest {
+public class LamusNodeAccessCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private NodeAccessChecker nodeAccessChecker;
@@ -38,7 +38,7 @@ public class NodeAmsAccessCheckerTest {
     @Mock private AmsBridge mockAmsBridge;
     @Mock private WorkspaceDao mockWorkspaceDao;
     
-    public NodeAmsAccessCheckerTest() {
+    public LamusNodeAccessCheckerTest() {
     }
 
     @BeforeClass
