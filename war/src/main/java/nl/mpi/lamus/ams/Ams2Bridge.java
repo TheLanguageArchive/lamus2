@@ -373,7 +373,8 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	}
         
         private long convertIntMBToLongB(int valueInMB) {
-            return valueInMB * 1024 * 1024;
+            int valueInB = valueInMB * 1024 * 1024;
+            return (long) valueInB;
         }
         
         private int convertLongBToIntMB(long valueInB) {
