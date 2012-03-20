@@ -35,88 +35,98 @@ import org.apache.commons.logging.LogFactory;
 /**
  * $Id$
  *
- *  implementation of AmsBridge using ams2 api
+ * implementation of AmsBridge using ams2 api
  *
  * @author	last modified by $Author$, created by mategg
  * @version	$Revision$
  */
 public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
-	
-	private final static Log LOG = LogFactory.getLog(Ams2Bridge.class);
-	
-	/** provides access to principals' data */
-	private PrincipalService		mPrincipalSrv;
-	/** handles authentication */
-	private AuthenticationService           mAuthenticationSrv;
-	/** handles authorization */
-	private AdvAuthorizationService         mAuthorizationSrv;
-	/** handles access to node data from corpusstrutcture db */
-	private FabricService			mFabricSrv;
-	/** handles license management */
-	private LicenseService			mLicenseSrv;
-	/** handles rule management*/
-	private RuleService			mRuleSrv;
-	
-        
-        private String baseURL;
-        private String recalcURL;
-        private String recalcParam;
-        
-	
-	/**
-	 * default constructor,
-	 * no special configuration <=> loads default settings
-	 */
+    
+    private final static Log LOG = LogFactory.getLog(Ams2Bridge.class);
+    /**
+     * provides access to principals' data
+     */
+    private PrincipalService mPrincipalSrv;
+    /**
+     * handles authentication
+     */
+    private AuthenticationService mAuthenticationSrv;
+    /**
+     * handles authorization
+     */
+    private AdvAuthorizationService mAuthorizationSrv;
+    /**
+     * handles access to node data from corpusstrutcture db
+     */
+    private FabricService mFabricSrv;
+    /**
+     * handles license management
+     */
+    private LicenseService mLicenseSrv;
+    /**
+     * handles rule management
+     */
+    private RuleService mRuleSrv;
+    private String baseURL;
+    private String recalcURL;
+    private String recalcParam;
+
+    /**
+     * default constructor, no special configuration <=> loads default settings
+     */
 //            public Ams2Bridge() {
 //		// load defaults
 ////		this.initServices(null, null, null, null, null, null, null);
 //	}
-            
-           
-            public Ams2Bridge(PrincipalService principalSrv, AuthenticationService authenticationSrv,
-                    AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
-                    LicenseService licenseSrv, RuleService ruleSrv) {
-                this.mPrincipalSrv = principalSrv;
-                this.mAuthenticationSrv = authenticationSrv;
-                this.mAuthorizationSrv = authorizationSrv;
-                this.mFabricSrv = fabricSrv;
-                this.mLicenseSrv = licenseSrv;
-                this.mRuleSrv = ruleSrv;
-            }
-	
-	
-	/**
-	 * constructor to specify utilized services and their configuration (springConfig files).
-	 * for parameter details see {@link #initServices(String, String, String, String)}
-	 * @param springConfigPaths comma separated relative paths to multiple spring-config files defining the utilized services
-	 * @param authorizationSrv name of the (spring-bean) service which implements {@link AdvAuthorizationService}
-	 * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
-	 * @param authenticationSrv name of the (spring-bean) service which implements {@link AuthenticationService}
-	 * @see #initServices(String, String, String, String)
-	 */
+    public Ams2Bridge(PrincipalService principalSrv, AuthenticationService authenticationSrv,
+            AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
+            LicenseService licenseSrv, RuleService ruleSrv) {
+        this.mPrincipalSrv = principalSrv;
+        this.mAuthenticationSrv = authenticationSrv;
+        this.mAuthorizationSrv = authorizationSrv;
+        this.mFabricSrv = fabricSrv;
+        this.mLicenseSrv = licenseSrv;
+        this.mRuleSrv = ruleSrv;
+    }
+
+    /**
+     * constructor to specify utilized services and their configuration
+     * (springConfig files). for parameter details see {@link #initServices(String, String, String, String)}
+     *
+     * @param springConfigPaths comma separated relative paths to multiple
+     * spring-config files defining the utilized services
+     * @param authorizationSrv name of the (spring-bean) service which
+     * implements {@link AdvAuthorizationService}
+     * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
+     * @param authenticationSrv name of the (spring-bean) service which
+     * implements {@link AuthenticationService}
+     * @see #initServices(String, String, String, String)
+     */
 //	public Ams2Bridge(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
 //			String licenseSrv, String ruleSrv) {
 //		this.initServices(springConfigPaths, authorizationSrv, principalSrv, authenticationSrv, fabricSrv, licenseSrv, ruleSrv);
 //	}
-
-	
-	/**
-	 * initializes utilized services and their configuration (springConfig files).
-	 * note:  all parameters can be null, 
-	 * 	if no value is given (null), the default config is used.
-	 * 
-	 * spring-ams2-auth.xml is used as default config
-	 * you can overwrite/extend... this config
-	 * by adding further spring-servlets (comma-separated) to the springConfigPaths
-	 * the actual beans which will be instantiated are the ones which have been defined in the LATEST given file
-	 * => by this way you can also easily overwrite some settings e.g. datasource strings etc...
-	 * (just define same bean with adapted settings in a new config file and add this file to this list)
-	 * 
-	 * @param springConfigPaths comma separated relative paths to multiple spring-config files defining the utilized services
-	 * @param authorizationSrv name of the (spring-bean) service which implements {@link AdvAuthorizationService}
-	 * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
-	 * @param authenticationSrv name of the (spring-bean) service which implements {@link AuthenticationService}
-	 */
+    /**
+     * initializes utilized services and their configuration (springConfig
+     * files). note: all parameters can be null, if no value is given (null),
+     * the default config is used.
+     *
+     * spring-ams2-auth.xml is used as default config you can
+     * overwrite/extend... this config by adding further spring-servlets
+     * (comma-separated) to the springConfigPaths the actual beans which will be
+     * instantiated are the ones which have been defined in the LATEST given
+     * file => by this way you can also easily overwrite some settings e.g.
+     * datasource strings etc... (just define same bean with adapted settings in
+     * a new config file and add this file to this list)
+     *
+     * @param springConfigPaths comma separated relative paths to multiple
+     * spring-config files defining the utilized services
+     * @param authorizationSrv name of the (spring-bean) service which
+     * implements {@link AdvAuthorizationService}
+     * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
+     * @param authenticationSrv name of the (spring-bean) service which
+     * implements {@link AuthenticationService}
+     */
 //	private void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
 //			String licenseSrv, String ruleSrv) {
 //		SpringContextLoader spring = new SpringContextLoader();
@@ -143,269 +153,263 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		this.setRuleSrv((RuleService) spring.getBean(
 //				Text.notEmpty(ruleSrv) ? ruleSrv : Constants.BEAN_RULE_SRV));
 //	}
-	
-	
-	/**
-	 * @return the authorizationSrv
-	 */
-	public AdvAuthorizationService getAuthorizationSrv() {
-		return this.mAuthorizationSrv;
-	}
-	/**
-	 * @param authorizationSrv the authorizationSrv to set
-	 */
-	private void setAuthorizationSrv(AdvAuthorizationService authorizationSrv) {
-		this.mAuthorizationSrv = authorizationSrv;
-	}
-	
-	
-	/**
-	 * @return the principalSrv
-	 */
-	public PrincipalService getPrincipalSrv() {
-		return this.mPrincipalSrv;
-	}
-	/**
-	 * @param principalSrv the principalSrv to set
-	 */
-	private void setPrincipalSrv(PrincipalService principalSrv) {
-		this.mPrincipalSrv = principalSrv;
-	}
-	
-	
-	/**
-	 * @return the authenticationSrv
-	 */
-	public AuthenticationService getAuthenticationSrv() {
-		return this.mAuthenticationSrv;
-	}
-	/**
-	 * @param authenticationSrv the authenticationSrv to set
-	 */
-	private void setAuthenticationSrv(AuthenticationService authenticationSrv) {
-		this.mAuthenticationSrv = authenticationSrv;
-	}
-	
-	
-	/**
-	 * @return the fabricSrv
-	 */
-	public FabricService getFabricSrv() {
-		return this.mFabricSrv;
-	}
-	/**
-	 * @param fabricSrv the fabricSrv to set
-	 */
-	public void setFabricSrv(FabricService fabricSrv) {
-		this.mFabricSrv = fabricSrv;
-	}
-	
-	
-	/**
-	 * @return the licenseSrv
-	 */
-	public LicenseService getLicenseSrv() {
-		return mLicenseSrv;
-	}
-	/**
-	 * @param licenseSrv the licenseSrv to set
-	 */
-	public void setLicenseSrv(LicenseService licenseSrv) {
-		this.mLicenseSrv = licenseSrv;
-	}
-	
+    /**
+     * @return the authorizationSrv
+     */
+    public AdvAuthorizationService getAuthorizationSrv() {
+        return this.mAuthorizationSrv;
+    }
 
-	/**
-	 * @return the ruleSrv
-	 */
-	public RuleService getRuleSrv() {
-		return mRuleSrv;
-	}
-	/**
-	 * @param ruleSrv the ruleSrv to set
-	 */
-	public void setRuleSrv(RuleService ruleSrv) {
-		this.mRuleSrv = ruleSrv;
-	}
+    /**
+     * @param authorizationSrv the authorizationSrv to set
+     */
+    private void setAuthorizationSrv(AdvAuthorizationService authorizationSrv) {
+        this.mAuthorizationSrv = authorizationSrv;
+    }
 
+    /**
+     * @return the principalSrv
+     */
+    public PrincipalService getPrincipalSrv() {
+        return this.mPrincipalSrv;
+    }
 
-	/**
-	 * @see lams.ams.AmsBridge#getStatus()
-	 */
-	public boolean getStatus() {
-		return this.getAuthorizationSrv() != null 
-		&& this.getAuthenticationSrv() != null
-		&& this.getPrincipalSrv() != null;
+    /**
+     * @param principalSrv the principalSrv to set
+     */
+    private void setPrincipalSrv(PrincipalService principalSrv) {
+        this.mPrincipalSrv = principalSrv;
+    }
+
+    /**
+     * @return the authenticationSrv
+     */
+    public AuthenticationService getAuthenticationSrv() {
+        return this.mAuthenticationSrv;
+    }
+
+    /**
+     * @param authenticationSrv the authenticationSrv to set
+     */
+    private void setAuthenticationSrv(AuthenticationService authenticationSrv) {
+        this.mAuthenticationSrv = authenticationSrv;
+    }
+
+    /**
+     * @return the fabricSrv
+     */
+    public FabricService getFabricSrv() {
+        return this.mFabricSrv;
+    }
+
+    /**
+     * @param fabricSrv the fabricSrv to set
+     */
+    public void setFabricSrv(FabricService fabricSrv) {
+        this.mFabricSrv = fabricSrv;
+    }
+
+    /**
+     * @return the licenseSrv
+     */
+    public LicenseService getLicenseSrv() {
+        return mLicenseSrv;
+    }
+
+    /**
+     * @param licenseSrv the licenseSrv to set
+     */
+    public void setLicenseSrv(LicenseService licenseSrv) {
+        this.mLicenseSrv = licenseSrv;
+    }
+
+    /**
+     * @return the ruleSrv
+     */
+    public RuleService getRuleSrv() {
+        return mRuleSrv;
+    }
+
+    /**
+     * @param ruleSrv the ruleSrv to set
+     */
+    public void setRuleSrv(RuleService ruleSrv) {
+        this.mRuleSrv = ruleSrv;
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#getStatus()
+     */
+    public boolean getStatus() {
+        return this.getAuthorizationSrv() != null
+                && this.getAuthenticationSrv() != null
+                && this.getPrincipalSrv() != null;
+    }
+    
+    public String getBaseURL() {
+        return this.baseURL;
+    }
+
+    public void setBaseURL(String baseURL) {
+        this.baseURL = baseURL;
+    }
+    
+    public String getRecalcURL() {
+        return this.recalcURL;
+    }
+
+    public void setRecalcURL(String recalcURL) {
+        this.recalcURL = recalcURL;
+    }
+    
+    public String getRecalcParam() {
+        return this.recalcParam;
+    }
+
+    public void setRecalcParam(String recalcParam) {
+        this.recalcParam = recalcParam;
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#close()
+     */
+    public void close() {
+        // unimplemented: db access control handled by hibernate
+        LOG.debug("closing ams2Bridge...");
+        this.close(null);
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#close(java.lang.String)
+     */
+    public void close(String reason) {
+        // unimplemented: db access control handled by hibernate
+        LOG.debug("closing ams2Bridge due to " + reason);
+        if (this.getFabricSrv() != null) {
+            this.getFabricSrv().close();
+        }
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#validateUser(java.lang.String, java.lang.String)
+     */
+    /*
+     * removed form interface public boolean validateUser(String username,
+     * String password) { try {
+     * this.getAuthenticationSrv().authenticate(username, password); return
+     * true; } catch(AuthenticationException aE) { return false; }
+     * catch(Exception eE) { _log.error("error during authentication", eE);
+     * return false; }
 	}
-	
-        public String getBaseURL() {
-            return this.baseURL;
-        }
-        public void setBaseURL(String baseURL) {
-            this.baseURL = baseURL;
-        }
-        
-        public String getRecalcURL() {
-            return this.recalcURL;
-        }
-        public void setRecalcURL(String recalcURL) {
-            this.recalcURL = recalcURL;
-        }
-        
-        public String getRecalcParam() {
-            return this.recalcParam;
-        }
-        public void setRecalcParam(String recalcParam) {
-            this.recalcParam = recalcParam;
-        }
-        
-	
-	/**
-	 * @see lams.ams.AmsBridge#close()
-	 */
-	public void close() {
-		// unimplemented: db access control handled by hibernate
-		LOG.debug("closing ams2Bridge...");
-		this.close(null);
-	}
-	/**
-	 * @see lams.ams.AmsBridge#close(java.lang.String)
-	 */
-	public void close(String reason) {
-		// unimplemented: db access control handled by hibernate
-		LOG.debug("closing ams2Bridge due to " + reason);
-                if(this.getFabricSrv() != null) {
-                    this.getFabricSrv().close();
-                }
-	}
-	
-	
-	/**
-	 * @see lams.ams.AmsBridge#validateUser(java.lang.String, java.lang.String)
-	 */
-	/*	removed form interface	
-	public boolean validateUser(String username, String password) {
-		try {
-			this.getAuthenticationSrv().authenticate(username, password);
-			return true;
-		} catch(AuthenticationException aE) {
-			return false;
-		} catch(Exception eE) {
-			_log.error("error during authentication", eE);
-			return false;
-		}
-	}*/
-	
-	
-	/**
-	 * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String, nl.mpi.util.OurURL)
-	 */
-	public boolean hasWriteAccess(String userId, String nodeIdStr) {
-		LatPrincipal user = this.getPrincipalSrv().getUser(userId);
-                NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
-		return this.getAuthorizationSrv().isWriteable(user, target);
-	}
-	
-	
-	/**
-	 * provides the NodePcplRule target for all DomainEditor options
-	 * @param userId the destined user's uid 
-	 * @param ourl the target resource
-	 * @return target for all DomainEditor options
-	 */
-	private NodePcplRule getDomEditorRuleOpts(String userId, String nodeIdStr) {
-            NodeID nodeIDObj = this.getFabricSrv().newNodeID(nodeIdStr);
-		LatPrincipal pcpl = this.getPrincipalSrv().getUser(userId);
-		NodePcplRule result = this.getAuthorizationSrv()
-			.getEffectiveDomainEditorRule(nodeIDObj, pcpl);
-		return result;
-	}
-	
-	
-	/**
-	 * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String, nl.mpi.util.OurURL, long)
-	 */
-	public void setUsedStorageSpace(String uid, String nodeIdStr, long val) {
-            try {
-		NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-		if(target == null) {
-			LOG.error("found no NPR target for setting DomainEditor options");
-			return;
-		}
-		// npr is just a mimic, 
-		//	e.g. for ArchiveManager role incorporating DomainEditor options
-		if(target.isVirtual()) {
-			LOG.debug("caught virtual " + target);
-			return;
-		}
-		// evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
-		Integer mb = convertLongBToIntMB(val);
-		target.setUsedStorageMB(mb);
-		this.getAuthorizationSrv().save(target.getParent());
-		
-		// trigger recalculation to re-export modified data from ams2 to csdb
-		// NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
-		// <=> max- vs. used-storage-space is checked & handled in lamus itself
-//		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
-                } catch (RuntimeException rE) {
-                    LOG.error("could not set UsedStorageSpace", rE);
-                    return;
+     */
+    /**
+     * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String,
+     * nl.mpi.util.OurURL)
+     */
+    public boolean hasWriteAccess(String userId, String nodeIdStr) {
+        LatPrincipal user = this.getPrincipalSrv().getUser(userId);
+        NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
+        return this.getAuthorizationSrv().isWriteable(user, target);
+    }
+
+    /**
+     * provides the NodePcplRule target for all DomainEditor options
+     *
+     * @param userId the destined user's uid
+     * @param ourl the target resource
+     * @return target for all DomainEditor options
+     */
+    private NodePcplRule getDomEditorRuleOpts(String userId, String nodeIdStr) {
+        NodeID nodeIDObj = this.getFabricSrv().newNodeID(nodeIdStr);
+        LatPrincipal pcpl = this.getPrincipalSrv().getUser(userId);
+        NodePcplRule result = this.getAuthorizationSrv().getEffectiveDomainEditorRule(nodeIDObj, pcpl);
+        return result;
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String,
+     * nl.mpi.util.OurURL, long)
+     */
+    public void setUsedStorageSpace(String uid, String nodeIdStr, long val) {
+        try {
+            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+            if (target == null) {
+                LOG.error("found no NPR target for setting DomainEditor options");
+                return;
             }
-	}
-	
-	
-	/**
-	 * @see lams.ams.AmsBridge#getUsedStorageSpace(java.lang.String, nl.mpi.util.OurURL)
-	 */
-	public long getUsedStorageSpace(String uid, String nodeIdStr) {
-		try {
-			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-			long usedStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
-                        if(target != null && target.getUsedStorageMB() != null) {
-                        usedStorageInBytes = convertIntMBToLongB(target.getUsedStorageMB());
-                        }
-                        return usedStorageInBytes;
-		} catch(RuntimeException rE) {
-			LOG.error("could not determine UsedStorageSpace, providing error-default " 
-				+ AmsBridge.ERROR_MB, rE);
-			return AmsBridge.ERROR_MB.longValue();
-		}
-	}
-        
-        private long convertIntMBToLongB(int valueInMB) {
-            int valueInB = valueInMB * 1024 * 1024;
-            return (long) valueInB;
+            // npr is just a mimic, 
+            //	e.g. for ArchiveManager role incorporating DomainEditor options
+            if (target.isVirtual()) {
+                LOG.debug("caught virtual " + target);
+                return;
+            }
+            // evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
+            Integer mb = convertLongBToIntMB(val);
+            target.setUsedStorageMB(mb);
+            this.getAuthorizationSrv().save(target.getParent());
+
+            // trigger recalculation to re-export modified data from ams2 to csdb
+            // NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
+            // <=> max- vs. used-storage-space is checked & handled in lamus itself
+//		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
+        } catch (RuntimeException rE) {
+            LOG.error("could not set UsedStorageSpace", rE);
+            return;
         }
-        
-        private int convertLongBToIntMB(long valueInB) {
-            long valueInMB = valueInB / 1024 / 1024;
-            return (int) valueInMB;
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#getUsedStorageSpace(java.lang.String,
+     * nl.mpi.util.OurURL)
+     */
+    public long getUsedStorageSpace(String uid, String nodeIdStr) {
+        try {
+            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+            long usedStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+            if (target != null && target.getUsedStorageMB() != null) {
+                usedStorageInBytes = convertIntMBToLongB(target.getUsedStorageMB());
+            }
+            return usedStorageInBytes;
+        } catch (RuntimeException rE) {
+            LOG.error("could not determine UsedStorageSpace, providing error-default "
+                    + AmsBridge.ERROR_MB, rE);
+            return AmsBridge.ERROR_MB.longValue();
         }
-	
-	/**
-	 * @see lams.ams.AmsBridge#getMaxStorageSpace(java.lang.String, nl.mpi.util.OurURL)
-	 */
-	public long getMaxStorageSpace(String uid, String nodeIdStr) {
-		try {
-			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-			// no target -> no domain-editor(options)
-                        long maxStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
-			if(target != null && target.getMaxStorageMB() != null) {
-                            maxStorageInBytes = convertIntMBToLongB(target.getMaxStorageMB());
-                        }
-			//contract from ams2-api: value null means unlimited = MAX_MB
-                        return maxStorageInBytes;
-                } catch(RuntimeException rE) {
-			LOG.error("could not determine MaxStorageSpace, providing error-default " 
-				+ ERROR_MB, rE);
-			return ERROR_MB.longValue();
-		}
-	}
-	
-	
-	/**
-	 * @see lams.ams.AmsBridge#getMailAddress(java.lang.String)
-	 */
+    }
+    
+    private long convertIntMBToLongB(int valueInMB) {
+        int valueInB = valueInMB * 1024 * 1024;
+        return (long) valueInB;
+    }
+    
+    private int convertLongBToIntMB(long valueInB) {
+        long valueInMB = valueInB / 1024 / 1024;
+        return (int) valueInMB;
+    }
+
+    /**
+     * @see lams.ams.AmsBridge#getMaxStorageSpace(java.lang.String,
+     * nl.mpi.util.OurURL)
+     */
+    public long getMaxStorageSpace(String uid, String nodeIdStr) {
+        try {
+            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+            // no target -> no domain-editor(options)
+            long maxStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+            if (target != null && target.getMaxStorageMB() != null) {
+                maxStorageInBytes = convertIntMBToLongB(target.getMaxStorageMB());
+            }
+            //contract from ams2-api: value null means unlimited = MAX_MB
+            return maxStorageInBytes;
+        } catch (RuntimeException rE) {
+            LOG.error("could not determine MaxStorageSpace, providing error-default "
+                    + ERROR_MB, rE);
+            return ERROR_MB.longValue();
+        }
+    }
+    /**
+     * @see lams.ams.AmsBridge#getMailAddress(java.lang.String)
+     */
 //	public String getMailAddress(String uid) {
 //		try {
 //			LatUser user = this.getPrincipalSrv().getUser(uid);
@@ -415,9 +419,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //			return null;
 //		}
 //	}
-	/**
-	 * @see lams.ams.AmsBridge#getRealName(java.lang.String)
-	 */
+    /**
+     * @see lams.ams.AmsBridge#getRealName(java.lang.String)
+     */
 //	public String getRealName(String uid) {
 //		try {
 //			LatUser user = this.getPrincipalSrv().getUser(uid);
@@ -427,12 +431,12 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //			return null;
 //		}
 //	}
-        
-	/**
-	 * transcribes given ourURL into a NodeID
-	 * @param ourl
-	 * @return NodeID equivalent of given OurURL
-	 */
+    /**
+     * transcribes given ourURL into a NodeID
+     *
+     * @param ourl
+     * @return NodeID equivalent of given OurURL
+     */
 //	private NodeID toNodeID(OurURL ourl) {
 //		NodeID result = this.getFabricSrv().newNodeID(ourl);
 //		//we have to throw the unknownNodeException if the url is not known in the AO table
@@ -440,10 +444,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //			throw new UnknownNodeException("AmsBridge:toNodeID(): URL not in AO table: "+ourl);
 //		return result;
 //	}
-	
-	/**
-	 * @see lams.ams.AmsBridge#callAccessRightsManagementSystem(String)
-	 */
+    /**
+     * @see lams.ams.AmsBridge#callAccessRightsManagementSystem(String)
+     */
 //	public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
 //		try {
 //			// build & check target url
@@ -482,10 +485,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //			LOG.error("!! failed to call ams2 recalculation !!", eE);
 //		}
 //	}
-	
-	/**
-	 * @see lams.ams.AmsBridge#replaceNodeAms(String, String, String)
-	 */
+    /**
+     * @see lams.ams.AmsBridge#replaceNodeAms(String, String, String)
+     */
 //	public boolean replaceNodeAms(String oldNodeId, String newNodeId, String userId) {
 //		
 //		LOG.debug("Ams2Bridge.replaceNodeAms: AMS node replacement triggered. Old node: " + oldNodeId + "; New node: " + newNodeId);
@@ -518,16 +520,16 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		
 //		return true;
 //	}
-	
-	/**
-	 * Creates node-principals (NodeAuth) for the new node, based on the existing ones (in the old node).
-	 * So that the new node has exactly the same access rights as the old one had (in this case the rules).
-	 * It also deletes the node-principals from the old node afterwards.
-	 *  
-	 * @param user Current user
-	 * @param oldNodeId	ID of the old node (replaced)
-	 * @param newNodeId	ID of the new node (replacing)
-	 */
+    /**
+     * Creates node-principals (NodeAuth) for the new node, based on the
+     * existing ones (in the old node). So that the new node has exactly the
+     * same access rights as the old one had (in this case the rules). It also
+     * deletes the node-principals from the old node afterwards.
+     *
+     * @param user Current user
+     * @param oldNodeId	ID of the old node (replaced)
+     * @param newNodeId	ID of the new node (replacing)
+     */
 //	private void copyNodePcpls(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
 //		
 //		List<NodeAuth> oldNodePcpls = getAuthorizationSrv().getNodeAuths(oldNodeId);
@@ -577,16 +579,16 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		getAuthorizationSrv().save(newNodePcpls);
 //		
 //	}
-	
-	/**
-	 * Creates node-licenses (NodeLicense) for the new node, based on the existing ones (in the old node).
-	 * So that the new node has exactly the same access rights as the old one had (in this case the licenses).
-	 * It also deletes the node-licenses from the old node afterwards.
-	 * 
-	 * @param user Current user
-	 * @param oldNodeId	ID of the old node
-	 * @param newNodeId	ID of the new node
-	 */
+    /**
+     * Creates node-licenses (NodeLicense) for the new node, based on the
+     * existing ones (in the old node). So that the new node has exactly the
+     * same access rights as the old one had (in this case the licenses). It
+     * also deletes the node-licenses from the old node afterwards.
+     *
+     * @param user Current user
+     * @param oldNodeId	ID of the old node
+     * @param newNodeId	ID of the new node
+     */
 //	private void copyNodeLicenses(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
 //		List<NodeLicense> oldNodeLicenses = getLicenseSrv().getNodeLicenses(oldNodeId);
 //		List<NodeLicense> newNodeLicenses = new ArrayList<NodeLicense>();
@@ -610,17 +612,23 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		getLicenseSrv().save(newNodeLicenses);
 //		
 //	}
-	
-	/**
-	 * Creates a node-principal (NodeAuth) and default rule for versioned nodes 
-	 * (forbid to everybody except Archive Managers and Domain Curators, Editors and Managers),
-	 * which is then applied to the versioned node.  
-	 * @param user User to become creator/modifier of the rules
-	 * @param node Versioned node, in which the rules will be applied 
-	 * @param oldNodeDomainManagers List of domain managers to be applied in the versioned node (they were domain managers of the node before being versioned)
-	 * @param oldNodeDomainCurators	List of domain curators to be applied in the versioned node (they were domain curators of the node before being versioned)
-	 * @param oldNodeDomainEditors List of domain editors to be applied in the versioned node (they were domain editors of the node before being versioned)
-	 */
+    /**
+     * Creates a node-principal (NodeAuth) and default rule for versioned nodes
+     * (forbid to everybody except Archive Managers and Domain Curators, Editors
+     * and Managers), which is then applied to the versioned node.
+     *
+     * @param user User to become creator/modifier of the rules
+     * @param node Versioned node, in which the rules will be applied
+     * @param oldNodeDomainManagers List of domain managers to be applied in the
+     * versioned node (they were domain managers of the node before being
+     * versioned)
+     * @param oldNodeDomainCurators	List of domain curators to be applied in the
+     * versioned node (they were domain curators of the node before being
+     * versioned)
+     * @param oldNodeDomainEditors List of domain editors to be applied in the
+     * versioned node (they were domain editors of the node before being
+     * versioned)
+     */
 //	private void setDefaultRulesForVersionedNode(LatUser user, Node node,
 //			List<LatPrincipal> oldNodeDomainManagers, List<LatPrincipal> oldNodeDomainCurators, List<LatPrincipal> oldNodeDomainEditors) {
 //		
@@ -639,17 +647,18 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		}
 //		
 //	}
-	
-	/**
-	 * Applies the given rule, paired with a principal (from the provided list) to the given node.
-	 *  
-	 * @param user LatUser to be set as creator/modifier of the node_principal/nodepcpl_rule
-	 * @param nodeId ID of the node in which the rules will be applied
-	 * @param principals List of principals for whom the rules will be applied
-	 * @param nature Nature of the rule (permission/constraint)
-	 * @param priority Priority of the rule
-	 * @param rule Rule
-	 */
+    /**
+     * Applies the given rule, paired with a principal (from the provided list)
+     * to the given node.
+     *
+     * @param user LatUser to be set as creator/modifier of the
+     * node_principal/nodepcpl_rule
+     * @param nodeId ID of the node in which the rules will be applied
+     * @param principals List of principals for whom the rules will be applied
+     * @param nature Nature of the rule (permission/constraint)
+     * @param priority Priority of the rule
+     * @param rule Rule
+     */
 //	private void setRules(LatUser user, NodeID nodeId, List<LatPrincipal> principals, Integer nature, Integer priority, AbstractRule rule) {
 //		
 //		for(LatPrincipal principal : principals) {
@@ -682,5 +691,4 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		}
 //		
 //	}
-
 }
