@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace;
 
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
 
@@ -42,8 +43,8 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
      */
     public Workspace getNewWorkspace(String userID, int archiveTopNodeID) {
         
-        long usedStorageSpace = this.amsBridge.getUsedStorageSpace(userID, archiveTopNodeID);
-        long maxStorageSpace = this.amsBridge.getMaxStorageSpace(userID, archiveTopNodeID);
+        long usedStorageSpace = this.amsBridge.getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+        long maxStorageSpace = this.amsBridge.getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
         
         if(usedStorageSpace == -1) {
             usedStorageSpace = 0;

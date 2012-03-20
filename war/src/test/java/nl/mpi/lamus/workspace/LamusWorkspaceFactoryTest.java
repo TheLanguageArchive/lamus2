@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace;
 
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
 import org.jmock.Expectations;
@@ -70,8 +71,8 @@ public class LamusWorkspaceFactoryTest {
         final long expectedMaxStorageSpace = 10000000000L;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedMaxStorageSpace));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedUsedStorageSpace));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
@@ -97,8 +98,8 @@ public class LamusWorkspaceFactoryTest {
         final long expectedMaxStorageSpace = 10000000000L;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(valueNotDefined));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedMaxStorageSpace));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(valueNotDefined));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
@@ -124,8 +125,8 @@ public class LamusWorkspaceFactoryTest {
         final long expectedMaxStorageSpace = 90000000L;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeID); will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeID); will(returnValue(valueNotDefined));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedUsedStorageSpace));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(valueNotDefined));
             oneOf (mockConfiguration).getDefaultMaxStorageSpace(); will(returnValue(expectedMaxStorageSpace));
         }});
         

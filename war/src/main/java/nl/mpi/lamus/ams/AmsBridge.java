@@ -53,56 +53,56 @@ public interface AmsBridge {
 	/**
 	 * determines whether given user (uid) has write access to given resource
 	 * @param userId  destined user's uid
-	 * @param ourl destined resource to check 
+	 * @param nodeIdStr MPI String ID of the destined resource to check 
 	 * @return true/false according to whether given user (uid) has write access to given resource
 	 */
-	public boolean hasWriteAccess(String userId, String nodeIdStr/*OurURL ourl*/);
+	public boolean hasWriteAccess(String userId, String nodeIdStr);
 	
 	/**
-	 * sets the used-storage-space for the given user(uid) on the given resource(ourl)
+	 * sets the used-storage-space for the given user(uid) on the given resource(nodeIdStr)
 	 * to given value
 	 * @param uid target user's uid
-	 * @param ourl target resource
+	 * @param nodeIdStr MPI String ID of the target resource
 	 * @param val value to be set
 	 */
-	public void setUsedStorageSpace(String uid, int nodeID, /*OurURL ourl,*/ long val);
+	public void setUsedStorageSpace(String uid, String nodeIdStr, long val);
 
 	/**
-	 * provides the used-storage-space of the given user(uid) on the given resource(ourl)
+	 * provides the used-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 * @param uid destined user's uid
-	 * @param ourl target resource
-	 * @return  the used-storage-space of the given user(uid) on the given resource(ourl)
+	 * @param nodeIdStr MPI String ID of the target resource
+	 * @return  the used-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 */
-	public long getUsedStorageSpace(String uid, int nodeID /*OurURL ourl*/);
+	public long getUsedStorageSpace(String uid, String nodeIdStr);
 
 	/**
-	 * provides the maximum-storage-space of the given user(uid) on the given resource(ourl)
+	 * provides the maximum-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 * @param uid destined user's uid
-	 * @param ourl target resource
-	 * @return maximum-storage-space of the given user(uid) on the given resource(ourl)
+	 * @param nodeIdStr MPI String ID of the target resource
+	 * @return maximum-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 */
-	public long getMaxStorageSpace(String uid, int nodeID /*OurURL ourl*/);
+	public long getMaxStorageSpace(String uid, String nodeIdStr);
 
 	/**
 	 * provides the email address of given user(uid)
 	 * @param uid destined user's uid
 	 * @return the email address of given user(uid)
 	 */
-	public String getMailAddress(String uid);
+//	public String getMailAddress(String uid);
 
 	/**
 	 * provides the "real-name" of given user(uid): firstname surname
 	 * @param uid destined user's uid 
 	 * @return the "real-name" of given user(uid): firstname surname
 	 */
-	public String getRealName(String uid);
+//	public String getRealName(String uid);
 	
 	
 	/**
 	 * Recalculate the resource access rights for the updated part of the archive,
 	 * propagate them to the Apache htaccess file and signal the webserver
 	 */
-	public void callAccessRightsManagementSystem(String recalcDomainMpiID);
+//	public void callAccessRightsManagementSystem(String recalcDomainMpiID);
 
 	/**
 	 * Applies the necessary procedures to replace a node in AMS:
@@ -114,6 +114,6 @@ public interface AmsBridge {
 	 * @param newNodeId	ID of the new node (replacing) in mpi-node-id string format
 	 * @param userId	ID of the current user
 	 */
-	public boolean replaceNodeAms(String oldNodeId, String newNodeId, String userId);
+//	public boolean replaceNodeAms(String oldNodeId, String newNodeId, String userId);
 
 }

@@ -1,37 +1,33 @@
 package nl.mpi.lamus.ams;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import nl.mpi.common.util.Text;
-import nl.mpi.common.util.spring.SpringContextLoader;
-import nl.mpi.corpusstructure.NodeIdUtils;
-import nl.mpi.corpusstructure.UnknownNodeException;
-import nl.mpi.lat.ams.Constants;
-import nl.mpi.lat.ams.model.NodeAuth;
-import nl.mpi.lat.ams.model.NodeLicense;
-import nl.mpi.lat.ams.model.NodePcplLicense;
+//import java.io.BufferedReader;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
+//import java.net.HttpURLConnection;
+//import java.net.URLConnection;
+//import java.net.URLEncoder;
+//import java.util.ArrayList;
+//import java.util.Date;
+//import java.util.List;
+//import java.util.Set;
+//import nl.mpi.common.util.Text;
+//import nl.mpi.common.util.spring.SpringContextLoader;
+//import nl.mpi.corpusstructure.NodeIdUtils;
+//import nl.mpi.corpusstructure.UnknownNodeException;
+//import nl.mpi.lat.ams.Constants;
+//import nl.mpi.lat.ams.model.NodeAuth;
+//import nl.mpi.lat.ams.model.NodeLicense;
+//import nl.mpi.lat.ams.model.NodePcplLicense;
 import nl.mpi.lat.ams.model.NodePcplRule;
-import nl.mpi.lat.ams.model.rule.AbstractRule;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
 import nl.mpi.lat.auth.authentication.AuthenticationService;
 import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
 import nl.mpi.lat.auth.principal.LatPrincipal;
-import nl.mpi.lat.auth.principal.LatUser;
 import nl.mpi.lat.auth.principal.PrincipalService;
 import nl.mpi.lat.fabric.FabricService;
-import nl.mpi.lat.fabric.Node;
 import nl.mpi.lat.fabric.NodeID;
 import nl.mpi.latimpl.core.LatServiceImpl;
-import nl.mpi.latimpl.fabric.NodeIDImpl;
 import nl.mpi.util.OurURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -304,11 +300,8 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	/**
 	 * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String, nl.mpi.util.OurURL)
 	 */
-	public boolean hasWriteAccess(String userId, String nodeIdStr/* OurURL ourl*/) {
-//		if (ourl.toString().indexOf("/sessions/")!=-1) return true;
+	public boolean hasWriteAccess(String userId, String nodeIdStr) {
 		LatPrincipal user = this.getPrincipalSrv().getUser(userId);
-//		NodeID target = this.toNodeID(ourl);
-//                NodeID target = new NodeIDImpl(nodeId);
                 NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
 		return this.getAuthorizationSrv().isWriteable(user, target);
 	}
@@ -320,8 +313,8 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param ourl the target resource
 	 * @return target for all DomainEditor options
 	 */
-	private NodePcplRule getDomEditorRuleOpts(String userId, int nodeID /*OurURL ourl*/) {
-		NodeID nodeIDObj = new NodeIDImpl(nodeID); //this.toNodeID(ourl);
+	private NodePcplRule getDomEditorRuleOpts(String userId, String nodeIdStr) {
+            NodeID nodeIDObj = this.getFabricSrv().newNodeID(nodeIdStr);
 		LatPrincipal pcpl = this.getPrincipalSrv().getUser(userId);
 		NodePcplRule result = this.getAuthorizationSrv()
 			.getEffectiveDomainEditorRule(nodeIDObj, pcpl);
@@ -332,8 +325,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	/**
 	 * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String, nl.mpi.util.OurURL, long)
 	 */
-	public void setUsedStorageSpace(String uid, int nodeID, /*OurURL ourl,*/ long val) {
-		NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeID /*ourl*/);
+	public void setUsedStorageSpace(String uid, String nodeIdStr, long val) {
+            try {
+		NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
 		if(target == null) {
 			LOG.error("found no NPR target for setting DomainEditor options");
 			return;
@@ -345,7 +339,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 			return;
 		}
 		// evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
-		Integer mb = Integer.valueOf((int) val);
+		Integer mb = convertLongBToIntMB(val);
 		target.setUsedStorageMB(mb);
 		this.getAuthorizationSrv().save(target.getParent());
 		
@@ -353,41 +347,54 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 		// NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
 		// <=> max- vs. used-storage-space is checked & handled in lamus itself
 //		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
+                } catch (RuntimeException rE) {
+                    LOG.error("could not set UsedStorageSpace", rE);
+                    return;
+            }
 	}
 	
 	
 	/**
 	 * @see lams.ams.AmsBridge#getUsedStorageSpace(java.lang.String, nl.mpi.util.OurURL)
 	 */
-	public long getUsedStorageSpace(String uid, int nodeID /*OurURL ourl*/) {
+	public long getUsedStorageSpace(String uid, String nodeIdStr) {
 		try {
-			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeID /*ourl*/);
-			Integer val = target != null ? target.getUsedStorageMB() : null;
-			return val != null
-				? val.longValue() 
-				: DEFAULT_MB.longValue();
+			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+			long usedStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+                        if(target != null && target.getUsedStorageMB() != null) {
+                        usedStorageInBytes = convertIntMBToLongB(target.getUsedStorageMB());
+                        }
+                        return usedStorageInBytes;
 		} catch(RuntimeException rE) {
 			LOG.error("could not determine UsedStorageSpace, providing error-default " 
 				+ AmsBridge.ERROR_MB, rE);
 			return AmsBridge.ERROR_MB.longValue();
 		}
 	}
+        
+        private long convertIntMBToLongB(int valueInMB) {
+            return valueInMB * 1024 * 1024;
+        }
+        
+        private int convertLongBToIntMB(long valueInB) {
+            long valueInMB = valueInB / 1024 / 1024;
+            return (int) valueInMB;
+        }
 	
 	/**
 	 * @see lams.ams.AmsBridge#getMaxStorageSpace(java.lang.String, nl.mpi.util.OurURL)
 	 */
-	public long getMaxStorageSpace(String uid, int nodeID /*OurURL ourl*/) {
+	public long getMaxStorageSpace(String uid, String nodeIdStr) {
 		try {
-			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeID /*ourl*/);
+			NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
 			// no target -> no domain-editor(options)
-			if(target == null)
-				return DEFAULT_MB.longValue();
+                        long maxStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+			if(target != null && target.getMaxStorageMB() != null) {
+                            maxStorageInBytes = convertIntMBToLongB(target.getMaxStorageMB());
+                        }
 			//contract from ams2-api: value null means unlimited = MAX_MB
-			Integer result = target.getMaxStorageMB();
-			return result != null
-				? result.longValue() 
-				: ERROR_MB.longValue();
-		} catch(RuntimeException rE) {
+                        return maxStorageInBytes;
+                } catch(RuntimeException rE) {
 			LOG.error("could not determine MaxStorageSpace, providing error-default " 
 				+ ERROR_MB, rE);
 			return ERROR_MB.longValue();
@@ -398,118 +405,118 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	/**
 	 * @see lams.ams.AmsBridge#getMailAddress(java.lang.String)
 	 */
-	public String getMailAddress(String uid) {
-		try {
-			LatUser user = this.getPrincipalSrv().getUser(uid);
-			return user != null ? user.getEmail() : null;
-		} catch(Exception eE) {
-			LOG.error("failed to load user from ams2: " + uid, eE);
-			return null;
-		}
-	}
+//	public String getMailAddress(String uid) {
+//		try {
+//			LatUser user = this.getPrincipalSrv().getUser(uid);
+//			return user != null ? user.getEmail() : null;
+//		} catch(Exception eE) {
+//			LOG.error("failed to load user from ams2: " + uid, eE);
+//			return null;
+//		}
+//	}
 	/**
 	 * @see lams.ams.AmsBridge#getRealName(java.lang.String)
 	 */
-	public String getRealName(String uid) {
-		try {
-			LatUser user = this.getPrincipalSrv().getUser(uid);
-			return user != null ? user.getDisplayName() : null;
-		} catch(Exception eE) {
-			LOG.error("failed to load user from ams2: " + uid, eE);
-			return null;
-		}
-	}
+//	public String getRealName(String uid) {
+//		try {
+//			LatUser user = this.getPrincipalSrv().getUser(uid);
+//			return user != null ? user.getDisplayName() : null;
+//		} catch(Exception eE) {
+//			LOG.error("failed to load user from ams2: " + uid, eE);
+//			return null;
+//		}
+//	}
         
 	/**
 	 * transcribes given ourURL into a NodeID
 	 * @param ourl
 	 * @return NodeID equivalent of given OurURL
 	 */
-	private NodeID toNodeID(OurURL ourl) {
-		NodeID result = this.getFabricSrv().newNodeID(ourl);
-		//we have to throw the unknownNodeException if the url is not known in the AO table
-		if(result == null)
-			throw new UnknownNodeException("AmsBridge:toNodeID(): URL not in AO table: "+ourl);
-		return result;
-	}
+//	private NodeID toNodeID(OurURL ourl) {
+//		NodeID result = this.getFabricSrv().newNodeID(ourl);
+//		//we have to throw the unknownNodeException if the url is not known in the AO table
+//		if(result == null)
+//			throw new UnknownNodeException("AmsBridge:toNodeID(): URL not in AO table: "+ourl);
+//		return result;
+//	}
 	
 	/**
 	 * @see lams.ams.AmsBridge#callAccessRightsManagementSystem(String)
 	 */
-	public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
-		try {
-			// build & check target url
-			if(Text.empty(this.baseURL) || Text.empty(this.recalcURL)) {
-				LOG.warn("no ams-url configured, access rights will not be updated");
-				return;
-			}
-			StringBuilder amsurl = new StringBuilder();
-			amsurl.append(this.baseURL).append("/").append(this.recalcURL);
-			if(Text.notEmpty(recalcDomainMpiID) && Text.notEmpty(this.recalcParam)) {
-				amsurl.append("?").append(this.recalcParam).append("=")
-					.append( URLEncoder.encode(recalcDomainMpiID,"UTF-8"));
-			}
-			
-			// the actual call
-			OurURL amsurlServlet = new OurURL(amsurl.toString());
-			LOG.info("ams2 recalculation called by " + amsurlServlet);
-			
-			URLConnection servletConnection = amsurlServlet.openConnection();
-			servletConnection.setDoInput(true);
-			servletConnection.setDoOutput(false);
-			servletConnection.setUseCaches(false); // for the connection to the CGI / servlet, that is
-			servletConnection.setRequestProperty("Content-Type", "text");
-			InputStream instr = servletConnection.getInputStream();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(instr));
-			StringBuilder reply = new StringBuilder("ams2 recalculation call replied:\n");
-			String line;
-			while((line = reader.readLine()) != null) {
-				reply.append(line);
-			}
-			reader.close();
-			if (servletConnection instanceof HttpURLConnection)
-				((HttpURLConnection)servletConnection).disconnect();
-			LOG.info(reply.toString());
-		} catch(Exception eE) {
-			LOG.error("!! failed to call ams2 recalculation !!", eE);
-		}
-	}
+//	public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
+//		try {
+//			// build & check target url
+//			if(Text.empty(this.baseURL) || Text.empty(this.recalcURL)) {
+//				LOG.warn("no ams-url configured, access rights will not be updated");
+//				return;
+//			}
+//			StringBuilder amsurl = new StringBuilder();
+//			amsurl.append(this.baseURL).append("/").append(this.recalcURL);
+//			if(Text.notEmpty(recalcDomainMpiID) && Text.notEmpty(this.recalcParam)) {
+//				amsurl.append("?").append(this.recalcParam).append("=")
+//					.append( URLEncoder.encode(recalcDomainMpiID,"UTF-8"));
+//			}
+//			
+//			// the actual call
+//			OurURL amsurlServlet = new OurURL(amsurl.toString());
+//			LOG.info("ams2 recalculation called by " + amsurlServlet);
+//			
+//			URLConnection servletConnection = amsurlServlet.openConnection();
+//			servletConnection.setDoInput(true);
+//			servletConnection.setDoOutput(false);
+//			servletConnection.setUseCaches(false); // for the connection to the CGI / servlet, that is
+//			servletConnection.setRequestProperty("Content-Type", "text");
+//			InputStream instr = servletConnection.getInputStream();
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(instr));
+//			StringBuilder reply = new StringBuilder("ams2 recalculation call replied:\n");
+//			String line;
+//			while((line = reader.readLine()) != null) {
+//				reply.append(line);
+//			}
+//			reader.close();
+//			if (servletConnection instanceof HttpURLConnection)
+//				((HttpURLConnection)servletConnection).disconnect();
+//			LOG.info(reply.toString());
+//		} catch(Exception eE) {
+//			LOG.error("!! failed to call ams2 recalculation !!", eE);
+//		}
+//	}
 	
 	/**
 	 * @see lams.ams.AmsBridge#replaceNodeAms(String, String, String)
 	 */
-	public boolean replaceNodeAms(String oldNodeId, String newNodeId, String userId) {
-		
-		LOG.debug("Ams2Bridge.replaceNodeAms: AMS node replacement triggered. Old node: " + oldNodeId + "; New node: " + newNodeId);
-		
-		try {
-			Node oldNode = getFabricSrv().getNode(new NodeIDImpl(oldNodeId));
-			NodeID oldNodeIdParam = new NodeIDImpl(oldNodeId);
-			NodeID newNodeIdParam = new NodeIDImpl(newNodeId);
-			LatUser user = getPrincipalSrv().getUser(userId);
-			
-			// retrieve the domain managers, curators and editors of the old node, so that these rules can be used later
-			//  (they should be part of the default rules to be applied to the versioned node)
-			List<LatPrincipal> oldNodeDomainManagers = getAuthorizationSrv().getDomainManagers(oldNode);
-			List<LatPrincipal> oldNodeDomainCurators = getAuthorizationSrv().checkDomainCurator(oldNode);
-			List<LatPrincipal> oldNodeDomainEditors = getAuthorizationSrv().getDomainEditors(oldNode);
-	
-			// copy node-principals from the old node to the new one, delete them from the old node
-			copyNodePcpls(user, oldNodeIdParam, newNodeIdParam);
-			
-			// copy node-licenses from the old node to the new one, delete them from the old node
-			copyNodeLicenses(user, oldNodeIdParam, newNodeIdParam);
-			
-			// set the default rules (forbid everybody + domain managers, curators, editors) for the versioned node
-			setDefaultRulesForVersionedNode(user, oldNode, oldNodeDomainManagers, oldNodeDomainCurators, oldNodeDomainEditors);
-			
-		} catch(UnknownNodeException ex) {
-			LOG.error("Ams2Bridge.replaceNodeAms: problem retrieving node " + oldNodeId + " from the database", ex);
-			return false;
-		}
-		
-		return true;
-	}
+//	public boolean replaceNodeAms(String oldNodeId, String newNodeId, String userId) {
+//		
+//		LOG.debug("Ams2Bridge.replaceNodeAms: AMS node replacement triggered. Old node: " + oldNodeId + "; New node: " + newNodeId);
+//		
+//		try {
+//			Node oldNode = getFabricSrv().getNode(new NodeIDImpl(oldNodeId));
+//			NodeID oldNodeIdParam = new NodeIDImpl(oldNodeId);
+//			NodeID newNodeIdParam = new NodeIDImpl(newNodeId);
+//			LatUser user = getPrincipalSrv().getUser(userId);
+//			
+//			// retrieve the domain managers, curators and editors of the old node, so that these rules can be used later
+//			//  (they should be part of the default rules to be applied to the versioned node)
+//			List<LatPrincipal> oldNodeDomainManagers = getAuthorizationSrv().getDomainManagers(oldNode);
+//			List<LatPrincipal> oldNodeDomainCurators = getAuthorizationSrv().checkDomainCurator(oldNode);
+//			List<LatPrincipal> oldNodeDomainEditors = getAuthorizationSrv().getDomainEditors(oldNode);
+//	
+//			// copy node-principals from the old node to the new one, delete them from the old node
+//			copyNodePcpls(user, oldNodeIdParam, newNodeIdParam);
+//			
+//			// copy node-licenses from the old node to the new one, delete them from the old node
+//			copyNodeLicenses(user, oldNodeIdParam, newNodeIdParam);
+//			
+//			// set the default rules (forbid everybody + domain managers, curators, editors) for the versioned node
+//			setDefaultRulesForVersionedNode(user, oldNode, oldNodeDomainManagers, oldNodeDomainCurators, oldNodeDomainEditors);
+//			
+//		} catch(UnknownNodeException ex) {
+//			LOG.error("Ams2Bridge.replaceNodeAms: problem retrieving node " + oldNodeId + " from the database", ex);
+//			return false;
+//		}
+//		
+//		return true;
+//	}
 	
 	/**
 	 * Creates node-principals (NodeAuth) for the new node, based on the existing ones (in the old node).
@@ -520,55 +527,55 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param oldNodeId	ID of the old node (replaced)
 	 * @param newNodeId	ID of the new node (replacing)
 	 */
-	private void copyNodePcpls(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
-		
-		List<NodeAuth> oldNodePcpls = getAuthorizationSrv().getNodeAuths(oldNodeId);
-		List<NodeAuth> newNodePcpls = new ArrayList<NodeAuth>();
-		
-		for(NodeAuth nodePcpl : oldNodePcpls) {
-			NodeAuth newNodePcpl = getAuthorizationSrv().newNodeAuth();
-			newNodePcpl.setNodeID(newNodeId);
-			newNodePcpl.setPcpl(nodePcpl.getPcpl());
-
-			Set<NodePcplLicense> nodeAcceptedLicenses = nodePcpl.getAcceptedLicenses();
-			
-			for(NodePcplLicense nodeAcceptedLicense : nodeAcceptedLicenses) {
-				newNodePcpl.addLicenseAccptance(nodeAcceptedLicense);
-			}
-			
-			newNodePcpl.setCreatedOn(nodePcpl.getCreatedOn());
-			newNodePcpl.setCreator(nodePcpl.getCreator());
-			
-			newNodePcpl.setLastModifier(nodePcpl.getLastModifier());
-			newNodePcpl.setLastModOn(nodePcpl.getLastModOn());
-
-			Set<NodePcplRule> nodePrincipalRules = nodePcpl.getRules();
-			
-			for(NodePcplRule nodePrincipalRule : nodePrincipalRules) {
-				NodePcplRule newNodePcplRule = getAuthorizationSrv().newNodeRule();
-
-				Date now = new Date();
-				
-				newNodePcplRule.setCreatedOn(now);
-				newNodePcplRule.setCreator(user);
-				newNodePcplRule.setLastModifier(user);
-				newNodePcplRule.setLastModOn(now);
-				newNodePcplRule.setMaxStorageMB(nodePrincipalRule.getMaxStorageMB());
-				newNodePcplRule.setNature(nodePrincipalRule.getNature());
-				newNodePcplRule.setPriority(nodePrincipalRule.getPriority());
-				newNodePcplRule.setRule(nodePrincipalRule.getRule());
-				newNodePcplRule.setUsedStorageMB(nodePrincipalRule.getUsedStorageMB());
-				
-				newNodePcpl.addRule(newNodePcplRule);
-			}
-			
-			newNodePcpls.add(newNodePcpl);
-		}
-		
-		getAuthorizationSrv().delete(oldNodePcpls);
-		getAuthorizationSrv().save(newNodePcpls);
-		
-	}
+//	private void copyNodePcpls(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
+//		
+//		List<NodeAuth> oldNodePcpls = getAuthorizationSrv().getNodeAuths(oldNodeId);
+//		List<NodeAuth> newNodePcpls = new ArrayList<NodeAuth>();
+//		
+//		for(NodeAuth nodePcpl : oldNodePcpls) {
+//			NodeAuth newNodePcpl = getAuthorizationSrv().newNodeAuth();
+//			newNodePcpl.setNodeID(newNodeId);
+//			newNodePcpl.setPcpl(nodePcpl.getPcpl());
+//
+//			Set<NodePcplLicense> nodeAcceptedLicenses = nodePcpl.getAcceptedLicenses();
+//			
+//			for(NodePcplLicense nodeAcceptedLicense : nodeAcceptedLicenses) {
+//				newNodePcpl.addLicenseAccptance(nodeAcceptedLicense);
+//			}
+//			
+//			newNodePcpl.setCreatedOn(nodePcpl.getCreatedOn());
+//			newNodePcpl.setCreator(nodePcpl.getCreator());
+//			
+//			newNodePcpl.setLastModifier(nodePcpl.getLastModifier());
+//			newNodePcpl.setLastModOn(nodePcpl.getLastModOn());
+//
+//			Set<NodePcplRule> nodePrincipalRules = nodePcpl.getRules();
+//			
+//			for(NodePcplRule nodePrincipalRule : nodePrincipalRules) {
+//				NodePcplRule newNodePcplRule = getAuthorizationSrv().newNodeRule();
+//
+//				Date now = new Date();
+//				
+//				newNodePcplRule.setCreatedOn(now);
+//				newNodePcplRule.setCreator(user);
+//				newNodePcplRule.setLastModifier(user);
+//				newNodePcplRule.setLastModOn(now);
+//				newNodePcplRule.setMaxStorageMB(nodePrincipalRule.getMaxStorageMB());
+//				newNodePcplRule.setNature(nodePrincipalRule.getNature());
+//				newNodePcplRule.setPriority(nodePrincipalRule.getPriority());
+//				newNodePcplRule.setRule(nodePrincipalRule.getRule());
+//				newNodePcplRule.setUsedStorageMB(nodePrincipalRule.getUsedStorageMB());
+//				
+//				newNodePcpl.addRule(newNodePcplRule);
+//			}
+//			
+//			newNodePcpls.add(newNodePcpl);
+//		}
+//		
+//		getAuthorizationSrv().delete(oldNodePcpls);
+//		getAuthorizationSrv().save(newNodePcpls);
+//		
+//	}
 	
 	/**
 	 * Creates node-licenses (NodeLicense) for the new node, based on the existing ones (in the old node).
@@ -579,29 +586,29 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param oldNodeId	ID of the old node
 	 * @param newNodeId	ID of the new node
 	 */
-	private void copyNodeLicenses(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
-		List<NodeLicense> oldNodeLicenses = getLicenseSrv().getNodeLicenses(oldNodeId);
-		List<NodeLicense> newNodeLicenses = new ArrayList<NodeLicense>();
-		
-		for(NodeLicense nodeLicense : oldNodeLicenses) {
-			NodeLicense newNodeLicense = getLicenseSrv().newNodeLicense();
-			newNodeLicense.setNodeID(newNodeId);
-			newNodeLicense.setLicense(nodeLicense.getLicense());
-
-			Date now = new Date();
-			
-			newNodeLicense.setCreatedOn(now);
-			newNodeLicense.setCreator(user);
-			newNodeLicense.setLastModifier(user);
-			newNodeLicense.setLastModOn(now);
-
-			newNodeLicenses.add(newNodeLicense);
-		}
-		
-		getLicenseSrv().delete(oldNodeLicenses);
-		getLicenseSrv().save(newNodeLicenses);
-		
-	}
+//	private void copyNodeLicenses(LatUser user, NodeID oldNodeId, NodeID newNodeId) {
+//		List<NodeLicense> oldNodeLicenses = getLicenseSrv().getNodeLicenses(oldNodeId);
+//		List<NodeLicense> newNodeLicenses = new ArrayList<NodeLicense>();
+//		
+//		for(NodeLicense nodeLicense : oldNodeLicenses) {
+//			NodeLicense newNodeLicense = getLicenseSrv().newNodeLicense();
+//			newNodeLicense.setNodeID(newNodeId);
+//			newNodeLicense.setLicense(nodeLicense.getLicense());
+//
+//			Date now = new Date();
+//			
+//			newNodeLicense.setCreatedOn(now);
+//			newNodeLicense.setCreator(user);
+//			newNodeLicense.setLastModifier(user);
+//			newNodeLicense.setLastModOn(now);
+//
+//			newNodeLicenses.add(newNodeLicense);
+//		}
+//		
+//		getLicenseSrv().delete(oldNodeLicenses);
+//		getLicenseSrv().save(newNodeLicenses);
+//		
+//	}
 	
 	/**
 	 * Creates a node-principal (NodeAuth) and default rule for versioned nodes 
@@ -613,24 +620,24 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param oldNodeDomainCurators	List of domain curators to be applied in the versioned node (they were domain curators of the node before being versioned)
 	 * @param oldNodeDomainEditors List of domain editors to be applied in the versioned node (they were domain editors of the node before being versioned)
 	 */
-	private void setDefaultRulesForVersionedNode(LatUser user, Node node,
-			List<LatPrincipal> oldNodeDomainManagers, List<LatPrincipal> oldNodeDomainCurators, List<LatPrincipal> oldNodeDomainEditors) {
-		
-		List<LatPrincipal> everybody = new ArrayList<LatPrincipal>();
-		everybody.add(getPrincipalSrv().getEverybody());
-		setRules(user, node.getID(), everybody, NodePcplRule.NATURE_CONSTRAINT, NodePcplRule.PRIORITY_FORBID, getRuleSrv().getRuleForbid());
-		
-		if(oldNodeDomainManagers != null && oldNodeDomainManagers.size() > 0) {
-			setRules(user, node.getID(), oldNodeDomainManagers, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDM());
-		}
-		if(oldNodeDomainCurators != null && oldNodeDomainCurators.size() > 0) {
-			setRules(user, node.getID(), oldNodeDomainCurators, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDC());
-		}
-		if(oldNodeDomainEditors != null && oldNodeDomainEditors.size() > 0) {
-			setRules(user, node.getID(), oldNodeDomainEditors, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDE());
-		}
-		
-	}
+//	private void setDefaultRulesForVersionedNode(LatUser user, Node node,
+//			List<LatPrincipal> oldNodeDomainManagers, List<LatPrincipal> oldNodeDomainCurators, List<LatPrincipal> oldNodeDomainEditors) {
+//		
+//		List<LatPrincipal> everybody = new ArrayList<LatPrincipal>();
+//		everybody.add(getPrincipalSrv().getEverybody());
+//		setRules(user, node.getID(), everybody, NodePcplRule.NATURE_CONSTRAINT, NodePcplRule.PRIORITY_FORBID, getRuleSrv().getRuleForbid());
+//		
+//		if(oldNodeDomainManagers != null && oldNodeDomainManagers.size() > 0) {
+//			setRules(user, node.getID(), oldNodeDomainManagers, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDM());
+//		}
+//		if(oldNodeDomainCurators != null && oldNodeDomainCurators.size() > 0) {
+//			setRules(user, node.getID(), oldNodeDomainCurators, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDC());
+//		}
+//		if(oldNodeDomainEditors != null && oldNodeDomainEditors.size() > 0) {
+//			setRules(user, node.getID(), oldNodeDomainEditors, NodePcplRule.NATURE_PERMISSION, NodePcplRule.PRIORITY_DMANAGER, getRuleSrv().getRuleDE());
+//		}
+//		
+//	}
 	
 	/**
 	 * Applies the given rule, paired with a principal (from the provided list) to the given node.
@@ -642,37 +649,37 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	 * @param priority Priority of the rule
 	 * @param rule Rule
 	 */
-	private void setRules(LatUser user, NodeID nodeId, List<LatPrincipal> principals, Integer nature, Integer priority, AbstractRule rule) {
-		
-		for(LatPrincipal principal : principals) {
-			
-			Date now = new Date();
-			
-			NodeAuth nodePcpl = getAuthorizationSrv().getNodeAuth(nodeId, principal);
-			if(nodePcpl == null) {
-				nodePcpl = getAuthorizationSrv().newNodeAuth();
-				nodePcpl.setNodeID(nodeId);
-				nodePcpl.setPcpl(principal);
-				nodePcpl.setCreatedOn(now);
-				nodePcpl.setCreator(user);
-				nodePcpl.setLastModifier(user);
-				nodePcpl.setLastModOn(now);
-			}
-			
-			NodePcplRule pcplRule = getRuleSrv().newDefaultOptions(rule);
-			pcplRule.setCreatedOn(now);
-			pcplRule.setCreator(user);
-			pcplRule.setLastModifier(user);
-			pcplRule.setLastModOn(now);
-			pcplRule.setNature(nature);
-			pcplRule.setPriority(priority);
-			
-			pcplRule.setRule(rule);
-			nodePcpl.addRule(pcplRule);
-			
-			getAuthorizationSrv().save(nodePcpl);
-		}
-		
-	}
+//	private void setRules(LatUser user, NodeID nodeId, List<LatPrincipal> principals, Integer nature, Integer priority, AbstractRule rule) {
+//		
+//		for(LatPrincipal principal : principals) {
+//			
+//			Date now = new Date();
+//			
+//			NodeAuth nodePcpl = getAuthorizationSrv().getNodeAuth(nodeId, principal);
+//			if(nodePcpl == null) {
+//				nodePcpl = getAuthorizationSrv().newNodeAuth();
+//				nodePcpl.setNodeID(nodeId);
+//				nodePcpl.setPcpl(principal);
+//				nodePcpl.setCreatedOn(now);
+//				nodePcpl.setCreator(user);
+//				nodePcpl.setLastModifier(user);
+//				nodePcpl.setLastModOn(now);
+//			}
+//			
+//			NodePcplRule pcplRule = getRuleSrv().newDefaultOptions(rule);
+//			pcplRule.setCreatedOn(now);
+//			pcplRule.setCreator(user);
+//			pcplRule.setLastModifier(user);
+//			pcplRule.setLastModOn(now);
+//			pcplRule.setNature(nature);
+//			pcplRule.setPriority(priority);
+//			
+//			pcplRule.setRule(rule);
+//			nodePcpl.addRule(pcplRule);
+//			
+//			getAuthorizationSrv().save(nodePcpl);
+//		}
+//		
+//	}
 
 }
