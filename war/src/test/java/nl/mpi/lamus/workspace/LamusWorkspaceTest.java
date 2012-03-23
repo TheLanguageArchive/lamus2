@@ -160,6 +160,22 @@ public class LamusWorkspaceTest {
         assertEquals("Workspace objects are not equal.", testWorkspace1, testWorkspace2);
     }
     
+    @Test
+    public void workspacesHaveSameHashCode() {
+
+        Workspace testWorkspace1 = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        Workspace testWorkspace2 = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        assertEquals("Workspace objects don't have the same hashcode.", testWorkspace1.hashCode(), testWorkspace2.hashCode());
+    }
+    
     /**
      * Test of equals method, of class LamusWorkspace.
      */
@@ -177,6 +193,45 @@ public class LamusWorkspaceTest {
         
         Workspace testWorkspace2 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, differentDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        assertFalse("Workspace objects should not be equal.", testWorkspace1.equals(testWorkspace2));
+    }
+    
+    @Test
+    public void workspacesHaveDifferentHashCodes() {
+        
+        Calendar newCalendar = Calendar.getInstance();
+        newCalendar.add(Calendar.HOUR, -1);
+        Date differentDate = newCalendar.getTime();
+
+        Workspace testWorkspace1 = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        Workspace testWorkspace2 = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, differentDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        assertFalse("Workspace objects should not have the same hashcode.", testWorkspace1.hashCode() == testWorkspace2.hashCode());
+    }
+    
+    @Test
+    public void workspacesComparedWithObjectOfDifferentType() {
+        
+        Calendar newCalendar = Calendar.getInstance();
+        newCalendar.add(Calendar.HOUR, -1);
+
+        Workspace testWorkspace1 = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        
+        Object testWorkspace2 = new SomeOtherWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
@@ -334,4 +389,217 @@ public class LamusWorkspaceTest {
         assertNotSame("The 'sessionEndDate' object used in the 'set' method and the one retrieved should be clones and not the exact same object.",
                 newDate, testWorkspace.getSessionEndDate());
     }
+    
+    @Test
+    public void testToString() {
+        
+        Workspace testWorkspace = new LamusWorkspace(
+                this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
+                this.usedStorageSpace, this.maxStorageSpace,
+                this.status, this.message, this.archiveInfo);
+        String expectedString = "Workspace ID: " + testWorkspace.getWorkspaceID()
+                + ", User ID: " + testWorkspace.getUserID()
+                + ", Top Node ID: " + testWorkspace.getTopNodeID()
+                + ", Start Date: " + testWorkspace.getStartDate()
+                + ", End Date: " + testWorkspace.getEndDate()
+                + ", Session Start Date: " + testWorkspace.getSessionStartDate()
+                + ", Session End Date: " + testWorkspace.getSessionEndDate()
+                + ", Used Storage Space: " + testWorkspace.getUsedStorageSpace()
+                + ", Max Storage Space: " + testWorkspace.getMaxStorageSpace()
+                + ", Status: " + testWorkspace.getStatus()
+                + ", Message: " + testWorkspace.getMessage()
+                + ", Archive Info: " + testWorkspace.getArchiveInfo();
+        
+        String actualString = testWorkspace.toString();
+        
+        assertEquals(expectedString, actualString);
+    }
+}
+
+class SomeOtherWorkspace implements Workspace {
+
+    private int workspaceID;
+    private String userID;
+    private int topNodeID;
+    private Date startDate;
+    private Date endDate;
+    private Date sessionStartDate;
+    private Date sessionEndDate;
+    private long usedStorageSpace;
+    private long maxStorageSpace;
+    private WorkspaceStatus status;
+    private String message;
+    private String archiveInfo;
+    
+    public SomeOtherWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
+        this.userID = userID;
+        this.usedStorageSpace = usedStorageSpace;
+        this.maxStorageSpace = maxStorageSpace;
+        Date now = Calendar.getInstance().getTime();
+        this.startDate = now;
+        this.sessionStartDate = now;
+        this.status = WorkspaceStatus.INITIALISING;
+        //TODO set message, etc
+    }
+    
+    public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID,
+            Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
+            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
+        this.workspaceID = workspaceID;
+        this.userID = userID;
+        this.topNodeID = topNodeID;
+        if(startDate != null) {
+            this.startDate = (Date) startDate.clone();
+        }
+        if(endDate != null) {
+            this.endDate = (Date) endDate.clone();
+        }
+        if(sessionStartDate != null) {
+            this.sessionStartDate = (Date) sessionStartDate.clone();
+        }
+        if(sessionEndDate != null) {
+            this.sessionEndDate = (Date) sessionEndDate.clone();
+        }
+        this.usedStorageSpace = usedStorageSpace;
+        this.maxStorageSpace = maxStorageSpace;
+        this.status = status;
+        this.message = message;
+        this.archiveInfo = archiveInfo;
+    }
+    
+    public int getWorkspaceID() {
+        return this.workspaceID;
+    }
+    
+    public void setWorkspaceID(int workspaceID) {
+        this.workspaceID = workspaceID;
+    }
+
+    public String getUserID() {
+        return this.userID;
+    }
+    
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+    
+    public int getTopNodeID() {
+        return this.topNodeID;
+    }
+
+    public void setTopNodeID(int topNodeID) {
+        this.topNodeID = topNodeID;
+    }
+
+    public Date getStartDate() {
+        Date toReturn = null;
+        if(this.startDate != null) {
+            toReturn = (Date) this.startDate.clone();
+        }
+        return toReturn;
+    }
+    
+    public void setStartDate(Date startDate) {
+        Date toSet = null;
+        if(startDate != null) {
+            toSet = (Date) startDate.clone();
+        }
+        this.startDate = toSet;
+    }
+
+    public Date getEndDate() {
+        Date toReturn = null;
+        if(this.endDate != null) {
+            toReturn = (Date) this.endDate.clone();
+        }
+        return toReturn;
+    }
+    
+    public void setEndDate(Date endDate) {
+        Date toSet = null;
+        if(endDate != null) {
+            toSet = (Date) endDate.clone();
+        }
+        this.endDate = toSet;
+    }
+
+    public Date getSessionStartDate() {
+        Date toReturn = null;
+        if(this.sessionStartDate != null) {
+            toReturn = (Date) this.sessionStartDate.clone();
+        }
+        return toReturn;
+    }
+    
+    public void setSessionStartDate(Date sessionStartDate) {
+        Date toSet = null;
+        if(sessionStartDate != null) {
+            toSet = (Date) sessionStartDate.clone();
+        }
+        this.sessionStartDate = toSet;
+    }
+
+    public Date getSessionEndDate() {
+        Date toReturn = null;
+        if(this.sessionEndDate != null) {
+            toReturn = (Date) this.sessionEndDate.clone();
+        }
+        return toReturn;
+    }
+    
+    public void setSessionEndDate(Date sessionEndDate) {
+        Date toSet = null;
+        if(sessionEndDate != null) {
+            toSet = (Date) sessionEndDate.clone();
+        }
+        this.sessionEndDate = toSet;
+    }
+    
+//    public void updateStartDates() {
+//        throw new UnsupportedOperationException("not yet implemented");
+//    }
+//    
+//    public void updateEndDates() {
+//        throw new UnsupportedOperationException("not yet implemented");
+//    }
+    
+    public long getUsedStorageSpace() {
+        return this.usedStorageSpace;
+    }
+
+    public void setUsedStorageSpace(long usedStorageSpace) {
+        this.usedStorageSpace = usedStorageSpace;
+    }
+
+    public long getMaxStorageSpace() {
+        return this.maxStorageSpace;
+    }
+
+    public void setMaxStorageSpace(long maxStorageSpace) {
+        this.maxStorageSpace = maxStorageSpace;
+    }
+        
+    public WorkspaceStatus getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(WorkspaceStatus status) {
+        this.status = status;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getArchiveInfo() {
+        return this.archiveInfo;
+    }
+
+    public void setArchiveInfo(String archiveInfo) {
+        this.archiveInfo = archiveInfo;
+    }    
 }

@@ -163,13 +163,13 @@ public class LamusWorkspace implements Workspace {
         this.sessionEndDate = toSet;
     }
     
-    public void updateStartDates() {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-    
-    public void updateEndDates() {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
+//    public void updateStartDates() {
+//        throw new UnsupportedOperationException("not yet implemented");
+//    }
+//    
+//    public void updateEndDates() {
+//        throw new UnsupportedOperationException("not yet implemented");
+//    }
     
     public long getUsedStorageSpace() {
         return this.usedStorageSpace;

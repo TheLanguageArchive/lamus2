@@ -163,9 +163,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param authorizationSrv the authorizationSrv to set
      */
-    private void setAuthorizationSrv(AdvAuthorizationService authorizationSrv) {
-        this.mAuthorizationSrv = authorizationSrv;
-    }
+//    private void setAuthorizationSrv(AdvAuthorizationService authorizationSrv) {
+//        this.mAuthorizationSrv = authorizationSrv;
+//    }
 
     /**
      * @return the principalSrv
@@ -177,9 +177,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param principalSrv the principalSrv to set
      */
-    private void setPrincipalSrv(PrincipalService principalSrv) {
-        this.mPrincipalSrv = principalSrv;
-    }
+//    private void setPrincipalSrv(PrincipalService principalSrv) {
+//        this.mPrincipalSrv = principalSrv;
+//    }
 
     /**
      * @return the authenticationSrv
@@ -191,9 +191,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param authenticationSrv the authenticationSrv to set
      */
-    private void setAuthenticationSrv(AuthenticationService authenticationSrv) {
-        this.mAuthenticationSrv = authenticationSrv;
-    }
+//    private void setAuthenticationSrv(AuthenticationService authenticationSrv) {
+//        this.mAuthenticationSrv = authenticationSrv;
+//    }
 
     /**
      * @return the fabricSrv
@@ -205,9 +205,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param fabricSrv the fabricSrv to set
      */
-    public void setFabricSrv(FabricService fabricSrv) {
-        this.mFabricSrv = fabricSrv;
-    }
+//    public void setFabricSrv(FabricService fabricSrv) {
+//        this.mFabricSrv = fabricSrv;
+//    }
 
     /**
      * @return the licenseSrv
@@ -219,9 +219,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param licenseSrv the licenseSrv to set
      */
-    public void setLicenseSrv(LicenseService licenseSrv) {
-        this.mLicenseSrv = licenseSrv;
-    }
+//    public void setLicenseSrv(LicenseService licenseSrv) {
+//        this.mLicenseSrv = licenseSrv;
+//    }
 
     /**
      * @return the ruleSrv
@@ -233,9 +233,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @param ruleSrv the ruleSrv to set
      */
-    public void setRuleSrv(RuleService ruleSrv) {
-        this.mRuleSrv = ruleSrv;
-    }
+//    public void setRuleSrv(RuleService ruleSrv) {
+//        this.mRuleSrv = ruleSrv;
+//    }
 
     /**
      * @see lams.ams.AmsBridge#getStatus()
@@ -245,30 +245,30 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
                 && this.getAuthenticationSrv() != null
                 && this.getPrincipalSrv() != null;
     }
-    
-    public String getBaseURL() {
-        return this.baseURL;
-    }
-
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
-    }
-    
-    public String getRecalcURL() {
-        return this.recalcURL;
-    }
-
-    public void setRecalcURL(String recalcURL) {
-        this.recalcURL = recalcURL;
-    }
-    
-    public String getRecalcParam() {
-        return this.recalcParam;
-    }
-
-    public void setRecalcParam(String recalcParam) {
-        this.recalcParam = recalcParam;
-    }
+//    
+//    public String getBaseURL() {
+//        return this.baseURL;
+//    }
+//
+//    public void setBaseURL(String baseURL) {
+//        this.baseURL = baseURL;
+//    }
+//    
+//    public String getRecalcURL() {
+//        return this.recalcURL;
+//    }
+//
+//    public void setRecalcURL(String recalcURL) {
+//        this.recalcURL = recalcURL;
+//    }
+//    
+//    public String getRecalcParam() {
+//        return this.recalcParam;
+//    }
+//
+//    public void setRecalcParam(String recalcParam) {
+//        this.recalcParam = recalcParam;
+//    }
 
     /**
      * @see lams.ams.AmsBridge#close()

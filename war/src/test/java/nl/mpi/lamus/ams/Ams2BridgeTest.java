@@ -18,7 +18,6 @@ package nl.mpi.lamus.ams;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lat.ams.model.NodeAuth;
 import nl.mpi.lat.ams.model.NodePcplRule;
-import nl.mpi.lat.ams.model.rule.AbstractRule;
 import nl.mpi.lat.ams.model.rule.DomainEditor;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
@@ -53,6 +52,7 @@ public class Ams2BridgeTest {
     Ams2Bridge testAms2BridgeFromSpringContext;
     
     private Ams2Bridge testAms2BridgeWithMockServices;
+    private Ams2Bridge testAms2BridgeWithNullFabricService;
     @Mock PrincipalService mockPrincipalSrv;
     @Mock AuthenticationService mockAuthenticationSrv;
     @Mock AdvAuthorizationService mockAuthorizationSrv;
@@ -78,6 +78,8 @@ public class Ams2BridgeTest {
     public void setUp() {
         testAms2BridgeWithMockServices = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
                 mockAuthorizationSrv, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
+        testAms2BridgeWithNullFabricService = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
+                mockAuthorizationSrv, null, mockLicenseSrv, mockRuleSrv);
     }
     
     @After
@@ -195,13 +197,11 @@ public class Ams2BridgeTest {
     @Test
     public void doNothingWhenClosingAndFabricServiceIsNull() {
         
-        testAms2BridgeWithMockServices.setFabricSrv(null);
-        
         context.checking(new Expectations() {{
             never (mockFabricSrv).close();
         }});
         
-        testAms2BridgeWithMockServices.close();
+        testAms2BridgeWithNullFabricService.close();
     }
     
     @Test

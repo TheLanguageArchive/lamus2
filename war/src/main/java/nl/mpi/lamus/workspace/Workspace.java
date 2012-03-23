@@ -53,9 +53,9 @@ public interface Workspace {
     
     public void setSessionEndDate(Date sessionEndDate);
     
-    public void updateStartDates();
-    
-    public void updateEndDates();
+//    public void updateStartDates();
+//    
+//    public void updateEndDates();
     
     public long getUsedStorageSpace();
     

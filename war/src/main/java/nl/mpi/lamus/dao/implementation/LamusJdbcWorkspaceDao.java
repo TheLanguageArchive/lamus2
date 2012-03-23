@@ -66,23 +66,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
 
     public void addWorkspace(Workspace workspace) {
-        
-        Timestamp endDate = null;
-        if(workspace.getEndDate() != null) {
-            endDate = new Timestamp(workspace.getEndDate().getTime());
-        }
-        Timestamp sessionEndDate = null;
-        if(workspace.getSessionEndDate() != null) {
-            sessionEndDate = new Timestamp(workspace.getSessionEndDate().getTime());
-        }
+
+        //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
         
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
                 .addValue("start_date", new Timestamp(workspace.getStartDate().getTime()))
-                .addValue("end_date", endDate)
                 .addValue("session_start_date", new Timestamp(workspace.getSessionStartDate().getTime()))
-                .addValue("session_end_date", sessionEndDate)
                 .addValue("used_storage_space", workspace.getUsedStorageSpace())
                 .addValue("max_storage_space", workspace.getMaxStorageSpace())
                 .addValue("status", workspace.getStatus().toString())
@@ -134,6 +125,25 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return workspaceToReturn;
     }
+    
+//    public void updateWorkspaceEndDates(Workspace workspace) {
+//
+//        Timestamp endDateTimestamp = null;
+//        if (workspace.getEndDate() != null) {
+//            endDateTimestamp = new Timestamp(workspace.getEndDate().getTime());
+//        }
+//        Date sessionEndDateTimestamp = null;
+//        if (workspace.getSessionEndDate() != null) {
+//            sessionEndDateTimestamp = new Timestamp(workspace.getSessionEndDate().getTime());
+//        }
+//
+//        String updateWorkspaceSql = "update workspace set end_date = :end_date, session_end_date = :session_end_date "
+//                + "where workspace_id = " + workspace.getWorkspaceID();
+//
+//        SqlParameterSource parameters = new MapSqlParameterSource().addValue("end_date", endDateTimestamp).addValue("session_end_date", sessionEndDateTimestamp);
+//
+//        namedParameterJdbcTemplate.update(updateWorkspaceSql, parameters);
+//    }
 
     public boolean isNodeLocked(int archiveNodeID) {
         

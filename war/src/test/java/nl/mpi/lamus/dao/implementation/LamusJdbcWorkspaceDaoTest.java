@@ -17,6 +17,8 @@ package nl.mpi.lamus.dao.implementation;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import javax.sql.DataSource;
 import nl.mpi.lamus.workspace.LamusWorkspace;
 import nl.mpi.lamus.workspace.Workspace;
@@ -82,11 +84,21 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
 
     
+    
+    
+    //TODO test add workspace with some null values (dates...)
+    
+    //TODO test get workspace with exception (if empty result)
+    
+    
+    
+    
+    
     /**
      * Test of getWorkspace method, of class JdbcWorkspaceDao.
      */
     @Test
-    public void testGetWorkspace() {
+    public void getWorkspaceWithNullEndDates() {
 
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
@@ -109,7 +121,45 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace retrievedWorkspace = workspaceDao.getWorkspace(workspaceID);
         
         assertEquals("Values retrieved from the workspace table do not match the inserted ones.", testWorkspace, retrievedWorkspace);
+    }
+    
+    @Test
+    public void getWorkspaceWithNonNullEndDates() {
+
         
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setTopNodeID(10);
+        testWorkspace.setArchiveInfo("/blabla/blabla");
+        Date now = Calendar.getInstance().getTime();
+        testWorkspace.setEndDate(now);
+        testWorkspace.setSessionEndDate(now);
+        
+        String insertSql = "INSERT INTO workspace (user_id, top_node_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, archive_info)" +
+                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        simpleJdbcTemplate.update(insertSql,
+                testWorkspace.getUserID(), testWorkspace.getTopNodeID(),
+                new Timestamp(testWorkspace.getStartDate().getTime()),
+                new Timestamp(testWorkspace.getEndDate().getTime()),
+                new Timestamp(testWorkspace.getSessionStartDate().getTime()),
+                new Timestamp(testWorkspace.getSessionEndDate().getTime()),
+                testWorkspace.getUsedStorageSpace(), testWorkspace.getMaxStorageSpace(),
+                testWorkspace.getStatus(), testWorkspace.getArchiveInfo());
+        
+        String identitySql = "CALL IDENTITY();";
+        int workspaceID = simpleJdbcTemplate.queryForInt(identitySql);
+        testWorkspace.setWorkspaceID(workspaceID);
+        
+        Workspace retrievedWorkspace = workspaceDao.getWorkspace(workspaceID);
+        
+        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", testWorkspace, retrievedWorkspace);
+    }
+    
+    @Test
+    public void getWorkspaceThatDoesntExist() {
+        
+        Workspace workspaceThatDoesntExist = workspaceDao.getWorkspace(1564);
+        
+        assertNull("Retrieved workspace should not exist", workspaceThatDoesntExist);
     }
 
     /**

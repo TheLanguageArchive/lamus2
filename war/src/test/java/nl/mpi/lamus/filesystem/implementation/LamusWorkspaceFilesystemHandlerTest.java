@@ -23,8 +23,7 @@ import nl.mpi.lamus.workspace.Workspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
@@ -101,5 +100,27 @@ public class LamusWorkspaceFilesystemHandlerTest {
         File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
 
         assertNotNull("Returned workspace should not be null.", result);
+    }
+    
+    @Test
+    public void returnsNullWhenWorkspaceDirectoryCreationFails() {
+        
+        testFolder.delete();
+        
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setWorkspaceID(1);
+        final File baseDirectory = testFolder.newFolder("workspace_base_directory");
+        baseDirectory.mkdirs();
+        baseDirectory.setWritable(false);
+        File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
+        }});
+        
+        File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
+
+        assertFalse("Workspace directory shouldn't have been created, since there should be no permissions for that.", workspaceDirectory.exists());
+        assertNull("When the creation of the workspace directory fails, it should return null.", result);
     }
 }
