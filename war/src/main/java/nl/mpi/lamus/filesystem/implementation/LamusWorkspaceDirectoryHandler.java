@@ -17,36 +17,43 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class LamusWorkspaceFilesystemHandler implements WorkspaceFilesystemHandler {
+public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceDirectoryHandler.class);
 
     private Configuration configuration;
     
-    LamusWorkspaceFilesystemHandler(Configuration configuration) {
+    LamusWorkspaceDirectoryHandler(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public File createWorkspaceDirectory(Workspace workspace) {
+    public File createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
+        
+        logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
         
         File baseDirectory = new File(this.configuration.getWorkspaceBaseDirectory());
         File workspaceDirectory = new File(baseDirectory, "" + workspace.getWorkspaceID());
         
         if(workspaceDirectory.exists()) {
-            //TODO log something
+            logger.info("Directory for workspace " + workspace.getWorkspaceID() + " already exists");
             return workspaceDirectory;
         } else {
             if(workspaceDirectory.mkdirs()) {
-                //TODO log some successful message
+                logger.info("Directory for workspace " + workspace.getWorkspaceID() + " successfully created");
                 return workspaceDirectory;
             } else {
-                //TODO log some error
-                return null;
+                String errorMessage = "Directory for workspace " + workspace.getWorkspaceID() + " could not be created";
+                throw new FailedToCreateWorkspaceDirectoryException(errorMessage, workspace);
             }
         }
     }

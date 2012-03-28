@@ -17,12 +17,9 @@ package nl.mpi.lamus.service.implementation;
 
 import java.net.MalformedURLException;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.LamusWorkspace;
-import nl.mpi.lamus.workspace.NodeAccessChecker;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceFactory;
+import nl.mpi.lamus.workspace.*;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -39,10 +36,7 @@ public class LamusWorkspaceServiceTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceService service;
     @Mock private NodeAccessChecker mockNodeAccessChecker;
-    @Mock private WorkspaceFactory mockWorkspaceFactory;
-    @Mock private WorkspaceDao mockWorkspaceDao;
-    @Mock private WorkspaceFilesystemHandler mockWorkspaceFilesystemHandler;
-    
+    @Mock private WorkspaceManager mockWorkspaceManager;
     
     public LamusWorkspaceServiceTest() {
     }
@@ -57,7 +51,7 @@ public class LamusWorkspaceServiceTest {
     
     @Before
     public void setUp() {
-        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceFilesystemHandler);
+        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceManager);
     }
     
     @After
@@ -96,9 +90,7 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(true));
             //allow other calls
-            oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
-            oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceFilesystemHandler).createWorkspaceDirectory(newWorkspace);
+            oneOf (mockWorkspaceManager).createWorkspace(with(equal(userID)), with(equal(archiveNodeID)), with(any(WorkspaceImporter.class)));
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeID);

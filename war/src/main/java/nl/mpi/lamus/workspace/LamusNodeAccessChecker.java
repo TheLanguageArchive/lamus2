@@ -19,12 +19,16 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusNodeAccessChecker implements NodeAccessChecker {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusNodeAccessChecker.class);    
 
     private final ArchiveObjectsDB archiveObjectsDB;
     private final AmsBridge amsBridge;
@@ -39,15 +43,18 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
     public boolean canCreateWorkspace(String userID, int archiveNodeID) {
         
         if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {
+            logger.warn("Node with archive ID " + archiveNodeID + " is not on site (it is an external node)");
             return false;
         }
         if(!this.amsBridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID))) {
+            logger.warn("User " + userID + " has no write access on the node with archive ID " + archiveNodeID);
             return false;
         }
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
         
         if(this.workspaceDao.isNodeLocked(archiveNodeID)) {
+            logger.warn("Node with archive ID " + archiveNodeID + " is locked");
             return false;
         }
         
@@ -56,6 +63,8 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
             // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
             // if there was a way of checking just the leave nodes, it would be a bit easier
 
+        logger.info("A workspace can be created in node with archive ID " + archiveNodeID);
+        
         return true;
     }
     

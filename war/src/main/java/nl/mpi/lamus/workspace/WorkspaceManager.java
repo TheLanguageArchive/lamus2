@@ -13,17 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.filesystem;
-
-import java.io.File;
-import nl.mpi.lamus.workspace.Workspace;
+package nl.mpi.lamus.workspace;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceFilesystemHandler {
+public interface WorkspaceManager {
     
-    public File createWorkspaceDirectory(Workspace workspace);
+    public Workspace createWorkspace(String userID, int archiveNodeID, WorkspaceImporter workspaceImporter);
     
 }

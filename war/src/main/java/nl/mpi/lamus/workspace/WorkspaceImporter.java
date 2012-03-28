@@ -19,6 +19,8 @@ package nl.mpi.lamus.workspace;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceException extends Exception {
+public interface WorkspaceImporter {
+    
+    public void importWorkspace(Workspace workspaceToImport);
     
 }

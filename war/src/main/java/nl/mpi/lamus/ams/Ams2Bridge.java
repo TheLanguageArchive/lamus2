@@ -29,8 +29,8 @@ import nl.mpi.lat.fabric.FabricService;
 import nl.mpi.lat.fabric.NodeID;
 import nl.mpi.latimpl.core.LatServiceImpl;
 import nl.mpi.util.OurURL;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * $Id$
@@ -42,7 +42,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     
-    private final static Log LOG = LogFactory.getLog(Ams2Bridge.class);
+    private final static Logger logger = LoggerFactory.getLogger(Ams2Bridge.class);
     /**
      * provides access to principals' data
      */
@@ -275,7 +275,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      */
     public void close() {
         // unimplemented: db access control handled by hibernate
-        LOG.debug("closing ams2Bridge...");
+        logger.debug("closing ams2Bridge...");
         this.close(null);
     }
 
@@ -284,7 +284,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      */
     public void close(String reason) {
         // unimplemented: db access control handled by hibernate
-        LOG.debug("closing ams2Bridge due to " + reason);
+        logger.debug("closing ams2Bridge due to " + reason);
         if (this.getFabricSrv() != null) {
             this.getFabricSrv().close();
         }
@@ -334,13 +334,13 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
         try {
             NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
             if (target == null) {
-                LOG.error("found no NPR target for setting DomainEditor options");
+                logger.error("found no NPR target for setting DomainEditor options");
                 return;
             }
             // npr is just a mimic, 
             //	e.g. for ArchiveManager role incorporating DomainEditor options
             if (target.isVirtual()) {
-                LOG.debug("caught virtual " + target);
+                logger.debug("caught virtual " + target);
                 return;
             }
             // evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
@@ -353,7 +353,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
             // <=> max- vs. used-storage-space is checked & handled in lamus itself
 //		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
         } catch (RuntimeException rE) {
-            LOG.error("could not set UsedStorageSpace", rE);
+            logger.error("could not set UsedStorageSpace", rE);
             return;
         }
     }
@@ -371,7 +371,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
             }
             return usedStorageInBytes;
         } catch (RuntimeException rE) {
-            LOG.error("could not determine UsedStorageSpace, providing error-default "
+            logger.error("could not determine UsedStorageSpace, providing error-default "
                     + AmsBridge.ERROR_MB, rE);
             return AmsBridge.ERROR_MB.longValue();
         }
@@ -402,7 +402,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
             //contract from ams2-api: value null means unlimited = MAX_MB
             return maxStorageInBytes;
         } catch (RuntimeException rE) {
-            LOG.error("could not determine MaxStorageSpace, providing error-default "
+            logger.error("could not determine MaxStorageSpace, providing error-default "
                     + ERROR_MB, rE);
             return ERROR_MB.longValue();
         }

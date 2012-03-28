@@ -39,6 +39,13 @@ public class LamusWorkspace implements Workspace {
     private String message;
     private String archiveInfo;
     
+    /**
+     * Constructor to be used when creating a new workspace.
+     * 
+     * @param userID
+     * @param usedStorageSpace
+     * @param maxStorageSpace 
+     */
     public LamusWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
         this.userID = userID;
         this.usedStorageSpace = usedStorageSpace;
@@ -50,6 +57,22 @@ public class LamusWorkspace implements Workspace {
         //TODO set message, etc
     }
     
+    /**
+     * Constructor to be used when loading a workspace from the database.
+     * 
+     * @param workspaceID
+     * @param userID
+     * @param topNodeID
+     * @param startDate
+     * @param endDate
+     * @param sessionStartDate
+     * @param sessionEndDate
+     * @param usedStorageSpace
+     * @param maxStorageSpace
+     * @param status
+     * @param message
+     * @param archiveInfo 
+     */
     public LamusWorkspace(int workspaceID, String userID, int topNodeID,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {

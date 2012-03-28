@@ -22,6 +22,8 @@ import java.util.Date;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -37,6 +39,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class LamusJdbcWorkspaceDao implements WorkspaceDao {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusJdbcWorkspaceDao.class);
     
 //    private JdbcTemplate jdbcTemplate;
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -66,6 +70,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
 
     public void addWorkspace(Workspace workspace) {
+        
+        logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeID());
 
         //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
         
@@ -81,9 +87,13 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("archive_info", workspace.getArchiveInfo());
             Number newID = this.insertWorkspace.executeAndReturnKey(parameters);
         workspace.setWorkspaceID(newID.intValue());
+        
+        logger.info("Workspace added to the database. Workspace ID: " + workspace.getWorkspaceID());
     }
 
     public Workspace getWorkspace(int workspaceID) {
+        
+        logger.debug("Retrieving workspace with ID: " + workspaceID);
         
         String queryWorkspaceSql = "select * from workspace where workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
@@ -120,8 +130,11 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, mapper);
         } catch(EmptyResultDataAccessException ex) {
+            logger.warn("Workspace with ID " + workspaceID + " does not exist in the database");
             return null;
         }
+        
+        logger.info("Workspace with ID " + workspaceID + " retrieved from the database");
         
         return workspaceToReturn;
     }
@@ -147,6 +160,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
     public boolean isNodeLocked(int archiveNodeID) {
         
+        logger.debug("Checking if node with archive ID " + archiveNodeID + " is locked");
+        
         String queryNodeSql = "select workspace_node_id from node where archive_node_id = :archive_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("archive_node_id", archiveNodeID);
         
@@ -162,9 +177,18 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             retrievedNode = this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
         } catch(EmptyResultDataAccessException ex) {
+            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node)");
             return false;
         }
 
-        return (retrievedNode != null);
+        boolean isLocked = (retrievedNode != null);
+        
+        if(!isLocked) {
+            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node)");
+        } else {
+            logger.info("Node with archive ID " + archiveNodeID + " is locked (there is already a workspace that contains this node)");
+        }
+        
+        return isLocked;
     }
 }

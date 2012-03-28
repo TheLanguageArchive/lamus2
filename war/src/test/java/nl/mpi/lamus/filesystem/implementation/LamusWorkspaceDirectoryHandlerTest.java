@@ -17,9 +17,10 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.LamusWorkspace;
 import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -31,14 +32,14 @@ import org.junit.rules.TemporaryFolder;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class LamusWorkspaceFilesystemHandlerTest {
+public class LamusWorkspaceDirectoryHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     @Mock private Configuration mockConfiguration;
-    private WorkspaceFilesystemHandler workspaceFilesystemHandler;
+    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     
-    public LamusWorkspaceFilesystemHandlerTest() {
+    public LamusWorkspaceDirectoryHandlerTest() {
     }
 
     @BeforeClass
@@ -51,7 +52,7 @@ public class LamusWorkspaceFilesystemHandlerTest {
     
     @Before
     public void setUp() {
-        workspaceFilesystemHandler = new LamusWorkspaceFilesystemHandler(mockConfiguration);
+        workspaceDirectoryHandler = new LamusWorkspaceDirectoryHandler(mockConfiguration);
     }
     
     @After
@@ -62,7 +63,7 @@ public class LamusWorkspaceFilesystemHandlerTest {
      * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
      */
     @Test
-    public void workspaceDirectoryHasToBeCreated() {
+    public void workspaceDirectoryHasToBeCreated() throws FailedToCreateWorkspaceDirectoryException {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -73,7 +74,7 @@ public class LamusWorkspaceFilesystemHandlerTest {
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
         }});
         
-        File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
+        File result = workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
         
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
         assertNotNull("Returned workspace should not be null.", result);
@@ -83,7 +84,7 @@ public class LamusWorkspaceFilesystemHandlerTest {
      * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
      */
     @Test
-    public void workspaceDirectoryAlreadyExists() {
+    public void workspaceDirectoryAlreadyExists() throws FailedToCreateWorkspaceDirectoryException {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -97,13 +98,13 @@ public class LamusWorkspaceFilesystemHandlerTest {
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
         }});
         
-        File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
+        File result = workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
 
         assertNotNull("Returned workspace should not be null.", result);
     }
     
     @Test
-    public void returnsNullWhenWorkspaceDirectoryCreationFails() {
+    public void throwsExceptionWhenWorkspaceDirectoryCreationFails() throws FailedToCreateWorkspaceDirectoryException{
         
         testFolder.delete();
         
@@ -113,14 +114,20 @@ public class LamusWorkspaceFilesystemHandlerTest {
         baseDirectory.mkdirs();
         baseDirectory.setWritable(false);
         File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
+        String errorMessage = "Directory for workspace " + testWorkspace.getWorkspaceID() + " could not be created";
         
         context.checking(new Expectations() {{
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
         }});
         
-        File result = workspaceFilesystemHandler.createWorkspaceDirectory(testWorkspace);
+        try {
+            workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+            fail("Exception was not thrown");
+        } catch(FailedToCreateWorkspaceDirectoryException ex) {
+            assertEquals(testWorkspace, ex.getWorkspace());
+            assertEquals(errorMessage, ex.getMessage());
+        }
 
         assertFalse("Workspace directory shouldn't have been created, since there should be no permissions for that.", workspaceDirectory.exists());
-        assertNull("When the creation of the workspace directory fails, it should return null.", result);
     }
 }

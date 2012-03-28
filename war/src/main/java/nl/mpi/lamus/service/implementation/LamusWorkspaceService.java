@@ -16,29 +16,26 @@
 package nl.mpi.lamus.service.implementation;
 
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFilesystemHandler;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.NodeAccessChecker;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceFactory;
+import nl.mpi.lamus.workspace.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusWorkspaceService implements WorkspaceService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceService.class);
 
     private final NodeAccessChecker nodeAccessChecker;
-    private final WorkspaceFactory workspaceFactory;
-    private final WorkspaceDao workspaceDao;
-    private final WorkspaceFilesystemHandler workspaceFilesystemHandler;
+    private final WorkspaceManager workspaceManager;
 
-    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceFactory factory,
-            WorkspaceDao workspaceDao, WorkspaceFilesystemHandler workspaceFilesystemHandler) {
-        this.workspaceFactory = factory;
+    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager) {
         this.nodeAccessChecker = accessChecker;
-        this.workspaceDao = workspaceDao;
-        this.workspaceFilesystemHandler = workspaceFilesystemHandler;
+        this.workspaceManager = workspaceManager;
     }
     
     
@@ -51,6 +48,11 @@ public class LamusWorkspaceService implements WorkspaceService {
     public Workspace createWorkspace(String userID, int archiveNodeID) {
 
         if(!this.nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID)) {
+            
+            //TODO Inform the user of the reason why the workspace can't be created (either there is already a workspace from the same user or from a different one)
+            //TODO Throw an exception instead?
+            
+            logger.error("Cannot create workspace in node with archive ID " + archiveNodeID);
             return null;
         }
         
@@ -58,26 +60,9 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
         
-        //TODO create workspace object
-        Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, archiveNodeID);
-        
-        //TODO create workspace in database
-        workspaceDao.addWorkspace(newWorkspace);
-        
-        //TODO create workspace directories
-        workspaceFilesystemHandler.createWorkspaceDirectory(newWorkspace);
-        
-        
-        //TODO start exploring the nodes in the filesystem - WorkspaceImporter - what about having a super class for both threads (importer/exported)?
-            // use the MetadataAPI to check CMDI files
-                // copy the files to the workspace directory (what to do with the names???? if changing, change links)
-                // create nodes in the database for the files
-                // fill the database with the proper metadata (is external, which type, is protected, etc)
-                // use typechecker to fill format data and check files
-                // add links in the database for children
-        
-        
-        
+
+        WorkspaceImporter workspaceImporter = new LamusWorkspaceImporter();
+        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeID, workspaceImporter);
         
         
 
