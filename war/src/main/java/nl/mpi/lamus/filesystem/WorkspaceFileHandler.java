@@ -15,12 +15,17 @@
  */
 package nl.mpi.lamus.filesystem;
 
+import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.model.MetadataDocument;
+
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceFileHandler {
     
-    
-    
+    public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
+            MetadataAPI metadataAPI, MetadataDocument metadataDocument);
 }

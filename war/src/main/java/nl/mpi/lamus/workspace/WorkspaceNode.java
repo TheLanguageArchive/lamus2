@@ -17,7 +17,7 @@ package nl.mpi.lamus.workspace;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Set;
+import java.util.Map;
 
 /**
  *
@@ -49,6 +49,10 @@ public interface WorkspaceNode {
     
     public void setTitle(String title);
     
+    public String getType();
+    
+    public void setType(String type);
+    
     public URL getWorkspaceURL();
     
     public void setWorkspaceURL(URL workspaceURL);
@@ -73,8 +77,8 @@ public interface WorkspaceNode {
     
     public void setFormat(String format);
     
-    public Set<Integer> getParentNodes();
+    public Map<Integer, String> getParentNodesReferences();
     
-    public void setParentNodes(Set<Integer> parentNodes);
+    public void setParentNodesReferences(Map<Integer, String> parentNodes);
     
 }

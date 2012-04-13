@@ -74,10 +74,9 @@ public class LamusWorkspaceDirectoryHandlerTest {
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
         }});
         
-        File result = workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+        workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
         
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
-        assertNotNull("Returned workspace should not be null.", result);
     }
     
     /**
@@ -90,17 +89,18 @@ public class LamusWorkspaceDirectoryHandlerTest {
         testWorkspace.setWorkspaceID(1);
         final File baseDirectory = testFolder.newFolder("workspace_base_directory");
         File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
-        workspaceDirectory.mkdirs();
-        
+        boolean isDirectoryCreated = workspaceDirectory.mkdirs();
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
+
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
         
         context.checking(new Expectations() {{
             oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
         }});
         
-        File result = workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
-
-        assertNotNull("Returned workspace should not be null.", result);
+        workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+        
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
     }
     
     @Test
@@ -111,7 +111,8 @@ public class LamusWorkspaceDirectoryHandlerTest {
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
         final File baseDirectory = testFolder.newFolder("workspace_base_directory");
-        baseDirectory.mkdirs();
+        boolean isDirectoryCreated = baseDirectory.mkdirs();
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
         baseDirectory.setWritable(false);
         File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
         String errorMessage = "Directory for workspace " + testWorkspace.getWorkspaceID() + " could not be created";
@@ -130,4 +131,5 @@ public class LamusWorkspaceDirectoryHandlerTest {
 
         assertFalse("Workspace directory shouldn't have been created, since there should be no permissions for that.", workspaceDirectory.exists());
     }
+    
 }

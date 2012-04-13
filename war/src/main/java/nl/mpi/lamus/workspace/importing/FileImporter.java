@@ -13,14 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.importing;
+
+import nl.mpi.metadata.api.model.Reference;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceManager {
+public interface FileImporter<R extends Reference> {
     
-    public Workspace createWorkspace(String userID, int archiveNodeID);
-    
+    public void importFile(R reference, int nodeArchiveID);
 }

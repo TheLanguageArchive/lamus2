@@ -36,6 +36,11 @@ public enum WorkspaceStatus {
      * lcWaitForImport until state is changed to INITIALISED by DataMoverIn.
      */
     INITIALISING,
+    
+    
+    ERROR_DURING_INITIALISATION,
+    
+    
     /**
      * The request is initialised, workspace is finished The IR / WS is now in
      * use. Can change to SLEEPING in IngestRequestDBImpl and can change back in

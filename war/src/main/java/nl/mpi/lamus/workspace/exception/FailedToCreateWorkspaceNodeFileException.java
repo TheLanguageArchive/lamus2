@@ -13,14 +13,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.exception;
+
+import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.WorkspaceNode;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceManager {
+public class FailedToCreateWorkspaceNodeFileException extends WorkspaceException {
     
-    public Workspace createWorkspace(String userID, int archiveNodeID);
+    private WorkspaceNode workspaceNode;
     
+    public FailedToCreateWorkspaceNodeFileException(String message, Workspace workspace, WorkspaceNode node) {
+        super(message, workspace);
+        this.workspaceNode = node;
+    }
+    
+    public WorkspaceNode getWorkspaceNode() {
+        return this.workspaceNode;
+    }
 }

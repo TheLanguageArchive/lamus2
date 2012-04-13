@@ -13,11 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.factory.implementation;
 
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
+import nl.mpi.lamus.workspace.LamusWorkspace;
+import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 
 /**
  *
@@ -25,8 +28,8 @@ import nl.mpi.lamus.configuration.Configuration;
  */
 public class LamusWorkspaceFactory implements WorkspaceFactory {
     
-    private AmsBridge amsBridge;
-    private Configuration configuration;
+    private final AmsBridge amsBridge;
+    private final Configuration configuration;
     
     /**
      * 

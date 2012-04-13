@@ -13,14 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.exception;
+
+import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.importing.FileImporter;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceManager {
+public class FileImporterException extends WorkspaceException {
     
-    public Workspace createWorkspace(String userID, int archiveNodeID);
+    private Class<? extends FileImporter> fileImporterType;
     
+    public FileImporterException(String message, Workspace workspace, Class<? extends FileImporter> fileImporterType,
+            Throwable cause) {
+        super(message, workspace);
+        this.initCause(cause);
+        this.fileImporterType = fileImporterType;
+    }
+    
+    public Class<? extends FileImporter> getFileImporterType() {
+        return this.fileImporterType;
+    }
 }

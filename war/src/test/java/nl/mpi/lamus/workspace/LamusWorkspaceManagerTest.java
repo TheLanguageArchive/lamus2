@@ -15,14 +15,23 @@
  */
 package nl.mpi.lamus.workspace;
 
+import java.util.concurrent.Executor;
+import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
+import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.metadata.api.MetadataAPI;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.*;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -32,10 +41,10 @@ public class LamusWorkspaceManagerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceManager manager;
+    @Mock private Executor mockExecutor;
     @Mock private WorkspaceFactory mockWorkspaceFactory;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
-    @Mock private WorkspaceImporter mockWorkspaceImporter;
     
     public LamusWorkspaceManagerTest() {
     }
@@ -50,7 +59,7 @@ public class LamusWorkspaceManagerTest {
     
     @Before
     public void setUp() {
-        this.manager = new LamusWorkspaceManager(mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler);
+        this.manager = new LamusWorkspaceManager(mockExecutor, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler);
     }
     
     @After
@@ -72,10 +81,10 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace);
-            oneOf (mockWorkspaceImporter).importWorkspace(newWorkspace);
+            oneOf (mockExecutor).execute(with(any(WorkspaceImportRunner.class)));
         }});
         
-        Workspace result = manager.createWorkspace(userID, archiveNodeID, mockWorkspaceImporter);
+        Workspace result = manager.createWorkspace(userID, archiveNodeID/*, mockWorkspaceImporter*/);
         assertNotNull("Returned workspace should not be null when object, database and directory are successfully created.", result);
     }
     
@@ -95,10 +104,9 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new FailedToCreateWorkspaceDirectoryException(errorMessage, newWorkspace)));
-            never (mockWorkspaceImporter).importWorkspace(newWorkspace);
         }});
         
-        Workspace result = manager.createWorkspace(userID, archiveNodeID, mockWorkspaceImporter);
+        Workspace result = manager.createWorkspace(userID, archiveNodeID/*, mockWorkspaceImporter*/);
         assertNull("Returned workspace should be null when the directory creation fails.", result);
     }
 }

@@ -68,8 +68,9 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'maxStorageSpace' is not the expected one.", this.maxStorageSpace, testWorkspace.getMaxStorageSpace());
         assertNotNull("Value for 'startDate' should not be null.", testWorkspace.getStartDate());
         assertEquals("Value for 'startDate' is not the expected one.", testWorkspace.getStartDate(), testWorkspace.getSessionStartDate());
-        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.INITIALISING, testWorkspace.getStatus());
-        //TODO more assertions? message, etc
+        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.UNINITIALISED, testWorkspace.getStatus());
+        assertEquals("Value for 'message' is not the expected one.", "Workspace uninitialised", testWorkspace.getMessage());
+        //TODO move message to properties file
     }
 
     /**
@@ -414,6 +415,24 @@ public class LamusWorkspaceTest {
         
         assertEquals(expectedString, actualString);
     }
+    
+    @Test
+    public void statusAndMessageSetAsInitialising() {
+        Workspace testWorkspace = new LamusWorkspace(this.userID, this.usedStorageSpace, this.maxStorageSpace);
+        testWorkspace.setStatusMessageInitialising();
+        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.INITIALISING, testWorkspace.getStatus());
+        assertEquals("Value for 'message' is not the expected one.", "Workspace initialising", testWorkspace.getMessage());
+        //TODO move message to properties file
+    }
+    
+    @Test
+    public void statusAndMessageSetAsErrorDuringInitialisation() {
+        Workspace testWorkspace = new LamusWorkspace(this.userID, this.usedStorageSpace, this.maxStorageSpace);
+        testWorkspace.setStatusMessageErrorDuringInitialisation();
+        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.ERROR_DURING_INITIALISATION, testWorkspace.getStatus());
+        assertEquals("Value for 'message' is not the expected one.", "Error during initialisation", testWorkspace.getMessage());
+        //TODO move message to properties file
+    }
 }
 
 class SomeOtherWorkspace implements Workspace {
@@ -601,5 +620,13 @@ class SomeOtherWorkspace implements Workspace {
 
     public void setArchiveInfo(String archiveInfo) {
         this.archiveInfo = archiveInfo;
-    }    
+    }
+
+    public void setStatusMessageInitialising() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setStatusMessageErrorDuringInitialisation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

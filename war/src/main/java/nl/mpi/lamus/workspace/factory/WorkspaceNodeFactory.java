@@ -13,14 +13,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.factory;
+
+import java.net.URL;
+import nl.mpi.lamus.workspace.WorkspaceNode;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface NodeAccessChecker {
-
-    public boolean canCreateWorkspace(String userID, int archiveNodeID);
+public interface WorkspaceNodeFactory {
+    
+    /**
+     * 
+     * @param workspaceID
+     * @param archiveNodeID
+     * @param archiveNodeURL
+     * @return 
+     */
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
     
 }

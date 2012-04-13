@@ -13,20 +13,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.importing;
+
+import java.util.Collection;
+import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.metadata.api.model.Reference;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceFactory {
+public interface WorkspaceFileExplorer {
     
-    /**
-     * 
-     * @param userID
-     * @param archiveTopNodeID
-     * @return 
-     */
-    public Workspace getNewWorkspace(String userID, int archiveNodeID);
-    
+    public void explore(WorkspaceNode nodeToExplore, Collection<Reference> linksInNode);
 }

@@ -13,14 +13,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.importing.implementation;
+
+import nl.mpi.lamus.workspace.importing.FileImporter;
+import nl.mpi.metadata.api.model.ResourceReference;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceImporter {
-    
-    public void importWorkspace(Workspace workspaceToImport);
+public class ResourceFileImporter implements FileImporter<ResourceReference> {
+
+    public void importFile(ResourceReference reference, int nodeArchiveID) {
+        
+        //TODO if onsite and not in orphans folder: typechecker - gettype()
+        
+        //TODO etc...
+        
+        //TODO needsProtection?
+        
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

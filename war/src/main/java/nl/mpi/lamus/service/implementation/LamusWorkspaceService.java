@@ -15,10 +15,10 @@
  */
 package nl.mpi.lamus.service.implementation;
 
-import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.*;
+import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +61,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
         
 
-        WorkspaceImporter workspaceImporter = new LamusWorkspaceImporter();
-        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeID, workspaceImporter);
+        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeID);
         
         
 

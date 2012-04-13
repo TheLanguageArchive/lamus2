@@ -17,7 +17,7 @@ package nl.mpi.lamus.workspace;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Set;
+import java.util.Map;
 
 /**
  *
@@ -27,17 +27,21 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     
     private int workspaceNodeID;
     private int workspaceID;
+
+    //TODO Worth having???
     private int archiveNodeID;
+    
     private URI profileSchemaURI;
     private String name;
     private String title;
+    private String type;
     private URL workspaceURL;
     private URL archiveURL;
     private URL originURL;
     private WorkspaceNodeStatus status;
     private String pid;
     private String format;
-    private Set<Integer> parentNodes;
+    private Map<Integer, String> parentNodesReferences;
 
     public int getWorkspaceNodeID() {
         return this.workspaceNodeID;
@@ -85,6 +89,14 @@ public class LamusWorkspaceNode implements WorkspaceNode {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+    
+    public String getType() {
+        return this.type;
+    }
+    
+    public void setType(String type) {
+        this.type = type;
     }
 
     public URL getWorkspaceURL() {
@@ -135,12 +147,12 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         this.format = format;
     }
 
-    public Set<Integer> getParentNodes() {
-        return this.parentNodes;
+    public Map<Integer, String> getParentNodesReferences() {
+        return this.parentNodesReferences;
     }
 
-    public void setParentNodes(Set<Integer> parentNodes) {
-        this.parentNodes = parentNodes;
+    public void setParentNodesReferences(Map<Integer, String> parentNodesReferences) {
+        this.parentNodesReferences = parentNodesReferences;
     }
     
 }

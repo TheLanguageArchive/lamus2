@@ -13,12 +13,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.management.implementation;
 
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +46,12 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
         if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {
             logger.warn("Node with archive ID " + archiveNodeID + " is not on site (it is an external node)");
             return false;
+            //TODO ExternalNodeException
         }
         if(!this.amsBridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID))) {
             logger.warn("User " + userID + " has no write access on the node with archive ID " + archiveNodeID);
             return false;
+            //TODO NoWriteAccessException
         }
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
@@ -56,6 +59,7 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
         if(this.workspaceDao.isNodeLocked(archiveNodeID)) {
             logger.warn("Node with archive ID " + archiveNodeID + " is locked");
             return false;
+            //TODO LockedNodeException
         }
         
         //TODO Should it check now if any of the child nodes is locked??

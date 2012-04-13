@@ -17,6 +17,7 @@ package nl.mpi.lamus.dao;
 
 import javax.sql.DataSource;
 import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.WorkspaceNode;
 
 /**
  *
@@ -40,6 +41,30 @@ public interface WorkspaceDao {
     
     /**
      * 
+     * @param workspace 
+     */
+    public void updateWorkspaceTopNode(Workspace workspace);
+    
+    /**
+     * 
+     * @param workspace 
+     */
+    public void updateWorkspaceDates(Workspace workspace);
+    
+    /**
+     * 
+     * @param workspace 
+     */
+    public void updateWorkspaceStorageSpace(Workspace workspace);
+
+    /**
+     * 
+     * @param workspace 
+     */
+    public void updateWorkspaceStatusMessage(Workspace workspace);
+    
+    /**
+     * 
      * @param workspaceID
      * @return 
      */
@@ -52,4 +77,17 @@ public interface WorkspaceDao {
      */
     public boolean isNodeLocked(int archiveNodeID);
     
+    /**
+     * 
+     * @param node
+     * @return 
+     */
+    public void addWorkspaceNode(WorkspaceNode node);
+    
+    /**
+     * 
+     * @param workspaceNodeID
+     * @return 
+     */
+    public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
 }

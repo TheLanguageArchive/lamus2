@@ -378,7 +378,7 @@ public class Ams2BridgeTest {
         }});
         
         testAms2BridgeWithMockServices.setUsedStorageSpace(userID, nodeIDStr, expectedUsedStorageSpaceInBytes);
-        assertEquals(new Integer(expectedUsedStorageSpaceInMB), nodePcplRule.getUsedStorageMB());
+        assertEquals(Integer.valueOf(expectedUsedStorageSpaceInMB), nodePcplRule.getUsedStorageMB());
     }
 
     @Test

@@ -53,8 +53,9 @@ public class LamusWorkspace implements Workspace {
         Date now = Calendar.getInstance().getTime();
         this.startDate = now;
         this.sessionStartDate = now;
-        this.status = WorkspaceStatus.INITIALISING;
-        //TODO set message, etc
+        this.status = WorkspaceStatus.UNINITIALISED;
+        this.message = "Workspace uninitialised";
+        //TODO Change message, move to properties file
     }
     
     /**
@@ -224,6 +225,18 @@ public class LamusWorkspace implements Workspace {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+    
+    public void setStatusMessageInitialising() {
+        setStatus(WorkspaceStatus.INITIALISING);
+        setMessage("Workspace initialising");
+        //TODO Change message, move to properties file
+    }
+
+    public void setStatusMessageErrorDuringInitialisation() {
+        setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+        setMessage("Error during initialisation");
+        //TODO Change message, move to properties file
     }
 
     public String getArchiveInfo() {

@@ -45,6 +45,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 //    private JdbcTemplate jdbcTemplate;
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private SimpleJdbcInsert insertWorkspace;
+    private SimpleJdbcInsert insertWorkspaceNode;
     
     @Autowired
     public void setDataSource(DataSource datasource) {
@@ -66,6 +67,24 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "message",
                     "archive_info");
         //TODO Inject table and column names
+        
+        this.insertWorkspaceNode = new SimpleJdbcInsert(datasource)
+                .withTableName("node")
+                .usingGeneratedKeyColumns("workspace_node_id")
+                .usingColumns(
+                    "workspace_id",
+                    "archive_node_id",
+                    "profile_schema_uri",
+                    "name",
+                    "title",
+                    "type",
+                    "workspace_url",
+                    "archive_url",
+                    "origin_url",
+                    "status",
+                    "pid",
+                    "format");
+        //TODO Inject table and column names
     }
     
 
@@ -74,21 +93,71 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeID());
 
         //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
+        // if dates are null, let the database throw the errors
+        Timestamp startDate = null;
+        if(workspace.getStartDate() != null) {
+            startDate = new Timestamp(workspace.getStartDate().getTime());
+        }
+        Timestamp sessionStartDate = null;
+        if(workspace.getSessionStartDate() != null) {
+            sessionStartDate = new Timestamp(workspace.getSessionStartDate().getTime());
+        }
+        String statusStr = null;
+        if(workspace.getStatus() != null) {
+            statusStr = workspace.getStatus().toString();
+        }
         
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
-                .addValue("start_date", new Timestamp(workspace.getStartDate().getTime()))
-                .addValue("session_start_date", new Timestamp(workspace.getSessionStartDate().getTime()))
+                .addValue("start_date", startDate)
+                .addValue("session_start_date", sessionStartDate)
                 .addValue("used_storage_space", workspace.getUsedStorageSpace())
                 .addValue("max_storage_space", workspace.getMaxStorageSpace())
-                .addValue("status", workspace.getStatus().toString())
+                .addValue("status", statusStr)
                 .addValue("message", workspace.getMessage())
                 .addValue("archive_info", workspace.getArchiveInfo());
             Number newID = this.insertWorkspace.executeAndReturnKey(parameters);
         workspace.setWorkspaceID(newID.intValue());
         
         logger.info("Workspace added to the database. Workspace ID: " + workspace.getWorkspaceID());
+    }
+    
+    
+    public void updateWorkspaceTopNode(Workspace workspace) {
+        
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting top node to: " + workspace.getTopNodeID());
+        
+        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("top_node_id", workspace.getTopNodeID())
+                .addValue("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Top node of workspace " + workspace.getWorkspaceID() + " updated to node " + workspace.getTopNodeID());
+    }
+    
+    public void updateWorkspaceDates(Workspace workspace) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void updateWorkspaceStorageSpace(Workspace workspace) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void updateWorkspaceStatusMessage(Workspace workspace) {
+        
+        logger.debug("Uploading workspace with ID: " + workspace.getWorkspaceID() + "; setting status to : " + workspace.getStatus() 
+                + "; setting message to: \"" + workspace.getMessage() + "\"");
+        
+        String updateSql = "UPDATE workspace SET status = :status, message = :message WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("status", workspace.getStatus())
+                .addValue("message", workspace.getMessage())
+                .addValue("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Status of workspace " + workspace.getWorkspaceID() + " updated to \"" + workspace.getStatus() + "\" and message updated to \"" + workspace.getMessage() + "\"");
     }
 
     public Workspace getWorkspace(int workspaceID) {
@@ -191,4 +260,53 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return isLocked;
     }
+
+    public void addWorkspaceNode(WorkspaceNode node) {
+                
+        logger.debug("Adding node to the database belonging to workspace with ID: " + node.getWorkspaceID());
+
+        String profileSchemaURIStr = null;
+        if(node.getProfileSchemaURI() != null) {
+            profileSchemaURIStr = node.getProfileSchemaURI().toString();
+        }
+        String workspaceURLStr = null;
+        if(node.getWorkspaceURL() != null) {
+            workspaceURLStr = node.getWorkspaceURL().toString();
+        }
+        String archiveURLStr = null;
+        if(node.getArchiveURL() != null) {
+            archiveURLStr = node.getArchiveURL().toString();
+        }
+        String originURLStr = null;
+        if(node.getOriginURL() != null) {
+            originURLStr = node.getOriginURL().toString();
+        }
+        String statusStr = null;
+        if(node.getStatus() != null) {
+            statusStr = node.getStatus().toString();
+        }
+        
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("workspace_id", node.getWorkspaceID())
+                .addValue("archive_node_id", node.getArchiveNodeID())
+                .addValue("profile_schema_uri", profileSchemaURIStr)
+                .addValue("name", node.getName())
+                .addValue("title", node.getTitle())
+                .addValue("type", node.getType())
+                .addValue("workspace_url", workspaceURLStr)
+                .addValue("archive_url", archiveURLStr)
+                .addValue("origin_url", originURLStr)
+                .addValue("status", statusStr)
+                .addValue("pid", node.getPid())
+                .addValue("format", node.getFormat());
+            Number newID = this.insertWorkspaceNode.executeAndReturnKey(parameters);
+        node.setWorkspaceNodeID(newID.intValue());
+        
+        logger.info("Node added to the database. Node ID: " + node.getWorkspaceNodeID());
+    }
+
+    public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

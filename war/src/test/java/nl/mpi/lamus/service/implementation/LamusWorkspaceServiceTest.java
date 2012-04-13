@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import java.net.MalformedURLException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -90,7 +91,7 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(true));
             //allow other calls
-            oneOf (mockWorkspaceManager).createWorkspace(with(equal(userID)), with(equal(archiveNodeID)), with(any(WorkspaceImporter.class)));
+            oneOf (mockWorkspaceManager).createWorkspace(userID, archiveNodeID);
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeID);

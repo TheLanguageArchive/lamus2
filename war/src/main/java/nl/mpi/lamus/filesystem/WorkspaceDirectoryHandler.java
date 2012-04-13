@@ -25,6 +25,8 @@ import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryExceptio
  */
 public interface WorkspaceDirectoryHandler {
     
-    public File createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException;
+    public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException;
+    
+    public File getWorkspaceDirectory(Workspace workspace);
     
 }

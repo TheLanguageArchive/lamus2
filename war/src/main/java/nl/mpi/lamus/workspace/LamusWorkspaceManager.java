@@ -15,10 +15,14 @@
  */
 package nl.mpi.lamus.workspace;
 
-import java.io.File;
+import java.util.concurrent.Executor;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
+import nl.mpi.lamus.workspace.importing.FileImporterFactory;
+import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
+import nl.mpi.lamus.workspace.importing.implementation.WorkspaceFileImporterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,53 +34,49 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceManager.class);
     
+    private final Executor executor;
     private final WorkspaceFactory workspaceFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
-    
 
-    public LamusWorkspaceManager(WorkspaceFactory factory, WorkspaceDao dao, WorkspaceDirectoryHandler directoryHandler) {
+    //TODO use Spring injection
+    //TODO Executor can be created using Executors.newSingleThreadExecutor()
+    public LamusWorkspaceManager(Executor executor, WorkspaceFactory factory, WorkspaceDao dao, WorkspaceDirectoryHandler directoryHandler) {
+        this.executor = executor;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
-        
     }
     
-    public Workspace createWorkspace(String userID, int archiveNodeID, WorkspaceImporter workspaceImporter) {
+    public Workspace createWorkspace(String userID, int topNodeArchiveID) {
         
-                //TODO create workspace object
-        Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, archiveNodeID);
-        
-        //TODO create workspace in database
+        Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topNodeArchiveID);
         workspaceDao.addWorkspace(newWorkspace);
-        
-        //TODO create workspace directories
-        File workspaceDirectory;
         try {
-            workspaceDirectory = workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace);
+            workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace);
         } catch(FailedToCreateWorkspaceDirectoryException ex) {
             logger.error(ex.getMessage(), ex);
             return null;
         }
         
-        //TODO get the information from the top node (metadata API) and add the node
-            // call some helper class from which the metadata should be retrieved and the node insertion triggered
+        //TODO get more values to add to the node (e.g. from the file, using the metadataAPI)
+//        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(archiveNodeID), ArchiveAccessContext.getFileUrlContext());
+//        URL archiveNodeURL = tempUrl.toURL();
+//        WorkspaceNode topNode = workspaceNodeFactory.getNewWorkspaceNode(newWorkspace.getWorkspaceID(), archiveNodeID, archiveNodeURL);
+
+        
+        //TODO change this call - use Spring injection
+
+        FileImporterFactory importerFactory = new WorkspaceFileImporterFactory(newWorkspace);
+        Runnable workspaceImportRunner = new WorkspaceImportRunner(workspaceDao, newWorkspace, topNodeArchiveID, importerFactory);
+//        Thread importThread = new Thread(workspaceImportRunner);
+//        importThread.start();
         
         
+        //TODO use Callable and Future instead of Runnable, in order to get the result of the thread
         
         
-        //TODO start exploring the nodes in the filesystem - WorkspaceImporter - what about having a super class for both threads (importer/exporter)?
-            // use the MetadataAPI to check CMDI files
-                // copy the files to the workspace directory (what to do with the names???? if changing, change links)
-                // create nodes in the database for the files
-                // fill the database with the proper metadata (is external, which type, is protected, etc)
-                // use typechecker to fill format data and check files
-                // add links in the database for children
-        
-        
-        workspaceImporter.importWorkspace(newWorkspace);
-        
-        
+        executor.execute(workspaceImportRunner);
         
         return newWorkspace;
     }

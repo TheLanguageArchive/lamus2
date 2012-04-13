@@ -15,16 +15,17 @@
  */
 package nl.mpi.lamus.dao.implementation;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
-import javax.sql.DataSource;
-import nl.mpi.lamus.workspace.LamusWorkspace;
-import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.*;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
@@ -37,9 +38,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     
     @Autowired
     LamusJdbcWorkspaceDao workspaceDao;
-
-    @Autowired
-    DataSource embeddedDataSource;
     
     public LamusJdbcWorkspaceDaoTest() {
     }
@@ -69,31 +67,81 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * Test of addWorkspace method, of class JdbcWorkspaceDao.
      */
     @Test
-    public void testAddWorkspace() throws SQLException {
-        System.out.println("addWorkspace");
+    public void addWorkspace() {
 
         int initialNumberOfRows = countRowsInTable("workspace");
         
         Workspace insertedWorkspace = new LamusWorkspace("testUser", 0L, 10000L);
-        insertedWorkspace.setTopNodeID(10);
         insertedWorkspace.setArchiveInfo("/blabla/blabla");
         
         workspaceDao.addWorkspace(insertedWorkspace);
         
         assertEquals("Column was not added to the workspace table.", initialNumberOfRows + 1, countRowsInTable("workspace"));
     }
+    
+    /**
+     * 
+     */
+    @Test
+    public void addWorkspaceWithWrongParameters() {
 
+        int initialNumberOfRows = countRowsInTable("workspace");
+        
+        Workspace insertedWorkspace = new LamusWorkspace(0, null, 0, null, null, null, null, 0, 0, WorkspaceStatus.REFUSED, null, null);
+        
+        try {
+            workspaceDao.addWorkspace(insertedWorkspace);
+            fail("An exception should have been thrown.");
+        } catch(DataAccessException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+            assertEquals("Column was added to the workspace table.", initialNumberOfRows, countRowsInTable("workspace"));
+        }
+    }
     
+    /**
+     * 
+     */
+    @Test
+    public void updateWorkspaceTopNode() {
+        
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode topNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
+        int expectedTopNodeID = topNode.getWorkspaceNodeID();
+        
+        expectedWorkspace.setTopNodeID(topNode.getWorkspaceNodeID());
+        
+        workspaceDao.updateWorkspaceTopNode(expectedWorkspace);
+        
+        Workspace retrievedWorkspace = getWorkspaceFromDB(expectedWorkspace.getWorkspaceID());
+        
+        assertEquals("Workspace object retrieved from the database is different from expected.", expectedWorkspace, retrievedWorkspace);
+        assertEquals("Top node of the workspace was not updated in the database.", expectedTopNodeID, retrievedWorkspace.getTopNodeID());
+    }
     
-    
-    //TODO test add workspace with some null values (dates...)
-    
-    //TODO test get workspace with exception (if empty result)
-    
-    
-    
-    
-    
+    /**
+     * 
+     */
+    @Test
+    public void updateWorkspaceStatus() {
+        
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        
+        WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        String expectedMessage = "test message";
+        
+        expectedWorkspace.setStatus(expectedStatus);
+        expectedWorkspace.setMessage(expectedMessage);
+        
+        workspaceDao.updateWorkspaceStatusMessage(expectedWorkspace);
+        
+        Workspace retrievedWorkspace = getWorkspaceFromDB(expectedWorkspace.getWorkspaceID());
+        
+        assertEquals("Workspace object retrieved from the database is different from expected.", expectedWorkspace, retrievedWorkspace);
+        assertEquals("Status of the workspace was not updated in the database.", expectedStatus, retrievedWorkspace.getStatus());
+        assertEquals("Status of the workspace was not updated in the database.", expectedMessage, retrievedWorkspace.getMessage());
+    }
+
+
     /**
      * Test of getWorkspace method, of class JdbcWorkspaceDao.
      */
@@ -101,57 +149,37 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     public void getWorkspaceWithNullEndDates() {
 
         
-        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
-        testWorkspace.setTopNodeID(10);
-        testWorkspace.setArchiveInfo("/blabla/blabla");
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
         
-        String insertSql = "INSERT INTO workspace (user_id, top_node_id, start_date, session_start_date, used_storage_space, max_storage_space, status, archive_info)" +
-                        "values (?, ?, ?, ?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertSql,
-                testWorkspace.getUserID(), testWorkspace.getTopNodeID(),
-                new Timestamp(testWorkspace.getStartDate().getTime()),
-                new Timestamp(testWorkspace.getSessionStartDate().getTime()),
-                testWorkspace.getUsedStorageSpace(), testWorkspace.getMaxStorageSpace(),
-                testWorkspace.getStatus(), testWorkspace.getArchiveInfo());
+        Workspace retrievedWorkspace = workspaceDao.getWorkspace(expectedWorkspace.getWorkspaceID());
         
-        String identitySql = "CALL IDENTITY();";
-        int workspaceID = simpleJdbcTemplate.queryForInt(identitySql);
-        testWorkspace.setWorkspaceID(workspaceID);
-        
-        Workspace retrievedWorkspace = workspaceDao.getWorkspace(workspaceID);
-        
-        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", testWorkspace, retrievedWorkspace);
+        assertNotNull("Null retrieved from workspace table, using ID = " + expectedWorkspace.getWorkspaceID(), retrievedWorkspace);
+        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", expectedWorkspace, retrievedWorkspace);
     }
     
     @Test
     public void getWorkspaceWithNonNullEndDates() {
 
         
-        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
-        testWorkspace.setTopNodeID(10);
-        testWorkspace.setArchiveInfo("/blabla/blabla");
-        Date now = Calendar.getInstance().getTime();
-        testWorkspace.setEndDate(now);
-        testWorkspace.setSessionEndDate(now);
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        Workspace retrievedWorkspace = workspaceDao.getWorkspace(expectedWorkspace.getWorkspaceID());
         
-        String insertSql = "INSERT INTO workspace (user_id, top_node_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, archive_info)" +
-                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertSql,
-                testWorkspace.getUserID(), testWorkspace.getTopNodeID(),
-                new Timestamp(testWorkspace.getStartDate().getTime()),
-                new Timestamp(testWorkspace.getEndDate().getTime()),
-                new Timestamp(testWorkspace.getSessionStartDate().getTime()),
-                new Timestamp(testWorkspace.getSessionEndDate().getTime()),
-                testWorkspace.getUsedStorageSpace(), testWorkspace.getMaxStorageSpace(),
-                testWorkspace.getStatus(), testWorkspace.getArchiveInfo());
+        assertNotNull("Null retrieved from workspace table, using ID = " + expectedWorkspace.getWorkspaceID(), retrievedWorkspace);
+        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", expectedWorkspace, retrievedWorkspace);
+    }
+    
+    @Test
+    public void getWorkspaceWithTopNodeID() {
+
         
-        String identitySql = "CALL IDENTITY();";
-        int workspaceID = simpleJdbcTemplate.queryForInt(identitySql);
-        testWorkspace.setWorkspaceID(workspaceID);
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode testWorkspaceNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
+        setNodeAsWorkspaceTopNodeInDB(expectedWorkspace, testWorkspaceNode);
         
-        Workspace retrievedWorkspace = workspaceDao.getWorkspace(workspaceID);
+        Workspace retrievedWorkspace = workspaceDao.getWorkspace(expectedWorkspace.getWorkspaceID());
         
-        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", testWorkspace, retrievedWorkspace);
+        assertNotNull("Null retrieved from workspace table, using ID = " + expectedWorkspace.getWorkspaceID(), retrievedWorkspace);
+        assertEquals("Values retrieved from the workspace table do not match the inserted ones.", expectedWorkspace, retrievedWorkspace);
     }
     
     @Test
@@ -172,10 +200,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int archiveNodeIdToCheck = 10;
         int archiveNodeIdToBeInsertedInTheDb = archiveNodeIdToCheck;
         
-        String insertNodeSQL =
-                "insert into node (workspace_node_id, workspace_id, archive_node_id, name, status) "
-                + "values (?, ?, ?, ?, ?)";
-        this.simpleJdbcTemplate.update(insertNodeSQL, 1, 0, archiveNodeIdToBeInsertedInTheDb, "someNode", 9);
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeIdToCheck);
         
@@ -192,13 +218,172 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int archiveNodeIdToCheck = 13;
         int archiveNodeIdToBeInsertedInTheDb = 10;
         
-        String insertNodeSQL =
-                "insert into node (workspace_node_id, workspace_id, archive_node_id, name, status) "
-                + "values (?, ?, ?, ?, ?)";
-        this.simpleJdbcTemplate.update(insertNodeSQL, 1, 0, archiveNodeIdToBeInsertedInTheDb, "someNode", 9);
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeIdToCheck);
         
         assertFalse("Node should not be locked (should not exist in the database).", result);
     }
+    
+    @Test
+    public void addWorkspaceNode() {
+
+        int initialNumberOfRows = countRowsInTable("node");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        
+        WorkspaceNode insertedNode = new LamusWorkspaceNode();
+        insertedNode.setWorkspaceID(testWorkspace.getWorkspaceID());
+        insertedNode.setName("testNode");
+        insertedNode.setType("CMDI");
+        insertedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+        insertedNode.setFormat("someFormat");
+        
+        this.workspaceDao.addWorkspaceNode(insertedNode);
+        
+        assertEquals("Column was not added to the node table.", initialNumberOfRows + 1, countRowsInTable("node"));
+    }
+    
+    @Test
+    public void addWorkspaceNodeWithWrongParameters() {
+        
+        int initialNumberOfRows = countRowsInTable("node");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        
+        WorkspaceNode insertedNode = new LamusWorkspaceNode();
+        insertedNode.setWorkspaceID(testWorkspace.getWorkspaceID());
+        
+        try {
+            workspaceDao.addWorkspaceNode(insertedNode);
+            fail("An exception should have been thrown.");
+        } catch(DataAccessException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+            assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
+        }
+    }
+    
+    
+    private Workspace insertTestWorkspaceIntoDB() {
+        
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setArchiveInfo("/blabla/blabla");
+        Date now = Calendar.getInstance().getTime();
+        testWorkspace.setEndDate(now);
+        testWorkspace.setSessionEndDate(now);
+        
+        String insertWorkspaceSql = "INSERT INTO workspace (user_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, message, archive_info)" +
+                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        simpleJdbcTemplate.update(insertWorkspaceSql,
+                testWorkspace.getUserID(),
+                new Timestamp(testWorkspace.getStartDate().getTime()),
+                new Timestamp(testWorkspace.getEndDate().getTime()),
+                new Timestamp(testWorkspace.getSessionStartDate().getTime()),
+                new Timestamp(testWorkspace.getSessionEndDate().getTime()),
+                testWorkspace.getUsedStorageSpace(),
+                testWorkspace.getMaxStorageSpace(),
+                testWorkspace.getStatus(),
+                testWorkspace.getMessage(),
+                testWorkspace.getArchiveInfo());
+
+        int workspaceID = getIdentityFromDB();
+        testWorkspace.setWorkspaceID(workspaceID);
+        
+        return testWorkspace;
+    }
+    
+    private WorkspaceNode insertTestWorkspaceNodeIntoDB(Workspace workspace) {
+        
+        WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
+        testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
+        testWorkspaceNode.setName("someNode");
+        testWorkspaceNode.setType("someType");
+        testWorkspaceNode.setFormat("someFormat");
+        testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        
+        String insertNodeSql = "INSERT INTO node (workspace_id, name, type, format, status) values (?, ?, ?, ?, ?)";
+        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
+                testWorkspaceNode.getName(), testWorkspaceNode.getType(),
+                testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
+        
+        int workspaceNodeID = getIdentityFromDB();
+        testWorkspaceNode.setWorkspaceNodeID(workspaceNodeID);
+        
+        return testWorkspaceNode;
+    }
+    
+    private WorkspaceNode insertTestWorkspaceNodeWithArchiveIDIntoDB(Workspace workspace, int archiveNodeID) {
+        
+        WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
+        testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
+        testWorkspaceNode.setArchiveNodeID(archiveNodeID);
+        testWorkspaceNode.setName("someNode");
+        testWorkspaceNode.setType("someType");
+        testWorkspaceNode.setFormat("someFormat");
+        testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        
+        String insertNodeSql = "INSERT INTO node (workspace_id, archive_node_id, name, type, format, status) values (?, ?, ?, ?, ?, ?)";
+        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
+                testWorkspaceNode.getArchiveNodeID(), testWorkspaceNode.getName(),
+                testWorkspaceNode.getType(), testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
+        
+        int workspaceNodeID = getIdentityFromDB();
+        testWorkspaceNode.setWorkspaceNodeID(workspaceNodeID);
+        
+        return testWorkspaceNode;
+    }    
+    
+    private void setNodeAsWorkspaceTopNodeInDB(Workspace workspace, WorkspaceNode topNode) {
+        
+        workspace.setTopNodeID(topNode.getWorkspaceNodeID());
+        String updateWorkspaceSql = "UPDATE workspace SET top_node_id = ? WHERE workspace_id = ?";
+        simpleJdbcTemplate.update(updateWorkspaceSql, workspace.getTopNodeID(), workspace.getWorkspaceID());
+    }
+    
+    private int getIdentityFromDB() {
+        
+        String identitySql = "CALL IDENTITY();";
+        int id = simpleJdbcTemplate.queryForInt(identitySql);
+        return id;
+    }
+    
+    private Workspace getWorkspaceFromDB(int workspaceID) {
+        
+        String selectSql = "SELECT * FROM workspace WHERE workspace_id = ?";
+        Workspace workspace = (Workspace) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
+        return workspace;
+    }
+    
+}
+
+
+class WorkspaceRowMapper implements RowMapper {
+
+    public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+        Date endDate = null;
+        if (rs.getTimestamp("end_date") != null) {
+            endDate = new Date(rs.getTimestamp("end_date").getTime());
+        }
+        Date sessionEndDate = null;
+        if (rs.getTimestamp("session_end_date") != null) {
+            sessionEndDate = new Date(rs.getTimestamp("session_end_date").getTime());
+        }
+
+        Workspace workspace = new LamusWorkspace(
+                rs.getInt("workspace_id"),
+                rs.getString("user_id"),
+                rs.getInt("top_node_id"),
+                new Date(rs.getTimestamp("start_date").getTime()),
+                endDate,
+                new Date(rs.getTimestamp("session_start_date").getTime()),
+                sessionEndDate,
+                rs.getLong("used_storage_space"),
+                rs.getLong("max_storage_space"),
+                WorkspaceStatus.valueOf(rs.getString("status")),
+                rs.getString("message"),
+                rs.getString("archive_info"));
+        return workspace;
+    }
+ 
 }

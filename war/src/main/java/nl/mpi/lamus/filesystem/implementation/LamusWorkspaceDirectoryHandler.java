@@ -37,7 +37,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         this.configuration = configuration;
     }
 
-    public File createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
+    public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
         
         logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
         
@@ -46,16 +46,18 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         
         if(workspaceDirectory.exists()) {
             logger.info("Directory for workspace " + workspace.getWorkspaceID() + " already exists");
-            return workspaceDirectory;
         } else {
             if(workspaceDirectory.mkdirs()) {
                 logger.info("Directory for workspace " + workspace.getWorkspaceID() + " successfully created");
-                return workspaceDirectory;
             } else {
                 String errorMessage = "Directory for workspace " + workspace.getWorkspaceID() + " could not be created";
                 throw new FailedToCreateWorkspaceDirectoryException(errorMessage, workspace);
             }
         }
+    }
+
+    public File getWorkspaceDirectory(Workspace workspace) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

@@ -13,25 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.factory.implementation;
+
+import java.net.URL;
+import nl.mpi.lamus.workspace.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class LamusWorkspaceImporter implements WorkspaceImporter, Runnable{
+public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 
-    public void importWorkspace(Workspace workspaceToImport) {
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL) {
         
-        //TODO get the information about the top node with the CorpusStructure API
-        //TODO start using MetadataAPI to get the document corresponding to the top node
-        
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void run() {
-        
-        //TODO explore all the references in the metadata files and copy them to the workspace directory / workspace database
+        WorkspaceNode node = new LamusWorkspaceNode();
+        node.setWorkspaceID(workspaceID);
+        node.setArchiveNodeID(archiveNodeID);
+        node.setArchiveURL(archiveNodeURL);
+        node.setOriginURL(archiveNodeURL);
+        //TODO add other values as well
         
         throw new UnsupportedOperationException("Not supported yet.");
     }

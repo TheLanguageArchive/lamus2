@@ -76,6 +76,10 @@ public interface Workspace {
     
     public void setMessage(String message);
     
+    public void setStatusMessageInitialising();
+    
+    public void setStatusMessageErrorDuringInitialisation();
+    
     public String getArchiveInfo();
     
     public void setArchiveInfo(String archiveInfo);
