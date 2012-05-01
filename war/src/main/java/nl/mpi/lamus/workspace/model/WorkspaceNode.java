@@ -13,11 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.model;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  *
@@ -49,9 +49,9 @@ public interface WorkspaceNode {
     
     public void setTitle(String title);
     
-    public String getType();
+    public WorkspaceNodeType getType();
     
-    public void setType(String type);
+    public void setType(WorkspaceNodeType type);
     
     public URL getWorkspaceURL();
     
@@ -77,8 +77,10 @@ public interface WorkspaceNode {
     
     public void setFormat(String format);
     
-    public Map<Integer, String> getParentNodesReferences();
+    public Collection<WorkspaceParentNodeReference> getParentNodesReferences();
     
-    public void setParentNodesReferences(Map<Integer, String> parentNodes);
+    public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodeReferences);
+    
+    public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference);
     
 }

@@ -20,10 +20,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.FileImporterFactory;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.model.MetadataReference;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ResourceReference;
@@ -93,6 +93,9 @@ public class WorkspaceFileImporterFactory implements FileImporterFactory {
         Constructor<? extends FileImporter> importerConstructor;
         try {
             importerConstructor = importerType.getDeclaredConstructor();
+            
+            //TODO this should not be done using the default constructor but using Spring injection
+            
         } catch (NoSuchMethodException ex) {
             throw new FileImporterInitialisationException(
                     "FileImporter subtype does not have a default constructor.", workspace, importerType, ex);

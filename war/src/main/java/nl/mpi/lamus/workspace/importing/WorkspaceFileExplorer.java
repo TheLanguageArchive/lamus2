@@ -16,8 +16,9 @@
 package nl.mpi.lamus.workspace.importing;
 
 import java.util.Collection;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
  *
@@ -25,5 +26,5 @@ import nl.mpi.metadata.api.model.Reference;
  */
 public interface WorkspaceFileExplorer {
     
-    public void explore(WorkspaceNode nodeToExplore, Collection<Reference> linksInNode);
+    public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode);
 }

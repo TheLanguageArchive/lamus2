@@ -16,7 +16,7 @@
 package nl.mpi.lamus.workspace.factory;
 
 import java.net.URL;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
  *

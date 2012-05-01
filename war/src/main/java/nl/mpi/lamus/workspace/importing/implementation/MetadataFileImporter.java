@@ -15,7 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
@@ -24,18 +26,20 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceNode;
-import nl.mpi.lamus.workspace.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
+import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
+import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.api.model.MetadataReference;
-import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.api.model.*;
+import nl.mpi.metadata.api.type.MetadataDocumentType;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +55,36 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
     private ArchiveObjectsDB archiveObjectsDB;
     private WorkspaceDao workspaceDao;
     private MetadataAPI metadataAPI;
-    private Workspace workspace;
     private WorkspaceNodeFactory workspaceNodeFactory;
+    private WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
+    private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     private WorkspaceFileHandler workspaceFileHandler;
     private WorkspaceFileExplorer workspaceFileExplorer;
+    private Workspace workspace;
+    
+    public MetadataFileImporter() {
+        
+    }
+    
+    //TODO use Spring injection
+    public MetadataFileImporter(ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
+            WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
+            WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
+            WorkspaceFileExplorer fileExplorer, Workspace ws) {
+        
+        this.archiveObjectsDB = aoDB;
+        this.workspaceDao = wsDao;
+        this.metadataAPI = mAPI;
+        this.workspaceNodeFactory = nodeFactory;
+        this.workspaceParentNodeReferenceFactory = parentNodeReferenceFactory;
+        this.workspaceNodeLinkFactory = wsNodelinkFactory;
+        this.workspaceFileHandler = fileHandler;
+        this.workspaceFileExplorer = fileExplorer;
+        this.workspace = ws;
+    }
 
-    public void importFile(MetadataReference reference, int nodeArchiveID) {
+    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+            Reference childLink, int childNodeArchiveID) throws FileImporterException {
         
         
         //TODO if not onsite: create external node
@@ -67,90 +95,113 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
         
         
         
-        
+        //TODO check if node already exists in db
+        //TODO if so, it should be for the same workspace
+        //TODO also, the node file should already exist in the workspace directory
         
         
         
         //TODO get more values to add to the node (e.g. from the file, using the metadataAPI)
-        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-        URL nodeArchiveURL = tempUrl.toURL();
-        WorkspaceNode workspaceNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), nodeArchiveID, nodeArchiveURL);
+        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        if(tempUrl == null) {
+            String errorMessage = "Error getting object URL for node ID " + childNodeArchiveID;
+            logger.error(errorMessage);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), null);
+        }
+        URL childNodeArchiveURL = tempUrl.toURL();
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childNodeArchiveURL);
 
         
-                
-        
-        
-        //TODO Check if node is still not locked?
-        
-        MetadataDocument metadataDocument = null;
+        MetadataDocument childDocument = null;
         try {
-            metadataDocument = metadataAPI.getMetadataDocument(workspaceNode.getArchiveURL());
+            childDocument = metadataAPI.getMetadataDocument(childNode.getArchiveURL());
         } catch(IOException ioex) {
-            logger.error("Error importing Metadata Document " + workspaceNode.getArchiveURL(), ioex);
+            String errorMessage = "Error importing Metadata Document " + childNode.getArchiveURL();
+            logger.error(errorMessage, ioex);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), ioex);
         } catch(MetadataException mdex) {
-            logger.error("Error importing Metadata Document " + workspaceNode.getArchiveURL(), mdex);
+            String errorMessage = "Error importing Metadata Document " + childNode.getArchiveURL();
+            logger.error(errorMessage, mdex);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), mdex);
         }
         
-        if(metadataDocument == null) {
-            
-            
-            return;
-            //TODO THROW EXCEPTION INSTEAD
-            
-            
-        }
+        setWorkspaceNodeInformationFromMetadataDocument(childDocument, childNode);
+        workspaceDao.addWorkspaceNode(childNode);
         
-        
-
-        //TODO add some more information to the node (name, etc)
-//        metadataDocument.getChildElement(NAME???)
-        String nodeName = ""; //TODO get name from metadata file
-        workspaceNode.setName(nodeName);
-        String nodeType = metadataDocument.getType().getName(); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what?
-        workspaceNode.setType(nodeType);
-        String nodeFormat = ""; //TODO get this based on what? typechecker?
-        workspaceNode.setFormat(nodeFormat);
-        URI profileSchemaURI = null; //TODO how to get this information?
-        workspaceNode.setProfileSchemaURI(profileSchemaURI);
-        String nodePid = ""; //TODO how to get the self-handle from CMDI?
-        workspaceNode.setPid(nodePid);
-        workspaceNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
-        //TODO insert node in DB
-        workspaceDao.addWorkspaceNode(workspaceNode);
+        WorkspaceParentNodeReference parentNodeReference =
+                workspaceParentNodeReferenceFactory.getNewWorkspaceParentNodeReference(parentNode, childLink);
         
         //TODO set top node ID in workspace (if reference is null), set workspace status / Save workspace
-        if(reference == null) { //TODO find a better way of indicating this
-            workspace.setTopNodeID(workspaceNode.getWorkspaceNodeID());
+        if(parentNodeReference == null) { //TODO find a better way of indicating this
+            workspace.setTopNodeID(childNode.getWorkspaceNodeID());
             workspaceDao.updateWorkspaceTopNode(workspace);
+        } else {
+            //TODO add information about parent link
+            // add the link in the database
+            WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
+                    parentNodeReference.getParentWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childLink.getURI());
+            workspaceDao.addWorkspaceNodeLink(nodeLink);
+            //TODO possible problems with adding the link? if the link already exists?
         }
+        
         workspace.setStatusMessageInitialising();
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
+        File childNodeFile = workspaceFileHandler.getFileForWorkspaceNode(childNode);
         
+        try {
+            OutputStream outputStream = workspaceFileHandler.getOutputStreamForWorkspaceNodeFile(workspace, childNode, childNodeFile);
+            workspaceFileHandler.copyMetadataFileToWorkspace(workspace, childNode, metadataAPI, childDocument, outputStream);
+        } catch(FailedToCreateWorkspaceNodeFileException fwsnex) {
+            String errorMessage = "Failed to create file for workspace node " + childNode.getWorkspaceNodeID()
+                    + " in workspace " + workspace.getWorkspaceID();
+            logger.error(errorMessage, fwsnex);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), fwsnex);
+        }
         
-        //TODO add information about parent link
-        
-        
-
-        workspaceFileHandler.copyMetadataFileToWorkspace(workspace, workspaceNode, metadataAPI, metadataDocument);
-        
-
-        
+        //TODO change the referenced URL in the parent document
+            //TODO not of the original one, but the one IN THE WORKSPACE FOLDER
+        if(parentDocument != null) {
+            //TODO how to change the child link/element (of the new document) using the MetadataAPI?
+            //TODO change link of the copied document to have a different handle when it is null, for instance
+        }
         
         
         //TODO get metadata file links (references)
-        if(metadataDocument instanceof ReferencingMetadataDocument) {
-            Collection<Reference> links = ((ReferencingMetadataDocument) metadataDocument).getDocumentReferences();
-//            exploreNodesBelow(workspaceTopNode, links);
-            workspaceFileExplorer.explore(workspaceNode, links);
+        if(childDocument instanceof ReferencingMetadataDocument) {
+            ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
+            Collection<Reference> links = childReferencingDocument.getDocumentReferences();
+            workspaceFileExplorer.explore(childNode, childReferencingDocument, links);
         }
 
-        
-        
-        
-        
-        throw new UnsupportedOperationException("Not supported yet.");
+        //TODO What else?
     }
     
     
+    private void setWorkspaceNodeInformationFromMetadataDocument(MetadataDocument mdDocument, WorkspaceNode wsNode) {
+        
+        //TODO add some more information to the node (name, etc)
+        String nodeName = mdDocument.getDisplayValue();
+        wsNode.setName(nodeName);
+        //TODO is the title to be kept?
+        String nodeTitle = mdDocument.getDisplayValue();
+        wsNode.setTitle(nodeTitle);
+        WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
+        wsNode.setType(nodeType);
+        String nodeFormat = ""; //TODO get this based on what? typechecker?
+        wsNode.setFormat(nodeFormat);
+        MetadataDocumentType metadataDocumentType = mdDocument.getType();
+        URI profileSchemaURI = metadataDocumentType.getSchemaLocation();
+        wsNode.setProfileSchemaURI(profileSchemaURI);
+        String nodePid = WorkspacePidValue.NONE.toString();
+        
+        if(mdDocument instanceof HandleCarrier) {
+            nodePid = ((HandleCarrier) mdDocument).getHandle();
+        } else {
+            logger.warn("Metadata document '" + mdDocument.getFileLocation().toString() + "' does not contain a handle.");
+        }
+        
+        wsNode.setPid(nodePid);
+        wsNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+    }
 }

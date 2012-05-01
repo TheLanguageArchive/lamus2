@@ -15,7 +15,10 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import nl.mpi.lamus.workspace.exception.FileImporterException;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
  *
@@ -23,5 +26,6 @@ import nl.mpi.metadata.api.model.Reference;
  */
 public interface FileImporter<R extends Reference> {
     
-    public void importFile(R reference, int nodeArchiveID);
+    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+            Reference childLink, int childNodeArchiveID) throws FileImporterException;
 }

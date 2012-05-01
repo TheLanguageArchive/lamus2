@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.configuration;
 
+import java.io.File;
 import nl.mpi.lamus.ams.AmsBridge;
 
 /**
@@ -36,5 +37,7 @@ public interface Configuration {
     
     public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
     
-    public String getWorkspaceBaseDirectory();
+    public File getWorkspaceBaseDirectory();
+    
+    public int getTypeReCheckSizeLimit();
 }

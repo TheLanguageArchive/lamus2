@@ -15,12 +15,14 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import java.net.MalformedURLException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.*;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;

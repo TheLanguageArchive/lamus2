@@ -15,8 +15,8 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.importing.FileImporter;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *

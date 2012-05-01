@@ -18,8 +18,8 @@ package nl.mpi.lamus.filesystem.implementation;
 import java.io.File;
 import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceDirectoryHandler.class);
 
-    private Configuration configuration;
+    private final Configuration configuration;
     
     LamusWorkspaceDirectoryHandler(Configuration configuration) {
         this.configuration = configuration;
@@ -41,7 +41,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         
         logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
         
-        File baseDirectory = new File(this.configuration.getWorkspaceBaseDirectory());
+        File baseDirectory = this.configuration.getWorkspaceBaseDirectory();
         File workspaceDirectory = new File(baseDirectory, "" + workspace.getWorkspaceID());
         
         if(workspaceDirectory.exists()) {
@@ -51,7 +51,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
                 logger.info("Directory for workspace " + workspace.getWorkspaceID() + " successfully created");
             } else {
                 String errorMessage = "Directory for workspace " + workspace.getWorkspaceID() + " could not be created";
-                throw new FailedToCreateWorkspaceDirectoryException(errorMessage, workspace);
+                throw new FailedToCreateWorkspaceDirectoryException(errorMessage, workspace, null);
             }
         }
     }

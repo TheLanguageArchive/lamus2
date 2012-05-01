@@ -15,9 +15,11 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.Workspace;
+import java.util.logging.Level;
+    import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,14 +63,26 @@ public class WorkspaceImportRunner implements Runnable{
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
             return;
         }        
+        try {
+            //TODO create some other method that takes something else than a Reference
+            //TODO or have a separate method for importing the top node
+            topNodeImporter.importFile(null, null, null, topNodeArchiveID);
 
-        //TODO create some other method that takes something else than a Reference
-        //TODO or have a separate method for importing the top node
-        topNodeImporter.importFile(null, topNodeArchiveID);
 
-
-        
-        //TODO import successful? notify main thread, change workspace status, etc...
+            
+            //TODO import successful? notify main thread, change workspace status, etc...
+        } catch (FileImporterException ex) {
+            String errorMessage = "Error during initialisation of file importer.";
+                //TODO LOG PROPERLY
+                //TODO THROW EXCEPTION OR RETURN?
+            logger.error(errorMessage, ex);
+            
+            workspace.setStatusMessageErrorDuringInitialisation();
+            workspaceDao.updateWorkspaceStatusMessage(workspace);
+            
+            //TODO use Callable/Future instead and notify the calling thread when this one is finished?
+            return;
+        }
     }
     
 }

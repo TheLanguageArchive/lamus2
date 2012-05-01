@@ -18,9 +18,9 @@ package nl.mpi.lamus.workspace.factory.implementation;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.lamus.workspace.LamusWorkspace;
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 
 /**
  *

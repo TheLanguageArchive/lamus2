@@ -15,19 +15,33 @@
  */
 package nl.mpi.lamus.dao.implementation;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.Workspace;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
-import nl.mpi.lamus.workspace.*;
+import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+
+
 
 /**
  *
@@ -140,7 +154,58 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertEquals("Status of the workspace was not updated in the database.", expectedStatus, retrievedWorkspace.getStatus());
         assertEquals("Status of the workspace was not updated in the database.", expectedMessage, retrievedWorkspace.getMessage());
     }
+    
+    @Test
+    public void updateWorkspaceStatusWithNullStatus() {
+        
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        Workspace changedWorkspace = copyWorkspace(expectedWorkspace);
 
+        WorkspaceStatus changedStatus = null;
+        String changedMessage = "test message";
+        
+        changedWorkspace.setStatus(changedStatus);
+        changedWorkspace.setMessage(changedMessage);
+        
+        try {
+            workspaceDao.updateWorkspaceStatusMessage(changedWorkspace);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        Workspace retrievedWorkspace = getWorkspaceFromDB(expectedWorkspace.getWorkspaceID());
+
+        assertEquals("Workspace object retrieved from the database is different from expected.", expectedWorkspace, retrievedWorkspace);
+        assertEquals("Status of the workspace was not updated in the database.", expectedWorkspace.getStatus(), retrievedWorkspace.getStatus());
+        assertEquals("Status of the workspace was not updated in the database.", expectedWorkspace.getMessage(), retrievedWorkspace.getMessage());
+    }
+    
+    @Test
+    public void updateWorkspaceStatusWithNullMessage() {
+        
+        Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
+        Workspace changedWorkspace = copyWorkspace(expectedWorkspace);
+
+        WorkspaceStatus changedStatus = WorkspaceStatus.INITIALISING;
+        String changedMessage = null;
+        
+        changedWorkspace.setStatus(changedStatus);
+        changedWorkspace.setMessage(changedMessage);
+        
+        try {
+            workspaceDao.updateWorkspaceStatusMessage(changedWorkspace);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        Workspace retrievedWorkspace = getWorkspaceFromDB(expectedWorkspace.getWorkspaceID());
+
+        assertEquals("Workspace object retrieved from the database is different from expected.", expectedWorkspace, retrievedWorkspace);
+        assertEquals("Status of the workspace was not updated in the database.", expectedWorkspace.getStatus(), retrievedWorkspace.getStatus());
+        assertEquals("Status of the workspace was not updated in the database.", expectedWorkspace.getMessage(), retrievedWorkspace.getMessage());
+    }
 
     /**
      * Test of getWorkspace method, of class JdbcWorkspaceDao.
@@ -226,8 +291,27 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertFalse("Node should not be locked (should not exist in the database).", result);
     }
     
+/**
+     * Tests the method {@link JdbcWorkspaceDao#isNodeLocked(int)}
+     * by checking for a node ID that doesn't exist in the database
+     */
     @Test
-    public void addWorkspaceNode() {
+    public void nodeIsLockedMoreThanOnce() {
+        
+        int archiveNodeIdToCheck = 13;
+        int archiveNodeIdToBeInsertedInTheDb = archiveNodeIdToCheck;
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb);
+        insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb);
+        
+        boolean result = this.workspaceDao.isNodeLocked(archiveNodeIdToCheck);
+        
+        assertTrue("Node should be locked (should exist in the database).", result);
+    }
+    
+    @Test
+    public void addWorkspaceNode() throws URISyntaxException, MalformedURLException {
 
         int initialNumberOfRows = countRowsInTable("node");
         
@@ -236,9 +320,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode insertedNode = new LamusWorkspaceNode();
         insertedNode.setWorkspaceID(testWorkspace.getWorkspaceID());
         insertedNode.setName("testNode");
-        insertedNode.setType("CMDI");
+        insertedNode.setType(WorkspaceNodeType.METADATA);
         insertedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
         insertedNode.setFormat("someFormat");
+        insertedNode.setProfileSchemaURI(new URI("http://test.node.uri"));
+        insertedNode.setArchiveURL(new URL("http://test.node.uri"));
+        insertedNode.setOriginURL(new URL("http://test,node.uri"));
+        insertedNode.setWorkspaceURL(new URL("http://test.node.uri"));
         
         this.workspaceDao.addWorkspaceNode(insertedNode);
         
@@ -260,8 +348,118 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
             fail("An exception should have been thrown.");
         } catch(DataAccessException ex) {
             assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
-            assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
         }
+        
+        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
+    }
+    
+    @Test
+    public void addWorkspaceNodeToNonExistingWorkspace() {
+        
+        int initialNumberOfRows = countRowsInTable("node");
+        
+        int fakeWorkspaceID = 100;
+        
+        WorkspaceNode insertedNode = new LamusWorkspaceNode();
+        insertedNode.setWorkspaceID(fakeWorkspaceID);
+        
+        try {
+            workspaceDao.addWorkspaceNode(insertedNode);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
+    }
+    
+    @Test
+    public void addWorkspaceNodeLink() throws URISyntaxException {
+        
+        int initialNumberOfRows = countRowsInTable("node_link");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+
+        URI someResourceProxyURI = new URI("resource.proxy.id");
+        
+        WorkspaceNodeLink insertedLink = 
+                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), testChildNode.getWorkspaceNodeID(), someResourceProxyURI);
+        
+        this.workspaceDao.addWorkspaceNodeLink(insertedLink);
+        
+        assertEquals("Column was not added to the node table.", initialNumberOfRows + 1, countRowsInTable("node_link"));
+    }
+
+    @Test
+    public void addWorkspaceNodeLinkWhenParentDoesNotExist() throws URISyntaxException {
+        
+        int initialNumberOfRows = countRowsInTable("node_link");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        int fakeNodeID = 100;
+
+        URI someResourceProxyURI = new URI("resource.proxy.id");
+        
+        WorkspaceNodeLink insertedLink = 
+                new LamusWorkspaceNodeLink(fakeNodeID, testChildNode.getWorkspaceNodeID(), someResourceProxyURI);
+        
+        try {
+            this.workspaceDao.addWorkspaceNodeLink(insertedLink);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node_link"));
+    }
+    
+    @Test
+    public void addWorkspaceNodeLinkWhenChildDoesNotExist() throws URISyntaxException {
+        
+        int initialNumberOfRows = countRowsInTable("node_link");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        int fakeNodeID = 100;
+
+        URI someResourceProxyURI = new URI("resource.proxy.id");
+        
+        WorkspaceNodeLink insertedLink = 
+                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), fakeNodeID, someResourceProxyURI);
+        
+        try {
+            this.workspaceDao.addWorkspaceNodeLink(insertedLink);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node_link"));
+    }
+    
+    @Test
+    public void addWorkspaceNodeLinkWhenChildResourceProxyIsNull() {
+        
+        int initialNumberOfRows = countRowsInTable("node_link");
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB();
+        WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        
+        WorkspaceNodeLink insertedLink = 
+                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), testChildNode.getWorkspaceNodeID(), null);
+        
+        try {
+            this.workspaceDao.addWorkspaceNodeLink(insertedLink);
+            fail("An exception should have been thrown.");
+        } catch(DataIntegrityViolationException ex) {
+            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
+        }
+        
+        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node_link"));
     }
     
     
@@ -298,7 +496,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
         testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
         testWorkspaceNode.setName("someNode");
-        testWorkspaceNode.setType("someType");
+        testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
         testWorkspaceNode.setFormat("someFormat");
         testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
         
@@ -319,7 +517,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
         testWorkspaceNode.setArchiveNodeID(archiveNodeID);
         testWorkspaceNode.setName("someNode");
-        testWorkspaceNode.setType("someType");
+        testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
         testWorkspaceNode.setFormat("someFormat");
         testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
         
@@ -354,10 +552,16 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace workspace = (Workspace) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
         return workspace;
     }
+
+    private Workspace copyWorkspace(Workspace ws) {
+        Workspace copiedWs = new LamusWorkspace(
+                ws.getWorkspaceID(), ws.getUserID(), ws.getTopNodeID(), ws.getStartDate(), ws.getEndDate(),
+                ws.getSessionStartDate(), ws.getSessionEndDate(), ws.getUsedStorageSpace(), ws.getMaxStorageSpace(),
+                ws.getStatus(), ws.getMessage(), ws.getArchiveInfo());
+        return copiedWs;
+    }
     
 }
-
-
 class WorkspaceRowMapper implements RowMapper {
 
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {

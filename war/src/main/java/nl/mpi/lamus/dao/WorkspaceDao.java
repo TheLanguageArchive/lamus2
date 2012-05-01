@@ -16,8 +16,9 @@
 package nl.mpi.lamus.dao;
 
 import javax.sql.DataSource;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 
 /**
  *
@@ -90,4 +91,10 @@ public interface WorkspaceDao {
      * @return 
      */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
+    
+    /**
+     * 
+     * @param link 
+     */
+    public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink);
 }

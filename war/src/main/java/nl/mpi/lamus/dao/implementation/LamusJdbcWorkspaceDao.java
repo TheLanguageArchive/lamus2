@@ -21,11 +21,17 @@ import java.sql.Timestamp;
 import java.util.Date;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.*;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -46,6 +52,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private SimpleJdbcInsert insertWorkspace;
     private SimpleJdbcInsert insertWorkspaceNode;
+    private SimpleJdbcInsert insertWorkspaceNodeLink;
     
     @Autowired
     public void setDataSource(DataSource datasource) {
@@ -85,6 +92,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "pid",
                     "format");
         //TODO Inject table and column names
+        
+        this.insertWorkspaceNodeLink = new SimpleJdbcInsert(datasource)
+                .withTableName("node_link")
+                .usingColumns(
+                    "parent_workspace_node_id",
+                    "child_workspace_node_id",
+                    "child_uri");
+        //TODO Inject table and column names
+        
     }
     
 
@@ -117,7 +133,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("status", statusStr)
                 .addValue("message", workspace.getMessage())
                 .addValue("archive_info", workspace.getArchiveInfo());
-            Number newID = this.insertWorkspace.executeAndReturnKey(parameters);
+        Number newID = this.insertWorkspace.executeAndReturnKey(parameters);
         workspace.setWorkspaceID(newID.intValue());
         
         logger.info("Workspace added to the database. Workspace ID: " + workspace.getWorkspaceID());
@@ -242,23 +258,18 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
             }
         };
         
-        WorkspaceNode retrievedNode;
         try {
-            retrievedNode = this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
-        } catch(EmptyResultDataAccessException ex) {
-            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node)");
+            this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
+        } catch(EmptyResultDataAccessException eex) {
+            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node).");
             return false;
+        } catch(IncorrectResultSizeDataAccessException iex) {
+            logger.warn("Node with archive ID " + archiveNodeID + " is locked more than once.");
+            return true;
         }
 
-        boolean isLocked = (retrievedNode != null);
-        
-        if(!isLocked) {
-            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node)");
-        } else {
-            logger.info("Node with archive ID " + archiveNodeID + " is locked (there is already a workspace that contains this node)");
-        }
-        
-        return isLocked;
+        logger.info("Node with archive ID " + archiveNodeID + " is locked (there is already a workspace that contains this node).");
+        return true;
     }
 
     public void addWorkspaceNode(WorkspaceNode node) {
@@ -299,7 +310,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("status", statusStr)
                 .addValue("pid", node.getPid())
                 .addValue("format", node.getFormat());
-            Number newID = this.insertWorkspaceNode.executeAndReturnKey(parameters);
+        Number newID = this.insertWorkspaceNode.executeAndReturnKey(parameters);
         node.setWorkspaceNodeID(newID.intValue());
         
         logger.info("Node added to the database. Node ID: " + node.getWorkspaceNodeID());
@@ -307,6 +318,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink) {
+        
+        logger.debug("Adding to the database a link between node with ID: " + nodeLink.getParentWorkspaceNodeID()
+                + " and node with ID: " + nodeLink.getChildWorkspaceNodeID());
+        
+        String childResourceProxyURIStr = null;
+        if(nodeLink.getChildURI() != null) {
+            childResourceProxyURIStr = nodeLink.getChildURI().toString();
+        }
+        
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("parent_workspace_node_id", nodeLink.getParentWorkspaceNodeID())
+                .addValue("child_workspace_node_id", nodeLink.getChildWorkspaceNodeID())
+                .addValue("child_uri", childResourceProxyURIStr);
+        this.insertWorkspaceNodeLink.execute(parameters);
+
+        logger.info("Link added to the database. Parent node ID: " + nodeLink.getParentWorkspaceNodeID()
+                + "; Child node ID: " + nodeLink.getChildWorkspaceNodeID());
     }
 
 }

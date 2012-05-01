@@ -15,9 +15,6 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import java.lang.reflect.InvocationTargetException;
-import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
-import nl.mpi.lamus.workspace.importing.FileImporter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -25,12 +22,17 @@ import java.util.logging.Level;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.LamusWorkspaceNode;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
+import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.FileImporterFactory;
+import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
 import nl.mpi.metadata.api.model.Reference;
-import org.apache.xmlbeans.impl.xb.xsdschema.ListDocument;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
         this.fileImporterFactory = importerFactory;
     }
 
-    public void explore(WorkspaceNode nodeToExplore, Collection<Reference> linksInNode) {
+    public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode) {
         
         
         //TODO for each link call recursive method to explore it
@@ -60,70 +62,42 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
 
         for(Reference currentLink : linksInNode) {
         
-            //TODO check if node already exists in DB
-            WorkspaceNode currentNode = null;
-//            WorkspaceNode currentNode = workspaceDao.getWorkspaceNode(topNodeArchiveID); //TODO different method with archiveID
-
+            //TODO check if the file does exist
+            
             String currentNodeArchiveIdStr = archiveObjectsDB.getObjectId(currentLink.getURI());
             if(currentNodeArchiveIdStr == null) {
                 //TODO node doesn't exist?
+                logger.error("PROBLEMS GETTING NODE ID");
+                //TODO throw exception
             }
 
             int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
-            URL currentNodeArchiveURL = null;
+            
+            //TODO check here if it's already locked or not?
+            
+            //TODO check if it is Metadata or Resource node
+            
             try {
-                currentNodeArchiveURL = currentLink.getURI().toURL();
-            } catch(MalformedURLException muex) {
-                //TODO problems with URL
-                logger.error("PROBLEMS GETTING URL FOR NODE", muex);
+                Class<? extends FileImporter> linkImporterType = fileImporterFactory.getFileImporterTypeForReference(currentLink.getClass());
+                FileImporter linkImporter = fileImporterFactory.getNewFileImporterOfType(linkImporterType);
+//                WorkspaceParentNodeReference parentNodeReference = 
+//                        new LamusWorkspaceParentNodeReference(nodeToExplore.getWorkspaceNodeID(), currentLink);
+                linkImporter.importFile(nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
+            } catch (FileImporterInitialisationException fiiex) {
+                String errorMessage = "ERROR ERROR";
+                logger.error(errorMessage, fiiex);
+                //TODO LOG PROPERLY
+                //TODO THROW EXCEPTION OR RETURN?
+            } catch (FileImporterException fiex) {
+                String errorMessage = "ERROR ERROR";
+                logger.error(errorMessage, fiex);
+                //TODO LOG PROPERLY
+                //TODO THROW EXCEPTION OR RETURN?
             }
             
-            if(workspaceDao.isNodeLocked(currentNodeArchiveID)) {
-                //TODO check if it exists under the same workspace (wouldn't make sense if it's another one, though...)
-                
-            } else {
-
-                
-                
-                //TODO check if it is Metadata or Resource node
-
-                try {
-                    Class<? extends FileImporter> linkImporterType = fileImporterFactory.getFileImporterTypeForReference(currentLink.getClass());
-                    FileImporter linkImporter = fileImporterFactory.getNewFileImporterOfType(linkImporterType);
-                    linkImporter.importFile(currentLink, currentNodeArchiveID);
-                } catch (FileImporterInitialisationException ex) {
-                    java.util.logging.Logger.getLogger(LamusWorkspaceFileExplorer.class.getName()).log(Level.SEVERE, null, ex);
-                }                
-           
-                
-                
-                
-                
-                
-                //TODO following code should be part of importer
-                
-                //TODO create the node in DB
-                currentNode = new LamusWorkspaceNode();
-                currentNode.setArchiveNodeID(currentNodeArchiveID);
-                currentNode.setArchiveURL(currentNodeArchiveURL);
-                currentNode.setOriginURL(currentNodeArchiveURL);
-                currentNode.setWorkspaceID(nodeToExplore.getWorkspaceID());
-//                currentNode.setPid();
-                
-                
-                //TODO create link in DB
-                
-                
-                //TODO if MetadataReference: recursive call to exploreNodesBelow
-                
-            }
-            
-            //TODO link it to the parent in DB (it's the same either if it was already created or if it wasn't)
-            
-        
         }
         
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

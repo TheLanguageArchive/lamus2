@@ -15,8 +15,8 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
  *
@@ -26,8 +26,8 @@ public class FailedToCreateWorkspaceNodeFileException extends WorkspaceException
     
     private WorkspaceNode workspaceNode;
     
-    public FailedToCreateWorkspaceNodeFileException(String message, Workspace workspace, WorkspaceNode node) {
-        super(message, workspace);
+    public FailedToCreateWorkspaceNodeFileException(String message, Workspace workspace, WorkspaceNode node, Throwable cause) {
+        super(message, workspace, cause);
         this.workspaceNode = node;
     }
     

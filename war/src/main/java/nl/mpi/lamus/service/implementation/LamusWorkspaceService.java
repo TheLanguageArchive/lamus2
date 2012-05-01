@@ -16,9 +16,9 @@
 package nl.mpi.lamus.service.implementation;
 
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceManager;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,8 +15,8 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.importing.FileImporter;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
@@ -28,8 +28,7 @@ public class FileImporterException extends WorkspaceException {
     
     public FileImporterException(String message, Workspace workspace, Class<? extends FileImporter> fileImporterType,
             Throwable cause) {
-        super(message, workspace);
-        this.initCause(cause);
+        super(message, workspace, cause);
         this.fileImporterType = fileImporterType;
     }
     

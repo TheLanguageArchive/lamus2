@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.management.implementation;
 
 import java.util.concurrent.Executor;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -23,6 +23,8 @@ import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.FileImporterFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.importing.implementation.WorkspaceFileImporterFactory;
+import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

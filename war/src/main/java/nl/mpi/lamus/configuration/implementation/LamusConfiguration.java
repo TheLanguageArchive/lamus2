@@ -1,6 +1,7 @@
 package nl.mpi.lamus.configuration.implementation;
 
 
+import java.io.File;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class LamusConfiguration implements Configuration {
     /** ingest request allowed period, since the last warning email, before sending the next one, default 30 days */
     private int numberOfDaysOfInactivityAllowedSinceLastWarningEmail = 30;
     
+    /** file size limit for which the typechecker should check a file again (when importing from the archive), default 8MB **/
+    private int typeReCheckSizeLimit = 8 * 1024 * 1024;
     
     private final static LamusConfiguration instance = new LamusConfiguration();
     
@@ -75,9 +78,13 @@ public class LamusConfiguration implements Configuration {
         return this.numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
     }
 
-    public String getWorkspaceBaseDirectory() {
+    public File getWorkspaceBaseDirectory() {
         //TODO load this from properties/context
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public int getTypeReCheckSizeLimit() {
+        return this.typeReCheckSizeLimit;
     }
     
 }

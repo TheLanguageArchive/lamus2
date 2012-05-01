@@ -31,12 +31,12 @@ CREATE TABLE node (
 
 CREATE TABLE node_link (
         parent_workspace_node_id integer NOT NULL,
-        workspace_node_id integer NOT NULL,
-        resource_proxy_id varchar(255) NOT NULL,
-        PRIMARY KEY (parent_workspace_node_id, workspace_node_id));
+        child_workspace_node_id integer NOT NULL,
+        child_uri varchar(255) NOT NULL,
+        PRIMARY KEY (parent_workspace_node_id, child_workspace_node_id));
 
 
 ALTER TABLE node ADD CONSTRAINT workspace_node FOREIGN KEY (workspace_id) REFERENCES workspace (workspace_id);
 
 ALTER TABLE node_link ADD CONSTRAINT node_link_parent FOREIGN KEY (parent_workspace_node_id) REFERENCES node (workspace_node_id);
-ALTER TABLE node_link ADD CONSTRAINT node_link_child FOREIGN KEY (workspace_node_id) REFERENCES node (workspace_node_id);
+ALTER TABLE node_link ADD CONSTRAINT node_link_child FOREIGN KEY (child_workspace_node_id) REFERENCES node (workspace_node_id);

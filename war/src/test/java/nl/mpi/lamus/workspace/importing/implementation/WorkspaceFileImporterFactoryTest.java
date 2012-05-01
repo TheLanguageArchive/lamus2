@@ -16,12 +16,14 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.lang.reflect.InvocationTargetException;
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.FileImporterFactory;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.MetadataReference;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -184,7 +186,7 @@ class FileImporterWithoutDefaultConstructor implements FileImporter {
         
     }
     
-    public void importFile(Reference reference, int nodeArchiveID) {
+    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument, Reference childLink, int childNodeArchiveID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }    
 }
@@ -195,7 +197,7 @@ abstract class AbstractFileImporter implements FileImporter {
         
     }
     
-    public void importFile(Reference reference, int nodeArchiveID) {
+    public void importFile(WorkspaceNode parentNode, Reference childLink, int childNodeArchiveID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
@@ -206,7 +208,7 @@ class FileImporterWithInaccessibleDefaultConstructor implements FileImporter {
         
     }
     
-    public void importFile(Reference reference, int nodeArchiveID) {
+    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument, Reference childLink, int childNodeArchiveID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
@@ -217,7 +219,7 @@ class FileImporterWithExceptionThrowingConstructor implements FileImporter {
         throw new Exception();
     }
 
-    public void importFile(Reference reference, int nodeArchiveID) {
+    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument, Reference childLink, int childNodeArchiveID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

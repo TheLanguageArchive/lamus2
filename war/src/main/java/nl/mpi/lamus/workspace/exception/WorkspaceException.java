@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
@@ -25,8 +25,8 @@ public class WorkspaceException extends Exception {
     
     private Workspace workspace;
     
-    public WorkspaceException(String message, Workspace workspace) {
-        super(message);
+    public WorkspaceException(String message, Workspace workspace, Throwable cause) {
+        super(message, cause);
         this.workspace = workspace;
     }
     

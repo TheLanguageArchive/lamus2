@@ -17,9 +17,11 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.*;
 import javax.xml.transform.TransformerException;
+import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.Workspace;
-import nl.mpi.lamus.workspace.WorkspaceNode;
+import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -34,39 +36,54 @@ import org.slf4j.LoggerFactory;
 public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
+    
+    private final Configuration configuration;
+    
+    LamusWorkspaceFileHandler(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
-    public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode, MetadataAPI metadataAPI, MetadataDocument metadataDocument) {
+    public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
+            MetadataAPI metadataAPI, MetadataDocument metadataDocument, OutputStream nodeFileOutputStream)
+            throws FailedToCreateWorkspaceNodeFileException {
         
+        File workspaceNodeFile = getFileForWorkspaceNode(workspaceNode);
         
-//Copy file to workspace directory (give it a different name - based on the node ID)
-//        String workspaceDirectory = configuration.getWorkspaceBaseDirectory();
-//        File workspaceNodeFile = new File(workspaceDirectory + File.separator + workspaceTopNode.getWorkspaceNodeID());
-        File workspaceNodeFile = null;// = workspaceFileHandler.getWorkspaceNodeFile(workspace, workspaceTopNode);
-        
-        //TODO create node file in filesystem
-        OutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream(workspaceNodeFile);
-            metadataAPI.writeMetadataDocument(metadataDocument, outputStream);
-        } catch(FileNotFoundException fnfex) {
-            logger.error("Problem with file for node " + workspaceNode.getWorkspaceNodeID() + " in workspace + " + workspace.getWorkspaceID(), fnfex);
-            //TODO do something more, throw again?
+            metadataAPI.writeMetadataDocument(metadataDocument, nodeFileOutputStream);
         } catch(IOException ioex) {
-            logger.error("Problem writing file " + workspaceNodeFile.getAbsolutePath(), ioex);
-            //TODO do something more, throw again?
+            String errorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+            logger.error(errorMessage, ioex);
+            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, ioex);
         } catch(TransformerException tex) {
-            logger.error("Problem writing file " + workspaceNodeFile.getAbsolutePath(), tex);
-            //TODO do something more, throw again?
+            String errorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+            logger.error(errorMessage, tex);
+            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, tex);
         } catch(MetadataException mdex) {
-            logger.error("Problem writing file " + workspaceNodeFile.getAbsolutePath(), mdex);
-            //TODO do something more, throw again?
+            String errorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+            logger.error(errorMessage, mdex);
+            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, mdex);
         } finally {
-            IOUtils.closeQuietly(outputStream);
+            IOUtils.closeQuietly(nodeFileOutputStream);
         }
-        
-        
-        throw new UnsupportedOperationException("Not supported yet.");
-        
     }
     
+    public OutputStream getOutputStreamForWorkspaceNodeFile(Workspace workspace, WorkspaceNode workspaceNode, File nodeFile)
+            throws FailedToCreateWorkspaceNodeFileException {
+
+        try {
+            OutputStream outputStream = new FileOutputStream(nodeFile);
+            return outputStream;
+        } catch(FileNotFoundException fnfex) {
+            String errorMessage = "Problem with file " + nodeFile.getAbsolutePath();
+            logger.error(errorMessage, fnfex);
+            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, fnfex);
+        }
+    }
+
+    public File getFileForWorkspaceNode(WorkspaceNode workspaceNode) {
+        File workspaceBaseDirectory = configuration.getWorkspaceBaseDirectory();
+        File workspaceNodeFile = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceNodeID());
+        return workspaceNodeFile;
+    }
 }

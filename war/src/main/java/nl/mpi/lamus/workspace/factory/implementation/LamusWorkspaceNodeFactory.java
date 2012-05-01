@@ -16,9 +16,9 @@
 package nl.mpi.lamus.workspace.factory.implementation;
 
 import java.net.URL;
-import nl.mpi.lamus.workspace.LamusWorkspaceNode;
-import nl.mpi.lamus.workspace.WorkspaceNode;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 
 /**
  *
@@ -28,14 +28,10 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL) {
         
-        WorkspaceNode node = new LamusWorkspaceNode();
-        node.setWorkspaceID(workspaceID);
-        node.setArchiveNodeID(archiveNodeID);
-        node.setArchiveURL(archiveNodeURL);
-        node.setOriginURL(archiveNodeURL);
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
         //TODO add other values as well
-        
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        return node;
     }
     
 }

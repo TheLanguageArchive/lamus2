@@ -13,19 +13,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.management.implementation;
 
 import java.util.concurrent.Executor;
-import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
+import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -84,7 +83,7 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockExecutor).execute(with(any(WorkspaceImportRunner.class)));
         }});
         
-        Workspace result = manager.createWorkspace(userID, archiveNodeID/*, mockWorkspaceImporter*/);
+        Workspace result = manager.createWorkspace(userID, archiveNodeID);
         assertNotNull("Returned workspace should not be null when object, database and directory are successfully created.", result);
     }
     
@@ -103,10 +102,10 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new FailedToCreateWorkspaceDirectoryException(errorMessage, newWorkspace)));
+            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new FailedToCreateWorkspaceDirectoryException(errorMessage, newWorkspace, null)));
         }});
         
-        Workspace result = manager.createWorkspace(userID, archiveNodeID/*, mockWorkspaceImporter*/);
+        Workspace result = manager.createWorkspace(userID, archiveNodeID);
         assertNull("Returned workspace should be null when the directory creation fails.", result);
     }
 }

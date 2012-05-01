@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
@@ -23,8 +23,8 @@ import nl.mpi.lamus.workspace.Workspace;
  */
 public class FailedToCreateWorkspaceDirectoryException extends WorkspaceException {
     
-    public FailedToCreateWorkspaceDirectoryException(String message, Workspace workspace) {
-        super(message, workspace);
+    public FailedToCreateWorkspaceDirectoryException(String message, Workspace workspace, Throwable cause) {
+        super(message, workspace, cause);
     }
     
 }

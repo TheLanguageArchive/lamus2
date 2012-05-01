@@ -18,9 +18,9 @@ package nl.mpi.lamus.filesystem.implementation;
 import java.io.File;
 import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.LamusWorkspace;
-import nl.mpi.lamus.workspace.Workspace;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -71,7 +71,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         File workspaceDirectory = new File(baseDirectory, "" + testWorkspace.getWorkspaceID());
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
+            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
         }});
         
         workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
@@ -95,7 +95,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
+            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
         }});
         
         workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
@@ -118,7 +118,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         String errorMessage = "Directory for workspace " + testWorkspace.getWorkspaceID() + " could not be created";
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory.getAbsolutePath()));
+            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
         }});
         
         try {

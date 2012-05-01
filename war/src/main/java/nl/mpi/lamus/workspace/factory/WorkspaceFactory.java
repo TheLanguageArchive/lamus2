@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
-import nl.mpi.lamus.workspace.Workspace;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *

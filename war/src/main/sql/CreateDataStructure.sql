@@ -31,9 +31,9 @@ CREATE TABLE node (
 	
 CREATE TABLE node_link (
 	parent_workspace_node_id    integer                         NOT NULL,
-	workspace_node_id           integer                         NOT NULL,
-	resource_proxy_id           varchar(255)                    NOT NULL),
-        PRIMARY KEY (parent_workspace_node_id, workspace_node_id));
+	child_workspace_node_id     integer                         NOT NULL,
+	child_uri     varchar(255)                    NOT NULL),
+        PRIMARY KEY (parent_workspace_node_id, child_workspace_node_id));
 
 
 ALTER TABLE node
@@ -47,5 +47,5 @@ ALTER TABLE node_link
         REFERENCES node (workspace_node_id);
 ALTER TABLE node_link
     ADD CONSTRAINT node_link_child
-        FOREIGN KEY (workspace_node_id)
+        FOREIGN KEY (child_workspace_node_id)
         REFERENCES node (workspace_node_id);

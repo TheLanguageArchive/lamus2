@@ -13,8 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace;
+package nl.mpi.lamus.workspace.model.implementation;
 
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.Workspace;
 import java.util.Calendar;
 import java.util.Date;
 import static org.junit.Assert.*;
@@ -222,9 +225,6 @@ public class LamusWorkspaceTest {
     
     @Test
     public void workspacesComparedWithObjectOfDifferentType() {
-        
-        Calendar newCalendar = Calendar.getInstance();
-        newCalendar.add(Calendar.HOUR, -1);
 
         Workspace testWorkspace1 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.testDate, this.testDate, this.testDate, this.testDate,
