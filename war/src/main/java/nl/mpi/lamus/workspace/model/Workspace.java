@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.model;
 
+import java.net.URL;
 import java.util.Date;
 
 /**
@@ -31,11 +32,13 @@ public interface Workspace {
     
     public void setUserID(String userID);
     
-    //
     public int getTopNodeID();
     
-    //
-    public void setTopNodeID(int topNodeID);    
+    public void setTopNodeID(int topNodeID);
+    
+    public URL getTopNodeArchiveURL();
+    
+    public void setTopNodeArchiveURL(URL topNodeArchiveURL);
     
     public Date getStartDate();
     

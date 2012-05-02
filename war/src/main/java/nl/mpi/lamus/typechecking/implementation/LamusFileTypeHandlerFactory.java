@@ -1,0 +1,79 @@
+/*
+ * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package nl.mpi.lamus.typechecking.implementation;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Collection;
+import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.lamus.configuration.Configuration;
+import nl.mpi.lamus.typechecking.FileTypeFactory;
+import nl.mpi.lamus.typechecking.FileTypeHandler;
+import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
+import nl.mpi.lamus.workspace.model.TypeMapper;
+import nl.mpi.lamus.workspace.model.Workspace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ */
+public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
+
+    private static final Logger logger = LoggerFactory.getLogger(LamusFileTypeHandlerFactory.class);
+    
+    private final Configuration configuration;
+    private final FileTypeFactory fileTypeFactory;
+    private final TypeMapper typeMapper;
+    
+    public LamusFileTypeHandlerFactory(Configuration configuration, FileTypeFactory fileTypeFactory, TypeMapper typeMapper) {
+        this.configuration = configuration;
+        this.fileTypeFactory = fileTypeFactory;
+        this.typeMapper = typeMapper;
+    }
+    
+    public FileTypeHandler getNewFileTypeHandlerForWorkspace(Workspace workspace) {
+        
+        Collection<File> relaxedTypeCheckFolders = configuration.getRelaxedTypeCheckFolders();
+        FileType typeCheckerToUse = null;
+        if(relaxedTypeCheckFolders == null || relaxedTypeCheckFolders.isEmpty()
+                || workspace.getTopNodeArchiveURL() == null) {
+             typeCheckerToUse = fileTypeFactory.getNewFileTypeWithDefaultConfigFile();
+        } else {
+            URL topNodeURL = workspace.getTopNodeArchiveURL();
+            
+            outerloop:
+            for (File folder : relaxedTypeCheckFolders) {
+                File temp = new File(topNodeURL.getPath());
+                while (temp != null) { // check if this folder is a parent of the temp
+                    if (temp.equals(folder)) {
+                        File relaxedTypeCheckConfigFile = configuration.getRelaxedTypeCheckConfigFile();
+                        typeCheckerToUse = fileTypeFactory.getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile);
+                        break outerloop;
+                    }
+                    temp = temp.getParentFile();
+                } // loop towards root directory
+            } // loop over relaxedTypeCheckFolders
+            if(typeCheckerToUse == null) {
+                typeCheckerToUse = fileTypeFactory.getNewFileTypeWithDefaultConfigFile();
+            }
+        }
+        
+        return new LamusFileTypeHandler(typeCheckerToUse, typeMapper);
+    }
+    
+}

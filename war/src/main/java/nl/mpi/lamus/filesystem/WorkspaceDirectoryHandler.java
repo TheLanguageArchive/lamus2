@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.filesystem;
 
-import java.io.File;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
@@ -26,7 +25,4 @@ import nl.mpi.lamus.workspace.model.Workspace;
 public interface WorkspaceDirectoryHandler {
     
     public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException;
-    
-    public File getWorkspaceDirectory(Workspace workspace);
-    
 }

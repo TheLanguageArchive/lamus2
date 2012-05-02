@@ -55,9 +55,4 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
             }
         }
     }
-
-    public File getWorkspaceDirectory(Workspace workspace) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
 }

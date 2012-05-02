@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.model.implementation;
 
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -31,6 +32,7 @@ public class LamusWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
+    private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
     private Date sessionStartDate;
@@ -66,6 +68,7 @@ public class LamusWorkspace implements Workspace {
      * @param workspaceID
      * @param userID
      * @param topNodeID
+     * @param topNodeArchiveURL
      * @param startDate
      * @param endDate
      * @param sessionStartDate
@@ -76,12 +79,13 @@ public class LamusWorkspace implements Workspace {
      * @param message
      * @param archiveInfo 
      */
-    public LamusWorkspace(int workspaceID, String userID, int topNodeID,
+    public LamusWorkspace(int workspaceID, String userID, int topNodeID, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
+        this.topNodeArchiveURL = topNodeArchiveURL;
         if(startDate != null) {
             this.startDate = (Date) startDate.clone();
         }
@@ -123,6 +127,14 @@ public class LamusWorkspace implements Workspace {
 
     public void setTopNodeID(int topNodeID) {
         this.topNodeID = topNodeID;
+    }
+    
+    public URL getTopNodeArchiveURL() {
+        return this.topNodeArchiveURL;
+    }
+    
+    public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
+        this.topNodeArchiveURL = topNodeArchiveURL;
     }
 
     public Date getStartDate() {
@@ -259,6 +271,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID)
                 .append(this.userID)
                 .append(this.topNodeID)
+                .append(this.topNodeArchiveURL)
                 .append(this.startDate)
                 .append(this.endDate)
                 .append(this.sessionStartDate)
@@ -295,6 +308,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID, other.getWorkspaceID())
                 .append(this.userID, other.getUserID())
                 .append(this.topNodeID, other.getTopNodeID())
+                .append(this.topNodeArchiveURL, other.getTopNodeArchiveURL())
                 .append(this.startDate, other.getStartDate())
                 .append(this.endDate, other.getEndDate())
                 .append(this.sessionStartDate, other.getSessionStartDate())
@@ -312,11 +326,11 @@ public class LamusWorkspace implements Workspace {
     public String toString() {
         
         String stringResult = "Workspace ID: " + this.workspaceID + ", User ID: " + this.userID +
-                ", Top Node ID: " + this.topNodeID + ", Start Date: " + this.startDate +
-                ", End Date: " + this.endDate + ", Session Start Date: " + this.sessionStartDate +
-                ", Session End Date: " + this.sessionEndDate + ", Used Storage Space: " + this.usedStorageSpace +
-                ", Max Storage Space: " + this.maxStorageSpace + ", Status: " + this.status +
-                ", Message: " + this.message + ", Archive Info: " + this.archiveInfo;
+                ", Top Node ID: " + this.topNodeID + ", Top Node Archive URL: " + this.topNodeArchiveURL +
+                ", Start Date: " + this.startDate + ", End Date: " + this.endDate +
+                ", Session Start Date: " + this.sessionStartDate + ", Session End Date: " + this.sessionEndDate +
+                ", Used Storage Space: " + this.usedStorageSpace + ", Max Storage Space: " + this.maxStorageSpace +
+                ", Status: " + this.status + ", Message: " + this.message + ", Archive Info: " + this.archiveInfo;
         
         return stringResult;
     }

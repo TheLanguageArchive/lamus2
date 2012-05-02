@@ -16,6 +16,8 @@
 package nl.mpi.lamus.typechecking;
 
 import java.net.URL;
+import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
@@ -27,17 +29,13 @@ public interface FileTypeHandler {
     //TODO to be based on the 'ResourceConVoc' class from the old Lamus
     //TODO WS types and link types must be adjusted for CMDI
     
+    public FileType getConfiguredTypeChecker();
+    
     /**
      * Mimetype getter
      * @return the current mimetype string, for example &quot;image/png&quot;
      */
-    public String getFormat();
-    
-    /**
-     * Type getter
-     * @return the current type category string, for example &quot;audio&quot;
-     */
-    public String getType();
+    public String getMimetype();
     
     /**
      * Analysis summary getter
@@ -70,13 +68,11 @@ public interface FileTypeHandler {
      *   content or (as fallback) the file name, to determine the file format.
      *   NOTE: if mimetype IS given, filename and resourceURL will be ignored!
      */
-    public void calculateCV(URL resourceURL, String filename, WorkspaceNodeType nodetype, String mimetype);
+    public void checkType(URL resourceURL, String filename, WorkspaceNodeType nodetype, String mimetype) throws TypeCheckerException;
     
     /**
      * store the outcome of calculateCV, or override it, as done by DataMoverIn
      * @param format a mimetype or Unknown or Unspecified
-     * @param type a type such as audio or 'Primary Text'
-     * @param nodetype one of the WSNodeType constants
      */
-    public void setValues(String format, String type, WorkspaceNodeType nodetype);
+    public void setValues(String mimetype);
 }

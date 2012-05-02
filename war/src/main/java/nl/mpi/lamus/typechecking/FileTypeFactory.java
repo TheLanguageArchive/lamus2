@@ -13,36 +13,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.configuration;
+package nl.mpi.lamus.typechecking;
 
 import java.io.File;
-import java.util.Collection;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.bcarchive.typecheck.FileType;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface Configuration {
+public interface FileTypeFactory {
     
+    public FileType getNewFileTypeWithConfigFile(File configFile);
     
-    public AmsBridge getAmsBridge();
-    
-    public void setAmsBridge(AmsBridge amsBridge);
-    
-    public long getDefaultMaxStorageSpace();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
-    
-    public int getTotalNumberOfDaysAllowedUntilExpiry();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
-    
-    public File getWorkspaceBaseDirectory();
-    
-    public Collection<File> getRelaxedTypeCheckFolders();
-    
-    public File getRelaxedTypeCheckConfigFile();
-    
-    public int getTypeReCheckSizeLimit();
+    public FileType getNewFileTypeWithDefaultConfigFile();
 }

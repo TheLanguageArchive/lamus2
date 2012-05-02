@@ -2,6 +2,7 @@ package nl.mpi.lamus.configuration.implementation;
 
 
 import java.io.File;
+import java.util.Collection;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,16 @@ public class LamusConfiguration implements Configuration {
     }
 
     public File getWorkspaceBaseDirectory() {
+        //TODO load this from properties/context
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public Collection<File> getRelaxedTypeCheckFolders() {
+        //TODO load this from properties/context
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public File getRelaxedTypeCheckConfigFile() {
         //TODO load this from properties/context
         throw new UnsupportedOperationException("Not supported yet.");
     }

@@ -19,18 +19,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.Workspace;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -101,7 +97,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
         int initialNumberOfRows = countRowsInTable("workspace");
         
-        Workspace insertedWorkspace = new LamusWorkspace(0, null, 0, null, null, null, null, 0, 0, WorkspaceStatus.REFUSED, null, null);
+        Workspace insertedWorkspace = new LamusWorkspace(0, null, 0, null, null, null, null, null, 0, 0, WorkspaceStatus.REFUSED, null, null);
         
         try {
             workspaceDao.addWorkspace(insertedWorkspace);
@@ -121,15 +117,18 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace expectedWorkspace = insertTestWorkspaceIntoDB();
         WorkspaceNode topNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
         int expectedTopNodeID = topNode.getWorkspaceNodeID();
+        URL expectedTopNodeURL = topNode.getArchiveURL();
         
         expectedWorkspace.setTopNodeID(topNode.getWorkspaceNodeID());
+        expectedWorkspace.setTopNodeArchiveURL(topNode.getArchiveURL());
         
         workspaceDao.updateWorkspaceTopNode(expectedWorkspace);
         
         Workspace retrievedWorkspace = getWorkspaceFromDB(expectedWorkspace.getWorkspaceID());
         
         assertEquals("Workspace object retrieved from the database is different from expected.", expectedWorkspace, retrievedWorkspace);
-        assertEquals("Top node of the workspace was not updated in the database.", expectedTopNodeID, retrievedWorkspace.getTopNodeID());
+        assertEquals("Top node archive ID of the workspace was not updated in the database.", expectedTopNodeID, retrievedWorkspace.getTopNodeID());
+        assertEquals("Top node archive URL of the workspace was not updated in the database.", expectedTopNodeURL, retrievedWorkspace.getTopNodeArchiveURL());
     }
     
     /**
@@ -260,7 +259,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * by checking for a node ID that exists in the database
      */
     @Test
-    public void nodeIsLocked() {
+    public void nodeIsLocked() throws MalformedURLException {
         
         int archiveNodeIdToCheck = 10;
         int archiveNodeIdToBeInsertedInTheDb = archiveNodeIdToCheck;
@@ -278,7 +277,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * by checking for a node ID that doesn't exist in the database
      */
     @Test
-    public void nodeIsNotLocked() {
+    public void nodeIsNotLocked() throws MalformedURLException {
         
         int archiveNodeIdToCheck = 13;
         int archiveNodeIdToBeInsertedInTheDb = 10;
@@ -296,7 +295,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * by checking for a node ID that doesn't exist in the database
      */
     @Test
-    public void nodeIsLockedMoreThanOnce() {
+    public void nodeIsLockedMoreThanOnce() throws MalformedURLException {
         
         int archiveNodeIdToCheck = 13;
         int archiveNodeIdToBeInsertedInTheDb = archiveNodeIdToCheck;
@@ -511,11 +510,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         return testWorkspaceNode;
     }
     
-    private WorkspaceNode insertTestWorkspaceNodeWithArchiveIDIntoDB(Workspace workspace, int archiveNodeID) {
+    private WorkspaceNode insertTestWorkspaceNodeWithArchiveIDIntoDB(Workspace workspace, int archiveNodeID) throws MalformedURLException {
         
         WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
         testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
         testWorkspaceNode.setArchiveNodeID(archiveNodeID);
+        testWorkspaceNode.setArchiveURL(new URL ("http://some.url"));
         testWorkspaceNode.setName("someNode");
         testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
         testWorkspaceNode.setFormat("someFormat");
@@ -535,8 +535,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     private void setNodeAsWorkspaceTopNodeInDB(Workspace workspace, WorkspaceNode topNode) {
         
         workspace.setTopNodeID(topNode.getWorkspaceNodeID());
-        String updateWorkspaceSql = "UPDATE workspace SET top_node_id = ? WHERE workspace_id = ?";
-        simpleJdbcTemplate.update(updateWorkspaceSql, workspace.getTopNodeID(), workspace.getWorkspaceID());
+        String topNodeArchiveURLStr = null;
+        if(topNode.getArchiveURL() != null) {
+            topNodeArchiveURLStr = topNode.getArchiveURL().toString();
+        }
+        String updateWorkspaceSql = "UPDATE workspace SET top_node_id = ?, top_node_archive_url = ? WHERE workspace_id = ?";
+        simpleJdbcTemplate.update(updateWorkspaceSql, workspace.getTopNodeID(), topNodeArchiveURLStr, workspace.getWorkspaceID());
     }
     
     private int getIdentityFromDB() {
@@ -555,7 +559,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
     private Workspace copyWorkspace(Workspace ws) {
         Workspace copiedWs = new LamusWorkspace(
-                ws.getWorkspaceID(), ws.getUserID(), ws.getTopNodeID(), ws.getStartDate(), ws.getEndDate(),
+                ws.getWorkspaceID(), ws.getUserID(), ws.getTopNodeID(), ws.getTopNodeArchiveURL(), ws.getStartDate(), ws.getEndDate(),
                 ws.getSessionStartDate(), ws.getSessionEndDate(), ws.getUsedStorageSpace(), ws.getMaxStorageSpace(),
                 ws.getStatus(), ws.getMessage(), ws.getArchiveInfo());
         return copiedWs;
@@ -565,6 +569,16 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 class WorkspaceRowMapper implements RowMapper {
 
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+        
+        URL topNodeArchiveURL = null;
+        if (rs.getString("top_node_archive_url") != null) {
+            try {
+                topNodeArchiveURL = new URL(rs.getString("top_node_archive_url"));
+            } catch (MalformedURLException ex) {
+                fail("malformed URL for top_node_archive_url");
+            }
+        }
+        
         Date endDate = null;
         if (rs.getTimestamp("end_date") != null) {
             endDate = new Date(rs.getTimestamp("end_date").getTime());
@@ -578,6 +592,7 @@ class WorkspaceRowMapper implements RowMapper {
                 rs.getInt("workspace_id"),
                 rs.getString("user_id"),
                 rs.getInt("top_node_id"),
+                topNodeArchiveURL,
                 new Date(rs.getTimestamp("start_date").getTime()),
                 endDate,
                 new Date(rs.getTimestamp("session_start_date").getTime()),

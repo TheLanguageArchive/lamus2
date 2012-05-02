@@ -105,7 +105,7 @@ public class MetadataFileImporterTest {
     
     @Before
     public void setUp() {
-        testWorkspace = new LamusWorkspace(1, "someUser", -1,
+        testWorkspace = new LamusWorkspace(1, "someUser", -1, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         fileImporter = new MetadataFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockMetadataAPI,
@@ -157,6 +157,7 @@ public class MetadataFileImporterTest {
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
         testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
+        testWorkspace.setTopNodeArchiveURL(testChildNode.getArchiveURL());
         
         context.checking(new Expectations() {{
             
@@ -228,6 +229,7 @@ public class MetadataFileImporterTest {
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
         testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
+        testWorkspace.setTopNodeArchiveURL(testChildNode.getArchiveURL());
         
         context.checking(new Expectations() {{
             
@@ -293,6 +295,7 @@ public class MetadataFileImporterTest {
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
         testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
+        testWorkspace.setTopNodeArchiveURL(testChildNode.getArchiveURL());
         
         context.checking(new Expectations() {{
             
@@ -474,6 +477,7 @@ public class MetadataFileImporterTest {
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
         testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
+        testWorkspace.setTopNodeArchiveURL(testChildNode.getArchiveURL());
         
         context.checking(new Expectations() {{
             
@@ -560,11 +564,9 @@ public class MetadataFileImporterTest {
         }});
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
-//        testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
         
         context.checking(new Expectations() {{
             
-//            oneOf (mockWorkspaceDao).updateWorkspaceTopNode(testWorkspace);
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, testChildWorkspaceNodeID, testChildURI);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
@@ -647,11 +649,9 @@ public class MetadataFileImporterTest {
         }});
         
         testChildNode.setWorkspaceNodeID(testChildWorkspaceNodeID);
-//        testWorkspace.setTopNodeID(testChildNode.getWorkspaceNodeID());
         
         context.checking(new Expectations() {{
             
-//            oneOf (mockWorkspaceDao).updateWorkspaceTopNode(testWorkspace);
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, testChildWorkspaceNodeID, testChildURI);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);

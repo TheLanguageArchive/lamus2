@@ -13,36 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.configuration;
-
-import java.io.File;
-import java.util.Collection;
-import nl.mpi.lamus.ams.AmsBridge;
+package nl.mpi.lamus.workspace.exception;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface Configuration {
+public class TypeCheckerException extends Exception {
     
-    
-    public AmsBridge getAmsBridge();
-    
-    public void setAmsBridge(AmsBridge amsBridge);
-    
-    public long getDefaultMaxStorageSpace();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
-    
-    public int getTotalNumberOfDaysAllowedUntilExpiry();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
-    
-    public File getWorkspaceBaseDirectory();
-    
-    public Collection<File> getRelaxedTypeCheckFolders();
-    
-    public File getRelaxedTypeCheckConfigFile();
-    
-    public int getTypeReCheckSizeLimit();
+    public TypeCheckerException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

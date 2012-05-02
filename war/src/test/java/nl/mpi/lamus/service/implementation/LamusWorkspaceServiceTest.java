@@ -88,7 +88,7 @@ public class LamusWorkspaceServiceTest {
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
-        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+//        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
             oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(true));

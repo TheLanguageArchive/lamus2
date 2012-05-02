@@ -38,6 +38,7 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
@@ -100,8 +101,8 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         String childTitle = archiveFileHelper.getFileTitle(childURI.toString());
         
         //TODO get mime type (from link?)
-        WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here?
-        String childMimeType = childLink.getMimetype();
+        WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
+        String childMimetype = childLink.getMimetype();
         
         FileTypeHandler fileTypeHandler = fileTypeHandlerFactory.getNewFileTypeHandlerForWorkspace(workspace);
         
@@ -117,7 +118,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         if(!childIsOnSite) {
             
             //TODO is this call supposed to be like this?
-            fileTypeHandler.setValues(childMimeType, "Unspecified", childType); // unspecified category - unused anyway
+            fileTypeHandler.setValues(childMimetype);
             
             //TODO change URID for the link in the file that is copied
 //            childLink.setURID("NONE"); // flag resource as not on site
@@ -141,7 +142,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
                             " trusted without checks for big (" + resFile.length() + " bytes) file from archive: " + resFile);
                         
                         //TODO is this call supposed to be like this?
-                        fileTypeHandler.setValues(childMimeType, "Unspecified", childType); // unspecified category - unused anyway
+                        fileTypeHandler.setValues(childMimetype);
                     } else {
                         // will take a while, so log that we did not get stuck
                         if (resFile.length() > (1024*1024)) { // can differ from recheckLimit
@@ -156,37 +157,43 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         }
         //TODO get file type using typechecker
         if(performTypeCheck) {
-            fileTypeHandler.calculateCV(childURL, childFileName, childType, null);
+            try {
+                fileTypeHandler.checkType(childURL, childFileName, childType, null);
             //TODO what to pass as node type?
             //TODO use mimetype from CMDI?
                 // - this would cause the typechecker not to be executed, since the mimetype is known
                     // but anyway these files are already in the archive, so is it really needed to perform a type check?
+            } catch(TypeCheckerException tcex) {
+                String errorMessage = "ResourceFileImporter.importFile: error during type checking";
+                logger.error(errorMessage, tcex);
+                throw new FileImporterException(errorMessage, workspace, this.getClass(), tcex);
+            }
         }
         
         //TODO etc...
-        String childCheckedFormat = fileTypeHandler.getFormat();
+        String childCheckedFormat = fileTypeHandler.getMimetype();
         if(childCheckedFormat.startsWith("Un") &&  //TODO use a better way to identify these cases
-                childMimeType != null) {
+                childMimetype != null) {
             //TODO WARN
             if (performTypeCheck ) {
-                logger.warn("ResourceFileImporter.importFile: Unrecognized file contents, assuming format " + childMimeType +
+                logger.warn("ResourceFileImporter.importFile: Unrecognized file contents, assuming format " + childMimetype +
                         " as specified in metadata file for file: " + childURL);
                 logger.info("ResourceFileImporter.importFile: File type check result was: " + 
                         fileTypeHandler.getAnalysis() + " for: " + childURL);
             } else {
-                logger.debug("ResourceFileImporter.importFile: Using format " + childMimeType + 
+                logger.debug("ResourceFileImporter.importFile: Using format " + childMimetype + 
                         " as specified in metadata file for file: " + childURL);
             }
-        } else if(!childCheckedFormat.equals(childMimeType)) {
+        } else if(!childCheckedFormat.equals(childMimetype)) {
             //TODO do stuff... WARN
-            if (childMimeType != null) {
-                logger.warn("ResourceFileImporter.importFile: Metadata file claimed format " + childMimeType + " but contents are " +
-                    fileTypeHandler.getFormat() + " for file: " + childURL);
+            if (childMimetype != null) {
+                logger.warn("ResourceFileImporter.importFile: Metadata file claimed format " + childMimetype + " but contents are " +
+                    fileTypeHandler.getMimetype() + " for file: " + childURL);
             }
 
-            childMimeType = childCheckedFormat;
+            childMimetype = childCheckedFormat;
             //TODO if "un", WARN
-            if (childMimeType.startsWith("Un")) {
+            if (childMimetype.startsWith("Un")) {
                 logger.info("ResourceFileImporter.importFile: File type check result was: " + 
                         fileTypeHandler.getAnalysis() + " for: " + childURL);
             }
@@ -199,7 +206,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childURL);
         
         //TODO adjust node values according to file/link
-        setWorkspaceNodeInformationFromMetadataDocument(childLink, childNode, childTitle, childType, childMimeType, childURL);
+        setWorkspaceNodeInformationFromMetadataDocument(childLink, childNode, childTitle, childType, childMimetype, childURL);
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

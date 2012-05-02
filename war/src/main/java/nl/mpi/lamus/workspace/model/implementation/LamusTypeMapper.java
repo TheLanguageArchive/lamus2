@@ -13,36 +13,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.configuration;
+package nl.mpi.lamus.workspace.model.implementation;
 
-import java.io.File;
-import java.util.Collection;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.workspace.model.TypeMapper;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface Configuration {
+public class LamusTypeMapper implements TypeMapper {
+
+    public WorkspaceNodeType getNodeTypeForMimetype(String mimetype) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
-    
-    public AmsBridge getAmsBridge();
-    
-    public void setAmsBridge(AmsBridge amsBridge);
-    
-    public long getDefaultMaxStorageSpace();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
-    
-    public int getTotalNumberOfDaysAllowedUntilExpiry();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
-    
-    public File getWorkspaceBaseDirectory();
-    
-    public Collection<File> getRelaxedTypeCheckFolders();
-    
-    public File getRelaxedTypeCheckConfigFile();
-    
-    public int getTypeReCheckSizeLimit();
 }

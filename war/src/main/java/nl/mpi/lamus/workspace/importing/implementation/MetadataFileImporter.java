@@ -134,6 +134,7 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
         //TODO set top node ID in workspace (if reference is null), set workspace status / Save workspace
         if(parentNodeReference == null) { //TODO find a better way of indicating this
             workspace.setTopNodeID(childNode.getWorkspaceNodeID());
+            workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
             workspaceDao.updateWorkspaceTopNode(workspace);
         } else {
             //TODO add information about parent link

@@ -85,7 +85,7 @@ public class ResourceFileImporterTest {
     
     @Before
     public void setUp() {
-        testWorkspace = new LamusWorkspace(1, "someUser", -1,
+        testWorkspace = new LamusWorkspace(1, "someUser", -1, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         fileImporter = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockConfiguration,
@@ -150,9 +150,9 @@ public class ResourceFileImporterTest {
                 // if so and not orphan, do not typecheck
                 // if so and orphan, do typecheck (warn for large file)
             // calculateCV (change this) if typecheck is to be done
-            oneOf (mockFileTypeHandler).calculateCV(childLinkURI.toURL(), childNodeName, childNodeType, null);
+            oneOf (mockFileTypeHandler).checkType(childLinkURI.toURL(), childNodeName, childNodeType, null);
             // if type unspecified and typecheck to be done, warn
-            oneOf (mockFileTypeHandler).getFormat(); will(returnValue(childNodeMimetype));
+            oneOf (mockFileTypeHandler).getMimetype(); will(returnValue(childNodeMimetype));
             // if type differs from suggested mimetype, use mimetype from typecheck calculation (check also if it is unspecified)
             oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childLinkURI.toURL());
                 will(returnValue(testChildNode));

@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.dao.implementation;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -64,6 +66,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .usingColumns(
                     "user_id",
                     "top_node_id",
+                    "top_node_archive_url",
                     "start_date",
                     "end_date",
                     "session_start_date",
@@ -108,6 +111,11 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeID());
 
+        String topNodeArchiveURLStr = null;
+        if(workspace.getTopNodeArchiveURL() != null) {
+            topNodeArchiveURLStr = workspace.getTopNodeArchiveURL().toString();
+        }
+        
         //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
         // if dates are null, let the database throw the errors
         Timestamp startDate = null;
@@ -126,6 +134,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
+                .addValue("top_node_archive_url", topNodeArchiveURLStr)
                 .addValue("start_date", startDate)
                 .addValue("session_start_date", sessionStartDate)
                 .addValue("used_storage_space", workspace.getUsedStorageSpace())
@@ -144,9 +153,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting top node to: " + workspace.getTopNodeID());
         
-        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id WHERE workspace_id = :workspace_id";
+        String topNodeArchiveURLStr = null;
+        if(workspace.getTopNodeArchiveURL() != null) {
+            topNodeArchiveURLStr = workspace.getTopNodeArchiveURL().toString();
+        }
+        
+        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_url = :top_node_archive_url WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("top_node_id", workspace.getTopNodeID())
+                .addValue("top_node_archive_url", topNodeArchiveURLStr)
                 .addValue("workspace_id", workspace.getWorkspaceID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
@@ -185,6 +200,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         RowMapper<Workspace> mapper = new RowMapper<Workspace>() {
           public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
+              URL topNodeArchiveURL = null;
+              if(rs.getString("top_node_archive_url") != null) {
+                    try {
+                        topNodeArchiveURL = new URL(rs.getString("top_node_archive_url"));
+                    } catch (MalformedURLException ex) {
+                        logger.warn("Top Node Archive URL is malformed; null used instead", ex);
+                    }
+              }
               Date endDate = null;
               if(rs.getTimestamp("end_date") != null) {
                   endDate = new Date(rs.getTimestamp("end_date").getTime());
@@ -198,6 +221,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                       rs.getInt("workspace_id"),
                       rs.getString("user_id"),
                       rs.getInt("top_node_id"),
+                      topNodeArchiveURL,
                       new Date(rs.getTimestamp("start_date").getTime()),
                       endDate,
                       new Date(rs.getTimestamp("session_start_date").getTime()),
