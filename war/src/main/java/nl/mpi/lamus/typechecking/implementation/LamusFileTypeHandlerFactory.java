@@ -27,11 +27,14 @@ import nl.mpi.lamus.workspace.model.TypeMapper;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(LamusFileTypeHandlerFactory.class);
@@ -40,11 +43,15 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
     private final FileTypeFactory fileTypeFactory;
     private final TypeMapper typeMapper;
     
+    @Autowired
     public LamusFileTypeHandlerFactory(Configuration configuration, FileTypeFactory fileTypeFactory, TypeMapper typeMapper) {
         this.configuration = configuration;
         this.fileTypeFactory = fileTypeFactory;
         this.typeMapper = typeMapper;
     }
+    
+    //TODO in order to inject dependencies, maybe it's better to have the configuration receive the workspace object and,
+        // based on that, decide which is the type configuration file to use
     
     public FileTypeHandler getNewFileTypeHandlerForWorkspace(Workspace workspace) {
         

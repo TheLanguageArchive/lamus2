@@ -50,7 +50,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusJdbcWorkspaceDao.class);
     
-//    private JdbcTemplate jdbcTemplate;
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private SimpleJdbcInsert insertWorkspace;
     private SimpleJdbcInsert insertWorkspaceNode;
@@ -58,7 +57,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
     @Autowired
     public void setDataSource(DataSource datasource) {
-//        this.jdbcTemplate = new JdbcTemplate(datasource);
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(datasource);
         this.insertWorkspace = new SimpleJdbcInsert(datasource)
                 .withTableName("workspace")

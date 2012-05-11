@@ -13,23 +13,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing;
+package nl.mpi.lamus.typechecking.implementation;
 
-import nl.mpi.lamus.workspace.exception.FileExplorerException;
-import nl.mpi.lamus.workspace.exception.FileImporterException;
-import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import java.io.File;
+import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.lamus.typechecking.FileTypeFactory;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface FileImporter<R extends Reference> {
+@Component
+public class LamusFileTypeFactory implements FileTypeFactory {
+
+    public FileType getNewFileTypeWithConfigFile(File configFile) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public FileType getNewFileTypeWithDefaultConfigFile() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
-    public void setWorkspace(Workspace workspace);
-    
-    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, int childNodeArchiveID) throws FileImporterException, FileExplorerException;
 }

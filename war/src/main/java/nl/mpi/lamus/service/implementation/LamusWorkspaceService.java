@@ -21,11 +21,14 @@ import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Service
 public class LamusWorkspaceService implements WorkspaceService {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceService.class);
@@ -33,6 +36,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final NodeAccessChecker nodeAccessChecker;
     private final WorkspaceManager workspaceManager;
 
+    @Autowired
     public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager) {
         this.nodeAccessChecker = accessChecker;
         this.workspaceManager = workspaceManager;

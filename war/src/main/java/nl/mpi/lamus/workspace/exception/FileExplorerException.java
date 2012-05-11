@@ -13,20 +13,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing;
+package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
-import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface FileImporterFactory {
+public class FileExplorerException extends WorkspaceException {
     
-    public Class<? extends FileImporter> getFileImporterTypeForReference(Class<? extends Reference> referenceType);
-    
-    public Class<? extends FileImporter> getFileImporterTypeForTopNode();
-    
-    public FileImporter getNewFileImporterOfType(Class<? extends FileImporter> fileImporterType) throws FileImporterInitialisationException;
+    public FileExplorerException(String message, Workspace workspace, Throwable cause) {
+        super(message, workspace, cause);
+    }
 }

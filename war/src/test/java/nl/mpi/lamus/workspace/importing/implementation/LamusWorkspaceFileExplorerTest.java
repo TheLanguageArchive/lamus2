@@ -16,17 +16,14 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.exception.FileImporterException;
-import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
 import nl.mpi.lamus.workspace.importing.FileImporter;
-import nl.mpi.lamus.workspace.importing.FileImporterFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -35,6 +32,7 @@ import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 
 /**
@@ -43,14 +41,18 @@ import org.junit.*;
  */
 public class LamusWorkspaceFileExplorerTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     private WorkspaceFileExplorer fileExplorer;
     @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private WorkspaceDao mockWorkspaceDao;
-    @Mock private FileImporterFactory mockFileImporterFactory;
+    @Mock private FileImporterFactoryBean mockFileImporterFactoryBean;
     @Mock private FileImporter mockFileImporter;
     @Mock private WorkspaceNode mockNodeToExplore;
     @Mock private ReferencingMetadataDocument mockNodeDocument;
+    
+    @Mock private Workspace mockWorkspace;
     
     public LamusWorkspaceFileExplorerTest() {
     }
@@ -65,7 +67,7 @@ public class LamusWorkspaceFileExplorerTest {
     
     @Before
     public void setUp() {
-        fileExplorer = new LamusWorkspaceFileExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockFileImporterFactory);
+        fileExplorer = new LamusWorkspaceFileExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockFileImporterFactoryBean);
     }
     
     @After
@@ -76,7 +78,7 @@ public class LamusWorkspaceFileExplorerTest {
      * Test of explore method, of class LamusWorkspaceFileExplorer.
      */
     @Test
-    public void exploreSuccessfully() throws URISyntaxException, FileImporterInitialisationException, FileImporterException {
+    public void exploreSuccessfully() throws Exception {
 
         final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
         final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
@@ -104,9 +106,9 @@ public class LamusWorkspaceFileExplorerTest {
             for(Reference currentLink : testLinks) {
                 oneOf (mockArchiveObjectsDB).getObjectId(currentLink.getURI()); will(returnValue(testLinksArchiveIDs[current]));
                 
-                oneOf (mockFileImporterFactory).getFileImporterTypeForReference(currentLink.getClass()); will(returnValue(testLinksFileImporterTypes[current]));
-                oneOf (mockFileImporterFactory).getNewFileImporterOfType(testLinksFileImporterTypes[current]); will(returnValue(mockFileImporter));
-                
+                oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(currentLink);
+                oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
+                oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 oneOf (mockFileImporter).importFile(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
                 
                 current++;
@@ -115,7 +117,7 @@ public class LamusWorkspaceFileExplorerTest {
         }});
 
         
-        fileExplorer.explore(mockNodeToExplore, mockNodeDocument, testLinks);
+        fileExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
         
     }
 }

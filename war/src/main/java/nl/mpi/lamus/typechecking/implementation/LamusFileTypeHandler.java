@@ -40,15 +40,15 @@ public class LamusFileTypeHandler implements FileTypeHandler {
     private WorkspaceNodeType nodeType;
     private String analysis;
 
-    public FileType getConfiguredTypeChecker() {
-        return this.configuredTypeChecker;
-    }
-    
     public LamusFileTypeHandler(FileType configuredTypeChecker, TypeMapper typeMapper) {
         this.configuredTypeChecker = configuredTypeChecker;
         this.typeMapper = typeMapper;
     }
-    
+
+    public FileType getConfiguredTypeChecker() {
+        return this.configuredTypeChecker;
+    }
+
     public String getMimetype() {
         return this.mimetype;
     }

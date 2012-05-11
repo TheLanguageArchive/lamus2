@@ -90,7 +90,8 @@ public class ResourceFileImporterTest {
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         fileImporter = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockConfiguration,
                 mockArchiveFileHelper, mockFileTypeHandlerFactory, mockWorkspaceNodeFactory,
-                mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory, testWorkspace);
+                mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
+        fileImporter.setWorkspace(testWorkspace);
     }
     
     @After
@@ -109,14 +110,15 @@ public class ResourceFileImporterTest {
         final String childNodeName = "filename.txt";
         final String childNodeLabel = "file name label";
         final String childNodeTitle = "NO TITLE YET"; //TODO How should this look like?
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.UNKNOWN; //TODO WHat to use here?
-        final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNodeType unknownType = WorkspaceNodeType.UNKNOWN;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
+        final String childNodeMimetype = "txt";
+        final URI childNodeSchemaLocation = new URI("file://some.location");
         final String childNodePid = "somePid";
-        final OurURL archiveFileUrlWithContext = new OurURL("http://lux16.mpi.nl/corpora/");
+        final OurURL archiveFileUrlWithContext = new OurURL("file://lux16.mpi.nl/corpora/");
         final String childNodeUrlProtocol = "http";
-        final URI childLinkURI = new URI("http://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
-        final URL parentURL = new URL("http://some.uri/filename.cmdi");
+        final URI childLinkURI = new URI("file://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
+        final URL parentURL = new URL("file://some.uri/filename.cmdi");
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
@@ -147,12 +149,16 @@ public class ResourceFileImporterTest {
 //            oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
 //            oneOf (mockChildURI).toURL(); will(returnValue(mockChildURL));
 //            oneOf (mockChildURL).getProtocol(); will(returnValue(childNodeUrlProtocol));
+            
+            oneOf (mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(childLinkURI.toURL().getFile()); will(returnValue(false));
+            
                 // if so and not orphan, do not typecheck
                 // if so and orphan, do typecheck (warn for large file)
             // calculateCV (change this) if typecheck is to be done
-            oneOf (mockFileTypeHandler).checkType(childLinkURI.toURL(), childNodeName, childNodeType, null);
+            oneOf (mockFileTypeHandler).checkType(childLinkURI.toURL(), childNodeName, unknownType, null);
             // if type unspecified and typecheck to be done, warn
             oneOf (mockFileTypeHandler).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf (mockFileTypeHandler).getNodeType(); will(returnValue(childNodeType));
             // if type differs from suggested mimetype, use mimetype from typecheck calculation (check also if it is unspecified)
             oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childLinkURI.toURL());
                 will(returnValue(testChildNode));

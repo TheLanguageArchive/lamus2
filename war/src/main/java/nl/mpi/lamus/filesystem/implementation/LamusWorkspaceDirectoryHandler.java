@@ -22,17 +22,21 @@ import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryExceptio
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceDirectoryHandler.class);
 
     private final Configuration configuration;
     
+    @Autowired
     LamusWorkspaceDirectoryHandler(Configuration configuration) {
         this.configuration = configuration;
     }

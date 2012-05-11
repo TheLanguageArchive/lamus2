@@ -15,54 +15,69 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import java.util.logging.Level;
-    import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
-import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
+import nl.mpi.lamus.workspace.importing.implementation.FileImporterFactoryBean;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class WorkspaceImportRunner implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
     
     private final WorkspaceDao workspaceDao;
-    private final Workspace workspace;
-    private final int topNodeArchiveID;
-    private final FileImporterFactory fileImporterFactory;
+    private final WorkspaceFileExplorer workspaceFileExplorer;
+    private final FileImporterFactoryBean fileImporterFactoryBean;
     
-    //TODO use Spring injection
-    public WorkspaceImportRunner(WorkspaceDao workspaceDao, Workspace workspace, int topNodeArchiveID, FileImporterFactory importerFactory) {
+    private Workspace workspace = null;
+    private int topNodeArchiveID = -1;
+    
+    @Autowired
+    public WorkspaceImportRunner(WorkspaceDao workspaceDao, WorkspaceFileExplorer workspaceFileExplorer,
+        FileImporterFactoryBean fileImporterFactoryBean) {
         this.workspaceDao = workspaceDao;
-        this.workspace = workspace;
-        this.topNodeArchiveID = topNodeArchiveID;
-        this.fileImporterFactory = importerFactory;
+        this.workspaceFileExplorer = workspaceFileExplorer;
+        this.fileImporterFactoryBean = fileImporterFactoryBean;
+    }
+    
+    public void setWorkspace(Workspace ws) {
+        this.workspace = ws;
+    }
+    
+    public void setTopNodeArchiveID(int nodeArchiveID) {
+        this.topNodeArchiveID = nodeArchiveID;
     }
     
     public void run() {
         
-        FileImporter topNodeImporter;
+        //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
         
+        fileImporterFactoryBean.setFileImporterTypeForReference(null);
+        FileImporter topNodeImporter;
         try {
-            
-            Class<? extends FileImporter> topNodeFileImporterType = fileImporterFactory.getFileImporterTypeForTopNode();
-            
-            topNodeImporter = fileImporterFactory.getNewFileImporterOfType(topNodeFileImporterType);
-            
-        } catch (FileImporterInitialisationException ex) {
-            logger.error("Error during initialisation of file importer.", ex);
+            topNodeImporter = fileImporterFactoryBean.getObject();
+        } catch (Exception ex) {
+            String errorMessage = "Error during initialisation of file importer.";
+            logger.error(errorMessage, ex);
             
             workspace.setStatusMessageErrorDuringInitialisation();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
             return;
-        }        
+        }
+        
+        topNodeImporter.setWorkspace(workspace);
+        
         try {
             //TODO create some other method that takes something else than a Reference
             //TODO or have a separate method for importing the top node
@@ -71,17 +86,26 @@ public class WorkspaceImportRunner implements Runnable{
 
             
             //TODO import successful? notify main thread, change workspace status, etc...
-        } catch (FileImporterException ex) {
-            String errorMessage = "Error during initialisation of file importer.";
+        } catch (FileImporterException fiex) {
+            String errorMessage = "Error during file import.";
                 //TODO LOG PROPERLY
                 //TODO THROW EXCEPTION OR RETURN?
-            logger.error(errorMessage, ex);
+            logger.error(errorMessage, fiex);
             
             workspace.setStatusMessageErrorDuringInitialisation();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
-            return;
+        } catch (FileExplorerException feex) {
+            String errorMessage = "Error during file explore.";
+                //TODO LOG PROPERLY
+                //TODO THROW EXCEPTION OR RETURN?
+            logger.error(errorMessage, feex);
+            
+            workspace.setStatusMessageErrorDuringInitialisation();
+            workspaceDao.updateWorkspaceStatusMessage(workspace);
+            
+            //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
     }
     

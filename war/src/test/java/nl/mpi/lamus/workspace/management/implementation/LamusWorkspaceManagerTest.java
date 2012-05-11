@@ -15,22 +15,22 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
-import java.util.concurrent.Executor;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
-import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.*;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -38,12 +38,15 @@ import org.junit.*;
  */
 public class LamusWorkspaceManagerTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     private WorkspaceManager manager;
-    @Mock private Executor mockExecutor;
+    @Mock private TaskExecutor mockExecutor;
     @Mock private WorkspaceFactory mockWorkspaceFactory;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
+    @Mock private WorkspaceImportRunner mockWorkspaceImportRunner;
     
     public LamusWorkspaceManagerTest() {
     }
@@ -58,7 +61,7 @@ public class LamusWorkspaceManagerTest {
     
     @Before
     public void setUp() {
-        this.manager = new LamusWorkspaceManager(mockExecutor, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler);
+        this.manager = new LamusWorkspaceManager(mockExecutor, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner);
     }
     
     @After
@@ -69,7 +72,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void testCreateWorkspace() throws FailedToCreateWorkspaceDirectoryException {
+    public void createWorkspaceSuccessfully() throws FailedToCreateWorkspaceDirectoryException {
         final int archiveNodeID = 10;
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
@@ -80,7 +83,9 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace);
-            oneOf (mockExecutor).execute(with(any(WorkspaceImportRunner.class)));
+            oneOf (mockWorkspaceImportRunner).setWorkspace(newWorkspace);
+            oneOf (mockWorkspaceImportRunner).setTopNodeArchiveID(archiveNodeID);
+            oneOf (mockExecutor).execute(mockWorkspaceImportRunner);
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);

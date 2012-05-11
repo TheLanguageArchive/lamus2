@@ -19,7 +19,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.logging.Level;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -33,7 +32,6 @@ import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.model.*;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
@@ -43,6 +41,7 @@ import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -52,24 +51,21 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceFileImporter.class);
     
-    private ArchiveObjectsDB archiveObjectsDB;
-    private WorkspaceDao workspaceDao;
-    private Configuration configuration;
-    private ArchiveFileHelper archiveFileHelper;
-    private FileTypeHandlerFactory fileTypeHandlerFactory;
-    private WorkspaceNodeFactory workspaceNodeFactory;
-    private WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
-    private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
-    private Workspace workspace;
+    private final ArchiveObjectsDB archiveObjectsDB;
+    private final WorkspaceDao workspaceDao;
+    private final Configuration configuration;
+    private final ArchiveFileHelper archiveFileHelper;
+    private final FileTypeHandlerFactory fileTypeHandlerFactory;
+    private final WorkspaceNodeFactory workspaceNodeFactory;
+    private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
+    private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
+    private Workspace workspace = null;
     
-    public ResourceFileImporter() {
-        
-    }
-    
+    @Autowired
     public ResourceFileImporter(ArchiveObjectsDB aoDB, WorkspaceDao wsDao, Configuration config,
             ArchiveFileHelper archiveFileHelper, FileTypeHandlerFactory fileTypeHandlerFactory,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceParentNodeReferenceFactory wsParentNodeReferenceFactory,
-            WorkspaceNodeLinkFactory wsNodeLinkFactory, Workspace ws) {
+            WorkspaceNodeLinkFactory wsNodeLinkFactory) {
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
         this.configuration = config;
@@ -78,11 +74,21 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceParentNodeReferenceFactory = wsParentNodeReferenceFactory;
         this.workspaceNodeLinkFactory = wsNodeLinkFactory;
+    }
+    
+    public void setWorkspace(Workspace ws) {
         this.workspace = ws;
     }
     
     public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, int childNodeArchiveID) throws FileImporterException {
+        
+        if(workspace == null) {
+            String errorMessage = "ResourceFileImporter.importFile: workspace not set";
+            logger.error(errorMessage);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), null);
+        }
+        
         
         //TODO if onsite and not in orphans folder: typechecker - gettype()
         
@@ -109,7 +115,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         //TODO get onsite
         boolean childIsOnSite = archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID));
         OurURL childURLWithContext = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-        if("file".equals(childURLWithContext.getProtocol())) {
+        if(!"file".equals(childURLWithContext.getProtocol())) {
             childIsOnSite = false;
         }
         
@@ -131,8 +137,10 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
 
                 //TODO check if file is larger than the checker limit
                     // if so, do not typecheck
-                File resFile = new File(childURL.getFile());
-                if (resFile.length() > configuration.getTypeReCheckSizeLimit()) { // length==0 if !exists, no error
+                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(childURL.getFile())) { // length==0 if !exists, no error
+                    
+                    File resFile = new File(childURL.getFile());
+                    
                     // skip checks for big files if from archive
                     if (archiveFileHelper.getOrphansDirectoryName() != null &&
                         resFile.getAbsolutePath().toString().indexOf(archiveFileHelper.getOrphansDirectoryName()) == -1) {
@@ -172,6 +180,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         
         //TODO etc...
         String childCheckedFormat = fileTypeHandler.getMimetype();
+        WorkspaceNodeType childCheckedNodeType = fileTypeHandler.getNodeType();
         if(childCheckedFormat.startsWith("Un") &&  //TODO use a better way to identify these cases
                 childMimetype != null) {
             //TODO WARN
@@ -192,6 +201,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
             }
 
             childMimetype = childCheckedFormat;
+            childType = childCheckedNodeType;
             //TODO if "un", WARN
             if (childMimetype.startsWith("Un")) {
                 logger.info("ResourceFileImporter.importFile: File type check result was: " + 

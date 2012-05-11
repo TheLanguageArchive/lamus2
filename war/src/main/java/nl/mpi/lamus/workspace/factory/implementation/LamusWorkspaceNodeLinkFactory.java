@@ -19,11 +19,13 @@ import java.net.URI;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceNodeLinkFactory implements WorkspaceNodeLinkFactory {
 
     public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childURI) {

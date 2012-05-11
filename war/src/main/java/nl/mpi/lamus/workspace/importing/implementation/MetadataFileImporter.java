@@ -27,6 +27,7 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -34,8 +35,6 @@ import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
 import nl.mpi.lamus.workspace.model.*;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.*;
@@ -43,6 +42,7 @@ import nl.mpi.metadata.api.type.MetadataDocumentType;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -52,25 +52,22 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
     
     private static final Logger logger = LoggerFactory.getLogger(MetadataFileImporter.class);
     
-    private ArchiveObjectsDB archiveObjectsDB;
-    private WorkspaceDao workspaceDao;
-    private MetadataAPI metadataAPI;
-    private WorkspaceNodeFactory workspaceNodeFactory;
-    private WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
-    private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
-    private WorkspaceFileHandler workspaceFileHandler;
-    private WorkspaceFileExplorer workspaceFileExplorer;
-    private Workspace workspace;
+    private final ArchiveObjectsDB archiveObjectsDB;
+    private final WorkspaceDao workspaceDao;
+    private final MetadataAPI metadataAPI;
+    private final WorkspaceNodeFactory workspaceNodeFactory;
+    private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
+    private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
+    private final WorkspaceFileHandler workspaceFileHandler;
+    private final WorkspaceFileExplorer workspaceFileExplorer;
+    private Workspace workspace = null;
     
-    public MetadataFileImporter() {
-        
-    }
     
-    //TODO use Spring injection
+    @Autowired
     public MetadataFileImporter(ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
             WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
             WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
-            WorkspaceFileExplorer fileExplorer, Workspace ws) {
+            WorkspaceFileExplorer workspaceFileExplorer) {
         
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
@@ -79,12 +76,21 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
         this.workspaceParentNodeReferenceFactory = parentNodeReferenceFactory;
         this.workspaceNodeLinkFactory = wsNodelinkFactory;
         this.workspaceFileHandler = fileHandler;
-        this.workspaceFileExplorer = fileExplorer;
+        this.workspaceFileExplorer = workspaceFileExplorer;
+    }
+    
+    public void setWorkspace(Workspace ws) {
         this.workspace = ws;
     }
-
+    
     public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, int childNodeArchiveID) throws FileImporterException {
+            Reference childLink, int childNodeArchiveID) throws FileImporterException, FileExplorerException {
+        
+        if(workspace == null) {
+            String errorMessage = "MetadataFileImporter.importFile: workspace not set";
+            logger.error(errorMessage);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), null);
+        }
         
         
         //TODO if not onsite: create external node
@@ -172,7 +178,7 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
         if(childDocument instanceof ReferencingMetadataDocument) {
             ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
             Collection<Reference> links = childReferencingDocument.getDocumentReferences();
-            workspaceFileExplorer.explore(childNode, childReferencingDocument, links);
+            workspaceFileExplorer.explore(workspace, childNode, childReferencingDocument, links);
         }
 
         //TODO What else?

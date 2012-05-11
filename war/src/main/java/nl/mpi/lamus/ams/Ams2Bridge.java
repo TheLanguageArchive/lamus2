@@ -31,6 +31,7 @@ import nl.mpi.latimpl.core.LatServiceImpl;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * $Id$
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author	last modified by $Author$, created by mategg
  * @version	$Revision$
  */
+@Component
 public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     
     private final static Logger logger = LoggerFactory.getLogger(Ams2Bridge.class);
@@ -74,10 +76,10 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * default constructor, no special configuration <=> loads default settings
      */
-//            public Ams2Bridge() {
-//		// load defaults
-////		this.initServices(null, null, null, null, null, null, null);
-//	}
+            public Ams2Bridge() {
+		// load defaults
+//		this.initServices(null, null, null, null, null, null, null);
+	}
     public Ams2Bridge(PrincipalService principalSrv, AuthenticationService authenticationSrv,
             AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
             LicenseService licenseSrv, RuleService ruleSrv) {

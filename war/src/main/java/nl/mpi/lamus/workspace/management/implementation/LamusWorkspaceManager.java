@@ -15,39 +15,45 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
-import java.util.concurrent.Executor;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.importing.FileImporterFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
-import nl.mpi.lamus.workspace.importing.implementation.WorkspaceFileImporterFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceManager implements WorkspaceManager {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceManager.class);
     
-    private final Executor executor;
+    private final TaskExecutor executor;
     private final WorkspaceFactory workspaceFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
+//    private final FileImporterFactory importerFactory;
+    private final WorkspaceImportRunner workspaceImportRunner;
 
     //TODO use Spring injection
     //TODO Executor can be created using Executors.newSingleThreadExecutor()
-    public LamusWorkspaceManager(Executor executor, WorkspaceFactory factory, WorkspaceDao dao, WorkspaceDirectoryHandler directoryHandler) {
+    @Autowired
+    public LamusWorkspaceManager(TaskExecutor executor, WorkspaceFactory factory, WorkspaceDao dao,
+        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner) {
         this.executor = executor;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
+        this.workspaceImportRunner = wsImportRunner;
     }
     
     public Workspace createWorkspace(String userID, int topNodeArchiveID) {
@@ -69,8 +75,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         //TODO change this call - use Spring injection
 
-        FileImporterFactory importerFactory = new WorkspaceFileImporterFactory(newWorkspace);
-        Runnable workspaceImportRunner = new WorkspaceImportRunner(workspaceDao, newWorkspace, topNodeArchiveID, importerFactory);
+//        FileImporterFactory importerFactory = new WorkspaceFileImporterFactory(newWorkspace);
+//        Runnable workspaceImportRunner = new WorkspaceImportRunner(workspaceDao, newWorkspace, topNodeArchiveID, importerFactory);
+        workspaceImportRunner.setWorkspace(newWorkspace);
+        workspaceImportRunner.setTopNodeArchiveID(topNodeArchiveID);
 //        Thread importThread = new Thread(workspaceImportRunner);
 //        importThread.start();
         

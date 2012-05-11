@@ -15,12 +15,11 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
-import nl.mpi.lamus.workspace.management.implementation.LamusNodeAccessChecker;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;

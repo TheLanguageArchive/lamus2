@@ -6,6 +6,7 @@ import java.util.Collection;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.configuration.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /*
  * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
@@ -27,8 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusConfiguration implements Configuration {
-    
+
+    @Autowired
     private AmsBridge amsBridge;
     /** ingest request storage quota, default 10 GB */
     private long defaultMaxStorageSpace = 10 * 1024 * 1024 * 1024; // in bytes
@@ -42,25 +45,25 @@ public class LamusConfiguration implements Configuration {
     /** file size limit for which the typechecker should check a file again (when importing from the archive), default 8MB **/
     private int typeReCheckSizeLimit = 8 * 1024 * 1024;
     
-    private final static LamusConfiguration instance = new LamusConfiguration();
+//    private final static LamusConfiguration instance = new LamusConfiguration();
     
-    private LamusConfiguration() {
-        
-    }
+//    public LamusConfiguration() {
+//        
+//    }
     
-    public static LamusConfiguration getInstance() {
-        return instance;
-    }
+//    public static LamusConfiguration getInstance() {
+//        return instance;
+//    }
     
     
     public AmsBridge getAmsBridge() {
         return this.amsBridge;
     }
     
-    @Autowired
-    public void setAmsBridge(AmsBridge amsBridge) {
-        this.amsBridge = amsBridge;
-    }
+//    @Autowired
+//    public void setAmsBridge(AmsBridge amsBridge) {
+//        this.amsBridge = amsBridge;
+//    }
     
     public long getDefaultMaxStorageSpace() {
         //TODO Check if it is overwritten in some configuration file

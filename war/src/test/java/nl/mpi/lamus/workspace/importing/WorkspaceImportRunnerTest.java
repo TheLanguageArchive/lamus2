@@ -15,11 +15,10 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
-import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
+import nl.mpi.lamus.workspace.importing.implementation.FileImporterFactoryBean;
 import nl.mpi.lamus.workspace.importing.implementation.MetadataFileImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataException;
@@ -28,7 +27,10 @@ import org.jmock.Mockery;
 import org.jmock.States;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -39,19 +41,18 @@ public class WorkspaceImportRunnerTest {
     Synchroniser synchroniser = new Synchroniser();
     Mockery context = new JUnit4Mockery() {{
         setThreadingPolicy(synchroniser);
+        setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
-    private Runnable workspaceImportRunner;
+    private WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceDao mockWorkspaceDao = context.mock(WorkspaceDao.class);
-//    @Mock private Workspace mockWorkspace;
+    private final WorkspaceFileExplorer mockWorkspaceFileExplorer = context.mock(WorkspaceFileExplorer.class);
+    private final FileImporter mockFileImporter = context.mock(FileImporter.class);
+    private final FileImporterFactoryBean mockFileImporterFactoryBean = context.mock(FileImporterFactoryBean.class);
+    
     private final Workspace mockWorkspace = context.mock(Workspace.class);
     private int topNodeArchiveID = 10;
-//    @Mock private FileImporterFactory mockFileImporterFactory;
-    private final FileImporterFactory mockFileImporterFactory = context.mock(FileImporterFactory.class);
-//    @Mock private Class<? extends FileImporter> mockFileImporterType;
-//    @Mock private FileImporter mockFileImporter;
-    private final FileImporter mockFileImporter = context.mock(FileImporter.class);
-    
+
     public WorkspaceImportRunnerTest() {
     }
 
@@ -65,7 +66,9 @@ public class WorkspaceImportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockWorkspace, topNodeArchiveID, mockFileImporterFactory);
+        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockWorkspaceFileExplorer, mockFileImporterFactoryBean);
+        workspaceImportRunner.setWorkspace(mockWorkspace);
+        workspaceImportRunner.setTopNodeArchiveID(topNodeArchiveID);
     }
     
     @After
@@ -76,18 +79,16 @@ public class WorkspaceImportRunnerTest {
      * Test of run method, of class WorkspaceImportRunner.
      */
     @Test
-    public void runsSuccessfully() throws FileImporterInitialisationException, FileImporterException, InterruptedException {
-        
-        final Class<? extends FileImporter> testImporterType = MetadataFileImporter.class;
+    public void runsSuccessfully() throws Exception {
         
         final States importing = context.states("importing");
         
         context.checking(new Expectations() {{
-            oneOf (mockFileImporterFactory).getFileImporterTypeForTopNode();
-                will(returnValue(testImporterType));
+            
+            oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(null);
+            oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
                 when(importing.isNot("finished"));
-            oneOf (mockFileImporterFactory).getNewFileImporterOfType(testImporterType);
-                will(returnValue(mockFileImporter));
+            oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
                 then(importing.is("finished"));
@@ -104,24 +105,19 @@ public class WorkspaceImportRunnerTest {
      * Test of run method, of class WorkspaceImportRunner.
      */
     @Test
-    public void throwsFileImporterInitialisationException() throws FileImporterInitialisationException, FileImporterException, InterruptedException {
+    public void throwsException() throws Exception {
         
-        final Class<? extends FileImporter> expectedImporterType = MetadataFileImporter.class;
-        final String expectedExceptionMessage = "this is a test message for the exception";
-        final Throwable expectedExceptionCause = new NoSuchMethodException("this is a test message for the exception cause");
+        final String someExceptionMessage = "some exception message";
         
         final States importing = context.states("importing");
         
         context.checking(new Expectations() {{
-            oneOf (mockFileImporterFactory).getFileImporterTypeForTopNode();
-                will(returnValue(expectedImporterType));
-                when(importing.isNot("finished"));
-            oneOf (mockFileImporterFactory).getNewFileImporterOfType(expectedImporterType);
-                will(throwException(new FileImporterInitialisationException(
-                        expectedExceptionMessage, mockWorkspace, expectedImporterType, expectedExceptionCause)));
+
+            oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(null);
+            oneOf (mockFileImporterFactoryBean).getObject(); will(throwException(new Exception(someExceptionMessage)));
+            oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             never (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
-            
             oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();
             oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
                 then(importing.is("finished"));
@@ -140,7 +136,7 @@ public class WorkspaceImportRunnerTest {
      * Test of run method, of class WorkspaceImportRunner.
      */
     @Test
-    public void throwsFileImporterException() throws FileImporterInitialisationException, FileImporterException, InterruptedException {
+    public void throwsFileImporterException() throws Exception {
         
         final Class<? extends FileImporter> expectedImporterType = MetadataFileImporter.class;
         final String expectedExceptionMessage = "this is a test message for the exception";
@@ -149,11 +145,11 @@ public class WorkspaceImportRunnerTest {
         final States importing = context.states("importing");
         
         context.checking(new Expectations() {{
-            oneOf (mockFileImporterFactory).getFileImporterTypeForTopNode();
-                will(returnValue(expectedImporterType));
+
+            oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(null);
+            oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
                 when(importing.isNot("finished"));
-            oneOf (mockFileImporterFactory).getNewFileImporterOfType(expectedImporterType);
-                will(returnValue(mockFileImporter));
+            oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
                 will(throwException(new FileImporterException(expectedExceptionMessage, mockWorkspace, expectedImporterType, expectedExceptionCause)));
@@ -172,8 +168,44 @@ public class WorkspaceImportRunnerTest {
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
     }
     
+    /**
+     * Test of run method, of class WorkspaceImportRunner.
+     */
+    @Test
+    public void throwsFileExplorerException() throws Exception {
+        
+        final String expectedExceptionMessage = "this is a test message for the exception";
+        final Throwable expectedExceptionCause = null;
+        
+        final States importing = context.states("importing");
+        
+        context.checking(new Expectations() {{
+
+            oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(null);
+            oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
+                when(importing.isNot("finished"));
+            oneOf (mockFileImporter).setWorkspace(mockWorkspace);
+                when(importing.isNot("finished"));
+            oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
+                will(throwException(new FileExplorerException(expectedExceptionMessage, mockWorkspace, expectedExceptionCause)));
+            
+            oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();
+            oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
+                then(importing.is("finished"));
+            
+            //TODO expect a call to a listener indicating failure
+        }});
+        
+        
+        executeRunner();
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
+    }
+    
     private void executeRunner() {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(workspaceImportRunner);
+        
+        TaskExecutor executor = new SimpleAsyncTaskExecutor();
+        executor.execute(workspaceImportRunner);
     }
 }

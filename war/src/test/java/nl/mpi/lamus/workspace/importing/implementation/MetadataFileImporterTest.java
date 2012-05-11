@@ -26,12 +26,15 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -110,19 +113,40 @@ public class MetadataFileImporterTest {
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         fileImporter = new MetadataFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockMetadataAPI,
                 mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
-                mockWorkspaceFileHandler, mockWorkspaceFileExplorer, testWorkspace);
+                mockWorkspaceFileHandler, mockWorkspaceFileExplorer);
+        fileImporter.setWorkspace(testWorkspace);
     }
     
     @After
     public void tearDown() {
     }
 
+    @Test
+    public void importNodeWithNullWorkspace() throws FileExplorerException {
+        FileImporter testFileImporter = new MetadataFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockMetadataAPI,
+                mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
+                mockWorkspaceFileHandler, mockWorkspaceFileExplorer);
+        
+        final int testChildArchiveID = 100;
+        try {
+            testFileImporter.importFile(null, null, null, testChildArchiveID);
+        } catch (FileImporterException ex) {
+            assertNotNull(ex);
+            String errorMessage = "MetadataFileImporter.importFile: workspace not set";
+            assertEquals(errorMessage, ex.getMessage());
+            assertEquals(null, ex.getWorkspace());
+            assertEquals(MetadataFileImporter.class, ex.getFileImporterType());
+            assertEquals(null, ex.getCause());
+        }
+        
+    }
+    
     /**
      * Test of importFile method, of class MetadataFileImporter.
      */
     @Test
     public void importTopNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException {
+        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -184,7 +208,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceCollection));
-            oneOf (mockWorkspaceFileExplorer).explore(testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
+            oneOf (mockWorkspaceFileExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
         }});
         
         
@@ -194,7 +218,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importTopNodeFileWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException {
+        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -260,7 +284,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException {
+        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -322,7 +346,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceCollection));
-            oneOf (mockWorkspaceFileExplorer).explore(testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
+            oneOf (mockWorkspaceFileExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
         }});
         
         
@@ -331,7 +355,7 @@ public class MetadataFileImporterTest {
     }
     
     @Test
-    public void importNodeUrlFromArchiveReturnsNull() throws MalformedURLException, URISyntaxException {
+    public void importNodeUrlFromArchiveReturnsNull() throws MalformedURLException, URISyntaxException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -363,7 +387,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNodeMetadataDocumentThrowsIOException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException {
+        IOException, MetadataException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -400,7 +424,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNodeMetadataDocumentThrowsMetadataException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException {
+        IOException, MetadataException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -437,7 +461,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNodeWorkspaceFileHandlerThrowsException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, FailedToCreateWorkspaceNodeFileException {
+        IOException, MetadataException, FailedToCreateWorkspaceNodeFileException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -515,9 +539,11 @@ public class MetadataFileImporterTest {
         }
     }
     
+    //TODO Test throw FileExplorerException
+    
     @Test
     public void importNormalNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException {
+        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -592,7 +618,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceCollection));
-            oneOf (mockWorkspaceFileExplorer).explore(testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
+            oneOf (mockWorkspaceFileExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceCollection);
         }});
         
         
@@ -602,7 +628,7 @@ public class MetadataFileImporterTest {
 
     @Test
     public void importNormalNodeFileWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException {
+        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;

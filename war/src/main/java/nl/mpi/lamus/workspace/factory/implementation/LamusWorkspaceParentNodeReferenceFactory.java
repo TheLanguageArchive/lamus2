@@ -20,11 +20,13 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
 import nl.mpi.metadata.api.model.Reference;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceParentNodeReferenceFactory implements WorkspaceParentNodeReferenceFactory {
 
     public WorkspaceParentNodeReference getNewWorkspaceParentNodeReference(WorkspaceNode parentNode, Reference childLink) {

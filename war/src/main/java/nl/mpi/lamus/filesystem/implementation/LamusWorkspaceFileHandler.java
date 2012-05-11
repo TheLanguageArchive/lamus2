@@ -28,17 +28,21 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
     
     private final Configuration configuration;
     
+    @Autowired
     LamusWorkspaceFileHandler(Configuration configuration) {
         this.configuration = configuration;
     }

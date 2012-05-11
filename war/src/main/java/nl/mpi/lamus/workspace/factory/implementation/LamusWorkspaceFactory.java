@@ -21,11 +21,14 @@ import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusWorkspaceFactory implements WorkspaceFactory {
     
     private final AmsBridge amsBridge;
@@ -34,6 +37,7 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
     /**
      * 
      */
+    @Autowired
     LamusWorkspaceFactory(AmsBridge amsBridge, Configuration configuration) {
         this.amsBridge = amsBridge;
         this.configuration = configuration;

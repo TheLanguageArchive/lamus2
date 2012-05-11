@@ -20,14 +20,18 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusArchiveFileHelper implements ArchiveFileHelper {
     
     //TODO based on the class 'ArchiveUtils' from the old Lamus
@@ -39,6 +43,13 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     
     /** Name of the directories where unlinked files of a corpus are stored */
     private final String orphansDirName = "sessions";
+    
+    private final Configuration configuration;
+    
+    @Autowired
+    public LamusArchiveFileHelper(Configuration config) {
+        this.configuration = config;
+    }
     
     /**
      * 
@@ -149,4 +160,10 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return this.orphansDirName;
     }
     
+    public boolean isFileSizeAboveTypeReCheckSizeLimit(String filePath) {
+        File fileToCheck = new File(filePath);
+        int sizeLimit = configuration.getTypeReCheckSizeLimit();
+        boolean isSizeAboveLimit = fileToCheck.length() > sizeLimit;
+        return isSizeAboveLimit;
+    }
 }

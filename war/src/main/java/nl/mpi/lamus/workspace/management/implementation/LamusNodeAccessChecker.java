@@ -22,11 +22,14 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusNodeAccessChecker implements NodeAccessChecker {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusNodeAccessChecker.class);    
@@ -35,6 +38,7 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
     private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;
     
+    @Autowired
     LamusNodeAccessChecker(ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
         this.archiveObjectsDB = archiveObjectsDB;
         this.amsBridge = amsBridge;

@@ -83,4 +83,6 @@ public interface ArchiveFileHelper {
     
 //    public String fileExtensionToLowerCase(String name);
     
+    public boolean isFileSizeAboveTypeReCheckSizeLimit(String filePath);
+    
 }

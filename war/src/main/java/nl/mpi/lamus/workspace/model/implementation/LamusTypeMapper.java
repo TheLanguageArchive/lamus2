@@ -17,11 +17,13 @@ package nl.mpi.lamus.workspace.model.implementation;
 
 import nl.mpi.lamus.workspace.model.TypeMapper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class LamusTypeMapper implements TypeMapper {
 
     public WorkspaceNodeType getNodeTypeForMimetype(String mimetype) {

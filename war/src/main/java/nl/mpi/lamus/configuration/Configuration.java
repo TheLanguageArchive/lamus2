@@ -28,7 +28,7 @@ public interface Configuration {
     
     public AmsBridge getAmsBridge();
     
-    public void setAmsBridge(AmsBridge amsBridge);
+//    public void setAmsBridge(AmsBridge amsBridge);
     
     public long getDefaultMaxStorageSpace();
     
