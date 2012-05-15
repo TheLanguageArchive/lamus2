@@ -109,7 +109,7 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsAboveTypeReCheckSizeLimit() {
         
-        URL testFileURL = getClass().getResource("testFile.txt");
+        URL testFileURL = getClass().getResource("/testFile.txt");
         File testFile = new File(testFileURL.getFile());
         
         final int typeReCheckSizeLimit = 2 * 1024;
@@ -126,7 +126,7 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsBelowTypeReCheckSizeLimit() {
         
-        URL testFileURL = getClass().getResource("testFile.txt");
+        URL testFileURL = getClass().getResource("/testFile.txt");
         File testFile = new File(testFileURL.getFile());
         
         final int typeReCheckSizeLimit = 10 * 1024;
