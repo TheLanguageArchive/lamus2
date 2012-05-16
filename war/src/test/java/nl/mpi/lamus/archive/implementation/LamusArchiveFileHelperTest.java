@@ -15,10 +15,7 @@
  */
 package nl.mpi.lamus.archive.implementation;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.configuration.Configuration;
@@ -109,7 +106,7 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsAboveTypeReCheckSizeLimit() {
         
-        URL testFileURL = getClass().getResource("/testFile.txt");
+        URL testFileURL = getClass().getClassLoader().getResource("testFile.txt");
         File testFile = new File(testFileURL.getFile());
         
         final int typeReCheckSizeLimit = 2 * 1024;
@@ -126,7 +123,7 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsBelowTypeReCheckSizeLimit() {
         
-        URL testFileURL = getClass().getResource("/testFile.txt");
+        URL testFileURL = getClass().getClassLoader().getResource("testFile.txt");
         File testFile = new File(testFileURL.getFile());
         
         final int typeReCheckSizeLimit = 10 * 1024;
