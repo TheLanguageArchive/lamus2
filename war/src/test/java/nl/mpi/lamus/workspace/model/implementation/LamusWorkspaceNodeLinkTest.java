@@ -138,6 +138,20 @@ public class LamusWorkspaceNodeLinkTest {
                 testWorkspaceNodeLink1.equals(testWorkspaceNodeLink2));
     }
 
+    @Test
+    public void testToString() {
+        
+        WorkspaceNodeLink testWorkspaceNodeLink = new LamusWorkspaceNodeLink(
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+        
+        String expectedString = "Parent Workspace Node ID: " + testWorkspaceNodeLink.getParentWorkspaceNodeID()
+                + ", Child Workspace Node ID: " + testWorkspaceNodeLink.getChildWorkspaceNodeID()
+                + ", Child URI: " + testWorkspaceNodeLink.getChildURI();
+        
+        String actualString = testWorkspaceNodeLink.toString();
+        
+        assertEquals(expectedString, actualString);
+    }
 }
 
 class SomeOtherWorkspaceNodeLink implements WorkspaceNodeLink {

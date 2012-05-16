@@ -1,0 +1,449 @@
+# filetypes.txt: configuration file for FileType.java - with extra NBL types
+#
+# By Eric Auer 2006-2011: based on inspection of actual files in
+# the archive, in other directories and on file's "/etc/magic".
+#
+# Use JHOVE for detail check? WAVE PDF TIFF   -XML- -HTML- TEXT
+# Non-recommended formats supported by JHOVE: AIFF JPEG2000 GIF
+#
+# Beyond-magic checks in FileType: ASCII UTF-8
+# Validateable by Annex and other libs: IMDI, annotation file formats
+#
+# Syntax / format of this file type magic definition file:
+# Empty lines and lines starting with # are ignored
+# Other lines are first split at spaces:
+#   magic extensions judgement description (rest of line: more description)
+# Magic and extensions are then split at commas, optional for extensions:
+#   offset,string,offset,string,... extension,extension,...
+# Judgement can be GOOD, BADTYPE or BADCODEC (others are done by Java code)
+# A '-' offset prefix, only allowed for the FIRST offset, means ignore case
+# and the special combination of first offset = 2147483647 with the string
+# 'ANYTHING' means 'any data at all' (for text/* mimetypes: any TEXT data)
+# Escape codes in magic strings: \\ backslash, \0 null byte, \_ space,
+#   \r carriage return, \n line feed, \x?? byte (??=hex value)
+
+# Binary formats without any specific properties - keep this list short!
+2147483647,ANYTHING eeg,seg GOOD application/x-brainvision-data Raw NBL Brain Vision EEG data blob? Needs VHDR and VMRK files to open!
+# Yet another NBL specific blob-of-any-data style headerless format: img
+2147483647,ANYTHING img GOOD application/x-nbl-img Raw NBL IMG data (N*16kB) needs accompanying application/x-nbl-img-hdr
+# NOTE: Put ANYTHING-matchers first, so later specific rules can override them!
+# Plain text formats without specific properties
+# As of 5/2011, ca 2000 *.tr and 150 *.1tr files not yet converted to more specific formats
+2147483647,ANYTHING tr,1tr GOOD text/plain transcription text
+# Note: Should only allow standard-session.cfg here?
+2147483647,ANYTHING cfg GOOD text/plain configuration text
+# NBL related plain text formats follow
+# What is this? SPSS scripts or data?
+2147483647,ANYTHING sps GOOD text/plain *.SPS text (NBL)
+# Matlab luckily is compatible with the free/open Octave software
+2147483647,ANYTHING m GOOD text/x-matlab Matlab script (NBL)
+# Unfortunately Praat has no #!/bin/praat style headers...
+2147483647,ANYTHING Praat,praat GOOD text/praat-script Praat script (NBL)
+# Presentation has no headers in scripts either, and it is quite expensive...
+2147483647,ANYTHING pcl,sce GOOD text/x-presentation-script Other NBL PCL script
+# Most generic plain text format line last(!)
+2147483647,ANYTHING txt GOOD text/plain text
+
+# Lexus LMF XML file <?xml version="1.0" encoding="utf-8"?>CRLF<lexicon...>
+-0,<?xml,40,<lexicon lmf GOOD text/x-lmf+xml Lexus LMF XML
+# LaTeX is a well-known format but not wanted in the archive:
+0,\\NeedsTeXFormat{LaTeX2e} tex BADTYPE LaTeX
+# magic: top element of IMDI is METATRANSCRIPT
+# IMDI metadata: see IMDIAPI mpi.imdi.api IMDI_3.0.xsd -->
+-0,<?xml imdi GOOD text/x-imdi+xml XML 
+# EAF data: see ELAN tool and annex search parser
+# http://www.mpi.nl/tools/elan/EAFv2.1.xsd -->
+-0,<?xml eaf GOOD text/x-eaf+xml XML Elan Eudico Annotation Format EAF
+# trs is Transcriber (to be removed)... is rdf interesting? top element: RDF
+# Transcriber data:
+-0,<?xml trs GOOD text/x-trs XML Transcriber
+# bpt pri prx skp tag tig are all CGN related XML formats
+# CGN bpt: ftext.dtd -->
+-0,<?xml bpt GOOD text/x-cgn-bpt+xml XML CGN BPT word segmentations
+# CGN pri: text.dtd -->
+-0,<?xml pri GOOD text/x-cgn-pri+xml XML CGN PRI orthographic transcriptions
+# CGN prx: prtext.dtd (2 annotators: 2 annotations for each file) -->
+-0,<?xml prx GOOD text/x-cgn-prx+xml XML CGN PRX prosodic annotations
+# CGN lxk: many files, none linked?? Top element: ltext. Text, base word forms...
+-0,<?xml prx GOOD text/x-cgn-lxk+xml XML CGN LXK
+# CGN skp: orthographic transcriptions with signal linking ttext.dtd -->
+-0,<?xml skp GOOD text/x-cgn-skp+xml XML CGN SKP orthographic tr. with signal linking
+# CGN tag: PoS tags, lemmata, lexicon links, multi-word... ptext.dtd -->
+-0,<?xml tag GOOD text/x-cgn-tag+xml XML CGN TAG PoS tags and lemmata etc
+# CGN tig: TigerSearch syntactic annotations stext.dtd (simplified Tiger) -->
+# http://www.ims.uni-stuttgart.de/projekte/TIGER/public/TigerXML.xsd would
+# not allow &eacute; and 35 other entities but would require &#233; etc...
+-0,<?xml tig GOOD text/x-cgn-tig+xml XML CGN TIG Tiger syntactic annotations
+# generic XML: W3C SMIL only tested as generic XML for now. More or less an annotation format.
+#   see (German) www.informatik.fernuni-hagen.de/import/pi3/peter/smil.htm
+#   SMIL can be played with RealPlayer in some versions. Top element is smil.
+-0,<?xml smil GOOD application/smil+xml SMIL media - Synchronised Multimedia Integration Language
+#   SVG is not widespread yet but less exotic than SMIL. InkScape is a free editor. Top element is svg.
+-0,<?xml svg GOOD image/svg+xml SVG Scalable Vector Graphics
+# Google Earth bookmarks, top element is kml xmlns="http://www.opengis.net/kml/2.2"
+# http://code.google.com/intl/de-DE/apis/kml/documentation/kml_tut.html#kml_server
+-0,<?xml kml GOOD application/vnd.google-earth.kml+xml KML Keyhole Markup Language
+# generic XML: can at most be checked against dtd referenced inside file...
+-0,<?xml xml GOOD text/xml generic XML file
+-0,\xef\xbb\xbf<?xml xml GOOD text/xml UTF-8 XML with BOM
+# ELAN preferences - data about colors, fonts, tier view order, selections...
+-0,<?xml pfsx GOOD text/x-pfsx+xml ELAN preferences (EAF views etc)
+# generic XML Schema: ...
+-0,<?xml xsd GOOD text/xml generic XML schema file
+-0,\xef\xbb\xbf<?xml xsd GOOD text/xml UTF-8 XML schema with BOM
+# 320 317 021 340 241 261 032 341 --> d0 cf 11 e0 a1 b1 1a e1 newer MS-Office
+#   typically contains a string describing the format at offset 2080
+#   other magic: 31 be 00 00   fe 37 00 23  rarely used: Word 5 used it...
+#   Rare Excel magic (GTF_V1R1 uses it) --- 09 04 06 00 00 00 10 00
+0,\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1 xls,doc,ppt BADTYPE MS-Office
+# older Word: db a5 2d 00 ... /etc/magic wrongly expects 2 more 00 here
+#   PS: FileType searches on for better matches until it finds a GOOD one...
+0,\xdb\xa5\x2d\0 doc BADTYPE MS-Word2
+# Rich Text Format:  \\rtf1\\ansi\\ansicpg1252...
+0,{\\rtf1 rtf BADTYPE RichText
+# common (in ESF) but deprecated: accept as plain text: tr is CP437, txt is Latin?
+0,DATEINAME tr,txt,1tr,2tr GOOD text/x-esf ESF variant of CHAT
+# many but not all Chat files start with @Begin...
+# ALL Chat files should start with @Begin -or- @UTF8 -or- @Font
+0,@Begin cha GOOD text/x-chat Chat annotation
+# for example acqui_data/ac-DaZ-AF/{Adolescent,Child}/Annotations/*.cha uses this:
+0,@UTF8 cha GOOD text/x-chat Chat UTF-8 annotation
+# many of those actually are plain ASCII - use 'recode' to fix the others:
+0,@Font:\x09RealDosCodePage:437 cha BADCODEC Chat annotation in DOS 437 encoding
+# we have 100s of Win95 encoded Chat files, so we tolerate those for now
+0,@Font:\x09Win95 cha GOOD text/x-chat Chat annotation in Win95 encoding
+# the \_\_ variants can be seen as unwanted conversions of the tab \x09 ones
+0,@Font:\_\_RealDosCodePage:437 cha BADCODEC Chat annotation in DOS 437 encoding
+# we have 100s of Win95 encoded Chat files, so we tolerate those for now
+0,@Font:\_\_Win95 cha GOOD text/x-chat Chat annotation in Win95 encoding
+# shx: Shoebox v2.xx lexicon files... more or less text, but use a strange encoding:
+0,\\_sh\_v2 shx GOOD text/x-shoebox-lexicon Shoebox v2 lexicon
+0,\\_sh\_v3 shx GOOD text/x-shoebox-lexicon Shoebox v3 lexicon??
+# sht: Shoebox v3.xx annotation files... more or less text, but use a strange encoding:
+0,\\_sh\_v3 sht GOOD text/x-shoebox-text Shoebox v3 annotation
+0,\\_sh\_v2 sht GOOD text/x-shoebox-text Shoebox v2 annotation??
+# Toolbox is the same but in UTF8, possibly with BOM
+0,\\_sh\_v2 tbx GOOD text/x-toolbox-lexicon Toolbox v2 lexicon
+0,\xef\xbb\xbf\\_sh\_v tbx GOOD text/x-toolbox-lexicon Toolbox lexicon with BOM
+0,\\_sh\_v3 tbx GOOD text/x-toolbox-lexicon Toolbox v3 lexicon??
+# Toolbox is the same but in UTF8, possibly with BOM
+0,\\_sh\_v3 tbt GOOD text/x-toolbox-text Toolbox v3 annotation
+0,\xef\xbb\xbf\\_sh\_v tbt GOOD text/x-toolbox-text Toolbox annotation with BOM
+0,\\_sh\_v2 tbt GOOD text/x-toolbox-text Toolbox v2 annotation??
+# Shoebox / Toolbox typ file: database definitions
+0,\\+DatabaseType typ GOOD text/x-shoebox-type Toolbox/Shoebox-DatabaseType definition file
+# Shoebox / Toolbox lng file: encoding configuration
+0,\\+LanguageEncoding lng GOOD text/x-shoebox-language Toolbox/Shoebox-LanguageEncoding definition file
+
+# Various archives
+0,MSCF\0\0\0\0 cab BADTYPE MS-Cabinet archive
+# ZIP, also used for Java and OpenOffice. Next byte is version 0b=1.1 14=20...
+0,PK\x03\x04 zip,jar,odt,sxi BADTYPE ZIP archive or related
+0,Rar! rar BADTYPE RAR archive
+0,BZh bz2 BADTYPE BZIP2 compressed
+0,\x1f\x8b gz,tgz BADTYPE GZIP compressed
+# -lh0- -lh1- -lz4 -lz5- version 1 -lzs -lh - -lhd -lh2- ... -lh7- version 2
+# LZH note: magic is at offset 2, not at offset 0!
+2,-lh lzh BADTYPE LHarc lh archive
+2,-lz lzh BADTYPE LHarc lz archive
+# TAR has high magic offset: 257. next bytes: 0 for posix, @@ 00 for GNU
+257,ustar tar BADTYPE TAR archive
+# not really an archive: Java serialization data (can store config / status etc)
+# example: store properties / config of Java apps. offset 3 has version: 4 / 5
+0,\xac\xed\0 BADTYPE properties Java serialization data
+
+# Various binary formats
+# Java .class files
+0,\xca\xfe\xba\xbe class BADTYPE Java class
+# Linux ELF binaries
+0,\x7fELF none,so BADTYPE Linux ELF binary
+# EXE... Note: we cannot really detect COM file format, has no header
+#   Windows EXE will usually have PE at offset 128
+0,MZ exe,sys,386,dll BADTYPE MS-binary
+# SYS drivers often start with ff ff, but other files can also start like that
+0,\xff\xff sys BADTYPE MS-driver?
+# one-byte magic strings are evil but for a BADTYPE line they are okay
+0,\x80 obj BADTYPE x86 object
+# EDF binary Eyelink eye-tracking log streams: acceptable as long as text ASC versions are archived, too?
+0,SR_RESEARCH_COMBFILE edf GOOD application/x-eyelink-edf Binary Eyelink EDF eye-tracking log stream, make sure to keep a plain text ASC backup of the data!
+
+# Various text formats
+# some files start with other text but actually they should not
+#   Note: bad HTML will be recognized as "plain text with bad filename"
+-0,<!DOCTYPE\_html html,htm GOOD text/html HTML with DOCTYPE
+-0,<html html,htm GOOD text/html HyperText Markup Language
+# DVI is an intermediate format for LaTeX output
+0,\xf7\x02 dvi BADTYPE TeX DVI file
+0,%!PS-Adobe-2 ps BADTYPE PostScript 2.x
+0,%!PS-Adobe-3 ps BADTYPE PostScript 3.x
+# versions: 1.2 very common 1.1 very rare 1.3 and 1.4 also common 1.5 rare 1.6 very rare
+# 7/2007: 1.5 okay if Win98se/MacOSX10.2, 1.6 Linux/WinNT/OSX10.3, newest 1.7
+0,%PDF-1.2 pdf GOOD application/pdf Portable Document Format 1.2
+0,%PDF-1.3 pdf GOOD application/pdf Portable Document Format 1.3
+0,%PDF-1.4 pdf GOOD application/pdf Portable Document Format 1.4
+0,%PDF-1.5 pdf GOOD application/pdf Portable Document Format 1.5 (WARNING: not for Win95, MacOS9)
+# more specific "1.6" and "1.7" below will override "other" in next line
+0,%PDF-1. pdf BADCODEC Portable Document Format unsupported version
+0,%PDF-1.6 pdf BADCODEC Portable Document Format 1.6 (not for Win98, MacOS9)
+0,%PDF-1.7 pdf BADCODEC Portable Document Format 1.7 (new Windows, MacOSX)
+# First 1.1 PDF: Evolution of Amino Acid Frequencies in Proteins Over Deep Time
+0,%PDF-1.1 pdf GOOD application/pdf Portable Document Format 1.1
+# UTF-16 starts with a byte order mark U+FEFF in either byte order
+#   We assume that the first 2 chars inside the file are ASCII,
+#   to get a more constrained signature
+#   The BOM itself is treated as a null. U+FFFE is no allowed Unicode char
+#   encoding the BOM in UTF-8 can make sense - to mark the file as UTF-8
+0,\xff\xfe,3,\0,5,\0 txt BADCODEC UTF-16 Intel
+0,\xfe\xff,2,\0,4,\0 txt BADCODEC UTF-16 Mac
+0,\xef\xbb\xbf txt GOOD text/plain UTF-8 with BOM
+# MediaTagger is an MPI 1994 Mac annotation software based on QuickTime 2.1,
+#   where tags are linked to a separate Cinepak compressed normal QuickTime movie
+#   fully accept that format - after all we still have 5600 MT files in the archive!
+#   Paul is finetuning a mediatagger to elan converter at the moment :-).
+#   Maximum file size seems to be 128k plus 16 bytes. Almost QuickTime video wide
+#   MediaTagger is a FORKED Mac format: the resource.frk has an extra .mdt "file"!
+4,wide,24,\0\0\0\0mdat mt GOOD application/mediatagger MediaTagger
+
+# Various audio formats
+# Sun audio has a big endian longint at offset 12... Common codecs:
+# 1 (8bit ISDN mu-law) ... and 2/3 are 8/16 bit linear pcm, 24 is 8bit adpcm
+0,.snd,12,\0\0\0\x01 au BADTYPE Sun audio 8bit mu-law
+0,.snd,12,\0\0\0\x02 au BADTYPE Sun audio 8bit PCM
+0,.snd,12,\0\0\0\x03 au BADTYPE Sun audio 16bit PCM
+# WAVE format is okay - if it is codec 1, PCM (2 adpcm, 6 alaw... are bad)
+#   sampling rate and channel count are at offset 24 and 22, 16bit Intel
+0,RIFF,8,WAVEfmt,20,\x01\0 wav GOOD audio/x-wav WAV audio PCM
+# Magic can only have 3 fixed parts so JUNK + fmt size must be fixed at 32 + 16
+0,RIFF,8,WAVEJUNK\x20\0\0\0,52,fmt\_\x10\0\0\0\x01\0\x02\0 wav GOOD audio/x-wav WAV audio PCM stereo SAMMA
+# everything else is bad generic but we specify a few examples below
+0,RIFF,8,WAVE wav BADCODEC WAV audio generic
+# reached when we fall through in the bad variant of WAV case...
+0,RIFF,8,WAVE,20,\x06\0 wav BADCODEC WAV audio A-Law
+0,RIFF,8,WAVE,20,\x55\0 wav,mp3 BADCODEC WAV audio MP3
+# a somehow Mac-ish audio format - compression can be NONE or adpcm-ish ones
+0,FORM,8,AIFF aiff BADTYPE AIFF audio uncompressed
+0,FORM,8,AIFC aifc GOOD audio/x-aiff AIFF-C audio compressed
+# Ogg Vorbis, maybe a nice alternative to MP3...
+#   0 is revision 0. at offset 28: \1vorbis or fLaC the two common codecs
+#   lelong at 35, 40 are revision (0), sample rate, byte at 39 is channels
+0,OggS\0 ogg GOOD application/ogg Ogg audio
+# MP3 compressed audio, 2 bytes after magic encode bitrate/samplingrate/channels
+# uncommon: fffc: layer 2v1 fffe: layer 1v1 fff4: layer 2v2 fff6: layer 1v2
+# uncommon: ffe2: layer 3v2.5 (low bitrates/freq) etc etc
+0,\xff\xfb mp3 BADTYPE MPEG ADTS layer 3 v1
+0,\xff\xfa mp3 BADTYPE MPEG ADTS layer 3 v1
+0,\xff\xf2 mp3 BADTYPE MPEG ADTS layer 3 v2
+0,\xff\xf3 mp3 BADTYPE MPEG ADTS layer 3 v2
+0,ID3 mp3 BADTYPE MP3 with ID3v2 tag
+# Two styles of MIDI files (MTHd: version at offset 8 is 00 0x)
+0,MThd mid,midi BADTYPE MIDI data
+0,RIFF,8,RMID mid,midi BADTYPE MIDI data RIFF
+# RealAudio compressed audio
+0,.ra\xfd ra BADTYPE RealAudio
+
+# Various image formats:
+# PNG: byte 24 depth (1/4/8), 25 colorspace (0/4 grey 2/6 rgb 3/7 map -/alpha)
+# IHDR chunk must be first. chunks are: size32 tag32 N*byte checksum32
+0,\x89PNG\r\n\x1a\n,12,IHDR png GOOD image/png PNG image
+# this happens when PNG are processed as "text" and "linebreaks" change:
+0,\x89PNG png BADCODEC image/png BAD PNG image
+# maybe it is not corrupted, just renamed?
+# Problem: the next rule confused right name finders:
+# ... 0,\x89PNG\r\n\x1a\n,12,IHDR gif,jpeg,jpg,tiff,tif BADCODEC image/png RENAMED PNG image
+# GIF87a is safe, it can only contain palette based images
+0,GIF87a gif GOOD image/gif GIF 87a image
+# GIF: GIF89a can contain special blocks for timed overlays / animation!
+# ... but we allow it anyway, for now
+0,GIF89a gif GOOD image/gif GIF 89a extended image
+# PCX image: 0a00 / 0a02 / 0a03 / 0a04 are older PCX versions. Win3 is 0a05
+#   header offsets: 65 planes 3 bit per plane 2 compression (0 none 1 rle)
+0,\x0a\x05 pcx BADTYPE PCX v3 image
+# JPEG: newer files are all JFIF or Exif... (MOVIjP... is jpeg 2000?)
+0,\xff\xd8\xff\xe0,6,JFIF jpg,jpeg GOOD image/jpeg JPEG image JFIF
+0,\xff\xd8\xff\xe1,6,Exif jpg,jpeg GOOD image/jpeg JPEG image Exif
+0,\xff\xd8\xff jpg,jpeg BADCODEC image/jpeg BAD JPEG image
+# Problem: the next rule confused right name finders:
+# ... 0,\xff\xd8\xff gif,tiff,tiff,png BADCODEC image/jpeg RENAMED JPEG image
+# BMP: allow only uncompressed 24 bit, so certain stimuli can be saved w/o conversion to PNG. Uhmmm...
+# ... fields: BM, size/32, 0_or_appcode/32, headersize/32, infosize/32, x/32, y/32, planes/16, depth/16, compression/32
+# ... if infoheader size is not 0x28, it can be 12 (OS/2), 108 (BMP4) or 124 (BMP5)
+0,BM,14,\x28\0\0\0,26,\x01\0\x18\0\0\0\0\0 bmp GOOD image/x-ms-bmp Uncompressed Windows 24bit BMP bitmap image
+# BMP images: various compression schemes etc
+0,BM,14,\x28\0 bmp BADCODEC BMP image Windows bitmap image, bad depth, compression or name: use uncompressed 24bit BMP or, better, use PNG
+# BMP images: various compression schemes etc. OS/2 uses short header with 16bit x, y, no compression info
+# ... see for header lengths: http://en.wikipedia.org/wiki/Windows_bitmap
+0,BM,14,\x0c\0 bmp BADCODEC BMP image OS2 bitmap image, only Windows supported
+# The "new OS/2" BMP format is even less frequently used than the old OS/2 format
+0,BM,14,\x40\0 bmp BADCODEC BMP image new OS2 bitmap image, only Windows supported
+# Win95 and newer BMP extension: with gamma, RGB CIE vectors, bitmasks. Negative height ok if uncompressed
+# ... negative height means render top down, which is nondefault for BMP / DIB
+0,BM,14,\x6c\0 bmp BADCODEC BMP image new Windows4 bitmap image, too new
+# Win98/Win2k and newer support JPEG/PNG compression at "0 bit/pixel", more color profiles
+# ... see links to MSDN on http://entropymine.com/jason/bmpsuite/
+0,BM,14,\x7c\0 bmp BADCODEC BMP image new Windows5 bitmap image, too new
+# XPM are classic uncompressed X images in text form
+0,/*\_XPM\_*/ xpm BADTYPE XPixMap image
+# PostScript-ish: some less-sane PS also have prefixed \x04 or \x1b%-12345X
+0,%!PS-Adobe-,15,EPS eps BADTYPE EncapsulatedPostScript
+# TIFF supports many codecs so TiffCheck specifies which are supported!
+0,MM\0\x2a tiff,tif GOOD image/tiff TIFF Mac
+# TIFF supports many codecs so TiffCheck specifies which are supported!
+0,II\x2a\0 tiff,tif GOOD image/tiff TIFF Intel
+
+# Various animation formats
+# Shockwave/Flash: next byte after 3 byte signature is version, usually 4..8
+0,FWS swf BADTYPE Macromedia Flash
+0,CWS swf BADTYPE Macromedia Flash compressed
+# MPEG sequence v1 system multiplex 1bb marks start of system header...
+#   we use .mpg for mpeg1 and .mpeg for mpeg2
+#   1ba is pack header, alternative headers use 1b0, 1b5, 1b3 instead of 1ba
+#   having 1b8 or 1b2 at offset 12, with 1b3 at offset 0, is progressive YCbCr
+0,\0\0\x01\xba,12,\0\0\x01\xbb mpg GOOD video/x-mpeg1 MPEG1 video
+# MPEG2 files differ in that their system header (1bb) starts 2 bytes later
+#   we use .mpg for mpeg1 and .mpeg for mpeg2
+0,\0\0\x01\xba,14,\0\0\x01\xbb mpeg GOOD video/x-mpeg2 MPEG2 video
+# we also have some MPEG files without a pack header, but should avoid those
+0,\0\0\x01\xb3 mpeg,mpg BADCODEC MPEG without pack header
+
+# AVI video can use various codecs, we might want to check the details
+#   technically LIST and hdrlavih could also be somewhere else...?
+#   most files have LIST????strlstrh????vids at offset 0x58 (?=wildcard)
+0,RIFF,8,AVI\_LIST,20,hdrlavih avi BADTYPE AVI video
+#
+# fourcc (case insensitive!) locations: *0x70* in 80% of the cases
+# fourcc values: DIV3 DIVX XVID DIV4 most common...
+# ... also mp42 rv40 mp43 fmp4 mpg2 wmv1 ...
+# in the other cases: fourcc at *0xbc* most common: DIV3
+# ... also dx50 mp42 rv40 wmv1 mpg2 fmp4 dvsd mp43...
+# long at 104 points to somewhere + 132 has fourcc...
+# ... for example (mp42 mp43 mjpg) div3 divx dx50 xvid
+# long at 92 points to somewhere + 188/180 has audio: 55 00 for mpeg 1 layer 3,
+# 61 01 divx 01 00 uncompressed ... IF + 180/172 has string strf
+# ... in both cases + 96 is LIST + 104 is strlstrh + 116 is auds
+# 112 can be div3 / div4 for low/fast motion...
+# always: offset 96 has strlstrh 38 0 0 0 vids
+#
+# QuickTime: magic starts at offset 4 
+#   moov offset 12: mvhd or cmov for movies, mdra or rmra for URLs
+4,moov,12,mdra mov BADCODEC QuickTime URL
+4,moov,12,rmra mov BADCODEC QuickTime URLs
+# at least 80 instances mvhd
+4,moov,12,mvhd mov GOOD video/quicktime QuickTime video mvhd
+# at least 2800 instances cmov
+4,moov,12,cmov mov GOOD video/quicktime QuickTime video cmov
+# at least 5 instances mdat
+4,mdat,12,mdat mov GOOD video/quicktime QuickTime video mdat
+# if we did not find MediaTagger above, it might be a normal wide QuickTime movie
+# at least 31 instances wide
+4,wide mov GOOD video/quicktime QuickTime video wide
+# we do not seem to have skip style files
+4,skip mov BADCODEC QuickTime video skip
+# at least 190 instances
+4,free mov GOOD video/quicktime QuickTime video free
+#
+# ISO media variants:
+# We do allow (MS) MPEG4 compatibles... IF they have mp4 or m4a extension!
+#   QUESTION: how can we distinguish mp4 video from m4a audio?
+#   Testing this: audio: 16=mp42mp41 28=moov   video: 16=mp42avc1 28=moov
+4,ftypmp42,16,mp42mp41,28,moov m4a GOOD audio/mp4 QuickTime audio ISO MPEG4 mp42mp41
+# avc1 is H264, a demanding modern video codec / format:
+4,ftypmp42,16,mp42avc1,28,moov mp4 GOOD video/mp4 QuickTime video ISO MPEG4 mp42avc1
+# generic bad case after last specific good case and before all specific bad cases
+4,ftyp mov BADCODEC QuickTime video generic
+# old Lund recordings:
+# 4,ftypqt,16,qt mov,qt GOOD video/quicktime QuickTime video ISO qt
+# deprecated, too generic: 3 of our 4 ISO/qt files contain just m1s data (mpeg1 stream)
+4,ftypqt  mov BADCODEC QuickTime video ISO qt
+# we do not seem to have such files
+4,ftypiso mov BADCODEC QuickTime video ISO MPEG4 iso
+#   ... we only have some mp42isom file, it seems. isom is too generic.
+4,ftypmp42,16,mp42isom mp4,m4a BADCODEC QuickTime audio/video ISO MPEG4 mp42 isom (too generic)
+# generic case tested after all specific good cases
+#   ... but before all specific bad cases as bad lets testing continue
+4,ftypmp42 mp4,m4a BADCODEC QuickTime audio/video ISO MPEG4 mp42 other
+# we do not have such files...
+4,ftypmp43 mp4 BADCODEC QuickTime video ISO MPEG4 mp43
+# specific bad case after generic one
+4,ftypmp7 mov BADCODEC QuickTime video ISO MPEG4.7
+# Windows Media container format, similar to AVI and QuickTime, various codecs:
+0,\x30\x26\xb2\x75 wmv BADTYPE MS-ASF/WMV video
+# yet another Real.com format:
+0,.RMF\0\0\0 rm BADTYPE RealMedia video
+#
+# MOVIftyp would be ISO media which can then in turn contain MPEG4:
+# offset 8 then has isom iso2 mp41 mp42 mp7t mp7b 3gp mmp4 avc1 qt...
+# digicams can create quite uncompressed jpeg+PCM movies: 0 0 0 14 pnot ...
+# Italian style MPEG4 audio files:
+4,ftypM4A,16,M4A\_mp42isom,36,moov m4a GOOD audio/mp4 QuickTime audio MPEG4 M4A/M4A/mp42/isom
+#
+#   AVI/DV: 0 RIFF 8 AVI 12 LIST 20 hdrlavih 108 vidsdvsd 88 LIST 96 strlstrh
+# http://msdn.microsoft.com/de-de/library/ms783421%28en-us,VS.85%29.aspx
+# DV Data in the AVI File Format - Microsoft DirectShow 9.0 [BildungsForschung]
+# dvsd: 525/29.97Hz, 625/25Hz dvhd: 1125/30Hz, 1250/25Hz dvsl: LQ SD (SDL)
+8,AVI\_LIST,20,hdrlavih,108,vidsdvsd avi GOOD video/x-msvideo AVI DV video
+8,AVI\_LIST,20,hdrlavih,108,vidsdvhd avi GOOD video/x-msvideo AVI DV HD video
+8,AVI\_LIST,20,hdrlavih,108,vidsdvsl avi BADCODEC High-compression AVI DV file
+0,RIFF,8,AVI\_LIST,20,hdrlavih avi BADCODEC Non-DVsd MS RIFF AVI file
+#   MXF container, possibly containing MJPEG2000 video:
+0,\x06\x0E\x2B\x34\x02\x05\x01\x01\x0D\x01\x02 mxf GOOD application/mxf MXF container - maybe MJPEG2000
+#   SUCA corpus CSV files (only first 3 column names have to match)
+0,ID;REFSOURCE;PAGE csv GOOD text/csv CSV with annotations
+0,"ID";"REFSOURCE";"PAGE csv GOOD text/csv CSV with annotations
+# SRT is officially(?) application/x-subrip but the whole format is plain text
+# Format: 1\r\nhh:mm:ss,xxx --> hh:mm:ss,xxx\r\nTEXT_LINES\r\n\r\n2\r\n...
+0,1\x0d\x0a00: srt GOOD text/x-subrip SubRip subtitle text file
+# Praat Pitch file - could check for deep syntax
+0,File\_type\_=\_"ooTextFile"\r\nObject\_class\_=\_"Pitch Pitch GOOD text/praat-pitch Praat Pitch data text file
+0,File\_type\_=\_"ooTextFile"\nObject\_class\_=\_"Pitch Pitch GOOD text/praat-pitch Praat Pitch data text file
+# Praat TextGrid file - supported by Annex Trova 1.0.12 and newer
+0,File\_type\_=\_"ooTextFile"\r\nObject\_class\_=\_"TextGrid TextGrid GOOD text/praat-textgrid Praat TextGrid data text file
+0,File\_type\_=\_"ooTextFile"\nObject\_class\_=\_"TextGrid TextGrid GOOD text/praat-textgrid Praat TextGrid data text file
+#
+# NBL Corpus specific types follow, for NeuroBiology of Language group
+#   Presentation scripts, Matlab / Octave scripts / data, SPSS data,
+#   SPSS result views, Brain Vision header / marker / data, generic
+#   text files with kwic, sents, sps extension and eeg / seg: Coded
+#
+# PK 3 4 14 0 is just "item in a zip, for unzip 2.0/newer" (see java.util.zip)
+#   Header: PK 3 4  version/flag/comp-method/time/date words  crc32 comp-size32
+#   uncomp-size32 name-size word extra-size word name extra data (each file)
+#   Sizes and crc32 are 0 if flag bit 3 set, real values follow after data
+#   Central directory header: PK 1 2 made-version-word needed-version-word...
+#   Central dir footer: PK 5 6 ... (max 64k+22 before end, gives dir offset)
+#   ZIPs do not need to start with a header; footers can have binary comments
+0,PK\x03\x04\x14\x00 zip GOOD application/zip NBL ZIP archive (content not checked)
+# ZIP 1.0 compat is okay as well, e.g. for directories
+0,PK\x03\x04\x0a\x00 zip GOOD application/zip NBL ZIP archive (content not checked)
+# Other (newer) ZIP compatibility levels for the first zipped item are bad
+0,PK\x03\x04 zip,zipx BADCODEC ZIP archive in uncommon format
+# http://en.wikipedia.org/wiki/Open_Packaging_Conventions ZIP 6.2.1 files
+#   starting with /[Content_Types].xml inside, for e.g. XLSX, DOCX, PPTX...
+#   Differs from XML http://en.wikipedia.org/wiki/Microsoft_Office_XML_formats
+# 0,PK\0x03\x04 xlsx GOOD application/vnd.ms-excel Excel 2007 Spreadsheet
+#
+# Presentation scripts have no good magic, but most start the same:
+0,/*\_PCP-SPL:\_Pipeline\_Code\_Project pcl,sce,txt GOOD text/x-presentation-script NBL PCP-made Presentation PCL script
+0,#\_Presentation\_pcl\_file\_generated\_with\_matlab pcl,sce GOOD text/x-presentation-script NBL Matlab-made Presentation PCL script
+# Weak magic fingerprints for res, log and sdf files follow:
+0,Item\x09Response\x09Time res GOOD text/plain NBL Response log file
+0,Scenario log GOOD text/plain NBL Log file for specific Presentation scenario
+0,#\_This\_is\_the\_default\_set\_definition sdf GOOD text/plain NBL PCP Presentation set definition file
+# PCP Settings: Could show version number from first line, e.g. <ver>0.71</ver>
+0,<ver> exp GOOD text/x-pcp-settings NBL PCP Experiment Settings
+# MATLAB data and figures: Could show space padded "metadata" until first NUL
+0,MATLAB\_5.0\_MAT-file mat,fig GOOD application/x-matlab-data NBL Matlab / Octave data file
+# SPSS Data: Could show space padded "metadata" until offset 0x3f
+0,$FL2@(#)\_SPSS\_DATA\_FILE sav GOOD application/x-spss-sav NBL SPSS / PSPP data file
+# SPSS Result view: Only version 16 or newer, better keep SAV/SPS to be able to redo (ZIP 2.0 compat)
+0,PK\x03\x04\x14\x00 spv GOOD application/x-spss-spv NBL SPSS 16+ result view - may not work with other versions
+0,PK\x03\x04 spv BADCODEC SPSS result view in uncommon ZIP format
+# VMRK / VHDR needed to parse binary headerless (!) EEG or SEG BrainVision data
+0,Brain\_Vision\_Data\_Exchange\_Marker\_File\x2c\_Version\_1.0 vmrk GOOD text/x-brainvision-marker NBL Brain Vision Marker File (needed for EEG data)
+0,Brain\_Vision\_Data\_Exchange\_Header\_File\_Version\_1.0 vhdr GOOD text/x-brainvision-header NBL Brain Vision Header File (needed for EEG data)
+# EHST are basically MS Office containers, used with HFINF for history data
+0,\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1 ehst GOOD application/x-nbl-ehst  NBL History file
+0,[Common\_Infos] hfinf GOOD text/x-nbl-hfinf NBL History info file
+# DICOM can store for example MRI data (supports at least 1-D to 4-D data?)
+128,DICM\x02\0\0\0UL\x04\0 IMA,ima GOOD application/dicom DICOM file set member / image
+# 348 bytes of metadata for raw img, see img anything-format above
+0,\x5c\x01\0\0 hdr GOOD application/x-nbl-img-hdr NBL img metadata (should be 348 bytes)

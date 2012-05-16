@@ -195,6 +195,32 @@ public class LamusWorkspaceNodeTest {
         assertFalse("Workspace objects should not be equal.", testWorkspaceNode1.equals(testWorkspaceNode2));
     }
     
+    @Test
+    public void testToString() {
+        
+        WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode(
+                this.workspaceNodeID, this.workspaceID, this.archiveNodeID,
+                this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
+                this.workspaceNodeType, this.nodeURL, this.nodeURL, this.nodeURL,
+                this.workspaceNodeStatus, this.workspaceNodePid, this.workspaceNodeFormat);
+        String expectedString = "Workspace Node ID: " + testWorkspaceNode.getWorkspaceNodeID()
+                + ", Workspace ID: " + testWorkspaceNode.getWorkspaceID()
+                + ", Archive Node ID: " + testWorkspaceNode.getArchiveNodeID()
+                + ", Profile Schema URI: " + testWorkspaceNode.getProfileSchemaURI()
+                + ", Name: " + testWorkspaceNode.getName()
+                + ", Title: " + testWorkspaceNode.getTitle()
+                + ", Type: " + testWorkspaceNode.getType()
+                + ", Workspace URL: " + testWorkspaceNode.getWorkspaceURL()
+                + ", Archive URL: " + testWorkspaceNode.getArchiveURL()
+                + ", Origin URL: " + testWorkspaceNode.getOriginURL()
+                + ", Status: " + testWorkspaceNode.getStatus()
+                + ", PID: " + testWorkspaceNode.getPid()
+                + ", Format: " + testWorkspaceNode.getFormat();
+        
+        String actualString = testWorkspaceNode.toString();
+        
+        assertEquals(expectedString, actualString);
+    }
 }
 
 class SomeOtherWorkspaceNode implements WorkspaceNode {

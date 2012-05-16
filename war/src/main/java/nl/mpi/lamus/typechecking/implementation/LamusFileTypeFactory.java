@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 public class LamusFileTypeFactory implements FileTypeFactory {
 
     public FileType getNewFileTypeWithConfigFile(File configFile) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new FileType(configFile);
     }
 
     public FileType getNewFileTypeWithDefaultConfigFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new FileType();
     }
     
 }
