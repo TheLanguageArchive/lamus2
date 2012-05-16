@@ -46,10 +46,10 @@ public class LamusConfiguration implements Configuration {
     private long typeReCheckSizeLimit = 8 * 1024 * 1024;
     
     /** Used by ArchiveFileHelper.correctPathElement to truncate unreasonably long names */
-    private final int maxDirectoryNameLength = 100;
+    private int maxDirectoryNameLength = 100;
     
     /** Name of the directories where unlinked files of a corpus are stored */
-    private final String orphansDirectoryBaseName = "sessions";
+    private String orphansDirectoryBaseName = "sessions";
     
 //    private final static LamusConfiguration instance = new LamusConfiguration();
     
