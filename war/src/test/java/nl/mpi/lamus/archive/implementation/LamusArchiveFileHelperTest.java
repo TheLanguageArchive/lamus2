@@ -96,8 +96,13 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFileTitleWithoutBaseName() {
         
+        final int maxDirLength = 100;
         String nameBeforeFirstSlash = "something";
         String fullName = nameBeforeFirstSlash + "/with/slashes/";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
+        }});
         
         String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
         assertEquals(nameBeforeFirstSlash, retrievedName);
@@ -106,23 +111,76 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFileTitleWithUrlName() {
         
+        final int maxDirLength = 100;
         String domainName = "mpi";
         String fullName = "file:/" + domainName + "/with/slashes/";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
+        }});
         
         String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
         assertEquals(domainName, retrievedName);
     }
     
-
-    /**
-     * Test of correctPathElement method, of class LamusArchiveFileHelper.
-     */
     @Test
-    public void correctPathElement() {
+    public void getFileTitleWithoutSlashes() {
         
+        String fullName = "no_slashes";
+        
+        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals(fullName, retrievedName);
+    }
+
+    @Test
+    public void correctPathElementWithInvalidCharacters() {
+        
+        final int maxDirLength = 100;
         String someReason = "because";
         String input = "this#file&has**invalid@characters.txt";
         String expectedOutput = "this_file_has_invalid_characters.txt";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
+        }});
+        
+        String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
+        
+        assertEquals(expectedOutput, actualOutput);
+    }
+    
+    @Test
+    public void correctPathElementWithoutInvalidCharacters() {
+        
+        final int maxDirLength = 100;
+        String someReason = "because";
+        String input = "this_file_has_no_invalid_characters.txt";
+        String expectedOutput = input;
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
+        }});
+        
+        String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
+        
+        assertEquals(expectedOutput, actualOutput);
+    }
+    
+    @Test
+    public void correctPathElementAboveMaxDirLength() {
+        
+        final int maxDirLength = 10;
+        String someReason = "because";
+        String firstThreeCharacters = "thi";
+        String lastCharacters = "s_has_several_characters";
+        String extension = ".txt";
+        String threePoints = "...";
+        String input = firstThreeCharacters + lastCharacters + extension;
+        String expectedOutput = firstThreeCharacters + threePoints + extension;
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
+        }});
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         

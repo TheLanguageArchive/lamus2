@@ -73,7 +73,7 @@ public interface ArchiveFileHelper {
      * 
      * @return the name of the orphans directory
      */
-    public String getOrphansDirectoryName();
+//    public String getOrphansDirectoryName();
     
 //    public String getRelativePath(String parent,String child);
     

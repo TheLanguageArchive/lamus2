@@ -36,12 +36,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     //TODO based on the class 'ArchiveUtils' from the old Lamus
     
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveFileHelper.class);
-
-    /** Used by correctPathElement to truncate unreasonably long names */
-    private final int maxDirectoryNameLength = 100;
-    
-    /** Name of the directories where unlinked files of a corpus are stored */
-    private final String orphansDirName = "sessions";
     
     private final Configuration configuration;
     
@@ -112,6 +106,8 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
 	        result = mat.replaceFirst("_");
         }
         
+        int maxDirectoryNameLength = configuration.getMaxDirectoryNameLength();
+        
         if (result.length()>maxDirectoryNameLength) { // truncate but try to keep extension
             int dot = result.lastIndexOf('.');
             String suffix = "...";
@@ -135,28 +131,23 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
      * @see ArchiveFileHelper#getOrphansDirectory(nl.mpi.util.OurURL) 
      */
     public File getOrphansDirectory(OurURL topNodeURL) {
-        String topNodePath=topNodeURL.getPath();
+        String topNodePath = topNodeURL.getPath();
         int index=topNodePath.indexOf("/Corpusstructure/");
+        String orphansDirectoryBaseName = configuration.getOrphansDirectoryBaseName();
         File orphansFolder = null;
-        if(index>-1) 
-            orphansFolder=new File(topNodePath.substring(0,index+1)+orphansDirName);
-        else {
+        if(index > -1) {
+            orphansFolder = new File(topNodePath.substring(0, index + 1) + orphansDirectoryBaseName);
+        } else {
             File temp=new File(topNodePath);
-            while((orphansFolder==null) && (temp!=null)) {
-                File cs=new File (temp,"Corpusstructure");
-                if(cs.exists() && cs.isDirectory()) 
-                    orphansFolder=new File(temp,orphansDirName);
+            while((orphansFolder == null) && (temp != null)) {
+                File cs = new File (temp, "Corpusstructure");
+                if(cs.exists() && cs.isDirectory()) {
+                    orphansFolder = new File(temp, orphansDirectoryBaseName);
+                }
                 temp=temp.getParentFile();
             }
         }
         return orphansFolder; 
-    }
-    
-    /**
-     * @see ArchiveFileHelper#getOrphansDirectoryName() 
-     */
-    public String getOrphansDirectoryName() {
-        return this.orphansDirName;
     }
     
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {

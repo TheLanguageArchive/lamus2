@@ -45,6 +45,12 @@ public class LamusConfiguration implements Configuration {
     /** file size limit for which the typechecker should check a file again (when importing from the archive), default 8MB **/
     private long typeReCheckSizeLimit = 8 * 1024 * 1024;
     
+    /** Used by ArchiveFileHelper.correctPathElement to truncate unreasonably long names */
+    private final int maxDirectoryNameLength = 100;
+    
+    /** Name of the directories where unlinked files of a corpus are stored */
+    private final String orphansDirectoryBaseName = "sessions";
+    
 //    private final static LamusConfiguration instance = new LamusConfiguration();
     
 //    public LamusConfiguration() {
@@ -99,6 +105,14 @@ public class LamusConfiguration implements Configuration {
 
     public long getTypeReCheckSizeLimit() {
         return this.typeReCheckSizeLimit;
+    }
+
+    public int getMaxDirectoryNameLength() {
+        return this.maxDirectoryNameLength;
+    }
+
+    public String getOrphansDirectoryBaseName() {
+        return this.orphansDirectoryBaseName;
     }
     
 }

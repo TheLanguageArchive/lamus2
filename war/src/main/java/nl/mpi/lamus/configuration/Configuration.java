@@ -45,4 +45,8 @@ public interface Configuration {
     public File getRelaxedTypeCheckConfigFile();
     
     public long getTypeReCheckSizeLimit();
+    
+    public int getMaxDirectoryNameLength();
+    
+    public String getOrphansDirectoryBaseName();
 }

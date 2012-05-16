@@ -141,8 +141,8 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
                 if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
                     
                     // skip checks for big files if from archive
-                    if (archiveFileHelper.getOrphansDirectoryName() != null &&
-                        resFile.getAbsolutePath().toString().indexOf(archiveFileHelper.getOrphansDirectoryName()) == -1) {
+                    if (configuration.getOrphansDirectoryBaseName() != null &&
+                        resFile.getAbsolutePath().toString().indexOf(configuration.getOrphansDirectoryBaseName()) == -1) {
                         // really skip checks: no orphan either
                         performTypeCheck = false;
                         logger.debug("ResourceFileImporter.importFile: Type specified in link " + childLink.getMimetype() +
