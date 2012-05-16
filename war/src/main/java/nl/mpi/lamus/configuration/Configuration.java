@@ -44,5 +44,5 @@ public interface Configuration {
     
     public File getRelaxedTypeCheckConfigFile();
     
-    public int getTypeReCheckSizeLimit();
+    public long getTypeReCheckSizeLimit();
 }

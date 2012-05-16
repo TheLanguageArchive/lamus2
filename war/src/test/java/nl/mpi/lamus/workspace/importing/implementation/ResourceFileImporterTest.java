@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.util.Calendar;
@@ -113,12 +114,12 @@ public class ResourceFileImporterTest {
         final WorkspaceNodeType unknownType = WorkspaceNodeType.UNKNOWN;
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
         final String childNodeMimetype = "txt";
-        final URI childNodeSchemaLocation = new URI("file://some.location");
+        final URI childNodeSchemaLocation = new URI("file:/some.location");
         final String childNodePid = "somePid";
-        final OurURL archiveFileUrlWithContext = new OurURL("file://lux16.mpi.nl/corpora/");
+        final OurURL archiveFileUrlWithContext = new OurURL("file:/lux16.mpi.nl/corpora/");
         final String childNodeUrlProtocol = "http";
-        final URI childLinkURI = new URI("file://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
-        final URL parentURL = new URL("file://some.uri/filename.cmdi");
+        final URI childLinkURI = new URI("file:/some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
+        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
@@ -149,8 +150,9 @@ public class ResourceFileImporterTest {
 //            oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
 //            oneOf (mockChildURI).toURL(); will(returnValue(mockChildURL));
 //            oneOf (mockChildURL).getProtocol(); will(returnValue(childNodeUrlProtocol));
-            
-            oneOf (mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(childLinkURI.toURL().getFile()); will(returnValue(false));
+
+            File testFile = new File(childLinkURI);
+            oneOf (mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(with(equal(testFile))); will(returnValue(false));
             
                 // if so and not orphan, do not typecheck
                 // if so and orphan, do typecheck (warn for large file)

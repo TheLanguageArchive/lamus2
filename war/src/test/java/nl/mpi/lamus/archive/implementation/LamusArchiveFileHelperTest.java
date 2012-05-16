@@ -15,17 +15,17 @@
  */
 package nl.mpi.lamus.archive.implementation;
 
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.IOException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.*;
-import static org.junit.Assert.*;
-import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -33,12 +33,13 @@ import org.junit.rules.TemporaryFolder;
  */
 public class LamusArchiveFileHelperTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    
-    @Rule public TemporaryFolder testFolder = new TemporaryFolder();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     
     private ArchiveFileHelper testArchiveFileHelper;
     @Mock Configuration mockConfiguration;
+    @Mock File mockFile;
     
     public LamusArchiveFileHelperTest() {
     }
@@ -104,35 +105,33 @@ public class LamusArchiveFileHelperTest {
      * Test of isFileSizeAboveTypeReCheckSizeLimit method, of class LamusArchiveFileHelper.
      */
     @Test
-    public void fileSizeIsAboveTypeReCheckSizeLimit() {
+    public void fileSizeIsAboveTypeReCheckSizeLimit() throws IOException {
         
-        URL testFileURL = getClass().getClassLoader().getResource("testFile.txt");
-        File testFile = new File(testFileURL.getFile());
-        
-        final int typeReCheckSizeLimit = 2 * 1024;
+        final long actualFileSize = 3 * 1024;
+        final long typeReCheckSizeLimit = 2 * 1024;
         
         context.checking(new Expectations() {{
             oneOf (mockConfiguration).getTypeReCheckSizeLimit(); will(returnValue(typeReCheckSizeLimit));
+            oneOf (mockFile).length(); will(returnValue(actualFileSize));
         }});
         
-        boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(testFile.getPath());
+        boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
         assertTrue(isSizeAboveLimit);
     }
     
     @Test
     public void fileSizeIsBelowTypeReCheckSizeLimit() {
-        
-        URL testFileURL = getClass().getClassLoader().getResource("testFile.txt");
-        File testFile = new File(testFileURL.getFile());
-        
-        final int typeReCheckSizeLimit = 10 * 1024;
+
+        final long actualFileSize = 1 * 1024;
+        final long typeReCheckSizeLimit = 10 * 1024;
         
         context.checking(new Expectations() {{
             oneOf (mockConfiguration).getTypeReCheckSizeLimit(); will(returnValue(typeReCheckSizeLimit));
+            oneOf (mockFile).length(); will(returnValue(actualFileSize));
         }});
         
-        boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(testFile.getPath());
+        boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
         assertFalse(isSizeAboveLimit);
     }

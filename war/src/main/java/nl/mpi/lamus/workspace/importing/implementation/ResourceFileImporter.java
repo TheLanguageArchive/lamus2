@@ -135,11 +135,10 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
                     childURL.getProtocol().length() == 0 ||
                     "file".equals(childURL.getProtocol())) {
 
+                File resFile = new File(childURI);
                 //TODO check if file is larger than the checker limit
                     // if so, do not typecheck
-                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(childURL.getFile())) { // length==0 if !exists, no error
-                    
-                    File resFile = new File(childURL.getFile());
+                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
                     
                     // skip checks for big files if from archive
                     if (archiveFileHelper.getOrphansDirectoryName() != null &&

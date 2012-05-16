@@ -43,7 +43,7 @@ public class LamusConfiguration implements Configuration {
     private int numberOfDaysOfInactivityAllowedSinceLastWarningEmail = 30;
     
     /** file size limit for which the typechecker should check a file again (when importing from the archive), default 8MB **/
-    private int typeReCheckSizeLimit = 8 * 1024 * 1024;
+    private long typeReCheckSizeLimit = 8 * 1024 * 1024;
     
 //    private final static LamusConfiguration instance = new LamusConfiguration();
     
@@ -97,7 +97,7 @@ public class LamusConfiguration implements Configuration {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public int getTypeReCheckSizeLimit() {
+    public long getTypeReCheckSizeLimit() {
         return this.typeReCheckSizeLimit;
     }
     

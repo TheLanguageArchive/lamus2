@@ -16,7 +16,6 @@
 package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
@@ -160,9 +159,8 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return this.orphansDirName;
     }
     
-    public boolean isFileSizeAboveTypeReCheckSizeLimit(String filePath) {
-        File fileToCheck = new File(filePath);
-        int sizeLimit = configuration.getTypeReCheckSizeLimit();
+    public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
+        long sizeLimit = configuration.getTypeReCheckSizeLimit();
         boolean isSizeAboveLimit = fileToCheck.length() > sizeLimit;
         return isSizeAboveLimit;
     }
