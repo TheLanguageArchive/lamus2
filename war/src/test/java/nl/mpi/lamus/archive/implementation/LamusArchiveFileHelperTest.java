@@ -23,8 +23,7 @@ import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.*;
 
 /**
@@ -61,29 +60,74 @@ public class LamusArchiveFileHelperTest {
     public void tearDown() {
     }
 
-//    /**
-//     * Test of getFileBasename method, of class LamusArchiveFileHelper.
-//     */
-//    @Test
-//    public void testGetFileBasename() {
-//         fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getFileTitle method, of class LamusArchiveFileHelper.
-//     */
-//    @Test
-//    public void testGetFileTitle() {
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of correctPathElement method, of class LamusArchiveFileHelper.
-//     */
-//    @Test
-//    public void testCorrectPathElement() {
-//        fail("The test case is a prototype.");
-//    }
+    @Test
+    public void getFileBasenameWithSlashes() {
+        
+        String baseName = "baseName.txt";
+        String fullName = "something/with/some/slashes/" + baseName;
+        
+        String retrievedName = testArchiveFileHelper.getFileBasename(fullName);
+        
+        assertEquals(baseName, retrievedName);
+        
+    }
+    
+    @Test
+    public void getFileBasenameWithoutSlashes() {
+        
+        String fullName = "something_without__slashes.txt";
+        
+        String retrievedName = testArchiveFileHelper.getFileBasename(fullName);
+        
+        assertEquals(fullName, retrievedName);
+        
+    }
+    
+    @Test
+    public void getFileTitleWithBaseName() {
+        
+        String baseName = "baseName.txt";
+        String fullName = "something/with/slashes/and/" + baseName;
+        
+        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals(baseName, retrievedName);
+    }
+    
+    @Test
+    public void getFileTitleWithoutBaseName() {
+        
+        String nameBeforeFirstSlash = "something";
+        String fullName = nameBeforeFirstSlash + "/with/slashes/";
+        
+        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals(nameBeforeFirstSlash, retrievedName);
+    }
+    
+    @Test
+    public void getFileTitleWithUrlName() {
+        
+        String domainName = "mpi";
+        String fullName = "file:/" + domainName + "/with/slashes/";
+        
+        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals(domainName, retrievedName);
+    }
+    
+
+    /**
+     * Test of correctPathElement method, of class LamusArchiveFileHelper.
+     */
+    @Test
+    public void correctPathElement() {
+        
+        String someReason = "because";
+        String input = "this#file&has**invalid@characters.txt";
+        String expectedOutput = "this_file_has_invalid_characters.txt";
+        
+        String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
+        
+        assertEquals(expectedOutput, actualOutput);
+    }
 //
 //    /**
 //     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
