@@ -15,16 +15,18 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.typechecking.FileTypeFactory;
+import org.apache.commons.io.IOUtils;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -35,6 +37,8 @@ public class LamusFileTypeFactoryTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
+    
+    @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     private FileTypeFactory testFileTypeFactory;
     
@@ -62,12 +66,14 @@ public class LamusFileTypeFactoryTest {
      * Test of getNewFileTypeWithConfigFile method, of class LamusFileTypeFactory.
      */
     @Test
-    public void newFileTypeWithConfigFileIsNotNull() {
+    public void newFileTypeWithConfigFileIsNotNull() throws IOException {
 
-        URL testURL = getClass().getClassLoader().getResource("filetypes-with-nbl.txt");
-        File testFile = new File(testURL.getFile());
-//        FileType expectedFileType = new FileType(testFile);
-        FileType retrievedFileType = testFileTypeFactory.getNewFileTypeWithConfigFile(testFile);
+        InputStream testIn = getClass().getClassLoader().getResourceAsStream("filetypes-with-nbl.txt");
+        File testConfigFile = testFolder.newFile("testConfigFile.txt");
+        OutputStream testOut = new FileOutputStream(testConfigFile);
+        IOUtils.copy(testIn, testOut);
+
+        FileType retrievedFileType = testFileTypeFactory.getNewFileTypeWithConfigFile(testConfigFile);
         
 //        assertEquals(expectedFileType, retrievedFileType);
         assertNotNull(retrievedFileType);
