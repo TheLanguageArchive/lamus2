@@ -17,6 +17,7 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import java.io.OutputStream;
+import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -30,11 +31,11 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 public interface WorkspaceFileHandler {
     
     public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
-            MetadataAPI metadataAPI, MetadataDocument metadataDocument, OutputStream nodeFileOutputStream)
+            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile,
+            StreamResult nodeFileStreamResult)
             throws FailedToCreateWorkspaceNodeFileException;
 
-    public OutputStream getOutputStreamForWorkspaceNodeFile(Workspace workspace, WorkspaceNode workspaceNode, File nodeFile)
-            throws FailedToCreateWorkspaceNodeFileException;
+    public StreamResult getStreamResultForWorkspaceNodeFile(Workspace workspace, WorkspaceNode workspaceNode, File nodeFile);
             
     public File getFileForWorkspaceNode(WorkspaceNode workspaceNode);
 }

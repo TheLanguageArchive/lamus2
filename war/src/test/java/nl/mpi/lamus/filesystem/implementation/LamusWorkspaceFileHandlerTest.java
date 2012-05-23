@@ -17,8 +17,14 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
@@ -31,6 +37,13 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.cmdi.api.dom.CMDIDocumentReader;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.type.CMDIProfileContainer;
+import nl.mpi.metadata.cmdi.api.type.CMDIProfileReader;
+import nl.mpi.metadata.cmdi.api.type.CMDITypeException;
+import nl.mpi.metadata.cmdi.util.CMDIEntityResolver;
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -38,12 +51,20 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusWorkspaceFileHandlerTest {
+    
+    private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
@@ -53,7 +74,8 @@ public class LamusWorkspaceFileHandlerTest {
     @Mock private Configuration mockConfiguration;
     @Mock private MetadataAPI mockMetadataAPI;
     @Mock private MetadataDocument mockMetadataDocument;
-    @Mock private OutputStream mockOutputStream;
+    @Mock private File mockNodeFile;
+    @Mock private StreamResult mockStreamResult;
     
     public LamusWorkspaceFileHandlerTest() {
     }
@@ -80,44 +102,45 @@ public class LamusWorkspaceFileHandlerTest {
      */
     @Test
     public void copyMetadataFileToWorkspaceSuccessfully() throws IOException,
-        TransformerException, MetadataException, FailedToCreateWorkspaceNodeFileException {
+        TransformerException, MetadataException, FailedToCreateWorkspaceNodeFileException,
+        CMDITypeException, ParserConfigurationException, SAXException, URISyntaxException {
         
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
-        createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
+        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockOutputStream);
-            oneOf (mockOutputStream).close();
+            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
         
-        workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockOutputStream);
+        workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+                mockMetadataDocument, testNodeFile, mockStreamResult);
     }
     
     @Test
     public void copyMetadataFileToWorkspaceThrowsIOException() throws IOException,
-        TransformerException, MetadataException {
+        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
+        SAXException, URISyntaxException {
         
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
-        createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
-        
-        File workspaceNodeFile = new File(baseDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
+        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         final IOException expectedExceptionCause = new IOException("something bla bla");
-        String expectedErrorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockOutputStream); will(throwException(expectedExceptionCause));
-            oneOf (mockOutputStream).close();
+            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+                will(throwException(expectedExceptionCause));
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockOutputStream);
+            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+                    mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
@@ -129,26 +152,26 @@ public class LamusWorkspaceFileHandlerTest {
     
     @Test
     public void copyMetadataFileToWorkspaceThrowsTransformerException() throws IOException,
-        TransformerException, MetadataException {
+        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
+        SAXException, URISyntaxException {
         
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
-        createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
-        
-        File workspaceNodeFile = new File(baseDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
+        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         final TransformerException expectedExceptionCause = new TransformerException("something bla bla");
-        String expectedErrorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockOutputStream); will(throwException(expectedExceptionCause));
-            oneOf (mockOutputStream).close();
+            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+                will(throwException(expectedExceptionCause));
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockOutputStream);
+            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+                    mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
@@ -159,26 +182,27 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void copyMetadataFileToWorkspaceThrowsMetadataException() throws IOException, TransformerException, MetadataException {
+    public void copyMetadataFileToWorkspaceThrowsMetadataException() throws IOException,
+        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
+        SAXException, URISyntaxException {
         
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
-        createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
-        
-        File workspaceNodeFile = new File(baseDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
+        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         final MetadataException expectedExceptionCause = new MetadataException("something bla bla");
-        String expectedErrorMessage = "Problem writing file " + workspaceNodeFile.getAbsolutePath();
+        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockOutputStream); will(throwException(expectedExceptionCause));
-            oneOf (mockOutputStream).close();
+            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+                will(throwException(expectedExceptionCause));
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockOutputStream);
+            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+                    mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
@@ -189,45 +213,18 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void getOutputStreamForWorkspaceNodeFileSuccessfully() throws IOException, FailedToCreateWorkspaceNodeFileException {
+    public void getStreamResultForWorkspaceNodeFileSuccessfully() throws MalformedURLException {
         
         Workspace testWorkspace = createTestWorkspace();
         File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
+        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
-        File workspaceNodeFile = new File(workspaceDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
+        StreamResult retrievedStreamResult = 
+                workspaceFileHandler.getStreamResultForWorkspaceNodeFile(testWorkspace, testWorkspaceNode, testNodeFile);
         
-        OutputStream retrievedOutputStream = 
-                workspaceFileHandler.getOutputStreamForWorkspaceNodeFile(testWorkspace, testWorkspaceNode, workspaceNodeFile);
-        
-        assertNotNull("Resulting OutputStream is null", retrievedOutputStream);
-        assertTrue("Resulting OutputStream is not of the expected type (FileOutputStream).", retrievedOutputStream instanceof FileOutputStream);
-    }
-    
-    @Test
-    public void getOutputStreamForWorkspaceNodeFileThrowsFileNotFoundException() throws IOException {
-        
-        Workspace testWorkspace = createTestWorkspace();
-        
-        File baseDirectory = createTestBaseDirectory();
-        createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        baseDirectory.setWritable(false);
-        WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
-        
-        File workspaceNodeFile = new File(baseDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
-        
-        String expectedErrorMessage = "Problem with file " + workspaceNodeFile.getAbsolutePath();
-        
-        try {
-            workspaceFileHandler.getOutputStreamForWorkspaceNodeFile(testWorkspace, testWorkspaceNode, workspaceNodeFile);
-            fail("An exception should have been thrown");
-        } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
-            assertTrue("Exception cause is different from expected", fwsex.getCause() instanceof FileNotFoundException);
-            assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
-            assertEquals("Workspace Node associated with exception is different from expected", fwsex.getWorkspaceNode(), testWorkspaceNode);
-        }
+        assertNotNull("Resulting StreamResult is null", retrievedStreamResult);
     }
     
     @Test
@@ -274,7 +271,7 @@ public class LamusWorkspaceFileHandlerTest {
         
     private WorkspaceNode createTestWorkspaceNode(int workspaceID) throws MalformedURLException {
         int archiveNodeID = 100;
-        URL archiveNodeURL = new URL("http://some.url");
+        URL archiveNodeURL = new URL("http://some.url/someNode.cmdi");
         WorkspaceNode node = new LamusWorkspaceNode(
                 workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
         node.setName("someNode");
@@ -284,5 +281,5 @@ public class LamusWorkspaceFileHandlerTest {
 
         return node;
     }
-
+    
 }

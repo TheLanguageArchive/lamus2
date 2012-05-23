@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
+import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -155,10 +156,10 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
         File childNodeFile = workspaceFileHandler.getFileForWorkspaceNode(childNode);
+        StreamResult streamResult = workspaceFileHandler.getStreamResultForWorkspaceNodeFile(workspace, childNode, childNodeFile);
         
         try {
-            OutputStream outputStream = workspaceFileHandler.getOutputStreamForWorkspaceNodeFile(workspace, childNode, childNodeFile);
-            workspaceFileHandler.copyMetadataFileToWorkspace(workspace, childNode, metadataAPI, childDocument, outputStream);
+            workspaceFileHandler.copyMetadataFileToWorkspace(workspace, childNode, metadataAPI, childDocument, childNodeFile, streamResult);
         } catch(FailedToCreateWorkspaceNodeFileException fwsnex) {
             String errorMessage = "Failed to create file for workspace node " + childNode.getWorkspaceNodeID()
                     + " in workspace " + workspace.getWorkspaceID();
