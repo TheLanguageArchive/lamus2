@@ -31,8 +31,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusConfiguration implements Configuration {
 
-    @Autowired
-    private AmsBridge amsBridge;
     /** ingest request storage quota, default 10 GB */
     private long defaultMaxStorageSpace = 10 * 1024 * 1024 * 1024; // in bytes
     /** ingest request allowed inactivity period before starting to send warning emails to its owner, default 60 days */
@@ -61,15 +59,6 @@ public class LamusConfiguration implements Configuration {
 //        return instance;
 //    }
     
-    
-    public AmsBridge getAmsBridge() {
-        return this.amsBridge;
-    }
-    
-//    @Autowired
-//    public void setAmsBridge(AmsBridge amsBridge) {
-//        this.amsBridge = amsBridge;
-//    }
     
     public long getDefaultMaxStorageSpace() {
         //TODO Check if it is overwritten in some configuration file

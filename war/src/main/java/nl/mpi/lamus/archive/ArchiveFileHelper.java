@@ -16,8 +16,7 @@
 package nl.mpi.lamus.archive;
 
 import java.io.File;
-import java.net.URL;
-import nl.mpi.util.OurURL;
+import java.net.URI;
 
 /**
  *
@@ -67,7 +66,7 @@ public interface ArchiveFileHelper {
      * @param topNodeURL the archive-URL of the topNode of the workspace
      * @return the directory where orphans are/should be stored (when it doesn't exist it is not created)
      */
-    public File getOrphansDirectory(OurURL topNodeURL);
+    public File getOrphansDirectory(URI topNodeURI);
     
     /**
      * 

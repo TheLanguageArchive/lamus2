@@ -17,28 +17,53 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.configuration.Configuration;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {LamusArchiveFileHelperTestProperties.class, LamusArchiveFileHelperTestBeans.class},
+        loader = AnnotationConfigContextLoader.class)
 public class LamusArchiveFileHelperTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
+    @Autowired
     private ArchiveFileHelper testArchiveFileHelper;
-    @Mock Configuration mockConfiguration;
     @Mock File mockFile;
+    @Rule public TemporaryFolder testFolder = new TemporaryFolder();
+    
+    @Autowired
+    private int maxDirectoryNameLength;
+    @Autowired
+    private String corpusDirectoryBaseName;
+    @Autowired
+    private String orphansDirectoryBaseName;
+    @Autowired
+    private long typeRecheckSizeLimitInBytes;
+    
     
     public LamusArchiveFileHelperTest() {
     }
@@ -53,7 +78,7 @@ public class LamusArchiveFileHelperTest {
     
     @Before
     public void setUp() {
-        testArchiveFileHelper = new LamusArchiveFileHelper(mockConfiguration);
+//        testArchiveFileHelper = new LamusArchiveFileHelper();
     }
     
     @After
@@ -96,13 +121,8 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFileTitleWithoutBaseName() {
         
-        final int maxDirLength = 100;
         String nameBeforeFirstSlash = "something";
         String fullName = nameBeforeFirstSlash + "/with/slashes/";
-        
-        context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
-        }});
         
         String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
         assertEquals(nameBeforeFirstSlash, retrievedName);
@@ -111,13 +131,8 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFileTitleWithUrlName() {
         
-        final int maxDirLength = 100;
         String domainName = "mpi";
         String fullName = "file:/" + domainName + "/with/slashes/";
-        
-        context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
-        }});
         
         String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
         assertEquals(domainName, retrievedName);
@@ -135,14 +150,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void correctPathElementWithInvalidCharacters() {
         
-        final int maxDirLength = 100;
         String someReason = "because";
         String input = "this#file&has**invalid@characters.txt";
         String expectedOutput = "this_file_has_invalid_characters.txt";
-        
-        context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
-        }});
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
@@ -152,14 +162,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void correctPathElementWithoutInvalidCharacters() {
         
-        final int maxDirLength = 100;
         String someReason = "because";
         String input = "this_file_has_no_invalid_characters.txt";
         String expectedOutput = input;
-        
-        context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
-        }});
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
@@ -169,39 +174,58 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void correctPathElementAboveMaxDirLength() {
         
-        final int maxDirLength = 10;
         String someReason = "because";
-        String firstThreeCharacters = "thi";
-        String lastCharacters = "s_has_several_characters";
+        String firstMaxNumberMinusSevenCharacters = "this_has_several_characters_and_they_are_re";
+        String lastCharacters = "peated_and_they_are_repeated_and_they_are_repeated";
         String extension = ".txt";
         String threePoints = "...";
-        String input = firstThreeCharacters + lastCharacters + extension;
-        String expectedOutput = firstThreeCharacters + threePoints + extension;
-        
-        context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getMaxDirectoryNameLength(); will(returnValue(maxDirLength));
-        }});
+        String input = firstMaxNumberMinusSevenCharacters + lastCharacters + extension;
+        String expectedOutput = firstMaxNumberMinusSevenCharacters + threePoints + extension;
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
         assertEquals(expectedOutput, actualOutput);
     }
-//
-//    /**
-//     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-//     */
-//    @Test
-//    public void testGetOrphansDirectory() {
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getOrphansDirectoryName method, of class LamusArchiveFileHelper.
-//     */
-//    @Test
-//    public void testGetOrphansDirectoryName() {
-//        fail("The test case is a prototype.");
-//    }
+
+    /**
+     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
+     */
+    @Test
+    public void getOrphansDirectoryWithCorpusDirectory() throws MalformedURLException {
+        
+        File pathPrefix = new File("/some/url/with/");
+        File corpusDirectoryFullPath = new File(pathPrefix, corpusDirectoryBaseName);
+        File fullPath = new File(corpusDirectoryFullPath, "blabla.cmdi");
+        
+        URI testURI = fullPath.toURI();
+        
+        File expectedOrphansDirectory = new File(pathPrefix, orphansDirectoryBaseName);
+        File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
+        
+        assertEquals(expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+    }
+    
+    /**
+     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
+     */
+    @Test
+    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException {
+        
+        String pathPrefix = "/some/url/with/";
+        File pathPrefixFile = testFolder.newFolder(pathPrefix);
+        File corpusFolder = testFolder.newFolder(pathPrefix + corpusDirectoryBaseName);
+        corpusFolder.mkdirs();
+        assertTrue(corpusFolder.exists());
+
+        File fullFilePath = new File(pathPrefixFile, "metadata/blabla.cmdi");
+        
+        URI testURI = fullFilePath.toURI();
+        
+        File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryBaseName);
+        File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
+        
+        assertEquals(expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+    }
 
     /**
      * Test of isFileSizeAboveTypeReCheckSizeLimit method, of class LamusArchiveFileHelper.
@@ -209,11 +233,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsAboveTypeReCheckSizeLimit() throws IOException {
         
-        final long actualFileSize = 3 * 1024;
-        final long typeReCheckSizeLimit = 2 * 1024;
+        final long actualFileSize = typeRecheckSizeLimitInBytes + 1;
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getTypeReCheckSizeLimit(); will(returnValue(typeReCheckSizeLimit));
             oneOf (mockFile).length(); will(returnValue(actualFileSize));
         }});
         
@@ -225,11 +247,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void fileSizeIsBelowTypeReCheckSizeLimit() {
 
-        final long actualFileSize = 1 * 1024;
-        final long typeReCheckSizeLimit = 10 * 1024;
+        final long actualFileSize = typeRecheckSizeLimitInBytes - 1;
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getTypeReCheckSizeLimit(); will(returnValue(typeReCheckSizeLimit));
             oneOf (mockFile).length(); will(returnValue(actualFileSize));
         }});
         
@@ -237,4 +257,34 @@ public class LamusArchiveFileHelperTest {
         
         assertFalse(isSizeAboveLimit);
     }
+}
+
+@Configuration
+class LamusArchiveFileHelperTestProperties {
+    
+    @Bean
+    public int maxDirectoryNameLength() {
+        return 50;
+    }
+    
+    @Bean
+    public String corpusDirectoryBaseName() {
+        return "Corpusstructure";
+    }
+    
+    @Bean
+    public String orphansDirectoryBaseName() {
+        return "sessions";
+    }
+    
+    @Bean
+    public long typeRecheckSizeLimitInBytes() {
+        return 8L * 1024 * 1024;
+    }
+}
+
+@Configuration
+@ComponentScan("nl.mpi.lamus.archive")
+class LamusArchiveFileHelperTestBeans {
+    
 }

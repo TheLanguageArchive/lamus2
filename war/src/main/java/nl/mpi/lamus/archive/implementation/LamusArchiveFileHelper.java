@@ -16,11 +16,11 @@
 package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +37,22 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveFileHelper.class);
     
-    private final Configuration configuration;
+//    private final Configuration configuration;
     
     @Autowired
-    public LamusArchiveFileHelper(Configuration config) {
-        this.configuration = config;
-    }
+    private int maxDirectoryNameLength;
+    @Autowired
+    private String corpusDirectoryBaseName;
+    @Autowired
+    private String orphansDirectoryBaseName;
+    @Autowired
+    private long typeRecheckSizeLimitInBytes;
+    
+    
+//    @Autowired
+//    public LamusArchiveFileHelper(Configuration config) {
+//        this.configuration = config;
+//    }
     
     /**
      * 
@@ -106,8 +116,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
 	        result = mat.replaceFirst("_");
         }
         
-        int maxDirectoryNameLength = configuration.getMaxDirectoryNameLength();
-        
         if (result.length()>maxDirectoryNameLength) { // truncate but try to keep extension
             int dot = result.lastIndexOf('.');
             String suffix = "...";
@@ -128,19 +136,18 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
 
     /**
-     * @see ArchiveFileHelper#getOrphansDirectory(nl.mpi.util.OurURL) 
+     * @see ArchiveFileHelper#getOrphansDirectory(
      */
-    public File getOrphansDirectory(OurURL topNodeURL) {
-        String topNodePath = topNodeURL.getPath();
-        int index=topNodePath.indexOf("/Corpusstructure/");
-        String orphansDirectoryBaseName = configuration.getOrphansDirectoryBaseName();
+    public File getOrphansDirectory(URI topNodeURI) {
+        String topNodePath = topNodeURI.getPath();
+        int index=topNodePath.indexOf(File.separator + corpusDirectoryBaseName + File.separator);
         File orphansFolder = null;
         if(index > -1) {
             orphansFolder = new File(topNodePath.substring(0, index + 1) + orphansDirectoryBaseName);
         } else {
             File temp=new File(topNodePath);
             while((orphansFolder == null) && (temp != null)) {
-                File cs = new File (temp, "Corpusstructure");
+                File cs = new File (temp, corpusDirectoryBaseName);
                 if(cs.exists() && cs.isDirectory()) {
                     orphansFolder = new File(temp, orphansDirectoryBaseName);
                 }
@@ -151,8 +158,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
     
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
-        long sizeLimit = configuration.getTypeReCheckSizeLimit();
-        boolean isSizeAboveLimit = fileToCheck.length() > sizeLimit;
+        boolean isSizeAboveLimit = fileToCheck.length() > typeRecheckSizeLimitInBytes;
         return isSizeAboveLimit;
     }
 }

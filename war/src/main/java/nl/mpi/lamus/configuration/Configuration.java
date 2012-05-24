@@ -26,10 +26,6 @@ import nl.mpi.lamus.ams.AmsBridge;
 public interface Configuration {
     
     
-    public AmsBridge getAmsBridge();
-    
-//    public void setAmsBridge(AmsBridge amsBridge);
-    
     public long getDefaultMaxStorageSpace();
     
     public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
