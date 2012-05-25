@@ -164,7 +164,7 @@ public class ResourceFileImporterTest {
                 // if so and not orphan, do not typecheck
                 // if so and orphan, do typecheck (warn for large file)
             // calculateCV (change this) if typecheck is to be done
-            oneOf (mockFileTypeHandler).checkType(childLinkURI.toURL(), childNodeName, unknownType, null);
+            oneOf (mockFileTypeHandler).checkType(new OurURL(childLinkURI.toURL()), childNodeName,/* unknownType,*/ null);
             // if type unspecified and typecheck to be done, warn
             oneOf (mockFileTypeHandler).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf (mockFileTypeHandler).getNodeType(); will(returnValue(childNodeType));

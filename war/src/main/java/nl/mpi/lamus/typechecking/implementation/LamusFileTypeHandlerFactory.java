@@ -17,7 +17,6 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Resource;
 import nl.mpi.bcarchive.typecheck.FileType;
@@ -52,12 +51,8 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
         this.typeMapper = typeMapper;
     }
     
-    //TODO in order to inject dependencies, maybe it's better to have the configuration receive the workspace object and,
-        // based on that, decide which is the type configuration file to use
-    
     public FileTypeHandler getNewFileTypeHandlerForWorkspace(Workspace workspace) {
         
-//        Collection<File> relaxedTypeCheckFolders = configuration.getRelaxedTypeCheckFolders();
         FileType typeCheckerToUse = null;
         if(customTypecheckerFolderToConfigFileMap == null || customTypecheckerFolderToConfigFileMap.isEmpty()
                 || workspace.getTopNodeArchiveURL() == null) {
@@ -66,7 +61,6 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
             URL topNodeURL = workspace.getTopNodeArchiveURL();
             
             outerloop:
-//            for (File folder : relaxedTypeCheckFolders) {
             for(File folder : customTypecheckerFolderToConfigFileMap.keySet()) {
                 File temp = new File(topNodeURL.getPath());
                 while (temp != null) { // check if this folder is a parent of the temp
@@ -76,8 +70,8 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
                         break outerloop;
                     }
                     temp = temp.getParentFile();
-                } // loop towards root directory
-            } // loop over relaxedTypeCheckFolders
+                }
+            }
             if(typeCheckerToUse == null) {
                 typeCheckerToUse = fileTypeFactory.getNewFileTypeWithDefaultConfigFile();
             }

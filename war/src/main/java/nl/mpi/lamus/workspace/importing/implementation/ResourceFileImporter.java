@@ -95,9 +95,9 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         
         //TODO get url, etc
         URI childURI = childLink.getURI();
-        URL childURL;
+        OurURL childURL;
         try {
-            childURL = childURI.toURL();
+            childURL = new OurURL(childURI.toURL());
         } catch (MalformedURLException ex) {
             String errorMessage = "Error getting URL for link " + childURI;
             logger.error(errorMessage, ex);
@@ -165,7 +165,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         //TODO get file type using typechecker
         if(performTypeCheck) {
             try {
-                fileTypeHandler.checkType(childURL, childFileName, childType, null);
+                fileTypeHandler.checkType(childURL, childFileName,/* childType,*/ null);
             //TODO what to pass as node type?
             //TODO use mimetype from CMDI?
                 // - this would cause the typechecker not to be executed, since the mimetype is known
@@ -212,10 +212,10 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         
         
         //TODO create node accordingly and add it to the database
-        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childURL);
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childURL.toURL());
         
         //TODO adjust node values according to file/link
-        setWorkspaceNodeInformationFromMetadataDocument(childLink, childNode, childTitle, childType, childMimetype, childURL);
+        setWorkspaceNodeInformationFromMetadataDocument(childLink, childNode, childTitle, childType, childMimetype, childURL.toURL());
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

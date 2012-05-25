@@ -15,10 +15,15 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.TypeMapper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -40,6 +45,9 @@ public class LamusFileTypeHandlerTest {
     @Mock FileType mockConfiguredTypeChecker;
     @Mock TypeMapper mockTypeMapper;
     
+    @Mock OurURL mockOurURL;
+    @Mock InputStream mockInputStream;
+    
     public LamusFileTypeHandlerTest() {
     }
 
@@ -59,10 +67,99 @@ public class LamusFileTypeHandlerTest {
     @After
     public void tearDown() {
     }
+    
+    
+    @Test
+    public void checkTypeWithKnownMimetype() throws TypeCheckerException, MalformedURLException {
+        
+        String testFileName = "someFileName.txt";
+        final String expectedMimetype = "text/plain";
+        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
+        String expectedAnalysis = "okay";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
+        }});
+        
+        fileTypeHandler.checkType(mockOurURL, testFileName, expectedMimetype);
+        
+        assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
+        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
+        assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
+    }
+    
+    @Test
+    public void checkTypeWithNoMimetypeAndKnownURL() throws MalformedURLException, TypeCheckerException, IOException {
+        
+        final String testFileName = "somefilename.txt";
+        final String expectedMimetype = "text/plain";
+        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
+        String expectedAnalysis = "okay (content, name)";
+        final String testCheckResult = "true ARCHIVABLE text/plain";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockOurURL).openStream(); will(returnValue(mockInputStream));
+            oneOf (mockConfiguredTypeChecker).checkStream(mockInputStream, testFileName);
+                will(returnValue(testCheckResult));
+            oneOf (mockInputStream).close();
+            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
+        }});
+        
+        fileTypeHandler.checkType(mockOurURL, testFileName, null);
+        
+        assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
+        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
+        assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
+    }
+    
+    @Test
+    public void checkTypeWithNoMimetypeAndKnownURLAndBadResult() throws MalformedURLException, TypeCheckerException, IOException {
+        
+        final String testFileName = "somefilename.jjj";
+        final String expectedMimetype = "Unknown";
+        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.UNKNOWN;
+        String expectedAnalysis = "outrageous file";
+        final String testCheckResult = "false " + expectedAnalysis;
+        
+        context.checking(new Expectations() {{
+            oneOf (mockOurURL).openStream(); will(returnValue(mockInputStream));
+            oneOf (mockConfiguredTypeChecker).checkStream(mockInputStream, testFileName);
+                will(returnValue(testCheckResult));
+            oneOf (mockInputStream).close();
+            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
+        }});
+        
+        fileTypeHandler.checkType(mockOurURL, testFileName, null);
+        
+        assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
+        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
+        assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
+    }
+    
+    @Test
+    public void checkTypeWithNoMimetypeAndNullURL() throws MalformedURLException, TypeCheckerException, IOException {
+        
+        final String testFileName = "somefilename.txt";
+        final String expectedMimetype = "text/plain";
+        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
+        String expectedAnalysis = "okay (name)";
+        final String testCheckResult = "true ARCHIVABLE text/plain";
+        
+        context.checking(new Expectations() {{
+            oneOf (mockConfiguredTypeChecker).checkStream(null, testFileName);
+                will(returnValue(testCheckResult));
+            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
+        }});
+        
+        fileTypeHandler.checkType(null, testFileName, null);
+        
+        assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
+        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
+        assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
+    }
 
-    /**
-     * Test of setValues method, of class LamusFileTypeHandler.
-     */
+    //TODO use some more real examples of checkResult and analysis
+    
     @Test
     public void testSetValues() {
 

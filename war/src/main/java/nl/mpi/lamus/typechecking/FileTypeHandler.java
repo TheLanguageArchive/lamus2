@@ -15,10 +15,10 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import java.net.URL;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.util.OurURL;
 
 /**
  *
@@ -68,7 +68,7 @@ public interface FileTypeHandler {
      *   content or (as fallback) the file name, to determine the file format.
      *   NOTE: if mimetype IS given, filename and resourceURL will be ignored!
      */
-    public void checkType(URL resourceURL, String filename, WorkspaceNodeType nodetype, String mimetype) throws TypeCheckerException;
+    public void checkType(OurURL resourceURL, String filename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException;
     
     /**
      * store the outcome of calculateCV, or override it, as done by DataMoverIn
