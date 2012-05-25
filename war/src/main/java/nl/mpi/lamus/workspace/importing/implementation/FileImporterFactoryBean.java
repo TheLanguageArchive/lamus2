@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
@@ -57,8 +56,6 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
     @Autowired
     private WorkspaceFileExplorer workspaceFileExplorer;
     @Autowired
-    private Configuration configuration;
-    @Autowired
     private ArchiveFileHelper archiveFileHelper;
     @Autowired
     private FileTypeHandlerFactory fileTypeHandlerFactory;
@@ -69,7 +66,7 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
     public FileImporter getObject() throws Exception {
         if(ResourceFileImporter.class.equals(fileImporterType)) {
             return new ResourceFileImporter(
-                    archiveObjectsDB, workspaceDao, configuration, archiveFileHelper,
+                    archiveObjectsDB, workspaceDao, archiveFileHelper,
                     fileTypeHandlerFactory, workspaceNodeFactory,
                     workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory);
         } else {

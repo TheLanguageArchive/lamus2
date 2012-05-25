@@ -15,6 +15,12 @@
  */
 package nl.mpi.lamus.configuration;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Resource;
 import nl.mpi.lamus.configuration.LamusProperties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,6 +55,10 @@ public class LamusPropertiesTest {
     private String corpusDirectoryBaseName;
     @Autowired
     private String orphansDirectoryBaseName;
+    @Autowired
+    private File workspaceBaseDirectory;
+    @Resource
+    private Map<File, File> customTypecheckerFolderToConfigFileMap;
     
     public LamusPropertiesTest() {
     }
@@ -98,5 +108,22 @@ public class LamusPropertiesTest {
         
         String expectedOrphansDirectoryBaseName = "sessions";
         assertEquals(expectedOrphansDirectoryBaseName, orphansDirectoryBaseName);
+        
+        String expectedWorkspaceBaseDirectoryPath = "/lat/corpora/lamus/LAMS_WORKSPACE";
+        assertEquals(expectedWorkspaceBaseDirectoryPath, workspaceBaseDirectory.getPath());
+        
+        File typecheckerFolder1 = new File("folder1");
+        File typecheckerFolder2 = new File("folder2");
+        File typecheckerConfigFile1 = new File("config_file1");
+        File typecheckerFolder3 = new File("folder3");
+        File typecheckerFolder4 = new File("folder4");
+        File typecheckerConfigFile2 = new File("config_file2");
+        
+        Map<File, File> expectedCustomTypecheckerConfigMap = new HashMap<File, File>();
+        expectedCustomTypecheckerConfigMap.put(typecheckerFolder1, typecheckerConfigFile1);
+        expectedCustomTypecheckerConfigMap.put(typecheckerFolder2, typecheckerConfigFile1);
+        expectedCustomTypecheckerConfigMap.put(typecheckerFolder3, typecheckerConfigFile2);
+        expectedCustomTypecheckerConfigMap.put(typecheckerFolder4, typecheckerConfigFile2);
+        assertEquals(expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
     }
 }

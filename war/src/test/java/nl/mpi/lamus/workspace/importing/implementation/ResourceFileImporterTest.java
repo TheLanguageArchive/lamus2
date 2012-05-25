@@ -23,7 +23,6 @@ import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
@@ -44,11 +43,20 @@ import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {ResourceFileImporterTestProperties.class},
+        loader = AnnotationConfigContextLoader.class)
 public class ResourceFileImporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -58,7 +66,6 @@ public class ResourceFileImporterTest {
     private FileImporter fileImporter;
     @Mock ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock Configuration mockConfiguration;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock FileTypeHandlerFactory mockFileTypeHandlerFactory;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
@@ -89,7 +96,7 @@ public class ResourceFileImporterTest {
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
-        fileImporter = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockConfiguration,
+        fileImporter = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao,
                 mockArchiveFileHelper, mockFileTypeHandlerFactory, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
         fileImporter.setWorkspace(testWorkspace);
@@ -184,5 +191,14 @@ public class ResourceFileImporterTest {
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         fileImporter.importFile(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
         
+    }
+}
+
+@Configuration
+class ResourceFileImporterTestProperties {
+    
+    @Bean
+    public String orphansDirectoryBaseName() {
+        return "sessions";
     }
 }

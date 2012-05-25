@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.factory.implementation;
 
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
@@ -32,15 +31,16 @@ import org.springframework.stereotype.Component;
 public class LamusWorkspaceFactory implements WorkspaceFactory {
     
     private final AmsBridge amsBridge;
-    private final Configuration configuration;
+    
+    @Autowired
+    private long defaultMaxStorageSpaceInBytes;
     
     /**
      * 
      */
     @Autowired
-    LamusWorkspaceFactory(AmsBridge amsBridge, Configuration configuration) {
+    LamusWorkspaceFactory(AmsBridge amsBridge) {
         this.amsBridge = amsBridge;
-        this.configuration = configuration;
     }
     
     
@@ -57,7 +57,7 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
             usedStorageSpace = 0;
         }
         if(maxStorageSpace == -1) {
-            maxStorageSpace = this.configuration.getDefaultMaxStorageSpace();
+            maxStorageSpace = defaultMaxStorageSpaceInBytes;
         }
         
         Workspace workspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);

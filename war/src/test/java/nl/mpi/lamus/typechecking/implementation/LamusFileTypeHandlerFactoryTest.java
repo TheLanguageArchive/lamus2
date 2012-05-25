@@ -20,11 +20,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Resource;
 import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.lamus.typechecking.FileTypeFactory;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
+import nl.mpi.lamus.typechecking.*;
 import nl.mpi.lamus.workspace.model.TypeMapper;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.jmock.Expectations;
@@ -33,19 +33,33 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {LamusTypecheckingTestProperties.class, LamusTypecheckingTestBeans.class},
+        loader = AnnotationConfigContextLoader.class)
 public class LamusFileTypeHandlerFactoryTest {
     
     public @Rule JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
+    @Autowired
     private FileTypeHandlerFactory factory;
-    @Mock Configuration mockConfiguration;
+    @Resource
+    private Map<File, File> customTypecheckerFolderToConfigFileMap;
+    
+    private Map<File, File> mapBackup;
+    
     @Mock Workspace mockWorkspace;
     @Mock FileTypeFactory mockFileTypeFactory;
     @Mock TypeMapper mockTypeMapper;
@@ -71,23 +85,30 @@ public class LamusFileTypeHandlerFactoryTest {
     @Before
     public void setUp() throws MalformedURLException {
         
-        factory = new LamusFileTypeHandlerFactory(mockConfiguration, mockFileTypeFactory, mockTypeMapper);
+        mapBackup = customTypecheckerFolderToConfigFileMap;
+        
+//        factory = new LamusFileTypeHandlerFactory(mockFileTypeFactory, mockTypeMapper);
+        ReflectionTestUtils.setField(factory, "fileTypeFactory", mockFileTypeFactory);
+        ReflectionTestUtils.setField(factory, "typeMapper", mockTypeMapper);
+        
         testMatchingArchiveURL = new URL(testMatchingArchiveURLStr);
         testSubArchiveURL = new URL(testSubArchiveURLStr);
     }
     
     @After
     public void tearDown() {
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", mapBackup);
     }
 
     /**
      * Test of getNewFileTypeHandlerForWorkspace method, of class LamusFileTypeHandlerFactory.
      */
     @Test
-    public void getNewFileTypeHandlerForWorkspaceWithNullRelaxedTypeCheckFolders() {
+    public void getNewFileTypeHandlerForWorkspaceWithNullMap() {
+        
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", null);
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(null));
             oneOf (mockFileTypeFactory).getNewFileTypeWithDefaultConfigFile(); will(returnValue(mockDefaultTypeChecker));
         }});
         
@@ -98,12 +119,14 @@ public class LamusFileTypeHandlerFactoryTest {
     }
     
     @Test
-    public void getNewFileTypeHandlerForWorkspaceWithEmptyRelaxedTypeCheckFolders() {
+    public void getNewFileTypeHandlerForWorkspaceWithEmptyMap() {
+        
+        Map<File, File> emptyMap = new HashMap<File, File>();
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", emptyMap);
         
         final Collection<File> emptyRelaxedTypeCheckFolders = new ArrayList<File>();
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(emptyRelaxedTypeCheckFolders));
             oneOf (mockFileTypeFactory).getNewFileTypeWithDefaultConfigFile(); will(returnValue(mockDefaultTypeChecker));
         }});
         
@@ -120,7 +143,6 @@ public class LamusFileTypeHandlerFactoryTest {
         relaxedTypeCheckFolders.add(new File(testArchivePath));
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
             oneOf (mockWorkspace).getTopNodeArchiveURL(); will(returnValue(null));
             oneOf (mockFileTypeFactory).getNewFileTypeWithDefaultConfigFile(); will(returnValue(mockDefaultTypeChecker));
         }});
@@ -132,17 +154,22 @@ public class LamusFileTypeHandlerFactoryTest {
     }
     
     @Test
-    public void getNewFileTypeHandlerForWorkspaceWithRelaxedTypeCheckFoldersMatchingWorkspaceURL() {
+    public void getNewFileTypeHandlerForWorkspaceWithMapContainingMatchingWorkspaceURL() {
         
-        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
-        relaxedTypeCheckFolders.add(new File(testArchivePath));
-        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
+        Map<File, File> map = new HashMap<File, File>();
+        File matchingFolder = new File(testArchivePath);
+        final File configFile = new File("someother_filetypes.txt");
+        map.put(matchingFolder, configFile);
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
+        
+//        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
+//        relaxedTypeCheckFolders.add(new File(testArchivePath));
+//        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
             exactly(2).of (mockWorkspace).getTopNodeArchiveURL(); will(returnValue(testMatchingArchiveURL));
-            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
-            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile); will(returnValue(mockTypeCheckerWithConfigFile));
+//            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
+            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(configFile); will(returnValue(mockTypeCheckerWithConfigFile));
         }});
         
         FileTypeHandler retrievedFileTypeHandler = factory.getNewFileTypeHandlerForWorkspace(mockWorkspace);
@@ -152,17 +179,23 @@ public class LamusFileTypeHandlerFactoryTest {
     }
     
     @Test
-    public void getNewFileTypeHandlerForWorkspaceWithRelaxedTypeCheckFoldersParentOfWorkspaceURL() {
+    public void getNewFileTypeHandlerForWorkspaceWithMapContainingParentOfWorkspaceURL() {
         
-        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
-        relaxedTypeCheckFolders.add(new File(testArchivePath));
-        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
+        Map<File, File> map = new HashMap<File, File>();
+        File matchingFolder = new File(testArchivePath);
+        final File configFile = new File("someother_filetypes.txt");
+        map.put(matchingFolder, configFile);
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
+        
+//        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
+//        relaxedTypeCheckFolders.add(new File(testArchivePath));
+//        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
+//            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
             exactly(2).of (mockWorkspace).getTopNodeArchiveURL(); will(returnValue(testSubArchiveURL));
-            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
-            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile); will(returnValue(mockTypeCheckerWithConfigFile));
+//            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
+            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(configFile); will(returnValue(mockTypeCheckerWithConfigFile));
         }});
         
         FileTypeHandler retrievedFileTypeHandler = factory.getNewFileTypeHandlerForWorkspace(mockWorkspace);
@@ -174,15 +207,21 @@ public class LamusFileTypeHandlerFactoryTest {
     @Test
     public void getNewFileTypeHandlerForWorkspaceWithRetrievedTypeCheckerNull() {
         
-        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
-        relaxedTypeCheckFolders.add(new File(testArchivePath));
-        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
+        Map<File, File> map = new HashMap<File, File>();
+        File matchingFolder = new File(testArchivePath);
+        final File configFile = new File("someother_filetypes.txt");
+        map.put(matchingFolder, configFile);
+        ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
+        
+//        final Collection<File> relaxedTypeCheckFolders = new ArrayList<File>();
+//        relaxedTypeCheckFolders.add(new File(testArchivePath));
+//        final File relaxedTypeCheckConfigFile = new File("someother_filetypes.txt");
         
         context.checking(new Expectations() {{
-            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
+//            oneOf (mockConfiguration).getRelaxedTypeCheckFolders(); will(returnValue(relaxedTypeCheckFolders));
             exactly(2).of (mockWorkspace).getTopNodeArchiveURL(); will(returnValue(testSubArchiveURL));
-            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
-            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile); will(returnValue(null));
+//            oneOf (mockConfiguration).getRelaxedTypeCheckConfigFile(); will(returnValue(relaxedTypeCheckConfigFile));
+            oneOf (mockFileTypeFactory).getNewFileTypeWithConfigFile(configFile); will(returnValue(null));
             oneOf (mockFileTypeFactory).getNewFileTypeWithDefaultConfigFile(); will(returnValue(mockDefaultTypeChecker));
         }});
         

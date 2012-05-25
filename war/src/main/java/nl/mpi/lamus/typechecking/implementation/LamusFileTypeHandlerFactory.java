@@ -18,8 +18,9 @@ package nl.mpi.lamus.typechecking.implementation;
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
+import javax.annotation.Resource;
 import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.typechecking.FileTypeFactory;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
@@ -39,13 +40,14 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(LamusFileTypeHandlerFactory.class);
     
-    private final Configuration configuration;
     private final FileTypeFactory fileTypeFactory;
     private final TypeMapper typeMapper;
     
+    @Resource
+    private Map<File, File> customTypecheckerFolderToConfigFileMap;
+    
     @Autowired
-    public LamusFileTypeHandlerFactory(Configuration configuration, FileTypeFactory fileTypeFactory, TypeMapper typeMapper) {
-        this.configuration = configuration;
+    public LamusFileTypeHandlerFactory(FileTypeFactory fileTypeFactory, TypeMapper typeMapper) {
         this.fileTypeFactory = fileTypeFactory;
         this.typeMapper = typeMapper;
     }
@@ -55,20 +57,21 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
     
     public FileTypeHandler getNewFileTypeHandlerForWorkspace(Workspace workspace) {
         
-        Collection<File> relaxedTypeCheckFolders = configuration.getRelaxedTypeCheckFolders();
+//        Collection<File> relaxedTypeCheckFolders = configuration.getRelaxedTypeCheckFolders();
         FileType typeCheckerToUse = null;
-        if(relaxedTypeCheckFolders == null || relaxedTypeCheckFolders.isEmpty()
+        if(customTypecheckerFolderToConfigFileMap == null || customTypecheckerFolderToConfigFileMap.isEmpty()
                 || workspace.getTopNodeArchiveURL() == null) {
              typeCheckerToUse = fileTypeFactory.getNewFileTypeWithDefaultConfigFile();
         } else {
             URL topNodeURL = workspace.getTopNodeArchiveURL();
             
             outerloop:
-            for (File folder : relaxedTypeCheckFolders) {
+//            for (File folder : relaxedTypeCheckFolders) {
+            for(File folder : customTypecheckerFolderToConfigFileMap.keySet()) {
                 File temp = new File(topNodeURL.getPath());
                 while (temp != null) { // check if this folder is a parent of the temp
                     if (temp.equals(folder)) {
-                        File relaxedTypeCheckConfigFile = configuration.getRelaxedTypeCheckConfigFile();
+                        File relaxedTypeCheckConfigFile = customTypecheckerFolderToConfigFileMap.get(folder);
                         typeCheckerToUse = fileTypeFactory.getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile);
                         break outerloop;
                     }

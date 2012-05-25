@@ -19,8 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.LamusArchiveTestBeans;
+import nl.mpi.lamus.archive.LamusArchiveTestProperties;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -30,9 +31,6 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -42,7 +40,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {LamusArchiveFileHelperTestProperties.class, LamusArchiveFileHelperTestBeans.class},
+@ContextConfiguration(classes = {LamusArchiveTestProperties.class, LamusArchiveTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
 public class LamusArchiveFileHelperTest {
     
@@ -78,7 +76,6 @@ public class LamusArchiveFileHelperTest {
     
     @Before
     public void setUp() {
-//        testArchiveFileHelper = new LamusArchiveFileHelper();
     }
     
     @After
@@ -257,34 +254,4 @@ public class LamusArchiveFileHelperTest {
         
         assertFalse(isSizeAboveLimit);
     }
-}
-
-@Configuration
-class LamusArchiveFileHelperTestProperties {
-    
-    @Bean
-    public int maxDirectoryNameLength() {
-        return 50;
-    }
-    
-    @Bean
-    public String corpusDirectoryBaseName() {
-        return "Corpusstructure";
-    }
-    
-    @Bean
-    public String orphansDirectoryBaseName() {
-        return "sessions";
-    }
-    
-    @Bean
-    public long typeRecheckSizeLimitInBytes() {
-        return 8L * 1024 * 1024;
-    }
-}
-
-@Configuration
-@ComponentScan("nl.mpi.lamus.archive")
-class LamusArchiveFileHelperTestBeans {
-    
 }

@@ -136,7 +136,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
 
     /**
-     * @see ArchiveFileHelper#getOrphansDirectory(
+     * @see ArchiveFileHelper#getOrphansDirectory(java.net.URI)
      */
     public File getOrphansDirectory(URI topNodeURI) {
         String topNodePath = topNodeURI.getPath();

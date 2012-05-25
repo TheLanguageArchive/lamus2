@@ -16,7 +16,6 @@
 package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -34,19 +33,14 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceDirectoryHandler.class);
 
-    private final Configuration configuration;
-    
     @Autowired
-    LamusWorkspaceDirectoryHandler(Configuration configuration) {
-        this.configuration = configuration;
-    }
+    private File workspaceBaseDirectory;
 
     public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
         
         logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
         
-        File baseDirectory = this.configuration.getWorkspaceBaseDirectory();
-        File workspaceDirectory = new File(baseDirectory, "" + workspace.getWorkspaceID());
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspace.getWorkspaceID());
         
         if(workspaceDirectory.exists()) {
             logger.info("Directory for workspace " + workspace.getWorkspaceID() + " already exists");

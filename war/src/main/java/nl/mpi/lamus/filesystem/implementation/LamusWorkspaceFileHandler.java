@@ -15,10 +15,10 @@
  */
 package nl.mpi.lamus.filesystem.implementation;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -26,7 +26,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,8 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
     
-    private final Configuration configuration;
-    
     @Autowired
-    LamusWorkspaceFileHandler(Configuration configuration) {
-        this.configuration = configuration;
-    }
+    private File workspaceBaseDirectory;
 
     public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile, StreamResult nodeFileStreamResult)
@@ -75,8 +70,8 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     }
 
     public File getFileForWorkspaceNode(WorkspaceNode workspaceNode) {
-        File workspaceBaseDirectory = configuration.getWorkspaceBaseDirectory();
-        File workspaceNodeFile = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceNodeID());
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
+        File workspaceNodeFile = new File(workspaceDirectory, "" + workspaceNode.getWorkspaceNodeID());
         return workspaceNodeFile;
     }
 }

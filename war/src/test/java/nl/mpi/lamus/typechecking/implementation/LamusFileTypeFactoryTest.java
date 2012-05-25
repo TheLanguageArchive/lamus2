@@ -18,7 +18,6 @@ package nl.mpi.lamus.typechecking.implementation;
 import java.io.*;
 import java.net.URL;
 import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.lamus.configuration.Configuration;
 import nl.mpi.lamus.typechecking.FileTypeFactory;
 import org.apache.commons.io.IOUtils;
 import org.jmock.auto.Mock;

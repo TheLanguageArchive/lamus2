@@ -21,8 +21,8 @@ import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
-import org.junit.*;
 import static org.junit.Assert.*;
+import org.junit.*;
 
 /**
  *

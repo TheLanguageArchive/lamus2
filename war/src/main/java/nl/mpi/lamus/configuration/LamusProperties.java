@@ -16,7 +16,10 @@
 package nl.mpi.lamus.configuration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,9 +97,38 @@ public class LamusProperties {
         return orphansDirectoryBaseName;
     }
     
+    @Value("${workspace_base_directory}")
     private String workspaceBaseDirectory;
+    @Bean
+    public File workspaceBaseDirectory() {
+        return new File(workspaceBaseDirectory);
+    }
     
-    private Collection<File> relaxedTypeCheckFolders;
-    
-    private File relaxedTypeCheckConfigFile;
+    @Value("${custom_typechecker_config_files_and_folders}")
+    private String customTypecheckerFoldersAndConfigFiles;
+    @Bean
+    public Map<File, File> customTypecheckerFolderToConfigFileMap() {
+        
+        //TODO Check the validity of the string (with regular expressions, for instance)
+        
+        Map<File, File> mapToReturn = new HashMap<File, File>();
+        
+        String[] foldersAndConfigFilesArray = customTypecheckerFoldersAndConfigFiles.split(";");
+        for(String foldersAndConfigFile : foldersAndConfigFilesArray) {
+            String[] foldersAndConfigFileSeparated = foldersAndConfigFile.split("=");
+            if(foldersAndConfigFileSeparated.length == 2) {
+                String configFileValue = foldersAndConfigFileSeparated[1];
+                File configFile = new File(configFileValue);
+                String[] foldersKey = foldersAndConfigFileSeparated[0].split(",");
+                if(foldersKey.length > 0) {
+                    for(String folderKey : foldersKey) {
+                        File folder = new File(folderKey);
+                        mapToReturn.put(folder, configFile);
+                    }
+                }
+            }
+        }
+        
+        return mapToReturn;
+    }
 }

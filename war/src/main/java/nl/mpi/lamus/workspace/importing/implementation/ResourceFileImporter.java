@@ -22,22 +22,21 @@ import java.net.URL;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
-import nl.mpi.lamus.configuration.Configuration;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
-import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,6 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
     
     private final ArchiveObjectsDB archiveObjectsDB;
     private final WorkspaceDao workspaceDao;
-    private final Configuration configuration;
     private final ArchiveFileHelper archiveFileHelper;
     private final FileTypeHandlerFactory fileTypeHandlerFactory;
     private final WorkspaceNodeFactory workspaceNodeFactory;
@@ -62,13 +60,15 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
     private Workspace workspace = null;
     
     @Autowired
-    public ResourceFileImporter(ArchiveObjectsDB aoDB, WorkspaceDao wsDao, Configuration config,
+    private String orphansDirectoryBaseName;
+    
+    @Autowired
+    public ResourceFileImporter(ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
             ArchiveFileHelper archiveFileHelper, FileTypeHandlerFactory fileTypeHandlerFactory,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceParentNodeReferenceFactory wsParentNodeReferenceFactory,
             WorkspaceNodeLinkFactory wsNodeLinkFactory) {
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
-        this.configuration = config;
         this.archiveFileHelper = archiveFileHelper;
         this.fileTypeHandlerFactory = fileTypeHandlerFactory;
         this.workspaceNodeFactory = wsNodeFactory;
@@ -141,8 +141,8 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
                 if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
                     
                     // skip checks for big files if from archive
-                    if (configuration.getOrphansDirectoryBaseName() != null &&
-                        resFile.getAbsolutePath().toString().indexOf(configuration.getOrphansDirectoryBaseName()) == -1) {
+                    if (orphansDirectoryBaseName != null &&
+                        resFile.getAbsolutePath().toString().indexOf(orphansDirectoryBaseName) == -1) {
                         // really skip checks: no orphan either
                         performTypeCheck = false;
                         logger.debug("ResourceFileImporter.importFile: Type specified in link " + childLink.getMimetype() +

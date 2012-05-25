@@ -15,17 +15,16 @@
  */
 package nl.mpi.lamus.filesystem.implementation;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.lamus.configuration.Configuration;
+import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
+import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -37,13 +36,8 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.cmdi.api.dom.CMDIDocumentReader;
-import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
-import nl.mpi.metadata.cmdi.api.type.CMDIProfileContainer;
-import nl.mpi.metadata.cmdi.api.type.CMDIProfileReader;
 import nl.mpi.metadata.cmdi.api.type.CMDITypeException;
-import nl.mpi.metadata.cmdi.util.CMDIEntityResolver;
-import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -51,17 +45,22 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.xml.sax.SAXException;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
+        loader = AnnotationConfigContextLoader.class)
 public class LamusWorkspaceFileHandlerTest {
     
     private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
@@ -70,8 +69,12 @@ public class LamusWorkspaceFileHandlerTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
+    
+    @Autowired
     private WorkspaceFileHandler workspaceFileHandler;
-    @Mock private Configuration mockConfiguration;
+    @Autowired
+    private File workspaceBaseDirectory;
+    
     @Mock private MetadataAPI mockMetadataAPI;
     @Mock private MetadataDocument mockMetadataDocument;
     @Mock private File mockNodeFile;
@@ -89,12 +92,13 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Before
-    public void setUp() {
-        workspaceFileHandler = new LamusWorkspaceFileHandler(mockConfiguration);
+    public void setUp() throws IOException {
+        FileUtils.cleanDirectory(workspaceBaseDirectory);
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
+        FileUtils.cleanDirectory(workspaceBaseDirectory);
     }
 
     /**
@@ -231,19 +235,14 @@ public class LamusWorkspaceFileHandlerTest {
     public void getFileForWorkspaceNodeSuccessfully() throws IOException {
         
         Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = new File("workspace_base_directory");
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
         
-        File expectedFile = new File(baseDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
-        
-        context.checking(new Expectations() {{
-            
-            oneOf (mockConfiguration).getWorkspaceBaseDirectory(); will(returnValue(baseDirectory));
-        }});
+        File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
+        File expectedNodeFile = new File(expectedWorkspaceDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
         
         File retrievedFile = workspaceFileHandler.getFileForWorkspaceNode(testWorkspaceNode);
         
-        assertEquals(expectedFile, retrievedFile);
+        assertEquals(expectedNodeFile, retrievedFile);
     }
 
     

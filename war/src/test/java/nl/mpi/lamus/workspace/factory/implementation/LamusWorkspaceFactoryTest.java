@@ -17,31 +17,43 @@ package nl.mpi.lamus.workspace.factory.implementation;
 
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
-import nl.mpi.lamus.configuration.Configuration;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.factory.LamusWorkspaceFactoryTestBeans;
+import nl.mpi.lamus.workspace.factory.LamusWorkspaceFactoryTestProperties;
+import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.factory.implementation.LamusWorkspaceFactory;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {LamusWorkspaceFactoryTestProperties.class, LamusWorkspaceFactoryTestBeans.class},
+        loader = AnnotationConfigContextLoader.class)
 public class LamusWorkspaceFactoryTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     @Mock private AmsBridge mockAmsBridge;
-    @Mock private Configuration mockConfiguration;
+    
+    @Autowired
+    private WorkspaceFactory factory;
+    @Autowired
+    private long defaultMaxStorageSpaceInBytes;
+    
     private int archiveTopNodeID;
     private String userID;
-    private WorkspaceFactory factory; 
     
     public LamusWorkspaceFactoryTest() {
     }
@@ -58,7 +70,7 @@ public class LamusWorkspaceFactoryTest {
     public void setUp() {
         archiveTopNodeID = 10;
         userID = "testUser";
-        factory = new LamusWorkspaceFactory(mockAmsBridge, mockConfiguration);
+        ReflectionTestUtils.setField(factory, "amsBridge", mockAmsBridge);
     }
     
     @After
@@ -78,8 +90,10 @@ public class LamusWorkspaceFactoryTest {
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedMaxStorageSpace));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(expectedUsedStorageSpace));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
@@ -107,8 +121,10 @@ public class LamusWorkspaceFactoryTest {
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(valueNotDefined));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedMaxStorageSpace));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(valueNotDefined));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(expectedMaxStorageSpace));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
@@ -132,13 +148,14 @@ public class LamusWorkspaceFactoryTest {
         
         final long valueNotDefined = -1L;
         final long expectedUsedStorageSpace = 10000000L;
-        final long expectedMaxStorageSpace = 90000000L;
+        final long expectedMaxStorageSpace = defaultMaxStorageSpaceInBytes;
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID)); will(returnValue(valueNotDefined));
-            oneOf (mockConfiguration).getDefaultMaxStorageSpace(); will(returnValue(expectedMaxStorageSpace));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(expectedUsedStorageSpace));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+                will(returnValue(valueNotDefined));
         }});
         
         Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);

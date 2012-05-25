@@ -13,36 +13,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.configuration;
+package nl.mpi.lamus.typechecking;
 
 import java.io.File;
-import java.util.Collection;
-import nl.mpi.lamus.ams.AmsBridge;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface Configuration {
+@Configuration
+public class LamusTypecheckingTestProperties {
     
-    
-    public long getDefaultMaxStorageSpace();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastSession();
-    
-    public int getTotalNumberOfDaysAllowedUntilExpiry();
-    
-    public int getNumberOfDaysOfInactivityAllowedSinceLastWarningEmail();
-    
-    public File getWorkspaceBaseDirectory();
-    
-    public Collection<File> getRelaxedTypeCheckFolders();
-    
-    public File getRelaxedTypeCheckConfigFile();
-    
-    public long getTypeReCheckSizeLimit();
-    
-    public int getMaxDirectoryNameLength();
-    
-    public String getOrphansDirectoryBaseName();
+    @Bean
+    public Map<File, File> customTypecheckerFolderToConfigFileMap() {
+        
+        Map<File, File> mapToReturn = new HashMap<File, File>();
+        mapToReturn.put(new File("folder1"), new File("config_file1"));
+        mapToReturn.put(new File("folder2"), new File("config_file2"));
+        mapToReturn.put(new File("folder3"), new File("config_file3"));
+        mapToReturn.put(new File("folder4"), new File("config_file4"));
+        
+        return mapToReturn;
+    }
 }
