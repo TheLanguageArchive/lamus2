@@ -16,6 +16,7 @@
 package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -229,7 +230,6 @@ public class LamusArchiveFileHelperTest {
      */
     @Test
     public void fileSizeIsAboveTypeReCheckSizeLimit() throws IOException {
-        
         final long actualFileSize = typeRecheckSizeLimitInBytes + 1;
         
         context.checking(new Expectations() {{

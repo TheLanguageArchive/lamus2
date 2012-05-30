@@ -714,6 +714,7 @@ public class MetadataFileImporterTest {
 }
 
 
+
 class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDocument, HandleCarrier {
 
     public Collection getDocumentReferences() {
@@ -807,6 +808,14 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
     public String getPathString() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public Collection getResourceProxyReferences(Reference reference) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MetadataDocumentType getDocumentType() {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
 
 class TestNonReferencingMetadataDocumentWithHandle implements MetadataDocument, HandleCarrier {
@@ -885,6 +894,10 @@ class TestNonReferencingMetadataDocumentWithHandle implements MetadataDocument, 
 
     public String getPathString() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MetadataDocumentType getDocumentType() {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }
