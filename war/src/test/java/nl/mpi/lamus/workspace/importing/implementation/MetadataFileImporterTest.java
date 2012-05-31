@@ -16,9 +16,7 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,8 +24,6 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
@@ -55,11 +51,8 @@ import nl.mpi.metadata.api.events.MetadataElementListener;
 import nl.mpi.metadata.api.model.*;
 import nl.mpi.metadata.api.type.ContainedMetadataElementType;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
-import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
-import nl.mpi.metadata.cmdi.api.type.CMDIProfile;
 import nl.mpi.util.OurURL;
-import org.apache.xmlbeans.SchemaProperty;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -172,7 +165,7 @@ public class MetadataFileImporterTest {
             exactly(2).of (mockTestReferencingMetadataDocumentWithHandle).getDisplayValue(); will(returnValue(testDisplayValue));
             //TODO get type
             //TODO get format
-            oneOf (mockTestReferencingMetadataDocumentWithHandle).getType(); will(returnValue(mockMetadataDocumentType));
+            oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf (mockMetadataDocumentType).getSchemaLocation(); will(returnValue(testSchemaLocation));
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getHandle(); will(returnValue(testPid));
             
@@ -245,7 +238,7 @@ public class MetadataFileImporterTest {
             exactly(2).of (mockTestNonReferencingMetadataDocumentWithHandle).getDisplayValue(); will(returnValue(testDisplayValue));
             //TODO get type
             //TODO get format
-            oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getType(); will(returnValue(mockMetadataDocumentType));
+            oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf (mockMetadataDocumentType).getSchemaLocation(); will(returnValue(testSchemaLocation));
             oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getHandle(); will(returnValue(testPid));
             
@@ -312,7 +305,7 @@ public class MetadataFileImporterTest {
             exactly(2).of (mockTestReferencingMetadataDocumentWithHandle).getDisplayValue(); will(returnValue(testDisplayValue));
             //TODO get type
             //TODO get format
-            oneOf (mockTestReferencingMetadataDocumentWithHandle).getType(); will(returnValue(mockMetadataDocumentType));
+            oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf (mockMetadataDocumentType).getSchemaLocation(); will(returnValue(testSchemaLocation));
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getHandle(); will(returnValue(testPid));
             
@@ -584,7 +577,7 @@ public class MetadataFileImporterTest {
             exactly(2).of (mockTestReferencingMetadataDocumentWithHandle).getDisplayValue(); will(returnValue(testDisplayValue));
             //TODO get type
             //TODO get format
-            oneOf (mockTestReferencingMetadataDocumentWithHandle).getType(); will(returnValue(mockMetadataDocumentType));
+            oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf (mockMetadataDocumentType).getSchemaLocation(); will(returnValue(testSchemaLocation));
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getHandle(); will(returnValue(testPid));
             
@@ -670,7 +663,7 @@ public class MetadataFileImporterTest {
             exactly(2).of (mockTestNonReferencingMetadataDocumentWithHandle).getDisplayValue(); will(returnValue(testDisplayValue));
             //TODO get type
             //TODO get format
-            oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getType(); will(returnValue(mockMetadataDocumentType));
+            oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf (mockMetadataDocumentType).getSchemaLocation(); will(returnValue(testSchemaLocation));
             oneOf (mockTestNonReferencingMetadataDocumentWithHandle).getHandle(); will(returnValue(testPid));
             
@@ -713,8 +706,7 @@ public class MetadataFileImporterTest {
 
 }
 
-
-
+@Ignore
 class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDocument, HandleCarrier {
 
     public Collection getDocumentReferences() {
@@ -818,6 +810,7 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
     }
 }
 
+@Ignore
 class TestNonReferencingMetadataDocumentWithHandle implements MetadataDocument, HandleCarrier {
 
     public MetadataDocumentType getType() {
