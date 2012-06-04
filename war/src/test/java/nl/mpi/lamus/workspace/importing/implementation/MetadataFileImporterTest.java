@@ -51,6 +51,7 @@ import nl.mpi.metadata.api.events.MetadataElementListener;
 import nl.mpi.metadata.api.model.*;
 import nl.mpi.metadata.api.type.ContainedMetadataElementType;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
+import nl.mpi.metadata.api.type.MetadataElementType;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
@@ -706,6 +707,7 @@ public class MetadataFileImporterTest {
 
 }
 
+
 @Ignore
 class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDocument, HandleCarrier {
 
@@ -725,11 +727,23 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public MetadataDocumentType getType() {
+    public Collection getResourceProxyReferences(Reference reference) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Reference getDocumentReferenceByURI(URI uri) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MetadataDocumentType getDocumentType() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public URI getFileLocation() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setFileLocation(URI location) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -761,11 +775,19 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public boolean canAddInstanceOfType(ContainedMetadataElementType type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public String getName() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public String getDisplayValue() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public MetadataElementType getType() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -781,6 +803,10 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public String getPathString() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public String getHandle() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -789,27 +815,8 @@ class TestReferencingMetadataDocumentWithHandle implements ReferencingMetadataDo
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void setFileLocation(URI location) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean canAddInstanceOfType(ContainedMetadataElementType type) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public String getPathString() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Collection getResourceProxyReferences(Reference reference) {
-	throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public MetadataDocumentType getDocumentType() {
-	throw new UnsupportedOperationException("Not supported yet.");
-    }
+   
 }
-
 @Ignore
 class TestNonReferencingMetadataDocumentWithHandle implements MetadataDocument, HandleCarrier {
 
