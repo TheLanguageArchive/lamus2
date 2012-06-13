@@ -1,0 +1,78 @@
+.menu-body { font-size:9pt; background-color:#CEC;
+ font-family:verdana, arial, helvetica, sans-serif; }
+.menu-h1 { font-size:10.0pt; font-weight:bold; color:#EE0; 
+ font-family:verdana, arial, helvetica, sans-serif; }
+.menu-h2 { font-size:9.0pt; font-style:italic; color:#EEE; }
+.menu-item { font-size:9.0pt;
+ font-family:verdana, arial, helvetica, sans-serif; }
+menu-link { color:#F00; }
+.menu-link:link { color:#282; }
+.menu-link:hover { background-color:#282; color:#CEC; }
+.browser-body { background-color:#EEE; font-size:8.0pt;
+ font-family:verdana, arial, helvetica, sans-serif; }
+.browser-title { background-color:#888; color:#CEC; }
+.current-node { background-color:#888; color:#CEC; }
+.current-path { color:#282; }
+.browser-cell { background-color:#CEC; color:#000; }
+.browser-link:link { color:#EEE; text-decoration:underline; }
+.browser-link:visited { text-decoration:none; color:#F50; }
+.browser-link:hover { font-weight:bold; background-color:#FFF; color:#F50; }
+
+.qbutton, a.qbutton:hover { height:36px; display:block; text-align:center;
+ vertical-align:middle; margin:0 0;
+ border-top:1px solid #ccc; border-bottom:2px solid #444;
+ border-left:1px solid #ccc; border-right:2px solid #444;
+ font-size:16px; line-height:16px;
+ width:95px; min-width:95px; max-width:200px; padding:0px; }
+a.qbutton:link,
+a.qbutton:visited { background-color:#DDD; color:#000; text-decoration:none; }
+a.qbutton:hover { background-color:#FFD; color:#902; text-decoration:none; }
+
+table.design1 { background-color:#FFD; border:thin solid #AAA; color:#000;
+ font-size:12px; line-height:13px; font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+.headcell { background-color:#888; color:#FFE; border:thin solid #BBB;
+ font-size:14px; line-height:16px; font-weight:bold; }
+
+.text, p { color:#000; font-size:14px; line-height:16px;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+
+a.aMenu, a.aMenu:visited { color:gray; background-color:#FFD;
+ font-weight:bold; font-size:12px; text-decoration:none;
+ font-family:Arial, Helvetica, sans-serif; }
+a.aMenu:hover { color:#FFD; background-color:#902; font-weight:bold;
+  font-size:12px; font-family:Arial, Helvetica, sans-serif; }
+
+a { color:#902; font-size: 14px; line-height:16px; text-decoration:underline;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }	
+a:hover { color:#000; font-size:14px; line-height:16px; text-decoration:none;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+body { color:#000; background-color:#FFE;
+ scrollbar-arrow-color:#B02; scrollbar-base-color:#FFD;
+ scrollbar-face-color:#FFD; scrollbar-highlight-color:#CCC;
+ font-size:14px; line-height:16px; margin-left:0; margin-top:0;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+
+h1 { color:#000; font-weight:bold; font-size:18px; line-height:20px;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+h2 { color:#000; font-weight:bold; font-size:16px; line-height:18px;
+ font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+h1.bar { color:#FFE; background-color:#888; font-size:18px;
+ line-height:20px; font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif;	}
+
+input.button { color:#000; font-size:12px;
+ font-family:Arial, Helvetica, sans-serif; }
+input.text1 { color:#FFE; background-color:#777; border:1px solid #777;
+ font-size:12px; font-family:Arial, Helvetica, sans-serif; }
+input.text2 { color:#000; background-color:#FFF; border:1px solid #000;
+ font-size:12px; font-family:Arial, Helvetica, sans-serif; }
+
+table.sortable a.sortheader { color:#FFE; background-color:#888; display:block;
+ font-size:14px; font-weight:bold; text-decoration:none; }
+table.sortable span.sortarrow { color:#000; text-decoration:none; }
+table.sortable { color:#000; background-color:#FFD; border:thin solid #AAA;
+ font-size:12px; line-height:13px; font-family:Verdana, 'DejaVu Sans', Arial, Helvetica, sans-serif; }
+.catalog{background-color: #008080;}
+.corpus{background-color: #7f81d4;}
+.session{background-color:#3ed44e; }
+.media{background-color: #CCFFFF;}
+.written{background-color: #CCFF99}
