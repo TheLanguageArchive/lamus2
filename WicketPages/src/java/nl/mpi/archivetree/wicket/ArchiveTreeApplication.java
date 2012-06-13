@@ -19,7 +19,7 @@ public class ArchiveTreeApplication extends WebApplication {
     }
 
     public Class getHomePage() {
-	return HomePage.class;
+	return IndexPage.class;
     }
 
 }

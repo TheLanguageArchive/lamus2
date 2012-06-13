@@ -23,10 +23,12 @@ import org.apache.wicket.model.Model;
 public abstract class TreePage extends WebPage implements TreeSelectionListener, TreeExpansionListener, Serializable {
 
     public TreePage() {
+        super();
         treeModel = new DefaultTreeModel(rootNode);
         tree = new JTree(treeModel);
         add(new ButtonPage("buttonpage"));
-        add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
+        add(new HeaderPanel("headerpanel", "Welcome To Wicket"));       
+
     }
 
     /**
@@ -111,7 +113,6 @@ public abstract class TreePage extends WebPage implements TreeSelectionListener,
 //
 //        return null;
 //    }
-
     /**
      * adds the node which holds the given object to the given parent when
      * number_of_childs is bigger then 0 a dummy_subnode is created for
@@ -146,7 +147,6 @@ public abstract class TreePage extends WebPage implements TreeSelectionListener,
 //        }
 //        return childNode;
 //    }
-
     /**
      * opens the tree at the given path and selects the node in the tree
      *

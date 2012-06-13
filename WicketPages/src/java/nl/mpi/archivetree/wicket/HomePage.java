@@ -31,7 +31,7 @@ import org.apache.wicket.markup.html.tree.ITreeStateListener;
  */
 public class HomePage extends TreePage {
 
-    private static final long serialVersionUID = 1L;
+private static final long serialVersionUID = 1L;
     private String openpath = null; //the tree path that should be opened on initialisation
     // of the applet
     private String welcome_url = null; // the page to show if the applet is loaded
@@ -45,10 +45,9 @@ public class HomePage extends TreePage {
     private WebMarkupContainer tablePanel;
     private final Tree myTree;
 
-    
     public HomePage() {
         init();
-        
+
         tableContainer = new WebMarkupContainer("tableContainer");
         tableContainer.setOutputMarkupId(true);
         tableContainer.setMarkupId("tableContainer");
@@ -58,7 +57,7 @@ public class HomePage extends TreePage {
         tablePanel = new WebMarkupContainer("tablePanel");
         tableContainer.add(tablePanel);
 
-        
+
 
         myTree = new Tree("remoteTree", createRemoteTree());
         add(myTree);
@@ -77,7 +76,7 @@ public class HomePage extends TreePage {
             @Override
             public void nodeCollapsed(Object node) {
                 DynamicExpandableTreeNode parent = (DynamicExpandableTreeNode) node;
-                parent.removeAllChildren();
+                //parent.removeAllChildren();
             }
 
             @Override
@@ -96,7 +95,7 @@ public class HomePage extends TreePage {
         });
         myTree.getTreeState().collapseAll();
     }
-
+    
     private void init() {
         System.out.println("MyTreeViewer:init() version 2");
         try {
@@ -223,69 +222,6 @@ public class HomePage extends TreePage {
         return ni;
     }
 
-//    @Override
-//    public void collapseNode(DynamicExpandableTreeNode parent) {
-//               setWaitCursor(true);
-//        try {
-//            long start = System.currentTimeMillis();
-//            long urlTime = 0;
-//            long addObjectTime = 0;
-//            if (!parent.isLeaf()) {
-//                //if (!parent.isAlreadyExpanded()) {
-//                parent.setAlreadyExpanded(true);
-//                try {
-//                    NodeInfo ni = (NodeInfo) parent.getUserObject();
-//                    if (ni != null) {
-//                        Map resourceCountMap = new HashMap();
-//                        long start2 = System.currentTimeMillis();
-//                        URL gcurl = new URL(viewcontroller_url + "?request=childs&nodeid=" + URLEncoder.encode(ni.getNodeId(), "UTF-8"));
-//                        System.out.println("request=" + gcurl);
-//
-//                        URLConnection gcurlcon = gcurl.openConnection();
-//                        gcurlcon.setUseCaches(false);
-//                        ObjectInputStream inputFromServlet = new ObjectInputStream(gcurlcon.getInputStream());
-//                        NodeInfo[] childs = (NodeInfo[]) inputFromServlet.readObject();
-//                        inputFromServlet.close();
-//                        urlTime = System.currentTimeMillis() - start2;
-//
-//                        System.out.println("Start add " + childs.length + " objects...");
-//                        start2 = System.currentTimeMillis();
-//                        boolean showResources = "true".equalsIgnoreCase(showNodeInfos);
-//                        for (int i = 0; i < childs.length; i++) {
-//                            if (childs[i] != null) {
-//                                if ((childs[i].getNodeType() == NodeType.getCorpus()) || (childs[i].getNodeType() == NodeType.getSession())) {
-//                                    //childs[i].setShowSessionsAndResources(showResources);
-//                                    DefaultMutableTreeNode addedNode = removeObject(parent, childs[i], true);
-//                                    if (showResources) {
-//                                        resourceCountMap.put(childs[i].getNodeId(), addedNode);
-//                                    }
-//                                } else {
-//                                    if (childs[i].getNodeType() == NodeType.getInfo()) {
-//                                      //  hasInfoChild = true;
-//                                    }
-//                                    childs[i].setShowSessionsAndResources(false);//no children so don't show empty brackets.
-//                                    removeObject(parent, childs[i], false); //Nodes have no children so do not try to expand
-//                                }
-//                            }
-//                        }
-//                        addObjectTime = System.currentTimeMillis() - start2;
-//                        //addResources(resourceCountMap, ni, hasInfoChild, parent);
-//                    } else {
-//                        System.err.println("getchilds called for a nonexisting node - this should not happen");
-//                    }
-//                } catch (IOException ioe) {
-//                    ioe.printStackTrace();
-//                } catch (ClassNotFoundException cnfe) {
-//                    cnfe.printStackTrace();
-//                }
-//            }
-//            if (urlTime != 0 && addObjectTime != 0) {
-//                System.out.println("End expand took:" + (System.currentTimeMillis() - start) + " ms (" + urlTime + " ms getting Data, " + addObjectTime + " ms adding children).");
-//            }
-//        } finally {
-//            //setWaitCursor(false);
-//        }
-//    }
 
     /**
      * Returns the tree on this pages. This is used to collapse, expand the tree

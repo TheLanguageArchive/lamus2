@@ -16,9 +16,6 @@ public final class IndexPage extends WebPage {
 
     public IndexPage() {
         super();
-        add(new BookmarkablePageLink("link", HomePage.class));
-        add(new BookmarkablePageLink("link2", HomePage.class));
-        add(new BookmarkablePageLink("link3", HomePage.class));
         add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
     }
     
