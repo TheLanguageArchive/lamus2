@@ -131,7 +131,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>ams2</artifactId>
-            <version>1.4.7-SNAPSHOT</version>
+            <version>1.4.7</version>
 <!--            <exclusions>
                 <exclusion>
                     <groupId>commons-fileupload</groupId>
