@@ -7,6 +7,8 @@ package nl.mpi.archivetree.wicket;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import nl.mpi.archivetree.model.mock.MockWorkspace;
+import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
@@ -24,31 +26,24 @@ import org.apache.wicket.model.Model;
 public final class LamusSelectWorkspace extends WebPage {
 
     private Workspace ws;
-    private int workspaceID;
     private String userID;
     private int topNodeID;
-    private URL topNodeArchiveURL;
-    private Date startDate;
-    private Date endDate;
-    private Date sessionStartDate;
-    private Date sessionEndDate;
-    private long usedStorageSpace;
-    private long maxStorageSpace;
-    private WorkspaceStatus status;
-    private String message;
-    private String archiveInfo;
 
-    public LamusSelectWorkspace() throws MalformedURLException {
+    
+    private WorkspaceFactory wsFactory; // = new MockWSFactory()
+
+    public LamusSelectWorkspace(WorkspaceFactory workspaceFactory) throws MalformedURLException {
         super();
+        this.wsFactory = workspaceFactory;
         
         add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
         //add(new ButtonPage("buttonpage"));
         Form nodeIdForm = new Form("workspaceForm");
-        final TextField wsid = new TextField("wsId", new Model<Integer>(workspaceID));
-        final TextField userid = new TextField("userId", new Model<String>(userID));
-        final TextField topnodeid = new TextField("topnodeId", new Model<Integer>(topNodeID));
+        final TextField wsid = new TextField("workspaceId");
+        final TextField userid = new TextField("userId");
+        final TextField topnodeid = new TextField("topnodeId");
         //final TextField topnodearchiveurl = new TextField("topnodearchiveurl", new Model<URL>(topNodeArchiveURL));
-        final TextField<URL> topnodearchiveurl = new TextField<URL>("topnodearchiveurl",new Model<URL>(topNodeArchiveURL));
+        final TextField<URL> topnodearchiveurl = new TextField<URL>("topnodearchiveurl");
         nodeIdForm.add(wsid);
         nodeIdForm.add(userid);
         nodeIdForm.add(topnodeid);
@@ -58,14 +53,7 @@ public final class LamusSelectWorkspace extends WebPage {
 
             @Override
             public void onSubmit() {
-                int wosid = Integer.parseInt(wsid.getValue());
-                String userId = userid.toString();
-                int topNodeId = Integer.parseInt(topnodeid.getValue());
-                URL topurl = topnodearchiveurl.getConvertedInput();
-                ws = new LamusWorkspace(wosid, userId, topNodeId, topurl, null, null, null, null, LATEST_VERSION, LATEST_VERSION, WorkspaceStatus.REFUSED, PARENT_PATH, PARENT_PATH);
-                //int nodeid = Integer.parseInt(nodeIdField.getValue());
-                //wsm.createWorkspace("jeafer", nodeid);
-                //System.out.println("OnSubmit, name = " + nodeId);
+                Workspace newWorkspace = wsFactory.getNewWorkspace(userID, topNodeID);
             }
         };
         nodeIdForm.add(submitButton);
@@ -74,5 +62,6 @@ public final class LamusSelectWorkspace extends WebPage {
 
     public LamusSelectWorkspace(PageParameters params) {
         //TODO:  process page parameters
+        add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
     }
 }

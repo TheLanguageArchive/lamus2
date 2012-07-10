@@ -4,17 +4,14 @@
  */
 package nl.mpi.archivetree.wicket;
 
-import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.Model;
-import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -24,18 +21,12 @@ public final class CreateWorkspacePage extends WebPage {
 
     
     private String nodeId;
-    private TaskExecutor mockexecutor;
-    private WorkspaceFactory workspaceFactory;
-    private WorkspaceDao workspaceDao;
-    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
-//    private final FileImporterFactory importerFactory;
-    private WorkspaceImportRunner workspaceImportRunner;
     private WorkspaceManager wsm;
-    
+    private WorkspaceFactory wsFactory; // = new MockWSFactory()
     
     public CreateWorkspacePage() {
         super();
-        this.wsm = new MokLamusWorkspaceManager(mockexecutor, workspaceFactory, workspaceDao, workspaceDirectoryHandler, workspaceImportRunner);
+        this.wsm = (WorkspaceManager) wsFactory;
 //        add(new Button("createWorkspace"){
 //                public void onSubmit() {
 //                    //wsm.createWorkspace(nodeId, FLAG_RESERVED1);
