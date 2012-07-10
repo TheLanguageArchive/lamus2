@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+                
+    <bean id="testAms2Bridge" class="nl.mpi.lamus.ams.Ams2Bridge">
+        <constructor-arg ref="principalSrv" />
+        <constructor-arg ref="integratedAuthenticationSrv" />
+        <constructor-arg ref="authorizationSrv" />
+        <constructor-arg ref="fabricSrv" />
+        <constructor-arg ref="licenseSrv" />
+        <constructor-arg ref="ruleSrv" />
+    </bean>
+    
+    <bean id="principalSrv" class="nl.mpi.lat.ams.service.impl.PrincipalSrv" 
+            parent="damlrSrv" >
+            <property name="pcplDao"		ref="pcplDao" />
+            <property name="userDao"        ref="userDao" />
+            <property name="groupDao"		ref="groupDao" />
+            <property name="encryptionSrv"	ref="encryptionSrv" />
+    </bean>
+    
+    <!-- ** authentication DAOs ********************************************* -->
+    <bean id="pcplDao"
+            class="nl.mpi.lat.ams.dao.PrincipalDao" >
+            <property name="sessionFactory">
+                    <ref bean="sessionFactory"/>
+            </property>
+    </bean>
+
+    <bean id="userDao"
+            class="nl.mpi.lat.ams.dao.UserDao" >
+            <property name="sessionFactory">
+                    <ref bean="sessionFactory" />
+            </property>
+    </bean>
+
+    <bean id="groupDao"
+            class="nl.mpi.lat.ams.dao.GroupDao" >
+            <property name="sessionFactory">
+                    <ref bean="sessionFactory"/>
+            </property>
+    </bean>
+
+    <!-- ** special dao for lana SSO authentication and mgmt ** -->
+    <bean id="sessionDao" class="nl.mpi.lat.ams.dao.SessionDao" >
+            <constructor-arg value="java:comp/env/jdbc/AMS2DB" />
+    </bean>
+
+</beans>
