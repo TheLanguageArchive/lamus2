@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package nl.mpi.archivetree.model.mock;
 
 import java.net.URL;
@@ -11,14 +7,14 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 
 /**
  *
- * @author jeafer
+ * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class MockWorkspace implements Workspace {
 
-    private int workspaceId;
-    private String userId;
-    private int topnodeId;
-    private URL topnodearchiveUrl;
+    private int workspaceID;
+    private String userID;
+    private int topNodeID;
+    private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
     private Date sessionStartDate;
@@ -29,136 +25,108 @@ public class MockWorkspace implements Workspace {
     private String message;
     private String archiveInfo;
 
-    public MockWorkspace(int workspaceId) {
-        this.workspaceId = workspaceId;
+    public String getArchiveInfo() {
+	return archiveInfo;
     }
 
-    public int getWorkspaceID() {
-        return workspaceId;
-    }
-
-    public void setWorkspaceID(int workspaceID) {
-        this.workspaceId = workspaceID;
-    }
-
-    public String getUserID() {
-        return userId;
-    }
-
-    public void setUserID(String userID) {
-        this.userId = userID;
-    }
-
-    public int getTopNodeID() {
-        return topnodeId;
-    }
-
-    public void setTopNodeID(int topNodeID) {
-        this.topnodeId = topNodeID;
-    }
-
-    public URL getTopNodeArchiveURL() {
-        return topnodearchiveUrl;
-    }
-
-    public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
-        this.topnodearchiveUrl = topNodeArchiveURL;
-    }
-
-    public Date getStartDate() {
-                Date toReturn = null;
-        if(this.startDate != null) {
-            toReturn = (Date) this.startDate.clone();
-        }
-        return toReturn;
-    }
-
-    public void setStartDate(Date startDate) {
-                Date toSet = null;
-        if(startDate != null) {
-            toSet = (Date) startDate.clone();
-        }
-        this.startDate = toSet;
+    public void setArchiveInfo(String archiveInfo) {
+	this.archiveInfo = archiveInfo;
     }
 
     public Date getEndDate() {
-                Date toReturn = null;
-        if(this.endDate != null) {
-            toReturn = (Date) this.endDate.clone();
-        }
-        return toReturn;
+	return endDate;
     }
 
     public void setEndDate(Date endDate) {
-                Date toSet = null;
-        if(endDate != null) {
-            toSet = (Date) endDate.clone();
-        }
-        this.endDate = toSet;
-    }
-
-    public Date getSessionStartDate() {
-                Date toReturn = null;
-        if(this.sessionStartDate != null) {
-            toReturn = (Date) this.sessionStartDate.clone();
-        }
-        return toReturn;
-    }
-
-    public void setSessionStartDate(Date sessionStartDate) {
-                Date toSet = null;
-        if(sessionStartDate != null) {
-            toSet = (Date) sessionStartDate.clone();
-        }
-        this.sessionStartDate = toSet;
-    }
-
-    public Date getSessionEndDate() {
-                Date toReturn = null;
-        if(this.sessionEndDate != null) {
-            toReturn = (Date) this.sessionEndDate.clone();
-        }
-        return toReturn;
-    }
-
-    public void setSessionEndDate(Date sessionEndDate) {
-        Date toSet = null;
-        if(sessionEndDate != null) {
-            toSet = (Date) sessionEndDate.clone();
-        }
-        this.sessionEndDate = toSet;
-    }
-
-    public long getUsedStorageSpace() {
-        return usedStorageSpace;
-    }
-
-    public void setUsedStorageSpace(long usedStorageSpace) {
-        this.usedStorageSpace = usedStorageSpace;
+	this.endDate = endDate;
     }
 
     public long getMaxStorageSpace() {
-        return maxStorageSpace;
+	return maxStorageSpace;
     }
 
     public void setMaxStorageSpace(long maxStorageSpace) {
-        this.maxStorageSpace = maxStorageSpace;
-    }
-
-    public WorkspaceStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(WorkspaceStatus status) {
-        this.status = status;
+	this.maxStorageSpace = maxStorageSpace;
     }
 
     public String getMessage() {
-        return message;
+	return message;
     }
 
     public void setMessage(String message) {
-        this.message = message;
+	this.message = message;
+    }
+
+    public Date getSessionEndDate() {
+	return sessionEndDate;
+    }
+
+    public void setSessionEndDate(Date sessionEndDate) {
+	this.sessionEndDate = sessionEndDate;
+    }
+
+    public Date getSessionStartDate() {
+	return sessionStartDate;
+    }
+
+    public void setSessionStartDate(Date sessionStartDate) {
+	this.sessionStartDate = sessionStartDate;
+    }
+
+    public Date getStartDate() {
+	return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+	this.startDate = startDate;
+    }
+
+    public URL getTopNodeArchiveURL() {
+	return topNodeArchiveURL;
+    }
+
+    public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
+	this.topNodeArchiveURL = topNodeArchiveURL;
+    }
+
+    public int getTopNodeID() {
+	return topNodeID;
+    }
+
+    public void setTopNodeID(int topNodeID) {
+	this.topNodeID = topNodeID;
+    }
+
+    public long getUsedStorageSpace() {
+	return usedStorageSpace;
+    }
+
+    public void setUsedStorageSpace(long usedStorageSpace) {
+	this.usedStorageSpace = usedStorageSpace;
+    }
+
+    public String getUserID() {
+	return userID;
+    }
+
+    public void setUserID(String userID) {
+	this.userID = userID;
+    }
+
+    public int getWorkspaceID() {
+	return workspaceID;
+    }
+
+    public void setWorkspaceID(int workspaceID) {
+	this.workspaceID = workspaceID;
+    }
+
+    public WorkspaceStatus getStatus() {
+	return status;
+    }
+
+    public void setStatus(WorkspaceStatus status) {
+	this.status = status;
     }
 
     public void setStatusMessageInitialising() {
@@ -171,11 +139,8 @@ public class MockWorkspace implements Workspace {
         setMessage("Error during initialisation");
     }
 
-    public String getArchiveInfo() {
-        return archiveInfo;
-    }
-
-    public void setArchiveInfo(String archiveInfo) {
-        this.archiveInfo = archiveInfo;
+    @Override
+    public String toString() {
+	return String.format("Workspace %1$d", getWorkspaceID());
     }
 }
