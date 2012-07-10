@@ -28,7 +28,7 @@
 
     <modules>
 <!-- 		<module>api</module> -->
-        <module>war</module>
+        <module>jar</module>
 <!-- 		<module>targz</module> -->
     </modules>
 
