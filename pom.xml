@@ -47,7 +47,7 @@
                 <version>2.8.1</version>
                 <configuration>
                     <aggregate>true</aggregate>
-                    <outputDirectory>war/</outputDirectory>
+                    <outputDirectory>jar/</outputDirectory>
                 </configuration>
             </plugin>
             <plugin>
