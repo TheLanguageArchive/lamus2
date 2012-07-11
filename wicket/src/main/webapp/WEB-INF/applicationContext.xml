@@ -25,13 +25,15 @@
 <!--		<ref bean="childNode1" />
 		<ref bean="childNode2" />-->
 		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
-		    <property name="name" value="Child1"/>
 		    <property name="parent" ref="archiveRootNode" />
+		    <property name="name" value="Child1"/>
+		    <property name="nodeId" value="101"/>
 		</bean>
 		    
 		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
-		    <property name="name" value="Child2"/>
 		    <property name="parent" ref="archiveRootNode" />
+		    <property name="name" value="Child2"/>
+		    <property name="nodeId" value="102"/>
 		</bean>
 	    </list>
 	</property>

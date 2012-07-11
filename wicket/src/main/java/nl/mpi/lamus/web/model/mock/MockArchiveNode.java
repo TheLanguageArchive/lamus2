@@ -4,16 +4,18 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.tree.ArchiveNode;
+import nl.mpi.archiving.tree.CorpusArchiveNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MockArchiveNode implements ArchiveNode, Serializable {
+public class MockArchiveNode implements CorpusArchiveNode, Serializable {
 
     private ArchiveNode parent;
     private List<ArchiveNode> children = Collections.emptyList();
     private String name = "";
+    private int nodeId;
 
     public void setChildren(List<ArchiveNode> children) {
 	this.children = children;
@@ -39,12 +41,26 @@ public class MockArchiveNode implements ArchiveNode, Serializable {
     }
 
     @Override
+    public String getName() {
+	return name;
+    }
+
+    @Override
     public ArchiveNode getParent() {
 	return parent;
     }
 
     public void setParent(ArchiveNode parent) {
 	this.parent = parent;
+    }
+
+    @Override
+    public int getNodeId() {
+	return nodeId;
+    }
+
+    public void setNodeId(int nodeId) {
+	this.nodeId = nodeId;
     }
 
     @Override
