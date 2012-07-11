@@ -4,7 +4,7 @@
     xmlns='http://www.springframework.org/schema/beans'
     xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd'>
 	
-    <bean id="wicketApplication" class="nl.mpi.lamus.web.pages.ArchiveTreeApplication" />
+    <bean id="wicketApplication" class="nl.mpi.lamus.web.LamusWicketApplication" />
 	
     <bean id="workspaceService" class="nl.mpi.lamus.web.model.mock.MockWorkspaceService">
 	<constructor-arg ref="mockCreatedWorkspace" />

@@ -1,10 +1,11 @@
 /*
- * ArchiveTreeApplication.java
+ * LamusWicketApplication.java
  *
  * Created on March 21, 2012, 1:47 PM
  */
-package nl.mpi.lamus.web.pages;
+package nl.mpi.lamus.web;
 
+import nl.mpi.lamus.web.pages.IndexPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
@@ -13,9 +14,9 @@ import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
  * @author jeafer
  * @version
  */
-public class ArchiveTreeApplication extends WebApplication {
+public class LamusWicketApplication extends WebApplication {
 
-    public ArchiveTreeApplication() {
+    public LamusWicketApplication() {
     }
 
     public Class getHomePage() {
