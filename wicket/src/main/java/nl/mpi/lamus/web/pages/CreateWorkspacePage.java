@@ -4,10 +4,11 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.archiving.tree.ArchiveNodeTreeModel;
+import javax.swing.tree.DefaultTreeModel;
 import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
+import nl.mpi.archiving.tree.ArchiveNodeTreeNodeWrapper;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.components.WicketArchiveNodeTree;
+import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -31,10 +32,9 @@ public final class CreateWorkspacePage extends WebPage {
 	super();
 
 	Form nodeIdForm = new Form("nodeIdForm");
-
-	final ArchiveNodeTreeModel treeModel = new ArchiveNodeTreeModel(archiveTreeProvider);
-	final WicketArchiveNodeTree archiveTree = new WicketArchiveNodeTree("archiveTree", treeModel);
-	archiveTree.setLinkType(WicketArchiveNodeTree.LinkType.REGULAR);
+	final DefaultTreeModel treeModel = new DefaultTreeModel(new ArchiveNodeTreeNodeWrapper(archiveTreeProvider.getRoot()));
+	final Tree archiveTree = new Tree("archiveTree", treeModel);
+	archiveTree.setLinkType(Tree.LinkType.AJAX_FALLBACK);
 	nodeIdForm.add(archiveTree);
 
 	final TextField nodeIdField = new TextField("nodeId", new Model<String>(nodeId));
