@@ -7,10 +7,13 @@
         <link rel="stylesheet" type="text/css" href="style.css"/>
     </head>
     <body>
-        <form wicket:id="nodeIdForm">
-	    <div wicket:id="archiveTree">[ARCHIVE TREE]</div>
-            <p>Node ID: <input wicket:id="nodeId" type="text" /></p>
-            <input  wicket:id="createWorkspace" type="submit" value="Create"/>
-        </form>
+	<div wicket:id="archiveTree">[ARCHIVE TREE]</div>
+	<div wicket:id="formContainer">
+	    <form wicket:id="nodeIdForm">
+		<p>Selected node: <span wicket:id="name">Node name</span></p>
+		<p>Node ID: <span wicket:id="nodeId">Node name</span></p>
+		<input  wicket:id="createWorkspace" type="submit" value="Create"/>
+	    </form>
+	</div>
     </body>
 </html>
