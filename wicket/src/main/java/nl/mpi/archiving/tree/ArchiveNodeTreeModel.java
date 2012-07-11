@@ -16,6 +16,7 @@
  */
 package nl.mpi.archiving.tree;
 
+import java.io.Serializable;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -24,42 +25,46 @@ import javax.swing.tree.TreePath;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeModel implements TreeModel {
-    
+public class ArchiveNodeTreeModel implements TreeModel, Serializable {
+
     private final ArchiveNodeTreeModelProvider provider;
 
+    /**
+     *
+     * @param provider provider to use in tree model. Must implement {@link Serializable}.
+     */
     public ArchiveNodeTreeModel(ArchiveNodeTreeModelProvider provider) {
 	this.provider = provider;
     }
-    
+
     public Object getRoot() {
 	return provider.getRoot();
     }
-    
+
     public Object getChild(Object parent, int index) {
 	return provider.getChild((ArchiveNode) parent, index);
     }
-    
+
     public int getChildCount(Object parent) {
 	return provider.getChildCount((ArchiveNode) parent);
     }
-    
+
     public boolean isLeaf(Object node) {
 	return provider.isLeaf((ArchiveNode) node);
     }
-    
+
     public void valueForPathChanged(TreePath path, Object newValue) {
 	throw new UnsupportedOperationException("ArchiveNodeTreeModel does not support changing values from the tree");
     }
-    
+
     public int getIndexOfChild(Object parent, Object child) {
 	return provider.getIndexOfChild((ArchiveNode) parent, (ArchiveNode) child);
     }
-    
+
     public void addTreeModelListener(TreeModelListener l) {
 	provider.addTreeModelListener(l);
     }
-    
+
     public void removeTreeModelListener(TreeModelListener l) {
 	provider.removeTreeModelListener(l);
     }

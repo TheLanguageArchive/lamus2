@@ -13,4 +13,36 @@
     <bean id="mockCreatedWorkspace" class="nl.mpi.lamus.web.model.mock.MockWorkspace">
 	<property name="workspaceID" value="1"/>
     </bean>
+    
+    <bean id="archiveTreeProvider" class="nl.mpi.archiving.tree.ArchiveNodeTreeModelProviderImpl">
+	<constructor-arg ref="archiveRootNode" />
+    </bean>
+    
+    <bean id="archiveRootNode" class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+	<property name="name" value="RootNode"/>
+	<property name="children">
+	    <list>
+<!--		<ref bean="childNode1" />
+		<ref bean="childNode2" />-->
+		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		    <property name="name" value="Child1"/>
+		    <property name="parent" ref="archiveRootNode" />
+		</bean>
+		    
+		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		    <property name="name" value="Child2"/>
+		    <property name="parent" ref="archiveRootNode" />
+		</bean>
+	    </list>
+	</property>
+    </bean>
+    
+    <bean id="childNode1" class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+	<property name="name" value="Child1"/>
+    </bean>
+		    
+		    
+    <bean id="childNode2" class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+	<property name="name" value="Child2"/>
+    </bean>
 </beans>

@@ -16,6 +16,7 @@
  */
 package nl.mpi.archiving.tree;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import javax.swing.event.TreeModelListener;
@@ -24,40 +25,44 @@ import javax.swing.event.TreeModelListener;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeModelProviderImpl implements ArchiveNodeTreeModelProvider {
-    
+public class ArchiveNodeTreeModelProviderImpl implements ArchiveNodeTreeModelProvider, Serializable {
+
     private final ArchiveNode rootNode;
     private final Set<TreeModelListener> treeModelListeners;
-    
+
+    /**
+     *
+     * @param rootNode root node of tree model. Must implement {@link Serializable}.
+     */
     public ArchiveNodeTreeModelProviderImpl(ArchiveNode rootNode) {
 	this.rootNode = rootNode;
 	this.treeModelListeners = new CopyOnWriteArraySet<TreeModelListener>();
     }
-    
+
     public ArchiveNode getRoot() {
 	return rootNode;
     }
-    
+
     public ArchiveNode getChild(ArchiveNode parent, int index) {
 	return parent.getChild(index);
     }
-    
+
     public int getChildCount(ArchiveNode parent) {
 	return parent.getChildCount();
     }
-    
+
     public boolean isLeaf(ArchiveNode node) {
 	return node.getChildCount() == 0;
     }
-    
+
     public int getIndexOfChild(ArchiveNode parent, ArchiveNode child) {
 	return parent.getIndexOfChild(child);
     }
-    
+
     public void addTreeModelListener(TreeModelListener l) {
 	treeModelListeners.add(l);
     }
-    
+
     public void removeTreeModelListener(TreeModelListener l) {
 	treeModelListeners.remove(l);
     }

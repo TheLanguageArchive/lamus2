@@ -41,4 +41,10 @@ public interface ArchiveNode {
      * @return index of child, -1 if child does not exist
      */
     int getIndexOfChild(ArchiveNode child); 
+    
+    /**
+     * 
+     * @return parent of this node
+     */
+    ArchiveNode getParent();
 }
