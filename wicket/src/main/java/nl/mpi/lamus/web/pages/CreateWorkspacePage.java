@@ -5,7 +5,6 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -25,6 +24,8 @@ public final class CreateWorkspacePage extends WebPage {
 
     public CreateWorkspacePage() {
 	super();
+	
+	
 	//this.wsm = new MokLamusWorkspaceManager(mockexecutor, workspaceFactory, workspaceDao, workspaceDirectoryHandler, workspaceImportRunner);
 //        add(new Button("createWorkspace"){
 //                public void onSubmit() {
