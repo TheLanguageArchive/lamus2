@@ -13,9 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.archive;
+package nl.mpi.lamus.spring;
 
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -23,25 +23,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-public class LamusArchiveTestProperties {
+@ComponentScan("nl.mpi.lamus.spring")
+public class LamusBeansTestConfig {
     
-    @Bean
-    public int maxDirectoryNameLength() {
-        return 50;
-    }
-    
-    @Bean
-    public String corpusDirectoryBaseName() {
-        return "Corpusstructure";
-    }
-    
-    @Bean
-    public String orphansDirectoryBaseName() {
-        return "sessions";
-    }
-    
-    @Bean
-    public long typeRecheckSizeLimitInBytes() {
-        return 8L * 1024 * 1024;
-    }
 }

@@ -62,7 +62,7 @@ import org.xml.sax.SAXException;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+//@ActiveProfiles("testing")
 public class LamusWorkspaceFileHandlerTest {
     
     private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
@@ -79,7 +79,6 @@ public class LamusWorkspaceFileHandlerTest {
     
     @Mock private MetadataAPI mockMetadataAPI;
     @Mock private MetadataDocument mockMetadataDocument;
-    @Mock private File mockNodeFile;
     @Mock private StreamResult mockStreamResult;
     
     public LamusWorkspaceFileHandlerTest() {

@@ -17,9 +17,6 @@ package nl.mpi.lamus.workspace.factory.implementation;
 
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
-import nl.mpi.lamus.configuration.EmbeddedDatabaseBeans;
-import nl.mpi.lamus.workspace.factory.LamusWorkspaceFactoryTestBeans;
-import nl.mpi.lamus.workspace.factory.LamusWorkspaceFactoryTestProperties;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -31,6 +28,9 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,10 +42,24 @@ import org.springframework.test.util.ReflectionTestUtils;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {LamusWorkspaceFactoryTestProperties.class, LamusWorkspaceFactoryTestBeans.class, EmbeddedDatabaseBeans.class},
-        loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
+//@ActiveProfiles("testing")
 public class LamusWorkspaceFactoryTest {
+    
+    @Configuration
+    @ComponentScan("nl.mpi.lamus.workspace.factory")
+    static class ConfigurationContext {
+        
+        @Bean
+        public AmsBridge amsBridge() {
+            return null;
+        }
+        
+        @Bean
+        public long defaultMaxStorageSpaceInBytes() {
+            return 10L * 1024 * 1024 * 1024;
+        }
+    }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     @Mock private AmsBridge mockAmsBridge;

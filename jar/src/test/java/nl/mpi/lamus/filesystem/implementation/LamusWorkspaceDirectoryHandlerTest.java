@@ -42,7 +42,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+//@ActiveProfiles("testing")
 public class LamusWorkspaceDirectoryHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();

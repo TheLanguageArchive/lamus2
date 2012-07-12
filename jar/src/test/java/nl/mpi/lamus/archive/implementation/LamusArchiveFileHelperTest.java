@@ -16,13 +16,10 @@
 package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.archive.LamusArchiveTestBeans;
-import nl.mpi.lamus.archive.LamusArchiveTestProperties;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -32,6 +29,9 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,10 +42,35 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {LamusArchiveTestProperties.class, LamusArchiveTestBeans.class},
+@ContextConfiguration(
         loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+//@ActiveProfiles("testing")
 public class LamusArchiveFileHelperTest {
+    
+    @Configuration
+    @ComponentScan("nl.mpi.lamus.archive")
+    static class ContextConfiguration {
+        
+        @Bean
+        public int maxDirectoryNameLength() {
+            return 50;
+        }
+
+        @Bean
+        public String corpusDirectoryBaseName() {
+            return "Corpusstructure";
+        }
+
+        @Bean
+        public String orphansDirectoryBaseName() {
+            return "sessions";
+        }
+
+        @Bean
+        public long typeRecheckSizeLimitInBytes() {
+            return 8L * 1024 * 1024;
+        }
+    }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);

@@ -32,6 +32,7 @@ import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -83,7 +84,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     }
             
     @Autowired
-    public Ams2Bridge(PrincipalService principalSrv, AuthenticationService authenticationSrv,
+    public Ams2Bridge(PrincipalService principalSrv, @Qualifier("integratedAuthenticationSrv") AuthenticationService authenticationSrv,
             AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
             LicenseService licenseSrv, RuleService ruleSrv) {
         this.mPrincipalSrv = principalSrv;

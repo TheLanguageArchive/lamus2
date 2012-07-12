@@ -13,17 +13,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.factory;
+package nl.mpi.lamus.spring;
 
+import javax.sql.DataSource;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
+import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.cmdi.api.CMDIApi;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-@ComponentScan({"nl.mpi.lamus.workspace.factory", "nl.mpi.lamus.ams"})
-public class LamusWorkspaceFactoryTestBeans {
+@ComponentScan("nl.mpi.lamus")
+public class LamusBeans {
     
+    @Bean
+    public TaskExecutor taskExecutor() {
+        return new SimpleAsyncTaskExecutor();
+    }
+    
+    //TODO change properties to initialise API
+    @Bean
+    public MetadataAPI metadataAPI() {
+        return new CMDIApi();
+    }
 }

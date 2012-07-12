@@ -49,7 +49,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusTypecheckingTestProperties.class, LamusTypecheckingTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+//@ActiveProfiles("testing")
 public class LamusFileTypeHandlerFactoryTest {
     
     public @Rule JUnitRuleMockery context = new JUnitRuleMockery() {{

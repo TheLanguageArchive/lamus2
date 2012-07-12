@@ -16,12 +16,16 @@
 package nl.mpi.lamus.ams;
 
 import nl.mpi.corpusstructure.UnknownNodeException;
-import nl.mpi.lamus.configuration.EmbeddedDatabaseBeans;
+import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
 import nl.mpi.lat.ams.model.NodeAuth;
 import nl.mpi.lat.ams.model.NodePcplRule;
 import nl.mpi.lat.ams.model.rule.DomainEditor;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
+import nl.mpi.lat.ams.service.impl.AmsAuthorizationSrv;
+import nl.mpi.lat.ams.service.impl.LicenseSrv;
+import nl.mpi.lat.ams.service.impl.PrincipalSrv;
+import nl.mpi.lat.ams.service.impl.RuleSrv;
 import nl.mpi.lat.auth.authentication.AuthenticationService;
 import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
 import nl.mpi.lat.auth.principal.LatUser;
@@ -29,6 +33,7 @@ import nl.mpi.lat.auth.principal.PrincipalService;
 import nl.mpi.lat.dao.DataSourceException;
 import nl.mpi.lat.fabric.FabricService;
 import nl.mpi.lat.fabric.NodeID;
+import nl.mpi.latimpl.fabric.FabricSrv;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -36,6 +41,10 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -47,10 +56,45 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(locations={"Ams2BridgeTest-context.xml", "Ams2BridgeTest_authentication-context.xml", "Ams2BridgeTest_core-context.xml"})
-@ContextConfiguration(classes = {EmbeddedDatabaseBeans.class, Ams2Bridge.class},
-        loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
+//@ActiveProfiles("testing")
 public class Ams2BridgeTest {
+    
+    @Configuration
+    @ComponentScan("nl.mpi.lamus.ams")
+    static class ContextConfiguration {
+        
+        @Bean
+        public PrincipalService principalSrv(){
+            return new PrincipalSrv();
+        }
+        
+        @Bean
+        @Qualifier("integratedAuthenticationSrv")
+        public AuthenticationService authenticationSrv() {
+            return new IntegratedAuthenticationSrv();
+        }
+        
+        @Bean
+        public AdvAuthorizationService authorizationSrv() {
+            return new AmsAuthorizationSrv();
+        }
+        
+        @Bean
+        public FabricService fabricSrv() {
+            return new FabricSrv();
+        }
+        
+        @Bean
+        public LicenseService licenseSrv() {
+            return new LicenseSrv();
+        }
+        
+        @Bean
+        public RuleService ruleSrv() {
+            return new RuleSrv();
+        }
+    }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
@@ -96,9 +140,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void authorizationServiceInitialisedWhenCallingNoArgConstructor() {
+    public void authorizationServiceInitialisedWhenInjected() {
         
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
         AdvAuthorizationService authorizationSrv = testAms2BridgeFromSpringContext.getAuthorizationSrv();
         assertNotNull(authorizationSrv);
     }
@@ -107,9 +150,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void principalServiceInitialisedWhenCallingNoArgConstructor() {
+    public void principalServiceInitialisedWhenInjected() {
         
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
         PrincipalService principalSrv = testAms2BridgeFromSpringContext.getPrincipalSrv();
         assertNotNull(principalSrv);
     }
@@ -118,9 +160,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void authenticationServiceInitialisedWhenCallingNoArgConstructor() {
+    public void authenticationServiceInitialisedWhenInjected() {
         
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
         AuthenticationService authenticationSrv = testAms2BridgeFromSpringContext.getAuthenticationSrv();
         assertNotNull(authenticationSrv);
     }
@@ -129,9 +170,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void fabricServiceInitialisedWhenCallingNoArgConstructor() {
+    public void fabricServiceInitialisedWhenInjected() {
         
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
         FabricService fabricSrv = testAms2BridgeFromSpringContext.getFabricSrv();
         assertNotNull(fabricSrv);
     }
@@ -140,9 +180,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void licenseServiceInitialisedWhenCallingNoArgConstructor() {
+    public void licenseServiceInitialisedWhenInjected() {
         
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
         LicenseService licenseSrv = testAms2BridgeFromSpringContext.getLicenseSrv();
         assertNotNull(licenseSrv);
     }
@@ -151,9 +190,8 @@ public class Ams2BridgeTest {
      * Test the constructor without parameters
      */
     @Test
-    public void ruleServiceInitialisedWhenCallingNoArgConstructor() {
-        
-//        Ams2Bridge testAmsBridge = new Ams2Bridge();
+    public void ruleServiceInitialisedWhenInjected() {
+
         RuleService ruleSrv = testAms2BridgeFromSpringContext.getRuleSrv();
         assertNotNull(ruleSrv);
     }

@@ -24,19 +24,32 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import javax.sql.DataSource;
+import nl.mpi.lamus.dao.LamusJdbcWorkspaceDaoTestBeans;
+import nl.mpi.lamus.spring.EmbeddedDatabaseBeans;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 
 
@@ -44,9 +57,41 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@ContextConfiguration
-@ActiveProfiles("testing")
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(/*classes = {LamusJdbcWorkspaceDao.class, EmbeddedDatabaseBeans.classLamusJdbcWorkspaceDaoTestBeans.class}, */
+        loader = AnnotationConfigContextLoader.class)
+//@ActiveProfiles("testing")
 public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4SpringContextTests {
+    
+    @Configuration
+    @ComponentScan("nl.mpi.lamus.dao")
+    static class DataSourceConfig {
+        
+        @Bean
+        @Qualifier("lamusDataSource")
+        public DataSource dataSource() {
+            return new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.HSQL)
+                .setName("lamus2")
+                .addScript("classpath:nl/mpi/lamus/dao/implementation/hsql_lamus2_drop.sql")
+                .addScript("classpath:nl/mpi/lamus/dao/implementation/hsql_lamus2_create.sql")
+                .build();
+        }
+    }
+    
+    @Configuration
+//    @ComponentScan({"nl.mpi.lamus.dao", "nl.mpi.lamus.spring"})
+    static class TransactionManagerConfig {
+        
+        @Autowired
+        @Qualifier("lamusDataSource")
+        private DataSource lamusDataSource;
+        
+        @Bean
+        public DataSourceTransactionManager transactionManager() {
+            return new DataSourceTransactionManager(lamusDataSource);
+        }
+    }
     
     @Autowired
     LamusJdbcWorkspaceDao workspaceDao;

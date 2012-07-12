@@ -32,6 +32,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -56,6 +57,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     private SimpleJdbcInsert insertWorkspaceNodeLink;
     
     @Autowired
+    @Qualifier("lamusDataSource")
     public void setDataSource(DataSource datasource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(datasource);
         this.insertWorkspace = new SimpleJdbcInsert(datasource)
