@@ -39,6 +39,18 @@
         <netbeans.hint.license>gpl30</netbeans.hint.license>
     </properties>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.11</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
     <reporting>
         <plugins>
             <plugin>
@@ -49,6 +61,11 @@
                     <aggregate>true</aggregate>
                     <outputDirectory>jar/</outputDirectory>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.11</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
