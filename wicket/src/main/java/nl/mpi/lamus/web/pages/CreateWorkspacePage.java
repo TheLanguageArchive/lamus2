@@ -1,15 +1,13 @@
 package nl.mpi.lamus.web.pages;
 
-import java.io.Serializable;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
+import nl.mpi.archiving.tree.ArchiveNode;
 import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.ArchiveNodeTreeNodeWrapper;
 import nl.mpi.archiving.tree.CorpusArchiveNode;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.markup.html.tree.Tree;
+import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
@@ -30,36 +28,25 @@ public final class CreateWorkspacePage extends WebPage {
     @SpringBean
     private ArchiveNodeTreeModelProvider archiveTreeProvider;
     // Page components
-    private final Tree archiveTree;
     private final Form nodeIdForm;
 
-    public <T extends CorpusArchiveNode & Serializable> CreateWorkspacePage() {
+    public CreateWorkspacePage() {
 	super();
-
-	// Create archive tree
-	archiveTree = createArchiveTree("archiveTree");
-	add(archiveTree);
-
-	// Create details/submit form
-	// Put in container for refresh through AJAX 
-	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
 	nodeIdForm = createNodeIdForm("nodeIdForm");
-	formContainer.add(nodeIdForm);
-	add(formContainer);
+	createArchiveTreePanel("archiveTree");
     }
 
-    private <T> Tree createArchiveTree(String id) {
-	final DefaultTreeModel treeModel = new DefaultTreeModel(new ArchiveNodeTreeNodeWrapper(archiveTreeProvider.getRoot()));
-	final Tree tree = new Tree(id, treeModel) {
+    /**
+     * Creates and adds an archive tree panel
+     *
+     * @return created tree panel
+     */
+    private ArchiveTreePanel createArchiveTreePanel(final String id) {
+	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider) {
 
 	    @Override
-	    protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
-		super.onNodeLinkClicked(target, node);
-
-		// TOOD: Make more robust against other types in model
-		final ArchiveNodeTreeNodeWrapper nodeWrapper = (ArchiveNodeTreeNodeWrapper) node;
-		final T archiveNode = (T) nodeWrapper.getArchiveNode();
-		nodeIdForm.setModel(new CompoundPropertyModel<T>(archiveNode));
+	    protected void onNodeLinkClicked(AjaxRequestTarget target, ArchiveNode node) {
+		nodeIdForm.setModel(new CompoundPropertyModel<ArchiveNode>(node));
 
 		if (target != null) {
 		    // Ajax, refresh nodeIdForm
@@ -67,12 +54,21 @@ public final class CreateWorkspacePage extends WebPage {
 		}
 	    }
 	};
-	tree.setLinkType(Tree.LinkType.AJAX_FALLBACK);
+	tree.setLinkType(LinkType.AJAX_FALLBACK);
+	// Add to page
+	add(tree);
+
 	return tree;
     }
 
-    private <T extends CorpusArchiveNode> Form<T> createNodeIdForm(String id) {
-	final Form<T> form = new Form<T>(id);
+    /**
+     * Creates and adds node id form
+     *
+     * @param id component id
+     * @return created form
+     */
+    private Form createNodeIdForm(final String id) {
+	final Form<CorpusArchiveNode> form = new Form<CorpusArchiveNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("nodeId"));
 
@@ -85,6 +81,13 @@ public final class CreateWorkspacePage extends WebPage {
 	    }
 	};
 	form.add(submitButton);
+
+	// Put details/submit form in container for refresh through AJAX 
+	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
+	formContainer.add(form);
+	// Add container to page
+	add(formContainer);
+
 	return form;
     }
 }
