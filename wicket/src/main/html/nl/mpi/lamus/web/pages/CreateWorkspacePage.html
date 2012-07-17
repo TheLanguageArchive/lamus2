@@ -22,14 +22,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <title>CreateWorkspacePage</title>
         <link rel="stylesheet" type="text/css" href="style.css"/>
     </head>
-    <body>
-	<div wicket:id="archiveTree">[ARCHIVE TREE]</div>
-	<div wicket:id="formContainer">
-	    <form wicket:id="nodeIdForm">
-		<p>Selected node: <span wicket:id="name">Node name</span></p>
-		<p>Node ID: <span wicket:id="nodeId">Node name</span></p>
-		<input  wicket:id="createWorkspace" type="submit" value="Create"/>
-	    </form>
-	</div>
+    <body style="position: absolute;">
+	<wicket:extend>
+	    <div style="position: relative;">
+		<div id="workspaceSelect" style="position: relative; float: left; width: 40%;">
+		    <div wicket:id="archiveTree">[ARCHIVE TREE]</div>
+		    <div wicket:id="formContainer">
+			<form wicket:id="nodeIdForm">
+			    <p>Selected node: <span wicket:id="name">Node name</span></p>
+			    <p>Node ID: <span wicket:id="nodeId">Node name</span></p>
+			    <input  wicket:id="createWorkspace" type="submit" value="Create"/>
+			</form>
+		    </div>
+		</div>
+		<div id="workspaceSelectInstructions" class="help" style="position: relative; float: right; width: 59%;">
+		    <h1 class="bar">Selecting a Workspace Topnode</h1>
+		    <p>Using the corpus tree on the left, you can browse the archive and select a node that will become
+			the topnode of your new workspace. Select the desired node and use the right mouse button to open
+			the pop-up menu, then choose the option <b>Select this node</b> to use the node as top-node for a new
+			workspace</p>
+		    <p>Once you have selected a node, this node and the subcorpus it represents (all its descendant nodes)
+			will be copied into the new workspace, where you can then modify and extend the subcorpus 
+			with new resources</p>
+		</div>
+	    </div>
+	</wicket:extend>
     </body>
 </html>

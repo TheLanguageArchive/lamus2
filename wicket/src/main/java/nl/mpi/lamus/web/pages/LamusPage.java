@@ -14,35 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.components;           
+package nl.mpi.lamus.web.pages;
 
-import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 
-/** 
+/**
  *
- * @author jeafer
- * @version 
+ * @author Twan Goosen <twan.goosen@mpi.nl>
  */
+public class LamusPage extends WebPage {
 
-public class HeaderPanel extends Panel {
-
-    /**
-     * Construct.
-     * @param componentName name of the component
-     * @param exampleTitle title of the example
-     */
-
-    public HeaderPanel(String componentName, String exampleTitle)
-    {
-        super(componentName);
-        add(new Label("exampleTitle", "Lamus2 Language Archive Management and Upload System"));
-        add(CSSPackageResource.getHeaderContribution(IndexPage.class,  "css/lams.css" ));
-        add(new Image("image", new ResourceReference(HeaderPanel.class, "lana.gif")));
+    public LamusPage() {
+	this("Lamus2 Language Archive Management and Upload System");
     }
 
+    public LamusPage(String pageTitle) {
+	super();
+	add(CSSPackageResource.getHeaderContribution(LamusPage.class, "lams.css"));
+	add(new Image("image", new ResourceReference(LamusPage.class, "lana.gif")));
+
+	add(new Label("pageTitle", pageTitle));
+	add(new Label("username", new Model<String>(LamusSession.get().getUserId())));
+    }
 }

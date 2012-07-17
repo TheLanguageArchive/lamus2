@@ -26,7 +26,6 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -37,7 +36,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author jeafer
  */
-public final class CreateWorkspacePage extends WebPage {
+public final class CreateWorkspacePage extends LamusPage {
 
     // Services to be injected
     @SpringBean

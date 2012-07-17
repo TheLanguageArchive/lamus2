@@ -16,19 +16,16 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.lamus.web.components.HeaderPanel;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.WebPage;
 
 /**
  *
  * @author jeafer
  */
-public final class IndexPage extends WebPage {
+public final class IndexPage extends LamusPage {
 
     public IndexPage() {
         super();
-        add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
     }
     
     public IndexPage(PageParameters params) {

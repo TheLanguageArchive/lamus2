@@ -76,3 +76,10 @@ table.sortable { color:#000; background-color:#FFD; border:thin solid #AAA;
 .session{background-color:#3ed44e; }
 .media{background-color: #CCFFFF;}
 .written{background-color: #CCFF99}
+
+body { background-color: #fffff2; }
+.appname { color: #a6a6af; font-size: 12px; font-family: verdana, arial; }
+.username { color: #000; font-size: 12px; font-family: verdana, arial; text-decoration: none; }
+a.menulink { color: #c51c29; font-size: 12px; font-family: verdana, arial; text-decoration: none; }
+a.menulink:visited { color: #c51c29; font-size: 12px; font-family: verdana, arial; text-decoration: none; }
+a.menulink:hover { color: #c51c29; font-size: 12px; font-family: verdana, arial; text-decoration: underline; }
