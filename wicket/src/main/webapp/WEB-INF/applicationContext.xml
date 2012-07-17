@@ -4,7 +4,18 @@
     xmlns='http://www.springframework.org/schema/beans'
     xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd'>
 	
-    <bean id="wicketApplication" class="nl.mpi.lamus.web.LamusWicketApplication" />
+    <!-- The application -->
+	
+    <bean id="wicketApplication" class="nl.mpi.lamus.web.LamusWicketApplication">
+	<constructor-arg ref="sessionFactory" />
+    </bean>
+
+    <bean id="sessionFactory" class="nl.mpi.lamus.web.session.mock.MockLamusSessionFactory">
+	<property name="userId" value="Joe Mock" />
+	<property name="authenticated" value="true" />
+    </bean>
+	
+    <!-- Workspace beans -->
 	
     <bean id="workspaceService" class="nl.mpi.lamus.web.model.mock.MockWorkspaceService">
 	<constructor-arg ref="mockCreatedWorkspace" />
@@ -13,6 +24,8 @@
     <bean id="mockCreatedWorkspace" class="nl.mpi.lamus.web.model.mock.MockWorkspace">
 	<property name="workspaceID" value="1"/>
     </bean>
+    
+    <!-- Archive tree beans -->
     
     <bean id="archiveTreeProvider" class="nl.mpi.archiving.tree.ArchiveNodeTreeModelProviderImpl">
 	<constructor-arg ref="archiveRootNode" />

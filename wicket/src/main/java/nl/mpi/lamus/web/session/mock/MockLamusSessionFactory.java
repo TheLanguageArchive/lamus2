@@ -14,44 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web;
+package nl.mpi.lamus.web.session.mock;
 
-import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
+import org.apache.wicket.Application;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
-import org.apache.wicket.Session;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 
 /**
  *
- * @author jeafer
- * @version
+ * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class LamusWicketApplication extends WebApplication {
+public class MockLamusSessionFactory implements LamusSessionFactory {
 
-    @SpringBean
-    private LamusSessionFactory sessionFactory;
+    private String userId;
+    private boolean authenticated;
 
-    public LamusWicketApplication(LamusSessionFactory sessionFactory) {
-	this.sessionFactory = sessionFactory;
+    public void setUserId(String userId) {
+	this.userId = userId;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+	this.authenticated = authenticated;
     }
 
     @Override
-    public Class getHomePage() {
-	return IndexPage.class;
-    }
+    public LamusSession createSession(Application application, Request request, Response response) {
+	return new LamusSession(request) {
 
-    @Override
-    protected void init() {
-	super.init();
-	addComponentInstantiationListener(new SpringComponentInjector(this));
-    }
+	    @Override
+	    public String getUserId() {
+		return userId;
+	    }
 
-    @Override
-    public Session newSession(Request request, Response response) {
-	return sessionFactory.createSession(this, request, response);
+	    @Override
+	    public boolean isAuthenticated() {
+		return authenticated;
+	    }
+	};
     }
 }
