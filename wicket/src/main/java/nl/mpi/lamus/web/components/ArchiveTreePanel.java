@@ -17,7 +17,7 @@ import org.apache.wicket.markup.html.panel.Panel;
  */
 public abstract class ArchiveTreePanel<T extends ArchiveNode & Serializable> extends Panel {
 
-    private Tree archiveTree;
+    private final Tree archiveTree;
 
     public ArchiveTreePanel(String id, ArchiveNodeTreeModelProvider provider) {
 	super(id);
