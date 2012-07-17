@@ -14,34 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.pages;           
+package nl.mpi.lamus.web.components;
 
-import org.apache.wicket.ResourceReference;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
 
-/** 
+/**
  *
  * @author jeafer
- * @version 
  */
+public class ButtonPanel extends Panel {
 
-public class HeaderPanel extends Panel {
-
-    /**
-     * Construct.
-     * @param componentName name of the component
-     * @param exampleTitle title of the example
-     */
-
-    public HeaderPanel(String componentName, String exampleTitle)
-    {
+    public ButtonPanel(String componentName) {
         super(componentName);
-        add(new Label("exampleTitle", "Lamus2 Language Archive Management and Upload System"));
-        add(CSSPackageResource.getHeaderContribution(IndexPage.class,  "css/lams.css" ));
-        add(new Image("image", new ResourceReference(HeaderPanel.class, "lana.gif")));
     }
-
 }

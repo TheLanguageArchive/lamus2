@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.web.components.HeaderPanel;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
 

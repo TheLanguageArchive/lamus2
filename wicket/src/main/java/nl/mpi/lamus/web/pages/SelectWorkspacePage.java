@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.pages;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import nl.mpi.lamus.web.components.HeaderPanel;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.PageParameters;
@@ -30,7 +31,7 @@ import org.apache.wicket.markup.html.form.TextField;
  *
  * @author jeafer
  */
-public final class LamusSelectWorkspace extends WebPage {
+public final class SelectWorkspacePage extends WebPage {
 
     private Workspace ws;
     private String userID;
@@ -39,7 +40,7 @@ public final class LamusSelectWorkspace extends WebPage {
     
     private WorkspaceFactory wsFactory; // = new MockWSFactory()
 
-    public LamusSelectWorkspace(WorkspaceFactory workspaceFactory) throws MalformedURLException {
+    public SelectWorkspacePage(WorkspaceFactory workspaceFactory) throws MalformedURLException {
         super();
         this.wsFactory = workspaceFactory;
         
@@ -67,7 +68,7 @@ public final class LamusSelectWorkspace extends WebPage {
         add(nodeIdForm);
     }
 
-    public LamusSelectWorkspace(PageParameters params) {
+    public SelectWorkspacePage(PageParameters params) {
         //TODO:  process page parameters
         add(new HeaderPanel("headerpanel", "Welcome To Wicket"));
     }
