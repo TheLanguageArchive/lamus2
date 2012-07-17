@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.session;
 
 import org.apache.wicket.Request;
+import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebSession;
 
 /**
@@ -27,6 +28,10 @@ public abstract class LamusSession extends WebSession {
 
     public LamusSession(Request request) {
 	super(request);
+    }
+
+    public static LamusSession get() {
+	return (LamusSession) Session.get();
     }
 
     public abstract String getUserId();

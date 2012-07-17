@@ -21,6 +21,7 @@ import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
 import nl.mpi.archiving.tree.CorpusArchiveNode;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
+import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
@@ -92,8 +93,9 @@ public final class CreateWorkspacePage extends WebPage {
 
 	    @Override
 	    public void onSubmit() {
-		// TODO: Get userId out of session through some service
-		workspaceService.createWorkspace("userId", form.getModelObject().getNodeId());
+		final String currentUserId = LamusSession.get().getUserId();
+		final int selectedNodeId = form.getModelObject().getNodeId();
+		workspaceService.createWorkspace(currentUserId, selectedNodeId);
 	    }
 	};
 	form.add(submitButton);
