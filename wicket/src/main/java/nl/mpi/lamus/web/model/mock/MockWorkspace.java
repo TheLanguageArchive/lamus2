@@ -146,13 +146,13 @@ public class MockWorkspace implements Workspace {
     }
 
     public void setStatusMessageInitialising() {
-        setStatus(WorkspaceStatus.INITIALISING);
-        setMessage("Workspace initialising");
+	setStatus(WorkspaceStatus.INITIALISING);
+	setMessage("Workspace initialising");
     }
 
     public void setStatusMessageErrorDuringInitialisation() {
-        setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
-        setMessage("Error during initialisation");
+	setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+	setMessage("Error during initialisation");
     }
 
     @Override

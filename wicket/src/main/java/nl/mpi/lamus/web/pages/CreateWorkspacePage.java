@@ -22,6 +22,7 @@ import nl.mpi.archiving.tree.CorpusArchiveNode;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
@@ -30,6 +31,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -94,7 +96,11 @@ public final class CreateWorkspacePage extends LamusPage {
 	    public void onSubmit() {
 		final String currentUserId = LamusSession.get().getUserId();
 		final int selectedNodeId = form.getModelObject().getNodeId();
-		workspaceService.createWorkspace(currentUserId, selectedNodeId);
+		// Request a new workspace with workspace service
+		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
+		// Show page for newly created workspace
+		final WorkspacePage resultPage = new WorkspacePage(createdWorkspace);
+		setResponsePage(resultPage);
 	    }
 	};
 	form.add(submitButton);
