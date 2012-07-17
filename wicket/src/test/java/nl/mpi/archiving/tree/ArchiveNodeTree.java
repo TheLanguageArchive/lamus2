@@ -16,6 +16,7 @@
  */
 package nl.mpi.archiving.tree;
 
+import nl.mpi.archiving.tree.swingtree.ArchiveNodeTreeModel;
 import javax.swing.JFrame;
 import javax.swing.JTree;
 import org.jmock.Expectations;

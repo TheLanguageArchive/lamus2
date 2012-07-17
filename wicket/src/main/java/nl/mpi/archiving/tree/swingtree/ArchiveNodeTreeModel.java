@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.archiving.tree;
+package nl.mpi.archiving.tree.swingtree;
 
 import java.io.Serializable;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import nl.mpi.archiving.tree.ArchiveNode;
+import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
 
 /**
  *

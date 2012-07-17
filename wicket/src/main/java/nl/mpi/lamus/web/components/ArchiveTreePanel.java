@@ -5,7 +5,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import nl.mpi.archiving.tree.ArchiveNode;
 import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.ArchiveNodeTreeNodeWrapper;
+import nl.mpi.archiving.tree.swingtree.ArchiveNodeTreeNodeWrapper;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
