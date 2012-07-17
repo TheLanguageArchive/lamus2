@@ -16,22 +16,17 @@
 	<!-- TODO project name  -->
     <name>Lamus2 wicket interface</name>
     <description></description>
-	<!--
-		TODO <organization> <name>company name</name> <url>company url</url>
-		</organization>
-	-->
-<!--	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>-->
+    <organization> 
+	<name>Max Planck Institute for Psycholinguistics</name> 
+	<url>http://www.mpi.nl</url>
+    </organization>
+	
     <properties>
 	<wicket.version>1.4.20</wicket.version>
 	<jetty.version>6.1.25</jetty.version>
 	<slf4j.version>1.5.8</slf4j.version>
 	<log4j.version>1.2.14</log4j.version>
+	<netbeans.hint.license>gpl30</netbeans.hint.license>
     </properties>
     <dependencies>
 		<!--  WICKET DEPENDENCIES -->
