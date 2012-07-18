@@ -24,6 +24,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -46,6 +48,7 @@ public final class WorkspacePage extends LamusPage {
 
 	add(createWorkspaceInfo("workspaceInfo"));
 	add(createWorkspaceTreePanel("workspaceTree"));
+	add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
 
     private ArchiveTreePanel createWorkspaceTreePanel(String id) {
@@ -66,5 +69,39 @@ public final class WorkspacePage extends LamusPage {
 	wsInfo.add(new Label("workspaceID"));
 	wsInfo.add(new Label("status"));
 	return wsInfo;
+    }
+
+    /**
+     * Form that allows user to select actions on the current workspace
+     */
+    private class WorkspaceActionsForm extends Form<Workspace> {
+
+	public WorkspaceActionsForm(String id, IModel<Workspace> model) {
+	    super(id, model);
+
+	    final Button uploadFilesButton = new Button("uploadFilesButton") {
+
+		@Override
+		public void onSubmit() {
+		    handleUploadFiles();
+		}
+	    };
+	    add(uploadFilesButton);
+
+	    final Button requestStorageButton = new Button("requestStorageButton") {
+
+		@Override
+		public void onSubmit() {
+		    handleRequestStorage();
+		}
+	    };
+	    add(requestStorageButton);
+	}
+
+	private void handleUploadFiles() {
+	}
+
+	private void handleRequestStorage() {
+	}
     }
 }

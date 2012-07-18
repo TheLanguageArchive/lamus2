@@ -3,7 +3,7 @@
 <html xmlns:wicket="http://wicket.apache.org">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>WorkspacePage</title>
+        <title>Workspace</title>
         <link rel="stylesheet" type="text/css" href="style.css"/>
     </head>
     <body>
@@ -17,6 +17,18 @@
 	    <div>
 		<div wicket:id="workspaceTree">[WORKSPACE TREE]</div>
 	    </div>
+	    <form wicket:id="workspaceActionsForm">
+		<button wicket:id="uploadFilesButton" type="submit">Upload files</button>
+		<button wicket:id="requestStorageButton" type="submit">Request storage</button>
+		<button type="submit">Unlinked files</button>
+		<button type="submit">Submit workspace</button>
+		<button type="submit">Save and Logout</button>
+		<button type="submit">Delete Workspace</button>
+		<button type="submit">Help</button>
+		<button type="submit">Report a Bug</button>
+		<button type="submit">About</button>
+		<button type="submit">Main Page</button>
+	    </form>
 	</wicket:extend>
     </body>
 </html>
