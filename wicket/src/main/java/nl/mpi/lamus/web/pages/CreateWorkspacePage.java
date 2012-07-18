@@ -31,7 +31,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -43,7 +42,7 @@ public final class CreateWorkspacePage extends LamusPage {
     // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
-    @SpringBean
+    @SpringBean(name="createWorkspaceTreeProvider")
     private ArchiveNodeTreeModelProvider archiveTreeProvider;
     // Page components
     private final Form nodeIdForm;

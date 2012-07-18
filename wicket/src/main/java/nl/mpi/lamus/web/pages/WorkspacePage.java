@@ -16,11 +16,16 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.archiving.tree.ArchiveNode;
+import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
+import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  *
@@ -28,6 +33,10 @@ import org.apache.wicket.model.IModel;
  */
 public final class WorkspacePage extends LamusPage {
 
+    // Services to be injected
+    @SpringBean(name = "workspaceTreeProvider")
+    private ArchiveNodeTreeModelProvider workspaceTreeProvider;
+    // Page model
     private final IModel<Workspace> model;
 
     public WorkspacePage(Workspace workspace) {
@@ -35,6 +44,15 @@ public final class WorkspacePage extends LamusPage {
 
 	model = new CompoundPropertyModel<Workspace>(workspace);
 	add(createWorkspaceInfo("workspaceInfo"));
+
+	ArchiveTreePanel treePanel = new ArchiveTreePanel("workspaceTree", workspaceTreeProvider) {
+
+	    @Override
+	    protected void onNodeLinkClicked(AjaxRequestTarget target, ArchiveNode node) {
+		//TODO: Handle node
+	    }
+	};
+	add(treePanel);
     }
 
     private WebMarkupContainer createWorkspaceInfo(String id) {
