@@ -15,7 +15,9 @@
  */
 package nl.mpi.lamus.service;
 
+import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
  *
@@ -26,16 +28,27 @@ public interface WorkspaceService {
     
     
     /**
+     * Creates a workspace starting in a given archive node, for a given user.
      * 
-     * @param archiveNodeID
-     * @param userID
-     * @return 
+     * @param archiveNodeID archive ID of the node
+     * @param userID ID of the user
+     * @return Workspace object
      */
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
+    
     /**
+     * Retrieves a workspace from the database.
      * 
-     * @param workspaceID 
+     * @param workspaceID ID of the workspace to retrieve
+     * @return Retrieved workspace object
+     */
+    public Workspace getWorkspace(int workspaceID);
+    
+    /**
+     * Submits a workspace back into the archive.
+     * 
+     * @param workspaceID ID of the workspace
      */
     public void submitWorkspace(int workspaceID);
     

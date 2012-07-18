@@ -82,5 +82,9 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         //TODO workspaceManager - submit workspace
     }
+
+    public Workspace getWorkspace(int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }
