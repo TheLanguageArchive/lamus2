@@ -21,6 +21,7 @@ import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
 import nl.mpi.archiving.tree.CorpusArchiveNode;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
+import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
@@ -42,7 +43,7 @@ public final class CreateWorkspacePage extends LamusPage {
     // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
-    @SpringBean(name="createWorkspaceTreeProvider")
+    @SpringBean(name = "createWorkspaceTreeProvider")
     private ArchiveNodeTreeModelProvider archiveTreeProvider;
     // Page components
     private final Form nodeIdForm;
@@ -98,7 +99,7 @@ public final class CreateWorkspacePage extends LamusPage {
 		// Request a new workspace with workspace service
 		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
 		// Show page for newly created workspace
-		final WorkspacePage resultPage = new WorkspacePage(createdWorkspace);
+		final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
 		setResponsePage(resultPage);
 	    }
 	};

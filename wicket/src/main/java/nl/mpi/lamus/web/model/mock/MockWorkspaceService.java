@@ -35,12 +35,20 @@ public class MockWorkspaceService implements WorkspaceService {
 	this.workspace = workspace;
     }
 
+    @Override
     public Workspace createWorkspace(String userID, int archiveNodeID) {
 	logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
 	return workspace;
     }
 
+    @Override
     public void submitWorkspace(int workspaceID) {
 	logger.info("call to submitWorkspace({})", workspaceID);
+    }
+
+    @Override
+    public Workspace getWorkspace(int workspaceID) {
+	logger.info("call to getWorkspace({})", workspaceID);
+	return workspace;
     }
 }

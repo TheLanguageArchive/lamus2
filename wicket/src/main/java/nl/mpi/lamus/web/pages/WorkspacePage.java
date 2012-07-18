@@ -21,6 +21,7 @@ import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -39,24 +40,28 @@ public final class WorkspacePage extends LamusPage {
     // Page model
     private final IModel<Workspace> model;
 
-    public WorkspacePage(Workspace workspace) {
+    public WorkspacePage(IModel<Workspace> model) {
 	super();
+	this.model = model;
 
-	model = new CompoundPropertyModel<Workspace>(workspace);
 	add(createWorkspaceInfo("workspaceInfo"));
+	add(createWorkspaceTreePanel("workspaceTree"));
+    }
 
-	ArchiveTreePanel treePanel = new ArchiveTreePanel("workspaceTree", workspaceTreeProvider) {
+    private ArchiveTreePanel createWorkspaceTreePanel(String id) {
+	ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider) {
 
 	    @Override
 	    protected void onNodeLinkClicked(AjaxRequestTarget target, ArchiveNode node) {
 		//TODO: Handle node
 	    }
 	};
-	add(treePanel);
+	treePanel.setLinkType(LinkType.AJAX_FALLBACK);
+	return treePanel;
     }
 
     private WebMarkupContainer createWorkspaceInfo(String id) {
-	WebMarkupContainer wsInfo = new WebMarkupContainer(id, model);
+	WebMarkupContainer wsInfo = new WebMarkupContainer(id, new CompoundPropertyModel<Workspace>(model));
 	wsInfo.add(new Label("userID"));
 	wsInfo.add(new Label("workspaceID"));
 	wsInfo.add(new Label("status"));
