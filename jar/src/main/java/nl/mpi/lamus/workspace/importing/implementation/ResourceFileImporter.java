@@ -61,6 +61,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
     private Workspace workspace = null;
     
     @Autowired
+    @Qualifier("orphansDirectoryBaseName")
     private String orphansDirectoryBaseName;
     
     @Autowired

@@ -21,6 +21,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,13 +34,14 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
     private final AmsBridge amsBridge;
     
     @Autowired
+    @Qualifier("defaultMaxStorageSpaceInBytes")
     private long defaultMaxStorageSpaceInBytes;
     
     /**
      * 
      */
     @Autowired
-    LamusWorkspaceFactory(AmsBridge amsBridge) {
+    public LamusWorkspaceFactory(AmsBridge amsBridge) {
         this.amsBridge = amsBridge;
     }
     
@@ -62,6 +64,8 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
         
         Workspace workspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         //TODO set more values?
+        
+        //SET TOPNODEID?????
         
         return workspace;
         

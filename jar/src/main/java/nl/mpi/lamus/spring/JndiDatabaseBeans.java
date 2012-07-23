@@ -29,7 +29,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-//@Profile("production")
+@Profile("production")
 public class JndiDatabaseBeans {
     
     //TODO add these properties to some configuration file and load them here

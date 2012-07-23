@@ -40,7 +40,7 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
     private final WorkspaceDao workspaceDao;
     
     @Autowired
-    LamusNodeAccessChecker(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
+    public LamusNodeAccessChecker(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
         this.archiveObjectsDB = archiveObjectsDB;
         this.amsBridge = amsBridge;
         this.workspaceDao = workspaceDao;

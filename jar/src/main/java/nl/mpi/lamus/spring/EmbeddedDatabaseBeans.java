@@ -57,7 +57,7 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-//@Profile("testing")
+@Profile("testing")
 public class EmbeddedDatabaseBeans {
     
     private final static Logger logger = LoggerFactory.getLogger(EmbeddedDatabaseBeans.class);

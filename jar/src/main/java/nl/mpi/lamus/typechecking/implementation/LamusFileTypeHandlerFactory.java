@@ -28,6 +28,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,7 +44,8 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
     private final TypeMapper typeMapper;
     
     @Resource
-    private Map<File, File> customTypecheckerFolderToConfigFileMap;
+    @Qualifier("customTypecheckerFolderToConfigFileMap")
+    private Map<String, String> customTypecheckerFolderToConfigFileMap;
     
     @Autowired
     public LamusFileTypeHandlerFactory(FileTypeFactory fileTypeFactory, TypeMapper typeMapper) {
@@ -61,11 +63,13 @@ public class LamusFileTypeHandlerFactory implements FileTypeHandlerFactory {
             URL topNodeURL = workspace.getTopNodeArchiveURL();
             
             outerloop:
-            for(File folder : customTypecheckerFolderToConfigFileMap.keySet()) {
+            for(String folderStr : customTypecheckerFolderToConfigFileMap.keySet()) {
                 File temp = new File(topNodeURL.getPath());
                 while (temp != null) { // check if this folder is a parent of the temp
-                    if (temp.equals(folder)) {
-                        File relaxedTypeCheckConfigFile = customTypecheckerFolderToConfigFileMap.get(folder);
+                    if (temp.getPath().equals(folderStr)) {
+
+                        String relaxedTypeCheckConfigStr = customTypecheckerFolderToConfigFileMap.get(folderStr);
+                        File relaxedTypeCheckConfigFile = new File(relaxedTypeCheckConfigStr);
                         typeCheckerToUse = fileTypeFactory.getNewFileTypeWithConfigFile(relaxedTypeCheckConfigFile);
                         break outerloop;
                     }

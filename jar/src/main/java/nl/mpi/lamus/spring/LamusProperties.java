@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
@@ -32,6 +34,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  */
 @Configuration
 @PropertySource(value="classpath:application.properties")
+@Profile("production")
 public class LamusProperties {
     
     // otherwise the properties don't get automatically injected with the Value annotations
@@ -44,6 +47,7 @@ public class LamusProperties {
     @Value("${default_max_storage_space_in_megabytes}")
     private long defaultMaxStorageSpaceInMegabytes;
     @Bean
+    @Qualifier("defaultMaxStorageSpaceInBytes")
     public long defaultMaxStorageSpaceInBytes() {
         return defaultMaxStorageSpaceInMegabytes * 1024 * 1024;
     }
@@ -51,6 +55,7 @@ public class LamusProperties {
     @Value("${days_of_inactivity_allowed_since_last_session}")
     private int numberOfDaysOfInactivityAllowedSinceLastSession;
     @Bean
+    @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
     public int numberOfDaysOfInactivityAllowedSinceLastSession() {
         return numberOfDaysOfInactivityAllowedSinceLastSession;
     }
@@ -58,6 +63,7 @@ public class LamusProperties {
     @Value("${total_number_of_days_allowed_until_expiry}")
     private int totalNumberOfDaysAllowedUntilExpiry;
     @Bean
+    @Qualifier("totalNumberOfDaysAllowedUntilExpiry")
     public int totalNumberOfDaysAllowedUntilExpiry() {
         return totalNumberOfDaysAllowedUntilExpiry;
     }
@@ -65,6 +71,7 @@ public class LamusProperties {
     @Value("${number_of_days_of_inactivity_allowed_since_last_warning_email}")
     private int numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
     @Bean
+    @Qualifier("numberOfDaysOfInactivityAllowedSinceLastWarningEmail")
     public int numberOfDaysOfInactivityAllowedSinceLastWarningEmail() {
         return numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
     }
@@ -72,6 +79,7 @@ public class LamusProperties {
     @Value("${type_recheck_size_limit_in_megabytes}")
     private long typeRecheckSizeLimitInMegabytes;
     @Bean
+    @Qualifier("typeRecheckSizeLimitInBytes")
     public long typeRecheckSizeLimitInBytes() {
         return typeRecheckSizeLimitInMegabytes * 1024 * 1024;
     }
@@ -79,6 +87,7 @@ public class LamusProperties {
     @Value("${max_directory_name_length}")
     private int maxDirectoryNameLength;
     @Bean
+    @Qualifier("maxDirectoryNameLength")
     public int maxDirectoryNameLength() {
         return maxDirectoryNameLength;
     }
@@ -86,6 +95,7 @@ public class LamusProperties {
     @Value("${corpus_directory_base_name}")
     private String corpusDirectoryBaseName;
     @Bean
+    @Qualifier("corpusDirectoryBaseName")
     public String corpusDirectoryBaseName() {
         return corpusDirectoryBaseName;
     }
@@ -93,6 +103,7 @@ public class LamusProperties {
     @Value("${orphans_directory_base_name}")
     private String orphansDirectoryBaseName;
     @Bean
+    @Qualifier("orphansDirectoryBaseName")
     public String orphansDirectoryBaseName() {
         return orphansDirectoryBaseName;
     }
@@ -100,6 +111,7 @@ public class LamusProperties {
     @Value("${workspace_base_directory}")
     private String workspaceBaseDirectory;
     @Bean
+    @Qualifier("workspaceBaseDirectory")
     public File workspaceBaseDirectory() {
         return new File(workspaceBaseDirectory);
     }
@@ -107,23 +119,25 @@ public class LamusProperties {
     @Value("${custom_typechecker_config_files_and_folders}")
     private String customTypecheckerFoldersAndConfigFiles;
     @Bean
-    public Map<File, File> customTypecheckerFolderToConfigFileMap() {
+    @Qualifier("customTypecheckerFolderToConfigFileMap")
+    public Map<String, String> customTypecheckerFolderToConfigFileMap() {
         
         //TODO Check the validity of the string (with regular expressions, for instance)
         
-        Map<File, File> mapToReturn = new HashMap<File, File>();
+        Map<String, String> mapToReturn = new HashMap<String, String>();
         
         String[] foldersAndConfigFilesArray = customTypecheckerFoldersAndConfigFiles.split(";");
         for(String foldersAndConfigFile : foldersAndConfigFilesArray) {
             String[] foldersAndConfigFileSeparated = foldersAndConfigFile.split("=");
             if(foldersAndConfigFileSeparated.length == 2) {
                 String configFileValue = foldersAndConfigFileSeparated[1];
-                File configFile = new File(configFileValue);
+//                File configFile = new File(configFileValue);
                 String[] foldersKey = foldersAndConfigFileSeparated[0].split(",");
                 if(foldersKey.length > 0) {
                     for(String folderKey : foldersKey) {
-                        File folder = new File(folderKey);
-                        mapToReturn.put(folder, configFile);
+//                        File folder = new File(folderKey);
+//                        mapToReturn.put(folder, configFile);
+                        mapToReturn.put(folderKey, configFileValue);
                     }
                 }
             }
