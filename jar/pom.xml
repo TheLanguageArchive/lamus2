@@ -17,10 +17,6 @@
     <name>LAMUS 2 (JAR)</name>
     <description>LAMUS 2</description>
 
-    <properties>
-        <jbehave.version>3.6-beta-3</jbehave.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -36,8 +32,13 @@
         <dependency>
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-core</artifactId>
-            <version>${jbehave.version}</version>
+            <version>3.6.8</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-spring</artifactId>
+            <version>3.6.8</version>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
@@ -77,13 +78,13 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>3.1.2.RELEASE</version>
+            <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
             <version>3.1.2.RELEASE</version>
-            <type>jar</type>
         </dependency>
 <!--        <dependency>
             <groupId>org.hibernate</groupId>
@@ -174,18 +175,20 @@
             <plugin>
                 <groupId>org.jbehave</groupId>
                 <artifactId>jbehave-maven-plugin</artifactId>
-                <version>${jbehave.version}</version>
+                <version>3.6.8</version>
                 <executions>
                     <execution>
                         <id>run-stories-as-embeddables</id>
                         <phase>integration-test</phase>
                         <configuration>
-                            <scope>test</scope>
+<!--                            <scope>test</scope>-->
                             <includes>
                                 <include>**/stories/*.java</include>
                             </includes>
                             <excludes>
                                 <exclude>**/stories/*ParentStory.java</exclude>
+                                <exclude>**/stories/Test*.java</exclude>
+                                <exclude>**/stories/*Config*.java</exclude>
                                 <exclude>**/stories/*Steps.java</exclude>
                             </excludes>
                             <!-- <metaFilters> -->
@@ -204,6 +207,8 @@
                         </configuration>
                         <goals>
                             <goal>run-stories-as-embeddables</goal>
+<!--                            <goal>run-stories-with-annotated-embedder</goal>-->
+
                         </goals>
                     </execution>
                 </executions>
