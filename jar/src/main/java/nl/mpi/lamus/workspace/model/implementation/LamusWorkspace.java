@@ -252,6 +252,12 @@ public class LamusWorkspace implements Workspace {
         setMessage("Error during initialisation");
         //TODO Change message, move to properties file
     }
+    
+    public void setStatusMessageInitialised() {
+        setStatus(WorkspaceStatus.INITIALISED);
+        setMessage("Workspace successfully initialised");
+        //TODO Change message, move to properties file
+    }
 
     public String getArchiveInfo() {
         return this.archiveInfo;

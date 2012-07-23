@@ -83,9 +83,13 @@ public class WorkspaceImportRunner implements Runnable{
             //TODO or have a separate method for importing the top node
             topNodeImporter.importFile(null, null, null, topNodeArchiveID);
 
-
             
             //TODO import successful? notify main thread, change workspace status, etc...
+            // no exceptions, so it was successful ?
+            
+            workspace.setStatusMessageInitialised();
+            workspaceDao.updateWorkspaceStatusMessage(workspace);
+            
         } catch (FileImporterException fiex) {
             String errorMessage = "Error during file import.";
                 //TODO LOG PROPERLY

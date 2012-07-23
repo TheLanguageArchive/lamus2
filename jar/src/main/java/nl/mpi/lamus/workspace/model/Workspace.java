@@ -84,6 +84,8 @@ public interface Workspace extends Serializable {
     
     public void setStatusMessageErrorDuringInitialisation();
     
+    public void setStatusMessageInitialised();
+    
     public String getArchiveInfo();
     
     public void setArchiveInfo(String archiveInfo);
