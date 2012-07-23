@@ -58,7 +58,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 //@ContextConfiguration(classes = {LamusBeansTestConfig.class}, loader = AnnotationConfigContextLoader.class)
 @ContextConfiguration(//classes = {/*Ams2Bridge.class, PrincipalServiceTestBeans.class, */LamusBeans.class, LamusJdbcWorkspaceDao.class, /*Ams2Bridge.class, EmbeddedDatabaseBeans.class*/},
     loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusBeansTest {
     
 //    @Configuration

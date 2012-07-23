@@ -49,6 +49,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -62,7 +63,7 @@ import org.xml.sax.SAXException;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusWorkspaceFileHandlerTest {
     
     private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
@@ -75,6 +76,7 @@ public class LamusWorkspaceFileHandlerTest {
     @Autowired
     private WorkspaceFileHandler workspaceFileHandler;
     @Autowired
+    @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     
     @Mock private MetadataAPI mockMetadataAPI;

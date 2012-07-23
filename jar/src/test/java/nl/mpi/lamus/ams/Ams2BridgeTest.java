@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -57,11 +58,12 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(locations={"Ams2BridgeTest-context.xml", "Ams2BridgeTest_authentication-context.xml", "Ams2BridgeTest_core-context.xml"})
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class Ams2BridgeTest {
     
     @Configuration
     @ComponentScan("nl.mpi.lamus.ams")
+    @Profile("testing")
     static class ContextConfiguration {
         
         @Bean

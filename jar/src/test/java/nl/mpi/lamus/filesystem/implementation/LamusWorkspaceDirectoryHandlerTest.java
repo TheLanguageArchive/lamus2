@@ -30,6 +30,7 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,7 +43,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusWorkspaceDirectoryHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
@@ -51,6 +52,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     @Autowired
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     @Autowired
+    @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     
     public LamusWorkspaceDirectoryHandlerTest() {

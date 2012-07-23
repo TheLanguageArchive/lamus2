@@ -36,6 +36,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -49,7 +50,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusTypecheckingTestProperties.class, LamusTypecheckingTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusFileTypeHandlerFactoryTest {
     
     public @Rule JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -59,9 +60,10 @@ public class LamusFileTypeHandlerFactoryTest {
     @Autowired
     private FileTypeHandlerFactory factory;
     @Resource
-    private Map<File, File> customTypecheckerFolderToConfigFileMap;
+    @Qualifier("customTypecheckerFolderToConfigFileMap")
+    private Map<String, String> customTypecheckerFolderToConfigFileMap;
     
-    private Map<File, File> mapBackup;
+    private Map<String, String> mapBackup;
     
     @Mock Workspace mockWorkspace;
     @Mock FileTypeFactory mockFileTypeFactory;
@@ -156,10 +158,11 @@ public class LamusFileTypeHandlerFactoryTest {
     @Test
     public void getNewFileTypeHandlerForWorkspaceWithMapContainingMatchingWorkspaceURL() {
         
-        Map<File, File> map = new HashMap<File, File>();
-        File matchingFolder = new File(testArchivePath);
-        final File configFile = new File("someother_filetypes.txt");
-        map.put(matchingFolder, configFile);
+        Map<String, String> map = new HashMap<String, String>();
+//        File matchingFolder = new File(testArchivePath);
+        final String configFileStr = "someother_filetypes.txt";
+        final File configFile = new File(configFileStr);
+        map.put(testArchivePath, configFileStr);
         ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
         
         context.checking(new Expectations() {{
@@ -176,10 +179,11 @@ public class LamusFileTypeHandlerFactoryTest {
     @Test
     public void getNewFileTypeHandlerForWorkspaceWithMapContainingParentOfWorkspaceURL() {
         
-        Map<File, File> map = new HashMap<File, File>();
-        File matchingFolder = new File(testArchivePath);
-        final File configFile = new File("someother_filetypes.txt");
-        map.put(matchingFolder, configFile);
+        Map<String, String> map = new HashMap<String, String>();
+//        File matchingFolder = new File(testArchivePath);
+        final String configFileStr = "someother_filetypes.txt";
+        final File configFile = new File(configFileStr);
+        map.put(testArchivePath, configFileStr);
         ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
         
         context.checking(new Expectations() {{
@@ -196,10 +200,11 @@ public class LamusFileTypeHandlerFactoryTest {
     @Test
     public void getNewFileTypeHandlerForWorkspaceWithRetrievedTypeCheckerNull() {
         
-        Map<File, File> map = new HashMap<File, File>();
-        File matchingFolder = new File(testArchivePath);
-        final File configFile = new File("someother_filetypes.txt");
-        map.put(matchingFolder, configFile);
+        Map<String, String> map = new HashMap<String, String>();
+//        File matchingFolder = new File(testArchivePath);
+        final String configFileStr = "someother_filetypes.txt";
+        final File configFile = new File(configFileStr);
+        map.put(testArchivePath, configFileStr);
         ReflectionTestUtils.setField(factory, "customTypecheckerFolderToConfigFileMap", map);
         
         context.checking(new Expectations() {{

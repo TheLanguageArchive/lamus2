@@ -13,12 +13,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.stories;
+package nl.mpi.lamus.workspace.stories.test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class SubmitWorkspace extends WorkspaceParentStory {
+//@Component
+public class TestBean {
     
+    private String testString;
+    
+    @Autowired
+    public TestBean(String testString) {
+        this.testString = testString;
+    }
+    
+    public String getTestString() {
+        return this.testString;
+    }
 }

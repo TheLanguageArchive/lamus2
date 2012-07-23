@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -38,29 +39,39 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusProperties.class}, loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("production")
 public class LamusPropertiesTest {
     
     @Autowired
+    @Qualifier("defaultMaxStorageSpaceInBytes")
     private long defaultMaxStorageSpaceInBytes;
     @Autowired
+    @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
     private int numberOfDaysOfInactivityAllowedSinceLastSession;
     @Autowired
+    @Qualifier("totalNumberOfDaysAllowedUntilExpiry")
     private int totalNumberOfDaysAllowedUntilExpiry;
     @Autowired
+    @Qualifier("numberOfDaysOfInactivityAllowedSinceLastWarningEmail")
     private int numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
     @Autowired
+    @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
     @Autowired
+    @Qualifier("maxDirectoryNameLength")
     private int maxDirectoryNameLength;
     @Autowired
+    @Qualifier("corpusDirectoryBaseName")
     private String corpusDirectoryBaseName;
     @Autowired
+    @Qualifier("orphansDirectoryBaseName")
     private String orphansDirectoryBaseName;
     @Autowired
+    @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     @Resource
-    private Map<File, File> customTypecheckerFolderToConfigFileMap;
+    @Qualifier("customTypecheckerFolderToConfigFileMap")
+    private Map<String, String> customTypecheckerFolderToConfigFileMap;
     
     public LamusPropertiesTest() {
     }
@@ -114,18 +125,18 @@ public class LamusPropertiesTest {
         String expectedWorkspaceBaseDirectoryPath = "/lat/corpora/lamus/LAMS_WORKSPACE";
         assertEquals(expectedWorkspaceBaseDirectoryPath, workspaceBaseDirectory.getPath());
         
-        File typecheckerFolder1 = new File("folder1");
-        File typecheckerFolder2 = new File("folder2");
-        File typecheckerConfigFile1 = new File("config_file1");
-        File typecheckerFolder3 = new File("folder3");
-        File typecheckerFolder4 = new File("folder4");
-        File typecheckerConfigFile2 = new File("config_file2");
+//        File typecheckerFolder1 = new File("folder1");
+//        File typecheckerFolder2 = new File("folder2");
+//        File typecheckerConfigFile1 = new File("config_file1");
+//        File typecheckerFolder3 = new File("folder3");
+//        File typecheckerFolder4 = new File("folder4");
+//        File typecheckerConfigFile2 = new File("config_file2");
         
-        Map<File, File> expectedCustomTypecheckerConfigMap = new HashMap<File, File>();
-        expectedCustomTypecheckerConfigMap.put(typecheckerFolder1, typecheckerConfigFile1);
-        expectedCustomTypecheckerConfigMap.put(typecheckerFolder2, typecheckerConfigFile1);
-        expectedCustomTypecheckerConfigMap.put(typecheckerFolder3, typecheckerConfigFile2);
-        expectedCustomTypecheckerConfigMap.put(typecheckerFolder4, typecheckerConfigFile2);
+        Map<String, String> expectedCustomTypecheckerConfigMap = new HashMap<String, String>();
+        expectedCustomTypecheckerConfigMap.put("folder1", "config_file1");
+        expectedCustomTypecheckerConfigMap.put("folder2", "config_file1");
+        expectedCustomTypecheckerConfigMap.put("folder3", "config_file2");
+        expectedCustomTypecheckerConfigMap.put("folder4", "config_file2");
         assertEquals(expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
     }
 }

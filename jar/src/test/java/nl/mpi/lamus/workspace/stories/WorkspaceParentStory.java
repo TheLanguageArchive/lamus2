@@ -33,15 +33,29 @@ import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InstanceStepsFactory;
 import org.jbehave.core.steps.SilentStepMonitor;
+import org.jbehave.core.steps.spring.SpringStepsFactory;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {WorkspaceStoriesConfig.class}, loader = AnnotationConfigContextLoader.class)
 public class WorkspaceParentStory extends JUnitStory {
 
-    public WorkspaceParentStory() {
+    @Autowired
+    private ApplicationContext context;
+    
+//    public WorkspaceParentStory() {
 
+    private void temporarilyNotUsedMethod() {
+    
         // start with default configuration, overriding only the elements that are needed
         StoryPathResolver storyPathResolver = new UnderscoredCamelCaseResolver(".story");
 //            storyPathResolver.resolve(storyClass);
@@ -74,5 +88,22 @@ public class WorkspaceParentStory extends JUnitStory {
     protected List<CandidateSteps> createSteps(Configuration configuration) {
         return new InstanceStepsFactory(configuration,
                 new WorkspaceSteps()).createCandidateSteps();
+    }
+    
+    
+//    @After
+//    public void cleanData() {
+//        jdbc.execute("truncate schema PUBLIC and commit");
+//    }
+    
+    
+    @Override
+    public Configuration configuration() {
+        return new MostUsefulConfiguration();
+    }
+    
+    @Override
+    public List<CandidateSteps> candidateSteps() {
+        return new SpringStepsFactory(configuration(), context).createCandidateSteps();
     }
 }

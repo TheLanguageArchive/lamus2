@@ -2,6 +2,7 @@ package nl.mpi.lamus.typechecking;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /*
  * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan({"nl.mpi.lamus.typechecking", "nl.mpi.lamus.workspace.model"})
+@Profile("testing")
 public class LamusTypecheckingTestBeans {
     
 }

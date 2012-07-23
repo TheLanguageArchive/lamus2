@@ -666,4 +666,8 @@ class SomeOtherWorkspace implements Workspace {
     public void setStatusMessageErrorDuringInitialisation() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void setStatusMessageInitialised() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

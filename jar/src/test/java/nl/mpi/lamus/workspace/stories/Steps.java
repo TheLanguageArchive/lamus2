@@ -1,10 +1,3 @@
-package nl.mpi.lamus.filesystem;
-
-
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
 /*
  * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
  *
@@ -20,14 +13,19 @@ import org.springframework.context.annotation.Profile;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package nl.mpi.lamus.workspace.stories;
+
+import java.lang.annotation.*;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Configuration
-@ComponentScan("nl.mpi.lamus.filesystem")
-@Profile("testing")
-public class LamusFilesystemTestBeans {
+@Target(value = ElementType.TYPE)
+@Retention(value = RetentionPolicy.RUNTIME)
+@Documented
+@Component
+public @interface Steps {
     
 }

@@ -25,7 +25,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import javax.sql.DataSource;
-import nl.mpi.lamus.dao.LamusJdbcWorkspaceDaoTestBeans;
 import nl.mpi.lamus.spring.EmbeddedDatabaseBeans;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
@@ -39,6 +38,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
@@ -60,11 +60,12 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(/*classes = {LamusJdbcWorkspaceDao.class, EmbeddedDatabaseBeans.classLamusJdbcWorkspaceDaoTestBeans.class}, */
         loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4SpringContextTests {
     
     @Configuration
     @ComponentScan("nl.mpi.lamus.dao")
+    @Profile("testing")
     static class DataSourceConfig {
         
         @Bean
@@ -80,7 +81,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Configuration
-//    @ComponentScan({"nl.mpi.lamus.dao", "nl.mpi.lamus.spring"})
+//    @ComponentScan("nl.mpi.lamus.dao")
     static class TransactionManagerConfig {
         
         @Autowired

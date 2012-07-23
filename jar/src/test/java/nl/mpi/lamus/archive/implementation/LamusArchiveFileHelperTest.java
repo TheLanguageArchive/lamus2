@@ -29,9 +29,11 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -44,29 +46,34 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
         loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
+@ActiveProfiles("testing")
 public class LamusArchiveFileHelperTest {
     
     @Configuration
     @ComponentScan("nl.mpi.lamus.archive")
+    @Profile("testing")
     static class ContextConfiguration {
         
         @Bean
+        @Qualifier("maxDirectoryNameLength")
         public int maxDirectoryNameLength() {
             return 50;
         }
 
         @Bean
+        @Qualifier("corpusDirectoryBaseName")
         public String corpusDirectoryBaseName() {
             return "Corpusstructure";
         }
 
         @Bean
+        @Qualifier("orphansDirectoryBaseName")
         public String orphansDirectoryBaseName() {
             return "sessions";
         }
 
         @Bean
+        @Qualifier("typeRecheckSizeLimitInBytes")
         public long typeRecheckSizeLimitInBytes() {
             return 8L * 1024 * 1024;
         }
@@ -82,12 +89,16 @@ public class LamusArchiveFileHelperTest {
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Autowired
+    @Qualifier("maxDirectoryNameLength")
     private int maxDirectoryNameLength;
     @Autowired
+    @Qualifier("corpusDirectoryBaseName")
     private String corpusDirectoryBaseName;
     @Autowired
+    @Qualifier("orphansDirectoryBaseName")
     private String orphansDirectoryBaseName;
     @Autowired
+    @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
     
     

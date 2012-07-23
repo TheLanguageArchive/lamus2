@@ -51,8 +51,11 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -62,9 +65,21 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {ResourceFileImporterTestProperties.class},
+@ContextConfiguration(//classes = {ResourceFileImporterTestProperties.class},
         loader = AnnotationConfigContextLoader.class)
+@ActiveProfiles("testing")
 public class ResourceFileImporterTest {
+    
+    @Configuration
+    @Profile("testing")
+    static class ResourceFileImporterTestProperties {
+        
+        @Bean
+        @Qualifier("orphansDirectoryBaseName")
+        public String orphansDirectoryBaseName() {
+            return "sessions";
+        }
+    }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
@@ -314,14 +329,5 @@ public class ResourceFileImporterTest {
 
         
         fileImporter.importFile(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
-    }
-}
-
-@Configuration
-class ResourceFileImporterTestProperties {
-    
-    @Bean
-    public String orphansDirectoryBaseName() {
-        return "sessions";
     }
 }
