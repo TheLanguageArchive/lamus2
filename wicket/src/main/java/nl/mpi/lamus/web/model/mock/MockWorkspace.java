@@ -41,117 +41,148 @@ public class MockWorkspace implements Workspace {
     private String message;
     private String archiveInfo;
 
+    @Override
     public String getArchiveInfo() {
 	return archiveInfo;
     }
 
+    @Override
     public void setArchiveInfo(String archiveInfo) {
 	this.archiveInfo = archiveInfo;
     }
 
+    @Override
     public Date getEndDate() {
 	return endDate;
     }
 
+    @Override
     public void setEndDate(Date endDate) {
 	this.endDate = endDate;
     }
 
+    @Override
     public long getMaxStorageSpace() {
 	return maxStorageSpace;
     }
 
+    @Override
     public void setMaxStorageSpace(long maxStorageSpace) {
 	this.maxStorageSpace = maxStorageSpace;
     }
 
+    @Override
     public String getMessage() {
 	return message;
     }
 
+    @Override
     public void setMessage(String message) {
 	this.message = message;
     }
 
+    @Override
     public Date getSessionEndDate() {
 	return sessionEndDate;
     }
 
+    @Override
     public void setSessionEndDate(Date sessionEndDate) {
 	this.sessionEndDate = sessionEndDate;
     }
 
+    @Override
     public Date getSessionStartDate() {
 	return sessionStartDate;
     }
 
+    @Override
     public void setSessionStartDate(Date sessionStartDate) {
 	this.sessionStartDate = sessionStartDate;
     }
 
+    @Override
     public Date getStartDate() {
 	return startDate;
     }
 
+    @Override
     public void setStartDate(Date startDate) {
 	this.startDate = startDate;
     }
 
+    @Override
     public URL getTopNodeArchiveURL() {
 	return topNodeArchiveURL;
     }
 
+    @Override
     public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
 	this.topNodeArchiveURL = topNodeArchiveURL;
     }
 
+    @Override
     public int getTopNodeID() {
 	return topNodeID;
     }
 
+    @Override
     public void setTopNodeID(int topNodeID) {
 	this.topNodeID = topNodeID;
     }
 
+    @Override
     public long getUsedStorageSpace() {
 	return usedStorageSpace;
     }
 
+    @Override
     public void setUsedStorageSpace(long usedStorageSpace) {
 	this.usedStorageSpace = usedStorageSpace;
     }
 
+    @Override
     public String getUserID() {
 	return userID;
     }
 
+    @Override
     public void setUserID(String userID) {
 	this.userID = userID;
     }
 
+    @Override
     public int getWorkspaceID() {
 	return workspaceID;
     }
 
+    @Override
     public void setWorkspaceID(int workspaceID) {
 	this.workspaceID = workspaceID;
     }
 
+    @Override
     public WorkspaceStatus getStatus() {
 	return status;
     }
 
+    @Override
     public void setStatus(WorkspaceStatus status) {
 	this.status = status;
     }
 
+    @Override
     public void setStatusMessageInitialising() {
-	setStatus(WorkspaceStatus.INITIALISING);
 	setMessage("Workspace initialising");
     }
 
+    @Override
+    public void setStatusMessageInitialised() {
+	setMessage("Workspace initialised");
+    }
+
+    @Override
     public void setStatusMessageErrorDuringInitialisation() {
-	setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
 	setMessage("Error during initialisation");
     }
 
