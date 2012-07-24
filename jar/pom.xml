@@ -27,18 +27,41 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.10</version>
-            <scope>test</scope>
+<!--            <scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-core</artifactId>
             <version>3.6.8</version>
-            <scope>test</scope>
+<!--            <scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-spring</artifactId>
             <version>3.6.8</version>
+<!--            <scope>test</scope>-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-context</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-aop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-expression</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-asm</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
@@ -170,7 +193,7 @@
         
     </dependencies>
 
-    <build>
+<!--    <build>
         <plugins>
             <plugin>
                 <groupId>org.jbehave</groupId>
@@ -181,7 +204,7 @@
                         <id>run-stories-as-embeddables</id>
                         <phase>integration-test</phase>
                         <configuration>
-<!--                            <scope>test</scope>-->
+                            <scope>test</scope>
                             <includes>
                                 <include>**/stories/*.java</include>
                             </includes>
@@ -190,11 +213,12 @@
                                 <exclude>**/stories/Test*.java</exclude>
                                 <exclude>**/stories/*Config*.java</exclude>
                                 <exclude>**/stories/*Steps.java</exclude>
+                                <exclude>**/stories/OldCreateWorkspace.java</exclude>
                             </excludes>
-                            <!-- <metaFilters> -->
-                            <!-- <metaFilter>+author *</metaFilter> -->
-                            <!-- <metaFilter>-skip</metaFilter> -->
-                            <!-- </metaFilters> -->
+                             <metaFilters> 
+                             <metaFilter>+author *</metaFilter> 
+                             <metaFilter>-skip</metaFilter> 
+                             </metaFilters> 
                             <systemProperties>
                                 <property>
                                     <name>java.awt.headless</name>
@@ -207,7 +231,8 @@
                         </configuration>
                         <goals>
                             <goal>run-stories-as-embeddables</goal>
-<!--                            <goal>run-stories-with-annotated-embedder</goal>-->
+                            <goal>run-stories-with-annotated-embedder</goal>
+                            <goal>run-stories-as-paths</goal>
 
                         </goals>
                     </execution>
@@ -222,6 +247,6 @@
             </plugin>
 
         </plugins>
-    </build>
+    </build>-->
 
 </project>
