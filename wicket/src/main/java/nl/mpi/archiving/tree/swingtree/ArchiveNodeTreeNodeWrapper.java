@@ -28,9 +28,18 @@ import nl.mpi.archiving.tree.ArchiveNode;
 public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
     private final ArchiveNode archiveNode;
+    private final TreeNode parent;
 
+    /**
+     * Creates a parentless tree node ({@link #getParent() } will return null)
+     */
     public ArchiveNodeTreeNodeWrapper(ArchiveNode archiveNode) {
+	this(archiveNode, null);
+    }
+
+    public ArchiveNodeTreeNodeWrapper(ArchiveNode archiveNode, TreeNode parent) {
 	this.archiveNode = archiveNode;
+	this.parent = parent;
     }
 
     public ArchiveNode getArchiveNode() {
@@ -39,7 +48,7 @@ public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
     @Override
     public TreeNode getChildAt(int childIndex) {
-	return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(childIndex));
+	return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(childIndex), this);
     }
 
     @Override
@@ -49,12 +58,7 @@ public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
     @Override
     public TreeNode getParent() {
-	final ArchiveNode parent = archiveNode.getParent();
-	if (parent == null) {
-	    return null;
-	} else {
-	    return new ArchiveNodeTreeNodeWrapper(parent);
-	}
+	return parent;
     }
 
     @Override
@@ -85,7 +89,7 @@ public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
 	    @Override
 	    public Object nextElement() {
-		return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(index++));
+		return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(index++), ArchiveNodeTreeNodeWrapper.this);
 	    }
 	};
     }
