@@ -18,11 +18,29 @@ package nl.mpi.lamus.web.pages;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import nl.mpi.archiving.tree.ArchiveNode;
+import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
+import nl.mpi.archiving.tree.CorpusArchiveNode;
+import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.components.ArchiveTreePanel;
+import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.ListChoice;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  *
@@ -30,37 +48,64 @@ import org.apache.wicket.markup.html.form.TextField;
  */
 public final class SelectWorkspacePage extends LamusPage {
 
-    private Workspace ws;
-    private String userID;
-    private int topNodeID;
-
+    @SpringBean
+    private WorkspaceService workspaceService;
+    @SpringBean(name = "workspaceSelectTreeProvider")
+    private ArchiveNodeTreeModelProvider openedArchiveTreeProvider;
+    private final Form nodeIdForm;
     
-    private WorkspaceFactory wsFactory; // = new MockWSFactory()
+            //single list choice
+        private static final List<String> WORKSPACES = Arrays.asList(new String[] {
+			"3", "2", "1" });
+        private String selectedWorkspace = "2";
 
-    public SelectWorkspacePage(WorkspaceFactory workspaceFactory) throws MalformedURLException {
+    public SelectWorkspacePage() {
         super();
-        this.wsFactory = workspaceFactory;
+        nodeIdForm = createNodeIdForm("workspaceForm");      
+    }
+
+
+    private Form createNodeIdForm(String id) { 
+ListChoice<String> listWorkspaces = new ListChoice<String>("workspace",
+				new PropertyModel<String>(this, "selectedWorkspace"), WORKSPACES);
         
-        //add(new ButtonPage("buttonpage"));
-        Form nodeIdForm = new Form("workspaceForm");
-        final TextField wsid = new TextField("workspaceId");
-        final TextField userid = new TextField("userId");
-        final TextField topnodeid = new TextField("topnodeId");
+        listWorkspaces.setMaxRows(5);
+        final Form<Workspace> form = new Form<Workspace>(id);
+//        form.add(new Label("name"));
+//        form.add(new Label("nodeId"));
+        //form.add(new Label("workspaceId"));
+//        form.add(new Label("userId"));
+//                form.add(new Label("topnodeId"));
+//        form.add(new Label("topnodearchiveurl"));
+//        final TextField wsid = new TextField("workspaceId");
+//        final TextField userid = new TextField("userId");
+//        final TextField topnodeid = new TextField("topnodeId");
         //final TextField topnodearchiveurl = new TextField("topnodearchiveurl", new Model<URL>(topNodeArchiveURL));
-        final TextField<URL> topnodearchiveurl = new TextField<URL>("topnodearchiveurl");
-        nodeIdForm.add(wsid);
-        nodeIdForm.add(userid);
-        nodeIdForm.add(topnodeid);
-        nodeIdForm.add(topnodearchiveurl);
-        add(nodeIdForm);
+//        final TextField<URL> topnodearchiveurl = new TextField<URL>("topnodearchiveurl");
+//        form.add(wsid);
+//        form.add(userid);
+//        form.add(topnodeid);
+//        form.add(topnodearchiveurl);
         Button submitButton = new Button("OpenWorkspace") {
 
             @Override
             public void onSubmit() {
-                Workspace newWorkspace = wsFactory.getNewWorkspace(userID, topNodeID);
+                // Request a workspace with workspace service
+                final Workspace openSelectedWorkspace = workspaceService.getWorkspace(Integer.parseInt(selectedWorkspace));
+                // Show page for newly created workspace
+                final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(openSelectedWorkspace));
+                setResponsePage(resultPage);
             }
         };
-        nodeIdForm.add(submitButton);
-        add(nodeIdForm);
+        form.add(submitButton);
+        form.add(listWorkspaces);
+
+        // Put details/submit form in container for refresh through AJAX 
+        final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
+        formContainer.add(form);
+        // Add container to page
+        add(formContainer);
+        return form;
+
     }
 }

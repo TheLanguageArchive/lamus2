@@ -7,28 +7,38 @@
         <link rel="stylesheet" type="text/css" href="style.css"/>
     </head>
     <body>
-	<wicket:extend>
-	    <div wicket:id="workspaceInfo">
-		<h1>Workspace information</h1>
-		<p>User id: <span wicket:id="userID">user1</span></p>
-		<p>Id: <span wicket:id="workspaceID">123</span></p>
-		<p>Status: <span wicket:id="status">STATUS</span></p>
-	    </div>
-	    <div>
-		<div wicket:id="workspaceTree">[WORKSPACE TREE]</div>
-	    </div>
-	    <form wicket:id="workspaceActionsForm">
-		<button wicket:id="uploadFilesButton" type="submit">Upload files</button>
-		<button wicket:id="requestStorageButton" type="submit">Request storage</button>
-		<button type="submit">Unlinked files</button>
-		<button type="submit">Submit workspace</button>
-		<button type="submit">Save and Logout</button>
-		<button type="submit">Delete Workspace</button>
-		<button type="submit">Help</button>
-		<button type="submit">Report a Bug</button>
-		<button type="submit">About</button>
-		<button type="submit">Main Page</button>
-	    </form>
-	</wicket:extend>
+        <wicket:extend>
+            <form wicket:id="workspaceActionsForm">
+                <button wicket:id="uploadFilesButton" type="submit">Upload files</button>
+                <button wicket:id="requestStorageButton" type="submit">Request storage</button>
+                <button wicket:id="unlinkedFilesButton" type="submit">Unlinked files</button>
+                <button type="submit">Submit workspace</button>
+                <button type="submit">Save and Logout</button>
+                <button type="submit">Delete Workspace</button>
+                <button type="submit">Help</button>
+                <button type="submit">Report a Bug</button>
+                <button type="submit">About</button>
+                <button type="submit">Main Page</button>
+            </form>
+            <div id="workspaceSelect" style="position: relative; float: left; width: 40%;">
+                <div wicket:id="workspaceInfo">
+                    <h1>Workspace information</h1>
+                    <p>User id: <span wicket:id="userID">user1</span></p>
+                    <p>Id: <span wicket:id="workspaceID">123</span></p>
+                    <p>Status: <span wicket:id="status">STATUS</span></p>
+                </div>
+                <div>
+                    <div wicket:id="workspaceTree">[WORKSPACE TREE]</div>
+                </div>
+            </div>
+            <div id="workspaceSelect" style="position: relative; float: right; width: 40%;">
+                <div wicket:id="formContainer">
+                    <form wicket:id="nodeInfoForm">
+                        <p>Selected node: <span wicket:id="name">Node name</span></p>
+                        <p>Node ID: <span wicket:id="nodeId">Node name</span></p>
+                    </form>
+                </div>
+            </div>
+        </wicket:extend>
     </body>
 </html>
