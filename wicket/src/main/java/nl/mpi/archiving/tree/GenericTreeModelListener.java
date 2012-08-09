@@ -16,13 +16,12 @@
  */
 package nl.mpi.archiving.tree;
 
+import java.util.EventListener;
+
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public interface CorpusArchiveNode extends ArchiveNode {
-
-    int getNodeId();
-    
-    String getName();
+public interface GenericTreeModelListener extends EventListener{
+    //TODO: Think about events
 }

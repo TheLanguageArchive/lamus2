@@ -19,51 +19,52 @@ package nl.mpi.archiving.tree;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import javax.swing.event.TreeModelListener;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeModelProviderImpl implements ArchiveNodeTreeModelProvider, Serializable {
+public class GenericTreeModelProviderImpl implements GenericTreeModelProvider, Serializable {
 
-    private final ArchiveNode rootNode;
-    private final Set<TreeModelListener> treeModelListeners;
+    private final GenericTreeNode rootNode;
+    private final Set<GenericTreeModelListener> treeModelListeners;
 
     /**
      *
      * @param rootNode root node of tree model. Must implement {@link Serializable}.
      */
-    public ArchiveNodeTreeModelProviderImpl(ArchiveNode rootNode) {
+    public GenericTreeModelProviderImpl(GenericTreeNode rootNode) {
 	this.rootNode = rootNode;
-	this.treeModelListeners = new CopyOnWriteArraySet<TreeModelListener>();
+	this.treeModelListeners = new CopyOnWriteArraySet<GenericTreeModelListener>();
     }
 
-    public ArchiveNode getRoot() {
+    public GenericTreeNode getRoot() {
 	return rootNode;
     }
 
-    public ArchiveNode getChild(ArchiveNode parent, int index) {
+    public GenericTreeNode getChild(GenericTreeNode parent, int index) {
 	return parent.getChild(index);
     }
 
-    public int getChildCount(ArchiveNode parent) {
+    public int getChildCount(GenericTreeNode parent) {
 	return parent.getChildCount();
     }
 
-    public boolean isLeaf(ArchiveNode node) {
+    public boolean isLeaf(GenericTreeNode node) {
 	return node.getChildCount() == 0;
     }
 
-    public int getIndexOfChild(ArchiveNode parent, ArchiveNode child) {
+    public int getIndexOfChild(GenericTreeNode parent, GenericTreeNode child) {
 	return parent.getIndexOfChild(child);
     }
 
-    public void addTreeModelListener(TreeModelListener l) {
+    @Override
+    public void addTreeModelListener(GenericTreeModelListener l) {
 	treeModelListeners.add(l);
     }
 
-    public void removeTreeModelListener(TreeModelListener l) {
+    @Override
+    public void removeTreeModelListener(GenericTreeModelListener l) {
 	treeModelListeners.remove(l);
     }
 }

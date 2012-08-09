@@ -16,29 +16,17 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.CorpusArchiveNode;
+import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.session.LamusSession;
-import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListChoice;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -51,7 +39,7 @@ public final class SelectWorkspacePage extends LamusPage {
     @SpringBean
     private WorkspaceService workspaceService;
     @SpringBean(name = "workspaceSelectTreeProvider")
-    private ArchiveNodeTreeModelProvider openedArchiveTreeProvider;
+    private GenericTreeModelProvider openedArchiveTreeProvider;
     private final Form nodeIdForm;
     
             //single list choice

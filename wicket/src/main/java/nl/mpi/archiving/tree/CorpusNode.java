@@ -20,31 +20,9 @@ package nl.mpi.archiving.tree;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public interface ArchiveNode {
+public interface CorpusNode extends GenericTreeNode {
+
+    int getNodeId();
     
-    /**
-     * 
-     * @param index index of child to get
-     * @return the child at the specified index
-     */
-    ArchiveNode getChild(int index);
-    
-    /**
-     * 
-     * @return Number of children this node has
-     */
-    int getChildCount();
-    
-    /**
-     * 
-     * @param child child to get index for
-     * @return index of child, -1 if child does not exist
-     */
-    int getIndexOfChild(ArchiveNode child); 
-    
-    /**
-     * 
-     * @return parent of this node
-     */
-    ArchiveNode getParent();
+    String getName();
 }

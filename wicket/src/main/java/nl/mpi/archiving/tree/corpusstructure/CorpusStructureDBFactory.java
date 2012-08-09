@@ -14,27 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.archiving.tree;
+package nl.mpi.archiving.tree.corpusstructure;
 
-import javax.swing.event.TreeModelListener;
+import nl.mpi.corpusstructure.CorpusStructureDB;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public interface ArchiveNodeTreeModelProvider {
-
-    ArchiveNode getRoot();
+public interface CorpusStructureDBFactory {
     
-    ArchiveNode getChild(ArchiveNode parent, int index);
+    CorpusStructureDB createCorpusStructureDB();
     
-    public int getChildCount(ArchiveNode parent);
-
-    public boolean isLeaf(ArchiveNode node);
-
-    public int getIndexOfChild(ArchiveNode parent, ArchiveNode child);
-    
-    public void addTreeModelListener(TreeModelListener l);
-
-    public void removeTreeModelListener(TreeModelListener l);
 }

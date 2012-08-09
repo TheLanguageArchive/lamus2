@@ -16,12 +16,10 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.CorpusArchiveNode;
+import nl.mpi.archiving.tree.CorpusNode;
+import nl.mpi.archiving.tree.GenericTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
-import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -42,7 +40,7 @@ public final class WorkspacePage extends LamusPage {
 
     // Services to be injected
     @SpringBean(name = "workspaceTreeProvider")
-    private ArchiveNodeTreeModelProvider workspaceTreeProvider;
+    private GenericTreeModelProvider workspaceTreeProvider;
     // Page model
     private final IModel<Workspace> model;
     private final Form nodeIdForm;
@@ -61,8 +59,8 @@ public final class WorkspacePage extends LamusPage {
         ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider) {
 
             @Override
-            protected void onNodeLinkClicked(AjaxRequestTarget target, ArchiveNode node) {
-                nodeIdForm.setModel(new CompoundPropertyModel<ArchiveNode>(node));
+            protected void onNodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
+                nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
 
                 if (target != null) {
                     // Ajax, refresh nodeIdForm
@@ -83,7 +81,7 @@ public final class WorkspacePage extends LamusPage {
     }
     
     private Form createNodeInfoForm(final String id) {
-	final Form<CorpusArchiveNode> form = new Form<CorpusArchiveNode>(id);
+	final Form<CorpusNode> form = new Form<CorpusNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("nodeId"));
 

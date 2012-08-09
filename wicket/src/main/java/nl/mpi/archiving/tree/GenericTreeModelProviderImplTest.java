@@ -23,13 +23,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeModelProviderImplTest {
+public class GenericTreeModelProviderImplTest {
 
     private Mockery context = new JUnit4Mockery();
 
@@ -43,16 +44,16 @@ public class ArchiveNodeTreeModelProviderImplTest {
 
     @Test
     public void testGetRoot() {
-	ArchiveNode archiveNode = context.mock(ArchiveNode.class);
-	ArchiveNodeTreeModelProvider instance = new ArchiveNodeTreeModelProviderImpl(archiveNode);
+	GenericTreeNode archiveNode = context.mock(GenericTreeNode.class);
+	GenericTreeModelProvider instance = new GenericTreeModelProviderImpl(archiveNode);
 	assertEquals(archiveNode, instance.getRoot());
     }
 
     @Test
     public void testGetChild() {
-	final ArchiveNode parent = context.mock(ArchiveNode.class, "parent");
-	final ArchiveNode child0 = context.mock(ArchiveNode.class, "child0");
-	final ArchiveNode child3 = context.mock(ArchiveNode.class, "child3");
+	final GenericTreeNode parent = context.mock(GenericTreeNode.class, "parent");
+	final GenericTreeNode child0 = context.mock(GenericTreeNode.class, "child0");
+	final GenericTreeNode child3 = context.mock(GenericTreeNode.class, "child3");
 	context.checking(new Expectations() {
 
 	    {
@@ -64,7 +65,7 @@ public class ArchiveNodeTreeModelProviderImplTest {
 	    }
 	});
 
-	ArchiveNodeTreeModelProvider instance = new ArchiveNodeTreeModelProviderImpl(parent);
+	GenericTreeModelProvider instance = new GenericTreeModelProviderImpl(parent);
 	assertSame(child0, instance.getChild(parent, 0));
 	assertSame(child3, instance.getChild(parent, 3));
     }

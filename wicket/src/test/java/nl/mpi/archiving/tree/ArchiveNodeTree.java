@@ -16,9 +16,9 @@
  */
 package nl.mpi.archiving.tree;
 
-import nl.mpi.archiving.tree.swingtree.ArchiveNodeTreeModel;
 import javax.swing.JFrame;
 import javax.swing.JTree;
+import nl.mpi.archiving.tree.swingtree.GenericTreeSwingTreeModel;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
@@ -29,17 +29,17 @@ import org.jmock.integration.junit4.JUnit4Mockery;
  */
 public class ArchiveNodeTree extends JTree {
 
-    public ArchiveNodeTree(ArchiveNode rootNode) {
-	super(new ArchiveNodeTreeModel(new ArchiveNodeTreeModelProviderImpl(rootNode)));
+    public ArchiveNodeTree(GenericTreeNode rootNode) {
+	super(new GenericTreeSwingTreeModel(new GenericTreeModelProviderImpl(rootNode)));
     }
 
     public static void main(String[] args) {
 	Mockery context = new JUnit4Mockery();
 
-	final ArchiveNode parent = context.mock(ArchiveNode.class, "parent");
-	final ArchiveNode child0 = context.mock(ArchiveNode.class, "child0");
-	final ArchiveNode child00 = context.mock(ArchiveNode.class, "child00");
-	final ArchiveNode child1 = context.mock(ArchiveNode.class, "child1");
+	final GenericTreeNode parent = context.mock(GenericTreeNode.class, "parent");
+	final GenericTreeNode child0 = context.mock(GenericTreeNode.class, "child0");
+	final GenericTreeNode child00 = context.mock(GenericTreeNode.class, "child00");
+	final GenericTreeNode child1 = context.mock(GenericTreeNode.class, "child1");
 	context.checking(new Expectations() {
 
 	    {

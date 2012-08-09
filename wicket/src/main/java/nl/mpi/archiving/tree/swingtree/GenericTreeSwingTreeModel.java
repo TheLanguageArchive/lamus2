@@ -20,22 +20,22 @@ import java.io.Serializable;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeModel implements TreeModel, Serializable {
+public class GenericTreeSwingTreeModel implements TreeModel, Serializable {
 
-    private final ArchiveNodeTreeModelProvider provider;
+    private final GenericTreeModelProvider provider;
 
     /**
      *
      * @param provider provider to use in tree model. Must implement {@link Serializable}.
      */
-    public ArchiveNodeTreeModel(ArchiveNodeTreeModelProvider provider) {
+    public GenericTreeSwingTreeModel(GenericTreeModelProvider provider) {
 	this.provider = provider;
     }
 
@@ -44,15 +44,15 @@ public class ArchiveNodeTreeModel implements TreeModel, Serializable {
     }
 
     public Object getChild(Object parent, int index) {
-	return provider.getChild((ArchiveNode) parent, index);
+	return provider.getChild((GenericTreeNode) parent, index);
     }
 
     public int getChildCount(Object parent) {
-	return provider.getChildCount((ArchiveNode) parent);
+	return provider.getChildCount((GenericTreeNode) parent);
     }
 
     public boolean isLeaf(Object node) {
-	return provider.isLeaf((ArchiveNode) node);
+	return provider.isLeaf((GenericTreeNode) node);
     }
 
     public void valueForPathChanged(TreePath path, Object newValue) {
@@ -60,14 +60,18 @@ public class ArchiveNodeTreeModel implements TreeModel, Serializable {
     }
 
     public int getIndexOfChild(Object parent, Object child) {
-	return provider.getIndexOfChild((ArchiveNode) parent, (ArchiveNode) child);
+	return provider.getIndexOfChild((GenericTreeNode) parent, (GenericTreeNode) child);
     }
 
     public void addTreeModelListener(TreeModelListener l) {
-	provider.addTreeModelListener(l);
+	//TOOD: Wrap in GenericTreeModelListener
+	//provider.addTreeModelListener(l);
+	throw new UnsupportedOperationException();
     }
 
     public void removeTreeModelListener(TreeModelListener l) {
-	provider.removeTreeModelListener(l);
+	//TOOD: Wrap in GenericTreeModelListener 
+	//provider.removeTreeModelListener(l);
+	throw new UnsupportedOperationException();
     }
 }

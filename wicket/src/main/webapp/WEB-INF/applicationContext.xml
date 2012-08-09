@@ -27,21 +27,21 @@
     
     <!-- Archive tree beans -->
     
-    <bean id="createWorkspaceTreeProvider" class="nl.mpi.archiving.tree.ArchiveNodeTreeModelProviderImpl">
+    <bean id="createWorkspaceTreeProvider" class="nl.mpi.archiving.tree.GenericTreeModelProviderImpl">
 	<constructor-arg ref="archiveRootNode" />
     </bean>
     
-    <bean id="archiveRootNode" class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+    <bean id="archiveRootNode" class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 	<property name="name" value="RootNode"/>
 	<property name="children">
 	    <list>
-		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		<bean class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 		    <property name="parent" ref="archiveRootNode" />
 		    <property name="name" value="Child1"/>
 		    <property name="nodeId" value="101"/>
 		</bean>
 		    
-		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		<bean class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 		    <property name="parent" ref="archiveRootNode" />
 		    <property name="name" value="Child2"/>
 		    <property name="nodeId" value="102"/>
@@ -52,21 +52,21 @@
     
     <!-- Workspace tree beans -->
     
-    <bean id="workspaceTreeProvider" class="nl.mpi.archiving.tree.ArchiveNodeTreeModelProviderImpl">
+    <bean id="workspaceTreeProvider" class="nl.mpi.archiving.tree.GenericTreeModelProviderImpl">
 	<constructor-arg ref="workspaceRootNode" />
     </bean>
     
-    <bean id="workspaceRootNode" class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+    <bean id="workspaceRootNode" class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 	<property name="name" value="Workspace"/>
 	<property name="children">
 	    <list>
-		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		<bean class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 		    <property name="parent" ref="workspaceRootNode" />
 		    <property name="name" value="WorkspaceChild1"/>
 		    <property name="nodeId" value="101"/>
 		</bean>
 		    
-		<bean class="nl.mpi.lamus.web.model.mock.MockArchiveNode">
+		<bean class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
 		    <property name="parent" ref="workspaceRootNode" />
 		    <property name="name" value="WorkspaceChild2"/>
 		    <property name="nodeId" value="102"/>

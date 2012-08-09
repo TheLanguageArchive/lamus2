@@ -19,26 +19,26 @@ package nl.mpi.lamus.web.model.mock;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.CorpusArchiveNode;
+import nl.mpi.archiving.tree.CorpusNode;
+import nl.mpi.archiving.tree.GenericTreeNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MockArchiveNode implements CorpusArchiveNode, Serializable {
+public class MockCorpusNode implements CorpusNode, Serializable {
 
-    private ArchiveNode parent;
-    private List<ArchiveNode> children = Collections.emptyList();
+    private GenericTreeNode parent;
+    private List<GenericTreeNode> children = Collections.emptyList();
     private String name = "";
     private int nodeId;
 
-    public void setChildren(List<ArchiveNode> children) {
+    public void setChildren(List<GenericTreeNode> children) {
 	this.children = children;
     }
 
     @Override
-    public ArchiveNode getChild(int index) {
+    public GenericTreeNode getChild(int index) {
 	return children.get(index);
     }
 
@@ -48,7 +48,7 @@ public class MockArchiveNode implements CorpusArchiveNode, Serializable {
     }
 
     @Override
-    public int getIndexOfChild(ArchiveNode child) {
+    public int getIndexOfChild(GenericTreeNode child) {
 	return children.indexOf(child);
     }
 
@@ -62,11 +62,11 @@ public class MockArchiveNode implements CorpusArchiveNode, Serializable {
     }
 
     @Override
-    public ArchiveNode getParent() {
+    public GenericTreeNode getParent() {
 	return parent;
     }
 
-    public void setParent(ArchiveNode parent) {
+    public void setParent(GenericTreeNode parent) {
 	this.parent = parent;
     }
 

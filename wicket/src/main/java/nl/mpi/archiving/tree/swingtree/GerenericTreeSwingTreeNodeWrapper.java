@@ -19,36 +19,36 @@ package nl.mpi.archiving.tree.swingtree;
 import java.io.Serializable;
 import java.util.Enumeration;
 import javax.swing.tree.TreeNode;
-import nl.mpi.archiving.tree.ArchiveNode;
+import nl.mpi.archiving.tree.GenericTreeNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
+public class GerenericTreeSwingTreeNodeWrapper implements TreeNode, Serializable {
 
-    private final ArchiveNode archiveNode;
+    private final GenericTreeNode archiveNode;
     private final TreeNode parent;
 
     /**
      * Creates a parentless tree node ({@link #getParent() } will return null)
      */
-    public ArchiveNodeTreeNodeWrapper(ArchiveNode archiveNode) {
+    public GerenericTreeSwingTreeNodeWrapper(GenericTreeNode archiveNode) {
 	this(archiveNode, null);
     }
 
-    public ArchiveNodeTreeNodeWrapper(ArchiveNode archiveNode, TreeNode parent) {
+    public GerenericTreeSwingTreeNodeWrapper(GenericTreeNode archiveNode, TreeNode parent) {
 	this.archiveNode = archiveNode;
 	this.parent = parent;
     }
 
-    public ArchiveNode getArchiveNode() {
+    public GenericTreeNode getArchiveNode() {
 	return archiveNode;
     }
 
     @Override
     public TreeNode getChildAt(int childIndex) {
-	return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(childIndex), this);
+	return new GerenericTreeSwingTreeNodeWrapper(archiveNode.getChild(childIndex), this);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
     @Override
     public int getIndex(TreeNode node) {
-	return archiveNode.getIndexOfChild(((ArchiveNodeTreeNodeWrapper) node).getArchiveNode());
+	return archiveNode.getIndexOfChild(((GerenericTreeSwingTreeNodeWrapper) node).getArchiveNode());
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ArchiveNodeTreeNodeWrapper implements TreeNode, Serializable {
 
 	    @Override
 	    public Object nextElement() {
-		return new ArchiveNodeTreeNodeWrapper(archiveNode.getChild(index++), ArchiveNodeTreeNodeWrapper.this);
+		return new GerenericTreeSwingTreeNodeWrapper(archiveNode.getChild(index++), GerenericTreeSwingTreeNodeWrapper.this);
 	    }
 	};
     }

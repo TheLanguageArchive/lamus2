@@ -14,14 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.archiving.tree;
+package nl.mpi.archiving.tree.corpusstructure;
 
-import java.util.EventListener;
+import nl.mpi.archiving.tree.GenericTreeModelProviderImpl;
+import nl.mpi.corpusstructure.CorpusStructureDB;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public interface ArchiveNodeTreeModelListener extends EventListener{
-    //TODO: Think about events
+public class CorpusStructureTreeModelProvider extends GenericTreeModelProviderImpl {
+
+    public CorpusStructureTreeModelProvider(CorpusStructureDB csdb, String rootNodeId) {
+	super(new CorpusStructureArchiveNode(csdb, rootNodeId, null));
+    }
 }

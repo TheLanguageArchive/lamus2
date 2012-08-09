@@ -19,9 +19,9 @@ package nl.mpi.lamus.web.components;
 import java.io.Serializable;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.swingtree.ArchiveNodeTreeNodeWrapper;
+import nl.mpi.archiving.tree.GenericTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.swingtree.GerenericTreeSwingTreeNodeWrapper;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
@@ -31,18 +31,18 @@ import org.apache.wicket.markup.html.panel.Panel;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public abstract class ArchiveTreePanel<T extends ArchiveNode & Serializable> extends Panel {
+public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable> extends Panel {
 
     private final Tree archiveTree;
 
-    public ArchiveTreePanel(String id, ArchiveNodeTreeModelProvider provider) {
+    public ArchiveTreePanel(String id, GenericTreeModelProvider provider) {
 	super(id);
 	archiveTree = createArchiveTree("archiveTree", provider);
 	add(archiveTree);
     }
 
-    private Tree createArchiveTree(String id, ArchiveNodeTreeModelProvider archiveTreeProvider) {
-	final DefaultTreeModel treeModel = new DefaultTreeModel(new ArchiveNodeTreeNodeWrapper(archiveTreeProvider.getRoot()));
+    private Tree createArchiveTree(String id, GenericTreeModelProvider archiveTreeProvider) {
+	final DefaultTreeModel treeModel = new DefaultTreeModel(new GerenericTreeSwingTreeNodeWrapper(archiveTreeProvider.getRoot()));
 	final Tree tree = new Tree(id, treeModel) {
 
 	    @Override
@@ -50,7 +50,7 @@ public abstract class ArchiveTreePanel<T extends ArchiveNode & Serializable> ext
 		super.onNodeLinkClicked(target, node);
 
 		// TOOD: Make more robust against other types in model
-		final ArchiveNodeTreeNodeWrapper nodeWrapper = (ArchiveNodeTreeNodeWrapper) node;
+		final GerenericTreeSwingTreeNodeWrapper nodeWrapper = (GerenericTreeSwingTreeNodeWrapper) node;
 		final T archiveNode = (T) nodeWrapper.getArchiveNode();
 		ArchiveTreePanel.this.onNodeLinkClicked(target, archiveNode);
 	    }

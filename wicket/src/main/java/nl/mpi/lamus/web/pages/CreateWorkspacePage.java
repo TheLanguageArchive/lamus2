@@ -16,9 +16,9 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.archiving.tree.ArchiveNode;
-import nl.mpi.archiving.tree.ArchiveNodeTreeModelProvider;
-import nl.mpi.archiving.tree.CorpusArchiveNode;
+import nl.mpi.archiving.tree.CorpusNode;
+import nl.mpi.archiving.tree.GenericTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.web.model.WorkspaceModel;
@@ -44,7 +44,7 @@ public final class CreateWorkspacePage extends LamusPage {
     @SpringBean
     private WorkspaceService workspaceService;
     @SpringBean(name = "createWorkspaceTreeProvider")
-    private ArchiveNodeTreeModelProvider archiveTreeProvider;
+    private GenericTreeModelProvider archiveTreeProvider;
     // Page components
     private final Form nodeIdForm;
 
@@ -63,8 +63,8 @@ public final class CreateWorkspacePage extends LamusPage {
 	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider) {
 
 	    @Override
-	    protected void onNodeLinkClicked(AjaxRequestTarget target, ArchiveNode node) {
-		nodeIdForm.setModel(new CompoundPropertyModel<ArchiveNode>(node));
+	    protected void onNodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
+		nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
 
 		if (target != null) {
 		    // Ajax, refresh nodeIdForm
@@ -86,7 +86,7 @@ public final class CreateWorkspacePage extends LamusPage {
      * @return created form
      */
     private Form createNodeIdForm(final String id) {
-	final Form<CorpusArchiveNode> form = new Form<CorpusArchiveNode>(id);
+	final Form<CorpusNode> form = new Form<CorpusNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("nodeId"));
 
