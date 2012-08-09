@@ -31,7 +31,7 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     private GenericTreeNode parent;
     private List<GenericTreeNode> children = Collections.emptyList();
     private String name = "";
-    private int nodeId;
+    private String nodeId;
 
     public void setChildren(List<GenericTreeNode> children) {
 	this.children = children;
@@ -71,11 +71,11 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     }
 
     @Override
-    public int getNodeId() {
+    public String getNodeId() {
 	return nodeId;
     }
 
-    public void setNodeId(int nodeId) {
+    public void setNodeId(String nodeId) {
 	this.nodeId = nodeId;
     }
 
