@@ -21,7 +21,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
-import nl.mpi.archiving.tree.swingtree.GerenericTreeSwingTreeNodeWrapper;
+import nl.mpi.archiving.tree.swingtree.GenericTreeSwingTreeNodeWrapper;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
@@ -42,7 +42,7 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
     }
 
     private Tree createArchiveTree(String id, GenericTreeModelProvider archiveTreeProvider) {
-	final DefaultTreeModel treeModel = new DefaultTreeModel(new GerenericTreeSwingTreeNodeWrapper(archiveTreeProvider.getRoot()));
+	final DefaultTreeModel treeModel = new DefaultTreeModel(new GenericTreeSwingTreeNodeWrapper(archiveTreeProvider.getRoot()));
 	final Tree tree = new Tree(id, treeModel) {
 
 	    @Override
@@ -50,7 +50,7 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
 		super.onNodeLinkClicked(target, node);
 
 		// TOOD: Make more robust against other types in model
-		final GerenericTreeSwingTreeNodeWrapper nodeWrapper = (GerenericTreeSwingTreeNodeWrapper) node;
+		final GenericTreeSwingTreeNodeWrapper nodeWrapper = (GenericTreeSwingTreeNodeWrapper) node;
 		final T archiveNode = (T) nodeWrapper.getArchiveNode();
 		ArchiveTreePanel.this.onNodeLinkClicked(target, archiveNode);
 	    }
