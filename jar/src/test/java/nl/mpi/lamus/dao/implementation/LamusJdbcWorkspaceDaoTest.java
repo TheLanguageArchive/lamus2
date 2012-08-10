@@ -596,6 +596,28 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
         assertTrue("The returned list of nodes does not contain the expected node", result.contains(childNode));
     }
+
+    @Test
+    public void getNonExistingChildNodes() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceIntoDB(true);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, true, true);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getChildWorkspaceNodes(parentNode.getWorkspaceNodeID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Returned list of nodes should be empty", 0, result.size());
+    }
+
+    @Test
+    public void getChildNodesFromNonExistingParent() throws URISyntaxException, MalformedURLException {
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getChildWorkspaceNodes(1);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Returned list of nodes should be empty", 0, result.size());
+    }
+
     
     private Workspace insertTestWorkspaceIntoDB(boolean withEndDates) {
         
