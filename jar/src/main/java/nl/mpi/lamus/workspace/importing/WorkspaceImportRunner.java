@@ -26,7 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Runner that will trigger a thread that performs
+ * the import of the nodes into the workspace.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -49,14 +51,26 @@ public class WorkspaceImportRunner implements Runnable{
         this.fileImporterFactoryBean = fileImporterFactoryBean;
     }
     
+    /**
+     * Setter for the workspace to which the imported files should be connected
+     * @param ws workspace to be used for the import
+     */
     public void setWorkspace(Workspace ws) {
         this.workspace = ws;
     }
     
+    /**
+     * Setter for the archive ID of the top node of the workspace
+     * @param nodeArchiveID archive ID of the top node of the workspace
+     */
     public void setTopNodeArchiveID(int nodeArchiveID) {
         this.topNodeArchiveID = nodeArchiveID;
     }
     
+    /**
+     * The import process is started in a separate thread.
+     * The nodes will be explored and copied, starting with the top node.
+     */
     public void run() {
         
         //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED

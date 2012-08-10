@@ -32,7 +32,8 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceManager
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -63,6 +64,9 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         this.workspaceImportRunner = wsImportRunner;
     }
     
+    /**
+     * @see WorkspaceManager#createWorkspace(java.lang.String, int)
+     */
     public Workspace createWorkspace(String userID, int topNodeArchiveID) {
         
         Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topNodeArchiveID);
@@ -98,6 +102,9 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         return newWorkspace;
     }
 
+    /**
+     * @see WorkspaceManager#submitWorkspace(int)
+     */
     public void submitWorkspace(int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet.");
         
@@ -112,6 +119,9 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         //TODO workspaceExportRunner - start export thread
     }
 
+    /**
+     * @see WorkspaceManager#openWorkspace(java.lang.String, int)
+     */
     public Workspace openWorkspace(String userID, int workspaceID) {
         
         Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);

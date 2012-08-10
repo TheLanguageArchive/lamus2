@@ -23,12 +23,16 @@ import nl.mpi.metadata.api.model.Reference;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceParentNodeReferenceFactory
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
 public class LamusWorkspaceParentNodeReferenceFactory implements WorkspaceParentNodeReferenceFactory {
 
+    /**
+     * @see WorkspaceParentNodeReferenceFactory#getNewWorkspaceParentNodeReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
+     */
     public WorkspaceParentNodeReference getNewWorkspaceParentNodeReference(WorkspaceNode parentNode, Reference childLink) {
         
         WorkspaceParentNodeReference referenceToReturn = null;

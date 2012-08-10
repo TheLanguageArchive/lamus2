@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Checker for node access. If a user needs access to a certain node in the
+ * archive in order to create a workspace, this is the class to use.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -46,6 +48,9 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
         this.workspaceDao = workspaceDao;
     }
 
+    /**
+     * @see NodeAccessChecker#canCreateWorkspace(java.lang.String, int)
+     */
     public boolean canCreateWorkspace(String userID, int archiveNodeID) {
         
         if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {

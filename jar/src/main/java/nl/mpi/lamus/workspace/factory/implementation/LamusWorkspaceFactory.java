@@ -25,7 +25,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceFactory
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -37,9 +38,6 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
     @Qualifier("defaultMaxStorageSpaceInBytes")
     private long defaultMaxStorageSpaceInBytes;
     
-    /**
-     * 
-     */
     @Autowired
     public LamusWorkspaceFactory(AmsBridge amsBridge) {
         this.amsBridge = amsBridge;
@@ -47,8 +45,7 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
     
     
     /**
-     * 
-     * @return 
+     * @see WorkspaceFactory#getNewWorkspace(java.lang.String, int)
      */
     public Workspace getNewWorkspace(String userID, int archiveTopNodeID) {
         

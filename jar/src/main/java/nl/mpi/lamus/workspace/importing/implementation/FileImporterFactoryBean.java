@@ -34,7 +34,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * FactoryBean for the file importers.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -64,6 +65,12 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
     
     private Class<? extends FileImporter> fileImporterType; 
     
+    /**
+     * Returns the right file importer for the current defined type.
+     * 
+     * @return Instance of the file importer
+     * @throws Exception in case of creation errors
+     */
     @Override
     public FileImporter getObject() throws Exception {
         if(ResourceFileImporter.class.equals(fileImporterType)) {
@@ -78,11 +85,21 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
         }
     }
 
+    /**
+     * Returns the type of object created by the FactoryBean
+     * @return type of the file importer
+     */
     @Override
     public Class<? extends FileImporter> getObjectType() {
         return fileImporterType;
     }
     
+    /**
+     * Setter for the file importer type,
+     * according to the given metadata reference.
+     * 
+     * @param reference reference included in the parent metadata document
+     */
     public void setFileImporterTypeForReference(Reference reference) {
         fileImporterType = MetadataFileImporter.class;
         if(reference instanceof ResourceReference) {
@@ -90,6 +107,9 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
         }
     }
 
+    /**
+     * @return true if the created object is a singleton
+     */
     @Override
     public boolean isSingleton() {
         return false;

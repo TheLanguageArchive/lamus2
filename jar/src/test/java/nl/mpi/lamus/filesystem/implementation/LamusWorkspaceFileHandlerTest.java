@@ -229,7 +229,7 @@ public class LamusWorkspaceFileHandlerTest {
         File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         StreamResult retrievedStreamResult = 
-                workspaceFileHandler.getStreamResultForWorkspaceNodeFile(testWorkspace, testWorkspaceNode, testNodeFile);
+                workspaceFileHandler.getStreamResultForWorkspaceNodeFile(testNodeFile);
         
         assertNotNull("Resulting StreamResult is null", retrievedStreamResult);
     }

@@ -22,94 +22,97 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 
 /**
- *
+ * Data access layer for the workspace data.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceDao {
     
-    
     /**
+     * Inserts a workspace into the database
      * 
-     * @param datasource 
-     */
-    public void setDataSource(DataSource datasource);
-    
-    /**
-     * 
-     * @param workspace
-     * @return 
+     * @param workspace Workspace object to insert into the database
      */
     public void addWorkspace(Workspace workspace);
     
     /**
+     * Updates the top node of the given workspace.
      * 
-     * @param workspace 
+     * @param workspace Workspace object already with the updated top node
      */
     public void updateWorkspaceTopNode(Workspace workspace);
     
     /**
+     * Updates the session dates of the given workspace.
      * 
-     * @param workspace 
+     * @param workspace workspace object already with the updated session dates
      */
     public void updateWorkspaceSessionDates(Workspace workspace);
     
     /**
-     * 
-     * @param workspace 
+     * Updates the storage space of the given workspace
+     * @param workspace workspace object already with the updated storage space
      */
     public void updateWorkspaceStorageSpace(Workspace workspace);
 
     /**
+     * Updates the status and message of the given workspace.
      * 
-     * @param workspace 
+     * @param workspace workspace object already with the updated status and message
      */
     public void updateWorkspaceStatusMessage(Workspace workspace);
     
     /**
+     * Retrieves the workspace with the given ID.
      * 
-     * @param workspaceID
-     * @return 
+     * @param workspaceID ID of the workspace to retrieve
+     * @return Workspace object with the given ID
      */
     public Workspace getWorkspace(int workspaceID);
 
     /**
+     * Retrieves a collection of workspaces created by the given user.
      * 
-     * @param userID
-     * @return 
+     * @param userID ID of the user to use in the query
+     * @return Collectio of workspaces created by the given user
      */
     public Collection<Workspace> listWorkspacesForUser(String userID);
     
     /**
-     * 
-     * @param archiveNodeID
-     * @return 
+     * Checks if the archive node with the given ID is locked
+     * (is part of any existing workspace)
+     * @param archiveNodeID ID of the archive node to be checked
+     * @return true if the given archive node is locked
      */
     public boolean isNodeLocked(int archiveNodeID);
     
     /**
+     * Inserts a node into the database.
      * 
-     * @param node
-     * @return 
+     * @param node WorkspaceNode object to insert into the database
      */
     public void addWorkspaceNode(WorkspaceNode node);
     
     /**
+     * Retrieves the node with the given ID.
      * 
-     * @param workspaceNodeID
-     * @return 
+     * @param workspaceNodeID ID of the node to retrieve
+     * @return WorkspaceNode object with the given ID
      */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
     
     /**
+     * Retrieves a collection containing the child nodes of the node with the
+     * given ID.
      * 
-     * @param workspaceNodeID
-     * @return 
+     * @param workspaceNodeID ID of the parent node
+     * @return Collection of nodes that have the given node as parent
      */
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID);
     
     /**
-     * 
-     * @param link 
+     * Inserts a link between two nodes (parent and child) into the database.
+     * @param link WorkspaceNodeLink object to insert into the database
      */
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink);
 }

@@ -17,10 +17,18 @@ package nl.mpi.lamus.workspace.management;
 
 /**
  *
+ * Interface for the archive node access checking.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface NodeAccessChecker {
 
+    /**
+     * Checks if a given user has write access to the given archive node.
+     * @param userID ID of the user who needs to create a workspace
+     * @param archiveNodeID ID of the node in which the workspace is supposed to be created
+     * @return true if the given user has write access to the given node
+     */
     public boolean canCreateWorkspace(String userID, int archiveNodeID);
     
 }

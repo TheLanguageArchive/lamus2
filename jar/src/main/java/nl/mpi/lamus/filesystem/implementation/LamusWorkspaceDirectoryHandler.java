@@ -26,7 +26,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceDirectoryHandler
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -38,6 +39,9 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
 
+    /**
+     * @see WorkspaceDirectoryHandler#createWorkspaceDirectory(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
         
         logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
@@ -56,6 +60,9 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         }
     }
     
+    /**
+     * @see WorkspaceDirectoryHandler#workspaceDirectoryExists(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public boolean workspaceDirectoryExists(Workspace workspace) {
         
         logger.debug("Checking if directory for workspace " + workspace.getWorkspaceID() + " exists");

@@ -35,7 +35,7 @@ public interface WorkspaceService {
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
     /**
-     * Retrieves a workspace with the given ID from the database.
+     * Retrieves a workspace with the given ID.
      * 
      * @param workspaceID ID of the workspace to retrieve
      * @return Retrieved workspace object
@@ -43,10 +43,10 @@ public interface WorkspaceService {
     public Workspace getWorkspace(int workspaceID);
     
     /**
-     * Retrieves a list containing the active workspaces belonging to the
+     * Retrieves a collection containing the active workspaces belonging to the
      * given user.
      * @param userID ID of the user
-     * @return List with the user's active workspaces
+     * @return Collection with the user's active workspaces
      */
     public Collection<Workspace> listUserWorkspaces(String userID);
     
@@ -67,7 +67,7 @@ public interface WorkspaceService {
     public void submitWorkspace(int workspaceID);
     
     /**
-     * Retrieves a workspace node with the given ID from the database.
+     * Retrieves a workspace node with the given ID.
      * 
      * @param nodeID ID of the node to retrieve
      * @return corresponding workspace node
@@ -75,7 +75,8 @@ public interface WorkspaceService {
     public WorkspaceNode getNode(int nodeID);
     
     /**
-     * Retrieves the child nodes of the node with the given ID from the database.
+     * Retrieves a collection containing the child nodes of the node with 
+     * the given ID.
      * 
      * @param nodeID ID of the parent node
      * @return child nodes of the given node

@@ -43,7 +43,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 /**
- *
+ * Data access layer that uses JDBC from the Spring framework
+ * in order to access tha lamus database.
+ * 
+ * @see WorkspaceDao
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Repository
@@ -56,6 +60,12 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     private SimpleJdbcInsert insertWorkspaceNode;
     private SimpleJdbcInsert insertWorkspaceNodeLink;
     
+    /**
+     * Setter for the DataSource that will be used by the several
+     * JdbcTemplate and JdbcInsert objects.
+     * 
+     * @param datasource data source to be used for accessing the lamus database
+     */
     @Autowired
     @Qualifier("lamusDataSource")
     public void setDataSource(DataSource datasource) {
@@ -106,7 +116,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
     }
     
-
+    /**
+     * @see WorkspaceDao#addWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void addWorkspace(Workspace workspace) {
         
         logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeID());
@@ -148,7 +160,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Workspace added to the database. Workspace ID: " + workspace.getWorkspaceID());
     }
     
-    
+    /**
+     * @see WorkspaceDao#updateWorkspaceTopNode(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void updateWorkspaceTopNode(Workspace workspace) {
         
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting top node to: " + workspace.getTopNodeID());
@@ -169,6 +183,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Top node of workspace " + workspace.getWorkspaceID() + " updated to node " + workspace.getTopNodeID());
     }
     
+    /**
+     * @see WorkspaceDao#updateWorkspaceSessionDates(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void updateWorkspaceSessionDates(Workspace workspace) {
                 
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting session start date to: "
@@ -186,10 +203,16 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + " and session end date updated to " + workspace.getSessionEndDate());
     }
 
+    /**
+     * @see WorkspaceDao#updateWorkspaceStorageSpace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void updateWorkspaceStorageSpace(Workspace workspace) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * @see WorkspaceDao#updateWorkspaceStatusMessage(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void updateWorkspaceStatusMessage(Workspace workspace) {
         
         logger.debug("Uploading workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
@@ -206,6 +229,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + "\" and message updated to \"" + workspace.getMessage() + "\"");
     }
 
+    /**
+     * @see WorkspaceDao#getWorkspace(int)
+     */
     public Workspace getWorkspace(int workspaceID) {
         
         logger.debug("Retrieving workspace with ID: " + workspaceID);
@@ -226,6 +252,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return workspaceToReturn;
     }
     
+    /**
+     * @see WorkspaceDao#listWorkspacesForUser(java.lang.String)
+     */
     public Collection<Workspace> listWorkspacesForUser(String userID) {
 
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
@@ -257,6 +286,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 //        namedParameterJdbcTemplate.update(updateWorkspaceSql, parameters);
 //    }
 
+    /**
+     * @see WorkspaceDao#isNodeLocked(int)
+     */
     public boolean isNodeLocked(int archiveNodeID) {
         
         logger.debug("Checking if node with archive ID " + archiveNodeID + " is locked");
@@ -286,6 +318,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return true;
     }
 
+    /**
+     * @see WorkspaceDao#addWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     public void addWorkspaceNode(WorkspaceNode node) {
                 
         logger.debug("Adding node to the database belonging to workspace with ID: " + node.getWorkspaceID());
@@ -330,6 +365,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Node added to the database. Node ID: " + node.getWorkspaceNodeID());
     }
 
+    /**
+     * @see WorkspaceDao#getWorkspaceNode(int)
+     */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
 
         logger.debug("Retrieving workspace node with ID: " + workspaceNodeID);
@@ -350,6 +388,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return workspaceNodeToReturn;
     }
     
+    /**
+     * @see WorkspaceDao#getChildWorkspaceNodes(int)
+     */
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID) {
         
         logger.debug("Retrieving list containing child nodes of the node with ID: " + workspaceNodeID);
@@ -363,6 +404,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return listToReturn;
     }
 
+    /**
+     * @see WorkspaceDao#addWorkspaceNodeLink(nl.mpi.lamus.workspace.model.WorkspaceNodeLink)
+     */
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink) {
         
         logger.debug("Adding to the database a link between node with ID: " + nodeLink.getParentWorkspaceNodeID()
@@ -384,6 +428,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
 
     
+    /**
+     * Inner class used to map rows from the workspace table into Workspace objects in queries
+     */
     private static final class WorkspaceMapper implements RowMapper<Workspace> {
         
         public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -422,6 +469,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         }
     }
     
+    /**
+     * Inner class used to map rows from the node table into WorkspaceNode objects in queries
+     */
     private static final class WorkspaceNodeMapper implements RowMapper<WorkspaceNode> {
 
         public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {

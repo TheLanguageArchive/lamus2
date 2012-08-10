@@ -34,7 +34,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceFileExplorer
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -54,6 +55,9 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
         this.fileImporterFactoryBean = fileImporterFactoryBean;
     }
 
+    /**
+     * @see WorkspaceFileExplorer#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
+     */
     public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
         throws FileImporterException, FileExplorerException {
         

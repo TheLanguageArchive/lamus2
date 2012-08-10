@@ -44,7 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- *
+ * File importer specific for resource files.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class ResourceFileImporter implements FileImporter<ResourceReference> {
@@ -78,10 +79,16 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         this.workspaceNodeLinkFactory = wsNodeLinkFactory;
     }
     
+    /**
+     * @see FileImporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void setWorkspace(Workspace ws) {
         this.workspace = ws;
     }
     
+    /**
+     * @see FileImporter#importFile(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
+     */
     public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, int childNodeArchiveID) throws FileImporterException {
         

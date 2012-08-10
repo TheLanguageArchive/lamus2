@@ -24,11 +24,24 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
- *
+ * Explorer of the tree/branch containing the nodes that
+ * will be imported into the workspace.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceFileExplorer {
     
+    /**
+     * Explores, recursively, the tree/branch where the import process is
+     * currently working on, triggering the import of its nodes.
+     * 
+     * @param workspace workspace to which the imported files will be connected
+     * @param nodeToExplore node where the import proccess is working on currently
+     * @param nodeDocument metadata document corresponding to the current node
+     * @param linksInNode references contained in the metadata document corresponding to the current node
+     * @throws FileImporterException if there was some problem during the import of a file
+     * @throws FileExplorerException if there was some problem retrieving the file importer
+     */
     public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
             throws FileImporterException, FileExplorerException;
 }

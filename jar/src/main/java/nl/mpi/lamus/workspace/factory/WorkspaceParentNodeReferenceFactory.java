@@ -20,10 +20,18 @@ import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import nl.mpi.metadata.api.model.Reference;
 
 /**
- *
+ * Factory for WorkspaceParentNodeReference objects.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceParentNodeReferenceFactory {
     
+    /**
+     * Creates a WorkspaceParentNodeReference object with the given values.
+     * 
+     * @param parentNode parent node
+     * @param childLink reference for the child node, included in the parent metadata document
+     * @return created WorkspaceParentNodeReference object
+     */
     public WorkspaceParentNodeReference getNewWorkspaceParentNodeReference(WorkspaceNode parentNode, Reference childLink);
 }

@@ -33,7 +33,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceFileHandler
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -45,6 +46,9 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
 
+    /**
+     * @see WorkspaceFileHandler#copyMetadataFileToWorkspace(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.MetadataAPI, nl.mpi.metadata.api.model.MetadataDocument, java.io.File, javax.xml.transform.stream.StreamResult)
+     */
     public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile, StreamResult nodeFileStreamResult)
             throws FailedToCreateWorkspaceNodeFileException {
@@ -66,11 +70,17 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         }
     }
     
-    public StreamResult getStreamResultForWorkspaceNodeFile(Workspace workspace, WorkspaceNode workspaceNode, File nodeFile) {
+    /**
+     * @see WorkspaceFileHandler#getStreamResultForWorkspaceNodeFile(java.io.File)
+     */
+    public StreamResult getStreamResultForWorkspaceNodeFile(File nodeFile) {
             StreamResult streamResult = new StreamResult(nodeFile);
             return streamResult;
     }
 
+    /**
+     * @see WorkspaceFileHandler#getFileForWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     public File getFileForWorkspaceNode(WorkspaceNode workspaceNode) {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
         File workspaceNodeFile = new File(workspaceDirectory, "" + workspaceNode.getWorkspaceNodeID());

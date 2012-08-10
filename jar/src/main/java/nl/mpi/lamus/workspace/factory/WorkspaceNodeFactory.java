@@ -19,17 +19,20 @@ import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Factory for WorkspaceNode objects.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceNodeFactory {
     
     /**
+     * Creates a WorkspaceNode object with the given values, while some others are
+     * injected or set as a default value.
      * 
-     * @param workspaceID
-     * @param archiveNodeID
-     * @param archiveNodeURL
-     * @return 
+     * @param workspaceID ID of the workspace to which the node should be connected
+     * @param archiveNodeID archive ID of the node
+     * @param archiveNodeURL archive URL of the node
+     * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
     

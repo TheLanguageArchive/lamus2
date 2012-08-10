@@ -22,12 +22,16 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceNodeFactory
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
 public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 
+    /**
+     * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, int, java.net.URL)
+     */
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);

@@ -16,7 +16,6 @@
 package nl.mpi.lamus.filesystem;
 
 import java.io.File;
-import java.io.OutputStream;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -25,17 +24,41 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.MetadataDocument;
 
 /**
- *
+ * Handler for operations related with the lamus files.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceFileHandler {
     
+    /**
+     * Copies the given metadata file into the workspace directory.
+     * 
+     * @param workspace workspace where the file should copied to
+     * @param workspaceNode node corresponding to the file
+     * @param metadataAPI instance of the MetadataAPI
+     * @param metadataDocument MetadataDocument corresponding to the file
+     * @param nodeFile File object corresponding to the file
+     * @param nodeFileStreamResult StreamResult object corresponding to the file
+     * @throws FailedToCreateWorkspaceNodeFileException if there is some problem with the file copy
+     */
     public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile,
             StreamResult nodeFileStreamResult)
             throws FailedToCreateWorkspaceNodeFileException;
 
-    public StreamResult getStreamResultForWorkspaceNodeFile(Workspace workspace, WorkspaceNode workspaceNode, File nodeFile);
-            
+    /**
+     * Gets a StreamResult object based on the given file.
+     * 
+     * @param nodeFile file with which to construct the StreamResult
+     * @return StreamResult object
+     */
+    public StreamResult getStreamResultForWorkspaceNodeFile(File nodeFile);
+    
+    /**
+     * Construct a File object corresponding to the given node.
+     * 
+     * @param workspaceNode node with which to construct the File object.
+     * @return File object
+     */
     public File getFileForWorkspaceNode(WorkspaceNode workspaceNode);
 }

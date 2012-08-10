@@ -19,12 +19,25 @@ import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryExceptio
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
- *
+ * Handler for operations related with the lamus directories.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceDirectoryHandler {
     
+    /**
+     * Creates the directory for the given workspace.
+     * 
+     * @param workspace Workspace for which the directory should be created
+     * @throws FailedToCreateWorkspaceDirectoryException if the directory creation fails
+     */
     public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException;
     
+    /**
+     * Checks if a directory for the given workspace exists.
+     * 
+     * @param workspace Workspace for which the existence of the directory is checked
+     * @return true if the directory exists
+     */
     public boolean workspaceDirectoryExists(Workspace workspace);
 }

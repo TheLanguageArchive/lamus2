@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
@@ -47,7 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- *
+ * File importer specific for metadata files.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class MetadataFileImporter implements FileImporter<MetadataReference> {
@@ -79,10 +79,16 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
 	this.workspaceFileExplorer = workspaceFileExplorer;
     }
 
+    /**
+     * @see FileImporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     public void setWorkspace(Workspace ws) {
 	this.workspace = ws;
     }
 
+    /**
+     * @see FileImporter#importFile(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
+     */
     public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference childLink, int childNodeArchiveID) throws FileImporterException, FileExplorerException {
 
@@ -155,7 +161,7 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
 	workspaceDao.updateWorkspaceStatusMessage(workspace);
 
 	File childNodeFile = workspaceFileHandler.getFileForWorkspaceNode(childNode);
-	StreamResult streamResult = workspaceFileHandler.getStreamResultForWorkspaceNodeFile(workspace, childNode, childNodeFile);
+	StreamResult streamResult = workspaceFileHandler.getStreamResultForWorkspaceNodeFile(childNodeFile);
 
 	try {
 	    workspaceFileHandler.copyMetadataFileToWorkspace(workspace, childNode, metadataAPI, childDocument, childNodeFile, streamResult);

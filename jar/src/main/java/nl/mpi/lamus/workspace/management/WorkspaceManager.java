@@ -18,14 +18,37 @@ package nl.mpi.lamus.workspace.management;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
- *
+ * Interface for some managing operations in a workspace.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceManager {
     
+    /**
+     * Triggers the creation of a workspace 
+     * (copying the corresponding data from the archive).
+     * 
+     * @param userID ID of the user who is creating the workspace
+     * @param archiveNodeID ID of the archive node where the workspace is being created
+     * @return the object corresponding to the created workspace
+     */
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
+    /**
+     * Triggers the submission of a workspace 
+     * (copying the corresponding data back to the archive).
+     * 
+     * @param workspaceID ID of the workspace to submit
+     */
     public void submitWorkspace(int workspaceID);
     
+    /**
+     * Opens a workspace, getting the corresponding object from the
+     * database, as well as changing its status.
+     * 
+     * @param userID ID of the user who is opening the workspace
+     * @param workspaceID ID of the workspace to be opened
+     * @return the object corresponding to the opened workspace
+     */
     public Workspace openWorkspace(String userID, int workspaceID);
 }

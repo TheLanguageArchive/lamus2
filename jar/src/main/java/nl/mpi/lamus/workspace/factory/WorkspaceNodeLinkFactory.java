@@ -19,11 +19,20 @@ import java.net.URI;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 
 /**
- *
+ * Factory for WorkspaceNodeLink objects.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceNodeLinkFactory {
     
+    /**
+     * Creates a WorkspaceNodeLink object with the given values.
+     * 
+     * @param parentWorkspaceNodeID ID of the parent node
+     * @param childWorkspaceNodeID ID of the child node
+     * @param childURI URI of the child node
+     * @return created WorkspaceNodeLink object
+     */
     public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childURI);
     
 }

@@ -196,7 +196,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockWorkspaceFileHandler).getFileForWorkspaceNode(testChildNode); will(returnValue(testChildNodeFile));
-            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testWorkspace, testChildNode, testChildNodeFile);
+            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testChildNodeFile);
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
@@ -269,7 +269,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockWorkspaceFileHandler).getFileForWorkspaceNode(testChildNode); will(returnValue(testChildNodeFile));
-            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testWorkspace, testChildNode, testChildNodeFile);
+            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testChildNodeFile);
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestNonReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
@@ -336,7 +336,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockWorkspaceFileHandler).getFileForWorkspaceNode(testChildNode); will(returnValue(testChildNodeFile));
-            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testWorkspace, testChildNode, testChildNodeFile);
+            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testChildNodeFile);
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
@@ -609,7 +609,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockWorkspaceFileHandler).getFileForWorkspaceNode(testChildNode); will(returnValue(testChildNodeFile));
-            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testWorkspace, testChildNode, testChildNodeFile);
+            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testChildNodeFile);
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
@@ -695,7 +695,7 @@ public class MetadataFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockWorkspaceFileHandler).getFileForWorkspaceNode(testChildNode); will(returnValue(testChildNodeFile));
-            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testWorkspace, testChildNode, testChildNodeFile);
+            oneOf (mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(testChildNodeFile);
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestNonReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
