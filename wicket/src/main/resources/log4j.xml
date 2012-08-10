@@ -23,13 +23,13 @@
 	<level value="debug" />
     </logger>
     
-    <!-- CORPUS STRUCTURE -->
+    <!-- MPI LIBRARIES -->
     <logger name="nl.mpi.corpusstructure">
-	<level value="debug" />
+	<level value="info" />
     </logger>
     
     <logger name="nl.mpi.util">
-	<level value="debug" />
+	<level value="info" />
     </logger>
     
     <!-- WICKET -->
