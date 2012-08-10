@@ -95,16 +95,12 @@ public final class CreateWorkspacePage extends LamusPage {
 	    @Override
 	    public void onSubmit() {
 		final String currentUserId = LamusSession.get().getUserId();
-		try {
-		    final int selectedNodeId = Integer.parseInt(form.getModelObject().getNodeId());
-		    // Request a new workspace with workspace service
-		    final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
-		    // Show page for newly created workspace
-		    final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
-		    setResponsePage(resultPage);
-		} catch (NumberFormatException nfEx) {
-		    error(nfEx.getMessage());
-		}
+		final int selectedNodeId = form.getModelObject().getNodeId();
+		// Request a new workspace with workspace service
+		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
+		// Show page for newly created workspace
+		final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
+		setResponsePage(resultPage);
 	    }
 	};
 	form.add(submitButton);
