@@ -15,10 +15,11 @@
  */
 package nl.mpi.lamus.workspace.model.implementation;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -194,6 +195,9 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
     
     public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
+        if(this.parentNodesReferences == null) {
+            this.parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();
+        }
         this.parentNodesReferences.add(parentNodeReference);
     }
     

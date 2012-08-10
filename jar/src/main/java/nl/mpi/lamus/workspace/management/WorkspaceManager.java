@@ -26,4 +26,6 @@ public interface WorkspaceManager {
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
     public void submitWorkspace(int workspaceID);
+    
+    public Workspace openWorkspace(String userID, int workspaceID);
 }

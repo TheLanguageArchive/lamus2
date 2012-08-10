@@ -25,4 +25,6 @@ import nl.mpi.lamus.workspace.model.Workspace;
 public interface WorkspaceDirectoryHandler {
     
     public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException;
+    
+    public boolean workspaceDirectoryExists(Workspace workspace);
 }

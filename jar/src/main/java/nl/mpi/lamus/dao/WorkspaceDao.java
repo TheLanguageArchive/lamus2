@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.dao;
 
+import java.util.Collection;
 import javax.sql.DataSource;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -50,7 +51,7 @@ public interface WorkspaceDao {
      * 
      * @param workspace 
      */
-    public void updateWorkspaceDates(Workspace workspace);
+    public void updateWorkspaceSessionDates(Workspace workspace);
     
     /**
      * 
@@ -91,6 +92,13 @@ public interface WorkspaceDao {
      * @return 
      */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
+    
+    /**
+     * 
+     * @param workspaceNodeID
+     * @return 
+     */
+    public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID);
     
     /**
      * 

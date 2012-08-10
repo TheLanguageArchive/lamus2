@@ -670,4 +670,8 @@ class SomeOtherWorkspace implements Workspace {
     public void setStatusMessageInitialised() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void updateDatesForOpening() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

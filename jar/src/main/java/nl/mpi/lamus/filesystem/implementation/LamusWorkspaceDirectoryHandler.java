@@ -55,4 +55,12 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
             }
         }
     }
+    
+    public boolean workspaceDirectoryExists(Workspace workspace) {
+        
+        logger.debug("Checking if directory for workspace " + workspace.getWorkspaceID() + " exists");
+        
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspace.getWorkspaceID());
+        return workspaceDirectory.exists();
+    }
 }

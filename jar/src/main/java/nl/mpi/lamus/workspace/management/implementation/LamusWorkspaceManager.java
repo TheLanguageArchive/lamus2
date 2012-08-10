@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.util.Calendar;
+import java.util.Date;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
@@ -25,6 +27,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +46,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
 //    private final FileImporterFactory importerFactory;
     private final WorkspaceImportRunner workspaceImportRunner;
+    
+    @Autowired
+    @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
+    private int numberOfDaysOfInactivityAllowedSinceLastSession;
 
     //TODO use Spring injection
     //TODO Executor can be created using Executors.newSingleThreadExecutor()
@@ -103,6 +110,38 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             // this should be part of the export thread?
         
         //TODO workspaceExportRunner - start export thread
+    }
+
+    public Workspace openWorkspace(String userID, int workspaceID) {
+        
+        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        
+        if(workspace != null) {
+            if(userID.equals(workspace.getUserID())) {
+                if(this.workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
+                    Calendar calendarNow = Calendar.getInstance();
+                    Date now = calendarNow.getTime();
+                    workspace.setSessionStartDate(now);
+                    calendarNow.add(Calendar.DATE, this.numberOfDaysOfInactivityAllowedSinceLastSession);
+                    Date nowPlusExpiry = calendarNow.getTime();
+                    workspace.setSessionEndDate(nowPlusExpiry);
+                    this.workspaceDao.updateWorkspaceSessionDates(workspace);
+                    workspace = this.workspaceDao.getWorkspace(workspaceID);
+                } else {
+                    //TODO Or throw exception?
+                    logger.error("LamusWorkspaceManager.openWorkspace: Directory for workpace " + workspaceID +
+                        " does not exist");
+                    return null;
+                }
+            } else {
+                //TODO Or throw exception?
+                logger.error("LamusWorkspaceManager.openWorkspace: Given userID (" + userID +
+                        ") different from expected (" + workspace.getUserID() + ")");
+                return null;
+            }
+        }
+        
+        return workspace;
     }
     
 }

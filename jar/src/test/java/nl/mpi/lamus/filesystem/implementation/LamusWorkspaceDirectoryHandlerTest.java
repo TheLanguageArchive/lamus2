@@ -69,6 +69,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     @Before
     public void setUp() throws IOException {
         FileUtils.cleanDirectory(workspaceBaseDirectory);
+        workspaceBaseDirectory.setWritable(true);
     }
     
     @After
@@ -113,7 +114,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     @Test
     public void throwsExceptionWhenWorkspaceDirectoryCreationFails() throws FailedToCreateWorkspaceDirectoryException{
         
-        testFolder.delete();
+//        testFolder.delete();
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -130,6 +131,37 @@ public class LamusWorkspaceDirectoryHandlerTest {
         }
 
         assertFalse("Workspace directory shouldn't have been created, since there should be no permissions for that.", workspaceDirectory.exists());
+    }
+    
+    @Test
+    public void workspaceDirectoryExists() {
+        
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setWorkspaceID(1);
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
+        boolean isDirectoryCreated = workspaceDirectory.mkdirs();
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
+
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
+        
+        boolean result = workspaceDirectoryHandler.workspaceDirectoryExists(testWorkspace);
+
+        assertTrue("Workspace directory wasn't created", result);
+
+    }
+    
+    @Test public void workspaceDirectoryDoesNotExist() {
+        Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
+        testWorkspace.setWorkspaceID(1);
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
+        boolean isDirectoryCreated = false;
+        assertFalse("Workspace directory was not supposed to be created.", isDirectoryCreated);
+
+        assertFalse("Workspace directory wasn't supposed to be created", workspaceDirectory.exists());
+        
+        boolean result = workspaceDirectoryHandler.workspaceDirectoryExists(testWorkspace);
+        
+        assertFalse("Workspace directory wasn't supposed to be created", workspaceDirectory.exists());
     }
     
 }

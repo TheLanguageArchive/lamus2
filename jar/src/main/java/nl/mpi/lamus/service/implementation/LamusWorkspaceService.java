@@ -15,10 +15,13 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,19 +38,19 @@ public class LamusWorkspaceService implements WorkspaceService {
 
     private final NodeAccessChecker nodeAccessChecker;
     private final WorkspaceManager workspaceManager;
+    private final WorkspaceDao workspaceDao;
 
     @Autowired
-    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager) {
+    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager,
+            WorkspaceDao workspaceDao) {
         this.nodeAccessChecker = accessChecker;
         this.workspaceManager = workspaceManager;
+        this.workspaceDao = workspaceDao;
     }
     
     
     /**
-     * 
-     * @param archiveNodeID
-     * @param userID
-     * @return 
+     * @see WorkspaceService#createWorkspace(java.lang.String, int)
      */
     public Workspace createWorkspace(String userID, int archiveNodeID) {
 
@@ -72,6 +75,9 @@ public class LamusWorkspaceService implements WorkspaceService {
         return newWorkspace;
     }
 
+    /**
+     * @see WorkspaceService#submitWorkspace(int)
+     */
     public void submitWorkspace(int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet.");
         
@@ -83,8 +89,42 @@ public class LamusWorkspaceService implements WorkspaceService {
         //TODO workspaceManager - submit workspace
     }
 
+    /**
+     * @see WorkspaceService#getWorkspace(int)
+     */
     public Workspace getWorkspace(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        return this.workspaceDao.getWorkspace(workspaceID);
     }
     
+    /**
+     * @see WorkspaceService#listUserWorkspaces(java.lang.String)
+     */
+    public Collection<Workspace> listUserWorkspaces(String userID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * @see WorkspaceService#openWorkspace(java.lang.String, int)
+     */
+    public Workspace openWorkspace(String userID, int workspaceID) {
+        
+        return this.workspaceManager.openWorkspace(userID, workspaceID);
+    }
+
+    /**
+     * @see WorkspaceService#getNode(int)
+     */
+    public WorkspaceNode getNode(int nodeID) {
+        
+        return this.workspaceDao.getWorkspaceNode(nodeID);
+    }
+
+    /**
+     * @see WorkspaceService#getChildNodes(int)
+     */
+    public Collection<WorkspaceNode> getChildNodes(int nodeID) {
+        
+        return this.workspaceDao.getChildWorkspaceNodes(nodeID);
+    }
 }

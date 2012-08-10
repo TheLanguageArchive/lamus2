@@ -25,8 +25,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  */
 public interface WorkspaceService {
     
-    
-    
     /**
      * Creates a workspace starting in a given archive node, for a given user.
      * 
@@ -36,9 +34,8 @@ public interface WorkspaceService {
      */
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
-    
     /**
-     * Retrieves a workspace from the database.
+     * Retrieves a workspace with the given ID from the database.
      * 
      * @param workspaceID ID of the workspace to retrieve
      * @return Retrieved workspace object
@@ -46,10 +43,43 @@ public interface WorkspaceService {
     public Workspace getWorkspace(int workspaceID);
     
     /**
+     * Retrieves a list containing the active workspaces belonging to the
+     * given user.
+     * @param userID ID of the user
+     * @return List with the user's active workspaces
+     */
+    public Collection<Workspace> listUserWorkspaces(String userID);
+    
+    /**
+     * Opens a workspace, retrieving the corresponding object from the database.
+     * While doing so, it also updates the session start date of the workspace.
+     * 
+     * @param workspaceID ID of the workspace to open
+     * @return Retrieved workspace object
+     */
+    public Workspace openWorkspace(String userID, int workspaceID);
+    
+    /**
      * Submits a workspace back into the archive.
      * 
      * @param workspaceID ID of the workspace
      */
     public void submitWorkspace(int workspaceID);
+    
+    /**
+     * Retrieves a workspace node with the given ID from the database.
+     * 
+     * @param nodeID ID of the node to retrieve
+     * @return corresponding workspace node
+     */
+    public WorkspaceNode getNode(int nodeID);
+    
+    /**
+     * Retrieves the child nodes of the node with the given ID from the database.
+     * 
+     * @param nodeID ID of the parent node
+     * @return child nodes of the given node
+     */
+    public Collection<WorkspaceNode> getChildNodes(int nodeID);
     
 }

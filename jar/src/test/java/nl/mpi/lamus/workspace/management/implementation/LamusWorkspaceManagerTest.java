@@ -15,6 +15,10 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
@@ -22,15 +26,16 @@ import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import org.junit.*;
 import org.springframework.core.task.TaskExecutor;
+import static org.hamcrest.Matchers.*;
 
 /**
  *
@@ -112,5 +117,110 @@ public class LamusWorkspaceManagerTest {
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);
         assertNull("Returned workspace should be null when the directory creation fails.", result);
+    }
+    
+    @Test
+    public void openExistingWorkspaceWithRightUser() throws MalformedURLException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+            
+            //check if the workspace directory exists
+            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(true));
+            
+            oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(workspaceToRetrieve);
+            //update as well status?
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+        }});
+        
+        Workspace result = manager.openWorkspace(userID, workspaceID);
+        assertNotNull("Returned workspace should not be null", result);
+        assertEquals("Returned workspace is different from expected", result, workspaceToRetrieve);
+        
+        assertFalse("", startDate.equals(workspaceToRetrieve.getSessionStartDate()));
+        assertNotNull(workspaceToRetrieve.getSessionEndDate());
+    }
+    
+    @Test
+    public void openExistingWorkspaceWithWrongUser() throws MalformedURLException {
+        final int workspaceID = 1;
+        final String givenUserID = "someUser";
+        final String expectedUserID = "someOtherUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, expectedUserID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+        }});
+        
+        Workspace result = manager.openWorkspace(givenUserID, workspaceID);
+        
+        //TODO Or throw an exception?
+        
+        assertNull("Returned workspace should be null", result);
+    }
+    
+ @Test
+    public void openExistingWorkspaceWithoutDirectory() throws MalformedURLException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(false));
+        }});
+        
+        Workspace result = manager.openWorkspace(userID, workspaceID);
+        
+        //TODO Or throw an exception?
+        
+        assertNull("Returned workspace should be null", result);
+    }
+    
+    @Test
+    public void openNonExistingWorkspace() throws MalformedURLException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(null));
+        }});
+        
+        Workspace result = manager.openWorkspace(userID, workspaceID);
+        assertNull("Returned workspace should be null", result);
     }
 }
