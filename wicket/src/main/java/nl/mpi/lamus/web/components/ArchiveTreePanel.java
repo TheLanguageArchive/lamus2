@@ -51,7 +51,7 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
 
 		// TOOD: Make more robust against other types in model
 		final GenericTreeSwingTreeNodeWrapper nodeWrapper = (GenericTreeSwingTreeNodeWrapper) node;
-		final T archiveNode = (T) nodeWrapper.getArchiveNode();
+		final T archiveNode = (T) nodeWrapper.getContentNode();
 		ArchiveTreePanel.this.onNodeLinkClicked(target, archiveNode);
 	    }
 	};
