@@ -34,10 +34,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable> extends Panel {
 
     private final Tree archiveTree;
+    private final GenericTreeModelProvider provider;
 
     public ArchiveTreePanel(String id, GenericTreeModelProvider provider) {
 	super(id);
-	archiveTree = createArchiveTree("archiveTree", provider);
+	this.provider = provider;
+	this.archiveTree = createArchiveTree("archiveTree", provider);
 	add(archiveTree);
     }
 
@@ -62,5 +64,11 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
 
     public void setLinkType(LinkType linkType) {
 	archiveTree.setLinkType(linkType);
+    }
+
+    @Override
+    public void onDetach() {
+	super.onDetach();
+	provider.onDetach();
     }
 }
