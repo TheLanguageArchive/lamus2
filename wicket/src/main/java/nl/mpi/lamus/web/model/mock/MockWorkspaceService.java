@@ -16,8 +16,10 @@
  */
 package nl.mpi.lamus.web.model.mock;
 
+import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,5 +52,25 @@ public class MockWorkspaceService implements WorkspaceService {
     public Workspace getWorkspace(int workspaceID) {
 	logger.info("call to getWorkspace({})", workspaceID);
 	return workspace;
+    }
+
+    @Override
+    public Collection<Workspace> listUserWorkspaces(String userID) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Workspace openWorkspace(String userID, int workspaceID) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public WorkspaceNode getNode(int nodeID) {
+	throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Collection<WorkspaceNode> getChildNodes(int nodeID) {
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 }
