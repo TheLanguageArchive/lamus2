@@ -24,15 +24,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
-import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.slf4j.Logger;
@@ -219,46 +213,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         String queryWorkspaceSql = "select * from workspace where workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         
-        RowMapper<Workspace> mapper = new RowMapper<Workspace>() {
-          public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
-              URL topNodeArchiveURL = null;
-              if(rs.getString("top_node_archive_url") != null) {
-                    try {
-                        topNodeArchiveURL = new URL(rs.getString("top_node_archive_url"));
-                    } catch (MalformedURLException ex) {
-                        logger.warn("Top Node Archive URL is malformed; null used instead", ex);
-                    }
-              }
-              Date endDate = null;
-              if(rs.getTimestamp("end_date") != null) {
-                  endDate = new Date(rs.getTimestamp("end_date").getTime());
-              }
-              Date sessionEndDate = null;
-              if(rs.getTimestamp("session_end_date") != null) {
-                  sessionEndDate = new Date(rs.getTimestamp("session_end_date").getTime());
-              }
-              
-              Workspace workspace = new LamusWorkspace(
-                      rs.getInt("workspace_id"),
-                      rs.getString("user_id"),
-                      rs.getInt("top_node_id"),
-                      topNodeArchiveURL,
-                      new Date(rs.getTimestamp("start_date").getTime()),
-                      endDate,
-                      new Date(rs.getTimestamp("session_start_date").getTime()),
-                      sessionEndDate,
-                      rs.getLong("used_storage_space"),
-                      rs.getLong("max_storage_space"),
-                      WorkspaceStatus.valueOf(rs.getString("status")),
-                      rs.getString("message"),
-                      rs.getString("archive_info"));
-              return workspace;
-          }
-        };
-        
         Workspace workspaceToReturn;
         try {
-            workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, mapper);
+            workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, new WorkspaceMapper());
         } catch(EmptyResultDataAccessException ex) {
             logger.warn("Workspace with ID " + workspaceID + " does not exist in the database");
             return null;
@@ -267,6 +224,18 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Workspace with ID " + workspaceID + " retrieved from the database");
         
         return workspaceToReturn;
+    }
+    
+    public Collection<Workspace> listWorkspacesForUser(String userID) {
+
+        logger.debug("Retrieving list of workspace created by user with ID: " + userID);
+        
+        String queryWorkspaceListSql = "select * from workspace where user_id = :user_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("user_id", userID);
+        
+        Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
+        
+        return listToReturn;
     }
     
 //    public void updateWorkspaceEndDates(Workspace workspace) {
@@ -389,10 +358,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + "(select child_workspace_node_id from node_link where parent_workspace_node_id = :parent_workspace_node_id)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("parent_workspace_node_id", workspaceNodeID);
         
-        //TODO check for exception?
-        
         Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceNodeListSql, namedParameters, new WorkspaceNodeMapper());
-        
         
         return listToReturn;
     }
@@ -417,6 +383,44 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + "; Child node ID: " + nodeLink.getChildWorkspaceNodeID());
     }
 
+    
+    private static final class WorkspaceMapper implements RowMapper<Workspace> {
+        
+        public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
+            URL topNodeArchiveURL = null;
+            if(rs.getString("top_node_archive_url") != null) {
+                try {
+                    topNodeArchiveURL = new URL(rs.getString("top_node_archive_url"));
+                } catch (MalformedURLException ex) {
+                    logger.warn("Top Node Archive URL is malformed; null used instead", ex);
+                }
+            }
+            Date endDate = null;
+            if(rs.getTimestamp("end_date") != null) {
+                endDate = new Date(rs.getTimestamp("end_date").getTime());
+            }
+            Date sessionEndDate = null;
+            if(rs.getTimestamp("session_end_date") != null) {
+                sessionEndDate = new Date(rs.getTimestamp("session_end_date").getTime());
+            }
+
+            Workspace workspace = new LamusWorkspace(
+                    rs.getInt("workspace_id"),
+                    rs.getString("user_id"),
+                    rs.getInt("top_node_id"),
+                    topNodeArchiveURL,
+                    new Date(rs.getTimestamp("start_date").getTime()),
+                    endDate,
+                    new Date(rs.getTimestamp("session_start_date").getTime()),
+                    sessionEndDate,
+                    rs.getLong("used_storage_space"),
+                    rs.getLong("max_storage_space"),
+                    WorkspaceStatus.valueOf(rs.getString("status")),
+                    rs.getString("message"),
+                    rs.getString("archive_info"));
+            return workspace;
+        }
+    }
     
     private static final class WorkspaceNodeMapper implements RowMapper<WorkspaceNode> {
 

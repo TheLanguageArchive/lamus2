@@ -101,7 +101,8 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#listUserWorkspaces(java.lang.String)
      */
     public Collection<Workspace> listUserWorkspaces(String userID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        return this.workspaceDao.listWorkspacesForUser(userID);
     }
 
     /**

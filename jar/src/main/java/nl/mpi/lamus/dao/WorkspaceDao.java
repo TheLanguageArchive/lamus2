@@ -74,6 +74,13 @@ public interface WorkspaceDao {
 
     /**
      * 
+     * @param userID
+     * @return 
+     */
+    public Collection<Workspace> listWorkspacesForUser(String userID);
+    
+    /**
+     * 
      * @param archiveNodeID
      * @return 
      */

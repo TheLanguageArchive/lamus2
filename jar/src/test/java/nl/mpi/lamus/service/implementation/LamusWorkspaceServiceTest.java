@@ -15,10 +15,6 @@
  */
 package nl.mpi.lamus.service.implementation;
 
-import nl.mpi.lamus.workspace.management.WorkspaceManager;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
-import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,9 +24,11 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -117,7 +115,7 @@ public class LamusWorkspaceServiceTest {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 0;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
@@ -138,12 +136,35 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void listUserWorkspaces() throws MalformedURLException {
+        
+        final String userID = "someUser";
+        final Date date = Calendar.getInstance().getTime();
+        Workspace workspace1 = new LamusWorkspace(1, userID, 0, new URL("http://some/url/node.cmdi"),
+                date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        Workspace workspace2 = new LamusWorkspace(2, userID, 1, new URL("http://someother/url/node.cmdi"),
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).listWorkspacesForUser(userID); will(returnValue(expectedList));
+        }});
+        
+        Collection<Workspace> result = service.listUserWorkspaces(userID);
+        
+        assertEquals("Retrieved list differenc from expected", expectedList, result);
+    }
+    
+    @Test
     public void openExistingWorkspace() throws MalformedURLException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 0;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
