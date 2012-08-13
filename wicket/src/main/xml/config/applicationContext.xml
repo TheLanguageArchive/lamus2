@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns='http://www.springframework.org/schema/beans'
+    xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd'>
+	
+    <!-- The application -->
+	
+    <bean id="wicketApplication" class="nl.mpi.lamus.web.LamusWicketApplication">
+	<constructor-arg ref="sessionFactory" />
+    </bean>
+    
+    <!-- 
+	All other bean definitions are read from the XML files in the subdirectories. 
+	This filter and the selected profile are configured in web.xml
+    -->
+</beans>

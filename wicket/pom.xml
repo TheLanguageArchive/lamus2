@@ -14,8 +14,8 @@
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 	<!-- TODO project name  -->
-    <name>Lamus2 wicket interface</name>
-    <description></description>
+    <name>Lamus2 wicket</name>
+    <description>Lamus2 wicket interface</description>
     <organization> 
 	<name>Max Planck Institute for Psycholinguistics</name> 
 	<url>http://www.mpi.nl</url>
@@ -28,6 +28,7 @@
 	<log4j.version>1.2.16</log4j.version>
 	<spring.version>3.1.2.RELEASE</spring.version>
 	<netbeans.hint.license>gpl30</netbeans.hint.license>
+        <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
     </properties>
     <dependencies>
 		<!--  WICKET DEPENDENCIES -->
@@ -135,6 +136,10 @@
 	    <resource>
 		<filtering>false</filtering>
 		<directory>src/main/html</directory>
+	    </resource>
+	    <resource>
+		<filtering>false</filtering>
+		<directory>src/main/xml</directory>
 	    </resource>
 	</resources>
 	<testResources>

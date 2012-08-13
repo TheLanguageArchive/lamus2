@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns='http://www.springframework.org/schema/beans'
+    xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd'>
+			
+    <!-- Workspace beans -->
+	
+    <bean id="workspaceService" class="nl.mpi.lamus.web.model.mock.MockWorkspaceService">
+	<constructor-arg ref="mockCreatedWorkspace" />
+    </bean>
+    
+    <bean id="mockCreatedWorkspace" class="nl.mpi.lamus.web.model.mock.MockWorkspace">
+	<property name="workspaceID" value="1"/>
+    </bean>
+    
+</beans>
