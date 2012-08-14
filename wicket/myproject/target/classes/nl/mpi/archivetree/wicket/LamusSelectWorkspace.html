@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:wicket="http://wicket.apache.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>LamusSelectWorkspace</title>
+                <wicket:link>
+            <link type="text/css" rel="stylesheet" href="lams.css"></link>
+        </wicket:link>
+    </head>
+    <body>
+            <header wicket:id="headerpanel" />
+            <form wicket:id="workspaceForm">
+            <p>Workspace ID: <input wicket:id="workspaceId" type="text" value=""/></p>
+            <p>User ID: <input wicket:id="userId" type="text" value=""/></p>
+            <p>TopNode ID: <input wicket:id="topnodeId" type="text" value="MPI311620#"/></p>
+            <p>TopNodeArchiveURL: <input wicket:id="topnodearchiveurl" type="text" value=""/></p>
+            <input  wicket:id="OpenWorkspace" type="submit" value="Open selected Workspace"/>
+        </form>
+<!--        <section class="button_container">
+        <fieldset wicket:id="buttonpage" />
+    </section>-->
+    </body>
+</html>

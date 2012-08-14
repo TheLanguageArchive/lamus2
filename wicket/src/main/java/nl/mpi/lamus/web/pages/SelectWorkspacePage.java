@@ -21,6 +21,7 @@ import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -38,9 +39,8 @@ public final class SelectWorkspacePage extends LamusPage {
 
     @SpringBean
     private WorkspaceService workspaceService;
-    @SpringBean(name = "workspaceSelectTreeProvider")
-    private GenericTreeModelProvider openedArchiveTreeProvider;
     private final Form nodeIdForm;
+    final String currentUserId = LamusSession.get().getUserId();
     
             //single list choice
         private static final List<String> WORKSPACES = Arrays.asList(new String[] {
@@ -54,9 +54,10 @@ public final class SelectWorkspacePage extends LamusPage {
 
 
     private Form createNodeIdForm(String id) { 
-ListChoice<String> listWorkspaces = new ListChoice<String>("workspace",
-				new PropertyModel<String>(this, "selectedWorkspace"), WORKSPACES);
-        
+//ListChoice<String> listWorkspaces = new ListChoice<String>("workspace",
+//				new PropertyModel<String>(this, "selectedWorkspace"), WORKSPACES);
+//        
+        ListChoice<String> listWorkspaces = (ListChoice<String>) workspaceService.listUserWorkspaces(currentUserId);
         listWorkspaces.setMaxRows(5);
         final Form<Workspace> form = new Form<Workspace>(id);
 //        form.add(new Label("name"));
@@ -78,8 +79,9 @@ ListChoice<String> listWorkspaces = new ListChoice<String>("workspace",
 
             @Override
             public void onSubmit() {
+                
                 // Request a workspace with workspace service
-                final Workspace openSelectedWorkspace = workspaceService.getWorkspace(Integer.parseInt(selectedWorkspace));
+                final Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, Integer.parseInt(selectedWorkspace));
                 // Show page for newly created workspace
                 final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(openSelectedWorkspace));
                 setResponsePage(resultPage);
