@@ -20,7 +20,7 @@ import org.apache.wicket.PageParameters;
 
 /**
  *
- * @author jeafer
+ * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public final class IndexPage extends LamusPage {
 

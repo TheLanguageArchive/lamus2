@@ -23,18 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:extend>
-<!--            <div wicket:id="openedArchiveTree">[OPENED ARCHIVE TREE]</div>-->
-            <div wicket:id="formContainer">
+
+            <div align="center" wicket:id="formContainer">
                 <form wicket:id="workspaceForm">
 		<p>
 			<label>[ListChoice] Select a workspace :</label> 
 			<br />
 			<select wicket:id="workspace"></select>
 		</p>
-<!--                    <p>Workspace ID: <span wicket:id="workspaceId" type="text">workspaceId</span></p>-->
- <!--                   <p>User ID: <span wicket:id="userId" type="text">userid</span></p>
-                    <p>TopNode ID: <span wicket:id="topnodeId" type="text">MPI311620#</span></p>
-                    <p>TopNodeArchiveURL: <span wicket:id="topnodearchiveurl" type="text">topnodearchiveURL</span></p>-->
                     <input  wicket:id="OpenWorkspace" type="submit" value="Open selected Workspace"/>
                 </form>
             </div>

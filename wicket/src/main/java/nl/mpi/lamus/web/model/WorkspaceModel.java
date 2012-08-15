@@ -23,7 +23,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- * Workspace model that allows detaching, loading via {@link WorkspaceService} by {@link Workspace#getWorkspaceID() workspaceId}
+ * Workspace model that allows detaching, loading via {@link WorkspaceService}
+ * by {@link Workspace#getWorkspaceID() workspaceId}
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @see WorkspaceService
@@ -34,26 +35,34 @@ public class WorkspaceModel extends LoadableDetachableModel<Workspace> {
     @SpringBean
     private WorkspaceService workspaceService;
     // Workspace identifier
-    private final int workspaceId;
+    private final Integer workspaceId;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public WorkspaceModel(Workspace workspace) {
-	super(workspace);
-	workspaceId = workspace.getWorkspaceID();
-	// Get workspaceService injected
-	InjectorHolder.getInjector().inject(this);
+        super(workspace);
+        if (workspace == null) {
+            workspaceId = null;
+        } else {
+            workspaceId = workspace.getWorkspaceID();
+        }
+        // Get workspaceService injected
+        InjectorHolder.getInjector().inject(this);
     }
 
     @SuppressWarnings("LeakingThisInConstructor")
     public WorkspaceModel(int workspaceId) {
-	super();
-	this.workspaceId = workspaceId;
-	// Get workspaceService injected
-	InjectorHolder.getInjector().inject(this);
+        super();
+        this.workspaceId = workspaceId;
+        // Get workspaceService injected
+        InjectorHolder.getInjector().inject(this);
     }
 
     @Override
     protected Workspace load() {
-	return workspaceService.getWorkspace(workspaceId);
+        if (workspaceId == null) {
+            return null;
+        } else {
+            return workspaceService.getWorkspace(workspaceId);
+        }
     }
 }

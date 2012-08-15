@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.model.mock;
 
+import java.util.Arrays;
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -56,12 +57,18 @@ public class MockWorkspaceService implements WorkspaceService {
 
     @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
-	throw new UnsupportedOperationException("Not supported yet.");
+        Workspace myNewMockWorkspace = new MockWorkspace();
+        myNewMockWorkspace.setWorkspaceID(1);
+        Workspace myNewMockWorkspace2 = new MockWorkspace();
+        myNewMockWorkspace2.setWorkspaceID(2);
+        
+	return Arrays.asList(myNewMockWorkspace, myNewMockWorkspace2);
     }
 
     @Override
     public Workspace openWorkspace(String userID, int workspaceID) {
-	throw new UnsupportedOperationException("Not supported yet.");
+		logger.info("call to getWorkspace({})", workspaceID);
+	return workspace;
     }
 
     @Override

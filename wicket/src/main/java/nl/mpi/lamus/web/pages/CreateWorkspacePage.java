@@ -36,7 +36,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  *
- * @author jeafer
+ * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public final class CreateWorkspacePage extends LamusPage {
 
