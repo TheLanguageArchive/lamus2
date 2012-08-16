@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web;
 
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.UploadPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.Request;
@@ -24,11 +25,14 @@ import org.apache.wicket.Response;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
+import org.apache.wicket.util.file.Folder;
 
 public class LamusWicketApplication extends WebApplication {
 
     @SpringBean
     private LamusSessionFactory sessionFactory;
+    
+    private Folder uploadFolder = null;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
 	this.sessionFactory = sessionFactory;
@@ -43,10 +47,28 @@ public class LamusWicketApplication extends WebApplication {
     protected void init() {
 	super.init();
 	addComponentInstantiationListener(new SpringComponentInjector(this));
+        getResourceSettings().setThrowExceptionOnMissingResource(false);
+
+        uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
+        // Ensure folder exists
+        uploadFolder.mkdirs();
+
+
+        //getRootRequestMapperAsCompound().add(new MountedMapper("/single", UploadPage.class));
+
+        //getApplicationSettings().setUploadProgressUpdatesEnabled(true);
     }
 
     @Override
     public LamusSession newSession(Request request, Response response) {
 	return sessionFactory.createSession(this, request, response);
+    }
+    
+    /**
+     * @return the folder for uploads
+     */
+    public Folder getUploadFolder()
+    {
+        return uploadFolder;
     }
 }

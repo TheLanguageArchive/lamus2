@@ -20,6 +20,7 @@ import nl.mpi.archiving.tree.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
+import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -106,7 +107,8 @@ public final class WorkspacePage extends LamusPage {
 
                 @Override
                 public void onSubmit() {
-                    handleUploadFiles();
+                    final UploadPage resultPage = new UploadPage();
+		setResponsePage(resultPage);
                 }
             };
             add(uploadFilesButton);
@@ -128,6 +130,16 @@ public final class WorkspacePage extends LamusPage {
                 }
             };
             add(unlinkedFilesButton);
+            
+            final Button indexPageButton = new Button("indexPageButton") {
+
+                @Override
+                public void onSubmit() {
+                    final IndexPage resultPage = new IndexPage();
+		setResponsePage(resultPage);
+                }
+            };
+            add(indexPageButton);
         }
     }
 

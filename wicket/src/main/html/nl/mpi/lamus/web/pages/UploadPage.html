@@ -1,0 +1,70 @@
+<!--
+Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <title>Upload Files</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <style>
+        legend { border: 1px solid #e9601a; background-color: #bbb; color: #fff; padding: 4px;}
+        fieldset { border: 1px solid #e9601a; padding: 10px; margin-top: 10px;}
+    </style>
+</head>
+<body>
+<wicket:extend>
+    <form wicket:id="progressUpload">
+     <fieldset>
+      <legend>Upload form with progress bar</legend>
+        <p>
+        <label for="upload">File</label>
+        <input wicket:id="fileInput" type="file"/>
+        </p>
+        <input type="submit" value="Upload!"/>
+        <span wicket:id="progress">[[upload progressbar]]</span>
+     </fieldset>
+    </form>
+
+    <form wicket:id="html5Upload">
+     <fieldset>
+      <legend>Upload form that uses HTML5 &lt;input type="file" <strong>multiple</strong> /&gt;, so it can upload
+        more than one file in browsers which support <em>multiple</em> attribute</legend>
+        <p>
+        <label>File</label>
+        <input wicket:id="fileInput" type="file" multiple="multiple" />
+        </p>
+        <input type="submit" value="Upload!"/>
+     </fieldset>
+    </form>
+
+
+     <div>
+        <span wicket:id="uploadFeedback"/>
+     </div>
+
+    <div>
+      <h4>Current files in <span wicket:id="dir">(dir)</span>:</h4>
+      <table>
+        <tr wicket:id="fileList">
+            <td width="200"><span wicket:id="file">(file)</span></td>
+            <td><a href="#" wicket:id="delete"><img src="delete.gif" border="0"/></a></td>
+        </tr>
+      </table>
+    </div>
+    </wicket:extend>
+</body>
+</html>
+
