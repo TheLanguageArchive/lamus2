@@ -29,6 +29,7 @@
     <modules>
 <!-- 		<module>api</module> -->
         <module>jar</module>
+        <module>wicket</module>
 <!-- 		<module>targz</module> -->
     </modules>
 
