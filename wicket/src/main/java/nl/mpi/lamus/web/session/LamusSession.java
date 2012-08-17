@@ -16,9 +16,9 @@
  */
 package nl.mpi.lamus.web.session;
 
-import org.apache.wicket.Request;
 import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebSession;
+import org.apache.wicket.request.Request;
 
 /**
  *

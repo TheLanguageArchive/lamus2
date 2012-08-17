@@ -23,9 +23,9 @@ import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.archiving.tree.swingtree.GenericTreeSwingTreeNodeWrapper;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.markup.html.tree.DefaultAbstractTree.LinkType;
 import org.apache.wicket.extensions.markup.html.tree.Tree;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.tree.LinkType;
 
 /**
  *

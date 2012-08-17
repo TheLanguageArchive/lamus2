@@ -17,8 +17,8 @@
 package nl.mpi.lamus.web.session;
 
 import org.apache.wicket.Application;
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Response;
 
 /**
  *

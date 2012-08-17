@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import nl.mpi.lamus.web.LamusWicketApplication;
 import org.apache.wicket.Application;
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -35,7 +34,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.file.Folder;
-import org.apache.wicket.util.lang.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

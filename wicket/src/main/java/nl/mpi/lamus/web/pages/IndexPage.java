@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import org.apache.wicket.PageParameters;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  *

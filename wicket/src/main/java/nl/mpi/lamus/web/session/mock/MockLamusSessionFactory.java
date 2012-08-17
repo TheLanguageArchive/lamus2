@@ -19,8 +19,8 @@ package nl.mpi.lamus.web.session.mock;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.Application;
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Response;
 
 /**
  *
