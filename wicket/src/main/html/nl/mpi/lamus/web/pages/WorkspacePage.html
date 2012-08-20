@@ -8,18 +8,7 @@
     </head>
     <body>
         <wicket:extend>
-            <form wicket:id="workspaceActionsForm">
-                <button wicket:id="uploadFilesButton" type="submit">Upload files</button>
-                <button wicket:id="requestStorageButton" type="submit">Request storage</button>
-                <button wicket:id="unlinkedFilesButton" type="submit">Unlinked files</button>
-                <button type="submit">Submit workspace</button>
-                <button type="submit">Save and Logout</button>
-                <button type="submit">Delete Workspace</button>
-                <button type="submit">Help</button>
-                <button type="submit">Report a Bug</button>
-                <button type="submit">About</button>
-                <button wicket:id="indexPageButton" type="submit">Main Page</button>
-            </form>
+            <div wicket:id="buttonpage" />
             <div id="workspaceSelect" style="position: relative; float: left; width: 40%;">
                 <div wicket:id="workspaceInfo">
                     <h1>Workspace information</h1>
@@ -38,7 +27,8 @@
                         <p>Node ID: <span wicket:id="nodeId">Node name</span></p>
                     </form>
                 </div>
-            </div>
+            </div>  
+            
         </wicket:extend>
     </body>
 </html>
