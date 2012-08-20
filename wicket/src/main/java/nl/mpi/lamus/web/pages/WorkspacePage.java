@@ -53,7 +53,8 @@ public final class WorkspacePage extends LamusPage {
 
         add(createWorkspaceInfo("workspaceInfo"));
         add(createWorkspaceTreePanel("workspaceTree"));
-        add(new WorkspaceActionsForm("workspaceActionsForm", model));
+        add(new ButtonPage("buttonpage"));
+        
     }
 
     private ArchiveTreePanel createWorkspaceTreePanel(String id) {
@@ -95,60 +96,5 @@ public final class WorkspacePage extends LamusPage {
 	return form;
     }
 
-    /**
-     * Form that allows user to select actions on the current workspace
-     */
-    private class WorkspaceActionsForm extends Form<Workspace> {
-
-        public WorkspaceActionsForm(String id, IModel<Workspace> model) {
-            super(id, model);
-
-            final Button uploadFilesButton = new Button("uploadFilesButton") {
-
-                @Override
-                public void onSubmit() {
-                    final UploadPage resultPage = new UploadPage();
-		setResponsePage(resultPage);
-                }
-            };
-            add(uploadFilesButton);
-
-            final Button requestStorageButton = new Button("requestStorageButton") {
-
-                @Override
-                public void onSubmit() {
-                    handleRequestStorage();
-                }
-            };
-            add(requestStorageButton);
-
-            final Button unlinkedFilesButton = new Button("unlinkedFilesButton") {
-
-                @Override
-                public void onSubmit() {
-                    handleUnlinkedFiles();
-                }
-            };
-            add(unlinkedFilesButton);
-            
-            final Button indexPageButton = new Button("indexPageButton") {
-
-                @Override
-                public void onSubmit() {
-                    final IndexPage resultPage = new IndexPage();
-		setResponsePage(resultPage);
-                }
-            };
-            add(indexPageButton);
-        }
-    }
-
-    private void handleUploadFiles() {
-    }
-
-    private void handleRequestStorage() {
-    }
-
-    private void handleUnlinkedFiles() {
-    }
+ 
 }

@@ -17,11 +17,13 @@
 package nl.mpi.lamus.web;
 
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.UploadPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.mapper.MountedMapper;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.apache.wicket.util.file.Folder;
@@ -52,6 +54,7 @@ public class LamusWicketApplication extends WebApplication {
         // Ensure folder exists
         uploadFolder.mkdirs();
 
+        getRootRequestMapperAsCompound().add(new MountedMapper("/single", UploadPage.class));
         getApplicationSettings().setUploadProgressUpdatesEnabled(true);
     }
 

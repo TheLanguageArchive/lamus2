@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import nl.mpi.lamus.web.LamusWicketApplication;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Application;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.basic.Label;
@@ -34,6 +35,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.file.Folder;
+import org.apache.wicket.util.lang.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,41 +43,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-    @SuppressWarnings("serial")
+@SuppressWarnings("serial")
 public class UploadPage extends LamusPage {
+
+    //private final IModel<Workspace> model;
 
     /**
      * List view for files in upload folder.
      */
-    private class FileListView extends ListView<File>
-    {
+    private class FileListView extends ListView<File> {
+
         /**
          * Construct.
-         * 
-         * @param name
-         *            Component name
-         * @param files
-         *            The file list model
+         *
+         * @param name Component name
+         * @param files The file list model
          */
-        public FileListView(String name, final IModel<List<File>> files)
-        {
+        public FileListView(String name, final IModel<List<File>> files) {
             super(name, files);
         }
-
 
         /**
          * @see ListView#populateItem(ListItem)
          */
         @Override
-        protected void populateItem(ListItem<File> listItem)
-        {
+        protected void populateItem(ListItem<File> listItem) {
             final File file = listItem.getModelObject();
             listItem.add(new Label("file", file.getName()));
-            listItem.add(new Link<Void>("delete")
-            {
+            listItem.add(new Link<Void>("delete") {
+
                 @Override
-                public void onClick()
-                {
+                public void onClick() {
                     Files.remove(file);
                     info("Deleted " + file);
                 }
@@ -86,18 +84,16 @@ public class UploadPage extends LamusPage {
     /**
      * Form for uploads.
      */
-    private class FileUploadForm extends Form<Void>
-    {
+    private class FileUploadForm extends Form<Void> {
+
         FileUploadField fileUploadField;
 
         /**
          * Construct.
-         * 
-         * @param name
-         *            Component name
+         *
+         * @param name Component name
          */
-        public FileUploadForm(String name)
-        {
+        public FileUploadForm(String name) {
             super(name);
 
             // set this form to multipart mode (allways needed for uploads!)
@@ -107,58 +103,52 @@ public class UploadPage extends LamusPage {
             add(fileUploadField = new FileUploadField("fileInput"));
 
             // Set maximum size to 100K for demo purposes
-            //setMaxSize(Bytes.kilobytes(100));
+            setMaxSize(Bytes.kilobytes(100));
         }
 
         /**
          * @see org.apache.wicket.markup.html.form.Form#onSubmit()
          */
         @Override
-        protected void onSubmit()
-        {
-            final List<FileUpload> uploads = (List<FileUpload>) fileUploadField.getFileUpload();
-            if (uploads != null)
-            {
-                for (FileUpload upload : uploads)
-                {
+        protected void onSubmit() {
+            final List<FileUpload> uploads = fileUploadField.getFileUploads();
+            if (uploads != null) {
+                for (FileUpload upload : uploads) {
                     // Create a new file
                     File newFile = new File(getUploadFolder(), upload.getClientFileName());
 
                     // Check new file, delete if it already existed
                     checkFileExists(newFile);
-                    try
-                    {
+                    try {
                         // Save to new file
                         newFile.createNewFile();
                         upload.writeTo(newFile);
 
                         UploadPage.this.info("saved file: " + upload.getClientFileName());
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         throw new IllegalStateException("Unable to write file", e);
                     }
                 }
             }
         }
     }
-
-    /** Log. */
+    /**
+     * Log.
+     */
     private static final Logger log = LoggerFactory.getLogger(UploadPage.class);
-
-    /** Reference to listview for easy access. */
+    /**
+     * Reference to listview for easy access.
+     */
     private final FileListView fileListView;
 
     /**
      * Constructor.
-     * 
-     * @param parameters
-     *            Page parameters
+     *
+     * @param parameters Page parameters
      */
-    public UploadPage()
-    {
+    
+    public UploadPage() {
         Folder uploadFolder = getUploadFolder();
-
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
 
@@ -168,11 +158,10 @@ public class UploadPage extends LamusPage {
 
         // Add folder view
         add(new Label("dir", uploadFolder.getAbsolutePath()));
-        fileListView = new FileListView("fileList", new LoadableDetachableModel<List<File>>()
-        {
+        fileListView = new FileListView("fileList", new LoadableDetachableModel<List<File>>() {
+
             @Override
-            protected List<File> load()
-            {
+            protected List<File> load() {
                 return Arrays.asList(getUploadFolder().listFiles());
             }
         });
@@ -182,35 +171,32 @@ public class UploadPage extends LamusPage {
         final FileUploadForm progressUploadForm = new FileUploadForm("progressUpload");
 
         progressUploadForm.add(new UploadProgressBar("progress", progressUploadForm,
-            progressUploadForm.fileUploadField));
+                progressUploadForm.fileUploadField));
         add(progressUploadForm);
 
         // Add upload form that uses HTML5 <input type="file" multiple />, so it can upload
         // more than one file in browsers which support "multiple" attribute
         final FileUploadForm html5UploadForm = new FileUploadForm("html5Upload");
         add(html5UploadForm);
+
+        add(new ButtonPage("buttonpage"));
     }
 
     /**
      * Check whether the file allready exists, and if so, try to delete it.
-     * 
-     * @param newFile
-     *            the file to check
+     *
+     * @param newFile the file to check
      */
-    private void checkFileExists(File newFile)
-    {
-        if (newFile.exists())
-        {
+    private void checkFileExists(File newFile) {
+        if (newFile.exists()) {
             // Try to delete the file
-            if (!Files.remove(newFile))
-            {
+            if (!Files.remove(newFile)) {
                 throw new IllegalStateException("Unable to overwrite " + newFile.getAbsolutePath());
             }
         }
     }
 
-    private Folder getUploadFolder()
-    {
-        return ((LamusWicketApplication)Application.get()).getUploadFolder();
+    private Folder getUploadFolder() {
+        return ((LamusWicketApplication) Application.get()).getUploadFolder();
     }
 }
