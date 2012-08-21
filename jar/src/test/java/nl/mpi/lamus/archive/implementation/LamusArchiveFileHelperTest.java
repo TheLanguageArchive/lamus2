@@ -145,6 +145,27 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
+    public void getFileDirNameWithSlashes() {
+        
+        String dirName = "something/with/some/slashes";
+        String fullName = dirName + "/baseName.txt";
+        
+        String retrievedName = testArchiveFileHelper.getFileDirname(fullName);
+        
+        assertEquals(dirName, retrievedName);
+    }
+    
+    @Test
+    public void getFileDirNameWithoutSlashes() {
+        
+        String fullName = "something_without__slashes.txt";
+        
+        String retrievedName = testArchiveFileHelper.getFileDirname(fullName);
+        
+        assertEquals("", retrievedName);
+    }
+    
+    @Test
     public void getFileTitleWithBaseName() {
         
         String baseName = "baseName.txt";

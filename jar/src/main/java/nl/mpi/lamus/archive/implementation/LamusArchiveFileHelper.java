@@ -79,6 +79,18 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         if ((sp+1)==fullname.length()) logger.warn("getFileBasename: None for "+fullname);
         return fullname.substring(sp+1);
     }
+    
+    /**
+     * @see ArchiveFileHelper#getFileDirname(java.lang.String) 
+     */
+    public String getFileDirname(String fullname) {
+        int sp = lastSlashPos(fullname);
+        if (sp < 0) {
+            logger.warn("getFileDirname: None for " + fullname);
+            return ""; // none
+        }
+        return fullname.substring(0, sp);
+    }
 
     /**
      * @see ArchiveFileHelper#getFileTitle(java.lang.String) 
