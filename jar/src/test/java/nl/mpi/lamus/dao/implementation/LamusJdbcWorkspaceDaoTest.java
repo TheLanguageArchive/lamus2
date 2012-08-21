@@ -471,6 +471,39 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void updateNodeWorkspaceURL() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 10, true, true);
+        URL expectedURL = new URL("http:/totally/different.url");
+
+        testNode.setWorkspaceURL(expectedURL);
+        
+        workspaceDao.updateNodeWorkspaceURL(testNode);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        
+        assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
+        assertEquals("Workspace URL of the node was not updated in the database.", expectedURL, retrievedNode.getWorkspaceURL());
+    }
+    
+    @Test
+    public void updateNodeWithNullWorkspaceURL() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 10, true, true);
+
+        testNode.setWorkspaceURL(null);
+        
+        workspaceDao.updateNodeWorkspaceURL(testNode);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        
+        assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
+        assertEquals("Workspace URL of the node was not updated in the database.", null, retrievedNode.getWorkspaceURL());
+    }
+    
+    @Test
     public void addWorkspaceNodeLink() throws URISyntaxException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
@@ -760,6 +793,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace workspace = (Workspace) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
         return workspace;
     }
+    
+    private WorkspaceNode getNodeFromDB(int nodeID) {
+        
+        String selectSql = "SELECT * FROM node WHERE workspace_node_id = ?";
+        WorkspaceNode node = (WorkspaceNode) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceNodeRowMapper(), nodeID);
+        return node;
+    }
 
     private Workspace copyWorkspace(Workspace ws) {
         Workspace copiedWs = new LamusWorkspace(
@@ -784,6 +824,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
 }
+
 class WorkspaceRowMapper implements RowMapper<Workspace> {
 
     public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -821,6 +862,66 @@ class WorkspaceRowMapper implements RowMapper<Workspace> {
                 rs.getString("message"),
                 rs.getString("archive_info"));
         return workspace;
+    }
+ 
+}
+
+class WorkspaceNodeRowMapper implements RowMapper<WorkspaceNode> {
+
+    public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
+        
+            int archiveNodeID = -1;
+            if(rs.getString("archive_node_id") != null) {
+                archiveNodeID = rs.getInt("archive_node_id");
+            }
+            URI profileSchemaURI = null;
+            if(rs.getString("profile_schema_uri") != null) {
+                try {
+                    profileSchemaURI = new URI(rs.getString("profile_schema_uri"));
+                } catch (URISyntaxException ex) {
+                    fail("Profile Schema URI has invalid syntax; null used instead");
+                }
+            }
+            URL workspaceURL = null;
+            if(rs.getString("workspace_url") != null) {
+                try {
+                    workspaceURL = new URL(rs.getString("workspace_url"));
+                } catch (MalformedURLException ex) {
+                    fail("Workspace URL is malformed; null used instead");
+                }
+            }
+            URL archiveURL = null;
+            if(rs.getString("archive_url") != null) {
+                try {
+                    archiveURL = new URL(rs.getString("archive_url"));
+                } catch (MalformedURLException ex) {
+                    fail("Archive URL is malformed; null used instead");
+                }
+            }
+            URL originURL = null;
+            if(rs.getString("origin_url") != null) {
+                try {
+                    originURL = new URL(rs.getString("origin_url"));
+                } catch (MalformedURLException ex) {
+                    fail("Origin URL is malformed; null used instead");
+                }
+            }
+
+            WorkspaceNode workspaceNode = new LamusWorkspaceNode(
+                    rs.getInt("workspace_node_id"),
+                    rs.getInt("workspace_id"),
+                    archiveNodeID,
+                    profileSchemaURI,
+                    rs.getString("name"),
+                    rs.getString("title"),
+                    WorkspaceNodeType.valueOf(rs.getString("type")),
+                    workspaceURL,
+                    archiveURL,
+                    originURL,
+                    WorkspaceNodeStatus.valueOf(rs.getString("status")),
+                    rs.getString("pid"),
+                    rs.getString("format"));
+            return workspaceNode;
     }
  
 }

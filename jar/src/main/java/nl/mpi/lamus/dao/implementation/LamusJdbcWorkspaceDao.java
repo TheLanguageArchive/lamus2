@@ -218,14 +218,19 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Uploading workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
                 + "; setting message to: \"" + workspace.getMessage() + "\"");
         
+        String statusStr = null;
+        if(workspace.getStatus() != null) {
+            statusStr = workspace.getStatus().toString();
+        }
+        
         String updateSql = "UPDATE workspace SET status = :status, message = :message WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("status", workspace.getStatus())
+                .addValue("status", statusStr)
                 .addValue("message", workspace.getMessage())
                 .addValue("workspace_id", workspace.getWorkspaceID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
-        logger.info("Status of workspace " + workspace.getWorkspaceID() + " updated to \"" + workspace.getStatus()
+        logger.info("Status of workspace " + workspace.getWorkspaceID() + " updated to \"" + statusStr
                 + "\" and message updated to \"" + workspace.getMessage() + "\"");
     }
 
@@ -329,6 +334,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         if(node.getProfileSchemaURI() != null) {
             profileSchemaURIStr = node.getProfileSchemaURI().toString();
         }
+        String typeStr = null;
+        if(node.getType() != null) {
+            typeStr = node.getType().toString();
+        }
         String workspaceURLStr = null;
         if(node.getWorkspaceURL() != null) {
             workspaceURLStr = node.getWorkspaceURL().toString();
@@ -352,7 +361,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("profile_schema_uri", profileSchemaURIStr)
                 .addValue("name", node.getName())
                 .addValue("title", node.getTitle())
-                .addValue("type", node.getType())
+                .addValue("type", typeStr)
                 .addValue("workspace_url", workspaceURLStr)
                 .addValue("archive_url", archiveURLStr)
                 .addValue("origin_url", originURLStr)
@@ -402,6 +411,25 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceNodeListSql, namedParameters, new WorkspaceNodeMapper());
         
         return listToReturn;
+    }
+    
+    public void updateNodeWorkspaceURL(WorkspaceNode node) {
+        
+        logger.debug("Updating workspace URL for node with ID: " + node.getWorkspaceNodeID() + "; setting workspace URL to: " + node.getWorkspaceURL());
+        
+        String nodeWorkspaceURLStr = null;
+        if(node.getWorkspaceURL() != null) {
+            nodeWorkspaceURLStr = node.getWorkspaceURL().toString();
+        }
+        
+        String updateSql = "UPDATE node SET workspace_url = :workspace_url"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("workspace_url", nodeWorkspaceURLStr)
+                .addValue("workspace_node_id", node.getWorkspaceNodeID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Workspace URL of node " + node.getWorkspaceNodeID() + " updated to " + node.getWorkspaceURL());
     }
 
     /**

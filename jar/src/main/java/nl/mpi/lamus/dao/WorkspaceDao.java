@@ -111,6 +111,13 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID);
     
     /**
+     * Updates the Workspace URL of the given node.
+     * 
+     * @param node WorkspaceNode object to be updated
+     */
+    public void updateNodeWorkspaceURL(WorkspaceNode node);
+    
+    /**
      * Inserts a link between two nodes (parent and child) into the database.
      * @param link WorkspaceNodeLink object to insert into the database
      */
