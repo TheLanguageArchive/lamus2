@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.util.Collection;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
@@ -25,6 +26,7 @@ import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.slf4j.Logger;
@@ -46,13 +48,15 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
     private final ArchiveObjectsDB archiveObjectsDB;
     private final WorkspaceDao workspaceDao;
     private final FileImporterFactoryBean fileImporterFactoryBean;
+    private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
     public LamusWorkspaceFileExplorer(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
-        FileImporterFactoryBean fileImporterFactoryBean) {
+        FileImporterFactoryBean fileImporterFactoryBean, ArchiveFileHelper aFileHelper) {
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
         this.fileImporterFactoryBean = fileImporterFactoryBean;
+        this.archiveFileHelper = aFileHelper;
     }
 
     /**
@@ -68,9 +72,19 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
         for(Reference currentLink : linksInNode) {
         
             //TODO check if the file does exist
+
+            String currentNodeArchiveIdStr;
             
-            String currentNodeArchiveIdStr = archiveObjectsDB.getObjectId(currentLink.getURI());
+            if(currentLink instanceof HandleCarrier) {
+                String linkHandle = ((HandleCarrier) currentLink).getHandle();
+                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
+            } else {
+                //TODO Get the URL/nodeID some other way...
+                currentNodeArchiveIdStr = null;
+            }
+            
             if(currentNodeArchiveIdStr == null) {
+                
                 //TODO node doesn't exist?
                 String errorMessage = "PROBLEMS GETTING NODE ID";
                 throw new FileExplorerException(errorMessage, workspace, null);
@@ -94,9 +108,6 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
             linkImporterToUse.setWorkspace(workspace);
             linkImporterToUse.importFile(nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
         }
-        
-        
-//        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

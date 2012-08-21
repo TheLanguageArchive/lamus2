@@ -20,15 +20,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.importing.FileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -48,6 +51,7 @@ public class LamusWorkspaceFileExplorerTest {
     @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private FileImporterFactoryBean mockFileImporterFactoryBean;
+    @Mock private ArchiveFileHelper mockArchiveFileHelper;
     @Mock private FileImporter mockFileImporter;
     @Mock private WorkspaceNode mockNodeToExplore;
     @Mock private ReferencingMetadataDocument mockNodeDocument;
@@ -67,7 +71,7 @@ public class LamusWorkspaceFileExplorerTest {
     
     @Before
     public void setUp() {
-        fileExplorer = new LamusWorkspaceFileExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockFileImporterFactoryBean);
+        fileExplorer = new LamusWorkspaceFileExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockFileImporterFactoryBean, mockArchiveFileHelper);
     }
     
     @After
@@ -78,15 +82,23 @@ public class LamusWorkspaceFileExplorerTest {
      * Test of explore method, of class LamusWorkspaceFileExplorer.
      */
     @Test
-    public void exploreSuccessfully() throws Exception {
+    public void exploreSuccessfullyLinkWithHandle() throws Exception {
 
         final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
         final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
-        final Reference metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
-        final Reference resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
+        final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
+        final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
+        
+        final String metadataLinkHandle = "hdl:LOCAL/00-0000-0000-0000-0000-1";
+        metadataLink.setHandle(metadataLinkHandle);
+        final String resourceLinkHandle = "hdl:LOCAL/00-0000-0000-0000-0000-2";
+        resourceLink.setHandle(resourceLinkHandle);
+//        final String[] linkHandles = {metadataLinkHandle, resourceLinkHandle};
+        
         final Collection<Reference> testLinks = new ArrayList<Reference>();
         testLinks.add(metadataLink);
         testLinks.add(resourceLink);
+
         
         final String metadataLink_archiveIDStr = "MPI123#";
         final String resourceLink_archiveIDStr = "MPI456#";
@@ -103,8 +115,10 @@ public class LamusWorkspaceFileExplorerTest {
         context.checking(new Expectations() {{
             
             int current = 0;
-            for(Reference currentLink : testLinks) {
-                oneOf (mockArchiveObjectsDB).getObjectId(currentLink.getURI()); will(returnValue(testLinksArchiveIDs[current]));
+            for(Reference currentLink : testLinks) { //instances of HandleCarrier
+                
+                oneOf (mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
+//                oneOf (mockArchiveObjectsDB).getObjectId(new OurURL(currentLink.getURI().toURL())); will(returnValue(testLinksArchiveIDs[current]));
                 
                 oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(currentLink);
                 oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
@@ -120,4 +134,48 @@ public class LamusWorkspaceFileExplorerTest {
         fileExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
         
     }
+    
+//    @Test
+//    public void exploreSuccessfullyRelativeLink() throws Exception {
+//
+//        final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
+//        final URI resourceURI = new URI("test/test.jpg");
+//        final Reference metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
+//        final Reference resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
+//        final Collection<Reference> testLinks = new ArrayList<Reference>();
+//        testLinks.add(metadataLink);
+//        testLinks.add(resourceLink);
+//        
+//        final String metadataLink_archiveIDStr = "MPI123#";
+//        final String resourceLink_archiveIDStr = "MPI456#";
+//        final String[] testLinksArchiveIDs = new String[testLinks.size()];
+//        testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
+//        testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
+//        
+//        final Class metadataFileImporterType = MetadataFileImporter.class;
+//        final Class resourceFileImporterType = ResourceFileImporter.class;
+//        final Class[] testLinksFileImporterTypes = new Class[testLinks.size()];
+//        testLinksFileImporterTypes[0] = metadataFileImporterType;
+//        testLinksFileImporterTypes[1] = resourceFileImporterType;
+//        
+//        context.checking(new Expectations() {{
+//            
+//            int current = 0;
+//            for(Reference currentLink : testLinks) {
+//                oneOf (mockArchiveObjectsDB).getObjectId(new OurURL(currentLink.getURI().toURL())); will(returnValue(testLinksArchiveIDs[current]));
+//                
+//                oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(currentLink);
+//                oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
+//                oneOf (mockFileImporter).setWorkspace(mockWorkspace);
+//                oneOf (mockFileImporter).importFile(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
+//                
+//                current++;
+//            }
+//            
+//        }});
+//
+//        
+//        fileExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+//        
+//    }
 }

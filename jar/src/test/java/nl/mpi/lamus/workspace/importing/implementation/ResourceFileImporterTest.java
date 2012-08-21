@@ -21,8 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -41,8 +39,8 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
-import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -97,7 +95,7 @@ public class ResourceFileImporterTest {
     private Workspace testWorkspace;
     
     @Mock ReferencingMetadataDocument mockReferencingMetadataDocument;
-    @Mock Reference mockChildLink;
+    @Mock ResourceProxy mockChildLink;
 //    @Mock URI mockChildURI;
 //    @Mock URL mockChildURL;
 //    @Mock URL mockParentURL;
@@ -149,9 +147,11 @@ public class ResourceFileImporterTest {
         final String childNodeMimetype = "txt";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final String childNodePid = "somePid";
-        final OurURL archiveFileUrlWithContext = new OurURL("file:/lux16.mpi.nl/corpora/some.uri/filename.txt");
+//        final OurURL archiveFileUrlWithContext = new OurURL("file:/lux16.mpi.nl/corpora/some.uri/filename.txt");
         final String childNodeUrlProtocol = "http";
-        final URI childLinkURI = new URI("file:/some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
+        final URI childLinkURI = new URI("http://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
+        final OurURL childNodeUrl = new OurURL(childLinkURI.toURL());
+        final OurURL childNodeUrlWithContext = new OurURL("file:/some.uri/filename.txt");
         final URL parentURL = new URL("file:/some.uri/filename.cmdi");
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
@@ -164,8 +164,12 @@ public class ResourceFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
-            oneOf (mockArchiveFileHelper).getFileBasename(childLinkURI.toString()); will(returnValue(childNodeName));
-            oneOf (mockArchiveFileHelper).getFileTitle(childLinkURI.toString()); will(returnValue(childNodeLabel));
+            
+            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(childNodePid); will(returnValue(childNodeUrl));
+            
+            oneOf (mockArchiveFileHelper).getFileBasename(childNodeUrl.toString()); will(returnValue(childNodeName));
+            oneOf (mockArchiveFileHelper).getFileTitle(childNodeUrl.toString()); will(returnValue(childNodeLabel));
             
             //TODO check type
             
@@ -179,28 +183,30 @@ public class ResourceFileImporterTest {
                 // otherwise, if url belongs to local server but is outside of the archive, treat as not onsite
             //TODO catch exceptions thrown by getObjectURL?
             oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-                will(returnValue(archiveFileUrlWithContext));
+                will(returnValue(childNodeUrlWithContext));
             // if protocol null, empty or file (file in archive), check if file is bigger than the typecheck limit
 //            oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
 //            oneOf (mockChildURI).toURL(); will(returnValue(mockChildURL));
 //            oneOf (mockChildURL).getProtocol(); will(returnValue(childNodeUrlProtocol));
 
-            File testFile = new File(childLinkURI);
+            File testFile = new File(childNodeUrlWithContext.getPath());
             oneOf (mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(with(equal(testFile))); will(returnValue(false));
             
                 // if so and not orphan, do not typecheck
                 // if so and orphan, do typecheck (warn for large file)
             // calculateCV (change this) if typecheck is to be done
-            oneOf (mockFileTypeHandler).checkType(new OurURL(childLinkURI.toURL()), childNodeName,/* unknownType,*/ null);
+            oneOf (mockFileTypeHandler).checkType(childNodeUrlWithContext, childNodeName,/* unknownType,*/ null);
             // if type unspecified and typecheck to be done, warn
             oneOf (mockFileTypeHandler).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf (mockFileTypeHandler).getNodeType(); will(returnValue(childNodeType));
             // if type differs from suggested mimetype, use mimetype from typecheck calculation (check also if it is unspecified)
-            oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childLinkURI.toURL());
+            oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childNodeUrlWithContext.toURL());
                 will(returnValue(testChildNode));
             // needs protection?
             
             //TODO SOMETHING MISSING HERE?
+            
+            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
             
             // create node (depending on some values, it can be an external one, a protected one, etc)
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -243,33 +249,33 @@ public class ResourceFileImporterTest {
         }
     }
     
-    @Test
-    public void childLinkIsNotURL() throws URISyntaxException, MalformedURLException, FileExplorerException {
-        
-        final int parentWorkspaceNodeID = 1;
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
-        final int childNodeArchiveID = 100;
-        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
-        final URI validUriButInvalidUrl = new URI("urn:isbn:1234567890");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf (mockChildLink).getURI(); will(returnValue(validUriButInvalidUrl));
-        }});
-        
-        try {
-            fileImporter.importFile(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
-        } catch (FileImporterException ex) {
-            assertNotNull(ex);
-            String expectedErrorMessage = "Error getting URL for link " + validUriButInvalidUrl;
-            assertEquals(expectedErrorMessage, ex.getMessage());
-            assertEquals(testWorkspace, ex.getWorkspace());
-            assertEquals(ResourceFileImporter.class, ex.getFileImporterType());
-            assertTrue(ex.getCause() instanceof MalformedURLException);
-        }
-    }
+//    @Test
+//    public void childLinkIsNotURL() throws URISyntaxException, MalformedURLException, FileExplorerException {
+//        
+//        final int parentWorkspaceNodeID = 1;
+//        final URI childNodeSchemaLocation = new URI("file:/some.location");
+//        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
+//        final int childNodeArchiveID = 100;
+//        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
+//                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+//        final URI validUriButInvalidUrl = new URI("urn:isbn:1234567890");
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf (mockChildLink).getURI(); will(returnValue(validUriButInvalidUrl));
+//        }});
+//        
+//        try {
+//            fileImporter.importFile(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
+//        } catch (FileImporterException ex) {
+//            assertNotNull(ex);
+//            String expectedErrorMessage = "Error getting URL for link " + validUriButInvalidUrl;
+//            assertEquals(expectedErrorMessage, ex.getMessage());
+//            assertEquals(testWorkspace, ex.getWorkspace());
+//            assertEquals(ResourceFileImporter.class, ex.getFileImporterType());
+//            assertTrue(ex.getCause() instanceof MalformedURLException);
+//        }
+//    }
     
     @Test
     public void childIsNotOnsite() throws URISyntaxException, MalformedURLException, FileImporterException, FileExplorerException {
@@ -282,6 +288,7 @@ public class ResourceFileImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
         
         final URI childLinkURI = new URI("http:/some.external.uri/filename.txt");
+        final OurURL childNodeUrl = new OurURL(childLinkURI.toURL());
         final String childNodeName = "filename.txt";
         final String childNodeLabel = "file name label";
         final String childNodeMimetype = "txt";
@@ -299,14 +306,18 @@ public class ResourceFileImporterTest {
         context.checking(new Expectations() {{
             
             oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
-            oneOf (mockArchiveFileHelper).getFileBasename(childLinkURI.toString()); will(returnValue(childNodeName));
-            oneOf (mockArchiveFileHelper).getFileTitle(childLinkURI.toString()); will(returnValue(childNodeLabel));
+            
+            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(childNodePid); will(returnValue(childNodeUrl));
+            
+            oneOf (mockArchiveFileHelper).getFileBasename(childNodeUrl.toString()); will(returnValue(childNodeName));
+            oneOf (mockArchiveFileHelper).getFileTitle(childNodeUrl.toString()); will(returnValue(childNodeLabel));
             
             oneOf (mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
             
             oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
             
-            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID)); will(returnValue(true));
+            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID)); will(returnValue(false));
             
             oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
                 will(returnValue(archiveFileUrlWithContext));
@@ -317,7 +328,9 @@ public class ResourceFileImporterTest {
             
             oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childLinkURI.toURL());
                 will(returnValue(testChildNode));
-                
+            
+            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
+            
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
             oneOf (mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(testParentNode, mockChildLink);

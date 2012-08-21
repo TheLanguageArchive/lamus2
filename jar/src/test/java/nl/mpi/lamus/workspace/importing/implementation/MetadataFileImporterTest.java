@@ -200,6 +200,7 @@ public class MetadataFileImporterTest {
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
+            oneOf (mockWorkspaceDao).updateNodeWorkspaceURL(testChildNode);
         }});
         
         context.checking(new Expectations() {{
@@ -273,6 +274,7 @@ public class MetadataFileImporterTest {
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestNonReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
+            oneOf (mockWorkspaceDao).updateNodeWorkspaceURL(testChildNode);
         }});
         
         fileImporter.importFile(null, null, null, testChildArchiveID);
@@ -340,6 +342,7 @@ public class MetadataFileImporterTest {
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
+            oneOf (mockWorkspaceDao).updateNodeWorkspaceURL(testChildNode);
         }});
         
         context.checking(new Expectations() {{
@@ -613,6 +616,7 @@ public class MetadataFileImporterTest {
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
+            oneOf (mockWorkspaceDao).updateNodeWorkspaceURL(testChildNode);
         }});
         
         context.checking(new Expectations() {{
@@ -699,6 +703,7 @@ public class MetadataFileImporterTest {
                 will(returnValue(mockStreamResult));
             oneOf (mockWorkspaceFileHandler).copyMetadataFileToWorkspace(testWorkspace, testChildNode, mockMetadataAPI,
                     mockTestNonReferencingMetadataDocumentWithHandle, testChildNodeFile, mockStreamResult);
+            oneOf (mockWorkspaceDao).updateNodeWorkspaceURL(testChildNode);
         }});
         
         fileImporter.importFile(testParentNode, mockReferencingMetadataDocument, testChildReference, testChildArchiveID);

@@ -105,25 +105,38 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         //TODO get url, etc
         URI childURI = childLink.getURI();
         OurURL childURL;
-        try {
-            childURL = new OurURL(childURI.toURL());
-        } catch (MalformedURLException ex) {
-            String errorMessage = "Error getting URL for link " + childURI;
-            logger.error(errorMessage, ex);
-            throw new FileImporterException(errorMessage, workspace, this.getClass(), ex);
+        
+        if(childLink instanceof HandleCarrier) {
+            String childHandle = ((HandleCarrier) childLink).getHandle();
+            
+            childURL = this.archiveObjectsDB.getObjectURLForPid(childHandle);
+            
+            
+        } else {
+            
+            //TODO Something else
+            
+            try {
+                childURL = new OurURL(childURI.toURL());
+            } catch (MalformedURLException ex) {
+                String errorMessage = "Error getting URL for link " + childURI;
+                logger.error(errorMessage, ex);
+                throw new FileImporterException(errorMessage, workspace, this.getClass(), ex);
+            }
         }
-        String childFileName = archiveFileHelper.getFileBasename(childURI.toString());
-        String childTitle = archiveFileHelper.getFileTitle(childURI.toString());
+        
+        String childFileName = this.archiveFileHelper.getFileBasename(childURL.toString());
+        String childTitle = this.archiveFileHelper.getFileTitle(childURL.toString());
         
         //TODO get mime type (from link?)
         WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();
         
-        FileTypeHandler fileTypeHandler = fileTypeHandlerFactory.getNewFileTypeHandlerForWorkspace(workspace);
+        FileTypeHandler fileTypeHandler = this.fileTypeHandlerFactory.getNewFileTypeHandlerForWorkspace(workspace);
         
         //TODO get onsite
-        boolean childIsOnSite = archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID));
-        OurURL childURLWithContext = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        boolean childIsOnSite = this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID));
+        OurURL childURLWithContext = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
         if(!"file".equals(childURLWithContext.getProtocol())) {
             childIsOnSite = false;
         }
@@ -140,11 +153,11 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
             
             performTypeCheck = false;
         } else {
-            if(childURL.getProtocol() == null ||
-                    childURL.getProtocol().length() == 0 ||
-                    "file".equals(childURL.getProtocol())) {
+            if(childURLWithContext.getProtocol() == null ||
+                    childURLWithContext.getProtocol().length() == 0 ||
+                    "file".equals(childURLWithContext.getProtocol())) {
 
-                File resFile = new File(childURI);
+                File resFile = new File(childURLWithContext.getPath());
                 //TODO check if file is larger than the checker limit
                     // if so, do not typecheck
                 if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
@@ -174,7 +187,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         //TODO get file type using typechecker
         if(performTypeCheck) {
             try {
-                fileTypeHandler.checkType(childURL, childFileName,/* childType,*/ null);
+                fileTypeHandler.checkType(childURLWithContext, childFileName,/* childType,*/ null);
             //TODO what to pass as node type?
             //TODO use mimetype from CMDI?
                 // - this would cause the typechecker not to be executed, since the mimetype is known
@@ -221,7 +234,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         
         
         //TODO create node accordingly and add it to the database
-        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childURL.toURL());
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(workspace.getWorkspaceID(), childNodeArchiveID, childURLWithContext.toURL());
         
         //TODO adjust node values according to file/link
         setWorkspaceNodeInformationFromMetadataDocument(childLink, childNode, childTitle, childType, childMimetype, childURL.toURL());

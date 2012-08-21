@@ -17,9 +17,11 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
+import java.util.logging.Level;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
@@ -171,6 +173,20 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
 	    logger.error(errorMessage, fwsnex);
 	    throw new FileImporterException(errorMessage, workspace, this.getClass(), fwsnex);
 	}
+        
+        try {
+            childNode.setWorkspaceURL(childNodeFile.toURI().toURL());
+        } catch (MalformedURLException mfex) {
+            
+            
+            
+            String errorMessage = "Failed to create URL from the Workspace file location: " + childNodeFile.toURI();
+            logger.error(errorMessage, mfex);
+            throw new FileImporterException(errorMessage, workspace, this.getClass(), mfex);
+                    
+                    
+        }
+        this.workspaceDao.updateNodeWorkspaceURL(childNode);
 
 	//TODO change the referenced URL in the parent document
 	//TODO not of the original one, but the one IN THE WORKSPACE FOLDER
