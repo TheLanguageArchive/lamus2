@@ -27,7 +27,12 @@ import org.springframework.stereotype.Component;
 public class LamusTypeMapper implements TypeMapper {
 
     public WorkspaceNodeType getNodeTypeForMimetype(String mimetype) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        
+        //TODO How should this be implemented? What are the possible types?
+        
+        return WorkspaceNodeType.UNKNOWN;
+        
     }
     
 }
