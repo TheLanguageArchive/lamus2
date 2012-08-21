@@ -122,7 +122,7 @@ public class LamusPropertiesTest {
         String expectedOrphansDirectoryBaseName = "sessions";
         assertEquals(expectedOrphansDirectoryBaseName, orphansDirectoryBaseName);
         
-        String expectedWorkspaceBaseDirectoryPath = "/lat/corpora/lamus/LAMS_WORKSPACE";
+        String expectedWorkspaceBaseDirectoryPath = "/lat/corpora/lamus/workspaces";
         assertEquals(expectedWorkspaceBaseDirectoryPath, workspaceBaseDirectory.getPath());
         
 //        File typecheckerFolder1 = new File("folder1");
