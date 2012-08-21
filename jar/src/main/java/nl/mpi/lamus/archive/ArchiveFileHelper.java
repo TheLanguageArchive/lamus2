@@ -35,7 +35,10 @@ public interface ArchiveFileHelper {
     
 //    public String getFileSystemId(String fullname);
     
-//    public String getFileDirname(String fullname);
+    /**
+     * @return the part of fullname up to but excluding the last slash
+     */
+    public String getFileDirname(String fullname);
     
     /**
      * 
