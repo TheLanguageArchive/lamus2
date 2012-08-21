@@ -15,69 +15,72 @@
  */
 package nl.mpi.lamus.spring;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
+import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
+import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 /**
  * Configuration class containing some beans related with databases.
- * To be used in production, connecting to the real databases.
+ * To be used in testing, therefore the databases are embedded.
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-@Profile("production")
-public class JndiDatabaseBeans {
+@Profile("testing")
+public class EmbeddedDatabaseBeans {
     
-    //TODO add these properties to some configuration file and load them here
-    //TODO for testing load a dummy one? take care of closing the connection
-
+    private final static Logger logger = LoggerFactory.getLogger(EmbeddedDatabaseBeans.class);
     private CorpusStructureDBWriteImpl csDBWrite;
-    private DataSource lamusDataSource;
     
     /**
      * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure' database
      */
     @Bean
     @Qualifier("ArchiveObjectsDB")
-    public CorpusStructureDBWriteImpl archiveObjectsDB() {
+    public ArchiveObjectsDBWrite archiveObjectsDB() {
         return corpusStructureDBWrite();
     }
 
     /**
+     * @return  CorpusStructureDB bean, which connects to the 'corpusstructure' database
+     */
+    @Bean
+    @Qualifier("CorpusStructureDB")
+    public CorpusStructureDB corpusStructureDB() {
+        return corpusStructureDBWrite();
+    }
+    
+    /**
      * Creates the connection to the 'corpusstructure' database, in case it hasn't been done before.
-     * @return CorpusStructureDBWriteImpl object, which will be used for the ArchiveObjectsDB bean
+     * @return CorpusStructureDBWriteImpl object, which will be used for the ArchiveObjectsDB and CorpusStructureDB beans
      */
     private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
         if(csDBWrite == null) {
-            
-            //TODO How are the username and password injected here?
-            
-            csDBWrite = new CorpusStructureDBWriteImpl("java:comp/env/jdbc/CSDB", false, "", "");
+            createCorpusstructureDB();
+            csDBWrite = new CorpusStructureDBWriteImpl("jdbc:hsqldb:mem:corpusstructure", true, "sa", "");
         }
         return csDBWrite;
     }
     
     /**
-     * @return DataSource bean corresponding to the Lamus2 database
-     * @throws NamingException 
+     * Creates the 'corpusstructure' database, as an embedded database
      */
-    @Bean
-    @Qualifier("lamusDataSource")
-    public DataSource lamusDataSource() throws NamingException {
-        if(lamusDataSource == null) {
-            Context ctx = new InitialContext();
-            lamusDataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
-        }
-        return lamusDataSource;
+    private void createCorpusstructureDB() {
+        logger.debug("Creating connection to the corpusstructure database.");
+        new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.HSQL)
+                .setName("corpusstructure")
+//                .addScript("classpath:hsql_corpusstructure_drop.sql")
+//                .addScript("classpath:hsql_corpusstructure_create.sql")
+                .build();
     }
+    
 }
