@@ -77,13 +77,21 @@ public class LamusWorkspaceTreeNodeTest {
                 "parentName", "parent title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/parent/fake1.url"), new URL("file:/parent/fake2.url"), new URL("file:/parent/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-01", "unknown");
-        parentTreeNode = new LamusWorkspaceTreeNode(parent, null, mockWorkspaceDao);
+        parentTreeNode = new LamusWorkspaceTreeNode(1, 1, 1, new URI("file:/parent.uri"),
+                "parentName", "parent title", WorkspaceNodeType.UNKNOWN, 
+                new URL("file:/parent/fake1.url"), new URL("file:/parent/fake2.url"), new URL("file:/parent/fake3.url"),
+                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-01", "unknown",
+                null, mockWorkspaceDao);
         
         node = new LamusWorkspaceNode(1, 10, 100, new URI("file:/some.uri"),
                 "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/some/fake1.url"), new URL("file:/some/fake2.url"), new URL("file:/some/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-10", "unknown");
-        treeNode = new LamusWorkspaceTreeNode(node, parentTreeNode, mockWorkspaceDao);
+        treeNode = new LamusWorkspaceTreeNode(1, 10, 100, new URI("file:/some.uri"),
+                "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
+                new URL("file:/some/fake1.url"), new URL("file:/some/fake2.url"), new URL("file:/some/fake3.url"),
+                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-10", "unknown",
+                parentTreeNode, mockWorkspaceDao);
         
         nodeChildren = new ArrayList<WorkspaceNode>();
         treeNodeChildren = new ArrayList<WorkspaceTreeNode>();
@@ -93,7 +101,11 @@ public class LamusWorkspaceTreeNodeTest {
                 new URL("file:/child1/fake1.url"), new URL("file:/child1/fake2.url"), new URL("file:/child1/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-20", "unknown");
         nodeChildren.add(child1);
-        childTreeNode1 = new LamusWorkspaceTreeNode(child1, treeNode, mockWorkspaceDao);
+        childTreeNode1 = new LamusWorkspaceTreeNode(1, 20, 200, new URI("file:/child1.uri"),
+                "child1Name", "child1 title", WorkspaceNodeType.UNKNOWN, 
+                new URL("file:/child1/fake1.url"), new URL("file:/child1/fake2.url"), new URL("file:/child1/fake3.url"),
+                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-20", "unknown",
+                treeNode, mockWorkspaceDao);
         treeNodeChildren.add(childTreeNode1);
         
         child2 = new LamusWorkspaceNode(1, 21, 201, new URI("file:/child2.uri"),
@@ -101,7 +113,11 @@ public class LamusWorkspaceTreeNodeTest {
                 new URL("file:/child2/fake1.url"), new URL("file:/child2/fake2.url"), new URL("file:/child2/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-21", "unknown");
         nodeChildren.add(child2);
-        childTreeNode2 = new LamusWorkspaceTreeNode(child2, treeNode, mockWorkspaceDao);
+        childTreeNode2 = new LamusWorkspaceTreeNode(1, 21, 201, new URI("file:/child2.uri"),
+                "child2Name", "child2 title", WorkspaceNodeType.UNKNOWN, 
+                new URL("file:/child2/fake1.url"), new URL("file:/child2/fake2.url"), new URL("file:/child2/fake3.url"),
+                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-21", "unknown",
+                treeNode, mockWorkspaceDao);
         treeNodeChildren.add(childTreeNode2);
     }
     
@@ -191,16 +207,5 @@ public class LamusWorkspaceTreeNodeTest {
         WorkspaceTreeNode retrievedTreeParent = treeNode.getParent();
         
         assertEquals("Retrieved parent tree nodes different from expected", parentTreeNode, retrievedTreeParent);
-    }
-
-    /**
-     * Test of getWorkspaceNode method, of class LamusWorkspaceTreeNode.
-     */
-    @Test
-    public void testGetWorkspaceNode() {
-        
-        WorkspaceNode retrievedNode = treeNode.getWorkspaceNode();
-        
-        assertEquals("Retrieved node different from expected", node, retrievedNode);
     }
 }

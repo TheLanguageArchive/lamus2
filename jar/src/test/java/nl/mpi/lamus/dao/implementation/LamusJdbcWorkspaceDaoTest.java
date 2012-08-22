@@ -27,6 +27,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import javax.sql.DataSource;
+import nl.mpi.lamus.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
@@ -637,6 +639,77 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode result = this.workspaceDao.getWorkspaceNode(testNode.getWorkspaceNodeID());
         
         assertNotNull("Returned node should not be null", result);
+    }
+    
+    @Test
+    public void getExistingTreeNodeWithoutParent() throws MalformedURLException, URISyntaxException {
+        
+        int archiveNodeIdToBeInsertedInTheDb = 10;
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
+        
+        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), -1);
+        
+        assertNotNull("Returned tree node should not be null", result);
+        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
+        assertNull("Returned tree node should have a null parent tree node", result.getParent());
+    }
+    
+    @Test
+    public void getExistingTreeNodeWithParent() throws MalformedURLException, URISyntaxException {
+        
+        int archiveNodeIdToBeInsertedInTheDb = 10;
+        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+        WorkspaceNode testParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
+        setNodeAsParentAndInsertLinkIntoDatabase(testParentNode, testNode);
+        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(testParentNode, null, workspaceDao);
+        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, parentTreeNode, workspaceDao);
+        
+        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), testParentNode.getWorkspaceNodeID());
+        
+        assertNotNull("Returned tree node should not be null", result);
+        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
+        assertNotNull("Returned tree node should have a null parent tree node", result.getParent());
+        assertEquals("Returned tree node has a parent tree node that is different from expected", parentTreeNode, result.getParent());
+    }
+    
+    @Test
+    public void getExistingTreeNodeWithIllegalParent() throws MalformedURLException, URISyntaxException {
+        
+        int archiveNodeIdToBeInsertedInTheDb = 10;
+        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+        WorkspaceNode testNotParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
+        
+        WorkspaceTreeNode notParentTreeNode = new LamusWorkspaceTreeNode(testNotParentNode, null, workspaceDao);
+        WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
+        
+        String expectedErrorMessage = "Node with ID " + notParentTreeNode.getWorkspaceNodeID() +
+                " is passed as parent of node with ID " + treeNode.getWorkspaceNodeID() +
+                " but these nodes are not linked in the database.";
+        
+        WorkspaceTreeNode result;
+        try {
+            result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), testNotParentNode.getWorkspaceNodeID());
+            fail("An IllegalArgumentException should have been thrown.");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedErrorMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void getNonExistingTreeNode() {
+        
+        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(100, -1);
+        
+        assertNull("Retrieved tree node should be null", result);
     }
     
     @Test
