@@ -39,7 +39,7 @@ public class LamusWorkspaceService implements WorkspaceService {
 
     private final NodeAccessChecker nodeAccessChecker;
     private final WorkspaceManager workspaceManager;
-    private final WorkspaceDao workspaceDao;
+    protected final WorkspaceDao workspaceDao;
 
     @Autowired
     public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager,

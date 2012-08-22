@@ -24,11 +24,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,14 +245,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Retrieving workspace with ID: " + workspaceID);
         
-        String queryWorkspaceSql = "select * from workspace where workspace_id = :workspace_id";
+        String queryWorkspaceSql = "SELECT * FROM workspace WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         
         Workspace workspaceToReturn;
         try {
             workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, new WorkspaceMapper());
         } catch(EmptyResultDataAccessException ex) {
-            logger.warn("Workspace with ID " + workspaceID + " does not exist in the database");
+            logger.warn("Workspace with ID " + workspaceID + " does not exist in the database", ex);
             return null;
         }
         
@@ -264,7 +268,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
         
-        String queryWorkspaceListSql = "select * from workspace where user_id = :user_id";
+        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE user_id = :user_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("user_id", userID);
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
@@ -298,7 +302,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Checking if node with archive ID " + archiveNodeID + " is locked");
         
-        String queryNodeSql = "select workspace_node_id from node where archive_node_id = :archive_node_id";
+        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_node_id = :archive_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("archive_node_id", archiveNodeID);
         
         RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
@@ -312,10 +316,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
         } catch(EmptyResultDataAccessException eex) {
-            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node).");
+            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node).", eex);
             return false;
         } catch(IncorrectResultSizeDataAccessException iex) {
-            logger.warn("Node with archive ID " + archiveNodeID + " is locked more than once.");
+            logger.warn("Node with archive ID " + archiveNodeID + " is locked more than once.", iex);
             return true;
         }
 
@@ -381,20 +385,60 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
         logger.debug("Retrieving workspace node with ID: " + workspaceNodeID);
         
-        String queryWorkspaceNodeSql = "select * from node where workspace_node_id = :workspace_node_id";
+        String queryWorkspaceNodeSql = "SELECT * FROM node WHERE workspace_node_id = :workspace_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_node_id", workspaceNodeID);
         
         WorkspaceNode workspaceNodeToReturn;
         try {
             workspaceNodeToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
         } catch(EmptyResultDataAccessException ex) {
-            logger.warn("Workspace Node with ID " + workspaceNodeID + " does not exist in the database");
+            logger.warn("Workspace Node with ID " + workspaceNodeID + " does not exist in the database", ex);
             return null;
         }
         
         logger.info("Workspace Node with ID " + workspaceNodeID + " retrieved from the database");
         
         return workspaceNodeToReturn;
+    }
+    
+    public WorkspaceTreeNode getWorkspaceTreeNode(int workspaceNodeID, int parentNodeID) {
+        
+        logger.debug("Retrieving workspace tree node with ID: " + workspaceNodeID + " and parent with ID: " + parentNodeID);
+        
+        String queryWorkspaceNodeSql = "SELECT * FROM node WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource nodeNamedParameters = new MapSqlParameterSource("workspace_node_id", workspaceNodeID);
+        SqlParameterSource parentNamedParameters = new MapSqlParameterSource("workspace_node_id", parentNodeID);
+
+        String queryNodeLinkSql = "SELECT * FROM node_link WHERE parent_workspace_node_id = :parent_workspace_node_id AND child_workspace_node_id = :child_workspace_node_id";
+        SqlParameterSource nodeLinkNamedParameters = new MapSqlParameterSource()
+                .addValue("parent_workspace_node_id", parentNodeID)
+                .addValue("child_workspace_node_id", workspaceNodeID);
+        
+        try {
+            this.namedParameterJdbcTemplate.queryForObject(queryNodeLinkSql, nodeLinkNamedParameters, new WorkspaceNodeLinkMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            if(parentNodeID > -1) {
+                throw new IllegalArgumentException("Node with ID " + parentNodeID +
+                        " is passed as parent of node with ID " + workspaceNodeID +
+                        " but these nodes are not linked in the database.", ex);
+            }
+        }
+        
+        WorkspaceTreeNode workspaceTreeNodeToReturn;
+        try {
+            WorkspaceTreeNode parentTreeNode = null;
+            if(parentNodeID > -1) {
+                parentTreeNode = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, parentNamedParameters, new WorkspaceTreeNodeMapper(null, this));
+            }
+            workspaceTreeNodeToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, nodeNamedParameters, new WorkspaceTreeNodeMapper(parentTreeNode, this));
+        } catch(EmptyResultDataAccessException ex) {
+            logger.warn("Workspace Node with ID " + workspaceNodeID + " does not exist in the database", ex);
+            return null;
+        }
+        
+        logger.info("Workspace Tree Node with ID " + workspaceNodeID + " and parent with ID: " + parentNodeID + " retrieved from the database");
+        
+        return workspaceTreeNodeToReturn;
     }
     
     /**
@@ -557,6 +601,101 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     rs.getString("format"));
             return workspaceNode;
         }
+    }
+    
+    /**
+     * Inner class used to map rows from the node table into WorkspaceTreeNode objects in queries
+     */
+    private static final class WorkspaceTreeNodeMapper implements RowMapper<WorkspaceTreeNode> {
 
+        private final WorkspaceTreeNode parentTreeNode;
+        private final WorkspaceDao workspaceDao;
+        
+        public WorkspaceTreeNodeMapper(WorkspaceTreeNode parentTreeNode, WorkspaceDao workspaceDao) {
+            this.parentTreeNode = parentTreeNode;
+            this.workspaceDao = workspaceDao;
+        }
+        
+        public WorkspaceTreeNode mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+            int archiveNodeID = -1;
+            if(rs.getString("archive_node_id") != null) {
+                archiveNodeID = rs.getInt("archive_node_id");
+            }
+            URI profileSchemaURI = null;
+            if(rs.getString("profile_schema_uri") != null) {
+                try {
+                    profileSchemaURI = new URI(rs.getString("profile_schema_uri"));
+                } catch (URISyntaxException ex) {
+                    logger.warn("Profile Schema URI has invalid syntax; null used instead", ex);
+                }
+            }
+            URL workspaceURL = null;
+            if(rs.getString("workspace_url") != null) {
+                try {
+                    workspaceURL = new URL(rs.getString("workspace_url"));
+                } catch (MalformedURLException ex) {
+                    logger.warn("Workspace URL is malformed; null used instead", ex);
+                }
+            }
+            URL archiveURL = null;
+            if(rs.getString("archive_url") != null) {
+                try {
+                    archiveURL = new URL(rs.getString("archive_url"));
+                } catch (MalformedURLException ex) {
+                    logger.warn("Archive URL is malformed; null used instead", ex);
+                }
+            }
+            URL originURL = null;
+            if(rs.getString("origin_url") != null) {
+                try {
+                    originURL = new URL(rs.getString("origin_url"));
+                } catch (MalformedURLException ex) {
+                    logger.warn("Origin URL is malformed; null used instead", ex);
+                }
+            }
+
+            WorkspaceTreeNode workspaceNode = new LamusWorkspaceTreeNode(
+                    rs.getInt("workspace_node_id"),
+                    rs.getInt("workspace_id"),
+                    archiveNodeID,
+                    profileSchemaURI,
+                    rs.getString("name"),
+                    rs.getString("title"),
+                    WorkspaceNodeType.valueOf(rs.getString("type")),
+                    workspaceURL,
+                    archiveURL,
+                    originURL,
+                    WorkspaceNodeStatus.valueOf(rs.getString("status")),
+                    rs.getString("pid"),
+                    rs.getString("format"),
+                    this.parentTreeNode,
+                    this.workspaceDao);
+            return workspaceNode;
+        }
+    }
+    
+    /**
+     * Inner class used to map rows from the node_link table into WorkspaceNodeLink objects in queries
+     */
+    private static final class WorkspaceNodeLinkMapper implements RowMapper<WorkspaceNodeLink> {
+        
+        public WorkspaceNodeLink mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+            URI childURI = null;
+            if(rs.getString("child_uri") != null) {
+                try {
+                    childURI = new URI(rs.getString("child_uri"));
+                } catch (URISyntaxException ex) {
+                    logger.warn("Child URI has an invalid syntax; null used instead", ex);
+                }
+            }
+            
+            WorkspaceNodeLink workspaceNodeLink = new LamusWorkspaceNodeLink(
+                    rs.getInt("parent_workspace_node_id"),
+                    rs.getInt("child_workspace_node_id"),
+                    childURI);
+            return workspaceNodeLink;
+        }
     }
 }

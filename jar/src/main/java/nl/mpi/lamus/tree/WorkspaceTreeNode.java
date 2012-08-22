@@ -46,9 +46,4 @@ public interface WorkspaceTreeNode extends GenericTreeNode, WorkspaceNode {
      * @see GenericTreeNode#getParent()
      */
     public WorkspaceTreeNode getParent();
-    
-    /**
-     * @return WorkspaceNode object contained in this WorkspaceTreeNode
-     */
-    public WorkspaceNode getWorkspaceNode();
 }
