@@ -22,19 +22,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import static org.junit.Assert.assertEquals;
 import org.junit.*;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -44,8 +42,6 @@ public class LamusWorkspaceTreeNodeTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    private WorkspaceNode parent;
-    private WorkspaceNode node;
     private WorkspaceNode child1;
     private WorkspaceNode child2;
     private Collection<WorkspaceNode> nodeChildren;
@@ -73,20 +69,12 @@ public class LamusWorkspaceTreeNodeTest {
     @Before
     public void setUp() throws URISyntaxException, MalformedURLException {
         
-        parent = new LamusWorkspaceNode(1, 1, 1, new URI("file:/parent.uri"),
-                "parentName", "parent title", WorkspaceNodeType.UNKNOWN, 
-                new URL("file:/parent/fake1.url"), new URL("file:/parent/fake2.url"), new URL("file:/parent/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-01", "unknown");
         parentTreeNode = new LamusWorkspaceTreeNode(1, 1, 1, new URI("file:/parent.uri"),
                 "parentName", "parent title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/parent/fake1.url"), new URL("file:/parent/fake2.url"), new URL("file:/parent/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-01", "unknown",
                 null, mockWorkspaceDao);
         
-        node = new LamusWorkspaceNode(1, 10, 100, new URI("file:/some.uri"),
-                "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
-                new URL("file:/some/fake1.url"), new URL("file:/some/fake2.url"), new URL("file:/some/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, "hdl:FAKE/00-0000-0000-0000-0000-10", "unknown");
         treeNode = new LamusWorkspaceTreeNode(1, 10, 100, new URI("file:/some.uri"),
                 "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/some/fake1.url"), new URL("file:/some/fake2.url"), new URL("file:/some/fake3.url"),
