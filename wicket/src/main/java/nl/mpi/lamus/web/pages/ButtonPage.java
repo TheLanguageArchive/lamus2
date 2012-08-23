@@ -20,7 +20,6 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
 
 /**
  *
@@ -28,11 +27,9 @@ import org.apache.wicket.model.IModel;
  */
 public final class ButtonPage extends Panel {
 
-    //private final IModel<Workspace> model;
     
     public ButtonPage(String id) {
         super(id);
-        //this.model = model;
         add(new WorkspaceActionsForm("workspaceActionsForm"));
     }
 
@@ -68,7 +65,8 @@ public final class ButtonPage extends Panel {
 
                 @Override
                 public void onSubmit() {
-                    handleUnlinkedFiles();
+                    final FreeNodesPage resultPage = new FreeNodesPage();
+		setResponsePage(resultPage);
                 }
             };
             add(unlinkedFilesButton);
@@ -85,12 +83,7 @@ public final class ButtonPage extends Panel {
         }
     }
 
-    private void handleUploadFiles() {
-    }
-
     private void handleRequestStorage() {
     }
 
-    private void handleUnlinkedFiles() {
-    }
 }

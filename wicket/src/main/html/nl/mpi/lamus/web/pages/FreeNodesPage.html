@@ -1,0 +1,23 @@
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <title>Unlinked Files</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+<wicket:extend>
+    <div>
+      <h4>Current files in <span wicket:id="dir">(dir)</span>:</h4>
+      <table>
+        <tr wicket:id="fileList">
+            <td width="200"><span wicket:id="file">(file)</span></td>
+            <td><a href="#" wicket:id="delete"><img wicket:id="image2" src="delete.gif" border="0"/></a></td>
+        </tr>
+      </table>
+    </div>
+    <br/><div wicket:id="buttonpage" />
+    </wicket:extend>
+</body>
+</html>

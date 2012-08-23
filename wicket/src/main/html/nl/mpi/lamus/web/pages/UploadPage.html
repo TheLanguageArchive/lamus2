@@ -28,29 +28,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <wicket:extend>
     <form wicket:id="progressUpload">
      <fieldset>
-      <legend>Upload form with progress bar</legend>
+      <legend>Upload form with progress bar and HTML5 &lt;input type="file" <strong>multiple</strong> /&gt;, so it can upload more than one file in browsers which support <em>multiple</em> attribute</legend>
         <p>
         <label for="upload">File</label>
-        <input wicket:id="fileInput" type="file"/>
+        <input wicket:id="fileInput" type="file" multiple="multiple"/>
         </p>
         <input type="submit" value="Upload!"/>
         <span wicket:id="progress">[[upload progressbar]]</span>
      </fieldset>
     </form>
-
-    <form wicket:id="html5Upload">
-     <fieldset>
-      <legend>Upload form that uses HTML5 &lt;input type="file" <strong>multiple</strong> /&gt;, so it can upload
-        more than one file in browsers which support <em>multiple</em> attribute</legend>
-        <p>
-        <label>File</label>
-        <input wicket:id="fileInput" type="file" multiple="multiple" />
-        </p>
-        <input type="submit" value="Upload!"/>
-     </fieldset>
-    </form>
-
-
      <div>
         <span wicket:id="uploadFeedback"/>
      </div>
@@ -60,11 +46,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <table>
         <tr wicket:id="fileList">
             <td width="200"><span wicket:id="file">(file)</span></td>
-            <td><a href="#" wicket:id="delete"><img src="delete.gif" border="0"/></a></td>
+            <td><a href="#" wicket:id="delete"><img wicket:id="image2" src="delete.gif" border="0"/></a></td>
         </tr>
       </table>
     </div>
-    <div><form wicket:id="buttonpage" /></div>
+    <br/><div wicket:id="buttonpage" />
     </wicket:extend>
 </body>
 </html>

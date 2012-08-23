@@ -23,9 +23,6 @@ import nl.mpi.lamus.web.LamusWicketApplication;
 import org.apache.wicket.Application;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -36,18 +33,13 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.file.Folder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
- * Adapted from org.apache.wicket.examples.upload example @author Eelco Hillenius
  */
-@SuppressWarnings("serial")
-public class UploadPage extends LamusPage {
-    
-    public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
+public class FreeNodesPage extends LamusPage {
+        public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
     /**
      * List view for files in upload folder.
      */
@@ -82,65 +74,6 @@ public class UploadPage extends LamusPage {
             listItem.add(link);
         }
     }
-
-    /**
-     * Form for uploads.
-     */
-    private class FileUploadForm extends Form<Void> {
-
-        FileUploadField fileUploadField;
-
-        /**
-         * Construct.
-         *
-         * @param name Component name
-         */
-        public FileUploadForm(String name) {
-            super(name);
-
-            // set this form to multipart mode (allways needed for uploads!)
-            setMultiPart(true);
-
-            // Add one file input field
-            add(fileUploadField = new FileUploadField("fileInput"));
-
-            // Set maximum size to 100K for demo purposes
-            //setMaxSize(Bytes.kilobytes(100));
-        }
-
-        /**
-         * @see org.apache.wicket.markup.html.form.Form#onSubmit()
-         */
-        @Override
-        protected void onSubmit() {
-            final List<FileUpload> uploads = fileUploadField.getFileUploads();
-            if (uploads != null) {
-                for (FileUpload upload : uploads) {
-                    // Create a new file
-                    File newFile = new File(getUploadFolder(), upload.getClientFileName());
-
-                    // Check new file, delete if it already existed
-                    checkFileExists(newFile);
-                    try {
-                        // Save to new file
-                        newFile.createNewFile();
-                        upload.writeTo(newFile);
-
-                        UploadPage.this.info("saved file: " + upload.getClientFileName());
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Unable to write file", e);
-                    }
-                }
-            }
-        }
-    }
-    /**
-     * Log.
-     */
-    private static final Logger log = LoggerFactory.getLogger(UploadPage.class);
-    /**
-     * Reference to listview for easy access.
-     */
     private final FileListView fileListView;
 
     /**
@@ -148,15 +81,10 @@ public class UploadPage extends LamusPage {
      *
      * @param parameters Page parameters
      */
-    public UploadPage() { 
+    public FreeNodesPage() { 
         
         add(new ButtonPage("buttonpage"));
         Folder uploadFolder = getUploadFolder();
-        // Create feedback panels
-        final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
-
-        // Add uploadFeedback to the page itself
-        add(uploadFeedback);
 
 
         // Add folder view
@@ -170,28 +98,8 @@ public class UploadPage extends LamusPage {
         });
         add(fileListView);
 
-        // Add upload form with progress bar that uses HTML <input type="file" multiple />, so it can upload
-        // more than one file in browsers which support "multiple" attribute
-        final FileUploadForm progressUploadForm = new FileUploadForm("progressUpload");
-
-        progressUploadForm.add(new UploadProgressBar("progress", progressUploadForm,
-                progressUploadForm.fileUploadField));
-        add(progressUploadForm);
     }
 
-    /**
-     * Check whether the file allready exists, and if so, try to delete it.
-     *
-     * @param newFile the file to check
-     */
-    private void checkFileExists(File newFile) {
-        if (newFile.exists()) {
-            // Try to delete the file
-            if (!Files.remove(newFile)) {
-                throw new IllegalStateException("Unable to overwrite " + newFile.getAbsolutePath());
-            }
-        }
-    }
 
     private Folder getUploadFolder() {
         return ((LamusWicketApplication) Application.get()).getUploadFolder();
