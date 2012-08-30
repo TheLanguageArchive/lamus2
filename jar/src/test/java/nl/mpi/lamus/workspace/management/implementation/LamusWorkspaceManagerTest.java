@@ -19,6 +19,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
@@ -47,11 +50,12 @@ public class LamusWorkspaceManagerTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private WorkspaceManager manager;
-    @Mock private TaskExecutor mockExecutor;
+    @Mock private ExecutorService mockExecutorService;
     @Mock private WorkspaceFactory mockWorkspaceFactory;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock private WorkspaceImportRunner mockWorkspaceImportRunner;
+    @Mock private Future<Boolean> mockFuture;
     
     public LamusWorkspaceManagerTest() {
     }
@@ -66,7 +70,7 @@ public class LamusWorkspaceManagerTest {
     
     @Before
     public void setUp() {
-        this.manager = new LamusWorkspaceManager(mockExecutor, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner);
+        this.manager = new LamusWorkspaceManager(mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner);
     }
     
     @After
@@ -77,7 +81,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void createWorkspaceSuccessfully() throws FailedToCreateWorkspaceDirectoryException {
+    public void createWorkspaceSuccessfully() throws FailedToCreateWorkspaceDirectoryException, InterruptedException, ExecutionException {
         final int archiveNodeID = 10;
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
@@ -90,7 +94,9 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace);
             oneOf (mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf (mockWorkspaceImportRunner).setTopNodeArchiveID(archiveNodeID);
-            oneOf (mockExecutor).execute(mockWorkspaceImportRunner);
+//            oneOf (mockExecutorService).execute(mockWorkspaceImportRunner);
+            oneOf (mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
+            oneOf (mockFuture).get(); will(returnValue(Boolean.TRUE));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);

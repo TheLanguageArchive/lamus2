@@ -22,13 +22,10 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import javax.sql.DataSource;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.tree.implementation.LamusWorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
@@ -100,6 +97,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Autowired
+    @Qualifier("lamusDataSource")
+    DataSource lamusDataSource;
+    
+//    @Autowired
     LamusJdbcWorkspaceDao workspaceDao;
     
     public LamusJdbcWorkspaceDaoTest() {
@@ -117,7 +118,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     
     @Before
     public void setUp() throws Exception {
-
+        workspaceDao = new LamusJdbcWorkspaceDao(lamusDataSource);
     }
     
     @After
@@ -165,7 +166,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * 
      */
     @Test
-    public void updateWorkspaceTopNode() {
+    public void updateWorkspaceTopNode() throws URISyntaxException, MalformedURLException {
         
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
         WorkspaceNode topNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
@@ -308,7 +309,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getWorkspaceWithTopNodeID() {
+    public void getWorkspaceWithTopNodeID() throws URISyntaxException, MalformedURLException {
         
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
         WorkspaceNode testWorkspaceNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
@@ -506,7 +507,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void addWorkspaceNodeLink() throws URISyntaxException {
+    public void addWorkspaceNodeLink() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
         
@@ -525,7 +526,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
 
     @Test
-    public void addWorkspaceNodeLinkWhenParentDoesNotExist() throws URISyntaxException {
+    public void addWorkspaceNodeLinkWhenParentDoesNotExist() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
         
@@ -549,7 +550,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void addWorkspaceNodeLinkWhenChildDoesNotExist() throws URISyntaxException {
+    public void addWorkspaceNodeLinkWhenChildDoesNotExist() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
         
@@ -573,7 +574,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void addWorkspaceNodeLinkWhenChildResourceProxyIsNull() {
+    public void addWorkspaceNodeLinkWhenChildResourceProxyIsNull() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
         
@@ -641,76 +642,76 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertNotNull("Returned node should not be null", result);
     }
     
-    @Test
-    public void getExistingTreeNodeWithoutParent() throws MalformedURLException, URISyntaxException {
-        
-        int archiveNodeIdToBeInsertedInTheDb = 10;
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
-        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
-        
-        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), -1);
-        
-        assertNotNull("Returned tree node should not be null", result);
-        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
-        assertNull("Returned tree node should have a null parent tree node", result.getParent());
-    }
+//    @Test
+//    public void getExistingTreeNodeWithoutParent() throws MalformedURLException, URISyntaxException {
+//        
+//        int archiveNodeIdToBeInsertedInTheDb = 10;
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+//        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
+//        
+//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), null);
+//        
+//        assertNotNull("Returned tree node should not be null", result);
+//        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
+//        assertNull("Returned tree node should have a null parent tree node", result.getParent());
+//    }
     
-    @Test
-    public void getExistingTreeNodeWithParent() throws MalformedURLException, URISyntaxException {
-        
-        int archiveNodeIdToBeInsertedInTheDb = 10;
-        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
-        WorkspaceNode testParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
-        setNodeAsParentAndInsertLinkIntoDatabase(testParentNode, testNode);
-        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(testParentNode, null, workspaceDao);
-        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, parentTreeNode, workspaceDao);
-        
-        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), testParentNode.getWorkspaceNodeID());
-        
-        assertNotNull("Returned tree node should not be null", result);
-        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
-        assertNotNull("Returned tree node should have a null parent tree node", result.getParent());
-        assertEquals("Returned tree node has a parent tree node that is different from expected", parentTreeNode, result.getParent());
-    }
+//    @Test
+//    public void getExistingTreeNodeWithParent() throws MalformedURLException, URISyntaxException {
+//        
+//        int archiveNodeIdToBeInsertedInTheDb = 10;
+//        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+//        WorkspaceNode testParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
+//        setNodeAsParentAndInsertLinkIntoDatabase(testParentNode, testNode);
+//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(testParentNode, null, workspaceDao);
+//        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, parentTreeNode, workspaceDao);
+//        
+//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), parentTreeNode);
+//        
+//        assertNotNull("Returned tree node should not be null", result);
+//        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
+//        assertNotNull("Returned tree node should have a null parent tree node", result.getParent());
+//        assertEquals("Returned tree node has a parent tree node that is different from expected", parentTreeNode, result.getParent());
+//    }
     
-    @Test
-    public void getExistingTreeNodeWithIllegalParent() throws MalformedURLException, URISyntaxException {
-        
-        int archiveNodeIdToBeInsertedInTheDb = 10;
-        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
-        WorkspaceNode testNotParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
-        
-        WorkspaceTreeNode notParentTreeNode = new LamusWorkspaceTreeNode(testNotParentNode, null, workspaceDao);
-        WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
-        
-        String expectedErrorMessage = "Node with ID " + notParentTreeNode.getWorkspaceNodeID() +
-                " is passed as parent of node with ID " + treeNode.getWorkspaceNodeID() +
-                " but these nodes are not linked in the database.";
-        
-        WorkspaceTreeNode result;
-        try {
-            result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), testNotParentNode.getWorkspaceNodeID());
-            fail("An IllegalArgumentException should have been thrown.");
-        } catch(IllegalArgumentException ex) {
-            assertEquals("Exception message different from expected", expectedErrorMessage, ex.getMessage());
-        }
-    }
+//    @Test
+//    public void getExistingTreeNodeWithIllegalParent() throws MalformedURLException, URISyntaxException {
+//        
+//        int archiveNodeIdToBeInsertedInTheDb = 10;
+//        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, true, true);
+//        WorkspaceNode testNotParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, true, true);
+//        
+//        WorkspaceTreeNode notParentTreeNode = new LamusWorkspaceTreeNode(testNotParentNode, null, workspaceDao);
+//        WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
+//        
+//        String expectedErrorMessage = "Node with ID " + notParentTreeNode.getWorkspaceNodeID() +
+//                " is passed as parent of node with ID " + treeNode.getWorkspaceNodeID() +
+//                " but these nodes are not linked in the database.";
+//        
+//        WorkspaceTreeNode result;
+//        try {
+//            result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), notParentTreeNode);
+//            fail("An IllegalArgumentException should have been thrown.");
+//        } catch(IllegalArgumentException ex) {
+//            assertEquals("Exception message different from expected", expectedErrorMessage, ex.getMessage());
+//        }
+//    }
     
-    @Test
-    public void getNonExistingTreeNode() {
-        
-        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(100, -1);
-        
-        assertNull("Retrieved tree node should be null", result);
-    }
+//    @Test
+//    public void getNonExistingTreeNode() {
+//        
+//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(100, null);
+//        
+//        assertNull("Retrieved tree node should be null", result);
+//    }
     
     @Test
     public void getExistingChildNodes() throws URISyntaxException, MalformedURLException {
@@ -747,6 +748,49 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertNotNull("The returned list of nodes should not be null", result);
         assertEquals("Returned list of nodes should be empty", 0, result.size());
     }
+    
+//    @Test
+//    public void getExistingChildTreeNodes() throws URISyntaxException, MalformedURLException {
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, true, true);
+//        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, true, true);
+//        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
+//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(parentNode, null, workspaceDao);
+//        WorkspaceTreeNode childTreeNode = new LamusWorkspaceTreeNode(childNode, parentTreeNode, workspaceDao);
+//        
+//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(parentTreeNode);
+//        
+//        assertNotNull("The returned list of tree nodes should not be null", result);
+//        assertEquals("Size of the returned list of tree nodes is different from expected", 1, result.size());
+//        assertTrue("The returned list of tree nodes does not contain the expected tree node", result.contains(childTreeNode));
+//    }
+
+//    @Test
+//    public void getNonExistingChildTreeNodes() throws URISyntaxException, MalformedURLException {
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, true, true);
+//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(parentNode, null, workspaceDao);
+//        
+//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(parentTreeNode);
+//        
+//        assertNotNull("The returned list of treenodes should not be null", result);
+//        assertEquals("Returned list of treenodes should be empty", 0, result.size());
+//    }
+
+//    @Test
+//    public void getChildTreeNodesFromNonExistingParent() throws URISyntaxException, MalformedURLException {
+//        
+//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+//        WorkspaceNode nonExistingParentNode = createWorkspaceNode(testWorkspace, -1, false, false);
+//        WorkspaceTreeNode nonExistingParentTreeNode = new LamusWorkspaceTreeNode(nonExistingParentNode, null, workspaceDao);
+//        
+//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(nonExistingParentTreeNode);
+//        
+//        assertNotNull("The returned list of tree nodes should not be null", result);
+//        assertEquals("Returned list of tree nodes should be empty", 0, result.size());
+//    }
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);
@@ -791,14 +835,9 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         return testWorkspace;
     }
     
-    private WorkspaceNode insertTestWorkspaceNodeIntoDB(Workspace workspace) {
+    private WorkspaceNode insertTestWorkspaceNodeIntoDB(Workspace workspace) throws URISyntaxException, MalformedURLException {
         
-        WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
-        testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
-        testWorkspaceNode.setName("someNode");
-        testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
-        testWorkspaceNode.setFormat("someFormat");
-        testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, -1, false, false);
         
         String insertNodeSql = "INSERT INTO node (workspace_id, name, type, format, status) values (?, ?, ?, ?, ?)";
         simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
@@ -812,6 +851,23 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     private WorkspaceNode insertTestWorkspaceNodeWithArchiveIDIntoDB(Workspace workspace, int archiveNodeID, boolean withURLs, boolean withURI) throws MalformedURLException, URISyntaxException {
+        
+        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, archiveNodeID, withURLs, withURI);
+        
+        String insertNodeSql = "INSERT INTO node (workspace_id, archive_node_id, profile_schema_uri, workspace_url, archive_url, origin_url, name, type, format, status) "
+                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(), testWorkspaceNode.getArchiveNodeID(),
+                testWorkspaceNode.getProfileSchemaURI(), testWorkspaceNode.getWorkspaceURL(),
+                testWorkspaceNode.getArchiveURL(), testWorkspaceNode.getOriginURL(), testWorkspaceNode.getName(),
+                testWorkspaceNode.getType(), testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
+        
+        int workspaceNodeID = getIdentityFromDB();
+        testWorkspaceNode.setWorkspaceNodeID(workspaceNodeID);
+        
+        return testWorkspaceNode;
+    }
+    
+    private WorkspaceNode createWorkspaceNode(Workspace workspace, int archiveNodeID, boolean withURLs, boolean withURI) throws URISyntaxException, MalformedURLException {
         
         WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
         testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
@@ -829,18 +885,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         testWorkspaceNode.setFormat("someFormat");
         testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
         
-        String insertNodeSql = "INSERT INTO node (workspace_id, archive_node_id, profile_schema_uri, workspace_url, archive_url, origin_url, name, type, format, status) "
-                + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(), testWorkspaceNode.getArchiveNodeID(),
-                testWorkspaceNode.getProfileSchemaURI(), testWorkspaceNode.getWorkspaceURL(),
-                testWorkspaceNode.getArchiveURL(), testWorkspaceNode.getOriginURL(), testWorkspaceNode.getName(),
-                testWorkspaceNode.getType(), testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
-        
-        int workspaceNodeID = getIdentityFromDB();
-        testWorkspaceNode.setWorkspaceNodeID(workspaceNodeID);
-        
         return testWorkspaceNode;
-    }    
+    }
     
     private void setNodeAsWorkspaceTopNodeInDB(Workspace workspace, WorkspaceNode topNode) {
         

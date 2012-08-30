@@ -19,12 +19,14 @@ import java.net.URI;
 import java.net.URL;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.tree.implementation.LamusWorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -69,8 +71,6 @@ public class LamusWorkspaceTreeServiceTest {
     @Test
     public void testGetTreeNodeWithoutParent() {
 
-        final int parentNodeID = -1;
-        
         final int nodeID = 1;
         final int workspaceID = 1;
         int archiveNodeID = 10;
@@ -84,17 +84,22 @@ public class LamusWorkspaceTreeServiceTest {
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
         String pid = "some:fake-pid";
         String format = "cmdi";
-        final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(
                 nodeID, workspaceID, archiveNodeID, profileSchemaURI,
                 name, title, type, wsURL, archiveURL, originURL,
-                status, pid, format, null, mockWorkspaceDao);
+                status, pid, format);
+        
+        final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
+                node, null, mockWorkspaceDao);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, parentNodeID); will(returnValue(treeNodeToRetrieve));
+//            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, null); will(returnValue(treeNodeToRetrieve));
+            oneOf(mockWorkspaceDao).getWorkspaceNode(nodeID); will(returnValue(node));
         }});
         
-        WorkspaceTreeNode result = service.getTreeNode(nodeID, parentNodeID);
+        WorkspaceTreeNode result = service.getTreeNode(nodeID, null);
         assertNotNull("Returned tree node should not be null", result);
         assertEquals("Returned tree node is different from expected", result, treeNodeToRetrieve);
         assertNull("Returned tree node should have a null parent tree node.", result.getParent());
@@ -126,21 +131,26 @@ public class LamusWorkspaceTreeServiceTest {
         String pid = "some:fake-pid";
         String format = "cmdi";
 
-        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(
+        final WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(
                 parentNodeID, workspaceID, parentArchiveNodeID, profileSchemaURI,
                 parentName, parentTitle, type, originURL, archiveURL, originURL,
                 status, pid, format, null, mockWorkspaceDao);
-        final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(
                 nodeID, workspaceID, archiveNodeID, profileSchemaURI,
                 name, title, type, wsURL, archiveURL, originURL,
-                status, pid, format, parentTreeNode, mockWorkspaceDao);
+                status, pid, format);
+        
+        final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
+                node, parentTreeNode, mockWorkspaceDao);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, parentNodeID); will(returnValue(treeNodeToRetrieve));
+//            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, parentTreeNode); will(returnValue(treeNodeToRetrieve));
+            oneOf(mockWorkspaceDao).getWorkspaceNode(nodeID); will(returnValue(node));
         }});
         
-        WorkspaceTreeNode result = service.getTreeNode(nodeID, parentNodeID);
+        WorkspaceTreeNode result = service.getTreeNode(nodeID, parentTreeNode);
         assertNotNull("Returned tree node should not be null", result);
         assertEquals("Returned tree node is different from expected", treeNodeToRetrieve, result);
         assertNotNull("Returned tree node should have a null parent tree node.", result.getParent());

@@ -13,8 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.tree.implementation;
+package nl.mpi.lamus.workspace.tree.implementation;
 
+import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.service.WorkspaceTreeService;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -123,6 +125,7 @@ public class LamusWorkspaceTreeNodeTest {
         
         context.checking(new Expectations() {{
             
+//            oneOf(mockWorkspaceDao).getChildWorkspaceTreeNodes(treeNode); will(returnValue(treeNodeChildren));
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID()); will(returnValue(nodeChildren));
         }});
         
@@ -132,7 +135,7 @@ public class LamusWorkspaceTreeNodeTest {
         
         context.checking(new Expectations() {{
             
-            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID()); will(returnValue(nodeChildren));
+            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
         }});
         
         treeNode.getChild(index);
@@ -155,7 +158,7 @@ public class LamusWorkspaceTreeNodeTest {
         
         context.checking(new Expectations() {{
             
-            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID()); will(returnValue(nodeChildren));
+            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
         }});
         
         treeNode.getChildCount();
@@ -180,7 +183,7 @@ public class LamusWorkspaceTreeNodeTest {
         
         context.checking(new Expectations() {{
             
-            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID()); will(returnValue(nodeChildren));
+            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
         }});
         
         treeNode.getIndexOfChild(childTreeNode2);

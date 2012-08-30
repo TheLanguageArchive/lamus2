@@ -15,9 +15,14 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
+import nl.mpi.lamus.workspace.exception.FileImporterInitialisationException;
 import nl.mpi.lamus.workspace.importing.implementation.FileImporterFactoryBean;
 import nl.mpi.lamus.workspace.importing.implementation.MetadataFileImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -31,6 +36,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -91,14 +97,20 @@ public class WorkspaceImportRunnerTest {
             oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
+                when(importing.isNot("finished"));
+            oneOf (mockWorkspace).setStatusMessageInitialised();
+                when(importing.isNot("finished"));
+            oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
                 then(importing.is("finished"));
         }});
         
         
-        executeRunner();
+        boolean result = executeRunner();
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
+        
+        assertTrue("Execution result should have been successful (true)", result);
     }
     
     /**
@@ -108,13 +120,14 @@ public class WorkspaceImportRunnerTest {
     public void throwsException() throws Exception {
         
         final String someExceptionMessage = "some exception message";
+        final Exception expectedExceptionCause = new Exception(someExceptionMessage);
         
         final States importing = context.states("importing");
         
         context.checking(new Expectations() {{
 
             oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(null);
-            oneOf (mockFileImporterFactoryBean).getObject(); will(throwException(new Exception(someExceptionMessage)));
+            oneOf (mockFileImporterFactoryBean).getObject(); will(throwException(expectedExceptionCause));
             oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             never (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
@@ -125,8 +138,13 @@ public class WorkspaceImportRunnerTest {
             //TODO expect a call to a listener indicating failure
         }});
         
-        
-        executeRunner();
+        try {
+            executeRunner();
+            fail("An exception should have been thrown");
+        } catch(ExecutionException ex) {
+            assertNotNull(ex);
+            assertEquals("Exception cause different from expected", expectedExceptionCause, ex.getCause());
+        }
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
@@ -140,7 +158,8 @@ public class WorkspaceImportRunnerTest {
         
         final Class<? extends FileImporter> expectedImporterType = MetadataFileImporter.class;
         final String expectedExceptionMessage = "this is a test message for the exception";
-        final Throwable expectedExceptionCause = new MetadataException("this is a test message for the exception cause");
+        final Throwable expectedExceptionCauseCause = new MetadataException("this is a test message for the exception cause");
+        final Exception expectedExceptionCause = new FileImporterException(expectedExceptionMessage, mockWorkspace, expectedImporterType, expectedExceptionCauseCause);
         
         final States importing = context.states("importing");
         
@@ -152,17 +171,23 @@ public class WorkspaceImportRunnerTest {
             oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
-                will(throwException(new FileImporterException(expectedExceptionMessage, mockWorkspace, expectedImporterType, expectedExceptionCause)));
+                will(throwException(expectedExceptionCause));
             
             oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();
+                when(importing.isNot("finished"));
             oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
                 then(importing.is("finished"));
             
             //TODO expect a call to a listener indicating failure
         }});
         
-        
-        executeRunner();
+        try {
+            executeRunner();
+            fail("An exception should have been thrown");
+        } catch(ExecutionException ex) {
+            assertNotNull(ex);
+            assertEquals("Exception cause different from expected", expectedExceptionCause, ex.getCause());
+        }
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
@@ -175,7 +200,8 @@ public class WorkspaceImportRunnerTest {
     public void throwsFileExplorerException() throws Exception {
         
         final String expectedExceptionMessage = "this is a test message for the exception";
-        final Throwable expectedExceptionCause = null;
+        final Throwable expectedExceptionCauseCause = null;
+        final Exception expectedExceptionCause = new FileExplorerException(expectedExceptionMessage, mockWorkspace, expectedExceptionCauseCause);
         
         final States importing = context.states("importing");
         
@@ -187,7 +213,7 @@ public class WorkspaceImportRunnerTest {
             oneOf (mockFileImporter).setWorkspace(mockWorkspace);
                 when(importing.isNot("finished"));
             oneOf (mockFileImporter).importFile(null, null, null, topNodeArchiveID);
-                will(throwException(new FileExplorerException(expectedExceptionMessage, mockWorkspace, expectedExceptionCause)));
+                will(throwException(expectedExceptionCause));
             
             oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();
             oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
@@ -197,15 +223,25 @@ public class WorkspaceImportRunnerTest {
         }});
         
         
-        executeRunner();
+        try {
+            executeRunner();
+            fail("An exception should have been thrown");
+        } catch(ExecutionException ex) {
+            assertNotNull(ex);
+            assertEquals("Exception cause different from expected", expectedExceptionCause, ex.getCause());
+        }
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
     }
     
-    private void executeRunner() {
+    private boolean executeRunner() throws InterruptedException, ExecutionException {
         
-        TaskExecutor executor = new SimpleAsyncTaskExecutor();
-        executor.execute(workspaceImportRunner);
+//        TaskExecutor executor = new SimpleAsyncTaskExecutor();
+//        executor.execute(workspaceImportRunner);
+        
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Boolean> result = executorService.submit(workspaceImportRunner);
+        return result.get();
     }
 }

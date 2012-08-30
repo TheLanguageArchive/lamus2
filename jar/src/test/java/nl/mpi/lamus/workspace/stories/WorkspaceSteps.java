@@ -123,6 +123,7 @@ public class WorkspaceSteps {
     private WorkspaceDao workspaceDao;
     
     @Autowired
+    @Qualifier("WorkspaceService")
     private WorkspaceService workspaceService;
  
     private int selectedNodeID;
