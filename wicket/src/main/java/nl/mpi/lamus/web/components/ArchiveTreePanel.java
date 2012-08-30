@@ -51,7 +51,7 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
 	    protected void onNodeLinkClicked(AjaxRequestTarget target, TreeNode node) {
 		super.onNodeLinkClicked(target, node);
 
-		// TOOD: Make more robust against other types in model
+		// TODO: Make more robust against other types in model
 		final GenericTreeSwingTreeNodeWrapper nodeWrapper = (GenericTreeSwingTreeNodeWrapper) node;
 		final T archiveNode = (T) nodeWrapper.getContentNode();
 		ArchiveTreePanel.this.onNodeLinkClicked(target, archiveNode);
