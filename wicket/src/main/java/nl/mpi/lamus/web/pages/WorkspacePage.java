@@ -16,17 +16,17 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.archiving.tree.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.components.ArchiveTreePanel;
-import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.tree.LinkType;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -40,7 +40,13 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 public final class WorkspacePage extends LamusPage {
 
     // Services to be injected
-    @SpringBean(name = "workspaceTreeProvider")
+    
+    @SpringBean
+    private WorkspaceTreeService workspaceTreeService;
+    
+    @SpringBean(name = "workspaceTreeProviderFactory")
+    private GenericTreeModelProviderFactory workspaceTreeProviderFactory;
+
     private GenericTreeModelProvider workspaceTreeProvider;
     // Page model
     private final IModel<Workspace> model;
@@ -50,7 +56,10 @@ public final class WorkspacePage extends LamusPage {
         super();
         this.model = model;
         nodeIdForm = (Form) createNodeInfoForm("nodeInfoForm");
-
+        
+        this.workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(
+                this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null));
+        
         add(createWorkspaceInfo("workspaceInfo"));
         add(createWorkspaceTreePanel("workspaceTree"));
         add(new ButtonPage("buttonpage"));
@@ -83,7 +92,7 @@ public final class WorkspacePage extends LamusPage {
     }
     
     private Form createNodeInfoForm(final String id) {
-	final Form<CorpusNode> form = new Form<CorpusNode>(id);
+	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("nodeId"));
 
