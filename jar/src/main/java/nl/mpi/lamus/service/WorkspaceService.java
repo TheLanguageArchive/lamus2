@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service;
 
+import java.io.Serializable;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -23,7 +24,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceService {
+public interface WorkspaceService extends Serializable {
     
     /**
      * Creates a workspace starting in a given archive node, for a given user.
