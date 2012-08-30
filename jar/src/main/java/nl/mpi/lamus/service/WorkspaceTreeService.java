@@ -15,7 +15,8 @@
  */
 package nl.mpi.lamus.service;
 
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
+import java.util.List;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
  * Collection of service methods that are used to retrieve nodes with the
@@ -30,7 +31,8 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * Retrieves a workspace tree node with the given ID.
      * 
      * @param nodeID ID of the node to retrieve
+     * @param parentNode WorkspaceTreeNode object of the parent node
      * @return corresponding workspace tree node
      */
-    public WorkspaceTreeNode getTreeNode(int nodeID, int parentNodeID);
+    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode);
 }

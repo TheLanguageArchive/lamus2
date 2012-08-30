@@ -15,17 +15,22 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.management.NodeAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Service
 public class LamusWorkspaceTreeService extends LamusWorkspaceService implements WorkspaceTreeService {
 
     @Autowired
@@ -34,9 +39,20 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
         super(accessChecker, workspaceManager, workspaceDao);
     }
     
-    public WorkspaceTreeNode getTreeNode(int nodeID, int parentNodeID) {
+    /**
+     * @see WorkspaceTreeService#getTreeNode(int, int)
+     */
+    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentTreeNode) {
         
-        return this.workspaceDao.getWorkspaceTreeNode(nodeID, parentNodeID);
+        WorkspaceNode child = this.workspaceDao.getWorkspaceNode(nodeID);
+        
+        WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
+                        child.getWorkspaceNodeID(), child.getWorkspaceID(), child.getArchiveNodeID(),
+                        child.getProfileSchemaURI(), child.getName(), child.getTitle(),
+                        child.getType(), child.getWorkspaceURL(), child.getArchiveURL(),
+                        child.getOriginURL(), child.getStatus(), child.getPid(),
+                        child.getFormat(), parentTreeNode, this.workspaceDao);
+        
+        return treeNode;
     }
-    
 }
