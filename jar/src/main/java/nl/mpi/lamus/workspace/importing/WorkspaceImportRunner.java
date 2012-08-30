@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Component;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
-public class WorkspaceImportRunner implements Runnable{
+public class WorkspaceImportRunner implements Callable{
 
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
     
@@ -71,7 +72,7 @@ public class WorkspaceImportRunner implements Runnable{
      * The import process is started in a separate thread.
      * The nodes will be explored and copied, starting with the top node.
      */
-    public void run() {
+    public Boolean call() throws Exception {
         
         //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
         
@@ -87,7 +88,9 @@ public class WorkspaceImportRunner implements Runnable{
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
-            return;
+//            return;
+//            throw new ExecutionException(errorMessage, ex);
+            throw ex;
         }
         
         topNodeImporter.setWorkspace(workspace);
@@ -113,6 +116,8 @@ public class WorkspaceImportRunner implements Runnable{
             workspace.setStatusMessageErrorDuringInitialisation();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
+            throw fiex;
+            
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         } catch (FileExplorerException feex) {
             String errorMessage = "Error during file explore.";
@@ -123,8 +128,15 @@ public class WorkspaceImportRunner implements Runnable{
             workspace.setStatusMessageErrorDuringInitialisation();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
+            throw feex;
+            
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
+            
+            
+            //TODO When to return false?
+            
+            return true;
     }
     
 }

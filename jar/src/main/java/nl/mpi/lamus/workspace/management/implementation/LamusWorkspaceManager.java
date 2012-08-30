@@ -17,6 +17,9 @@ package nl.mpi.lamus.workspace.management.implementation;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
@@ -28,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,23 +43,20 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceManager.class);
     
-    private final TaskExecutor executor;
+    private final ExecutorService executorService;
     private final WorkspaceFactory workspaceFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
-//    private final FileImporterFactory importerFactory;
     private final WorkspaceImportRunner workspaceImportRunner;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
     private int numberOfDaysOfInactivityAllowedSinceLastSession;
 
-    //TODO use Spring injection
-    //TODO Executor can be created using Executors.newSingleThreadExecutor()
     @Autowired
-    public LamusWorkspaceManager(TaskExecutor executor, WorkspaceFactory factory, WorkspaceDao dao,
+    public LamusWorkspaceManager(ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
         WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner) {
-        this.executor = executor;
+        this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
@@ -78,26 +77,40 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             return null;
         }
         
-        //TODO get more values to add to the node (e.g. from the file, using the metadataAPI)
-//        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(archiveNodeID), ArchiveAccessContext.getFileUrlContext());
-//        URL archiveNodeURL = tempUrl.toURL();
-//        WorkspaceNode topNode = workspaceNodeFactory.getNewWorkspaceNode(newWorkspace.getWorkspaceID(), archiveNodeID, archiveNodeURL);
-
-        
-        //TODO change this call - use Spring injection
-
-//        FileImporterFactory importerFactory = new WorkspaceFileImporterFactory(newWorkspace);
-//        Runnable workspaceImportRunner = new WorkspaceImportRunner(workspaceDao, newWorkspace, topNodeArchiveID, importerFactory);
         workspaceImportRunner.setWorkspace(newWorkspace);
         workspaceImportRunner.setTopNodeArchiveID(topNodeArchiveID);
-//        Thread importThread = new Thread(workspaceImportRunner);
-//        importThread.start();
-        
         
         //TODO use Callable and Future instead of Runnable, in order to get the result of the thread
         
+        Future<Boolean> importResult = executorService.submit(workspaceImportRunner);
         
-        executor.execute(workspaceImportRunner);
+//        executorService.execute(workspaceImportRunner);
+
+            // TODO implement some notification mechanism to let the caller know when this is ready
+                // OR just have some different way of filling up the tree
+        
+        Boolean isSuccessful;
+        
+        try {            
+            isSuccessful = importResult.get();
+        } catch (InterruptedException iex) {
+            logger.error("The thread was interrupted", iex);
+            
+            //TODO return some error instead??
+            return null;
+        } catch (ExecutionException eex) {
+            logger.error("There was a problem with the thread execution", eex);
+            
+            //TODO return some error instead??
+            return null;
+        }
+        
+        if(!isSuccessful) {
+            //TODO remove whatever was already created for the workspace
+                // (filesystem, database) and return some error instead??
+            
+            return null;
+        }
         
         return newWorkspace;
     }
