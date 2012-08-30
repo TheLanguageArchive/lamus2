@@ -15,18 +15,14 @@
  */
 package nl.mpi.lamus.spring;
 
-import javax.sql.DataSource;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  *
@@ -38,8 +34,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 public class LamusBeans {
     
     @Bean
-    public TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor();
+    public ExecutorService executorService() {
+        return Executors.newSingleThreadExecutor();
     }
     
     //TODO change properties to initialise API
