@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.model;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
@@ -23,7 +24,7 @@ import java.util.Collection;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceNode {
+public interface WorkspaceNode extends Serializable {
     
     public int getWorkspaceNodeID();
     
