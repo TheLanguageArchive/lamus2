@@ -15,9 +15,8 @@
  */
 package nl.mpi.lamus.dao;
 
+import java.io.Serializable;
 import java.util.Collection;
-import javax.sql.DataSource;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -27,7 +26,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceDao {
+public interface WorkspaceDao extends Serializable {
     
     /**
      * Inserts a workspace into the database
@@ -101,15 +100,6 @@ public interface WorkspaceDao {
      * @return WorkspaceNode object with the given ID
      */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
-    
-    /**
-     * Retrieves the tree node with the given ID.
-     * 
-     * @param workspaceNodeID ID of the node to retrieve
-     * @param parentNodeID ID of the parent, in the tree, of the node to retrieve
-     * @return WorkspaceTreeNode object with the given ID
-     */
-    public WorkspaceTreeNode getWorkspaceTreeNode(int workspaceNodeID, int parentNodeID);
     
     /**
      * Retrieves a collection containing the child nodes of the node with the
