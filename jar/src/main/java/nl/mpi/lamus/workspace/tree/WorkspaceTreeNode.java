@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.tree;
+package nl.mpi.lamus.workspace.tree;
 
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;

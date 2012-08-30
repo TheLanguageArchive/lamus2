@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.tree.implementation;
+package nl.mpi.lamus.workspace.tree.implementation;
 
 import java.net.URI;
 import java.net.URL;
@@ -22,11 +22,11 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -51,7 +51,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
                 status, pid, format);
         
         if(dao == null) {
-            throw new IllegalArgumentException("The WorkspaceDao should not be null.");
+            throw new IllegalArgumentException("The WorkspaceService object should not be null.");
         }
         
         this.parentTreeNode = parent;
@@ -66,7 +66,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
                 node.getStatus(), node.getPid(), node.getFormat());
         
         if(dao == null) {
-            throw new IllegalArgumentException("The WorkspaceDao should not be null.");
+            throw new IllegalArgumentException("The WorkspaceService object should not be null.");
         }
         
         this.parentTreeNode = parent;
@@ -92,6 +92,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     private List<WorkspaceTreeNode> getChildren() {
         
         if(this.childrenTreeNodes == null) {
+            
             this.childrenTreeNodes = new ArrayList<WorkspaceTreeNode>();
             Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
             for(WorkspaceNode child : children) {
@@ -140,6 +141,6 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     @Override
     public String toString() {
         
-        return super.toString() + "\nWorkspace Tree Parent: " + this.parentTreeNode;
+        return this.getName();
     }
 }
