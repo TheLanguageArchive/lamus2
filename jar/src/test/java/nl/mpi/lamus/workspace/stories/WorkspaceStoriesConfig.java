@@ -18,6 +18,8 @@ package nl.mpi.lamus.workspace.stories;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.sql.DataSource;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWrite;
@@ -423,8 +425,8 @@ public class WorkspaceStoriesConfig {
     }
     
     @Bean
-    public TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor();
+    public ExecutorService executorService() {
+        return Executors.newSingleThreadExecutor();
     }
     
     //TODO change properties to initialise API
