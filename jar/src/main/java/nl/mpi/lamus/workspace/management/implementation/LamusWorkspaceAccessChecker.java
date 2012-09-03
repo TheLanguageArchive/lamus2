@@ -19,7 +19,8 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +34,16 @@ import org.springframework.stereotype.Component;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
-public class LamusNodeAccessChecker implements NodeAccessChecker {
+public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     
-    private static final Logger logger = LoggerFactory.getLogger(LamusNodeAccessChecker.class);    
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
     private final ArchiveObjectsDB archiveObjectsDB;
     private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;
     
     @Autowired
-    public LamusNodeAccessChecker(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
+    public LamusWorkspaceAccessChecker(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
         this.archiveObjectsDB = archiveObjectsDB;
         this.amsBridge = amsBridge;
         this.workspaceDao = workspaceDao;
@@ -82,4 +83,25 @@ public class LamusNodeAccessChecker implements NodeAccessChecker {
         return true;
     }
     
+    /**
+     * @see WorkspaceAccessChecker#hasAccessToWorkspace(java.lang.String, int)
+     */
+    public boolean hasAccessToWorkspace(String userID, int workspaceID) {
+        
+        
+        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        
+        if(workspace == null) {
+            logger.error("Can't access a workspace (with ID " + workspaceID + ") that does not exist");
+            return false;
+        }
+        
+        if(userID.equals(workspace.getUserID())) {
+            logger.info("User with ID " + userID + " has access to workspace with ID " + workspaceID);
+            return true;
+        } else {
+            logger.warn("User with ID " + userID + " does not have access to workspace with ID " + workspaceID);
+            return false;
+        }
+    }
 }

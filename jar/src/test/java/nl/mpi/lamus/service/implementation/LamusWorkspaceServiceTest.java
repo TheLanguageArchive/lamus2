@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
@@ -44,7 +44,7 @@ public class LamusWorkspaceServiceTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceService service;
-    @Mock private NodeAccessChecker mockNodeAccessChecker;
+    @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     
@@ -106,7 +106,21 @@ public class LamusWorkspaceServiceTest {
         Workspace result = service.createWorkspace(userID, archiveNodeID);
         assertNotNull("Returned workspace should not be null when it can be created", result);
         assertEquals("Returned workspace is different from expected", result, newWorkspace);
-                
+    }
+    
+    @Test
+    public void deleteExistingWorkspace() {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(true));
+            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID);
+        }});
+        
+        service.deleteWorkspace(userID, workspaceID);
     }
     
     @Test

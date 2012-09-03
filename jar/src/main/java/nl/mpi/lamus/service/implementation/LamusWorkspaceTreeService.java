@@ -19,7 +19,7 @@ import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 public class LamusWorkspaceTreeService extends LamusWorkspaceService implements WorkspaceTreeService {
 
     @Autowired
-    public LamusWorkspaceTreeService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager,
+    public LamusWorkspaceTreeService(WorkspaceAccessChecker accessChecker, WorkspaceManager workspaceManager,
             WorkspaceDao workspaceDao) {
         super(accessChecker, workspaceManager, workspaceDao);
     }

@@ -16,15 +16,22 @@
 package nl.mpi.lamus.workspace.exception;
 
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class FailedToCreateWorkspaceDirectoryException extends WorkspaceException {
+public class WorkspaceNodeFilesystemException extends WorkspaceException {
     
-    public FailedToCreateWorkspaceDirectoryException(String message, Workspace workspace, Throwable cause) {
+    private WorkspaceNode workspaceNode;
+    
+    public WorkspaceNodeFilesystemException(String message, Workspace workspace, WorkspaceNode node, Throwable cause) {
         super(message, workspace, cause);
+        this.workspaceNode = node;
     }
     
+    public WorkspaceNode getWorkspaceNode() {
+        return this.workspaceNode;
+    }
 }

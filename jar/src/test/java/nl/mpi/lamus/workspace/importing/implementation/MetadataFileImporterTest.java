@@ -30,7 +30,7 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -142,7 +142,7 @@ public class MetadataFileImporterTest {
      */
     @Test
     public void importTopNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
+        WorkspaceNodeFilesystemException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -216,7 +216,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importTopNodeFileWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
+        WorkspaceNodeFilesystemException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -284,7 +284,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
+        WorkspaceNodeFilesystemException, FileImporterException, FileExplorerException {
 
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
@@ -545,7 +545,7 @@ public class MetadataFileImporterTest {
     
     @Test
     public void importNormalNodeFileWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
+        WorkspaceNodeFilesystemException, FileImporterException, FileExplorerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -632,7 +632,7 @@ public class MetadataFileImporterTest {
 
     @Test
     public void importNormalNodeFileWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        FailedToCreateWorkspaceNodeFileException, FileImporterException, FileExplorerException {
+        WorkspaceNodeFilesystemException, FileImporterException, FileExplorerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;

@@ -163,6 +163,24 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
+     * @see WorkspaceDao#deleteWorkspace(int)
+     */
+    public void deleteWorkspace(int workspaceID) {
+        
+        logger.debug("Deleting workspace with ID " + workspaceID);
+        
+        String deleteNodeLinkSql = "DELETE FROM node_link WHERE parent_workspace_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
+        String deleteNodeSql = "DELETE FROM node WHERE workspace_ID = :workspace_id;";
+        String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteWorkspaceSql, namedParameters);
+        
+        logger.info("Workspace with ID " + workspaceID + " deleted");
+    }
+    
+    /**
      * @see WorkspaceDao#updateWorkspaceTopNode(nl.mpi.lamus.workspace.model.Workspace)
      */
     public void updateWorkspaceTopNode(Workspace workspace) {
@@ -397,6 +415,21 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Workspace Node with ID " + workspaceNodeID + " retrieved from the database");
         
         return workspaceNodeToReturn;
+    }
+    
+    /**
+     * @see WorkspaceDao#getNodesForWorkspace(int)
+     */
+    public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID) {
+        
+        logger.debug("Retrieving list containing nodes of the workspace with ID " + workspaceID);
+        
+        String queryWorkspaceNodeListSql = "SELECT * FROM node WHERE workspace_id = :workspace_id;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        
+        return listToReturn;
     }
     
     /**

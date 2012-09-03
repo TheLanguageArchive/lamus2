@@ -36,6 +36,13 @@ public interface WorkspaceDao extends Serializable {
     public void addWorkspace(Workspace workspace);
     
     /**
+     * Deletes a workspace from the database
+     * 
+     * @param workspaceID ID of the workspace to delete
+     */
+    public void deleteWorkspace(int workspaceID);
+    
+    /**
      * Updates the top node of the given workspace.
      * 
      * @param workspace Workspace object already with the updated top node
@@ -100,6 +107,15 @@ public interface WorkspaceDao extends Serializable {
      * @return WorkspaceNode object with the given ID
      */
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
+    
+    /**
+     * Retrieves a collection containing all the nodes
+     * of the workspace with the given ID.
+     * 
+     * @param workspaceID ID of the workspace
+     * @return Collection of nodes associated with the given workspace
+     */
+    public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID);
     
     /**
      * Retrieves a collection containing the child nodes of the node with the

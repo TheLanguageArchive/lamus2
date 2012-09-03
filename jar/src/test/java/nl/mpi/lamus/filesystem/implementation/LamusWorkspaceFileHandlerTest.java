@@ -26,7 +26,7 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -109,7 +109,7 @@ public class LamusWorkspaceFileHandlerTest {
      */
     @Test
     public void copyMetadataFileToWorkspaceSuccessfully() throws IOException,
-        TransformerException, MetadataException, FailedToCreateWorkspaceNodeFileException,
+        TransformerException, MetadataException, WorkspaceNodeFilesystemException,
         CMDITypeException, ParserConfigurationException, SAXException, URISyntaxException {
         
         Workspace testWorkspace = createTestWorkspace();
@@ -149,7 +149,7 @@ public class LamusWorkspaceFileHandlerTest {
             workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
+        } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
             assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
@@ -180,7 +180,7 @@ public class LamusWorkspaceFileHandlerTest {
             workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
+        } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
             assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
@@ -211,7 +211,7 @@ public class LamusWorkspaceFileHandlerTest {
             workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(FailedToCreateWorkspaceNodeFileException fwsex) {
+        } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
             assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);

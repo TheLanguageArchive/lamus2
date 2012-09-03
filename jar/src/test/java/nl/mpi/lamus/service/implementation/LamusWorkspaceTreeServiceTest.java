@@ -21,7 +21,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -41,7 +41,7 @@ public class LamusWorkspaceTreeServiceTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceTreeService service;
-    @Mock private NodeAccessChecker mockNodeAccessChecker;
+    @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     

@@ -162,6 +162,20 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         }
     }
     
+    @Test
+    public void deleteWorkspace() {
+        
+        int initialNumberOfRows = countRowsInTable("workspace");
+        
+        Workspace insertedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(false);
+        
+        assertTrue("Workspace was not inserted into the database", countRowsInTable("workspace") == initialNumberOfRows + 1);
+        
+        workspaceDao.deleteWorkspace(insertedWorkspace.getWorkspaceID());
+        
+        assertTrue("Workspace was not deleted from the database", countRowsInTable("workspace") == initialNumberOfRows);
+    }
+    
     /**
      * 
      */
@@ -712,6 +726,32 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 //        
 //        assertNull("Retrieved tree node should be null", result);
 //    }
+    
+    @Test
+    public void getExistingNodesForWorkspace() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, true, true);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, true, true);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getNodesForWorkspace(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 2, result.size());
+        assertTrue("The returned list of nodes does not contain the expected nodes", result.contains(parentNode) && result.contains(childNode));
+    }
+    
+    @Test
+    public void getNonExistingNodesForWorkspace() {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(true);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getNodesForWorkspace(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Returned list of nodes should be empty", 0, result.size());
+
+    }
     
     @Test
     public void getExistingChildNodes() throws URISyntaxException, MalformedURLException {

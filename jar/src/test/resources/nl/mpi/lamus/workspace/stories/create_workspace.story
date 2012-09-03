@@ -1,8 +1,8 @@
 Narrative:
-Creating workspaces in an archive
+Creating workspaces containing part of an existing archive
 
 
-Scenario: create a workspace in an archive
+Scenario: create a workspace containing part of the archive
 
 Given an archive
 And a node with ID 1

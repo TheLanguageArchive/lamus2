@@ -15,11 +15,18 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -31,15 +38,15 @@ import org.junit.*;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class LamusNodeAccessCheckerTest {
+public class LamusWorkspaceAccessCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    private NodeAccessChecker nodeAccessChecker;
+    private WorkspaceAccessChecker nodeAccessChecker;
     @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private AmsBridge mockAmsBridge;
     @Mock private WorkspaceDao mockWorkspaceDao;
     
-    public LamusNodeAccessCheckerTest() {
+    public LamusWorkspaceAccessCheckerTest() {
     }
 
     @BeforeClass
@@ -52,7 +59,7 @@ public class LamusNodeAccessCheckerTest {
     
     @Before
     public void setUp() {
-        nodeAccessChecker = new LamusNodeAccessChecker(mockArchiveObjectsDB, mockAmsBridge, mockWorkspaceDao);
+        nodeAccessChecker = new LamusWorkspaceAccessChecker(mockArchiveObjectsDB, mockAmsBridge, mockWorkspaceDao);
     }
     
     @After
@@ -63,7 +70,7 @@ public class LamusNodeAccessCheckerTest {
      * Test of canCreateWorkspace method, of class NodeAccessCheckerImpl.
      */
     @Test
-    public void returnsFalseIfNodeIsExternal() {
+    public void cannotCreateWorkspaceIfNodeIsExternal() {
         
         final String userID = "someUser";
         final int archiveNodeID = 10;
@@ -80,7 +87,7 @@ public class LamusNodeAccessCheckerTest {
      * Test of canCreateWorkspace method, of class NodeAccessCheckerImpl.
      */
     @Test
-    public void returnsFalseIfNodeIsNotAccessibleToUser() {
+    public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() {
         
         final String userID = "someUser";
         final int archiveNodeID = 10;
@@ -98,7 +105,7 @@ public class LamusNodeAccessCheckerTest {
      * Test of canCreateWorkspace method, of class NodeAccessCheckerImpl.
      */
     @Test
-    public void returnsFalseIfNodeIsLocked() {
+    public void cannotCreateWorkspaceIfNodeIsLocked() {
         
         final String userID = "someUser";
         final int archiveNodeID = 10;
@@ -117,7 +124,7 @@ public class LamusNodeAccessCheckerTest {
      * Test of canCreateWorkspace method, of class NodeAccessCheckerImpl.
      */
     @Test
-    public void returnsTrueIfNodeIsNotLocked() {
+    public void canCreateWorkspaceIfNodeIsNotLocked() {
         
         final String userID = "someUser";
         final int archiveNodeID = 10;
@@ -129,7 +136,71 @@ public class LamusNodeAccessCheckerTest {
         }});
         
         boolean result = nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID);
-        assertTrue("Result should be false when the selected top node is locked.", result);
+        assertTrue("Result should be true when the selected top node is not locked.", result);
     }
     
+    @Test
+    public void hasAccessToWorkspaceIfUserIsTheSame() throws MalformedURLException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        boolean result = nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID);
+        assertTrue("Result should be true when the user is the creator of the workspace.", result);
+    }
+    
+    @Test
+    public void hasNoAccessToWorkspaceIfUserIsTheSame() throws MalformedURLException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        boolean result = nodeAccessChecker.hasAccessToWorkspace("someOtherUser", workspaceID);
+        assertFalse("Result should be false when the user is not the creator of the workspace.", result);
+    }
+    
+    @Test
+    public void hasNoAccessToWorkspaceIfWorkspaceIsNull() throws MalformedURLException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(null));
+        }});
+        
+        boolean result = nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID);
+        assertFalse("Result should be false when the workspace does not exist.", result);
+    }
 }

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -81,7 +82,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void createWorkspaceSuccessfully() throws FailedToCreateWorkspaceDirectoryException, InterruptedException, ExecutionException {
+    public void createWorkspaceSuccessfully() throws WorkspaceFilesystemException, InterruptedException, ExecutionException {
         final int archiveNodeID = 10;
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
@@ -107,7 +108,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void creationOfWorkspaceDirectoryFails() throws FailedToCreateWorkspaceDirectoryException {
+    public void creationOfWorkspaceDirectoryFails() throws WorkspaceFilesystemException {
         final int archiveNodeID = 10;
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
@@ -118,11 +119,45 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new FailedToCreateWorkspaceDirectoryException(errorMessage, newWorkspace, null)));
+            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new WorkspaceFilesystemException(errorMessage, newWorkspace, null)));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);
         assertNull("Returned workspace should be null when the directory creation fails.", result);
+    }
+    
+    @Test
+    public void deleteWorkspaceSuccessfully() throws IOException {
+        
+        final int workspaceID = 1;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
+        }});
+        
+        boolean result = manager.deleteWorkspace(workspaceID);
+        
+        assertTrue("Result should be true.", result);
+    }
+    
+    @Test
+    public void deleteWorkspaceThrowsException() throws IOException {
+        
+        final int workspaceID = 1;
+        final String exceptionMessage = "some message";
+        final Exception expectedException = new IOException(exceptionMessage);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID); will(throwException(expectedException));
+        }});
+        
+        boolean result = manager.deleteWorkspace(workspaceID);
+        
+        assertFalse("Result should be false.", result);
     }
     
     @Test

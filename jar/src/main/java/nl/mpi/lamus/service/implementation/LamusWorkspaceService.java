@@ -18,7 +18,8 @@ package nl.mpi.lamus.service.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
+import nl.mpi.lamus.workspace.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -35,11 +36,11 @@ public class LamusWorkspaceService implements WorkspaceService {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceService.class);
 
-    private final NodeAccessChecker nodeAccessChecker;
+    private final WorkspaceAccessChecker nodeAccessChecker;
     private final WorkspaceManager workspaceManager;
     protected final WorkspaceDao workspaceDao;
 
-    public LamusWorkspaceService(NodeAccessChecker accessChecker, WorkspaceManager workspaceManager,
+    public LamusWorkspaceService(WorkspaceAccessChecker accessChecker, WorkspaceManager workspaceManager,
             WorkspaceDao workspaceDao) {
         this.nodeAccessChecker = accessChecker;
         this.workspaceManager = workspaceManager;
@@ -71,6 +72,23 @@ public class LamusWorkspaceService implements WorkspaceService {
         
 
         return newWorkspace;
+    }
+    
+    /**
+     * @see WorkspaceService#deleteWorkspace(java.lang.String, int)
+     */
+    public void deleteWorkspace(String userID, int workspaceID) {
+        
+        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+            
+            //TODO Inform the user of the reason why the workspace can't be deleted
+            //TODO Throw an exception instead?
+            
+            logger.error("Cannot delete workspace with ID " + workspaceID);
+        } else {
+        
+            this.workspaceManager.deleteWorkspace(workspaceID);
+        }
     }
 
     /**

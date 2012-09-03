@@ -28,7 +28,7 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -167,7 +167,7 @@ public class MetadataFileImporter implements FileImporter<MetadataReference> {
 
 	try {
 	    workspaceFileHandler.copyMetadataFileToWorkspace(workspace, childNode, metadataAPI, childDocument, childNodeFile, streamResult);
-	} catch (FailedToCreateWorkspaceNodeFileException fwsnex) {
+	} catch (WorkspaceNodeFilesystemException fwsnex) {
 	    String errorMessage = "Failed to create file for workspace node " + childNode.getWorkspaceNodeID()
 		    + " in workspace " + workspace.getWorkspaceID();
 	    logger.error(errorMessage, fwsnex);

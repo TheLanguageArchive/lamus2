@@ -18,10 +18,7 @@ package nl.mpi.lamus.workspace.stories;
 import java.io.*;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import javax.sql.DataSource;
 import nl.mpi.corpusstructure.*;
 import nl.mpi.lamus.ams.Ams2Bridge;
@@ -34,12 +31,10 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.service.implementation.LamusWorkspaceService;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.factory.implementation.LamusWorkspaceFactory;
-import nl.mpi.lamus.workspace.management.NodeAccessChecker;
-import nl.mpi.lamus.workspace.management.implementation.LamusNodeAccessChecker;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
+import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
-import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lat.ams.dao.*;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
@@ -130,6 +125,13 @@ public class WorkspaceSteps {
     private String currentUserID;
     
     private Workspace createdWorkspace;
+    
+    private int workspaceIDToDelete;
+    
+    @BeforeStory
+    public void beforeStory() throws IOException {
+        cleanLamusDatabaseAndFilesystem();
+    }
     
     
 //    @BeforeClass
@@ -566,17 +568,70 @@ public class WorkspaceSteps {
 //        workspaceDao.setDataSource(lamusDataSource);
 //    }
     
-    private void initialiseWorkspaceService() {
-//        NodeAccessChecker accessChecker = new LamusNodeAccessChecker(archiveObjectsDB, ams2Bridge, workspaceDao);
-//        TaskExecutor executor = new SimpleAsyncTaskExecutor();
-//        WorkspaceFactory workspaceFactory = new LamusWorkspaceFactory(ams2Bridge);
-//        WorkspaceDirectoryHandler directoryHandler = new LamusWorkspaceDirectoryHandler();
-//        WorkspaceManager manager = new LamusWorkspaceManager(executor, workspaceFactory, workspaceDao, manager, manager)
-//                
-//                //TODO SPRING SPRING SPRING......
-//                
-//                
-//        workspaceService = new LamusWorkspaceService(null, null);
+    private void insertWorkspaceInDB(int workspaceID, String userID) throws FileNotFoundException, IOException {
+
+        String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
+        int topNodeID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File testFile = new File(workspaceDirectory, "Node_CMDIfied_IMDI.cmdi");
+        
+        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
+        
+        String insertString = "INSERT INTO workspace (workspace_id, user_id, start_date, session_start_date, status, message) "
+                + "VALUES (:workspace_id, :user_id, :start_date, :session_start_date, :status, :message);";
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("workspace_id", "" + workspaceID);
+        map.put("user_id", userID);
+        map.put("start_date", currentDate);
+        map.put("session_start_date", currentDate);
+        map.put("status", WorkspaceStatus.INITIALISED.toString());
+        map.put("message", "some message");
+        template.update(insertString, map);
+        
+        insertString = "INSERT INTO node (workspace_node_id, workspace_id, name, type, workspace_url, status, format) "
+                + "VALUES (:workspace_node_id, :workspace_id, :name, :type, :workspace_url, :status, :format);";
+        map.clear();
+        map.put("workspace_node_id", "" + topNodeID);
+        map.put("workspace_id", "" + workspaceID);
+        map.put("name", "testNode");
+        map.put("type", WorkspaceNodeType.METADATA.toString());
+        map.put("workspace_url", testFile.toURI().toURL().toString());
+        map.put("status", WorkspaceNodeStatus.NODE_ISCOPY.toString());
+        map.put("format", "cmdi");
+        template.update(insertString, map);
+        
+        insertString = "UPDATE workspace SET top_node_id = :top_node_id WHERE workspace_id = :workspace_id;";
+        map.clear();
+        map.put("top_node_id", "" + topNodeID);
+        map.put("workspace_id", "" + workspaceID);
+        template.update(insertString, map);
+        
+        workspaceDirectory.mkdirs();
+        InputStream testIn = getClass().getClassLoader().getResourceAsStream("Node_CMDIfied_IMDI.cmdi");
+        OutputStream testOut = new FileOutputStream(testFile);
+        IOUtils.copy(testIn, testOut);
+    }
+    
+    private void cleanLamusDatabaseAndFilesystem() throws IOException {
+        
+        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
+        
+        String deleteNodeLinkSql = "DELETE FROM node_link;";
+        String deleteNodeSql = "DELETE FROM node;";
+        String deleteWorkspaceSql = "DELETE FROM workspace;";
+        
+        Map<String, String> map = new HashMap<String, String>();
+        
+        template.update(deleteNodeLinkSql, map);
+        template.update(deleteNodeSql, map);
+        template.update(deleteWorkspaceSql, map);
+        
+        FileUtils.cleanDirectory(this.workspaceBaseDirectory);
+        
+        this.createdWorkspace = null;
+        this.currentUserID = null;
+        this.selectedNodeID = -1;
+        this.workspaceIDToDelete = -1;
     }
     
     
@@ -618,6 +673,23 @@ public class WorkspaceSteps {
         this.currentUserID = userID;
     }
     
+    @Given("a workspace with ID $workspaceID created by user with ID $userID")
+    public void aWorkspaceWithIDCreatedByUserWithID(int workspaceID, String userID) throws FileNotFoundException, IOException {
+
+        this.currentUserID = userID;
+        this.workspaceIDToDelete = workspaceID;
+        
+        insertWorkspaceInDB(workspaceID, userID);
+
+        //filesystem
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
+        
+        // database
+        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
+        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
+    }
+    
     @When("that user chooses to create a workspace in that node")
     public void thatUserChoosesToCreateAWorkspaceInThatNode() {
 
@@ -628,12 +700,18 @@ public class WorkspaceSteps {
         assertNotNull("createdWorkspace null just after 'createWorkspace' was called", this.createdWorkspace);
     }
     
+    @When("that user chooses to delete the workspace")
+    public void thatUserChoosesToDeleteTheWorkspace() {
+        
+        assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
+        assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
+
+        this.workspaceService.deleteWorkspace(this.currentUserID, this.workspaceIDToDelete);
+    }
+    
     @Then("a workspace is created in that node for that user")
     public void aWorkspaceIsCreatedInThatNodeForThatUser() throws InterruptedException {
         
-
-        //TODO intead of this, implement a notification mecanism in the importer
-        Thread.sleep(5000);
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspace.getWorkspaceID());
@@ -647,5 +725,19 @@ public class WorkspaceSteps {
         assertEquals("selectedNodeID (" + this.selectedNodeID + ") does not match the ID of the top node in the retrieved workspace (" + retrievedWorkspaceTopNode.getArchiveNodeID() + ")", this.selectedNodeID, retrievedWorkspaceTopNode.getArchiveNodeID());
         
         assertEquals("retrieved workspace does not have the expected status (expected = " + WorkspaceStatus.INITIALISED + "; retrieved = " + retrievedWorkspace.getStatus() + ")", WorkspaceStatus.INITIALISED, retrievedWorkspace.getStatus());
+    }
+    
+    @Then("the workspace is deleted")
+    public void theWorkspaceIsDeleted() {
+        
+        // filesystem
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.workspaceIDToDelete);
+        assertFalse("Workspace directory for workspace " + this.workspaceIDToDelete + " still exists", workspaceDirectory.exists());
+        
+        // database
+        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(this.workspaceIDToDelete);
+        assertNull("retrievedWorkspace not null, was not properly deleted from the database", retrievedWorkspace);
+        Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getNodesForWorkspace(this.workspaceIDToDelete);
+        assertTrue("There should be no nodes associated with the deleted workspace", retrievedNodes.isEmpty());
     }
 }

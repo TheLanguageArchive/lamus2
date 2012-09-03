@@ -53,6 +53,10 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public void addWorkspace(Workspace workspace) {
         this.getWorkspaceDao().addWorkspace(workspace);
     }
+    
+    public void deleteWorkspace(int workspaceID) {
+        this.getWorkspaceDao().deleteWorkspace(workspaceID);
+    }
 
     public void updateWorkspaceTopNode(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceTopNode(workspace);
@@ -88,6 +92,10 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
 
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
         return this.getWorkspaceDao().getWorkspaceNode(workspaceNodeID);
+    }
+    
+    public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getNodesForWorkspace(workspaceID);
     }
 
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID) {

@@ -36,6 +36,14 @@ public interface WorkspaceService extends Serializable {
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
     /**
+     * Deletes the workspace with the given ID.
+     * 
+     * @param userID ID of the user who is trying to delete the workspace
+     * @param workspaceID ID of the workspace to be deleted
+     */
+    public void deleteWorkspace(String userID, int workspaceID);
+    
+    /**
      * Retrieves a workspace with the given ID.
      * 
      * @param workspaceID ID of the workspace to retrieve

@@ -15,14 +15,16 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -72,7 +74,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceDao.addWorkspace(newWorkspace);
         try {
             workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace);
-        } catch(FailedToCreateWorkspaceDirectoryException ex) {
+        } catch(WorkspaceFilesystemException ex) {
             logger.error(ex.getMessage(), ex);
             return null;
         }
@@ -113,6 +115,23 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         }
         
         return newWorkspace;
+    }
+    
+    /**
+     * @see WorkspaceManager#deleteWorkspace(java.lang.String, int)
+     */
+    public boolean deleteWorkspace(int workspaceID) {
+        
+        this.workspaceDao.deleteWorkspace(workspaceID);
+        try {
+            this.workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
+        } catch (IOException ex) {
+            String errorMessage = "Problems deleting workspace directory for workspace with ID " + workspaceID;
+            logger.error(errorMessage, ex);
+            return false;
+        }
+        
+        return true;
     }
 
     /**

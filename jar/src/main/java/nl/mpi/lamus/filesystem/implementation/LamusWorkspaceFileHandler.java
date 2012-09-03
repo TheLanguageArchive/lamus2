@@ -20,7 +20,7 @@ import java.io.IOException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceNodeFileException;
+import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -51,22 +51,22 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
      */
     public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile, StreamResult nodeFileStreamResult)
-            throws FailedToCreateWorkspaceNodeFileException {
+            throws WorkspaceNodeFilesystemException {
         
         try {
             metadataAPI.writeMetadataDocument(metadataDocument, nodeFileStreamResult);
         } catch(IOException ioex) {
             String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
             logger.error(errorMessage, ioex);
-            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, ioex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, ioex);
         } catch(TransformerException tex) {
             String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
             logger.error(errorMessage, tex);
-            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, tex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, tex);
         } catch(MetadataException mdex) {
             String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
             logger.error(errorMessage, mdex);
-            throw new FailedToCreateWorkspaceNodeFileException(errorMessage, workspace, workspaceNode, mdex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, mdex);
         }
     }
     

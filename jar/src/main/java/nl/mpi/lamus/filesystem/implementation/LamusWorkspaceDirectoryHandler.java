@@ -16,9 +16,11 @@
 package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
+import java.io.IOException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.exception.FailedToCreateWorkspaceDirectoryException;
+import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +44,11 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     /**
      * @see WorkspaceDirectoryHandler#createWorkspaceDirectory(nl.mpi.lamus.workspace.model.Workspace)
      */
-    public void createWorkspaceDirectory(Workspace workspace) throws FailedToCreateWorkspaceDirectoryException {
+    public void createWorkspaceDirectory(Workspace workspace) throws WorkspaceFilesystemException {
         
         logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
         
-        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspace.getWorkspaceID());
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspace.getWorkspaceID());
         
         if(workspaceDirectory.exists()) {
             logger.info("Directory for workspace " + workspace.getWorkspaceID() + " already exists");
@@ -55,8 +57,22 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
                 logger.info("Directory for workspace " + workspace.getWorkspaceID() + " successfully created");
             } else {
                 String errorMessage = "Directory for workspace " + workspace.getWorkspaceID() + " could not be created";
-                throw new FailedToCreateWorkspaceDirectoryException(errorMessage, workspace, null);
+                throw new WorkspaceFilesystemException(errorMessage, workspace, null);
             }
+        }
+    }
+    
+    /**
+     * @see WorkspaceDirectoryHandler#deleteWorkspaceDirectory(int)
+     */
+    public void deleteWorkspaceDirectory(int workspaceID) throws IOException {
+        
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        
+        if(!workspaceDirectory.exists()) {
+            logger.info("Directory for workspace " + workspaceID + " doesn't exist");
+        } else {
+            FileUtils.deleteDirectory(workspaceDirectory);
         }
     }
     
@@ -67,7 +83,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         
         logger.debug("Checking if directory for workspace " + workspace.getWorkspaceID() + " exists");
         
-        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspace.getWorkspaceID());
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspace.getWorkspaceID());
         return workspaceDirectory.exists();
     }
 }

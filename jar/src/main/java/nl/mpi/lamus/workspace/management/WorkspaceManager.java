@@ -35,6 +35,16 @@ public interface WorkspaceManager {
     public Workspace createWorkspace(String userID, int archiveNodeID);
     
     /**
+     * Triggers the deletion of a workspace
+     * (removing the data both from the database and the filesystem).
+     * 
+     * @param userID ID of the user who is deleting the workspace
+     * @param workspaceID  ID of the workspace to be deleted
+     * @return true if deletion was successful
+     */
+    public boolean deleteWorkspace(int workspaceID);
+    
+    /**
      * Triggers the submission of a workspace 
      * (copying the corresponding data back to the archive).
      * 
