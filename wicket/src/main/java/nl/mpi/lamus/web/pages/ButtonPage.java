@@ -16,10 +16,14 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  *
@@ -27,10 +31,12 @@ import org.apache.wicket.markup.html.panel.Panel;
  */
 public final class ButtonPage extends Panel {
 
+    @SpringBean
+    private WorkspaceService workspaceService;
     
-    public ButtonPage(String id) {
-        super(id);
-        add(new WorkspaceActionsForm("workspaceActionsForm"));
+    public ButtonPage(String id, IModel<Workspace> model) {
+        super(id, model);
+        add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
 
     
@@ -38,15 +44,15 @@ public final class ButtonPage extends Panel {
      * Form that allows user to select actions on the current workspace
      */
     private class WorkspaceActionsForm extends Form<Workspace> {
-
-        public WorkspaceActionsForm(String id) {
-            super(id);
+        
+        public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
+            super(id, model);
 
             final Button uploadFilesButton = new Button("uploadFilesButton") {
 
                 @Override
                 public void onSubmit() {
-                    final UploadPage resultPage = new UploadPage();
+                    final UploadPage resultPage = new UploadPage(model);
 		setResponsePage(resultPage);
                 }
             };
@@ -65,11 +71,23 @@ public final class ButtonPage extends Panel {
 
                 @Override
                 public void onSubmit() {
-                    final FreeNodesPage resultPage = new FreeNodesPage();
+                    final FreeNodesPage resultPage = new FreeNodesPage(model);
 		setResponsePage(resultPage);
                 }
             };
             add(unlinkedFilesButton);
+            
+            final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {
+                
+                @Override
+                public void onSubmit() {
+                    workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
+                    final IndexPage resultPage = new IndexPage();
+                    setResponsePage(resultPage);
+                }
+            };
+            deleteWorkspaceButton.add(new SimpleAttributeModifier("onclick", "return confirm('are you sure?');"));
+            add(deleteWorkspaceButton);
             
             final Button indexPageButton = new Button("indexPageButton") {
 

@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import nl.mpi.lamus.web.LamusWicketApplication;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Application;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.basic.Label;
@@ -148,9 +149,9 @@ public class UploadPage extends LamusPage {
      *
      * @param parameters Page parameters
      */
-    public UploadPage() { 
+    public UploadPage(IModel<Workspace> model) { 
         
-        add(new ButtonPage("buttonpage"));
+        add(new ButtonPage("buttonpage", model));
         Folder uploadFolder = getUploadFolder();
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");

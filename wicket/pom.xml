@@ -28,7 +28,7 @@
 	<log4j.version>1.2.16</log4j.version>
 	<spring.version>3.1.2.RELEASE</spring.version>
 	<netbeans.hint.license>gpl30</netbeans.hint.license>
-        <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
+        <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>                          
     </properties>
     <dependencies>
 		<!--  WICKET DEPENDENCIES -->

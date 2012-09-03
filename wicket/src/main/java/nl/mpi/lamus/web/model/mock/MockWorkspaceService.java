@@ -80,4 +80,9 @@ public class MockWorkspaceService implements WorkspaceService {
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public void deleteWorkspace(String userID, int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

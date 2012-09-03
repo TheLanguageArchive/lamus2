@@ -62,7 +62,7 @@ public final class WorkspacePage extends LamusPage {
         
         add(createWorkspaceInfo("workspaceInfo"));
         add(createWorkspaceTreePanel("workspaceTree"));
-        add(new ButtonPage("buttonpage"));
+        add(new ButtonPage("buttonpage", model));
         
     }
 
