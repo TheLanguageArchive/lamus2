@@ -31,11 +31,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
+ * Page that displays list of workspaces that can be opened
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public final class SelectWorkspacePage extends LamusPage {
 
+    // service to be injected
     @SpringBean
     private WorkspaceService workspaceService;
     final String currentUserId = LamusSession.get().getUserId();
@@ -45,15 +47,18 @@ public final class SelectWorkspacePage extends LamusPage {
         createNodeIdForm("workspaceForm");
     }
 
-    /*
-     * Create Form that will show a list of Workspaces to be opened by a specific user
+    /**
+     * Create Form that will show a list of Workspaces to be opened by a
+     * specific user
+     *
+     * @param id
      * @return created form
      */
     private Form createNodeIdForm(String id) {
 
         IModel<Workspace> workspaceModel = new WorkspaceModel(null);
-        List<Workspace> alist = new ArrayList<Workspace>(workspaceService.listUserWorkspaces(currentUserId));
-        ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspace", workspaceModel, alist);
+        List<Workspace> myWSList = new ArrayList<Workspace>(workspaceService.listUserWorkspaces(currentUserId));
+        ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspace", workspaceModel, myWSList);
         listWorkspaces.setMaxRows(5);
         final Form<Workspace> form = new Form<Workspace>(id, workspaceModel);
 

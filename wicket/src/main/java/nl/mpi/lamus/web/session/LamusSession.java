@@ -21,7 +21,8 @@ import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.Request;
 
 /**
- *
+ * Contains information related to a session
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class LamusSession extends WebSession {

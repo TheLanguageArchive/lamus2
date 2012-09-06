@@ -19,15 +19,24 @@ package nl.mpi.lamus.web.pages;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
+ * Main page or index page Displays options for further navigation
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public final class IndexPage extends LamusPage {
 
+    /**
+     * Constructor.
+     */
     public IndexPage() {
         super();
     }
-    
+
+    /**
+     * Constructor.
+     *
+     * @param parameters Page parameters
+     */
     public IndexPage(PageParameters params) {
         //TODO:  process page parameters
     }

@@ -28,6 +28,7 @@ import org.apache.wicket.util.file.Folder;
 
 public class LamusWicketApplication extends WebApplication {
 
+    // service to be injected
     @SpringBean
     private LamusSessionFactory sessionFactory;
     
@@ -48,7 +49,8 @@ public class LamusWicketApplication extends WebApplication {
 	getComponentInstantiationListeners().add(new SpringComponentInjector(this));
         getResourceSettings().setThrowExceptionOnMissingResource(false);
 
-        uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
+        //uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
+        uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
         // Ensure folder exists
         uploadFolder.mkdirs();
 

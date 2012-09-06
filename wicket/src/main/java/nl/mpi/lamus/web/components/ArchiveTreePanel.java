@@ -28,7 +28,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.html.tree.LinkType;
 
 /**
- *
+ *  Panel for archive tree display to the user. 
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable> extends Panel {
@@ -43,6 +44,13 @@ public abstract class ArchiveTreePanel<T extends GenericTreeNode & Serializable>
 	add(archiveTree);
     }
 
+    /**
+     * Create a tree and trigger click action
+     * 
+     * @param id
+     * @param archiveTreeProvider
+     * @return Tree
+     */
     private Tree createArchiveTree(String id, GenericTreeModelProvider archiveTreeProvider) {
 	final DefaultTreeModel treeModel = new DefaultTreeModel(new GenericTreeSwingTreeNodeWrapper(archiveTreeProvider.getRoot()));
 	final Tree tree = new Tree(id, treeModel) {

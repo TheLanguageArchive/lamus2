@@ -21,7 +21,8 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 /**
- *
+ * Create a session 
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public interface LamusSessionFactory {

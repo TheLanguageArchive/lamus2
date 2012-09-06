@@ -26,13 +26,16 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Button page that allows navigation
+ * 
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public final class ButtonPage extends Panel {
 
+public final class ButtonPage extends Panel {
+// Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
+    
     
     public ButtonPage(String id, IModel<Workspace> model) {
         super(id, model);

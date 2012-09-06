@@ -23,7 +23,8 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 /**
- *
+ * Implementation of LamusSessionFactory. Set information and create session containing information.
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class MockLamusSessionFactory implements LamusSessionFactory {

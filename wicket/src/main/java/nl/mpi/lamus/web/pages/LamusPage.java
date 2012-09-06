@@ -25,6 +25,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
 /**
+ * Reference page that contains common features
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
@@ -34,20 +35,25 @@ public class LamusPage extends WebPage {
     public static final PackageResourceReference LANA_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lana.gif");
 
     public LamusPage() {
-	this("Lamus2 Language Archive Management and Upload System");
+        this("Lamus2 Language Archive Management and Upload System");
     }
 
+    /**
+     * edit title of the page, logo and userName
+     *
+     * @param pageTitle
+     */
     public LamusPage(String pageTitle) {
-	super();
-	add(new Image("image", LANA_IMAGE_RESOURCE_REFERENCE));
+        super();
+        add(new Image("image", LANA_IMAGE_RESOURCE_REFERENCE));
 
-	add(new Label("pageTitle", pageTitle));
-	add(new Label("username", new Model<String>(LamusSession.get().getUserId())));
+        add(new Label("pageTitle", pageTitle));
+        add(new Label("username", new Model<String>(LamusSession.get().getUserId())));
     }
 
     @Override
     public void renderHead(IHeaderResponse response) {
-	super.renderHead(response);
-	response.renderCSSReference(CSS_RESOURCE_REFERENCE);
+        super.renderHead(response);
+        response.renderCSSReference(CSS_RESOURCE_REFERENCE);
     }
 }

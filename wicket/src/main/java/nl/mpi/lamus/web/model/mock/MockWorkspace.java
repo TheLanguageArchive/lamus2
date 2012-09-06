@@ -22,7 +22,8 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 
 /**
- *
+ * A Lamus workspace. mock of the actual class which extends {@link Serializable}, <em>all implementations should be serializable!</em>
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class MockWorkspace implements Workspace {

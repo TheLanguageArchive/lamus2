@@ -36,11 +36,14 @@ import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.file.Folder;
 
 /**
+ * Display nodes that are not linked in the workspace
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public class FreeNodesPage extends LamusPage {
-        public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
+
+    public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
+
     /**
      * List view for files in upload folder.
      */
@@ -53,18 +56,19 @@ public class FreeNodesPage extends LamusPage {
          * @param files The file list model
          */
         public FileListView(String name, final IModel<List<File>> files) {
-            super(name, files);         
+            super(name, files);
         }
 
         /**
-         * @see ListView#populateItem(ListItem)
-         * Add clickable icon to remove unwanted uploaded files
+         * @see ListView#populateItem(ListItem) Add clickable icon to remove
+         * unwanted uploaded files
          */
         @Override
-        protected void populateItem(ListItem<File> listItem) {           
-            final File file = listItem.getModelObject();           
+        protected void populateItem(ListItem<File> listItem) {
+            final File file = listItem.getModelObject();
             listItem.add(new Label("file", file.getName()));
-                Link link = new Link("delete"){
+            Link link = new Link("delete") {
+
                 @Override
                 public void onClick() {
                     Files.remove(file);
@@ -82,8 +86,8 @@ public class FreeNodesPage extends LamusPage {
      *
      * @param parameters Page parameters
      */
-    public FreeNodesPage(IModel<Workspace> model) { 
-        
+    public FreeNodesPage(IModel<Workspace> model) {
+
         add(new ButtonPage("buttonpage", model));
         Folder uploadFolder = getUploadFolder();
 
@@ -101,7 +105,11 @@ public class FreeNodesPage extends LamusPage {
 
     }
 
-
+    /**
+     * getter
+     *
+     * @return Folder folderPath
+     */
     private Folder getUploadFolder() {
         return ((LamusWicketApplication) Application.get()).getUploadFolder();
     }

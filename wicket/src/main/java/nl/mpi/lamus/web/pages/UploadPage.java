@@ -41,14 +41,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * UploadPage displays page that offers possibility to upload multiple files
  *
- * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
- * Adapted from org.apache.wicket.examples.upload example @author Eelco Hillenius
+ * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl> Adapted from
+ * org.apache.wicket.examples.upload example
+ * @author Eelco Hillenius
  */
 @SuppressWarnings("serial")
 public class UploadPage extends LamusPage {
-    
+
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
+
     /**
      * List view for files in upload folder.
      */
@@ -61,18 +64,19 @@ public class UploadPage extends LamusPage {
          * @param files The file list model
          */
         public FileListView(String name, final IModel<List<File>> files) {
-            super(name, files);         
+            super(name, files);
         }
 
         /**
-         * @see ListView#populateItem(ListItem)
-         * Add clickable icon to remove unwanted uploaded files
+         * @see ListView#populateItem(ListItem) Add clickable icon to remove
+         * unwanted uploaded files
          */
         @Override
-        protected void populateItem(ListItem<File> listItem) {           
-            final File file = listItem.getModelObject();           
+        protected void populateItem(ListItem<File> listItem) {
+            final File file = listItem.getModelObject();
             listItem.add(new Label("file", file.getName()));
-                Link link = new Link("delete"){
+            Link link = new Link("delete") {
+
                 @Override
                 public void onClick() {
                     Files.remove(file);
@@ -149,8 +153,8 @@ public class UploadPage extends LamusPage {
      *
      * @param parameters Page parameters
      */
-    public UploadPage(IModel<Workspace> model) { 
-        
+    public UploadPage(IModel<Workspace> model) {
+
         add(new ButtonPage("buttonpage", model));
         Folder uploadFolder = getUploadFolder();
         // Create feedback panels
@@ -194,6 +198,11 @@ public class UploadPage extends LamusPage {
         }
     }
 
+    /**
+     * getter
+     *
+     * @return Folder folderPath
+     */
     private Folder getUploadFolder() {
         return ((LamusWicketApplication) Application.get()).getUploadFolder();
     }

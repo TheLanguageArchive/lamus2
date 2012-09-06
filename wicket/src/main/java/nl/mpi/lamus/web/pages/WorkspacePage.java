@@ -66,6 +66,12 @@ public final class WorkspacePage extends LamusPage {
         
     }
 
+    /**
+     * Create the tree to be display in the opened/created workspace
+     * 
+     * @param id
+     * @return ArchiveTreePanel
+     */
     private ArchiveTreePanel createWorkspaceTreePanel(String id) {
         ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider) {
 
@@ -83,6 +89,11 @@ public final class WorkspacePage extends LamusPage {
         return treePanel;
     }
 
+    /**
+     * Collect information about the workspace
+     * @param id
+     * @return WebMarkupContainer
+     */
     private WebMarkupContainer createWorkspaceInfo(String id) {
         WebMarkupContainer wsInfo = new WebMarkupContainer(id, new CompoundPropertyModel<Workspace>(model));
         wsInfo.add(new Label("userID"));
@@ -91,6 +102,12 @@ public final class WorkspacePage extends LamusPage {
         return wsInfo;
     }
     
+    /**
+     * Creates and adds node id form
+     * 
+     * @param id
+     * @return Form
+     */
     private Form createNodeInfoForm(final String id) {
 	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
