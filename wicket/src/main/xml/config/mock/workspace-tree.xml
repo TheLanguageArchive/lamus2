@@ -7,8 +7,7 @@
 		
     <!-- Workspace tree beans -->
     
-    <bean id="workspaceTreeProvider" class="nl.mpi.archiving.tree.GenericTreeModelProviderImpl" scope="prototype">
-	<constructor-arg ref="workspaceRootNode" />
+    <bean id="workspaceTreeProviderFactory" class="nl.mpi.lamus.web.model.mock.MockGenericTreeModelProviderFactory" scope="prototype">
     </bean>
     
     <bean id="workspaceRootNode" class="nl.mpi.lamus.web.model.mock.MockCorpusNode">
@@ -28,5 +27,5 @@
 		</bean>
 	    </list>
 	</property>
-    </bean>
+    </bean>   
 </beans>
