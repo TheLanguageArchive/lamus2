@@ -111,7 +111,10 @@ public final class WorkspacePage extends LamusPage {
     private Form createNodeInfoForm(final String id) {
 	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
-	form.add(new Label("nodeId"));
+	form.add(new Label("archiveNodeID"));
+        form.add(new Label("archiveURL"));
+        form.add(new Label("workspaceID"));
+        form.add(new Label("type"));
 
 	// Put details/submit form in container for refresh through AJAX 
 	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");

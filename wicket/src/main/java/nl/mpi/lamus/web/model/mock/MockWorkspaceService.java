@@ -18,71 +18,144 @@ package nl.mpi.lamus.web.model.mock;
 
 import java.util.Arrays;
 import java.util.Collection;
-import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
+ * Collection of service methods that are used to retrieve nodes with the
+ * intent of representing them graphically (using a WorkspaceTreeNode instead of
+ * just a WorkspaceNode)
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MockWorkspaceService implements WorkspaceService {
-
+public class MockWorkspaceService implements WorkspaceTreeService {
+    
+//@SpringBean(name = "workspaceTreeNode")
+    private WorkspaceTreeNode workspaceTreeNode;
     private static Logger logger = LoggerFactory.getLogger(MockWorkspaceService.class);
     private final Workspace workspace;
 
-    public MockWorkspaceService(Workspace workspace) {
-	logger.info("call to constructor MockWorkspaceService({})", workspace);
-	this.workspace = workspace;
+    public MockWorkspaceService(Workspace workspace, WorkspaceTreeNode workspaceTreeNode) {
+        logger.info("call to constructor MockWorkspaceService({})", workspace);
+        this.workspace = workspace;
+        this.workspaceTreeNode = workspaceTreeNode;
     }
 
+    /**
+     * Creates a workspace starting in a given archive node, for a given user.
+     *
+     * @param archiveNodeID archive ID of the node
+     * @param userID ID of the user
+     * @return Workspace object
+     */
     @Override
     public Workspace createWorkspace(String userID, int archiveNodeID) {
-	logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
-	return workspace;
+        logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
+        return workspace;
     }
 
+    /**
+     * Submits a workspace back into the archive.
+     *
+     * @param workspaceID ID of the workspace
+     */
     @Override
     public void submitWorkspace(int workspaceID) {
-	logger.info("call to submitWorkspace({})", workspaceID);
+        logger.info("call to submitWorkspace({})", workspaceID);
     }
 
+    /**
+     * Retrieves a workspace with the given ID.
+     *
+     * @param workspaceID ID of the workspace to retrieve
+     * @return Retrieved workspace object
+     */
     @Override
     public Workspace getWorkspace(int workspaceID) {
-	logger.info("call to getWorkspace({})", workspaceID);
-	return workspace;
+        logger.info("call to getWorkspace({})", workspaceID);
+        return workspace;
     }
 
+    /**
+     * Retrieves a collection containing the active workspaces belonging to the
+     * given user.
+     *
+     * @param userID ID of the user
+     * @return Collection with the user's active workspaces
+     */
     @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
         Workspace myNewMockWorkspace = new MockWorkspace();
         myNewMockWorkspace.setWorkspaceID(1);
         Workspace myNewMockWorkspace2 = new MockWorkspace();
         myNewMockWorkspace2.setWorkspaceID(2);
-        
-	return Arrays.asList(myNewMockWorkspace, myNewMockWorkspace2);
+
+        return Arrays.asList(myNewMockWorkspace, myNewMockWorkspace2);
     }
 
+    /**
+     * Opens a workspace, retrieving the corresponding object from the database.
+     * While doing so, it also updates the session start date of the workspace.
+     *
+     * @param workspaceID ID of the workspace to open
+     * @return Retrieved workspace object
+     */
     @Override
     public Workspace openWorkspace(String userID, int workspaceID) {
-		logger.info("call to getWorkspace({})", workspaceID);
-	return workspace;
+        logger.info("call to getWorkspace({})", workspaceID);
+        return workspace;
     }
 
+    /**
+     * Retrieves a workspace node with the given ID.
+     *
+     * @param nodeID ID of the node to retrieve
+     * @return corresponding workspace node
+     */
     @Override
     public WorkspaceNode getNode(int nodeID) {
-	throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Retrieves a collection containing the child nodes of the node with the
+     * given ID.
+     *
+     * @param nodeID ID of the parent node
+     * @return child nodes of the given node
+     */
     @Override
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
-	throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Deletes the workspace with the given ID.
+     *
+     * @param userID ID of the user who is trying to delete the workspace
+     * @param workspaceID ID of the workspace to be deleted
+     */
     @Override
     public void deleteWorkspace(String userID, int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * Retrieves a workspace tree node with the given ID.
+     *
+     * @param nodeID ID of the node to retrieve
+     * @param parentNode WorkspaceTreeNode object of the parent node
+     * @return corresponding workspace tree node
+     */
+    @Override
+    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode) {
+        return workspaceTreeNode;
+
+
     }
 }
