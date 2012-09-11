@@ -142,7 +142,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public void deleteWorkspace(String userID, int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //DO something;
     }
 
     /**

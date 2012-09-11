@@ -8,37 +8,39 @@
     <!-- Workspace beans -->
 	
     <bean id="workspaceService" class="nl.mpi.lamus.web.model.mock.MockWorkspaceService">
-	<constructor-arg ref="mockCreatedWorkspace" />
-        <constructor-arg> 
-        <ref bean="mockWorkspaceTreeNode" />
-        </constructor-arg>
+        <constructor-arg ref="mockCreatedWorkspace" />
+        <constructor-arg ref="mockWorkspaceTreeNode" />
     </bean>
     
     <bean id="mockCreatedWorkspace" class="nl.mpi.lamus.web.model.mock.MockWorkspace">
-	<property name="workspaceID" value="1"/>
+        <property name="workspaceID" value="1"/>
     </bean>
-    
+        
     <bean id="mockWorkspaceTreeNode" class="nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode">
-	<property name="name" value="workspaceTreeNode"/>
+        <property name="name" value="workspaceTreeNode"/>
         <property name="archiveNodeID" value="120"/>
         <property name="archiveURL" value="http://google.nl"/>
         <property name="workspaceID" value="12"/>
         <property name="type" value="METADATA"/>
         <property name="children">
-	    <list>
-		<bean class="nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode">
-		    <property name="parent" ref="mockWorkspaceTreeNode" />
-		    <property name="name" value="WorkspaceChild1"/>
-		    <property name="workspaceNodeID" value="1"/>
-		</bean>
+            <list>
+                <bean class="nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode">
+                    <property name="parent" ref="mockWorkspaceTreeNode" />
+                    <property name="name" value="WorkspaceChild1"/>
+                    <property name="workspaceID" value="1"/>
+                    <property name="type" value="RESOURCE_WR"/>
+                    <property name="archiveNodeID" value="100"/>
+                </bean>
 		    
-		<bean class="nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode">
-		    <property name="parent" ref="mockWorkspaceTreeNode" />
-		    <property name="name" value="WorkspaceChild2"/>
-		    <property name="workspaceNodeID" value="2"/>
-		</bean>
-	    </list>
-	</property>
+                <bean class="nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode">
+                    <property name="parent" ref="mockWorkspaceTreeNode" />
+                    <property name="name" value="WorkspaceChild2"/>
+                    <property name="workspaceID" value="2"/>
+                    <property name="type" value="RESOURCE_MR"/>
+                    <property name="archiveNodeID" value="200"/>
+                </bean>
+            </list>
+        </property>
     </bean>
     
 </beans>

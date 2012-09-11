@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -84,12 +85,12 @@ public final class ButtonPage extends Panel {
                 
                 @Override
                 public void onSubmit() {
-                    workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
+                    workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());                   
                     final IndexPage resultPage = new IndexPage();
                     setResponsePage(resultPage);
                 }
             };
-            deleteWorkspaceButton.add(new SimpleAttributeModifier("onclick", "return confirm('are you sure?');"));
+            deleteWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));
             add(deleteWorkspaceButton);
             
             final Button indexPageButton = new Button("indexPageButton") {

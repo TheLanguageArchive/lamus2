@@ -38,7 +38,6 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     private WorkspaceTreeNode parent;
-    private WorkspaceDao workspaceDao;
     private int workspaceNodeID;
     private int workspaceID;
 
@@ -57,7 +56,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     private String format;
     private Collection<WorkspaceParentNodeReference> parentNodesReferences;
 
-    private List<WorkspaceTreeNode> children;
+    private List<WorkspaceTreeNode> children= Collections.emptyList();
     
     public void setChildren(List<WorkspaceTreeNode> children) {
         this.children = children;
@@ -65,23 +64,22 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     
     @Override
     public WorkspaceTreeNode getChild(int index) {
-        return this.children.get(index);
+        return children.get(index); 
     }
 
     @Override
     public int getChildCount() {
-       // return this.children.size();
-        return 2;
+        return children.size();
     }
 
     @Override
     public int getIndexOfChild(GenericTreeNode child) {
-        return this.children.indexOf(child);
+        return children.indexOf(child);
     }
 
     @Override
     public WorkspaceTreeNode getParent() {
-        return this.parent;
+        return parent;
     }
     
     public void setParent(WorkspaceTreeNode parent) {
@@ -91,7 +89,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public int getWorkspaceNodeID() {
-        return this.workspaceNodeID;
+        return workspaceNodeID;
     }
     
     @Override
@@ -101,7 +99,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public int getWorkspaceID() {
-        return this.workspaceID;
+        return workspaceID;
     }
     
     @Override
@@ -111,7 +109,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public int getArchiveNodeID() {
-        return this.archiveNodeID;
+        return archiveNodeID;
     }
     
     @Override
@@ -121,7 +119,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public URI getProfileSchemaURI() {
-        return this.profileSchemaURI;
+        return profileSchemaURI;
     }
     
     @Override
@@ -131,7 +129,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
@@ -141,7 +139,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public String getTitle() {
-        return this.title;
+        return title;
     }
 
     @Override
@@ -151,7 +149,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     
     @Override
     public WorkspaceNodeType getType() {
-        return this.type;
+        return type;
     }
     
     @Override
@@ -161,7 +159,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public URL getWorkspaceURL() {
-        return this.workspaceURL;
+        return workspaceURL;
     }
     
     @Override
@@ -171,7 +169,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public URL getArchiveURL() {
-        return this.archiveURL;
+        return archiveURL;
     }
     
     @Override
@@ -181,7 +179,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public URL getOriginURL() {
-        return this.originURL;
+        return originURL;
     }
     
     @Override
@@ -191,7 +189,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public WorkspaceNodeStatus getStatus() {
-        return this.status;
+        return status;
     }
 
     @Override
@@ -201,7 +199,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public String getPid() {
-        return this.pid;
+        return pid;
     }
 
     @Override
@@ -211,7 +209,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public String getFormat() {
-        return this.format;
+        return format;
     }
     
     @Override
@@ -221,7 +219,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public Collection<WorkspaceParentNodeReference> getParentNodesReferences() {
-        return Collections.unmodifiableCollection(this.parentNodesReferences);
+        return Collections.unmodifiableCollection(parentNodesReferences);
     }
 
     @Override
@@ -231,10 +229,10 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     
     @Override
     public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
-        if(this.parentNodesReferences == null) {
-            this.parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();
+        if(parentNodesReferences == null) {
+            parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();
         }
-        this.parentNodesReferences.add(parentNodeReference);
+        parentNodesReferences.add(parentNodeReference);
     }
 
     
