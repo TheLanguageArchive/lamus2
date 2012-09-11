@@ -87,7 +87,7 @@ public class UploadPage extends LamusPage {
             listItem.add(link);
         }
     }
-
+    
     /**
      * Form for uploads.
      */
@@ -167,7 +167,7 @@ public class UploadPage extends LamusPage {
         // Add folder view
         add(new Label("dir", uploadFolder.getAbsolutePath()));
         fileListView = new FileListView("fileList", new LoadableDetachableModel<List<File>>() {
-
+            
             @Override
             protected List<File> load() {
                 return Arrays.asList(getUploadFolder().listFiles());
@@ -183,7 +183,7 @@ public class UploadPage extends LamusPage {
                 progressUploadForm.fileUploadField));
         add(progressUploadForm);
     }
-
+  
     /**
      * Check whether the file allready exists, and if so, try to delete it.
      *

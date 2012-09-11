@@ -67,7 +67,7 @@ public final class WorkspacePage extends LamusPage {
     }
 
     /**
-     * Create the tree to be display in the opened/created workspace
+     * Creates and adds an  tree panel to be display in the opened/created workspace
      * 
      * @param id
      * @return ArchiveTreePanel
