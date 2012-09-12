@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.dao;
 
-import java.io.Serializable;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -26,7 +25,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceDao extends Serializable {
+public interface WorkspaceDao {
     
     /**
      * Inserts a workspace into the database
