@@ -19,7 +19,8 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
+import nl.mpi.lamus.typechecking.FileTypeHandler;
+//import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
@@ -61,7 +62,7 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
     @Autowired
     private ArchiveFileHelper archiveFileHelper;
     @Autowired
-    private FileTypeHandlerFactory fileTypeHandlerFactory;
+    private FileTypeHandler fileTypeHandler;
     
     private Class<? extends FileImporter> fileImporterType; 
     
@@ -76,7 +77,7 @@ public class FileImporterFactoryBean implements FactoryBean<FileImporter> {
         if(ResourceFileImporter.class.equals(fileImporterType)) {
             return new ResourceFileImporter(
                     archiveObjectsDB, workspaceDao, archiveFileHelper,
-                    fileTypeHandlerFactory, workspaceNodeFactory,
+                    fileTypeHandler, workspaceNodeFactory,
                     workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory);
         } else {
             return new MetadataFileImporter(

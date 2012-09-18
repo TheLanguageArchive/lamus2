@@ -27,7 +27,7 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
+//import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
 import nl.mpi.lamus.workspace.exception.FileExplorerException;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -88,7 +88,7 @@ public class ResourceFileImporterTest {
     @Mock ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
-    @Mock FileTypeHandlerFactory mockFileTypeHandlerFactory;
+//    @Mock FileTypeHandlerFactory mockFileTypeHandlerFactory;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceParentNodeReferenceFactory mockWorkspaceParentNodeReferenceFactory;
     @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
@@ -118,11 +118,11 @@ public class ResourceFileImporterTest {
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         fileImporter = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao,
-                mockArchiveFileHelper, mockFileTypeHandlerFactory, mockWorkspaceNodeFactory,
+                mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
         fileImporter.setWorkspace(testWorkspace);
         fileImporterWithoutWorkspace = new ResourceFileImporter(mockArchiveObjectsDB, mockWorkspaceDao,
-                mockArchiveFileHelper, mockFileTypeHandlerFactory, mockWorkspaceNodeFactory,
+                mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
     }
     
@@ -176,7 +176,7 @@ public class ResourceFileImporterTest {
             // get mimetype
             oneOf (mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
             // get FileTypeHandler
-            oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
+//            oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
             // is onsite ?
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID)); will(returnValue(true));
                 // if not onsite, set as unspecified or something like that and set URID as NONE
@@ -315,7 +315,7 @@ public class ResourceFileImporterTest {
             
             oneOf (mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
+//            oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
             
             oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID)); will(returnValue(false));
             

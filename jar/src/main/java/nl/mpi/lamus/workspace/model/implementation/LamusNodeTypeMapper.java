@@ -13,16 +13,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking;
+package nl.mpi.lamus.workspace.model.implementation;
 
-import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.NodeTypeMapper;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface FileTypeHandlerFactory {
-    
-    public FileTypeHandler getNewFileTypeHandlerForWorkspace(Workspace workspace);
+@Component
+public class LamusNodeTypeMapper implements NodeTypeMapper {
+
+    public WorkspaceNodeType getNodeTypeForMimetype(String mimetype) {
+        
+        
+        //TODO How should this be implemented? What are the possible types?
+        
+        
+        if("text/plain".equals(mimetype)) { // THIS IS JUST A MOCK EXAMPLE
+            return WorkspaceNodeType.RESOURCE_WR;
+        }
+        
+        return WorkspaceNodeType.UNKNOWN;
+    }
     
 }

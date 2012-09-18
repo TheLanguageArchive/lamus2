@@ -13,26 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.model.implementation;
-
-import nl.mpi.lamus.workspace.model.TypeMapper;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import org.springframework.stereotype.Component;
+package nl.mpi.lamus.workspace.model;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Component
-public class LamusTypeMapper implements TypeMapper {
-
-    public WorkspaceNodeType getNodeTypeForMimetype(String mimetype) {
-        
-        
-        //TODO How should this be implemented? What are the possible types?
-        
-        return WorkspaceNodeType.UNKNOWN;
-        
-    }
+public interface NodeTypeMapper {
+    
+    public WorkspaceNodeType getNodeTypeForMimetype(String mimetype);
     
 }

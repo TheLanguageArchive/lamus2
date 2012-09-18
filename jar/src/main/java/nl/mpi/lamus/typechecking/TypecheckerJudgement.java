@@ -13,26 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
-
-import java.io.File;
-import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.lamus.typechecking.FileTypeFactory;
-import org.springframework.stereotype.Component;
+package nl.mpi.lamus.typechecking;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Component
-public class LamusFileTypeFactory implements FileTypeFactory {
-
-    public FileType getNewFileTypeWithConfigFile(File configFile) {
-        return new FileType(configFile);
-    }
-
-    public FileType getNewFileTypeWithDefaultConfigFile() {
-        return new FileType();
-    }
-    
+public enum TypecheckerJudgement {
+    UNARCHIVABLE,
+    ARCHIVABLE_SHORTTERM,
+    ARCHIVABLE_LONGTERM;
 }

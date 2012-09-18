@@ -29,7 +29,7 @@ public interface FileTypeHandler {
     //TODO to be based on the 'ResourceConVoc' class from the old Lamus
     //TODO WS types and link types must be adjusted for CMDI
     
-    public FileType getConfiguredTypeChecker();
+    public TypecheckHandler getTypecheckHandler();
     
     /**
      * Mimetype getter
@@ -75,4 +75,13 @@ public interface FileTypeHandler {
      * @param format a mimetype or Unknown or Unspecified
      */
     public void setValues(String mimetype);
+    
+    /**
+     * 
+     * @param resourceURL
+     * @param acceptableJudgementForNode
+     * @param message
+     * @return 
+     */
+    public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
 }

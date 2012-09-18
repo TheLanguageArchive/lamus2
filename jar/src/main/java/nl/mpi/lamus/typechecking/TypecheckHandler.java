@@ -13,14 +13,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.model;
+package nl.mpi.lamus.typechecking;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface TypeMapper {
+public interface TypecheckHandler {
     
-    public WorkspaceNodeType getNodeTypeForMimetype(String mimetype);
+    /**
+     * 
+     * @param iStream
+     * @param filename
+     * @throws IOException 
+     */
+    public void typecheck(InputStream iStream, String filename) throws IOException;
     
+    /**
+     * 
+     * @return 
+     */
+    public boolean isFileArchivable();
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getTypecheckResult();
+    
+    /**
+     * 
+     * @return 
+     */
+    public TypecheckerJudgement getTypecheckJudgement();
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getTypecheckMimetype();
 }

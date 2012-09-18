@@ -25,7 +25,7 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
+//import nl.mpi.lamus.typechecking.FileTypeHandlerFactory;
 import nl.mpi.lamus.workspace.exception.FileImporterException;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -55,7 +55,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
     private final ArchiveObjectsDB archiveObjectsDB;
     private final WorkspaceDao workspaceDao;
     private final ArchiveFileHelper archiveFileHelper;
-    private final FileTypeHandlerFactory fileTypeHandlerFactory;
+    private final FileTypeHandler fileTypeHandler;
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
@@ -67,13 +67,13 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
     
     @Autowired
     public ResourceFileImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
-            ArchiveFileHelper archiveFileHelper, FileTypeHandlerFactory fileTypeHandlerFactory,
+            ArchiveFileHelper archiveFileHelper, FileTypeHandler fileTypeHandler,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceParentNodeReferenceFactory wsParentNodeReferenceFactory,
             WorkspaceNodeLinkFactory wsNodeLinkFactory) {
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
         this.archiveFileHelper = archiveFileHelper;
-        this.fileTypeHandlerFactory = fileTypeHandlerFactory;
+        this.fileTypeHandler = fileTypeHandler;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceParentNodeReferenceFactory = wsParentNodeReferenceFactory;
         this.workspaceNodeLinkFactory = wsNodeLinkFactory;
@@ -132,7 +132,7 @@ public class ResourceFileImporter implements FileImporter<ResourceReference> {
         WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();
         
-        FileTypeHandler fileTypeHandler = this.fileTypeHandlerFactory.getNewFileTypeHandlerForWorkspace(workspace);
+//        FileTypeHandler fileTypeHandler = this.fileTypeHandlerFactory.getNewFileTypeHandlerForWorkspace(workspace);
         
         //TODO get onsite
         boolean childIsOnSite = this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID));
