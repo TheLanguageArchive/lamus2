@@ -19,8 +19,8 @@ package nl.mpi.lamus.web.pages;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.web.components.ArchiveTreePanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.MarkupContainer;
@@ -81,7 +81,7 @@ public final class WorkspacePage extends LamusPage {
 
                 if (target != null) {
                     // Ajax, refresh nodeIdForm
-                    target.addComponent(nodeIdForm);
+                    target.add(nodeIdForm);
                 }
             }
         };

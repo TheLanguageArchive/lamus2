@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeNode;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
@@ -235,5 +234,9 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
         parentNodesReferences.add(parentNodeReference);
     }
 
+    @Override
+    public String toString() {
+	return getName();
+    }
     
 }

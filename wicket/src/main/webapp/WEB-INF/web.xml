@@ -25,7 +25,7 @@
 		'mock': using only mocks
 		'corpusstructure': using the CorpusstructureAPI for the archive tree
 	-->
-	<param-value>corpusstructure,production</param-value>
+	<param-value>mock</param-value>
     </context-param>
     
     <filter>
