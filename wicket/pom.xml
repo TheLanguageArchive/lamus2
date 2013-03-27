@@ -23,7 +23,7 @@
     <properties>
 	<wicket.version>1.5.8</wicket.version>
 	<slf4j.version>1.6.6</slf4j.version>
-	<spring.version>3.1.2.RELEASE</spring.version>
+	<spring.version>3.2.2.RELEASE</spring.version>
 	<netbeans.hint.license>gpl30</netbeans.hint.license>                        
     </properties>
     <dependencies>
@@ -53,12 +53,6 @@
 	</dependency>
 		
 	    <!-- SPRING DEPENDENCIES -->
-		
-	<dependency>
-	    <groupId>org.springframework</groupId>
-	    <artifactId>spring-beans</artifactId>
-	    <version>${spring.version}</version>
-	</dependency>
 	<dependency>
 	    <groupId>org.springframework</groupId>
 	    <artifactId>spring-web</artifactId>
