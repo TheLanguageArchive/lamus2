@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.model.mock;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.tree.CorpusNode;
@@ -32,6 +33,7 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     private List<GenericTreeNode> children = Collections.emptyList();
     private String name = "";
     private int nodeId;
+    private URI nodeUri;
 
     public void setChildren(List<GenericTreeNode> children) {
 	this.children = children;
@@ -82,5 +84,14 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     @Override
     public String toString() {
 	return name;
+    }
+
+    @Override
+    public URI getUri() {
+	return nodeUri;
+    }
+
+    public void setUri(URI nodeUri) {
+	this.nodeUri = nodeUri;
     }
 }
