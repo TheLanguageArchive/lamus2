@@ -20,6 +20,7 @@ import nl.mpi.archiving.tree.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
+import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.session.LamusSession;
@@ -50,9 +51,9 @@ public final class CreateWorkspacePage extends LamusPage {
     private final Form nodeIdForm;
 
     public CreateWorkspacePage() {
-        super();
-        nodeIdForm = createNodeIdForm("nodeIdForm");
-        createArchiveTreePanel("archiveTree");
+	super();
+	nodeIdForm = createNodeIdForm("nodeIdForm");
+	createArchiveTreePanel("archiveTree");
     }
 
     /**
@@ -61,23 +62,23 @@ public final class CreateWorkspacePage extends LamusPage {
      * @return created tree panel
      */
     private ArchiveTreePanel createArchiveTreePanel(final String id) {
-        ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider) {
+	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider);
+	tree.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
+	    @Override
+	    public void nodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
+		nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
 
-            @Override
-            protected void onNodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
-                nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
+		if (target != null) {
+		    // Ajax, refresh nodeIdForm
+		    target.add(nodeIdForm);
+		}
+	    }
+	});
+	tree.setLinkType(LinkType.AJAX_FALLBACK);
+	// Add to page
+	add(tree);
 
-                if (target != null) {
-                    // Ajax, refresh nodeIdForm
-                    target.add(nodeIdForm);
-                }
-            }
-        };
-        tree.setLinkType(LinkType.AJAX_FALLBACK);
-        // Add to page
-        add(tree);
-
-        return tree;
+	return tree;
     }
 
     /**
@@ -87,31 +88,30 @@ public final class CreateWorkspacePage extends LamusPage {
      * @return created form
      */
     private Form createNodeIdForm(final String id) {
-        final Form<CorpusNode> form = new Form<CorpusNode>(id);
-        form.add(new Label("name"));
-        form.add(new Label("nodeId"));
+	final Form<CorpusNode> form = new Form<CorpusNode>(id);
+	form.add(new Label("name"));
+	form.add(new Label("nodeId"));
 
-        final Button submitButton = new Button("createWorkspace") {
+	final Button submitButton = new Button("createWorkspace") {
+	    @Override
+	    public void onSubmit() {
+		final String currentUserId = LamusSession.get().getUserId();
+		final int selectedNodeId = form.getModelObject().getNodeId();
+		// Request a new workspace with workspace service
+		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
+		// Show page for newly created workspace
+		final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
+		setResponsePage(resultPage);
+	    }
+	};
+	form.add(submitButton);
 
-            @Override
-            public void onSubmit() {
-                final String currentUserId = LamusSession.get().getUserId();
-                final int selectedNodeId = form.getModelObject().getNodeId();
-                // Request a new workspace with workspace service
-                final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeId);
-                // Show page for newly created workspace
-                final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
-                setResponsePage(resultPage);
-            }
-        };
-        form.add(submitButton);
+	// Put details/submit form in container for refresh through AJAX 
+	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
+	formContainer.add(form);
+	// Add container to page
+	add(formContainer);
 
-        // Put details/submit form in container for refresh through AJAX 
-        final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
-        formContainer.add(form);
-        // Add container to page
-        add(formContainer);
-
-        return form;
+	return form;
     }
 }

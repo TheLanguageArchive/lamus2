@@ -20,6 +20,7 @@ import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
+import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -40,71 +41,69 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 public final class WorkspacePage extends LamusPage {
 
     // Services to be injected
-    
     @SpringBean
     private WorkspaceTreeService workspaceTreeService;
-    
     @SpringBean(name = "workspaceTreeProviderFactory")
     private GenericTreeModelProviderFactory workspaceTreeProviderFactory;
-
     private GenericTreeModelProvider workspaceTreeProvider;
     // Page model
     private final IModel<Workspace> model;
     private final Form nodeIdForm;
 
     public WorkspacePage(IModel<Workspace> model) {
-        super();
-        this.model = model;
-        nodeIdForm = (Form) createNodeInfoForm("nodeInfoForm");
-        
-        this.workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(
-                this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null));
-        
-        add(createWorkspaceInfo("workspaceInfo"));
-        add(createWorkspaceTreePanel("workspaceTree"));
-        add(new ButtonPage("buttonpage", model));
-        
+	super();
+	this.model = model;
+	nodeIdForm = (Form) createNodeInfoForm("nodeInfoForm");
+
+	this.workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(
+		this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null));
+
+	add(createWorkspaceInfo("workspaceInfo"));
+	add(createWorkspaceTreePanel("workspaceTree"));
+	add(new ButtonPage("buttonpage", model));
+
     }
 
     /**
-     * Creates and adds an  tree panel to be display in the opened/created workspace
-     * 
+     * Creates and adds an tree panel to be display in the opened/created workspace
+     *
      * @param id
      * @return ArchiveTreePanel
      */
     private ArchiveTreePanel createWorkspaceTreePanel(String id) {
-        ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider) {
+	ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider);
+	treePanel.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
+	    @Override
+	    public void nodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
+		nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
 
-            @Override
-            protected void onNodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
-                nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
-
-                if (target != null) {
-                    // Ajax, refresh nodeIdForm
-                    target.add(nodeIdForm);
-                }
-            }
-        };
-        treePanel.setLinkType(LinkType.AJAX_FALLBACK);
-        return treePanel;
+		if (target != null) {
+		    // Ajax, refresh nodeIdForm
+		    target.add(nodeIdForm);
+		}
+	    }
+	});
+	treePanel.setLinkType(LinkType.AJAX_FALLBACK);
+	return treePanel;
     }
 
     /**
      * Collect information about the workspace
+     *
      * @param id
      * @return WebMarkupContainer
      */
     private WebMarkupContainer createWorkspaceInfo(String id) {
-        WebMarkupContainer wsInfo = new WebMarkupContainer(id, new CompoundPropertyModel<Workspace>(model));
-        wsInfo.add(new Label("userID"));
-        wsInfo.add(new Label("workspaceID"));
-        wsInfo.add(new Label("status"));
-        return wsInfo;
+	WebMarkupContainer wsInfo = new WebMarkupContainer(id, new CompoundPropertyModel<Workspace>(model));
+	wsInfo.add(new Label("userID"));
+	wsInfo.add(new Label("workspaceID"));
+	wsInfo.add(new Label("status"));
+	return wsInfo;
     }
-    
+
     /**
      * Creates and adds node id form
-     * 
+     *
      * @param id
      * @return Form
      */
@@ -112,9 +111,9 @@ public final class WorkspacePage extends LamusPage {
 	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("archiveNodeID"));
-        form.add(new Label("archiveURL"));
-        form.add(new Label("workspaceID"));
-        form.add(new Label("type"));
+	form.add(new Label("archiveURL"));
+	form.add(new Label("workspaceID"));
+	form.add(new Label("type"));
 
 	// Put details/submit form in container for refresh through AJAX 
 	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
@@ -124,6 +123,4 @@ public final class WorkspacePage extends LamusPage {
 
 	return form;
     }
-
- 
 }
