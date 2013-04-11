@@ -65,7 +65,8 @@ public final class CreateWorkspacePage extends LamusPage {
 	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider);
 	tree.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
 	    @Override
-	    public void nodeLinkClicked(AjaxRequestTarget target, GenericTreeNode node) {
+	    public void nodeSelectionChanged(AjaxRequestTarget target, ArchiveTreePanel treePanel) {
+		final GenericTreeNode node = (GenericTreeNode) treePanel.getSelectedNodes().iterator().next();
 		nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
 
 		if (target != null) {
