@@ -89,7 +89,7 @@ public class MetadataFileImporterTest {
     @Mock TestNonReferencingMetadataDocumentWithHandle mockTestNonReferencingMetadataDocumentWithHandle;
     @Mock MetadataDocumentType mockMetadataDocumentType;
     @Mock StreamResult mockStreamResult;
-    @Mock Collection<Reference> mockReferenceCollection;
+    @Mock List<Reference> mockReferenceCollection;
     
     public MetadataFileImporterTest() {
     }
