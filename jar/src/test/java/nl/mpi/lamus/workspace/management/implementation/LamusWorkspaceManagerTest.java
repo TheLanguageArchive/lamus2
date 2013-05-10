@@ -38,8 +38,6 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.springframework.core.task.TaskExecutor;
-import static org.hamcrest.Matchers.*;
 
 /**
  *
@@ -89,19 +87,23 @@ public class LamusWorkspaceManagerTest {
         final long maxStorageSpace = 10000000L;
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
+        final WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        final String expectedMessage = "Workspace initialising";
+        
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace);
             oneOf (mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf (mockWorkspaceImportRunner).setTopNodeArchiveID(archiveNodeID);
-//            oneOf (mockExecutorService).execute(mockWorkspaceImportRunner);
             oneOf (mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf (mockFuture).get(); will(returnValue(Boolean.TRUE));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);
         assertNotNull("Returned workspace should not be null when object, database and directory are successfully created.", result);
+        assertEquals("Workspace status different from expected", expectedStatus, result.getStatus());
+        assertEquals("Workspace message different from expected", expectedMessage, result.getMessage());
     }
     
     /**

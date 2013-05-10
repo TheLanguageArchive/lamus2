@@ -16,8 +16,8 @@
 package nl.mpi.lamus.workspace.importing;
 
 import java.util.Collection;
-import nl.mpi.lamus.workspace.exception.FileExplorerException;
-import nl.mpi.lamus.workspace.exception.FileImporterException;
+import nl.mpi.lamus.workspace.exception.NodeExplorerException;
+import nl.mpi.lamus.workspace.exception.NodeImporterException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
@@ -29,7 +29,7 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceFileExplorer {
+public interface WorkspaceNodeExplorer {
     
     /**
      * Explores, recursively, the tree/branch where the import process is
@@ -43,5 +43,5 @@ public interface WorkspaceFileExplorer {
      * @throws FileExplorerException if there was some problem retrieving the file importer
      */
     public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
-            throws FileImporterException, FileExplorerException;
+            throws NodeImporterException, NodeExplorerException;
 }

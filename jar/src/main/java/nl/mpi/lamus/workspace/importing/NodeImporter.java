@@ -15,20 +15,20 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import nl.mpi.lamus.workspace.exception.FileExplorerException;
-import nl.mpi.lamus.workspace.exception.FileImporterException;
+import nl.mpi.lamus.workspace.exception.NodeExplorerException;
+import nl.mpi.lamus.workspace.exception.NodeImporterException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
- * Generic file importer.
+ * Generic node importer.
  * The correct implementation should be chosen in the workspace file explorer
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface FileImporter<R extends Reference> {
+public interface NodeImporter<R extends Reference> {
     
     /**
      * Setter for the workspace where the import is being performed.
@@ -49,6 +49,6 @@ public interface FileImporter<R extends Reference> {
      * @throws FileImporterException if there is a problem during the import
      * @throws FileExplorerException if there is a problem in the recursive exploration of the tree
      */
-    public void importFile(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, int childNodeArchiveID) throws FileImporterException, FileExplorerException;
+    public void importNode(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+            Reference childLink, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException;
 }

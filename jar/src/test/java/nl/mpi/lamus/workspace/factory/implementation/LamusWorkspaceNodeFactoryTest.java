@@ -16,9 +16,26 @@
 package nl.mpi.lamus.workspace.factory.implementation;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.metadata.api.model.HandleCarrier;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.api.type.MetadataDocumentType;
+import org.jmock.Expectations;
+import org.jmock.auto.Mock;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -29,6 +46,13 @@ import static org.junit.Assert.*;
 public class LamusWorkspaceNodeFactoryTest {
     
     private WorkspaceNodeFactory factory;
+    
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    
+    @Mock ArchiveFileHelper mockArchiveFileHelper;
+    
+    @Mock TestReferencingMetadataDocumentHandleCarrier mockTestReferencingMetadataDocumentHandleCarrier;
+    @Mock MetadataDocumentType mockMetadataDocumentType;
     
     public LamusWorkspaceNodeFactoryTest() {
     }
@@ -43,7 +67,7 @@ public class LamusWorkspaceNodeFactoryTest {
     
     @Before
     public void setUp() {
-        factory = new LamusWorkspaceNodeFactory();
+        factory = new LamusWorkspaceNodeFactory(mockArchiveFileHelper);
     }
     
     @After
@@ -54,7 +78,7 @@ public class LamusWorkspaceNodeFactoryTest {
      * Test of getNewWorkspaceNode method, of class LamusWorkspaceNodeFactory.
      */
     @Test
-    public void workspaceNodeObjectIsCorrectlyInitialised() throws MalformedURLException {
+    public void workspaceNodeCorrectlyInitialised() throws MalformedURLException {
 
         int testWorkspaceID = 10;
         int testArchiveNodeID = 100;
@@ -66,5 +90,64 @@ public class LamusWorkspaceNodeFactoryTest {
         assertEquals(testArchiveNodeID, testWorkspaceNode.getArchiveNodeID());
         assertEquals(testArchiveNodeURL, testWorkspaceNode.getArchiveURL());
         assertEquals(testArchiveNodeURL, testWorkspaceNode.getOriginURL());
+    }
+    
+    @Test
+    public void workspaceMetadataNodeCorrectlyInitialised() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URL topNodeArchiveURL = new URL("http://top.url");
+        final Date startDate = Calendar.getInstance().getTime();
+        final Date endDate = null;
+        final long usedSpace = 0;
+        final long maxSpace = 1000;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISING;
+        final String message = "initialising...";
+        final String archiveInfo = "info...";
+        
+        final Workspace testWorkspace = new LamusWorkspace(
+                workspaceID, userID, topNodeID, topNodeArchiveURL, startDate, endDate, startDate, endDate,
+                usedSpace, maxSpace, status, message, archiveInfo);
+        
+        final int nodeArchiveID = 100;
+        final URL nodeURL = new URL("http://some.url/node.something");
+        final String displayValue = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI schemaLocation = new URI("http://some.location");
+        final String pid = "somePID";
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY; //TODO change this
+        final URI fileLocation = nodeURL.toURI();
+        
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveID, nodeURL, nodeURL);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setType(nodeType);
+        expectedNode.setFormat(nodeFormat); //TODO not implemented yet
+        expectedNode.setProfileSchemaURI(schemaLocation);
+        expectedNode.setPid(pid);
+        expectedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY); //TODO not implemented yet
+
+        context.checking(new Expectations() {{
+        
+            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getFileLocation(); will(returnValue(fileLocation));
+            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getDisplayValue(); will(returnValue(displayValue));
+            //TODO get type
+            //TODO get format
+            oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getDocumentType(); will(returnValue(mockMetadataDocumentType));
+            oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
+            oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getHandle(); will(returnValue(pid));
+        }});
+        
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(testWorkspace, nodeArchiveID,
+                mockTestReferencingMetadataDocumentHandleCarrier);
+        
+        assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);
+    }
+    
+    interface TestReferencingMetadataDocumentHandleCarrier extends ReferencingMetadataDocument, HandleCarrier {
+
     }
 }

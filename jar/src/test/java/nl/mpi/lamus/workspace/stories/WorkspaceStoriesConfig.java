@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.sql.DataSource;
+import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
@@ -436,6 +437,10 @@ public class WorkspaceStoriesConfig {
     }
     
     
+    @Bean
+    public FileType typeChecker() {
+        return new FileType();
+    }
     
     
     

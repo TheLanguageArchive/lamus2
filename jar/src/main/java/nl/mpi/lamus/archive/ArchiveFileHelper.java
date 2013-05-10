@@ -17,6 +17,7 @@ package nl.mpi.lamus.archive;
 
 import java.io.File;
 import java.net.URI;
+import nl.mpi.util.OurURL;
 
 /**
  *
@@ -87,4 +88,7 @@ public interface ArchiveFileHelper {
     
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck);
     
+    public boolean isFileInOrphansDirectory(File fileToCheck);
+    
+    public boolean isUrlLocal(OurURL urlToCheck);
 }

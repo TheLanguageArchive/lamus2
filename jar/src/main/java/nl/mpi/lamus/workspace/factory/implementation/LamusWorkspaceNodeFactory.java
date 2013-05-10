@@ -15,10 +15,22 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspacePidValue;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.metadata.api.model.HandleCarrier;
+import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,6 +40,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeFactory.class);
+    
+    private final ArchiveFileHelper archiveFileHelper;
+    
+    @Autowired
+    public LamusWorkspaceNodeFactory(ArchiveFileHelper archiveFileHelper) {
+        this.archiveFileHelper = archiveFileHelper;
+    }
 
     /**
      * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, int, java.net.URL)
@@ -39,5 +60,55 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 
         return node;
     }
+
+    public WorkspaceNode getNewWorkspaceMetadataNode(Workspace workspace, int archiveNodeID, MetadataDocument document)
+            throws MalformedURLException {
+        
+        WorkspaceNode node = new LamusWorkspaceNode(workspace.getWorkspaceID(), archiveNodeID,
+                document.getFileLocation().toURL(), document.getFileLocation().toURL());
+        node.setName(document.getDisplayValue());
+        node.setTitle(document.getDisplayValue());
+        node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
+        node.setFormat(""); //TODO get this based on what? typechecker?
+        node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
+        String nodePid = WorkspacePidValue.NONE.toString();
+
+	if (document instanceof HandleCarrier) {
+	    nodePid = ((HandleCarrier) document).getHandle();
+	} else {
+	    logger.warn("Metadata document '" + document.getFileLocation().toString() + "' does not contain a handle.");
+	}
+        
+        node.setPid(nodePid);
+        node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+        
+        return node;
+    }
     
+    public WorkspaceNode getNewWorkspaceResourceNode(Workspace workspace, int archiveNodeID, URL url,
+            Reference resourceReference, WorkspaceNodeType type, String mimetype) {
+        
+        String name = this.archiveFileHelper.getFileTitle(url.toString());
+        
+        WorkspaceNode node = new LamusWorkspaceNode(workspace.getWorkspaceID(), archiveNodeID,
+                url, url);
+        node.setName(name);
+        node.setTitle("(type=" + mimetype + ")");
+        node.setType(type);
+        node.setFormat(mimetype);
+        
+        String nodePid = WorkspacePidValue.NONE.toString();
+        if(resourceReference instanceof HandleCarrier) {
+            nodePid = ((HandleCarrier) resourceReference).getHandle();
+        } else {
+            logger.warn("Resource reference '" + url.toString() + "' does not contain a handle.");
+        }
+        node.setPid(nodePid);
+        
+        //ALWAYS?
+        node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
+        
+        
+        return node;
+    }
 }

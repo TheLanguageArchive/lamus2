@@ -21,9 +21,9 @@ import nl.mpi.lamus.workspace.model.Workspace;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class FileExplorerException extends WorkspaceException {
+public class NodeExplorerException extends WorkspaceException {
     
-    public FileExplorerException(String message, Workspace workspace, Throwable cause) {
+    public NodeExplorerException(String message, Workspace workspace, Throwable cause) {
         super(message, workspace, cause);
     }
 }

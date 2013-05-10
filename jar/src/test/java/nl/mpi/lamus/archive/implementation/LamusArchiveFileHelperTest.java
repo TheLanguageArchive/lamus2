@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -312,5 +313,37 @@ public class LamusArchiveFileHelperTest {
         boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
         assertFalse(isSizeAboveLimit);
+    }
+    
+    @Test
+    public void fileIsInOrphansDirectory() {
+        File testFile = new File("file:/bla/bla/sessions");
+        
+        boolean isFileInOrphansDirectory = testArchiveFileHelper.isFileInOrphansDirectory(testFile);
+        assertTrue("Result should be true", isFileInOrphansDirectory);
+    }
+    
+    @Test
+    public void fileIsNotInOrphansDirectory() {
+        File testFile = new File("file:/bla/bla/notthere");
+        
+        boolean isFileInOrphansDirectory = testArchiveFileHelper.isFileInOrphansDirectory(testFile);
+        assertFalse("Result should be false", isFileInOrphansDirectory);
+    }
+
+    @Test
+    public void urlHasLocalProtocol() throws MalformedURLException {
+        OurURL testUrl = new OurURL("file:/bla/bla");
+        
+        boolean isUrlLocal = testArchiveFileHelper.isUrlLocal(testUrl);
+        assertTrue("Result should be true", isUrlLocal);
+    }
+    
+    @Test
+    public void urlHasRemoteProtocol() throws MalformedURLException {
+        OurURL testUrl = new OurURL("http://bla/bla");
+        
+        boolean isUrlLocal = testArchiveFileHelper.isUrlLocal(testUrl);
+        assertFalse("Result should be false", isUrlLocal);
     }
 }

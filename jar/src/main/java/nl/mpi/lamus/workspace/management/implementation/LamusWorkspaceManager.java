@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
@@ -71,6 +70,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     public Workspace createWorkspace(String userID, int topNodeArchiveID) {
         
         Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topNodeArchiveID);
+        newWorkspace.setStatusMessageInitialising();
         workspaceDao.addWorkspace(newWorkspace);
         try {
             workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace);

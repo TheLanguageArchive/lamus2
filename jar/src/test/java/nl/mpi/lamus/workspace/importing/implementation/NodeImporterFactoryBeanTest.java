@@ -17,7 +17,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import nl.mpi.lamus.workspace.importing.FileImporter;
+import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
@@ -28,11 +28,11 @@ import org.junit.*;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class FileImporterFactoryBeanTest {
+public class NodeImporterFactoryBeanTest {
     
-    private FileImporterFactoryBean fileImporterFactoryBean;
+    private NodeImporterFactoryBean nodeImporterFactoryBean;
     
-    public FileImporterFactoryBeanTest() {
+    public NodeImporterFactoryBeanTest() {
     }
 
     @BeforeClass
@@ -45,7 +45,7 @@ public class FileImporterFactoryBeanTest {
     
     @Before
     public void setUp() {
-        fileImporterFactoryBean = new FileImporterFactoryBean();
+        nodeImporterFactoryBean = new NodeImporterFactoryBean();
     }
     
     @After
@@ -55,45 +55,43 @@ public class FileImporterFactoryBeanTest {
     @Test
     public void getMetadataImporter() throws Exception {
         Reference metadataReference = new MetadataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
-        fileImporterFactoryBean.setFileImporterTypeForReference(metadataReference);
+        nodeImporterFactoryBean.setNodeImporterTypeForReference(metadataReference);
         
-        FileImporter retrievedFileImporter = fileImporterFactoryBean.getObject();
+        NodeImporter retrievedNodeImporter = nodeImporterFactoryBean.getObject();
         
-        assertNotNull(retrievedFileImporter);
-        assertTrue(retrievedFileImporter instanceof MetadataFileImporter);
+        assertNotNull(retrievedNodeImporter);
+        assertTrue(retrievedNodeImporter instanceof MetadataNodeImporter);
     }
 
     @Test
     public void getResourceImporter() throws Exception {
         Reference resourceReference = new DataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
-        fileImporterFactoryBean.setFileImporterTypeForReference(resourceReference);
+        nodeImporterFactoryBean.setNodeImporterTypeForReference(resourceReference);
         
-        FileImporter retrievedFileImporter = fileImporterFactoryBean.getObject();
+        NodeImporter retrievedNodeImporter = nodeImporterFactoryBean.getObject();
         
-        assertNotNull(retrievedFileImporter);
-        assertTrue(retrievedFileImporter instanceof ResourceFileImporter);
+        assertNotNull(retrievedNodeImporter);
+        assertTrue(retrievedNodeImporter instanceof ResourceNodeImporter);
     }
     
     @Test
-    public void fileImporterTypeSetForMetadataReference() throws URISyntaxException {
-
+    public void nodeImporterTypeSetForMetadataReference() throws URISyntaxException {
         Reference metadataReference = new MetadataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
-        fileImporterFactoryBean.setFileImporterTypeForReference(metadataReference);
+        nodeImporterFactoryBean.setNodeImporterTypeForReference(metadataReference);
         
-        assertEquals("Retrieved object should be of type MetadataFileImporter", MetadataFileImporter.class, fileImporterFactoryBean.getObjectType());
+        assertEquals("Retrieved object should be of type MetadataNodeImporter", MetadataNodeImporter.class, nodeImporterFactoryBean.getObjectType());
     }
 
     @Test
-    public void fileImporterTypeSetForResourceReference() throws URISyntaxException {
-
+    public void nodeImporterTypeSetForResourceReference() throws URISyntaxException {
         Reference metadataReference = new DataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
-        fileImporterFactoryBean.setFileImporterTypeForReference(metadataReference);
+        nodeImporterFactoryBean.setNodeImporterTypeForReference(metadataReference);
         
-        assertEquals("Retrieved object should be of type ResourceFileImporter", ResourceFileImporter.class, fileImporterFactoryBean.getObjectType());
+        assertEquals("Retrieved object should be of type ResourceNodeImporter", ResourceNodeImporter.class, nodeImporterFactoryBean.getObjectType());
     }
         
     @Test
     public void testIsSingleton() {
-        assertFalse("Bean should not be a singleton", fileImporterFactoryBean.isSingleton());
+        assertFalse("Bean should not be a singleton", nodeImporterFactoryBean.isSingleton());
     }
 }

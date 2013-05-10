@@ -22,8 +22,8 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.importing.FileImporter;
-import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
+import nl.mpi.lamus.workspace.importing.NodeImporter;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
@@ -42,23 +42,23 @@ import org.junit.*;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class LamusWorkspaceFileExplorerTest {
+public class LamusWorkspaceNodeExplorerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
-    private WorkspaceFileExplorer fileExplorer;
+    private WorkspaceNodeExplorer nodeExplorer;
     @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private WorkspaceDao mockWorkspaceDao;
-    @Mock private FileImporterFactoryBean mockFileImporterFactoryBean;
+    @Mock private NodeImporterFactoryBean mockNodeImporterFactoryBean;
     @Mock private ArchiveFileHelper mockArchiveFileHelper;
-    @Mock private FileImporter mockFileImporter;
+    @Mock private NodeImporter mockNodeImporter;
     @Mock private WorkspaceNode mockNodeToExplore;
     @Mock private ReferencingMetadataDocument mockNodeDocument;
     
     @Mock private Workspace mockWorkspace;
     
-    public LamusWorkspaceFileExplorerTest() {
+    public LamusWorkspaceNodeExplorerTest() {
     }
 
     @BeforeClass
@@ -71,7 +71,7 @@ public class LamusWorkspaceFileExplorerTest {
     
     @Before
     public void setUp() {
-        fileExplorer = new LamusWorkspaceFileExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockFileImporterFactoryBean, mockArchiveFileHelper);
+        nodeExplorer = new LamusWorkspaceNodeExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeImporterFactoryBean, mockArchiveFileHelper);
     }
     
     @After
@@ -79,7 +79,7 @@ public class LamusWorkspaceFileExplorerTest {
     }
 
     /**
-     * Test of explore method, of class LamusWorkspaceFileExplorer.
+     * Test of explore method, of class LamusWorkspaceNodeExplorer.
      */
     @Test
     public void exploreSuccessfullyLinkWithHandle() throws Exception {
@@ -93,7 +93,6 @@ public class LamusWorkspaceFileExplorerTest {
         metadataLink.setHandle(metadataLinkHandle);
         final String resourceLinkHandle = "hdl:LOCAL/00-0000-0000-0000-0000-2";
         resourceLink.setHandle(resourceLinkHandle);
-//        final String[] linkHandles = {metadataLinkHandle, resourceLinkHandle};
         
         final Collection<Reference> testLinks = new ArrayList<Reference>();
         testLinks.add(metadataLink);
@@ -106,24 +105,17 @@ public class LamusWorkspaceFileExplorerTest {
         testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
         testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
         
-        final Class metadataFileImporterType = MetadataFileImporter.class;
-        final Class resourceFileImporterType = ResourceFileImporter.class;
-        final Class[] testLinksFileImporterTypes = new Class[testLinks.size()];
-        testLinksFileImporterTypes[0] = metadataFileImporterType;
-        testLinksFileImporterTypes[1] = resourceFileImporterType;
-        
         context.checking(new Expectations() {{
             
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
                 
                 oneOf (mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
-//                oneOf (mockArchiveObjectsDB).getObjectId(new OurURL(currentLink.getURI().toURL())); will(returnValue(testLinksArchiveIDs[current]));
                 
-                oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(currentLink);
-                oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
-                oneOf (mockFileImporter).setWorkspace(mockWorkspace);
-                oneOf (mockFileImporter).importFile(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
+                oneOf (mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
+                oneOf (mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
+                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
+                oneOf (mockNodeImporter).importNode(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
                 
                 current++;
             }
@@ -131,7 +123,7 @@ public class LamusWorkspaceFileExplorerTest {
         }});
 
         
-        fileExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
         
     }
     
@@ -152,11 +144,11 @@ public class LamusWorkspaceFileExplorerTest {
 //        testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
 //        testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
 //        
-//        final Class metadataFileImporterType = MetadataFileImporter.class;
-//        final Class resourceFileImporterType = ResourceFileImporter.class;
-//        final Class[] testLinksFileImporterTypes = new Class[testLinks.size()];
-//        testLinksFileImporterTypes[0] = metadataFileImporterType;
-//        testLinksFileImporterTypes[1] = resourceFileImporterType;
+//        final Class metadataNodeImporterType = MetadataNodeImporter.class;
+//        final Class resourceNodeImporterType = ResourceNodeImporter.class;
+//        final Class[] testLinksNodeImporterTypes = new Class[testLinks.size()];
+//        testLinksNodeImporterTypes[0] = metadataNodeImporterType;
+//        testLinksNodeImporterTypes[1] = resourceNodeImporterType;
 //        
 //        context.checking(new Expectations() {{
 //            
@@ -164,10 +156,10 @@ public class LamusWorkspaceFileExplorerTest {
 //            for(Reference currentLink : testLinks) {
 //                oneOf (mockArchiveObjectsDB).getObjectId(new OurURL(currentLink.getURI().toURL())); will(returnValue(testLinksArchiveIDs[current]));
 //                
-//                oneOf (mockFileImporterFactoryBean).setFileImporterTypeForReference(currentLink);
-//                oneOf (mockFileImporterFactoryBean).getObject(); will(returnValue(mockFileImporter));
-//                oneOf (mockFileImporter).setWorkspace(mockWorkspace);
-//                oneOf (mockFileImporter).importFile(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
+//                oneOf (mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
+//                oneOf (mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
+//                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
+//                oneOf (mockNodeImporter).importNode(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
 //                
 //                current++;
 //            }
@@ -175,7 +167,7 @@ public class LamusWorkspaceFileExplorerTest {
 //        }});
 //
 //        
-//        fileExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+//        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
 //        
 //    }
 }

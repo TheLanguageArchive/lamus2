@@ -20,10 +20,10 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.exception.FileExplorerException;
-import nl.mpi.lamus.workspace.exception.FileImporterException;
-import nl.mpi.lamus.workspace.importing.FileImporter;
-import nl.mpi.lamus.workspace.importing.WorkspaceFileExplorer;
+import nl.mpi.lamus.workspace.exception.NodeExplorerException;
+import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.workspace.importing.NodeImporter;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
@@ -36,34 +36,34 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- * @see WorkspaceFileExplorer
+ * @see WorkspaceNodeExplorer
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
-public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
+public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     
-    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileExplorer.class);
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeExplorer.class);
     
     private final ArchiveObjectsDB archiveObjectsDB;
     private final WorkspaceDao workspaceDao;
-    private final FileImporterFactoryBean fileImporterFactoryBean;
+    private final NodeImporterFactoryBean nodeImporterFactoryBean;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
-    public LamusWorkspaceFileExplorer(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
-        FileImporterFactoryBean fileImporterFactoryBean, ArchiveFileHelper aFileHelper) {
+    public LamusWorkspaceNodeExplorer(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
+        NodeImporterFactoryBean nodeImporterFactoryBean, ArchiveFileHelper aFileHelper) {
         this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
-        this.fileImporterFactoryBean = fileImporterFactoryBean;
+        this.nodeImporterFactoryBean = nodeImporterFactoryBean;
         this.archiveFileHelper = aFileHelper;
     }
 
     /**
-     * @see WorkspaceFileExplorer#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
+     * @see WorkspaceNodeExplorer#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
      */
     public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
-        throws FileImporterException, FileExplorerException {
+        throws NodeImporterException, NodeExplorerException {
         
         
         //TODO for each link call recursive method to explore it
@@ -87,7 +87,7 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
                 
                 //TODO node doesn't exist?
                 String errorMessage = "PROBLEMS GETTING NODE ID";
-                throw new FileExplorerException(errorMessage, workspace, null);
+                throw new NodeExplorerException(errorMessage, workspace, null);
             }
 
             int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
@@ -96,17 +96,17 @@ public class LamusWorkspaceFileExplorer implements WorkspaceFileExplorer {
             
             //TODO check if it is Metadata or Resource node
             
-            fileImporterFactoryBean.setFileImporterTypeForReference(currentLink);
-            FileImporter linkImporterToUse = null;
+            nodeImporterFactoryBean.setNodeImporterTypeForReference(currentLink);
+            NodeImporter linkImporterToUse = null;
             try {
-                linkImporterToUse = fileImporterFactoryBean.getObject();
+                linkImporterToUse = nodeImporterFactoryBean.getObject();
             } catch (Exception ex) {
                 String errorMessage = "Error getting file importer.";
-                throw new FileExplorerException(errorMessage, workspace, ex);
+                throw new NodeExplorerException(errorMessage, workspace, ex);
             }
             
             linkImporterToUse.setWorkspace(workspace);
-            linkImporterToUse.importFile(nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
+            linkImporterToUse.importNode(nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
         }
     }
     

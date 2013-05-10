@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
@@ -84,4 +83,6 @@ public interface FileTypeHandler {
      * @return 
      */
     public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
+    
+    public TypecheckedResults getTypecheckedResults();
 }

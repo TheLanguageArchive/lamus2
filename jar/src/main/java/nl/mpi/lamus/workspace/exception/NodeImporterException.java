@@ -15,18 +15,24 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.importing.FileImporter;
+import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class FileImporterInitialisationException extends FileImporterException {
+public class NodeImporterException extends WorkspaceException {
     
-    public FileImporterInitialisationException(String message, Workspace workspace, Class<? extends FileImporter> fileImporterType,
+    private Class<? extends NodeImporter> nodeImporterType;
+    
+    public NodeImporterException(String message, Workspace workspace, Class<? extends NodeImporter> nodeImporterType,
             Throwable cause) {
-        super(message, workspace, fileImporterType, cause);
+        super(message, workspace, cause);
+        this.nodeImporterType = nodeImporterType;
     }
-
+    
+    public Class<? extends NodeImporter> getNodeImporterType() {
+        return this.nodeImporterType;
+    }
 }

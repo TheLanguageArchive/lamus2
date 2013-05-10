@@ -15,8 +15,13 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.Reference;
 
 /**
  * Factory for WorkspaceNode objects.
@@ -36,4 +41,9 @@ public interface WorkspaceNodeFactory {
      */
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
     
+    public WorkspaceNode getNewWorkspaceMetadataNode(Workspace workspace, int archiveNodeID, MetadataDocument document)
+            throws MalformedURLException;
+    
+    public WorkspaceNode getNewWorkspaceResourceNode(Workspace workspace, int archiveNodeID, URL url,
+            Reference resourceReference, WorkspaceNodeType type, String mimetype);
 }

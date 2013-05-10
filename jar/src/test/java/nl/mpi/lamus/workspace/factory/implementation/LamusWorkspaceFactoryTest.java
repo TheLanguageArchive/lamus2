@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.factory.implementation;
 
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -52,6 +53,15 @@ public class LamusWorkspaceFactoryTest {
     @ComponentScan("nl.mpi.lamus.workspace.factory")
     @Profile("testing")
     static class ConfigurationContext {
+        
+        // This bean is not needed here,
+        // but because of the "ComponentScan",
+        // Spring tries to add the LamusWorkspaceNodeFactory
+        // singleton to the application context, and it needs this object then
+        @Bean
+        public ArchiveFileHelper archiveFileHelper() {
+            return null;
+        }
         
         @Bean
         public AmsBridge amsBridge() {

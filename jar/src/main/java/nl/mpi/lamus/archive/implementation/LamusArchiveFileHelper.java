@@ -17,10 +17,10 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveFileHelper.class);
     
-//    private final Configuration configuration;
-    
     @Autowired
     @Qualifier("maxDirectoryNameLength")
     private int maxDirectoryNameLength;
@@ -52,12 +50,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Autowired
     @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
-    
-    
-//    @Autowired
-//    public LamusArchiveFileHelper(Configuration config) {
-//        this.configuration = config;
-//    }
     
     /**
      * 
@@ -175,7 +167,33 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
     
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
-        boolean isSizeAboveLimit = fileToCheck.length() > typeRecheckSizeLimitInBytes;
-        return isSizeAboveLimit;
+        if(fileToCheck.length() > typeRecheckSizeLimitInBytes) {
+            return true;
+        }
+        return false;
+    }
+    
+    
+    //TODO This method should be more robust
+     // it should not only check if the file's path contains the directory name
+     // it should check if the path is actually the same as the complete path for the orphans of that workspace
+    
+    public boolean isFileInOrphansDirectory(File fileToCheck) {
+        if (orphansDirectoryBaseName != null &&
+            fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryBaseName)) {
+            return true;
+        }
+        return false;
+    }
+    
+    //TODO Should this check be done in some different way?
+     // currently the CS database indicates if a file is local or not,
+     // but that's not always correct
+    
+    public boolean isUrlLocal(OurURL urlToCheck) {
+        if("file".equals(urlToCheck.getProtocol())) {
+            return true;
+        }
+        return false;
     }
 }

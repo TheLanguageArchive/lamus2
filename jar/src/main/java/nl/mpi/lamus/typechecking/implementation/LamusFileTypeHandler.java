@@ -20,6 +20,7 @@ import java.io.InputStream;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
+import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.NodeTypeMapper;
@@ -233,5 +234,10 @@ public class LamusFileTypeHandler implements FileTypeHandler {
                     append(".");
         }
         return isArchivable;
+    }
+    
+    public TypecheckedResults getTypecheckedResults() {
+        
+        return new LamusTypecheckedResults(nodeType, mimetype, analysis, typecheckHandler.getTypecheckJudgement());
     }
 }
