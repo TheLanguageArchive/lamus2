@@ -19,6 +19,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import nl.mpi.corpusstructure.ArchiveAccessContext;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
@@ -50,6 +53,13 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Autowired
     @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
+    
+    private final ArchiveObjectsDB archiveObjectsDB;
+    
+    @Autowired
+    public LamusArchiveFileHelper(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB) {
+        this.archiveObjectsDB = aoDB;
+    }
     
     /**
      * 
@@ -196,4 +206,14 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         }
         return false;
     }
+
+    public File getArchiveLocationForNodeID(int archiveNodeID) {
+        
+        OurURL urlWithContext =
+                this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(archiveNodeID), ArchiveAccessContext.getFileUrlContext());
+        File fileWithContext = new File(urlWithContext.getPath());
+        
+        return fileWithContext;
+    }
+    
 }

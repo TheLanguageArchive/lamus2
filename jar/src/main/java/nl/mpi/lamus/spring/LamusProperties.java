@@ -115,6 +115,14 @@ public class LamusProperties {
     public File workspaceBaseDirectory() {
         return new File(workspaceBaseDirectory);
     }
+
+    @Value("${trashcan_base_directory}")
+    private String trashCanBaseDirectory;
+    @Bean
+    @Qualifier("trashCanBaseDirectory")
+    public File trashCanBaseDirectory() {
+        return new File(trashCanBaseDirectory);
+    }
     
     @Value("${custom_typechecker_config_files_and_folders}")
     private String customTypecheckerFoldersAndConfigFiles;
@@ -145,4 +153,5 @@ public class LamusProperties {
         
         return mapToReturn;
     }
+
 }

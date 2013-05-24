@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
+import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -54,6 +55,7 @@ public class LamusWorkspaceManagerTest {
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock private WorkspaceImportRunner mockWorkspaceImportRunner;
+    @Mock private WorkspaceExportRunner mockWorkspaceExportRunner;
     @Mock private Future<Boolean> mockFuture;
     
     public LamusWorkspaceManagerTest() {
@@ -69,7 +71,9 @@ public class LamusWorkspaceManagerTest {
     
     @Before
     public void setUp() {
-        this.manager = new LamusWorkspaceManager(mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao, mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner);
+        this.manager = new LamusWorkspaceManager(
+                mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao,
+                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner, mockWorkspaceExportRunner);
     }
     
     @After
@@ -167,7 +171,7 @@ public class LamusWorkspaceManagerTest {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 0;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
@@ -182,7 +186,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
             
             //check if the workspace directory exists
-            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(true));
+            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(workspaceToRetrieve);
             //update as well status?
@@ -203,7 +207,7 @@ public class LamusWorkspaceManagerTest {
         final String givenUserID = "someUser";
         final String expectedUserID = "someOtherUser";
         final int topNodeID = 0;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
@@ -225,12 +229,12 @@ public class LamusWorkspaceManagerTest {
         assertNull("Returned workspace should be null", result);
     }
     
- @Test
+    @Test
     public void openExistingWorkspaceWithoutDirectory() throws MalformedURLException {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 0;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.imdi");
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
@@ -243,7 +247,7 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
-            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(false));
+            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(Boolean.FALSE));
         }});
         
         Workspace result = manager.openWorkspace(userID, workspaceID);
@@ -265,5 +269,40 @@ public class LamusWorkspaceManagerTest {
         
         Workspace result = manager.openWorkspace(userID, workspaceID);
         assertNull("Returned workspace should be null", result);
+    }
+    
+    @Test
+    public void submitWorkspaceSuccessful() throws MalformedURLException, InterruptedException, ExecutionException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 0;
+        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+            
+            //TODO something else?
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(workspaceToRetrieve);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        boolean result = manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
+        assertTrue("Result should be true", result);
     }
 }

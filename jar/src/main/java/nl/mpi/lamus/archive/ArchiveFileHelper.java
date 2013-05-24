@@ -17,6 +17,7 @@ package nl.mpi.lamus.archive;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import nl.mpi.util.OurURL;
 
 /**
@@ -91,4 +92,7 @@ public interface ArchiveFileHelper {
     public boolean isFileInOrphansDirectory(File fileToCheck);
     
     public boolean isUrlLocal(OurURL urlToCheck);
+    
+    public File getArchiveLocationForNodeID(int archiveNodeID);
+    
 }

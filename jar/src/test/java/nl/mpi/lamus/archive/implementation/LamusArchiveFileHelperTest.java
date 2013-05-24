@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import nl.mpi.corpusstructure.ArchiveAccessContext;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
@@ -39,46 +42,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(
-        loader = AnnotationConfigContextLoader.class)
-@ActiveProfiles("testing")
 public class LamusArchiveFileHelperTest {
-    
-    @Configuration
-    @ComponentScan("nl.mpi.lamus.archive")
-    @Profile("testing")
-    static class ContextConfiguration {
-        
-        @Bean
-        @Qualifier("maxDirectoryNameLength")
-        public int maxDirectoryNameLength() {
-            return 50;
-        }
-
-        @Bean
-        @Qualifier("corpusDirectoryBaseName")
-        public String corpusDirectoryBaseName() {
-            return "Corpusstructure";
-        }
-
-        @Bean
-        @Qualifier("orphansDirectoryBaseName")
-        public String orphansDirectoryBaseName() {
-            return "sessions";
-        }
-
-        @Bean
-        @Qualifier("typeRecheckSizeLimitInBytes")
-        public long typeRecheckSizeLimitInBytes() {
-            return 8L * 1024 * 1024;
-        }
-    }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
@@ -89,19 +59,12 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockFile;
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
-    @Autowired
-    @Qualifier("maxDirectoryNameLength")
-    private int maxDirectoryNameLength;
-    @Autowired
-    @Qualifier("corpusDirectoryBaseName")
-    private String corpusDirectoryBaseName;
-    @Autowired
-    @Qualifier("orphansDirectoryBaseName")
-    private String orphansDirectoryBaseName;
-    @Autowired
-    @Qualifier("typeRecheckSizeLimitInBytes")
-    private long typeRecheckSizeLimitInBytes;
+    private final int maxDirectoryNameLength = 50;
+    private final String corpusDirectoryBaseName = "Corpusstructure";
+    private String orphansDirectoryBaseName = "sessions";
+    private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
+    @Mock ArchiveObjectsDB mockArchiveObjectsDB;
     
     public LamusArchiveFileHelperTest() {
     }
@@ -116,6 +79,11 @@ public class LamusArchiveFileHelperTest {
     
     @Before
     public void setUp() {
+        testArchiveFileHelper = new LamusArchiveFileHelper(mockArchiveObjectsDB);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "maxDirectoryNameLength", maxDirectoryNameLength);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "corpusDirectoryBaseName", corpusDirectoryBaseName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "orphansDirectoryBaseName", orphansDirectoryBaseName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "typeRecheckSizeLimitInBytes", typeRecheckSizeLimitInBytes);
     }
     
     @After
@@ -345,5 +313,24 @@ public class LamusArchiveFileHelperTest {
         
         boolean isUrlLocal = testArchiveFileHelper.isUrlLocal(testUrl);
         assertFalse("Result should be false", isUrlLocal);
+    }
+    
+    @Test
+    public void getArchiveLocationForNodeID() throws MalformedURLException {
+        
+        final int archiveNodeID = 100;
+        final OurURL nodeURL = new OurURL("http://some.url");
+        
+        final File expectedFile = new File(nodeURL.getPath());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(archiveNodeID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(nodeURL));
+        }});
+        
+        File result = testArchiveFileHelper.getArchiveLocationForNodeID(archiveNodeID);
+        
+        assertEquals("Location different from expected", expectedFile, result);
     }
 }

@@ -71,9 +71,12 @@ public interface WorkspaceService extends Serializable {
     /**
      * Submits a workspace back into the archive.
      * 
+     * @param userID ID of the user
      * @param workspaceID ID of the workspace
+     * @param keepUnlinkedFiles boolean indicating if unlinked files should be kept
+     * @return true if successfully submitted
      */
-    public void submitWorkspace(int workspaceID);
+    public boolean submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles);
     
     /**
      * Retrieves a workspace node with the given ID.

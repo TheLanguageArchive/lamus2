@@ -126,7 +126,8 @@ public class WorkspaceSteps {
     
     private Workspace createdWorkspace;
     
-    private int workspaceIDToDelete;
+    private int createdWorkspaceID;
+    
     
     @BeforeStory
     public void beforeStory() throws IOException {
@@ -567,11 +568,14 @@ public class WorkspaceSteps {
 //        workspaceDao = new LamusJdbcWorkspaceDao();
 //        workspaceDao.setDataSource(lamusDataSource);
 //    }
-    
+
     private void insertWorkspaceInDB(int workspaceID, String userID) throws FileNotFoundException, IOException {
+        insertWorkspaceInDB(workspaceID, userID, 1);
+    }
+    
+    private void insertWorkspaceInDB(int workspaceID, String userID, int topNodeID) throws FileNotFoundException, IOException {
 
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
-        int topNodeID = 1;
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
         File testFile = new File(workspaceDirectory, "Node_CMDIfied_IMDI.cmdi");
         
@@ -631,7 +635,7 @@ public class WorkspaceSteps {
         this.createdWorkspace = null;
         this.currentUserID = null;
         this.selectedNodeID = -1;
-        this.workspaceIDToDelete = -1;
+        this.createdWorkspaceID = -1;
     }
     
     
@@ -677,9 +681,26 @@ public class WorkspaceSteps {
     public void aWorkspaceWithIDCreatedByUserWithID(int workspaceID, String userID) throws FileNotFoundException, IOException {
 
         this.currentUserID = userID;
-        this.workspaceIDToDelete = workspaceID;
+        this.createdWorkspaceID = workspaceID;
         
         insertWorkspaceInDB(workspaceID, userID);
+
+        //filesystem
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
+        
+        // database
+        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
+        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
+    }
+    
+    @Given("a workspace with ID $workspaceID created by user with ID $userID in node with ID $nodeID")
+    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithID(int workspaceID, String userID, int nodeID) throws FileNotFoundException, IOException {
+
+        this.currentUserID = userID;
+        this.createdWorkspaceID = workspaceID;
+        
+        insertWorkspaceInDB(workspaceID, userID, nodeID);
 
         //filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -706,7 +727,21 @@ public class WorkspaceSteps {
         assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
 
-        this.workspaceService.deleteWorkspace(this.currentUserID, this.workspaceIDToDelete);
+        this.workspaceService.deleteWorkspace(this.currentUserID, this.createdWorkspaceID);
+    }
+    
+    @When("that user chooses to submit the workspace")
+    public void thatUserChoosesToSubmitTheWorkspace() {
+        
+        boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
+        assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
+        
+        //TODO more assertions missing?
+        
+        this.workspaceService.submitWorkspace(currentUserID, createdWorkspaceID, keepUnlinkedFiles);
+        
     }
     
     @Then("a workspace is created in that node for that user")
@@ -731,13 +766,22 @@ public class WorkspaceSteps {
     public void theWorkspaceIsDeleted() {
         
         // filesystem
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.workspaceIDToDelete);
-        assertFalse("Workspace directory for workspace " + this.workspaceIDToDelete + " still exists", workspaceDirectory.exists());
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
+        assertFalse("Workspace directory for workspace " + this.createdWorkspaceID + " still exists", workspaceDirectory.exists());
         
         // database
-        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(this.workspaceIDToDelete);
+        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(this.createdWorkspaceID);
         assertNull("retrievedWorkspace not null, was not properly deleted from the database", retrievedWorkspace);
-        Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getNodesForWorkspace(this.workspaceIDToDelete);
+        Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getNodesForWorkspace(this.createdWorkspaceID);
         assertTrue("There should be no nodes associated with the deleted workspace", retrievedNodes.isEmpty());
+    }
+    
+    @Then("the workspace is successfully submitted")
+    public void theWorkspaceIsSuccessfullySubmitted() {
+        
+        fail("not implemented yet");
+        
+        //TODO decide what it means exactly to submit successfully
+         // (what checks need to be made to evaluate that)
     }
 }

@@ -72,13 +72,13 @@ public class LamusWorkspaceServiceTest {
      * 
      */
     @Test
-    public void returnNullWorkspaceIfCannotBeCreated() throws MalformedURLException {
+    public void createWorkspaceNoAccess() throws MalformedURLException {
         
         final int archiveNodeID = 10;
         final String userID = "someUser";
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(false));
+            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(Boolean.FALSE));
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeID);
@@ -89,7 +89,7 @@ public class LamusWorkspaceServiceTest {
      * 
      */
     @Test
-    public void triggersWorkspaceCreationIfCanBeCreated() throws MalformedURLException {
+    public void createWorkspaceSuccess() throws MalformedURLException {
         
         final int archiveNodeID = 10;
         final String userID = "someUser";
@@ -98,7 +98,7 @@ public class LamusWorkspaceServiceTest {
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(true));
+            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(Boolean.TRUE));
             //allow other calls
             oneOf (mockWorkspaceManager).createWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
         }});
@@ -116,7 +116,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(true));
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID);
         }});
         
@@ -197,6 +197,54 @@ public class LamusWorkspaceServiceTest {
         assertNotNull("Returned workspace should not be null", result);
         assertEquals("Returned workspace is different from expected", result, workspaceToRetrieve);
     }
+    
+    @Test
+    public void submitWorkspaceNoAccess() {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.FALSE));
+        }});
+        
+        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void submitWorkspaceFail() {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(returnValue(Boolean.FALSE));
+        }});
+        
+        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        assertFalse("Result should be false", result);
+    }
+        
+    @Test
+    public void submitWorkspaceSuccess() {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(returnValue(Boolean.TRUE));
+        }});
+        
+        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        assertTrue("Result should be true", result);
+    }
+    
     
     @Test
     public void getExistingNode() throws URISyntaxException {

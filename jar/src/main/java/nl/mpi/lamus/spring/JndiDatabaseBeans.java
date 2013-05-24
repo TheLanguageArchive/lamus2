@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
+import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,7 @@ public class JndiDatabaseBeans {
 
     private CorpusStructureDBWriteImpl csDBWrite;
     private DataSource lamusDataSource;
+    private VersioningAPI versioningAPI;
     
     /**
      * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure' database
@@ -79,5 +81,13 @@ public class JndiDatabaseBeans {
             lamusDataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
         }
         return lamusDataSource;
+    }
+    
+    @Bean
+    public VersioningAPI versioningAPI() {
+        if(versioningAPI == null) {
+            versioningAPI = new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
+        }
+        return versioningAPI;
     }
 }

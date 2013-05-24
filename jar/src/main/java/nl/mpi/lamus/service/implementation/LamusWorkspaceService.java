@@ -94,15 +94,25 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#submitWorkspace(int)
      */
-    public void submitWorkspace(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
-        
+    public boolean submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles) {
+
         //TODO requests in this session?
         //TODO workspace should be initialised / connected
         
         //TODO nodeAccessChecker - check access?
         
-        //TODO workspaceManager - submit workspace
+        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+            
+            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Throw an exception instead?
+            logger.error("Cannot submit workspace with ID " + workspaceID);
+            return false;
+        } else {
+        
+            //TODO workspaceManager - submit workspace
+            
+            return this.workspaceManager.submitWorkspace(workspaceID, keepUnlinkedFiles);
+        }
     }
 
     /**

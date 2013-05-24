@@ -16,14 +16,10 @@
 package nl.mpi.lamus.spring;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
-import nl.mpi.lamus.spring.LamusProperties;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +65,9 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
+    @Autowired
+    @Qualifier("trashCanBaseDirectory")
+    private File trashCanBaseDirectory;
     @Resource
     @Qualifier("customTypecheckerFolderToConfigFileMap")
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
@@ -99,31 +98,34 @@ public class LamusPropertiesTest {
     public void testPropertiesAreLoaded() {
         
         long expectedDefaultMaxStorageSpaceInBytes = 10L * 1024 * 1024 * 1024;
-        assertEquals(expectedDefaultMaxStorageSpaceInBytes, defaultMaxStorageSpaceInBytes);
+        assertEquals("DefaultMaxStorageSpaceInBytes different from expected", expectedDefaultMaxStorageSpaceInBytes, defaultMaxStorageSpaceInBytes);
         
         int expectedNumberOfDaysOfInactivityAllowedSinceLastSession = 60;
-        assertEquals(expectedNumberOfDaysOfInactivityAllowedSinceLastSession, numberOfDaysOfInactivityAllowedSinceLastSession);
+        assertEquals("NumberOfDaysOfInactivityAllowedSinceLastSession different from expected", expectedNumberOfDaysOfInactivityAllowedSinceLastSession, numberOfDaysOfInactivityAllowedSinceLastSession);
         
         int expectedTotalNumberOfDaysAllowedUntilExpiry = 180;
-        assertEquals(expectedTotalNumberOfDaysAllowedUntilExpiry, totalNumberOfDaysAllowedUntilExpiry);
+        assertEquals("TotalNumberOfDaysAllowedUntilExpiry different from expected", expectedTotalNumberOfDaysAllowedUntilExpiry, totalNumberOfDaysAllowedUntilExpiry);
         
         int expectedNumberOfDaysOfInactivityAllowedSinceLastWarningEmail = 30;
-        assertEquals(expectedNumberOfDaysOfInactivityAllowedSinceLastWarningEmail, numberOfDaysOfInactivityAllowedSinceLastWarningEmail);
+        assertEquals("NumberOfDaysOfInactivityAllowedSinceLastWarningEmail different from expected", expectedNumberOfDaysOfInactivityAllowedSinceLastWarningEmail, numberOfDaysOfInactivityAllowedSinceLastWarningEmail);
         
         long expectedTypeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
-        assertEquals(expectedTypeRecheckSizeLimitInBytes, typeRecheckSizeLimitInBytes);
+        assertEquals("TypeRecheckSizeLimit different from expected", expectedTypeRecheckSizeLimitInBytes, typeRecheckSizeLimitInBytes);
         
         int expectedMaxDirectoryNameLength = 100;
-        assertEquals(expectedMaxDirectoryNameLength, maxDirectoryNameLength);
+        assertEquals("MaxDirectoryNameLength different from expected", expectedMaxDirectoryNameLength, maxDirectoryNameLength);
         
         String expectedCorpusDirectoryBaseName = "Corpusstructure";
-        assertEquals(expectedCorpusDirectoryBaseName, corpusDirectoryBaseName);
+        assertEquals("CorpusDirectoryBaseName different from expected", expectedCorpusDirectoryBaseName, corpusDirectoryBaseName);
         
         String expectedOrphansDirectoryBaseName = "sessions";
-        assertEquals(expectedOrphansDirectoryBaseName, orphansDirectoryBaseName);
+        assertEquals("OrphansDirectoryBaseName different from expected", expectedOrphansDirectoryBaseName, orphansDirectoryBaseName);
         
         String expectedWorkspaceBaseDirectoryPath = "/lat/corpora/lamus/workspaces";
-        assertEquals(expectedWorkspaceBaseDirectoryPath, workspaceBaseDirectory.getPath());
+        assertEquals("WorkspaceBaseDirectory different from expected", expectedWorkspaceBaseDirectoryPath, workspaceBaseDirectory.getPath());
+        
+        String expectedTrashCanBaseDirectoryPath = "/lat/corpora/version_archive";
+        assertEquals("TrashCanBaseDirectory different from expected", expectedTrashCanBaseDirectoryPath, trashCanBaseDirectory.getPath());
         
 //        File typecheckerFolder1 = new File("folder1");
 //        File typecheckerFolder2 = new File("folder2");
@@ -137,6 +139,6 @@ public class LamusPropertiesTest {
         expectedCustomTypecheckerConfigMap.put("folder2", "config_file1");
         expectedCustomTypecheckerConfigMap.put("folder3", "config_file2");
         expectedCustomTypecheckerConfigMap.put("folder4", "config_file2");
-        assertEquals(expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
+        assertEquals("CustomTypecheckerConfigMap different from expected", expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
     }
 }

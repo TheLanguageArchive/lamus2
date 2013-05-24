@@ -21,9 +21,11 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
+import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -49,6 +51,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceDao workspaceDao;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private final WorkspaceImportRunner workspaceImportRunner;
+    private final WorkspaceExportRunner workspaceExportRunner;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
@@ -56,12 +59,13 @@ public class LamusWorkspaceManager implements WorkspaceManager {
 
     @Autowired
     public LamusWorkspaceManager(ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
-        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner) {
+        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
         this.workspaceImportRunner = wsImportRunner;
+        this.workspaceExportRunner = wsExportRunner;
     }
     
     /**
@@ -137,18 +141,39 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#submitWorkspace(int)
      */
-    public void submitWorkspace(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
-        
+    public boolean submitWorkspace(int workspaceID, boolean keepUnlinkedFiles) {
+                
         //TODO workspaceDao - get workspace from DB
         //TODO workspaceFactory (or something else) - set workspace as submitted
+        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
         
-        
+        workspaceExportRunner.setWorkspace(workspace);
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?
         
         //TODO workspaceExportRunner - start export thread
+        
+        Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
+        
+        Boolean isSuccessful;
+        
+        try {
+            isSuccessful = exportResult.get();
+        } catch (InterruptedException iex) {
+            logger.error("The thread was interrupted", iex);
+            
+            //TODO return some error instead??
+            isSuccessful = false;
+        } catch (ExecutionException eex) {
+            logger.error("There was a problem with the thread execution", eex);
+            
+            //TODO return some error instead??
+            isSuccessful = false;
+        }
+        
+        return isSuccessful;
     }
 
     /**
