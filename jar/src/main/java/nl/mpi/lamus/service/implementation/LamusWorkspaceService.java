@@ -18,14 +18,12 @@ package nl.mpi.lamus.service.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @see WorkspaceService
@@ -92,9 +90,9 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
 
     /**
-     * @see WorkspaceService#submitWorkspace(int)
+     * @see WorkspaceService#submitWorkspace(String, int)
      */
-    public boolean submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles) {
+    public boolean submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/) {
 
         //TODO requests in this session?
         //TODO workspace should be initialised / connected
@@ -109,9 +107,7 @@ public class LamusWorkspaceService implements WorkspaceService {
             return false;
         } else {
         
-            //TODO workspaceManager - submit workspace
-            
-            return this.workspaceManager.submitWorkspace(workspaceID, keepUnlinkedFiles);
+            return this.workspaceManager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
         }
     }
 

@@ -49,10 +49,9 @@ public interface WorkspaceManager {
      * (copying the corresponding data back to the archive).
      * 
      * @param workspaceID ID of the workspace to submit
-     * @param keepUnlinkedFiles boolean indicating if unlinked files should be kept
      * @return true if submission was successful
      */
-    public boolean submitWorkspace(int workspaceID, boolean keepUnlinkedFiles);
+    public boolean submitWorkspace(int workspaceID);
     
     /**
      * Opens a workspace, getting the corresponding object from the

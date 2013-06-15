@@ -235,7 +235,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      */
     public void updateWorkspaceStatusMessage(Workspace workspace) {
         
-        logger.debug("Uploading workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
                 + "; setting message to: \"" + workspace.getMessage() + "\"");
         
         String statusStr = null;
@@ -252,6 +252,27 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.info("Status of workspace " + workspace.getWorkspaceID() + " updated to \"" + statusStr
                 + "\" and message updated to \"" + workspace.getMessage() + "\"");
+    }
+    
+    /**
+     * @see WorkspaceDao#updateWorkspaceEndDates(nl.mpi.lamus.workspace.model.Workspace)
+     */
+    public void updateWorkspaceEndDates(Workspace workspace) {
+        
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting end date to: " + workspace.getEndDate()
+                + "; setting session end date to: \"" + workspace.getSessionEndDate() + "\"");
+        
+        String updateSql = "UPDATE workspace SET end_date = :end_date, session_end_date = :session_end_date"
+                + " WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("end_date", workspace.getEndDate())
+                .addValue("session_end_date", workspace.getSessionEndDate())
+                .addValue("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("End date of workspace " + workspace.getWorkspaceID() + " updated to " + workspace.getEndDate()
+                + " and session end date updated to " + workspace.getSessionEndDate());
+
     }
 
     /**

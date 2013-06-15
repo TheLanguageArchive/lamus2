@@ -65,6 +65,10 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public void updateWorkspaceSessionDates(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceSessionDates(workspace);
     }
+    
+    public void updateWorkspaceEndDates(Workspace workspace) {
+        this.getWorkspaceDao().updateWorkspaceEndDates(workspace);
+    }
 
     public void updateWorkspaceStorageSpace(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceStorageSpace(workspace);

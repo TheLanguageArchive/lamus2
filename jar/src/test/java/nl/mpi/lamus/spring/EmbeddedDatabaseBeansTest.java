@@ -17,6 +17,7 @@ package nl.mpi.lamus.spring;
 
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDB;
+import nl.mpi.versioning.manager.VersioningAPI;
 import static org.junit.Assert.assertNotNull;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -40,9 +41,13 @@ public class EmbeddedDatabaseBeansTest {
     @Autowired
     @Qualifier("ArchiveObjectsDB")
     private ArchiveObjectsDBWrite archiveObjectsDBBean;
+    
     @Autowired
     @Qualifier("CorpusStructureDB")
     private CorpusStructureDB corpusStructureDBBean;
+    
+    @Autowired
+    private VersioningAPI versioningAPI;
     
     public EmbeddedDatabaseBeansTest() {
     }
@@ -68,5 +73,6 @@ public class EmbeddedDatabaseBeansTest {
         
         assertNotNull(archiveObjectsDBBean);
         assertNotNull(corpusStructureDBBean);
+        assertNotNull(versioningAPI);
     }
 }

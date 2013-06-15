@@ -24,12 +24,14 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
+import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private final WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceExportRunner workspaceExportRunner;
+    private final DateTimeHelper dateTimeHelper;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
@@ -59,13 +62,15 @@ public class LamusWorkspaceManager implements WorkspaceManager {
 
     @Autowired
     public LamusWorkspaceManager(ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
-        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner) {
+        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
+        DateTimeHelper dtHelper) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
         this.workspaceImportRunner = wsImportRunner;
         this.workspaceExportRunner = wsExportRunner;
+        this.dateTimeHelper = dtHelper;
     }
     
     /**
@@ -126,9 +131,9 @@ public class LamusWorkspaceManager implements WorkspaceManager {
      */
     public boolean deleteWorkspace(int workspaceID) {
         
-        this.workspaceDao.deleteWorkspace(workspaceID);
+        workspaceDao.deleteWorkspace(workspaceID);
         try {
-            this.workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
+            workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
         } catch (IOException ex) {
             String errorMessage = "Problems deleting workspace directory for workspace with ID " + workspaceID;
             logger.error(errorMessage, ex);
@@ -141,14 +146,14 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#submitWorkspace(int)
      */
-    public boolean submitWorkspace(int workspaceID, boolean keepUnlinkedFiles) {
+    public boolean submitWorkspace(int workspaceID/*, boolean keepUnlinkedFiles*/) {
                 
         //TODO workspaceDao - get workspace from DB
         //TODO workspaceFactory (or something else) - set workspace as submitted
-        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
         workspaceExportRunner.setWorkspace(workspace);
-        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+//        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?
@@ -173,6 +178,23 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             isSuccessful = false;
         }
         
+        Date endDate = dateTimeHelper.getCurrentDateTime();
+        workspace.setSessionEndDate(endDate);
+        workspace.setEndDate(endDate);
+        if(isSuccessful) {
+            workspace.setStatus(WorkspaceStatus.SUBMITTED);
+            workspace.setMessage("workspace was successfully submitted");
+            //TODO Set message from properties file
+        } else {
+            workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+            workspace.setMessage("there were errors when submitting the workspace");
+            //TODO Set message from properties file
+            
+            //TODO Maybe an exception would be a better option than a false boolean for an unsuccessful submission
+        }
+        workspaceDao.updateWorkspaceEndDates(workspace);        
+        workspaceDao.updateWorkspaceStatusMessage(workspace);
+        
         return isSuccessful;
     }
 
@@ -181,19 +203,19 @@ public class LamusWorkspaceManager implements WorkspaceManager {
      */
     public Workspace openWorkspace(String userID, int workspaceID) {
         
-        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
         if(workspace != null) {
             if(userID.equals(workspace.getUserID())) {
-                if(this.workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
+                if(workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
                     Calendar calendarNow = Calendar.getInstance();
                     Date now = calendarNow.getTime();
                     workspace.setSessionStartDate(now);
-                    calendarNow.add(Calendar.DATE, this.numberOfDaysOfInactivityAllowedSinceLastSession);
+                    calendarNow.add(Calendar.DATE, numberOfDaysOfInactivityAllowedSinceLastSession);
                     Date nowPlusExpiry = calendarNow.getTime();
                     workspace.setSessionEndDate(nowPlusExpiry);
-                    this.workspaceDao.updateWorkspaceSessionDates(workspace);
-                    workspace = this.workspaceDao.getWorkspace(workspaceID);
+                    workspaceDao.updateWorkspaceSessionDates(workspace);
+                    workspace = workspaceDao.getWorkspace(workspaceID);
                 } else {
                     //TODO Or throw exception?
                     logger.error("LamusWorkspaceManager.openWorkspace: Directory for workpace " + workspaceID +

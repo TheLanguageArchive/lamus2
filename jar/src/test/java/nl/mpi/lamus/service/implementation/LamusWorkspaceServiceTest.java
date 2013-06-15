@@ -209,7 +209,7 @@ public class LamusWorkspaceServiceTest {
             oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.FALSE));
         }});
         
-        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
         assertFalse("Result should be false", result);
     }
     
@@ -222,10 +222,10 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(returnValue(Boolean.FALSE));
         }});
         
-        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
         assertFalse("Result should be false", result);
     }
         
@@ -238,10 +238,10 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(returnValue(Boolean.TRUE));
         }});
         
-        boolean result = service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
         assertTrue("Result should be true", result);
     }
     

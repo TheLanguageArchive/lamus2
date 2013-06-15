@@ -18,6 +18,7 @@ package nl.mpi.lamus.spring;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
+import nl.mpi.versioning.manager.VersioningAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,6 +57,12 @@ public class EmbeddedDatabaseBeans {
     @Qualifier("CorpusStructureDB")
     public CorpusStructureDB corpusStructureDB() {
         return corpusStructureDBWrite();
+    }
+    
+    @Bean
+    public VersioningAPI versioningAPI() {
+        corpusStructureDBWrite();
+        return new VersioningAPI("jdbc:hsqldb:mem:corpusstructure", "", "");
     }
     
     /**

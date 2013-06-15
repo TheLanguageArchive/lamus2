@@ -69,6 +69,14 @@ public interface WorkspaceDao {
     public void updateWorkspaceStatusMessage(Workspace workspace);
     
     /**
+     * Updates the session end date and the end date of the given workspace
+     * in order to finalise it.
+     * 
+     * @param workspace workspace object already with the updated end dates
+     */
+    public void updateWorkspaceEndDates(Workspace workspace);
+    
+    /**
      * Retrieves the workspace with the given ID.
      * 
      * @param workspaceID ID of the workspace to retrieve
