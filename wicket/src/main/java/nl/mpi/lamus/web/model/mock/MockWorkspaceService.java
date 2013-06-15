@@ -65,7 +65,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      * @param workspaceID ID of the workspace
      */
     @Override
-    public boolean submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles) {
+    public boolean submitWorkspace(String userID, int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
