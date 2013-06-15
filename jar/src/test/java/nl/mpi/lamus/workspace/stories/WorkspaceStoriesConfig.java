@@ -44,6 +44,7 @@ import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
 import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
+import nl.mpi.versioning.manager.VersioningAPI;
 import org.delaman.ldap.ArchiveUserAuthImpl;
 import org.hibernate.SessionFactory;
 import org.jbehave.core.configuration.spring.SpringStoryReporterBuilder;
@@ -125,6 +126,17 @@ public class WorkspaceStoriesConfig {
                 .build();
     }
     
+    private VersioningAPI versioningAPI;
+    
+    @Bean
+    public VersioningAPI versioningAPI() {
+        corpusStructureDBWrite();
+        if(versioningAPI == null) {
+            versioningAPI = new VersioningAPI("jdbc:hsqldb:mem:corpusstructure");
+        }
+        return versioningAPI;
+    }
+    
     @Bean
     @Qualifier
     public DataSource amsDataSource() {
@@ -140,6 +152,7 @@ public class WorkspaceStoriesConfig {
                 .setName("ams2")
                 .addScript("classpath:hsql_ams2_drop.sql")
                 .addScript("classpath:hsql_ams2_create.sql")
+                .addScript("classpath:hsql_ams2_insert.sql")
                 .build();
     }
     
@@ -502,6 +515,15 @@ public class WorkspaceStoriesConfig {
         File workspaceBaseFolder = testFolder.newFolder("workspaceFolders");
         workspaceBaseFolder.mkdirs();
         return workspaceBaseFolder;
+    }
+    
+    @Bean
+    @Qualifier("trashCanBaseDirectory")
+    public File trashCanBaseDirectory() throws IOException {
+        testFolder.create();
+        File trashcanBaseFolder = testFolder.newFolder("trashcanFolder");
+        trashcanBaseFolder.mkdirs();
+        return trashcanBaseFolder;
     }
     
     @Bean
