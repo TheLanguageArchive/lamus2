@@ -1,3 +1,9 @@
+INSERT INTO "principal" VALUES(0,'system.lat.ams2@mpi.nl','system','USR','MPINLA','ams2/ldap',NULL,NULL,NULL,0,NOW(),0,NOW());
+INSERT INTO "user" VALUES(0,'system','latadmin@mpi.nl','mpi 4 psycholinguistics','wundtlaan 1\n6525 xd nijmegen\nthe netherlands','somepassword',0,NOW(),0,NOW());
+
+INSERT INTO "principal" VALUES(-1,'everybody','-== EVERYBODY ==-','ALL','MPINLA','ams2/ldap',NULL,NULL,NULL,0,NOW(),0,NOW());
+INSERT INTO "principal" VALUES(-2,'anyAuthenticatedUser','-== REGISTERED USERS ==-','ALL','MPINLA','ams2/ldap',NULL,NULL,NULL,0,NOW(),0,NOW());
+
 INSERT INTO "rule" VALUES(000, 'AM',    '0001', '0011', -100, 'Archive Manager',  0, now(), 0, now());
 INSERT INTO "rule" VALUES(100, 'DC',    '0110', '0001',  -80, 'Domain Curator',   0, now(), 0, now());
 INSERT INTO "rule" VALUES(110, 'DM',    '0110', '0001',  -60, 'Domain Manager',   0, now(), 0, now());
