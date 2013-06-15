@@ -15,16 +15,27 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
+import org.jmock.States;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,14 +51,19 @@ import org.junit.Rule;
  */
 public class WorkspaceExportRunnerTest {
     
+    Synchroniser synchroniser = new Synchroniser();
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(synchroniser);
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
-    
-    @Mock ArchiveFileHelper mockArchiveFileHelper;
+    @Mock Workspace mockWorkspace;
     @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeExporterFactory mockNodeExporterFactory;
     
+    @Mock NodeExporter mockNodeExporter;
+    
+    private WorkspaceExportRunner workspaceExportRunner;
     
     public WorkspaceExportRunnerTest() {
     }
@@ -62,6 +78,8 @@ public class WorkspaceExportRunnerTest {
     
     @Before
     public void setUp() {
+        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory);
+        workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
     @After
@@ -72,25 +90,27 @@ public class WorkspaceExportRunnerTest {
     /**
      * Test of call method, of class WorkspaceExportRunner.
      */
-//    @Test
-    public void testCall() {
-        
-        fail("not implemented yet");
+    @Test
+    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException {
         
         final int workspaceID = 1;
-        Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
         
-//        final int testChildWorkspaceNodeID = 10;
-//        final int testChildArchiveID = 100;
-//        final OurURL testChildURL = new OurURL("http://some.url/node.something");
-//        final String testDisplayValue = "someName";
-//        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-//        final String testNodeFormat = "";
-//        final URI testSchemaLocation = new URI("http://some.location");
-//        final String testPid = "somePID";
-//        final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
-//                testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
-//        
+        
+        
+        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
+        
+        final int testChildWorkspaceNodeID = 10;
+        final int testChildArchiveID = 100;
+        final URL testChildURL = new URL("http://some.url/node.something");
+        final String testDisplayValue = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final String testPid = "somePID";
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testChildArchiveID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, testChildURL, testChildURL, testChildURL, WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
+        
+        workspaceNodes.add(testNode);
         
         //1.0 synchronise files in the workspace with the lamus database
             // NOT necessary in the new lamus... every action in the workspace should be immediately reflected in the database
@@ -101,11 +121,20 @@ public class WorkspaceExportRunnerTest {
         //2.9 get the default prefix (path) for sessions
             //TODO NOW
         
+        final States exporting = context.states("exporting");
+        
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID);
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
+                when(exporting.isNot("finished"));
             
-            //oneOf(mockArchiveFileHelper).
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(testNode); will(returnValue(mockNodeExporter));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporter).exportNode(testNode);
+                then(exporting.is("finished"));
         }});
         
         // update message according to what's being done?
@@ -144,5 +173,22 @@ public class WorkspaceExportRunnerTest {
         
         //7 update user, ingest request information and send email
         
+        
+        boolean result = executeRunner();
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+        
+        assertTrue("Execution result should have been successful (true)", result);
+    }
+    
+    private boolean executeRunner() throws InterruptedException, ExecutionException {
+        
+//        TaskExecutor executor = new SimpleAsyncTaskExecutor();
+//        executor.execute(workspaceImportRunner);
+        
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Boolean> result = executorService.submit(workspaceExportRunner);
+        return result.get();
     }
 }

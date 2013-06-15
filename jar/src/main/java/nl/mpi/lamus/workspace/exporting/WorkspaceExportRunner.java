@@ -15,8 +15,12 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,9 +30,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkspaceExportRunner implements Callable<Boolean> {
 
+    private WorkspaceDao workspaceDao;
+    private NodeExporterFactory nodeExporterFactory;
+    
     private Workspace workspace;
     private boolean keepUnlinkedFiles;
 
+    @Autowired
+    public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory) {
+        this.workspaceDao = wsDao;
+        this.nodeExporterFactory = exporterFactory;
+    }
+    
     /**
      * Setter for the workspace to submit
      * @param ws workspace to be used for the export
@@ -46,8 +59,6 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     }
     
     public Boolean call() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
         
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)
@@ -77,6 +88,17 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         
         //7 update user, ingest request information and send email
         
+        
+        Collection<WorkspaceNode> workspaceNodes = workspaceDao.getNodesForWorkspace(workspace.getWorkspaceID());
+        
+        for(WorkspaceNode currentNode : workspaceNodes) {
+            
+            NodeExporter currentNodeExporter = nodeExporterFactory.getNodeExporterForNode(currentNode);
+            currentNodeExporter.exportNode(currentNode);
+        }
+        
+        
+        return Boolean.TRUE;
     }
 
 }
