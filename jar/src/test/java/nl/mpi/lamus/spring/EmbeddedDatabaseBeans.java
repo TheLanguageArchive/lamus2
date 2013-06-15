@@ -62,7 +62,7 @@ public class EmbeddedDatabaseBeans {
     @Bean
     public VersioningAPI versioningAPI() {
         corpusStructureDBWrite();
-        return new VersioningAPI("jdbc:hsqldb:mem:corpusstructure", "", "");
+        return new VersioningAPI("jdbc:hsqldb:mem:corpusstructure", "sa", "");
     }
     
     /**
