@@ -30,20 +30,20 @@ import org.slf4j.LoggerFactory;
  * Collection of service methods that are used to retrieve nodes with the
  * intent of representing them graphically (using a WorkspaceTreeNode instead of
  * just a WorkspaceNode)
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class MockWorkspaceService implements WorkspaceTreeService {
-    
+
 //@SpringBean(name = "workspaceTreeNode")
     private WorkspaceTreeNode workspaceTreeNode;
     private static Logger logger = LoggerFactory.getLogger(MockWorkspaceService.class);
     private final Workspace workspace;
 
     public MockWorkspaceService(Workspace workspace, WorkspaceTreeNode workspaceTreeNode) {
-        logger.info("call to constructor MockWorkspaceService({})", workspace);
-        this.workspace = workspace;
-        this.workspaceTreeNode = workspaceTreeNode;
+	logger.info("call to constructor MockWorkspaceService({})", workspace);
+	this.workspace = workspace;
+	this.workspaceTreeNode = workspaceTreeNode;
     }
 
     /**
@@ -55,18 +55,21 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public Workspace createWorkspace(String userID, int archiveNodeID) {
-        logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
-        return workspace;
+	logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
+	return workspace;
     }
 
     /**
      * Submits a workspace back into the archive.
      *
+     * @param userID ID of the user
      * @param workspaceID ID of the workspace
+     * @return true if successfully submitted
      */
     @Override
     public boolean submitWorkspace(String userID, int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	logger.info("call to submitWorkspace({}, {})", userID, workspaceID);
+	return true;
     }
 
     /**
@@ -77,8 +80,8 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public Workspace getWorkspace(int workspaceID) {
-        logger.info("call to getWorkspace({})", workspaceID);
-        return workspace;
+	logger.info("call to getWorkspace({})", workspaceID);
+	return workspace;
     }
 
     /**
@@ -90,12 +93,12 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
-        Workspace myNewMockWorkspace = new MockWorkspace();
-        myNewMockWorkspace.setWorkspaceID(1);
-        Workspace myNewMockWorkspace2 = new MockWorkspace();
-        myNewMockWorkspace2.setWorkspaceID(2);
+	Workspace myNewMockWorkspace = new MockWorkspace();
+	myNewMockWorkspace.setWorkspaceID(1);
+	Workspace myNewMockWorkspace2 = new MockWorkspace();
+	myNewMockWorkspace2.setWorkspaceID(2);
 
-        return Arrays.asList(myNewMockWorkspace, myNewMockWorkspace2);
+	return Arrays.asList(myNewMockWorkspace, myNewMockWorkspace2);
     }
 
     /**
@@ -107,8 +110,8 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public Workspace openWorkspace(String userID, int workspaceID) {
-        logger.info("call to getWorkspace({})", workspaceID);
-        return workspace;
+	logger.info("call to getWorkspace({})", workspaceID);
+	return workspace;
     }
 
     /**
@@ -119,7 +122,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public WorkspaceNode getNode(int nodeID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -131,7 +134,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -142,7 +145,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public void deleteWorkspace(String userID, int workspaceID) {
-        //DO something;
+	//DO something;
     }
 
     /**
@@ -154,7 +157,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      */
     @Override
     public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode) {
-        return workspaceTreeNode;
+	return workspaceTreeNode;
 
 
     }
