@@ -598,7 +598,7 @@ public class WorkspaceSteps {
         File topNodeFile = new File(workspaceDirectory, nodeID + ".cmdi");
         assertTrue("File for node " + nodeID + " should have been created", topNodeFile.exists());
         int resourceNodeID = nodeID + 1;
-        File resourceFile = new File(workspaceDirectory, resourceNodeID + ".cmdi");
+        File resourceFile = new File(workspaceDirectory, resourceNodeID + ".pdf");
         assertTrue("File for resource " + resourceNodeID + " should have been created", resourceFile.exists());
         
         // metadata

@@ -17,10 +17,12 @@ package nl.mpi.lamus.workspace.stories;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.sql.DataSource;
+import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWrite;
@@ -135,6 +137,26 @@ public class WorkspaceStoriesConfig {
             versioningAPI = new VersioningAPI("jdbc:hsqldb:mem:corpusstructure");
         }
         return versioningAPI;
+    }
+    
+    private SearchClient searchClient;
+    
+    @Bean
+    public SearchClient searchClient() throws SQLException {
+        if(searchClient == null) {
+            corpusStructureDBWrite();
+            createAnnexDB();
+            searchClient = new SearchClient("jdbc:hsqldb:mem:corpusstructure", "sa", "", null, "jdbc:hsqldb:mem:annex", "sa", "");
+        }
+        return searchClient;
+    }
+    
+    private void createAnnexDB() {
+        new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.HSQL)
+                .setName("annex")
+                //TODO Run scripts with proper database structure
+                .build();
     }
     
     @Bean
