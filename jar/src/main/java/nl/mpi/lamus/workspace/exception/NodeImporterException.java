@@ -16,7 +16,6 @@
 package nl.mpi.lamus.workspace.exception;
 
 import nl.mpi.lamus.workspace.importing.NodeImporter;
-import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
@@ -26,9 +25,9 @@ public class NodeImporterException extends WorkspaceException {
     
     private Class<? extends NodeImporter> nodeImporterType;
     
-    public NodeImporterException(String message, Workspace workspace, Class<? extends NodeImporter> nodeImporterType,
+    public NodeImporterException(String message, int workspaceID, Class<? extends NodeImporter> nodeImporterType,
             Throwable cause) {
-        super(message, workspace, cause);
+        super(message, workspaceID, cause);
         this.nodeImporterType = nodeImporterType;
     }
     

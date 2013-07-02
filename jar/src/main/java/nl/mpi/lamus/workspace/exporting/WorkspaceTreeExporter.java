@@ -3,7 +3,8 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,15 +16,16 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
+
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
-public interface SearchClientBridge {
+public interface WorkspaceTreeExporter {
     
-    public void addNode(int archiveNodeID);
     
-    public void removeNode(int archiveNodeID);
+    public void explore(Workspace workspace, WorkspaceNode node);
     
-    public boolean isFormatSearchable(String format);
 }

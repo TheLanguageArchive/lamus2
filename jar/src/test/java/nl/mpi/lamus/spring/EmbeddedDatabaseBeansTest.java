@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.spring;
 
+import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.versioning.manager.VersioningAPI;
@@ -49,6 +50,9 @@ public class EmbeddedDatabaseBeansTest {
     @Autowired
     private VersioningAPI versioningAPI;
     
+    @Autowired
+    private SearchClient searchClient;
+    
     public EmbeddedDatabaseBeansTest() {
     }
 
@@ -74,5 +78,6 @@ public class EmbeddedDatabaseBeansTest {
         assertNotNull(archiveObjectsDBBean);
         assertNotNull(corpusStructureDBBean);
         assertNotNull(versioningAPI);
+        assertNotNull(searchClient);
     }
 }

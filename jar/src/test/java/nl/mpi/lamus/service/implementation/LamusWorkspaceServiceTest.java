@@ -128,7 +128,8 @@ public class LamusWorkspaceServiceTest {
         
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -136,7 +137,7 @@ public class LamusWorkspaceServiceTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -154,9 +155,9 @@ public class LamusWorkspaceServiceTest {
         
         final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
-        Workspace workspace1 = new LamusWorkspace(1, userID, 0, new URL("http://some/url/node.cmdi"),
+        Workspace workspace1 = new LamusWorkspace(1, userID, 10, 0, new URL("http://some/url/node.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
-        Workspace workspace2 = new LamusWorkspace(2, userID, 1, new URL("http://someother/url/node.cmdi"),
+        Workspace workspace2 = new LamusWorkspace(2, userID, 11, 1, new URL("http://someother/url/node.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         final Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace1);
@@ -177,7 +178,8 @@ public class LamusWorkspaceServiceTest {
         
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -185,7 +187,7 @@ public class LamusWorkspaceServiceTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{

@@ -76,17 +76,18 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
      * The import process is started in a separate thread.
      * The nodes will be explored and copied, starting with the top node.
      */
+    @Override
     public Boolean call() throws NodeImporterException, NodeExplorerException {
         
         //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
         
-        topNodeImporter.setWorkspace(workspace);
+//        topNodeImporter.setWorkspace(workspace);
         
         try {
             //TODO create some other method that takes something else than a Reference
             // or have a separate method for importing the top node
 //            topNodeImporter.importNode(null, null, null, topNodeArchiveID);
-            topNodeImporter.importNode(topNodeArchiveID);
+            topNodeImporter.importNode(workspace.getWorkspaceID(), topNodeArchiveID);
 
             
             //TODO import successful? notify main thread, change workspace status, etc...

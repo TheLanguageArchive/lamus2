@@ -32,6 +32,7 @@ public class LamusWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
+    private int topNodeArchiveID;
     private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
@@ -67,7 +68,7 @@ public class LamusWorkspace implements Workspace {
      * 
      * @param workspaceID
      * @param userID
-     * @param topNodeID
+     * @param topNodeArchiveID
      * @param topNodeArchiveURL
      * @param startDate
      * @param endDate
@@ -79,12 +80,13 @@ public class LamusWorkspace implements Workspace {
      * @param message
      * @param archiveInfo 
      */
-    public LamusWorkspace(int workspaceID, String userID, int topNodeID, URL topNodeArchiveURL,
+    public LamusWorkspace(int workspaceID, String userID, int topNodeID, int topNodeArchiveID, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
+        this.topNodeArchiveID = topNodeArchiveID;
         this.topNodeArchiveURL = topNodeArchiveURL;
         if(startDate != null) {
             this.startDate = (Date) startDate.clone();
@@ -105,38 +107,57 @@ public class LamusWorkspace implements Workspace {
         this.archiveInfo = archiveInfo;
     }
     
+    @Override
     public int getWorkspaceID() {
         return this.workspaceID;
     }
     
+    @Override
     public void setWorkspaceID(int workspaceID) {
         this.workspaceID = workspaceID;
     }
 
+    @Override
     public String getUserID() {
         return this.userID;
     }
     
+    @Override
     public void setUserID(String userID) {
         this.userID = userID;
     }
     
+    @Override
     public int getTopNodeID() {
         return this.topNodeID;
     }
-
+    
+    @Override
     public void setTopNodeID(int topNodeID) {
         this.topNodeID = topNodeID;
     }
     
+    @Override
+    public int getTopNodeArchiveID() {
+        return this.topNodeArchiveID;
+    }
+
+    @Override
+    public void setTopNodeArchiveID(int topNodeArchiveID) {
+        this.topNodeArchiveID = topNodeArchiveID;
+    }
+    
+    @Override
     public URL getTopNodeArchiveURL() {
         return this.topNodeArchiveURL;
     }
     
+    @Override
     public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
         this.topNodeArchiveURL = topNodeArchiveURL;
     }
 
+    @Override
     public Date getStartDate() {
         Date toReturn = null;
         if(this.startDate != null) {
@@ -145,6 +166,7 @@ public class LamusWorkspace implements Workspace {
         return toReturn;
     }
     
+    @Override
     public void setStartDate(Date startDate) {
         Date toSet = null;
         if(startDate != null) {
@@ -153,6 +175,7 @@ public class LamusWorkspace implements Workspace {
         this.startDate = toSet;
     }
 
+    @Override
     public Date getEndDate() {
         Date toReturn = null;
         if(this.endDate != null) {
@@ -161,6 +184,7 @@ public class LamusWorkspace implements Workspace {
         return toReturn;
     }
     
+    @Override
     public void setEndDate(Date endDate) {
         Date toSet = null;
         if(endDate != null) {
@@ -169,6 +193,7 @@ public class LamusWorkspace implements Workspace {
         this.endDate = toSet;
     }
 
+    @Override
     public Date getSessionStartDate() {
         Date toReturn = null;
         if(this.sessionStartDate != null) {
@@ -177,6 +202,7 @@ public class LamusWorkspace implements Workspace {
         return toReturn;
     }
     
+    @Override
     public void setSessionStartDate(Date sessionStartDate) {
         Date toSet = null;
         if(sessionStartDate != null) {
@@ -185,6 +211,7 @@ public class LamusWorkspace implements Workspace {
         this.sessionStartDate = toSet;
     }
 
+    @Override
     public Date getSessionEndDate() {
         Date toReturn = null;
         if(this.sessionEndDate != null) {
@@ -193,6 +220,7 @@ public class LamusWorkspace implements Workspace {
         return toReturn;
     }
     
+    @Override
     public void setSessionEndDate(Date sessionEndDate) {
         Date toSet = null;
         if(sessionEndDate != null) {
@@ -209,60 +237,73 @@ public class LamusWorkspace implements Workspace {
 //        throw new UnsupportedOperationException("not yet implemented");
 //    }
     
+    @Override
     public long getUsedStorageSpace() {
         return this.usedStorageSpace;
     }
 
+    @Override
     public void setUsedStorageSpace(long usedStorageSpace) {
         this.usedStorageSpace = usedStorageSpace;
     }
 
+    @Override
     public long getMaxStorageSpace() {
         return this.maxStorageSpace;
     }
 
+    @Override
     public void setMaxStorageSpace(long maxStorageSpace) {
         this.maxStorageSpace = maxStorageSpace;
     }
         
+    @Override
     public WorkspaceStatus getStatus() {
         return this.status;
     }
 
+    @Override
     public void setStatus(WorkspaceStatus status) {
         this.status = status;
     }
 
+    @Override
     public String getMessage() {
         return this.message;
     }
 
+    @Override
     public void setMessage(String message) {
         this.message = message;
     }
     
+    @Override
     public void setStatusMessageInitialising() {
         setStatus(WorkspaceStatus.INITIALISING);
         setMessage("Workspace initialising");
         //TODO Change message, move to properties file
     }
 
+    @Override
     public void setStatusMessageErrorDuringInitialisation() {
         setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
         setMessage("Error during initialisation");
         //TODO Change message, move to properties file
     }
     
+    @Override
     public void setStatusMessageInitialised() {
         setStatus(WorkspaceStatus.INITIALISED);
         setMessage("Workspace successfully initialised");
         //TODO Change message, move to properties file
     }
 
+    @Override
     public String getArchiveInfo() {
         return this.archiveInfo;
     }
 
+    @Override
     public void setArchiveInfo(String archiveInfo) {
         this.archiveInfo = archiveInfo;
     }
@@ -277,6 +318,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID)
                 .append(this.userID)
                 .append(this.topNodeID)
+                .append(this.topNodeArchiveID)
                 .append(this.topNodeArchiveURL)
                 .append(this.startDate)
                 .append(this.endDate)
@@ -314,6 +356,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID, other.getWorkspaceID())
                 .append(this.userID, other.getUserID())
                 .append(this.topNodeID, other.getTopNodeID())
+                .append(this.topNodeArchiveID, other.getTopNodeArchiveID())
                 .append(this.topNodeArchiveURL, other.getTopNodeArchiveURL())
                 .append(this.startDate, other.getStartDate())
                 .append(this.endDate, other.getEndDate())
@@ -332,7 +375,7 @@ public class LamusWorkspace implements Workspace {
     public String toString() {
         
         String stringResult = "Workspace ID: " + this.workspaceID + ", User ID: " + this.userID +
-                ", Top Node ID: " + this.topNodeID + ", Top Node Archive URL: " + this.topNodeArchiveURL +
+                ", Top Node ID: " + this.topNodeID + ", Top Node Archive ID: " + this.topNodeArchiveID + ", Top Node Archive URL: " + this.topNodeArchiveURL +
                 ", Start Date: " + this.startDate + ", End Date: " + this.endDate +
                 ", Session Start Date: " + this.sessionStartDate + ", Session End Date: " + this.sessionEndDate +
                 ", Used Storage Space: " + this.usedStorageSpace + ", Max Storage Space: " + this.maxStorageSpace +

@@ -58,6 +58,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         this.keepUnlinkedFiles = keepUnlinkedFiles;
     }
     
+    @Override
     public Boolean call() {
         
         //1. save imdi files - NOT NEEDED (?)
@@ -89,13 +90,32 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         //7 update user, ingest request information and send email
         
         
-        Collection<WorkspaceNode> workspaceNodes = workspaceDao.getNodesForWorkspace(workspace.getWorkspaceID());
+//        Collection<WorkspaceNode> workspaceNodes = workspaceDao.getNodesForWorkspace(workspace.getWorkspace());
+//        
+//        for(WorkspaceNode currentNode : workspaceNodes) {
+//            
+//            NodeExporter currentNodeExporter = nodeExporterFactory.getNodeExporterForNode(currentNode);
+//            currentNodeExporter.exportNode(currentNode);
+//        }
         
-        for(WorkspaceNode currentNode : workspaceNodes) {
-            
-            NodeExporter currentNodeExporter = nodeExporterFactory.getNodeExporterForNode(currentNode);
-            currentNodeExporter.exportNode(currentNode);
-        }
+        WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
+//        workspaceTreeExporter.explore(topNode);
+        
+        NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
+        topNodeExporter.exportNode(null, topNode);
+        
+        
+        //TODO cleanup WS DB / filesystem
+        
+        //TODO call crawler
+        
+        //TODO fix permissions
+        
+        //TODO call AMS recalculation
+        
+        
+        //update user/request information and send email
+
         
         
         return Boolean.TRUE;

@@ -58,6 +58,8 @@ public class LamusWorkspaceNodeExplorerTest {
     
     @Mock private Workspace mockWorkspace;
     
+    private final int workspaceID = 1;
+    
     public LamusWorkspaceNodeExplorerTest() {
     }
 
@@ -110,12 +112,13 @@ public class LamusWorkspaceNodeExplorerTest {
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
                 
-                oneOf (mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
+                oneOf(mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
                 
-                oneOf (mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
-                oneOf (mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
-                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
-                oneOf (mockNodeImporter).importNode(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
+                oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
+                oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
+//                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
+                oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
+                oneOf(mockNodeImporter).importNode(workspaceID, mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
                 
                 current++;
             }
@@ -123,7 +126,7 @@ public class LamusWorkspaceNodeExplorerTest {
         }});
 
         
-        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+        nodeExplorer.explore(mockNodeToExplore, mockNodeDocument, testLinks);
         
     }
     

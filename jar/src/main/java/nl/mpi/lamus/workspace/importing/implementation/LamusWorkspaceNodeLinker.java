@@ -47,7 +47,7 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
         this.workspaceDao = wDao;
     }
 
-    public void linkNodes(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
         
         
         
@@ -56,7 +56,10 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
 
 	//TODO set top node ID in workspace (if reference is null), set workspace status / Save workspace
 	if (parentNodeReference == null) { //TODO find a better way of indicating this
-	    workspace.setTopNodeID(childNode.getWorkspaceNodeID());
+            
+            Workspace workspace = workspaceDao.getWorkspace(childNode.getWorkspaceID());
+            workspace.setTopNodeID(childNode.getWorkspaceNodeID());
+	    workspace.setTopNodeArchiveID(childNode.getArchiveNodeID());
 	    workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
 	    workspaceDao.updateWorkspaceTopNode(workspace);
 	} else {

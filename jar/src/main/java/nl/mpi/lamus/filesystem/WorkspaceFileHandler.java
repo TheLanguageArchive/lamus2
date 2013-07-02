@@ -37,22 +37,30 @@ public interface WorkspaceFileHandler {
      * @param workspaceNode node corresponding to the file
      * @param metadataAPI instance of the MetadataAPI
      * @param metadataDocument MetadataDocument corresponding to the file
-     * @param nodeFile File object corresponding to the file
-     * @param nodeFileStreamResult StreamResult object corresponding to the file
+     * @param originNodeFile File object corresponding to the file
+     * @param targetNodeFileStreamResult StreamResult object corresponding to the file
      * @throws FailedToCreateWorkspaceNodeFileException if there is some problem with the file copy
      */
-    public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
-            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile,
-            StreamResult nodeFileStreamResult)
+    
+    //TODO REVIEW THESE METHODS
+    
+    
+    public void copyMetadataFile(WorkspaceNode workspaceNode,
+            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile,
+            StreamResult targetNodeFileStreamResult)
             throws WorkspaceNodeFilesystemException;
-
+    
+    public void copyResourceFile(WorkspaceNode workspaceNode,
+            File originNodeFile, File targetNodeFile)
+            throws WorkspaceNodeFilesystemException;
+    
     /**
      * Gets a StreamResult object based on the given file.
      * 
      * @param nodeFile file with which to construct the StreamResult
      * @return StreamResult object
      */
-    public StreamResult getStreamResultForWorkspaceNodeFile(File nodeFile);
+    public StreamResult getStreamResultForNodeFile(File nodeFile);
     
     /**
      * Construct a File object corresponding to the given node.

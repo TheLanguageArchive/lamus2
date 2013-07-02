@@ -50,66 +50,87 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
 	return this.workspaceDao;
     }
     
+    @Override
     public void addWorkspace(Workspace workspace) {
         this.getWorkspaceDao().addWorkspace(workspace);
     }
     
+    @Override
     public void deleteWorkspace(int workspaceID) {
         this.getWorkspaceDao().deleteWorkspace(workspaceID);
     }
 
+    @Override
     public void updateWorkspaceTopNode(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceTopNode(workspace);
     }
 
+    @Override
     public void updateWorkspaceSessionDates(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceSessionDates(workspace);
     }
     
+    @Override
     public void updateWorkspaceEndDates(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceEndDates(workspace);
     }
 
+    @Override
     public void updateWorkspaceStorageSpace(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceStorageSpace(workspace);
     }
 
+    @Override
     public void updateWorkspaceStatusMessage(Workspace workspace) {
         this.getWorkspaceDao().updateWorkspaceStatusMessage(workspace);
     }
 
+    @Override
     public Workspace getWorkspace(int workspaceID) {
         return this.getWorkspaceDao().getWorkspace(workspaceID);
     }
 
+    @Override
     public Collection<Workspace> listWorkspacesForUser(String userID) {
         return this.getWorkspaceDao().listWorkspacesForUser(userID);
     }
 
+    @Override
     public boolean isNodeLocked(int archiveNodeID) {
         return this.getWorkspaceDao().isNodeLocked(archiveNodeID);
     }
 
+    @Override
     public void addWorkspaceNode(WorkspaceNode node) {
         this.getWorkspaceDao().addWorkspaceNode(node);
     }
 
+    @Override
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
         return this.getWorkspaceDao().getWorkspaceNode(workspaceNodeID);
     }
     
+    @Override
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID) {
+        return this.getWorkspaceDao().getWorkspaceTopNode(workspaceID);
+    }
+    
+    @Override
     public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID) {
         return this.getWorkspaceDao().getNodesForWorkspace(workspaceID);
     }
 
+    @Override
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID) {
         return this.getWorkspaceDao().getChildWorkspaceNodes(workspaceNodeID);
     }
 
+    @Override
     public void updateNodeWorkspaceURL(WorkspaceNode node) {
         this.getWorkspaceDao().updateNodeWorkspaceURL(node);
     }
 
+    @Override
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink) {
         this.getWorkspaceDao().addWorkspaceNodeLink(nodeLink);
     }

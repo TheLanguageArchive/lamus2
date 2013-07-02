@@ -26,7 +26,7 @@ import nl.mpi.metadata.api.model.MetadataDocument;
  */
 public interface WorkspaceFileImporter {
     
-    public void importMetadataFileToWorkspace(Workspace workspace, WorkspaceNode node, MetadataDocument document)
+    public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument document)
             throws WorkspaceNodeFilesystemException;
     
 }

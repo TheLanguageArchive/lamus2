@@ -53,6 +53,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     /**
      * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, int, java.net.URL)
      */
+    @Override
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
@@ -61,10 +62,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         return node;
     }
 
-    public WorkspaceNode getNewWorkspaceMetadataNode(Workspace workspace, int archiveNodeID, MetadataDocument document)
+    @Override
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, MetadataDocument document)
             throws MalformedURLException {
         
-        WorkspaceNode node = new LamusWorkspaceNode(workspace.getWorkspaceID(), archiveNodeID,
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID,
                 document.getFileLocation().toURL(), document.getFileLocation().toURL());
         node.setName(document.getDisplayValue());
         node.setTitle(document.getDisplayValue());
@@ -85,12 +87,13 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         return node;
     }
     
-    public WorkspaceNode getNewWorkspaceResourceNode(Workspace workspace, int archiveNodeID, URL url,
+    @Override
+    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
             Reference resourceReference, WorkspaceNodeType type, String mimetype) {
         
         String name = this.archiveFileHelper.getFileTitle(url.toString());
         
-        WorkspaceNode node = new LamusWorkspaceNode(workspace.getWorkspaceID(), archiveNodeID,
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID,
                 url, url);
         node.setName(name);
         node.setTitle("(type=" + mimetype + ")");

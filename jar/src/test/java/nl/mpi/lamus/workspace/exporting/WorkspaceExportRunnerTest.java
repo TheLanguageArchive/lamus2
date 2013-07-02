@@ -59,6 +59,7 @@ public class WorkspaceExportRunnerTest {
     
     @Mock Workspace mockWorkspace;
     @Mock WorkspaceDao mockWorkspaceDao;
+//    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock NodeExporterFactory mockNodeExporterFactory;
     
     @Mock NodeExporter mockNodeExporter;
@@ -127,13 +128,17 @@ public class WorkspaceExportRunnerTest {
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(exporting.isNot("finished"));
-            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
+//            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(testNode); will(returnValue(mockNodeExporter));
+//            oneOf(mockWorkspaceTreeExporter).explore(testNode);
+//                then(exporting.is("finished"));
+                
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(testNode);
+            oneOf(mockNodeExporter).exportNode(null, testNode);
                 then(exporting.is("finished"));
         }});
         

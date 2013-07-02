@@ -13,17 +13,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.exporting;
+package nl.mpi.lamus.archive;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface SearchClientBridge {
+public interface ArchiveFileLocationProvider {
     
-    public void addNode(int archiveNodeID);
+//    public File getNextAvailableMetadataFile(URL parentArchiveURL, String childNodeName, URL childOriginURL);
     
-    public void removeNode(int archiveNodeID);
-    
-    public boolean isFormatSearchable(String format);
+    //TODO HOW WILL THIS METHOD BE?
+    public File getAvailableFile(String parentNodePath, String filename) throws IOException;
 }

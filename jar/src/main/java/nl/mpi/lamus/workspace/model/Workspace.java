@@ -37,6 +37,10 @@ public interface Workspace extends Serializable {
     
     public void setTopNodeID(int topNodeID);
     
+    public int getTopNodeArchiveID();
+    
+    public void setTopNodeArchiveID(int topNodeArchiveID);
+    
     public URL getTopNodeArchiveURL();
     
     public void setTopNodeArchiveURL(URL topNodeArchiveURL);

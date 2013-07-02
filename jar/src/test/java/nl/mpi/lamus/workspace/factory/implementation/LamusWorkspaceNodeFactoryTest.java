@@ -98,6 +98,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final String userID = "someUser";
         final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://top.url");
         final Date startDate = Calendar.getInstance().getTime();
         final Date endDate = null;
@@ -108,7 +109,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final String archiveInfo = "info...";
         
         final Workspace testWorkspace = new LamusWorkspace(
-                workspaceID, userID, topNodeID, topNodeArchiveURL, startDate, endDate, startDate, endDate,
+                workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL, startDate, endDate, startDate, endDate,
                 usedSpace, maxSpace, status, message, archiveInfo);
         
         final int nodeArchiveID = 100;
@@ -141,7 +142,7 @@ public class LamusWorkspaceNodeFactoryTest {
             oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getHandle(); will(returnValue(pid));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(testWorkspace, nodeArchiveID,
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveID,
                 mockTestReferencingMetadataDocumentHandleCarrier);
         
         assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);

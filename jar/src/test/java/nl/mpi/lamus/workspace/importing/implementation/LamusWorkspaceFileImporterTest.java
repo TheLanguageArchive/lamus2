@@ -94,41 +94,44 @@ public class LamusWorkspaceFileImporterTest {
         context.checking(new Expectations() {{
         
             oneOf(mockWorkspaceFileHandler).getFileForWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
-            oneOf(mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFileToWorkspace(
-                    mockWorkspace, mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
+                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
             oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
             oneOf(mockWorkspaceNode).setWorkspaceURL(testURI.toURL());
             oneOf(mockWorkspaceDao).updateNodeWorkspaceURL(mockWorkspaceNode);
         }});
         
-        fileImporter.importMetadataFileToWorkspace(mockWorkspace, mockWorkspaceNode, mockMetadataDocument);
+        fileImporter.importMetadataFileToWorkspace(mockWorkspaceNode, mockMetadataDocument);
     }
     
     @Test
     public void importMetadataFileToWorkspaceThrowsException() throws URISyntaxException, WorkspaceNodeFilesystemException, MalformedURLException {
         
+        final int workspaceID = 1;
+        
         final URI testURI = new URI("urn:namespace-id:resource-id"); // a URI which is not a URL
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceFileHandler).getFileForWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
-            oneOf(mockWorkspaceFileHandler).getStreamResultForWorkspaceNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFileToWorkspace(
-                    mockWorkspace, mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
+                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
             oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
             
                 
             oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
+            oneOf(mockWorkspaceNode).getWorkspaceID(); will(returnValue(workspaceID));
         }});
         
         try {
-            fileImporter.importMetadataFileToWorkspace(mockWorkspace, mockWorkspaceNode, mockMetadataDocument);
+            fileImporter.importMetadataFileToWorkspace(mockWorkspaceNode, mockMetadataDocument);
             fail("Should have thrown exception");
         } catch(WorkspaceNodeFilesystemException ex) {
             assertNotNull(ex);
             String errorMessage = "Failed to create URL from the Workspace file location: " + testURI;
             assertEquals(errorMessage, ex.getMessage());
-            assertEquals(mockWorkspace, ex.getWorkspace());
+            assertEquals(workspaceID, ex.getWorkspaceID());
             assertEquals(MalformedURLException.class, ex.getCause().getClass());
         }
     }

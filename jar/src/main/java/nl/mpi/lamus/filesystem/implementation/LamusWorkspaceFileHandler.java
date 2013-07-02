@@ -17,6 +17,7 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -26,6 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,31 +51,45 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     /**
      * @see WorkspaceFileHandler#copyMetadataFileToWorkspace(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.MetadataAPI, nl.mpi.metadata.api.model.MetadataDocument, java.io.File, javax.xml.transform.stream.StreamResult)
      */
-    public void copyMetadataFileToWorkspace(Workspace workspace, WorkspaceNode workspaceNode,
-            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File nodeFile, StreamResult nodeFileStreamResult)
+    @Override
+    public void copyMetadataFile(WorkspaceNode workspaceNode,
+            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile, StreamResult targetNodeFileStreamResult)
             throws WorkspaceNodeFilesystemException {
         
         try {
-            metadataAPI.writeMetadataDocument(metadataDocument, nodeFileStreamResult);
+            metadataAPI.writeMetadataDocument(metadataDocument, targetNodeFileStreamResult);
         } catch(IOException ioex) {
-            String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
+            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
             logger.error(errorMessage, ioex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, ioex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, ioex);
         } catch(TransformerException tex) {
-            String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
+            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
             logger.error(errorMessage, tex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, tex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, tex);
         } catch(MetadataException mdex) {
-            String errorMessage = "Problem writing file " + nodeFile.getAbsolutePath();
+            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
             logger.error(errorMessage, mdex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, workspaceNode, mdex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, mdex);
+        }
+    }
+    
+    @Override
+    public void copyResourceFile(WorkspaceNode workspaceNode,
+            File originNodeFile, File targetNodeFile) throws WorkspaceNodeFilesystemException {
+        try {
+            FileUtils.copyFile(originNodeFile, targetNodeFile);
+        } catch (IOException ioex) {
+            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
+            logger.error(errorMessage, ioex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, ioex);
         }
     }
     
     /**
      * @see WorkspaceFileHandler#getStreamResultForWorkspaceNodeFile(java.io.File)
      */
-    public StreamResult getStreamResultForWorkspaceNodeFile(File nodeFile) {
+    @Override
+    public StreamResult getStreamResultForNodeFile(File nodeFile) {
             StreamResult streamResult = new StreamResult(nodeFile);
             return streamResult;
     }
@@ -81,6 +97,7 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     /**
      * @see WorkspaceFileHandler#getFileForWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
+    @Override
     public File getFileForWorkspaceNode(WorkspaceNode workspaceNode) {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
         File workspaceNodeFile = new File(workspaceDirectory, "" + workspaceNode.getWorkspaceNodeID());

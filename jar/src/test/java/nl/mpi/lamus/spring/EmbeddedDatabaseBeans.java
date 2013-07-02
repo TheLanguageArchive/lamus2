@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.spring;
 
+import java.sql.SQLException;
+import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
@@ -41,6 +43,8 @@ public class EmbeddedDatabaseBeans {
     private final static Logger logger = LoggerFactory.getLogger(EmbeddedDatabaseBeans.class);
     private CorpusStructureDBWriteImpl csDBWrite;
     
+    private SearchClient sClient;
+    
     /**
      * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure' database
      */
@@ -63,6 +67,16 @@ public class EmbeddedDatabaseBeans {
     public VersioningAPI versioningAPI() {
         corpusStructureDBWrite();
         return new VersioningAPI("jdbc:hsqldb:mem:corpusstructure", "sa", "");
+    }
+    
+    @Bean
+    public SearchClient searchClient() throws SQLException {
+        if(sClient == null) {
+            corpusStructureDBWrite();
+            createAnnexDB();
+            sClient = new SearchClient("jdbc:hsqldb:mem:corpusstructure", "sa", "", null, "jdbc:hsqldb:mem:annex", "sa", "");
+        }
+        return sClient;
     }
     
     /**
@@ -90,4 +104,12 @@ public class EmbeddedDatabaseBeans {
                 .build();
     }
     
+    private void createAnnexDB() {
+        logger.debug("Creating connection to the annex database");
+        new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.HSQL)
+                .setName("annex")
+                //TODO Run scripts with proper database structure
+                .build();
+    }
 }

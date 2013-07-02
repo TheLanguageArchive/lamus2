@@ -62,7 +62,8 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     /**
      * @see WorkspaceNodeExplorer#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
      */
-    public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
+    @Override
+    public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
         throws NodeImporterException, NodeExplorerException {
         
         
@@ -87,7 +88,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
                 
                 //TODO node doesn't exist?
                 String errorMessage = "PROBLEMS GETTING NODE ID";
-                throw new NodeExplorerException(errorMessage, workspace, null);
+                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), null);
             }
 
             int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
@@ -102,11 +103,11 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
                 linkImporterToUse = nodeImporterFactoryBean.getObject();
             } catch (Exception ex) {
                 String errorMessage = "Error getting file importer.";
-                throw new NodeExplorerException(errorMessage, workspace, ex);
+                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), ex);
             }
             
-            linkImporterToUse.setWorkspace(workspace);
-            linkImporterToUse.importNode(nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
+//            linkImporterToUse.setWorkspace(workspace);
+            linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
         }
     }
     

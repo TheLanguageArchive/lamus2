@@ -19,11 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.Calendar;
-import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.corpusstructure.NodeIdUtils;
-import nl.mpi.lamus.workspace.exporting.ArchiveObjectsBridge;
+import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
@@ -35,7 +32,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -44,7 +40,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 
 /**
@@ -57,11 +52,10 @@ public class DeletedNodeExporterTest {
     
     private NodeExporter deletedNodeExporter;
     private Workspace testWorkspace;
-    private WorkspaceNode testDeletedNode;
     
     @Mock TrashVersioningHandler mockTrashVersioningHandler;
     @Mock TrashCanHandler mockTrashCanHandler;
-    @Mock ArchiveObjectsBridge mockArchiveObjectsBridge;
+    @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock SearchClientBridge mockSearchClientBridge;
     
     public DeletedNodeExporterTest() {
@@ -77,9 +71,9 @@ public class DeletedNodeExporterTest {
     
     @Before
     public void setUp() {
-        deletedNodeExporter = new DeletedNodeExporter(mockTrashVersioningHandler, mockTrashCanHandler, mockArchiveObjectsBridge, mockSearchClientBridge);
+        deletedNodeExporter = new DeletedNodeExporter(mockTrashVersioningHandler, mockTrashCanHandler, mockCorpusStructureBridge, mockSearchClientBridge);
         
-        testWorkspace = new LamusWorkspace(1, "someUser", -1, null,
+        testWorkspace = new LamusWorkspace(1, "someUser", -1, -1, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         deletedNodeExporter.setWorkspace(testWorkspace);
@@ -94,7 +88,7 @@ public class DeletedNodeExporterTest {
      * Test of exportNode method, of class DeletedNodeExporter.
      */
     @Test
-    public void testExportNode() throws MalformedURLException, URISyntaxException, SQLException {
+    public void exportNode() throws MalformedURLException, URISyntaxException {
         
         final int testWorkspaceNodeID = 10;
         final int testArchiveNodeID = 100;
@@ -119,7 +113,7 @@ public class DeletedNodeExporterTest {
             
             oneOf(mockTrashCanHandler).moveFileToTrashCan(testNode); will(returnValue(testNodeVersionArchiveURL));
             
-            oneOf(mockArchiveObjectsBridge).updateArchiveObjectsNodeURL(testArchiveNodeID, testNodeArchiveURL, testNodeVersionArchiveURL);
+            oneOf(mockCorpusStructureBridge).updateArchiveObjectsNodeURL(testArchiveNodeID, testNodeArchiveURL, testNodeVersionArchiveURL);
             
             oneOf(mockSearchClientBridge).removeNode(testArchiveNodeID);
             
@@ -135,8 +129,8 @@ public class DeletedNodeExporterTest {
         //remove node from searchDB????
         
         
-        
-        deletedNodeExporter.exportNode(testNode);
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        deletedNodeExporter.exportNode(null, testNode);
         
     }
     

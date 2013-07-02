@@ -29,10 +29,10 @@ public interface WorkspaceDirectoryHandler {
     /**
      * Creates the directory for the given workspace.
      * 
-     * @param workspace Workspace for which the directory should be created
+     * @param workspaceID ID of the workspace for which the directory should be created
      * @throws FailedToCreateWorkspaceDirectoryException if the directory creation fails
      */
-    public void createWorkspaceDirectory(Workspace workspace) throws WorkspaceFilesystemException;
+    public void createWorkspaceDirectory(int workspaceID) throws WorkspaceFilesystemException;
     
     /**
      * Deletes the directory for the given workspace.

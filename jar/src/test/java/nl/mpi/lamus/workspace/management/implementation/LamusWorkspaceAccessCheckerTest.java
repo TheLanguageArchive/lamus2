@@ -144,7 +144,8 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -152,7 +153,7 @@ public class LamusWorkspaceAccessCheckerTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -169,7 +170,8 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -177,7 +179,7 @@ public class LamusWorkspaceAccessCheckerTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{

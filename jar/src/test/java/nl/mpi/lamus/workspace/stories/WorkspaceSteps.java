@@ -53,6 +53,7 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.util.OurURL;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
@@ -315,58 +316,59 @@ public class WorkspaceSteps {
     }
 
     private void insertWorkspaceInDB(int workspaceID, String userID) throws FileNotFoundException, IOException {
-        insertWorkspaceInDB(workspaceID, userID, 1);
+        insertWorkspaceInDB(workspaceID, userID, 1, new File(this.archiveFolder, "1.cmdi").toURI().toURL());
     }
     
-    private void insertWorkspaceInDB(int workspaceID, String userID, int topNodeID) throws FileNotFoundException, IOException {
+    private void insertWorkspaceInDB(int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL) throws FileNotFoundException, IOException {
 
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        File testFile = new File(workspaceDirectory, topNodeID + ".cmdi");
+        File testFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
         
         String insertString = "";
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
         Map<String, String> map = new HashMap<String, String>();
         
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeID,
+        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
                 workspaceID, testFile);
         
         workspaceDirectory.mkdirs();
-        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files/" + topNodeID + ".cmdi");
+        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files/" + topNodeArchiveID + ".cmdi");
         OutputStream testOut = new FileOutputStream(testFile);
         IOUtils.copy(testIn, testOut);
     }
     
-    private void insertWorkspaceInDBWithNewlyLinkedNode(int workspaceID, String userID, int topNodeID)
+    private void insertWorkspaceInDBWithNewlyLinkedNode(int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL)
             throws MalformedURLException, FileNotFoundException, IOException {
         
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        File topNodeFile = new File(workspaceDirectory, topNodeID + ".cmdi");
-        int resourceNodeID = topNodeID + 1;
-        File resourceFile = new File(workspaceDirectory, resourceNodeID + ".pdf");
+        File topNodeFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
+        int resourceNodeArchiveID = topNodeArchiveID + 1;
+        File resourceFile = new File(workspaceDirectory, resourceNodeArchiveID + ".pdf");
+        File resourceOriginFile = new File("/some/directory/" + resourceNodeArchiveID + ".pdf");
 
         String insertString = "";
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
         Map<String, String> map = new HashMap<String, String>();
 
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeID,
+        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
                 workspaceID, topNodeFile);
-        insertWorkspaceNode(insertString, template, map, topNodeID, resourceNodeID,
+        insertWorkspaceNode(insertString, template, map, topNodeArchiveID, resourceNodeArchiveID, null, resourceOriginFile.toURI().toURL(),
                 WorkspaceNodeType.RESOURCE_WR, WorkspaceNodeStatus.NODE_UPLOADED,
                 workspaceID, resourceFile);
         
         workspaceDirectory.mkdirs();
         
-        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeID + ".cmdi");
+        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeArchiveID + ".cmdi");
         OutputStream testOut = new FileOutputStream(topNodeFile);
         IOUtils.copy(testIn, testOut);
         
-        testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + resourceNodeID + ".pdf");
+        testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + resourceNodeArchiveID + ".pdf");
         testOut = new FileOutputStream(resourceFile);
         IOUtils.copy(testIn, testOut);
     }
@@ -386,19 +388,21 @@ public class WorkspaceSteps {
         template.update(insertString, map);
     }
     private void insertWorkspaceNode(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
-            int parentNodeID, int nodeID, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
+            int parentNodeArchiveID, int nodeArchiveID, URL nodeArchiveURL, URL nodeOriginURL, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
             int workspaceID, File nodeFile) throws MalformedURLException {
         
-        insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_node_id, name, type, workspace_url, status, format) "
-                + "VALUES (:workspace_node_id, :workspace_id, :archive_node_id, :name, :type, :workspace_url, :status, :format);";
+        insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_node_id, archive_url, origin_url, name, type, workspace_url, status, format) "
+                + "VALUES (:workspace_node_id, :workspace_id, :archive_node_id, :archive_url, :origin_url, :name, :type, :workspace_url, :status, :format);";
         map.clear();
-        map.put("workspace_node_id", "" + nodeID);
+        map.put("workspace_node_id", "" + nodeArchiveID);
         map.put("workspace_id", "" + workspaceID);
-        if(parentNodeID == -1) {
-            map.put("archive_node_id", "" + nodeID);
+        if(parentNodeArchiveID == -1) {
+            map.put("archive_node_id", "" + nodeArchiveID);
         } else {
-            map.put("archive_node_id", "");
+            map.put("archive_node_id", "-1");
         }
+        map.put("archive_url", (nodeArchiveURL != null ? nodeArchiveURL.toString() : ""));
+        map.put("origin_url", (nodeOriginURL != null ? nodeOriginURL.toString() : ""));
         map.put("name", "testNode");
         map.put("type", nodeType.toString());
         map.put("workspace_url", nodeFile.toURI().toURL().toString());
@@ -406,18 +410,20 @@ public class WorkspaceSteps {
         map.put("format", "cmdi");
         template.update(insertString, map);
         
-        if(parentNodeID == -1) {
-            insertString = "UPDATE workspace SET top_node_id = :top_node_id WHERE workspace_id = :workspace_id;";
+        if(parentNodeArchiveID == -1) {
+            insertString = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_id = :top_node_archive_id, top_node_archive_url = :top_node_archive_url WHERE workspace_id = :workspace_id;";
             map.clear();
-            map.put("top_node_id", "" + parentNodeID);
+            map.put("top_node_id", "" + nodeArchiveID);
+            map.put("top_node_archive_id", "" + nodeArchiveID);
+            map.put("top_node_archive_url", nodeArchiveURL.toString());
             map.put("workspace_id", "" + workspaceID);
             template.update(insertString, map);
         } else {
             insertString = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
                     + "VALUES (:parent_workspace_node_id, :child_workspace_node_id, :child_uri);";
             map.clear();
-            map.put("parent_workspace_node_id", "" + parentNodeID);
-            map.put("child_workspace_node_id", "" + nodeID);
+            map.put("parent_workspace_node_id", "" + parentNodeArchiveID);
+            map.put("child_workspace_node_id", "" + nodeArchiveID);
             map.put("child_uri", nodeFile.toURI().toString());
             template.update(insertString, map);
         }
@@ -483,6 +489,7 @@ public class WorkspaceSteps {
         template.update(deletePrincipalSql, map);
     }
     
+    
     @Given("an archive")
     public void anArchive() {
         
@@ -496,18 +503,18 @@ public class WorkspaceSteps {
     }
     
     @Given("a node with ID $nodeID which is the top node")
-    public void aNodeWithIDWhichIsTheTopNode(@Named("nodeID") int nodeID) throws IOException {
-        String filename = nodeID + ".cmdi";
-        URL nodeURL = copyFileToArchiveFolder(filename, true);
+    public void aNodeWithIDWhichIsTheTopNode(@Named("nodeID") int nodeArchiveID) throws IOException {
+        String filename = nodeArchiveID + ".cmdi";
+        URL nodeArchiveURL = copyFileToArchiveFolder(filename, true);
         int nodeType = 2;
         String nodeFormat = "text/cmdi";
         int parentNodeID = -1;
-        insertNodeInCSDB(nodeID, nodeURL, nodeType, nodeFormat, true, parentNodeID);
+        insertNodeInCSDB(nodeArchiveID, nodeArchiveURL, nodeType, nodeFormat, true, parentNodeID);
         
-        Node node = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(nodeID));
-        assertNotNull("Node with ID " + nodeID + " does not exist in the corpusstructure database", node);
+        Node node = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(nodeArchiveID));
+        assertNotNull("Node with ID " + nodeArchiveID + " does not exist in the corpusstructure database", node);
         
-        this.selectedNodeID = nodeID;
+        this.selectedNodeID = nodeArchiveID;
     }
     
     @Given("a node with ID $childNodeID which is a child of node with ID $parentNodeID")
@@ -544,42 +551,44 @@ public class WorkspaceSteps {
         this.currentUserID = userID;
     }
     
-    @Given("a workspace with ID $workspaceID created by user with ID $userID")
-    public void aWorkspaceWithIDCreatedByUserWithID(int workspaceID, String userID) throws FileNotFoundException, IOException {
-
-        this.currentUserID = userID;
-        this.createdWorkspaceID = workspaceID;
-        
-        insertWorkspaceInDB(workspaceID, userID);
-
-        //filesystem
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
-        
-        // database
-        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
-        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
-    }
+//    @Given("a workspace with ID $workspaceID created by user with ID $userID")
+//    public void aWorkspaceWithIDCreatedByUserWithID(int workspaceID, String userID) throws FileNotFoundException, IOException {
+//
+//        this.currentUserID = userID;
+//        this.createdWorkspaceID = workspaceID;
+//        
+//        insertWorkspaceInDB(workspaceID, userID);
+//
+//        //filesystem
+//        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+//        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
+//        
+//        // database
+//        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
+//        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
+//    }
     
-    @Given("a workspace with ID $workspaceID created by user with ID $userID in node with ID $nodeID")
-    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithID(int workspaceID, String userID, int nodeID) throws FileNotFoundException, IOException {
-
-        this.currentUserID = userID;
-        this.createdWorkspaceID = workspaceID;
-        
-        insertWorkspaceInDB(workspaceID, userID, nodeID);
-
-        // filesystem
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
-        
-        // database
-        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
-        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
-    }
+//    @Given("a workspace with ID $workspaceID created by user with ID $userID in node with ID $nodeArchiveID")
+//    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithID(int workspaceID, String userID, int nodeArchiveID) throws FileNotFoundException, IOException {
+//
+//        this.currentUserID = userID;
+//        this.createdWorkspaceID = workspaceID;
+//        
+//        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+//        
+//        insertWorkspaceInDB(workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
+//
+//        // filesystem
+//        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+//        assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
+//        
+//        // database
+//        Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
+//        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
+//    }
     
     @Given("a workspace with ID $workspaceID created by user with ID $userID in node with ID $nodeID to which a new node has been linked")
-    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithIDToWhichANewNodeHasBeenLinked(int workspaceID, String userID, int nodeID)
+    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithIDToWhichANewNodeHasBeenLinked(int workspaceID, String userID, int nodeArchiveID)
             throws MalformedURLException, FileNotFoundException, IOException, MetadataException {
         
         //TODO copy resource file (zorro pdf) to workspace folder
@@ -590,14 +599,16 @@ public class WorkspaceSteps {
         this.currentUserID = userID;
         this.createdWorkspaceID = workspaceID;
         
-        insertWorkspaceInDBWithNewlyLinkedNode(workspaceID, userID, nodeID);
+        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        
+        insertWorkspaceInDBWithNewlyLinkedNode(workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
         assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
-        File topNodeFile = new File(workspaceDirectory, nodeID + ".cmdi");
-        assertTrue("File for node " + nodeID + " should have been created", topNodeFile.exists());
-        int resourceNodeID = nodeID + 1;
+        File topNodeFile = new File(workspaceDirectory, nodeArchiveID + ".cmdi");
+        assertTrue("File for node " + nodeArchiveID + " should have been created", topNodeFile.exists());
+        int resourceNodeID = nodeArchiveID + 1;
         File resourceFile = new File(workspaceDirectory, resourceNodeID + ".pdf");
         assertTrue("File for resource " + resourceNodeID + " should have been created", resourceFile.exists());
         
@@ -610,6 +621,10 @@ public class WorkspaceSteps {
         List<Reference> childReferences = referencingTopNodeDocument.getDocumentReferences();
         assertNotNull("List of references in metadata document " + topNodeFile.getPath() + " should not be null", childReferences);
         assertTrue("Metadata document " + topNodeFile.getPath() + " should have one reference", childReferences.size() == 1);
+        
+        //TODO reference in parent file has to be set properly
+        childReferences.get(0).setURI(resourceFile.toURI());
+        
         assertEquals("URI of the child reference in the metadata document is different from expected",
                 resourceFile.toURI(), childReferences.get(0).getURI());
 
@@ -664,8 +679,9 @@ public class WorkspaceSteps {
         
         //TODO more assertions missing?
         
-        this.workspaceService.submitWorkspace(currentUserID, createdWorkspaceID/*, keepUnlinkedFiles*/);
+        boolean result = this.workspaceService.submitWorkspace(currentUserID, createdWorkspaceID/*, keepUnlinkedFiles*/);
         
+        assertTrue("Result of the workspace submission should be true", result);
     }
     
     @Then("a workspace is created in that node for that user")
@@ -758,7 +774,7 @@ public class WorkspaceSteps {
     @Then("the new node, with ID $newNodeID, is properly linked from the parent file (node with ID $parentNodeID)")
     public void theNewNodeIsProperlyLinkedFromTheParentFile(int newNodeID, int parentNodeID) throws IOException, MetadataException {
         
-        URL parentNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(parentNodeID), ArchiveAccessContext.FILE_UX_URL).toURL();
+        URL parentNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(parentNodeID), ArchiveAccessContext.getFileUrlContext()).toURL();
         MetadataDocument parentDocument = this.metadataAPI.getMetadataDocument(parentNodeURL);
         
         assertNotNull("Metadata document " + parentNodeURL + " should not be null", parentDocument);
@@ -770,9 +786,17 @@ public class WorkspaceSteps {
         assertTrue("Metadata document " + parentNodeURL + " should have one reference", childReferences.size() == 1);
         
         URI childNodeURI = this.archiveObjectsDB.getObjectURI(NodeIdUtils.TONODEID(newNodeID));
+
         assertNotNull("URI of the child node in the database should not be null", childNodeURI);
+        
+        URI childRelativeURI = childReferences.get(0).getURI();
+        File parentFile = new File(parentNodeURL.toString());
+        File childFileInDocument = new File(FilenameUtils.getFullPath(parentFile.getPath()), childRelativeURI.toString());
+        File expectedChildFile = new File(childNodeURI.toString());
+        
         assertEquals("URI of the child reference in the metadata document is different from expected",
-                childNodeURI, childReferences.get(0).getURI());
+//                childNodeURI, childReferences.get(0).getURI());
+                expectedChildFile, childFileInDocument);
         
     }
     
@@ -786,4 +810,6 @@ public class WorkspaceSteps {
         assertTrue("File for node " + newNodeID + " should exist in the proper location: " + newNodeFile.getPath(), newNodeFile.exists());
         
     }
+    
+    //TODO OTHER CHECKS MISSING... CRAWLER AND OTHER STUFF
 }

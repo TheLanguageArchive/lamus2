@@ -49,6 +49,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#createWorkspace(java.lang.String, int)
      */
+    @Override
     public Workspace createWorkspace(String userID, int archiveNodeID) {
 
         if(!this.nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID)) {
@@ -75,6 +76,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#deleteWorkspace(java.lang.String, int)
      */
+    @Override
     public void deleteWorkspace(String userID, int workspaceID) {
         
         if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
@@ -92,6 +94,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#submitWorkspace(String, int)
      */
+    @Override
     public boolean submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/) {
 
         //TODO requests in this session?
@@ -114,6 +117,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#getWorkspace(int)
      */
+    @Override
     public Workspace getWorkspace(int workspaceID) {
         
         return this.workspaceDao.getWorkspace(workspaceID);
@@ -122,6 +126,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#listUserWorkspaces(java.lang.String)
      */
+    @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
         
         return this.workspaceDao.listWorkspacesForUser(userID);
@@ -130,6 +135,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#openWorkspace(java.lang.String, int)
      */
+    @Override
     public Workspace openWorkspace(String userID, int workspaceID) {
         
         return this.workspaceManager.openWorkspace(userID, workspaceID);
@@ -138,6 +144,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#getNode(int)
      */
+    @Override
     public WorkspaceNode getNode(int nodeID) {
         
         return this.workspaceDao.getWorkspaceNode(nodeID);
@@ -146,6 +153,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#getChildNodes(int)
      */
+    @Override
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
         
         return this.workspaceDao.getChildWorkspaceNodes(nodeID);

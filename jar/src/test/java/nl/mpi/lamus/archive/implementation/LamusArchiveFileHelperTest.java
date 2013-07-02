@@ -19,11 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.util.OurURL;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -59,6 +62,10 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockFile;
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
+    @Mock File mockChildFile;
+    @Mock File mockChildAbsoluteFile;
+    @Mock File mockParentFile;
+    
     private final int maxDirectoryNameLength = 50;
     private final String corpusDirectoryBaseName = "Corpusstructure";
     private String orphansDirectoryBaseName = "sessions";
@@ -91,86 +98,85 @@ public class LamusArchiveFileHelperTest {
     }
 
     @Test
-    public void getFileBasenameWithSlashes() {
+    public void getFileBasenamePathHasSlashes() {
         
-        String baseName = "baseName.txt";
-        String fullName = "something/with/some/slashes/" + baseName;
-        
-        String retrievedName = testArchiveFileHelper.getFileBasename(fullName);
-        
-        assertEquals(baseName, retrievedName);
-        
-    }
-    
-    @Test
-    public void getFileBasenameWithoutSlashes() {
-        
-        String fullName = "something_without__slashes.txt";
+        String expectedName = "baseName.txt";
+        String fullName = "something/with/some/slashes/" + expectedName;
         
         String retrievedName = testArchiveFileHelper.getFileBasename(fullName);
         
-        assertEquals(fullName, retrievedName);
-        
+        assertEquals("Retrieved basename different from expected", expectedName, retrievedName);
     }
     
     @Test
-    public void getFileDirNameWithSlashes() {
+    public void getFileBasenamePathHasNoSlashes() {
         
-        String dirName = "something/with/some/slashes";
-        String fullName = dirName + "/baseName.txt";
+        String expectedName = "something_without__slashes.txt";
         
-        String retrievedName = testArchiveFileHelper.getFileDirname(fullName);
+        String retrievedName = testArchiveFileHelper.getFileBasename(expectedName);
         
-        assertEquals(dirName, retrievedName);
+        assertEquals("Retrieved basename different from expected", expectedName, retrievedName);
     }
     
     @Test
-    public void getFileDirNameWithoutSlashes() {
+    public void getFileBasenameWithoutExtensionPathHasSlashes() {
         
-        String fullName = "something_without__slashes.txt";
+        String expectedName = "baseName";
+        String fullName = "something/with/some/slashes/" + expectedName + ".txt";
         
-        String retrievedName = testArchiveFileHelper.getFileDirname(fullName);
+        String retrievedName = testArchiveFileHelper.getFileBasenameWithoutExtension(fullName);
         
-        assertEquals("", retrievedName);
+        assertEquals("Retrieved basename (without extension) different from expected", expectedName, retrievedName);
     }
     
     @Test
-    public void getFileTitleWithBaseName() {
+    public void getFileBasenameWithoutExtensionPathHasNoSlashes() {
         
-        String baseName = "baseName.txt";
-        String fullName = "something/with/slashes/and/" + baseName;
+        String expectedName = "something_without__slashes";
+        String fullName = expectedName + ".txt";
         
-        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
-        assertEquals(baseName, retrievedName);
+        String retrievedName = testArchiveFileHelper.getFileBasenameWithoutExtension(fullName);
+        
+        assertEquals("Retrieved basename (without extension) different from expected", expectedName, retrievedName);
     }
     
     @Test
-    public void getFileTitleWithoutBaseName() {
+    public void getFileTitlePathHasBaseName() {
         
-        String nameBeforeFirstSlash = "something";
-        String fullName = nameBeforeFirstSlash + "/with/slashes/";
+        String expectedTitle = "baseName.txt";
+        String fullName = "something/with/slashes/and/" + expectedTitle;
         
-        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
-        assertEquals(nameBeforeFirstSlash, retrievedName);
+        String retrievedTitle = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals("Retrieved title different from expected", expectedTitle, retrievedTitle);
     }
     
     @Test
-    public void getFileTitleWithUrlName() {
+    public void getFileTitlePathHasNoBaseName() {
         
-        String domainName = "mpi";
-        String fullName = "file:/" + domainName + "/with/slashes/";
+        String expectedTitle = "something";
+        String fullName = expectedTitle + "/with/slashes/";
         
-        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
-        assertEquals(domainName, retrievedName);
+        String retrievedTitle = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals("Retrieved title different from expected", expectedTitle, retrievedTitle);
     }
     
     @Test
-    public void getFileTitleWithoutSlashes() {
+    public void getFileTitlePathHasUrlName() {
         
-        String fullName = "no_slashes";
+        String expectedTitle = "mpi";
+        String fullName = "file:/" + expectedTitle + "/with/slashes/";
         
-        String retrievedName = testArchiveFileHelper.getFileTitle(fullName);
-        assertEquals(fullName, retrievedName);
+        String retrievedTitle = testArchiveFileHelper.getFileTitle(fullName);
+        assertEquals("Retrieved title different from expected", expectedTitle, retrievedTitle);
+    }
+    
+    @Test
+    public void getFileTitlePathHasNoSlashes() {
+        
+        String expectedTitle = "no_slashes";
+        
+        String retrievedTitle = testArchiveFileHelper.getFileTitle(expectedTitle);
+        assertEquals("Retrieved title different from expected", expectedTitle, retrievedTitle);
     }
 
     @Test
@@ -182,7 +188,7 @@ public class LamusArchiveFileHelperTest {
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
-        assertEquals(expectedOutput, actualOutput);
+        assertEquals("Actual output different from expected", expectedOutput, actualOutput);
     }
     
     @Test
@@ -194,7 +200,7 @@ public class LamusArchiveFileHelperTest {
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
-        assertEquals(expectedOutput, actualOutput);
+        assertEquals("Actual output different from expected", expectedOutput, actualOutput);
     }
     
     @Test
@@ -210,7 +216,7 @@ public class LamusArchiveFileHelperTest {
         
         String actualOutput = testArchiveFileHelper.correctPathElement(input, someReason);
         
-        assertEquals(expectedOutput, actualOutput);
+        assertEquals("Actual output different from expected", expectedOutput, actualOutput);
     }
 
     /**
@@ -228,19 +234,19 @@ public class LamusArchiveFileHelperTest {
         File expectedOrphansDirectory = new File(pathPrefix, orphansDirectoryBaseName);
         File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
         
-        assertEquals(expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
     }
     
     /**
      * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
      */
     @Test
-    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException {
+    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
         
         String pathPrefix = "/some/url/with/";
         File pathPrefixFile = testFolder.newFolder(pathPrefix);
         File corpusFolder = testFolder.newFolder(pathPrefix + corpusDirectoryBaseName);
-        corpusFolder.mkdirs();
+        FileUtils.forceMkdir(corpusFolder);
         assertTrue(corpusFolder.exists());
 
         File fullFilePath = new File(pathPrefixFile, "metadata/blabla.cmdi");
@@ -250,14 +256,14 @@ public class LamusArchiveFileHelperTest {
         File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryBaseName);
         File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
         
-        assertEquals(expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
     }
 
     /**
      * Test of isFileSizeAboveTypeReCheckSizeLimit method, of class LamusArchiveFileHelper.
      */
     @Test
-    public void fileSizeIsAboveTypeReCheckSizeLimit() throws IOException {
+    public void fileSizeIsAboveTypeReCheckSizeLimit() {
         final long actualFileSize = typeRecheckSizeLimitInBytes + 1;
         
         context.checking(new Expectations() {{
@@ -266,7 +272,7 @@ public class LamusArchiveFileHelperTest {
         
         boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
-        assertTrue(isSizeAboveLimit);
+        assertTrue("Result should be true", isSizeAboveLimit);
     }
     
     @Test
@@ -280,7 +286,7 @@ public class LamusArchiveFileHelperTest {
         
         boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
-        assertFalse(isSizeAboveLimit);
+        assertFalse("Result should be false", isSizeAboveLimit);
     }
     
     @Test
@@ -332,5 +338,134 @@ public class LamusArchiveFileHelperTest {
         File result = testArchiveFileHelper.getArchiveLocationForNodeID(archiveNodeID);
         
         assertEquals("Location different from expected", expectedFile, result);
+    }
+    
+    @Test
+    public void getFinalFileNonExistingName() {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        
+        File dir = testFolder.newFolder(dirPath);
+        File expectedFile = new File(dir, fileName);
+        
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        
+        assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
+    }
+    
+    @Test
+    public void getFinalFileExistingOneName() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        final String expectedName = "file_2.cmdi";
+        
+        File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        File file = new File(dir, fileName);
+        FileUtils.touch(file);
+        File expectedFile = new File(dir, expectedName);
+        
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        
+        assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
+    }
+    
+    @Test
+    public void getFinalFileExistingSeveralNames() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        File file = new File(dir, fileName);
+        FileUtils.touch(file);
+        
+        for(int suffix = 1; suffix < 11; suffix++) {
+            String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
+            File currentFile = new File(dir, currentFileName);
+            FileUtils.touch(currentFile);
+        }
+        
+        String expectedName = "file_11.cmdi";
+        File expectedFile = new File(dir, expectedName);
+        
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        
+        assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
+    }
+    
+    
+    //TODO Does it make sense to have this 10000 sufix limit? How likely is it to happen?
+    @Test
+    public void getFinalFileExistingAllNames() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        File file = new File(dir, fileName);
+        FileUtils.touch(file);
+        
+        for(int suffix = 1; suffix < 10000; suffix++) {
+            String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
+            File currentFile = new File(dir, currentFileName);
+            FileUtils.touch(currentFile);
+        }
+        
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        
+        //TODO Some Exception instead?
+        
+        assertNull("Retrieved file should be null when all suffixes exist already", retrievedFile);
+    }
+    
+    @Test
+    public void createFileAndDirectoriesBothNonExistingYet() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        
+        final File dir = testFolder.newFolder(dirPath);
+        final File file = new File(dir, fileName);
+        
+        testArchiveFileHelper.createFileAndDirectories(file);
+        
+        assertTrue("Directory should have been created", dir.exists());
+        assertTrue("File should have been created", file.exists());
+    }
+    
+    @Test
+    public void createFileAndDirectoriesFileNonExistingYet() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        
+        final File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        assertTrue("Directory should have been created", dir.exists());
+        final File file = new File(dir, fileName);
+        
+        testArchiveFileHelper.createFileAndDirectories(file);
+        
+        assertTrue("File should have been created", file.exists());
+    }
+    
+    @Test
+    public void createFileAndDirectoriesBothExistingAlready() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        
+        final File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        assertTrue("Directory should have been created", dir.exists());
+        final File file = new File(dir, fileName);
+        FileUtils.touch(file);
+        
+        testArchiveFileHelper.createFileAndDirectories(file);
+        
+        assertTrue("File should have been created", file.exists());
     }
 }

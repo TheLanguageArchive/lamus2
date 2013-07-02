@@ -15,14 +15,20 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
-import nl.mpi.lamus.workspace.exporting.ArchiveObjectsBridge;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,50 +39,75 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusNodeExporterFactory implements NodeExporterFactory {
 
+    @Autowired
     private TrashVersioningHandler trashVersioningHandler;
+    
+    @Autowired
     private TrashCanHandler trashCanHandler;
-    private ArchiveObjectsBridge archiveObjectsBridge;
+    
+    @Autowired
+    private CorpusStructureBridge corpusStructureBridge;
+    
+    @Autowired
     private SearchClientBridge searchClientBridge;
+    
+    @Autowired
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
+    
+    @Autowired
+    private WorkspaceFileHandler workspaceFileHandler;
+    
+    @Autowired
+    private MetadataAPI metadataAPI;
+    
+    @Autowired
+    private WorkspaceTreeExporter workspaceTreeExporter;
+    
+    @Autowired
+    private WorkspaceDao workspaceDao;
     
     private AddedNodeExporter addedNodeExporter;
     private DeletedNodeExporter deletedNodeExporter;
+    private GeneralNodeExporter generalNodeExporter;
     
-    @Autowired
-    public LamusNodeExporterFactory(TrashVersioningHandler tvHandler, TrashCanHandler tcHandler,
-            ArchiveObjectsBridge aoBridge, SearchClientBridge scBridge) {
-        this.trashVersioningHandler = tvHandler;
-        this.trashCanHandler = tcHandler;
-        this.archiveObjectsBridge = aoBridge;
-        this.searchClientBridge = scBridge;
-    }
-    
-    public NodeExporter getNodeExporterForNode(WorkspaceNode node) {
+    @Override
+    public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node) {
         
         if(WorkspaceNodeStatus.NODE_UPLOADED.equals(node.getStatus())) {
-            return getAddedNodeExporter();
+            return getAddedNodeExporter(workspace);
         }
         if(WorkspaceNodeStatus.NODE_CREATED.equals(node.getStatus())) {
-            return getAddedNodeExporter();
+            return getAddedNodeExporter(workspace);
         }
         if(WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus())) {
-            return getDeletedNodeExporter();
+            return getDeletedNodeExporter(workspace);
         }
         
-        return null; //TODO create other possible exporter types
+        return getGeneralNodeExporter(workspace); //TODO create other possible exporter types
     }
 
-    private AddedNodeExporter getAddedNodeExporter() {
+    private AddedNodeExporter getAddedNodeExporter(Workspace workspace) {
         if(addedNodeExporter == null) {
-            addedNodeExporter = new AddedNodeExporter();
+            addedNodeExporter = new AddedNodeExporter(archiveFileLocationProvider, workspaceFileHandler,
+                    metadataAPI, corpusStructureBridge, workspaceDao, searchClientBridge, workspaceTreeExporter);
         }
+        addedNodeExporter.setWorkspace(workspace);
         return addedNodeExporter;
     }
 
-    private NodeExporter getDeletedNodeExporter() {
+    private NodeExporter getDeletedNodeExporter(Workspace workspace) {
         if(deletedNodeExporter == null) {
-            deletedNodeExporter = new DeletedNodeExporter(trashVersioningHandler, trashCanHandler, archiveObjectsBridge, searchClientBridge);
+            deletedNodeExporter = new DeletedNodeExporter(trashVersioningHandler, trashCanHandler, corpusStructureBridge, searchClientBridge);
         }
+        deletedNodeExporter.setWorkspace(workspace);
         return deletedNodeExporter;
     }
     
+    private NodeExporter getGeneralNodeExporter(Workspace workspace) {
+        if(generalNodeExporter == null) {
+            generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler, workspaceTreeExporter);
+        }
+        generalNodeExporter.setWorkspace(workspace);
+        return generalNodeExporter;
+    }
 }

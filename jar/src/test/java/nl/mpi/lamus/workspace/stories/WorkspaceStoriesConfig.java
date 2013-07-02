@@ -47,6 +47,7 @@ import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.versioning.manager.VersioningAPI;
+import org.apache.commons.io.FileUtils;
 import org.delaman.ldap.ArchiveUserAuthImpl;
 import org.hibernate.SessionFactory;
 import org.jbehave.core.configuration.spring.SpringStoryReporterBuilder;
@@ -74,7 +75,8 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 @Profile("acceptance")
 public class WorkspaceStoriesConfig {
 
-    public TemporaryFolder testFolder = new TemporaryFolder();
+//    public TemporaryFolder testFolder = new TemporaryFolder();
+    private File temporaryDirectory;
     
     private EmbeddedDatabase corpusstructureDataSource;
     private EmbeddedDatabase amsDataSource;
@@ -85,11 +87,22 @@ public class WorkspaceStoriesConfig {
 //        return (SpringStoryReporterBuilder) new SpringStoryReporterBuilder().withDefaultFormats().withFormats(HTML);
 //    }
     
+    private void createTemporaryDirectory() throws IOException {
+        temporaryDirectory = new File("/temp/lamusStoriesTestDirectory/");
+        
+        FileUtils.forceMkdir(temporaryDirectory);
+        FileUtils.forceDeleteOnExit(temporaryDirectory);
+    }
+    
     @Bean
     @Qualifier("archiveFolder")
     public File archiveFolder() throws IOException {
-        testFolder.create();
-        File archiveFolder = testFolder.newFolder("archiveFolder");
+//        testFolder.create();
+        if(temporaryDirectory == null || !temporaryDirectory.exists()) {
+            createTemporaryDirectory();
+        }
+//        File archiveFolder = testFolder.newFolder("archiveFolder");
+        File archiveFolder = new File(temporaryDirectory, "archiveFolder");
         archiveFolder.mkdirs();
         return archiveFolder;
     }
@@ -533,8 +546,12 @@ public class WorkspaceStoriesConfig {
     @Bean
     @Qualifier("workspaceBaseDirectory")
     public File workspaceBaseDirectory() throws IOException {
-        testFolder.create();
-        File workspaceBaseFolder = testFolder.newFolder("workspaceFolders");
+//        testFolder.create();
+        if(temporaryDirectory == null || !temporaryDirectory.exists()) {
+            createTemporaryDirectory();
+        }
+//        File workspaceBaseFolder = testFolder.newFolder("workspaceFolders");
+        File workspaceBaseFolder = new File(temporaryDirectory, "workspaceFolders");
         workspaceBaseFolder.mkdirs();
         return workspaceBaseFolder;
     }
@@ -542,8 +559,12 @@ public class WorkspaceStoriesConfig {
     @Bean
     @Qualifier("trashCanBaseDirectory")
     public File trashCanBaseDirectory() throws IOException {
-        testFolder.create();
-        File trashcanBaseFolder = testFolder.newFolder("trashcanFolder");
+//        testFolder.create();
+        if(temporaryDirectory == null || !temporaryDirectory.exists()) {
+            createTemporaryDirectory();
+        }
+//        File trashcanBaseFolder = testFolder.newFolder("trashcanFolder");
+        File trashcanBaseFolder = new File(temporaryDirectory, "trashcanFolder");
         trashcanBaseFolder.mkdirs();
         return trashcanBaseFolder;
     }

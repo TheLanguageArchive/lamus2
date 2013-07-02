@@ -16,6 +16,7 @@
 package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +25,8 @@ import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.util.OurURL;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,27 +79,23 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     /**
      * @see ArchiveFileHelper#getFileBasename(java.lang.String) 
      */
+    @Override
     public String getFileBasename(String fullname) {
         int sp = lastSlashPos(fullname);
         if ((sp+1)==fullname.length()) logger.warn("getFileBasename: None for "+fullname);
         return fullname.substring(sp+1);
     }
     
-    /**
-     * @see ArchiveFileHelper#getFileDirname(java.lang.String) 
-     */
-    public String getFileDirname(String fullname) {
-        int sp = lastSlashPos(fullname);
-        if (sp < 0) {
-            logger.warn("getFileDirname: None for " + fullname);
-            return ""; // none
-        }
-        return fullname.substring(0, sp);
+    @Override
+    public String getFileBasenameWithoutExtension(String fullname) {
+        String basename = getFileBasename(fullname);
+        return basename.substring(0, basename.lastIndexOf("."));
     }
 
     /**
      * @see ArchiveFileHelper#getFileTitle(java.lang.String) 
      */
+    @Override
     public String getFileTitle(String fullname) {
         String name = "";
         if (fullname.length()!=(lastSlashPos(fullname)+1)) name = getFileBasename(fullname);
@@ -113,6 +112,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     /**
      * @see ArchiveFileHelper#correctPathElement(java.lang.String, java.lang.String) 
      */
+    @Override
     public String correctPathElement(String pathElement, String reason) {
         String temp = pathElement.replaceAll("\\&[^;]+;","_"); // replace xml variables
         // 20..2c: space ! " # $ % &amp;  ' ( ) * +   3a..40: : ; &lt; = > ? @
@@ -157,6 +157,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     /**
      * @see ArchiveFileHelper#getOrphansDirectory(java.net.URI)
      */
+    @Override
     public File getOrphansDirectory(URI topNodeURI) {
         String topNodePath = topNodeURI.getPath();
         int index=topNodePath.indexOf(File.separator + corpusDirectoryBaseName + File.separator);
@@ -176,6 +177,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return orphansFolder; 
     }
     
+    @Override
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
         if(fileToCheck.length() > typeRecheckSizeLimitInBytes) {
             return true;
@@ -188,6 +190,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
      // it should not only check if the file's path contains the directory name
      // it should check if the path is actually the same as the complete path for the orphans of that workspace
     
+    @Override
     public boolean isFileInOrphansDirectory(File fileToCheck) {
         if (orphansDirectoryBaseName != null &&
             fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryBaseName)) {
@@ -199,7 +202,9 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     //TODO Should this check be done in some different way?
      // currently the CS database indicates if a file is local or not,
      // but that's not always correct
+    //TODO check if protocol is "file" and if there is no host...?
     
+    @Override
     public boolean isUrlLocal(OurURL urlToCheck) {
         if("file".equals(urlToCheck.getProtocol())) {
             return true;
@@ -207,6 +212,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return false;
     }
 
+    @Override
     public File getArchiveLocationForNodeID(int archiveNodeID) {
         
         OurURL urlWithContext =
@@ -216,4 +222,35 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return fileWithContext;
     }
     
+    @Override
+    public File getFinalFile(String parentDirectory, String fileNameAttempt) {
+        
+        int suffix = 1;
+        String attemptSuffix = "";
+        
+        File fileAttempt =
+                new File(parentDirectory, FilenameUtils.getBaseName(fileNameAttempt) + attemptSuffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileNameAttempt));
+        
+        while ((fileAttempt.exists()) && (suffix < 10000)) {
+            suffix++;
+
+            fileAttempt = new File(parentDirectory,
+                    FilenameUtils.getBaseName(fileNameAttempt) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileNameAttempt));
+        }
+        if (suffix >= 10000) {
+            return null;
+            //TODO Throw some exception instead? does it make sense to stop here?
+        } // give up
+
+        
+        return fileAttempt;
+    }
+    
+    @Override
+    public void createFileAndDirectories(File fileToCreate) throws IOException {
+        
+        File parentFile = fileToCreate.getAbsoluteFile().getParentFile();
+        FileUtils.forceMkdir(parentFile);
+        FileUtils.touch(fileToCreate);
+    }
 }

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -29,6 +30,6 @@ public interface NodeExporterFactory {
      * @param node
      * @return 
      */
-    public NodeExporter getNodeExporterForNode(WorkspaceNode node);
+    public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node);
     
 }

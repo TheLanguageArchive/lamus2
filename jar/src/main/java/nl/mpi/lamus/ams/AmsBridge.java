@@ -102,7 +102,7 @@ public interface AmsBridge {
 	 * Recalculate the resource access rights for the updated part of the archive,
 	 * propagate them to the Apache htaccess file and signal the webserver
 	 */
-//	public void callAccessRightsManagementSystem(String recalcDomainMpiID);
+	public void callAccessRightsManagementSystem(String recalcDomainMpiID);
 
 	/**
 	 * Applies the necessary procedures to replace a node in AMS:

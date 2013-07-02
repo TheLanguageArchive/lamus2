@@ -15,22 +15,20 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.model.Workspace;
-
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class WorkspaceException extends Exception {
     
-    private Workspace workspace;
+    private int workspaceID = -1;
     
-    public WorkspaceException(String message, Workspace workspace, Throwable cause) {
+    public WorkspaceException(String message, int workspaceID, Throwable cause) {
         super(message, cause);
-        this.workspace = workspace;
+        this.workspaceID = workspaceID;
     }
     
-    public Workspace getWorkspace() {
-        return this.workspace;
+    public int getWorkspaceID() {
+        return this.workspaceID;
     }
 }

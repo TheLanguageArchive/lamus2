@@ -19,6 +19,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
@@ -30,24 +31,25 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
- * Configuration class containing some beans related with databases.
- * To be used in production, connecting to the real databases.
- * 
+ * Configuration class containing some beans related with databases. To be used
+ * in production, connecting to the real databases.
+ *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
 @Profile("production")
 public class JndiDatabaseBeans {
-    
+
     //TODO add these properties to some configuration file and load them here
     //TODO for testing load a dummy one? take care of closing the connection
-
     private CorpusStructureDBWriteImpl csDBWrite;
     private DataSource lamusDataSource;
     private VersioningAPI versioningAPI;
-    
+    private SearchClient searchClient;
+
     /**
-     * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure' database
+     * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure'
+     * database
      */
     @Bean
     @Qualifier("ArchiveObjectsDB")
@@ -56,38 +58,49 @@ public class JndiDatabaseBeans {
     }
 
     /**
-     * Creates the connection to the 'corpusstructure' database, in case it hasn't been done before.
-     * @return CorpusStructureDBWriteImpl object, which will be used for the ArchiveObjectsDB bean
+     * Creates the connection to the 'corpusstructure' database, in case it
+     * hasn't been done before.
+     *
+     * @return CorpusStructureDBWriteImpl object, which will be used for the
+     * ArchiveObjectsDB bean
      */
     private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
-        if(csDBWrite == null) {
-            
+        if (csDBWrite == null) {
+
             //TODO How are the username and password injected here?
-            
+
             csDBWrite = new CorpusStructureDBWriteImpl("java:comp/env/jdbc/CSDB", false, "", "");
         }
         return csDBWrite;
     }
-    
+
     /**
      * @return DataSource bean corresponding to the Lamus2 database
-     * @throws NamingException 
+     * @throws NamingException
      */
     @Bean
     @Qualifier("lamusDataSource")
     public DataSource lamusDataSource() throws NamingException {
-        if(lamusDataSource == null) {
+        if (lamusDataSource == null) {
             Context ctx = new InitialContext();
             lamusDataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
         }
         return lamusDataSource;
     }
-    
+
     @Bean
     public VersioningAPI versioningAPI() {
-        if(versioningAPI == null) {
+        if (versioningAPI == null) {
             versioningAPI = new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
         }
         return versioningAPI;
+    }
+
+    @Bean
+    public SearchClient searchClient() {
+        if (searchClient == null) {
+            //TODO INITIALIZE SearchClient bean
+        }
+        return searchClient;
     }
 }

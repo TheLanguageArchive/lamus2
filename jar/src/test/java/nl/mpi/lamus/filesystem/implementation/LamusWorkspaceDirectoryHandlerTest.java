@@ -87,7 +87,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         testWorkspace.setWorkspaceID(1);
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
         
-        this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+        this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace.getWorkspaceID());
         
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
     }
@@ -106,7 +106,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
 
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
         
-        this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+        this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace.getWorkspaceID());
         
         assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
     }
@@ -123,10 +123,10 @@ public class LamusWorkspaceDirectoryHandlerTest {
         String errorMessage = "Directory for workspace " + testWorkspace.getWorkspaceID() + " could not be created";
         
         try {
-            this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace);
+            this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace.getWorkspaceID());
             fail("Exception was not thrown");
         } catch(WorkspaceFilesystemException ex) {
-            assertEquals(testWorkspace, ex.getWorkspace());
+            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
             assertEquals(errorMessage, ex.getMessage());
         }
 

@@ -246,6 +246,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @see lams.ams.AmsBridge#getStatus()
      */
+    @Override
     public boolean getStatus() {
         return this.getAuthorizationSrv() != null
                 && this.getAuthenticationSrv() != null
@@ -279,6 +280,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @see lams.ams.AmsBridge#close()
      */
+    @Override
     public void close() {
         // unimplemented: db access control handled by hibernate
         logger.debug("closing ams2Bridge...");
@@ -288,6 +290,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @see lams.ams.AmsBridge#close(java.lang.String)
      */
+    @Override
     public void close(String reason) {
         // unimplemented: db access control handled by hibernate
         logger.debug("closing ams2Bridge due to " + reason);
@@ -312,6 +315,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String,
      * nl.mpi.util.OurURL)
      */
+    @Override
     public boolean hasWriteAccess(String userId, String nodeIdStr) {
         LatPrincipal user = this.getPrincipalSrv().getUser(userId);
         NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
@@ -336,6 +340,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String,
      * nl.mpi.util.OurURL, long)
      */
+    @Override
     public void setUsedStorageSpace(String uid, String nodeIdStr, long val) {
         try {
             NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
@@ -368,6 +373,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      * @see lams.ams.AmsBridge#getUsedStorageSpace(java.lang.String,
      * nl.mpi.util.OurURL)
      */
+    @Override
     public long getUsedStorageSpace(String uid, String nodeIdStr) {
         try {
             NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
@@ -397,6 +403,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      * @see lams.ams.AmsBridge#getMaxStorageSpace(java.lang.String,
      * nl.mpi.util.OurURL)
      */
+    @Override
     public long getMaxStorageSpace(String uid, String nodeIdStr) {
         try {
             NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
@@ -453,7 +460,11 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @see lams.ams.AmsBridge#callAccessRightsManagementSystem(String)
      */
-//	public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
+    @Override
+    public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
+            
+            throw new UnsupportedOperationException("not implemented yet");
+            
 //		try {
 //			// build & check target url
 //			if(Text.empty(this.baseURL) || Text.empty(this.recalcURL)) {
@@ -490,7 +501,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		} catch(Exception eE) {
 //			LOG.error("!! failed to call ams2 recalculation !!", eE);
 //		}
-//	}
+    }
     /**
      * @see lams.ams.AmsBridge#replaceNodeAms(String, String, String)
      */

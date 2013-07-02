@@ -102,6 +102,8 @@ public class ResourceNodeImporterTest {
     
     @Mock TypecheckedResults mockTypecheckedResults;
     
+    private final int workspaceID = 1;
+    
     public ResourceNodeImporterTest() {
     }
 
@@ -115,13 +117,13 @@ public class ResourceNodeImporterTest {
     
     @Before
     public void setUp() {
-        testWorkspace = new LamusWorkspace(1, "someUser", -1, null,
+        testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, -1, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         nodeImporter = new ResourceNodeImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeDataRetriever,
                 mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
-        nodeImporter.setWorkspace(testWorkspace);
+//        nodeImporter.setWorkspace(testWorkspace);
         nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeDataRetriever,
                 mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
@@ -177,7 +179,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(childNodeType));
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
                 
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace, childNodeArchiveID,
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID,
                     childNodeUrlWithContext.toURL(), mockChildLink, childNodeType, childNodeMimetype);
                 will(returnValue(testChildNode));
 
@@ -191,7 +193,7 @@ public class ResourceNodeImporterTest {
         }});
         
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
-        nodeImporter.importNode(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
+        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
         
     }
     
@@ -206,15 +208,15 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
         
         try {
-            nodeImporterWithoutWorkspace.importNode(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
+            nodeImporterWithoutWorkspace.importNode(-1, testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
             fail("Should have thrown NodeImporterException");
         } catch(NodeImporterException ex) {
             assertNotNull(ex);
             String expectedErrorMessage = "ResourceNodeImporter.importNode: workspace not set";
             assertEquals(expectedErrorMessage, ex.getMessage());
-            assertEquals(null, ex.getWorkspace());
+            assertEquals(-1, ex.getWorkspaceID());
             assertEquals(ResourceNodeImporter.class, ex.getNodeImporterType());
-            assertEquals(null, ex.getCause());
+            assertNull(ex.getCause());
         }
     }
     

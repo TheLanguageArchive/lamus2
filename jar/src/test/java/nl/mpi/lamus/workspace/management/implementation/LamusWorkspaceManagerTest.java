@@ -100,7 +100,7 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace);
+            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
             oneOf (mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf (mockWorkspaceImportRunner).setTopNodeArchiveID(archiveNodeID);
             oneOf (mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -128,7 +128,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace); will(throwException(new WorkspaceFilesystemException(errorMessage, newWorkspace, null)));
+            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
+                will(throwException(new WorkspaceFilesystemException(errorMessage, newWorkspace.getWorkspaceID(), null)));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeID);
@@ -173,7 +174,8 @@ public class LamusWorkspaceManagerTest {
     public void openExistingWorkspaceWithRightUser() throws MalformedURLException {
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -181,7 +183,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -209,7 +211,8 @@ public class LamusWorkspaceManagerTest {
         final int workspaceID = 1;
         final String givenUserID = "someUser";
         final String expectedUserID = "someOtherUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -217,7 +220,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, expectedUserID, topNodeID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, expectedUserID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -236,7 +239,8 @@ public class LamusWorkspaceManagerTest {
     public void openExistingWorkspaceWithoutDirectory() throws MalformedURLException {
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
@@ -244,7 +248,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -278,7 +282,8 @@ public class LamusWorkspaceManagerTest {
     public void submitWorkspaceSuccessful() throws MalformedURLException, InterruptedException, ExecutionException {
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
@@ -294,11 +299,11 @@ public class LamusWorkspaceManagerTest {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
                 initialStatus, initialMessage, archiveInfo);
         
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
                 successfullySubmittedStatus, successfullySubmittedMessage, archiveInfo);
         
@@ -328,7 +333,8 @@ public class LamusWorkspaceManagerTest {
         
         final int workspaceID = 1;
         final String userID = "someUser";
-        final int topNodeID = 0;
+        final int topNodeID = 1;
+        final int topNodeArchiveID = 2;
         final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
@@ -344,11 +350,11 @@ public class LamusWorkspaceManagerTest {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
                 initialStatus, initialMessage, archiveInfo);
         
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURL,
+        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
                 unsuccessfullySubmittedStatus, unsuccessfullySubmittedMessage, archiveInfo);
         

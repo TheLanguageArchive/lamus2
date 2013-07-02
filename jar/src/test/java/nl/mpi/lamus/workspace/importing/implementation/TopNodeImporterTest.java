@@ -99,25 +99,26 @@ public class TopNodeImporterTest {
     @Test
     public void testImportNode() throws Exception {
         
+        final int workspaceID = 1;
         final int nodeArchiveID = 10;
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataNodeImporter).importNode(null, null, null, nodeArchiveID);
+            oneOf(mockMetadataNodeImporter).importNode(workspaceID, null, null, null, nodeArchiveID);
         }});
         
-        topNodeImporter.importNode(nodeArchiveID);
+        topNodeImporter.importNode(workspaceID, nodeArchiveID);
     }
 
     /**
      * Test of setWorkspace method, of class TopNodeImporter.
      */
-    @Test
-    public void testSetWorkspace() {
-        
-        context.checking(new Expectations() {{
-            oneOf(mockMetadataNodeImporter).setWorkspace(mockWorkspace);
-        }});
-        
-        topNodeImporter.setWorkspace(mockWorkspace);
-    }
+//    @Test
+//    public void testSetWorkspace() {
+//        
+//        context.checking(new Expectations() {{
+//            oneOf(mockMetadataNodeImporter).setWorkspace(mockWorkspace);
+//        }});
+//        
+//        topNodeImporter.setWorkspace(mockWorkspace);
+//    }
 }

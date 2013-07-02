@@ -15,15 +15,13 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.model.Workspace;
-
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class WorkspaceFilesystemException extends WorkspaceException {
     
-    public WorkspaceFilesystemException(String message, Workspace workspace, Throwable cause) {
-        super(message, workspace, cause);
+    public WorkspaceFilesystemException(String message, int workspaceID, Throwable cause) {
+        super(message, workspaceID, cause);
     }
 }

@@ -82,118 +82,152 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         this.format = format;
     }
 
+    @Override
     public int getWorkspaceNodeID() {
         return this.workspaceNodeID;
     }
     
+    @Override
     public void setWorkspaceNodeID(int workspaceNodeID) {
         this.workspaceNodeID = workspaceNodeID;
     }
 
+    @Override
     public int getWorkspaceID() {
         return this.workspaceID;
     }
     
+    @Override
     public void setWorkspaceID(int workspaceID) {
         this.workspaceID = workspaceID;
     }
 
+    @Override
     public int getArchiveNodeID() {
         return this.archiveNodeID;
     }
     
+    @Override
     public void setArchiveNodeID(int archiveNodeID) {
         this.archiveNodeID = archiveNodeID;
     }
 
+    @Override
     public URI getProfileSchemaURI() {
         return this.profileSchemaURI;
     }
     
+    @Override
     public void setProfileSchemaURI(URI profileSchemaURI) {
         this.profileSchemaURI = profileSchemaURI;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getTitle() {
         return this.title;
     }
 
+    @Override
     public void setTitle(String title) {
         this.title = title;
     }
     
+    @Override
     public WorkspaceNodeType getType() {
         return this.type;
     }
     
+    @Override
+    public boolean isMetadata() {
+        return WorkspaceNodeType.METADATA.equals(this.type);
+    }
+    
+    @Override
     public void setType(WorkspaceNodeType type) {
         this.type = type;
     }
 
+    @Override
     public URL getWorkspaceURL() {
         return this.workspaceURL;
     }
     
+    @Override
     public void setWorkspaceURL(URL workspaceURL) {
         this.workspaceURL = workspaceURL;
     }
 
+    @Override
     public URL getArchiveURL() {
         return this.archiveURL;
     }
     
+    @Override
     public void setArchiveURL(URL archiveURL) {
         this.archiveURL = archiveURL;
     }
 
+    @Override
     public URL getOriginURL() {
         return this.originURL;
     }
     
+    @Override
     public void setOriginURL(URL originURL) {
         this.originURL = originURL;
     }
 
+    @Override
     public WorkspaceNodeStatus getStatus() {
         return this.status;
     }
 
+    @Override
     public void setStatus(WorkspaceNodeStatus status) {
         this.status = status;
     }
 
+    @Override
     public String getPid() {
         return this.pid;
     }
 
+    @Override
     public void setPid(String pid) {
         this.pid = pid;
     }
 
+    @Override
     public String getFormat() {
         return this.format;
     }
     
+    @Override
     public void setFormat(String format) {
         this.format = format;
     }
 
+    @Override
     public Collection<WorkspaceParentNodeReference> getParentNodesReferences() {
         return Collections.unmodifiableCollection(this.parentNodesReferences);
     }
 
+    @Override
     public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodesReferences) {
         this.parentNodesReferences = parentNodesReferences;
     }
     
+    @Override
     public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
         if(this.parentNodesReferences == null) {
             this.parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();

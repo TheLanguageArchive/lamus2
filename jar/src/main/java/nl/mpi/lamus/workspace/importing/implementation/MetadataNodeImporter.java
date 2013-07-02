@@ -64,8 +64,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     private final WorkspaceFileHandler workspaceFileHandler;
     private final WorkspaceNodeExplorer workspaceNodeExplorer;
-    private Workspace workspace = null;
 
+    private int workspaceID = -1;
+    
     @Autowired
     public MetadataNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
 	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinker nodeLinker, WorkspaceFileImporter fileImporter,
@@ -89,22 +90,18 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     }
 
     /**
-     * @see NodeImporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
-     */
-    public void setWorkspace(Workspace ws) {
-	this.workspace = ws;
-    }
-
-    /**
      * @see NodeImporter#importNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
      */
-    public void importNode(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    @Override
+    public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference childLink, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException {
 
-	if (workspace == null) {
+        workspaceID = wsID;
+        
+	if (workspaceID < 0) {
 	    String errorMessage = "MetadataNodeImporter.importNode: workspace not set";
 	    logger.error(errorMessage);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), null);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
 	}
 
 
@@ -127,39 +124,39 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         } catch (IOException ioex) {
 	    String errorMessage = "Error importing Metadata Document for node with ID " + childNodeArchiveID;
 	    logger.error(errorMessage, ioex);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), ioex);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), ioex);
         } catch (MetadataException mdex) {
 	    String errorMessage = "Error importing Metadata Document for node with ID " + childNodeArchiveID;
 	    logger.error(errorMessage, mdex);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), mdex);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), mdex);
         } catch (UnknownNodeException unex) {
 	    String errorMessage = "Error getting object URL for node ID " + childNodeArchiveID;
 	    logger.error(errorMessage, unex);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), unex);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
         
         WorkspaceNode childNode;
         try {
-            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace, childNodeArchiveID, childDocument);
+            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childNodeArchiveID, childDocument);
         } catch (MalformedURLException muex) {
             String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
             logger.error(errorMessage, muex);
-            throw new NodeImporterException(errorMessage, workspace, this.getClass(), muex);
+            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
         }
         
         workspaceDao.addWorkspaceNode(childNode);
         
         
-        workspaceNodeLinker.linkNodes(workspace, parentNode, childNode, childLink);
+        workspaceNodeLinker.linkNodes(parentNode, childNode, childLink);
         
         
         try {
-            this.workspaceFileImporter.importMetadataFileToWorkspace(workspace, childNode, childDocument);
+            this.workspaceFileImporter.importMetadataFileToWorkspace(childNode, childDocument);
         } catch (WorkspaceNodeFilesystemException fwsnex) {
 	    String errorMessage = "Failed to create file for workspace node " + childNode.getWorkspaceNodeID()
-		    + " in workspace " + workspace.getWorkspaceID();
+		    + " in workspace " + workspaceID;
 	    logger.error(errorMessage, fwsnex);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), fwsnex);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), fwsnex);
 	}
 
 	//TODO change the referenced URL in the parent document
@@ -174,7 +171,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	if (childDocument instanceof ReferencingMetadataDocument) {
 	    ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
             List<Reference> links = childReferencingDocument.getDocumentReferences();
-	    workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
+	    workspaceNodeExplorer.explore(childNode, childReferencingDocument, links);
 	}
 
 	//TODO What else?

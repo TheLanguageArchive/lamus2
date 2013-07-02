@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 
@@ -25,6 +24,6 @@ import nl.mpi.metadata.api.model.Reference;
  */
 public interface WorkspaceNodeLinker {
     
-    public void linkNodes(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
     
 }

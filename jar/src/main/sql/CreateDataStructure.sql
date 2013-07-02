@@ -2,6 +2,7 @@ CREATE TABLE workspace (
 	workspace_id                SERIAL                          NOT NULL,
 	user_id                     varchar(30)                     NOT NULL,
 	top_node_id                 integer,
+        top_node_archive_id         integer,
         top_node_archive_url        varchar(255),
 	start_date                  timestamp(6) with time zone     NOT NULL,
 	end_date                    timestamp(6) with time zone,

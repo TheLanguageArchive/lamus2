@@ -44,20 +44,21 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     /**
      * @see WorkspaceDirectoryHandler#createWorkspaceDirectory(nl.mpi.lamus.workspace.model.Workspace)
      */
-    public void createWorkspaceDirectory(Workspace workspace) throws WorkspaceFilesystemException {
+    @Override
+    public void createWorkspaceDirectory(int workspaceID) throws WorkspaceFilesystemException {
         
-        logger.debug("Creating directory for workspace " + workspace.getWorkspaceID());
+        logger.debug("Creating directory for workspace " + workspaceID);
         
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspace.getWorkspaceID());
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
         
         if(workspaceDirectory.exists()) {
-            logger.info("Directory for workspace " + workspace.getWorkspaceID() + " already exists");
+            logger.info("Directory for workspace " + workspaceID + " already exists");
         } else {
             if(workspaceDirectory.mkdirs()) {
-                logger.info("Directory for workspace " + workspace.getWorkspaceID() + " successfully created");
+                logger.info("Directory for workspace " + workspaceID + " successfully created");
             } else {
-                String errorMessage = "Directory for workspace " + workspace.getWorkspaceID() + " could not be created";
-                throw new WorkspaceFilesystemException(errorMessage, workspace, null);
+                String errorMessage = "Directory for workspace " + workspaceID + " could not be created";
+                throw new WorkspaceFilesystemException(errorMessage, workspaceID, null);
             }
         }
     }
@@ -65,6 +66,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     /**
      * @see WorkspaceDirectoryHandler#deleteWorkspaceDirectory(int)
      */
+    @Override
     public void deleteWorkspaceDirectory(int workspaceID) throws IOException {
         
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -79,6 +81,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     /**
      * @see WorkspaceDirectoryHandler#workspaceDirectoryExists(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public boolean workspaceDirectoryExists(Workspace workspace) {
         
         logger.debug("Checking if directory for workspace " + workspace.getWorkspaceID() + " exists");

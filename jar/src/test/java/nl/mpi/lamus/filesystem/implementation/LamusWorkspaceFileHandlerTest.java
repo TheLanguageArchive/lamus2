@@ -122,7 +122,7 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
         
-        workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+        workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                 mockMetadataDocument, testNodeFile, mockStreamResult);
     }
     
@@ -146,13 +146,13 @@ public class LamusWorkspaceFileHandlerTest {
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
+            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspaceID(), testWorkspace.getWorkspaceID());
             assertEquals("Workspace Node associated with exception is different from expected", fwsex.getWorkspaceNode(), testWorkspaceNode);
         }
     }
@@ -177,13 +177,13 @@ public class LamusWorkspaceFileHandlerTest {
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
+            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspaceID(), testWorkspace.getWorkspaceID());
             assertEquals("Workspace Node associated with exception is different from expected", fwsex.getWorkspaceNode(), testWorkspaceNode);
         }
     }
@@ -208,13 +208,13 @@ public class LamusWorkspaceFileHandlerTest {
         }});
         
         try {
-            workspaceFileHandler.copyMetadataFileToWorkspace(testWorkspace, testWorkspaceNode, mockMetadataAPI,
+            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
         } catch(WorkspaceNodeFilesystemException fwsex) {
             assertEquals("Exception cause is different from expected", fwsex.getCause(), expectedExceptionCause);
             assertEquals("Exception error message is different from expected", fwsex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspace(), testWorkspace);
+            assertEquals("Workspace associated with exception is different from expected", fwsex.getWorkspaceID(), testWorkspace.getWorkspaceID());
             assertEquals("Workspace Node associated with exception is different from expected", fwsex.getWorkspaceNode(), testWorkspaceNode);
         }
     }
@@ -229,7 +229,7 @@ public class LamusWorkspaceFileHandlerTest {
         File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
         
         StreamResult retrievedStreamResult = 
-                workspaceFileHandler.getStreamResultForWorkspaceNodeFile(testNodeFile);
+                workspaceFileHandler.getStreamResultForNodeFile(testNodeFile);
         
         assertNotNull("Resulting StreamResult is null", retrievedStreamResult);
     }

@@ -16,6 +16,7 @@
 package nl.mpi.lamus.archive;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import nl.mpi.util.OurURL;
@@ -37,10 +38,7 @@ public interface ArchiveFileHelper {
     
 //    public String getFileSystemId(String fullname);
     
-    /**
-     * @return the part of fullname up to but excluding the last slash
-     */
-    public String getFileDirname(String fullname);
+    public String getFileBasenameWithoutExtension(String fullname);
     
     /**
      * 
@@ -94,5 +92,9 @@ public interface ArchiveFileHelper {
     public boolean isUrlLocal(OurURL urlToCheck);
     
     public File getArchiveLocationForNodeID(int archiveNodeID);
+    
+    public File getFinalFile(String parentDirectory, String fileNameAttempt);
+    
+    public void createFileAndDirectories(File fileToCreate) throws IOException;
     
 }

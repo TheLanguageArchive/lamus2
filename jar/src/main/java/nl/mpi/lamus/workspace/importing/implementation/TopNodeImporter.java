@@ -53,11 +53,11 @@ public class TopNodeImporter {
                 parentNodeReferenceFactory, wsNodelinkFactory, fileHandler, workspaceNodeExplorer);
     }
     
-    public void importNode(int childNodeArchiveID) throws NodeImporterException, NodeExplorerException {
-        metadataNodeImporter.importNode(null, null, null, childNodeArchiveID);
+    public void importNode(int workspaceID, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException {
+        metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveID);
     }
     
-    public void setWorkspace(Workspace workspace) {
-        metadataNodeImporter.setWorkspace(workspace);
-    }
+//    public void setWorkspace(Workspace workspace) {
+//        metadataNodeImporter.setWorkspace(workspace);
+//    }
 }

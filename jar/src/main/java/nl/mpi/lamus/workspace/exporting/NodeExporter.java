@@ -24,8 +24,10 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  */
 public interface NodeExporter {
     
+    public Workspace getWorkspace();
+    
     public void setWorkspace(Workspace workspace);
     
-    public void exportNode(WorkspaceNode node);
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode);
     
 }

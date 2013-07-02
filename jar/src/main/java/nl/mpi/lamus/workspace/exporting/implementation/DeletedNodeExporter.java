@@ -16,7 +16,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.net.URL;
-import nl.mpi.lamus.workspace.exporting.ArchiveObjectsBridge;
+import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
@@ -25,45 +25,57 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Class responsible for exporting nodes that were deleted
+ * and should be moved to the trash can in the filesystem and have
+ * their record in the database updated accordingly.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class DeletedNodeExporter implements NodeExporter {
 
     private final TrashVersioningHandler trashVersioningHandler;
     private final TrashCanHandler trashCanHandler;
-    private final ArchiveObjectsBridge archiveObjectsBridge;
+    private final CorpusStructureBridge corpusStructureBridge;
     private final SearchClientBridge searchClientBridge;
     
-    private Workspace workspace = null;
+//    private Workspace workspace = null;
     
-    public DeletedNodeExporter(TrashVersioningHandler tvHandler, TrashCanHandler tcHandler, ArchiveObjectsBridge aoBridge, SearchClientBridge sClientBridge) {
+    public DeletedNodeExporter(TrashVersioningHandler tvHandler, TrashCanHandler tcHandler, CorpusStructureBridge csBridge, SearchClientBridge sClientBridge) {
         
         this.trashVersioningHandler = tvHandler;
         this.trashCanHandler = tcHandler;
-        this.archiveObjectsBridge = aoBridge;
+        this.corpusStructureBridge = csBridge;
         this.searchClientBridge = sClientBridge;
     }
     
+    @Override
+    public Workspace getWorkspace() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
     public void setWorkspace(Workspace workspace) {
-        this.workspace = workspace;
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void exportNode(WorkspaceNode node) {
+    @Override
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         
-        if(!trashVersioningHandler.retireNodeVersion(node)) {
+        if(!trashVersioningHandler.retireNodeVersion(currentNode)) {
             //TODO log error / throw exception
         }
         
-        URL trashedNodeArchiveURL = trashCanHandler.moveFileToTrashCan(node);
+        URL trashedNodeArchiveURL = trashCanHandler.moveFileToTrashCan(currentNode);
         
         //TODO check if URL is good
         
-        if(!archiveObjectsBridge.updateArchiveObjectsNodeURL(node.getArchiveNodeID(), node.getArchiveURL(), trashedNodeArchiveURL)) {
+        if(!corpusStructureBridge.updateArchiveObjectsNodeURL(currentNode.getArchiveNodeID(), currentNode.getArchiveURL(), trashedNodeArchiveURL)) {
             //TODO log error / throw exception
         }
         
-        searchClientBridge.removeNode(node.getArchiveNodeID());
+        searchClientBridge.removeNode(currentNode.getArchiveNodeID());
+        
+        //TODO REMOVE LINK FROM PARENT (IF THERE IS ONE)
     }
     
 }

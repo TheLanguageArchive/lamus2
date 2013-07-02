@@ -76,13 +76,14 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#createWorkspace(java.lang.String, int)
      */
+    @Override
     public Workspace createWorkspace(String userID, int topNodeArchiveID) {
         
         Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topNodeArchiveID);
         newWorkspace.setStatusMessageInitialising();
         workspaceDao.addWorkspace(newWorkspace);
         try {
-            workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace);
+            workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace.getWorkspaceID());
         } catch(WorkspaceFilesystemException ex) {
             logger.error(ex.getMessage(), ex);
             return null;
@@ -129,6 +130,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#deleteWorkspace(java.lang.String, int)
      */
+    @Override
     public boolean deleteWorkspace(int workspaceID) {
         
         workspaceDao.deleteWorkspace(workspaceID);
@@ -146,6 +148,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#submitWorkspace(int)
      */
+    @Override
     public boolean submitWorkspace(int workspaceID/*, boolean keepUnlinkedFiles*/) {
                 
         //TODO workspaceDao - get workspace from DB
@@ -201,6 +204,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     /**
      * @see WorkspaceManager#openWorkspace(java.lang.String, int)
      */
+    @Override
     public Workspace openWorkspace(String userID, int workspaceID) {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);

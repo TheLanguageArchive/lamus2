@@ -52,20 +52,21 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
         this.metadataAPI = mAPI;
     }
 
-    public void importMetadataFileToWorkspace(Workspace workspace, WorkspaceNode node, MetadataDocument metadataDocument)
+    @Override
+    public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument metadataDocument)
         throws WorkspaceNodeFilesystemException {
         
 	File nodeFile = workspaceFileHandler.getFileForWorkspaceNode(node);
-	StreamResult streamResult = workspaceFileHandler.getStreamResultForWorkspaceNodeFile(nodeFile);
+	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 
-        workspaceFileHandler.copyMetadataFileToWorkspace(workspace, node, metadataAPI, metadataDocument, nodeFile, streamResult);
+        workspaceFileHandler.copyMetadataFile(node, metadataAPI, metadataDocument, nodeFile, streamResult);
         
         try {
             node.setWorkspaceURL(nodeFile.toURI().toURL());
         } catch (MalformedURLException mfex) {
             String errorMessage = "Failed to create URL from the Workspace file location: " + nodeFile.toURI();
             logger.error(errorMessage, mfex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspace, node, mfex);
+            throw new WorkspaceNodeFilesystemException(errorMessage, node, mfex);
         }
         this.workspaceDao.updateNodeWorkspaceURL(node);
     }

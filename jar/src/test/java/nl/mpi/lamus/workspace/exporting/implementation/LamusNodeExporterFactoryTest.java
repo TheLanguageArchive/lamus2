@@ -19,18 +19,25 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import nl.mpi.lamus.workspace.exporting.ArchiveObjectsBridge;
+import java.util.Calendar;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.metadata.api.MetadataAPI;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -51,10 +58,19 @@ public class LamusNodeExporterFactoryTest {
     
     @Mock TrashVersioningHandler mockTrashVersioningHandler;
     @Mock TrashCanHandler mockTrashCanHandler;
-    @Mock ArchiveObjectsBridge mockArchiveObjectsBridge;
+    @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock SearchClientBridge mockSearchClientBridge;
+    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
+    @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock MetadataAPI mockMetadataAPI;
+    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    
+    @Mock Workspace mockWorkspace;
     
     private NodeExporterFactory exporterFactory;
+    
+    private Workspace workspace;
     
     public LamusNodeExporterFactoryTest() {
     }
@@ -70,8 +86,11 @@ public class LamusNodeExporterFactoryTest {
     @Before
     public void setUp() {
         
-        exporterFactory = new LamusNodeExporterFactory(
-                mockTrashVersioningHandler, mockTrashCanHandler, mockArchiveObjectsBridge, mockSearchClientBridge);
+        workspace = new LamusWorkspace(1, "someUser", -1, -1, null,
+                Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
+                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
+        
+        exporterFactory = new LamusNodeExporterFactory();
     }
     
     @After
@@ -93,8 +112,10 @@ public class LamusNodeExporterFactoryTest {
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, archiveNodeID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeURL, nodeURL, nodeURL, WorkspaceNodeStatus.NODE_UPLOADED, nodePid, nodeFormat);
         
-        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(node);
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
         
+        assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof AddedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
     }
 }

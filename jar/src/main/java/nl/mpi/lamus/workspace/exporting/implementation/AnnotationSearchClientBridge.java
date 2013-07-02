@@ -15,27 +15,47 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
 import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class AnnotationSearchClientBridge implements SearchClientBridge {
     
     private static final Logger logger = LoggerFactory.getLogger(AnnotationSearchClientBridge.class);
 
     private final SearchClient searchClient;
     
+    @Autowired
     public AnnotationSearchClientBridge(SearchClient sClient) {
         this.searchClient = sClient;
     }
     
+    
+    @Override
+    public void addNode(int archiveNodeID) {
+        try {
+            searchClient.add(NodeIdUtils.TONODEID(archiveNodeID));
+        } catch (SQLException ex) {
+            logger.error("Problems when calling Annex in order to add node " + archiveNodeID + " to the annotation search database", ex);
+            //TODO throw another exception? return something??
+        }
+        searchClient.close();
+    }
+    
+    @Override
     public void removeNode(int archiveNodeID) {
         try {
             searchClient.remove(NodeIdUtils.TONODEID(archiveNodeID));
@@ -44,6 +64,17 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
             //TODO throw another exception? return something??
         }
         searchClient.close();
+    }
+
+    @Override
+    public boolean isFormatSearchable(String format) {
+        
+        List<String> searchableFormats = Arrays.asList(SearchClient.getSearchableFormats());
+        if(searchableFormats.contains(format)) {
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
+        }
     }
     
 }

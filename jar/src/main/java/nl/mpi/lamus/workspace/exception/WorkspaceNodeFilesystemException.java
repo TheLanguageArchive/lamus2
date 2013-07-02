@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.exception;
 
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -26,8 +25,8 @@ public class WorkspaceNodeFilesystemException extends WorkspaceException {
     
     private WorkspaceNode workspaceNode;
     
-    public WorkspaceNodeFilesystemException(String message, Workspace workspace, WorkspaceNode node, Throwable cause) {
-        super(message, workspace, cause);
+    public WorkspaceNodeFilesystemException(String message, WorkspaceNode node, Throwable cause) {
+        super(message, node.getWorkspaceID(), cause);
         this.workspaceNode = node;
     }
     

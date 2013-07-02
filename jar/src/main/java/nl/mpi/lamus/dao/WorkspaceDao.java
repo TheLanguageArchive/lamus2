@@ -116,6 +116,14 @@ public interface WorkspaceDao {
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
     
     /**
+     * Retrieves the top node of the given workspace.
+     * 
+     * @param workspaceID ID of the workspace
+     * @return WorkspaceNode object corresponding to the top node of the workspace
+     */
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID);
+    
+    /**
      * Retrieves a collection containing all the nodes
      * of the workspace with the given ID.
      * 

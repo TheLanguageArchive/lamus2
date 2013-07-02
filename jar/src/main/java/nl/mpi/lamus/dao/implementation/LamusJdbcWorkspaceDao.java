@@ -78,6 +78,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .usingColumns(
                     "user_id",
                     "top_node_id",
+                    "top_node_archive_id",
                     "top_node_archive_url",
                     "start_date",
                     "end_date",
@@ -121,9 +122,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#addWorkspace(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void addWorkspace(Workspace workspace) {
         
-        logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeID());
+        logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeArchiveID());
 
         String topNodeArchiveURLStr = null;
         if(workspace.getTopNodeArchiveURL() != null) {
@@ -148,6 +150,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
+                .addValue("top_node_archive_id", workspace.getTopNodeArchiveID())
                 .addValue("top_node_archive_url", topNodeArchiveURLStr)
                 .addValue("start_date", startDate)
                 .addValue("session_start_date", sessionStartDate)
@@ -165,6 +168,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#deleteWorkspace(int)
      */
+    @Override
     public void deleteWorkspace(int workspaceID) {
         
         logger.debug("Deleting workspace with ID " + workspaceID);
@@ -183,29 +187,34 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#updateWorkspaceTopNode(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void updateWorkspaceTopNode(Workspace workspace) {
         
-        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting top node to: " + workspace.getTopNodeID());
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID()
+                + "; setting top node to: workspace ID = " + workspace.getTopNodeID() + "; archive ID = " + workspace.getTopNodeArchiveID());
         
         String topNodeArchiveURLStr = null;
         if(workspace.getTopNodeArchiveURL() != null) {
             topNodeArchiveURLStr = workspace.getTopNodeArchiveURL().toString();
         }
         
-        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_url = :top_node_archive_url"
+        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_id = :top_node_archive_id, top_node_archive_url = :top_node_archive_url"
                 + " WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("top_node_id", workspace.getTopNodeID())
+                .addValue("top_node_archive_id", workspace.getTopNodeArchiveID())
                 .addValue("top_node_archive_url", topNodeArchiveURLStr)
                 .addValue("workspace_id", workspace.getWorkspaceID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
-        logger.info("Top node of workspace " + workspace.getWorkspaceID() + " updated to node " + workspace.getTopNodeID());
+        logger.info("Top node of workspace " + workspace.getWorkspaceID()
+                + " updated to; workspace ID = " + workspace.getTopNodeID() + "; archive ID = " + workspace.getTopNodeArchiveID());
     }
     
     /**
      * @see WorkspaceDao#updateWorkspaceSessionDates(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void updateWorkspaceSessionDates(Workspace workspace) {
                 
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting session start date to: "
@@ -226,6 +235,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#updateWorkspaceStorageSpace(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void updateWorkspaceStorageSpace(Workspace workspace) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -233,6 +243,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#updateWorkspaceStatusMessage(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void updateWorkspaceStatusMessage(Workspace workspace) {
         
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
@@ -257,6 +268,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#updateWorkspaceEndDates(nl.mpi.lamus.workspace.model.Workspace)
      */
+    @Override
     public void updateWorkspaceEndDates(Workspace workspace) {
         
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting end date to: " + workspace.getEndDate()
@@ -278,6 +290,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#getWorkspace(int)
      */
+    @Override
     public Workspace getWorkspace(int workspaceID) {
         
         logger.debug("Retrieving workspace with ID: " + workspaceID);
@@ -301,6 +314,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#listWorkspacesForUser(java.lang.String)
      */
+    @Override
     public Collection<Workspace> listWorkspacesForUser(String userID) {
 
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
@@ -335,6 +349,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#isNodeLocked(int)
      */
+    @Override
     public boolean isNodeLocked(int archiveNodeID) {
         
         logger.debug("Checking if node with archive ID " + archiveNodeID + " is locked");
@@ -343,6 +358,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         SqlParameterSource namedParameters = new MapSqlParameterSource("archive_node_id", archiveNodeID);
         
         RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
+            @Override
             public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
                 WorkspaceNode node = new LamusWorkspaceNode();
                 node.setWorkspaceNodeID(rs.getInt("workspace_node_id"));
@@ -367,6 +383,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#addWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
+    @Override
     public void addWorkspaceNode(WorkspaceNode node) {
                 
         logger.debug("Adding node to the database belonging to workspace with ID: " + node.getWorkspaceID());
@@ -418,6 +435,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#getWorkspaceNode(int)
      */
+    @Override
     public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
 
         logger.debug("Retrieving workspace node with ID: " + workspaceNodeID);
@@ -438,9 +456,31 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return workspaceNodeToReturn;
     }
     
+    @Override
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID) {
+
+        logger.debug("Retrieving top node of workspace with ID: " + workspaceID);
+        
+        String queryWorkspaceNodeSql = "SELECT * FROM node WHERE workspace_node_id IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        WorkspaceNode topWorkspaceNode;
+        try {
+            topWorkspaceNode = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            logger.warn("Top node for workspace with ID " + workspaceID + " does not exist in the database");
+            return null;
+        }
+        
+        logger.info("Top node for workspace with ID " + workspaceID + " retrieved from the database");
+        
+        return topWorkspaceNode;
+    }
+    
     /**
      * @see WorkspaceDao#getNodesForWorkspace(int)
      */
+    @Override
     public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID) {
         
         logger.debug("Retrieving list containing nodes of the workspace with ID " + workspaceID);
@@ -456,6 +496,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#getChildWorkspaceNodes(int)
      */
+    @Override
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID) {
         
         logger.debug("Retrieving list containing child nodes of the node with ID: " + workspaceNodeID);
@@ -469,6 +510,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return listToReturn;
     }
     
+    @Override
     public void updateNodeWorkspaceURL(WorkspaceNode node) {
         
         logger.debug("Updating workspace URL for node with ID: " + node.getWorkspaceNodeID() + "; setting workspace URL to: " + node.getWorkspaceURL());
@@ -491,6 +533,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     /**
      * @see WorkspaceDao#addWorkspaceNodeLink(nl.mpi.lamus.workspace.model.WorkspaceNodeLink)
      */
+    @Override
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink) {
         
         logger.debug("Adding to the database a link between node with ID: " + nodeLink.getParentWorkspaceNodeID()
@@ -517,6 +560,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      */
     private static final class WorkspaceMapper implements RowMapper<Workspace> {
         
+        @Override
         public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
             URL topNodeArchiveURL = null;
             if(rs.getString("top_node_archive_url") != null) {
@@ -539,6 +583,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     rs.getInt("workspace_id"),
                     rs.getString("user_id"),
                     rs.getInt("top_node_id"),
+                    rs.getInt("top_node_archive_id"),
                     topNodeArchiveURL,
                     new Date(rs.getTimestamp("start_date").getTime()),
                     endDate,
@@ -558,6 +603,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      */
     private static final class WorkspaceNodeMapper implements RowMapper<WorkspaceNode> {
 
+        @Override
         public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
 
             int archiveNodeID = -1;
@@ -620,6 +666,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      */
     private static final class WorkspaceNodeLinkMapper implements RowMapper<WorkspaceNodeLink> {
         
+        @Override
         public WorkspaceNodeLink mapRow(ResultSet rs, int rowNum) throws SQLException {
 
             URI childURI = null;

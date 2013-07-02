@@ -30,11 +30,18 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.junit.runner.RunWith;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SearchClient.class)
 public class AnnotationSearchClientBridgeTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -66,8 +73,25 @@ public class AnnotationSearchClientBridgeTest {
     public void tearDown() {
     }
 
+    
     @Test
-    public void testSomeMethod() throws SQLException {
+    public void addNode() throws SQLException {
+        
+        final int testArchiveNodeID = 100;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockSearchClient).add(NodeIdUtils.TONODEID(testArchiveNodeID));
+            oneOf(mockSearchClient).close();
+        }});
+        
+        searchClientBridge.addNode(testArchiveNodeID);
+        
+        //TODO assertions
+    }
+    
+    @Test
+    public void removeNode() throws SQLException {
         
         final int testArchiveNodeID = 100;
         
@@ -78,8 +102,34 @@ public class AnnotationSearchClientBridgeTest {
      
         searchClientBridge.removeNode(testArchiveNodeID);
         
-        //TODO assert what?
+        //TODO assertions
     }
     
     //TODO test exceptions
+    
+    @Test
+    public void formatIsSearchable() {
+        
+        final String format = "application/pdf";
+        final String[] someFormats = {"text/plain", "application/pdf"};
+        
+        stub(method(SearchClient.class, "getSearchableFormats")).toReturn(someFormats);
+        
+        boolean result = searchClientBridge.isFormatSearchable(format);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void formatIsNotSearchable() {
+        
+        final String format = "application/pdf";
+        final String[] someFormats = {"text/plain"};
+        
+        stub(method(SearchClient.class, "getSearchableFormats")).toReturn(someFormats);
+        
+        boolean result = searchClientBridge.isFormatSearchable(format);
+        
+        assertFalse("Result should be false", result);
+    }
 }

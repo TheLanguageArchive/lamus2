@@ -61,7 +61,8 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
-    private Workspace workspace = null;
+    
+    private int workspaceID = -1;
     
     @Autowired
     public ResourceNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
@@ -78,23 +79,20 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         this.nodeDataRetriever = nodeDataRetriever;
     }
     
-    /**
-     * @see NodeImporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
-     */
-    public void setWorkspace(Workspace ws) {
-        this.workspace = ws;
-    }
     
     /**
      * @see NodeImporter#importNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
      */
-    public void importNode(WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    @Override
+    public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, int childNodeArchiveID) throws NodeImporterException {
         
-        if(workspace == null) {
+        workspaceID = wsID;
+        
+        if(workspaceID < 0) {
             String errorMessage = "ResourceNodeImporter.importNode: workspace not set";
             logger.error(errorMessage);
-            throw new NodeImporterException(errorMessage, workspace, this.getClass(), null);
+            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
         }
    
         URI childURI = childLink.getURI();
@@ -104,16 +102,16 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             if(childURL == null) {
                 String errorMessage = "Error getting URL for link " + childLink.getURI();
                 logger.error(errorMessage);
-                throw new NodeImporterException(errorMessage, workspace, this.getClass(), null);
+                throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
             }
         } catch (MalformedURLException muex) {
             String errorMessage = "Error getting URL for link " + childLink.getURI();
             logger.error(errorMessage, muex);
-            throw new NodeImporterException(errorMessage, workspace, this.getClass(), muex);
+            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
         } catch (UnknownNodeException unex) {
 	    String errorMessage = "Error getting object URL for node ID " + childNodeArchiveID;
 	    logger.error(errorMessage, unex);
-	    throw new NodeImporterException(errorMessage, workspace, this.getClass(), unex);
+	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
 
         
@@ -134,7 +132,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
-                throw new NodeImporterException(errorMessage, workspace, this.getClass(), tcex);
+                throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), tcex);
             }
             
             nodeDataRetriever.verifyTypecheckedResults(childURL, childLink, typecheckedResults);
@@ -146,7 +144,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace, childNodeArchiveID, childURLWithContext.toURL(), childLink, childType, childMimetype);
+                workspaceID, childNodeArchiveID, childURLWithContext.toURL(), childLink, childType, childMimetype);
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

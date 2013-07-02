@@ -102,14 +102,16 @@ public class LamusWorkspaceNodeLinkerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinker.linkNodes(mockWorkspace, mockParentNode, mockChildNode, mockChildReference);
+        nodeLinker.linkNodes(mockParentNode, mockChildNode, mockChildReference);
     }
 
     @Test
     public void linkNodesWithNullParentNode() throws MalformedURLException {
         
         final int childNodeID = 2;
+        final int childNodeArchiveID = 4;
         final URL childNodeURL = new URL("http://some.url");
+        final int workspaceID = 1;
         
         context.checking(new Expectations() {{
             
@@ -118,13 +120,17 @@ public class LamusWorkspaceNodeLinkerTest {
             
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspace).setTopNodeID(childNodeID);
+            oneOf(mockChildNode).getArchiveNodeID(); will(returnValue(childNodeArchiveID));
+            oneOf(mockWorkspace).setTopNodeArchiveID(childNodeArchiveID);
             oneOf(mockChildNode).getArchiveURL(); will(returnValue(childNodeURL));
             oneOf(mockWorkspace).setTopNodeArchiveURL(childNodeURL);
             
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).updateWorkspaceTopNode(mockWorkspace);
         }});
         
-        nodeLinker.linkNodes(mockWorkspace, null, mockChildNode, mockChildReference);
+        nodeLinker.linkNodes(null, mockChildNode, mockChildReference);
     }
   
     //TODO
