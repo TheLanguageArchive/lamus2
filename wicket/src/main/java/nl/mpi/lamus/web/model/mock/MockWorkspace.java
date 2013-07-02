@@ -31,6 +31,7 @@ public class MockWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
+    private int topNodeArchiveID;
     private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
@@ -121,15 +122,25 @@ public class MockWorkspace implements Workspace {
     public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
 	this.topNodeArchiveURL = topNodeArchiveURL;
     }
-
+    
     @Override
     public int getTopNodeID() {
-	return topNodeID;
+        return topNodeID;
+    }
+    
+    @Override
+    public void setTopNodeID(int topNodeID) {
+        this.topNodeID = topNodeID;
     }
 
     @Override
-    public void setTopNodeID(int topNodeID) {
-	this.topNodeID = topNodeID;
+    public int getTopNodeArchiveID() {
+	return topNodeArchiveID;
+    }
+
+    @Override
+    public void setTopNodeArchiveID(int topNodeArchiveID) {
+	this.topNodeArchiveID = topNodeArchiveID;
     }
 
     @Override

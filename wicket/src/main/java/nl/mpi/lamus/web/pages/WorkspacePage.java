@@ -56,7 +56,7 @@ public final class WorkspacePage extends LamusPage {
 	nodeIdForm = (Form) createNodeInfoForm("nodeInfoForm");
 
 	this.workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(
-		this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null));
+		this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeArchiveID(), null));
 
 	add(createWorkspaceInfo("workspaceInfo"));
 	add(createWorkspaceTreePanel("workspaceTree"));
