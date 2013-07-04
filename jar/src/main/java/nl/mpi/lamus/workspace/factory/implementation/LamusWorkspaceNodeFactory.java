@@ -73,7 +73,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
         node.setFormat(""); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
+
         String nodePid = WorkspacePidValue.NONE.toString();
+        //TODO Generate a new Handle at this point
 
 	if (document instanceof HandleCarrier) {
 	    nodePid = ((HandleCarrier) document).getHandle();
@@ -101,6 +103,8 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setFormat(mimetype);
         
         String nodePid = WorkspacePidValue.NONE.toString();
+        //TODO Generate a new Handle at this point?
+        
         if(resourceReference instanceof HandleCarrier) {
             nodePid = ((HandleCarrier) resourceReference).getHandle();
         } else {

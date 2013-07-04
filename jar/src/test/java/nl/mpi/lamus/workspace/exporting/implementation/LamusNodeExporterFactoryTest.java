@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -108,7 +109,7 @@ public class LamusNodeExporterFactoryTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
-        final String nodePid = "somePID";
+        final String nodePid = UUID.randomUUID().toString();
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, archiveNodeID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeURL, nodeURL, nodeURL, WorkspaceNodeStatus.NODE_UPLOADED, nodePid, nodeFormat);
         

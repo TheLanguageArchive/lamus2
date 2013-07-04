@@ -49,6 +49,7 @@ import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
 import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
@@ -144,349 +145,18 @@ public class WorkspaceSteps {
     
     @BeforeStory
     public void beforeStory() throws IOException {
-        cleanLamusDatabaseAndFilesystem();
-        cleanCsDatabaseAndFilesystem();
-        cleanAmsDatabase();
+        WorkspaceStepsHelper.clearLamusDatabaseAndFilesystem(this.lamusDataSource, this.workspaceBaseDirectory);
+        WorkspaceStepsHelper.clearCsDatabaseAndFilesystem(this.corpusstructureDataSource, this.archiveFolder);
+        WorkspaceStepsHelper.clearAmsDatabase(this.amsDataSource);
+        clearVariables();
     }
     
-      
-    private URL copyFileToArchiveFolder(String filename, boolean isTopNode) throws IOException {
-
-        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files/" + filename);
-        File testFile = new File(this.archiveFolder, filename);
-        OutputStream testOut = new FileOutputStream(testFile);
-        IOUtils.copy(testIn, testOut);
-        
-        URL fileURL = testFile.toURI().toURL();
-        
-        if(isTopNode) {
-            this.topNodeURL = fileURL;
-        }
-        
-        return fileURL;
-    }
-
-    private void insertNodeInCSDB(int nodeID, URL fileURL, int nodeType, String nodeFormat, boolean isFirstNode, int parentNodeID) {
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.corpusstructureDataSource);
-
-        String insertString = "";
-        Map<String, String> map = new HashMap<String, String>();
-        
-        if(isFirstNode) {
-            insertString = "INSERT INTO accessgroups VALUES (:md5, :aclstring);";
-            map.put("md5", "everybody");
-            map.put("aclstring", "everybody");
-            template.update(insertString, map);
-        }
-        
-        insertString = "INSERT INTO archiveobjects (nodeid, url, crawltime, onsite, readrights, writerights, pid, accesslevel) "
-                + "VALUES (:nodeid, :url, :crawltime, :onsite, :readrights, :writerights, :pid, :accesslevel);";
-        map.clear();
-        map.put("nodeid", "" + nodeID);
-        map.put("url", fileURL.toString()); //"http://someserver.mpi.nl/corpora/Node_CMDIfied_IMDI.cmdi");
-        map.put("crawltime", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-        map.put("onsite", Boolean.toString(true));
-        map.put("readrights", "everybody");
-        map.put("writerights", "everybody");
-        map.put("pid", "hdl:SOMETHING/00-0000-0000-0000-0000-" + nodeID);
-        map.put("accesslevel", "1");
-        template.update(insertString, map);
-
-        insertString = "INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) "
-                + "VALUES (:nodeid, :nodetype, :format, :name, :title);";
-        map.clear();
-        map.put("nodeid", "" + nodeID);
-        map.put("nodetype", "" + nodeType);
-        map.put("format", nodeFormat);
-        map.put("name", FilenameUtils.getBaseName(fileURL.getPath()));
-        map.put("title", FilenameUtils.getBaseName(fileURL.getPath()));
-        template.update(insertString, map);
-
-        if(isFirstNode) {
-            insertString = "INSERT INTO corpusstructure (nodeid, canonical, valid) "
-                    + "VALUES (:nodeid, :canonical, :valid);";
-            map.clear();
-            map.put("nodeid", "" + nodeID);
-            map.put("canonical", "t");
-            map.put("valid", "t");
-        } else {
-            insertString = "INSERT INTO corpusstructure (nodeid, canonical, valid, vpath0, vpath) "
-                    + "VALUES (:nodeid, :canonical, :valid, :vpath0, :vpath);";
-            map.clear();
-            map.put("nodeid", "" + nodeID);
-            map.put("canonical", "t");
-            map.put("valid", "t");
-            map.put("vpath0", "" + parentNodeID);
-            map.put("vpath", "/" + NodeIdUtils.TONODEID(parentNodeID));
-        }
-        template.update(insertString, map);
-    }
-    
-    private void insertDataInAmsDB() {
-        
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.amsDataSource);
-        
-        String insertString = "INSERT INTO \"principal\" (id, uid, name, nature, host_institute, host_srv, creator, created_on, lastmodifier, last_mod_on) "
-                + "VALUES (:id, :uid, :name, :nature, :host_institute, :host_srv, :creator, :created_on, :creator, :created_on);";
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("id", "1");
-        map.put("uid", "testUser");
-        map.put("name", "TestUser");
-        map.put("nature", "USR");
-        map.put("host_institute", "MPINLA");
-        map.put("host_srv", "ams2/ldap");
-        map.put("creator", "1");
-        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-        template.update(insertString, map);
-
-        insertString = "INSERT INTO \"user\" "
-                + "VALUES (:id, :firstname, :email, :organisation, :address, :passwd, :creator, :created_on, :creator, :created_on);";
-        map.clear();
-        map.put("id", "1");
-        map.put("firstname", "Test");
-        map.put("email", "testUser@mpi.nl");
-        map.put("organisation", "mpi 4 psycholinguistics");
-        map.put("address", "wundtlaan 1\n6525 xd nijmegen\nthe netherlands");
-        map.put("passwd", "{CRYPT}.GDJxqz1Ipii6");
-        map.put("creator", "1");
-        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-        template.update(insertString, map);
-        
-//        insertString = "INSERT INTO \"principal\" (id, uid, name, nature, host_institute, host_srv, creator, created_on, lastmodifier, last_mod_on) "
-//                + "VALUES (:id, :uid, :name, :nature, :host_institute, :host_srv, :creator, :created_on, :creator, :created_on);";
-//        map.clear();
-//        map.put("id", "-1");
-//        map.put("uid", "everybody");
-//        map.put("name", "-== EVERYBODY ==-");
-//        map.put("nature", "ALL");
-//        map.put("host_institute", "MPINLA");
-//        map.put("host_srv", "ams2/ldap");
-//        map.put("creator", "1");
-//        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-//        template.update(insertString, map);
-//        
-//        insertString = "INSERT INTO \"principal\" (id, uid, name, nature, host_institute, host_srv, creator, created_on, lastmodifier, last_mod_on) "
-//                + "VALUES (:id, :uid, :name, :nature, :host_institute, :host_srv, :creator, :created_on, :creator, :created_on);";
-//        map.clear();
-//        map.put("id", "-2");
-//        map.put("uid", "anyAuthenticatedUser");
-//        map.put("name", "-== REGISTERED USERS ==-");
-//        map.put("nature", "ALL");
-//        map.put("host_institute", "MPINLA");
-//        map.put("host_srv", "ams2/ldap");
-//        map.put("creator", "1");
-//        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-//        template.update(insertString, map);
-        
-        insertString = "INSERT INTO \"node_principal\" (id, node_id, pcpl_id, creator, created_on, lastmodifier, last_mod_on) "
-                + "VALUES (:id, :node_id, :pcpl_id, :creator, :created_on, :creator, :created_on);";
-        map.clear();
-        map.put("id", "1");
-        map.put("node_id", "1");
-        map.put("pcpl_id", "1");
-        map.put("creator", "1");
-        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-        template.update(insertString, map);
-        
-//        insertString = "INSERT INTO \"rule\" VALUES(:id, :species, :realm, :competence, :disposition, :name,  :creator, :created_on, :creator, :created_on);";
-//        map.clear();
-//        map.put("id", "120");
-//        map.put("species", "DE");
-//        map.put("realm", "0110");
-//        map.put("competence", "0010");
-//        map.put("disposition", "-40");
-//        map.put("name", "Domain Editor");
-//        map.put("creator", "1");
-//        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-//        template.update(insertString, map);
-
-        insertString = "INSERT INTO \"nodepcpl_rule\" (id, node_pcpl_id, rule_id, nature, priority, max_storage_mb, used_storage_mb, creator, created_on, lastmodifier, last_mod_on) "
-                + "VALUES (:id, :node_pcpl_id, :rule_id, :nature, :priority, :max_storage_mb, :used_storage_mb, :creator, :created_on, :creator, :created_on);";
-        map.clear();
-        map.put("id", "1");
-        map.put("node_pcpl_id", "1");
-        map.put("rule_id", "120");
-        map.put("nature", "1");
-        map.put("priority", "150");
-        map.put("max_storage_mb", "50000");
-        map.put("used_storage_mb", "10000");
-        map.put("creator", "1");
-        map.put("created_on", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
-        template.update(insertString, map);        
-    }
-
-    private void insertWorkspaceInDB(int workspaceID, String userID) throws FileNotFoundException, IOException {
-        insertWorkspaceInDB(workspaceID, userID, 1, new File(this.archiveFolder, "1.cmdi").toURI().toURL());
-    }
-    
-    private void insertWorkspaceInDB(int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL) throws FileNotFoundException, IOException {
-
-        String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        File testFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
-        
-        String insertString = "";
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
-        Map<String, String> map = new HashMap<String, String>();
-        
-        insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
-                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                workspaceID, testFile);
-        
-        workspaceDirectory.mkdirs();
-        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files/" + topNodeArchiveID + ".cmdi");
-        OutputStream testOut = new FileOutputStream(testFile);
-        IOUtils.copy(testIn, testOut);
-    }
-    
-    private void insertWorkspaceInDBWithNewlyLinkedNode(int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL)
-            throws MalformedURLException, FileNotFoundException, IOException {
-        
-        String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
-        File topNodeFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
-        int resourceNodeArchiveID = topNodeArchiveID + 1;
-        File resourceFile = new File(workspaceDirectory, resourceNodeArchiveID + ".pdf");
-        File resourceOriginFile = new File("/some/directory/" + resourceNodeArchiveID + ".pdf");
-
-        String insertString = "";
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
-        Map<String, String> map = new HashMap<String, String>();
-
-        insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
-                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                workspaceID, topNodeFile);
-        insertWorkspaceNode(insertString, template, map, topNodeArchiveID, resourceNodeArchiveID, null, resourceOriginFile.toURI().toURL(),
-                WorkspaceNodeType.RESOURCE_WR, WorkspaceNodeStatus.NODE_UPLOADED,
-                workspaceID, resourceFile);
-        
-        workspaceDirectory.mkdirs();
-        
-        InputStream testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeArchiveID + ".cmdi");
-        OutputStream testOut = new FileOutputStream(topNodeFile);
-        IOUtils.copy(testIn, testOut);
-        
-        testIn = getClass().getClassLoader().getResourceAsStream("example_archive_files_linked/" + resourceNodeArchiveID + ".pdf");
-        testOut = new FileOutputStream(resourceFile);
-        IOUtils.copy(testIn, testOut);
-    }
-    
-    private void insertWorkspace(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
-            int workspaceID, String userID, String currentDate) {
-        
-        insertString = "INSERT INTO workspace (workspace_id, user_id, start_date, session_start_date, status, message) "
-                + "VALUES (:workspace_id, :user_id, :start_date, :session_start_date, :status, :message);";
-        
-        map.put("workspace_id", "" + workspaceID);
-        map.put("user_id", userID);
-        map.put("start_date", currentDate);
-        map.put("session_start_date", currentDate);
-        map.put("status", WorkspaceStatus.INITIALISED.toString());
-        map.put("message", "some message");
-        template.update(insertString, map);
-    }
-    private void insertWorkspaceNode(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
-            int parentNodeArchiveID, int nodeArchiveID, URL nodeArchiveURL, URL nodeOriginURL, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
-            int workspaceID, File nodeFile) throws MalformedURLException {
-        
-        insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_node_id, archive_url, origin_url, name, type, workspace_url, status, format) "
-                + "VALUES (:workspace_node_id, :workspace_id, :archive_node_id, :archive_url, :origin_url, :name, :type, :workspace_url, :status, :format);";
-        map.clear();
-        map.put("workspace_node_id", "" + nodeArchiveID);
-        map.put("workspace_id", "" + workspaceID);
-        if(parentNodeArchiveID == -1) {
-            map.put("archive_node_id", "" + nodeArchiveID);
-        } else {
-            map.put("archive_node_id", "-1");
-        }
-        map.put("archive_url", (nodeArchiveURL != null ? nodeArchiveURL.toString() : ""));
-        map.put("origin_url", (nodeOriginURL != null ? nodeOriginURL.toString() : ""));
-        map.put("name", "testNode");
-        map.put("type", nodeType.toString());
-        map.put("workspace_url", nodeFile.toURI().toURL().toString());
-        map.put("status", nodeStatus.toString());
-        map.put("format", "cmdi");
-        template.update(insertString, map);
-        
-        if(parentNodeArchiveID == -1) {
-            insertString = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_id = :top_node_archive_id, top_node_archive_url = :top_node_archive_url WHERE workspace_id = :workspace_id;";
-            map.clear();
-            map.put("top_node_id", "" + nodeArchiveID);
-            map.put("top_node_archive_id", "" + nodeArchiveID);
-            map.put("top_node_archive_url", nodeArchiveURL.toString());
-            map.put("workspace_id", "" + workspaceID);
-            template.update(insertString, map);
-        } else {
-            insertString = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
-                    + "VALUES (:parent_workspace_node_id, :child_workspace_node_id, :child_uri);";
-            map.clear();
-            map.put("parent_workspace_node_id", "" + parentNodeArchiveID);
-            map.put("child_workspace_node_id", "" + nodeArchiveID);
-            map.put("child_uri", nodeFile.toURI().toString());
-            template.update(insertString, map);
-        }
-    }
-    
-    private void cleanCsDatabaseAndFilesystem() throws IOException {
-        
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.corpusstructureDataSource);
-        
-        String deleteCorpusStructureSql = "DELETE FROM corpusstructure;";
-        String deleteCorpusNodesSql = "DELETE FROM corpusnodes;";
-        String deleteArchiveObjectsSql = "DELETE FROM archiveobjects;";
-        String deleteAccessGroupsSql = "DELETE FROM accessgroups;";
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        template.update(deleteCorpusStructureSql, map);
-        template.update(deleteCorpusNodesSql, map);
-        template.update(deleteArchiveObjectsSql, map);
-        template.update(deleteAccessGroupsSql, map);
-        
-        FileUtils.cleanDirectory(this.archiveFolder);
-        
+    private void clearVariables() {
         this.topNodeURL = null;
-    }
-    
-    private void cleanLamusDatabaseAndFilesystem() throws IOException {
-        
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.lamusDataSource);
-        
-        String deleteNodeLinkSql = "DELETE FROM node_link;";
-        String deleteNodeSql = "DELETE FROM node;";
-        String deleteWorkspaceSql = "DELETE FROM workspace;";
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        template.update(deleteNodeLinkSql, map);
-        template.update(deleteNodeSql, map);
-        template.update(deleteWorkspaceSql, map);
-        
-        FileUtils.cleanDirectory(this.workspaceBaseDirectory);
-        
         this.createdWorkspace = null;
         this.currentUserID = null;
         this.selectedNodeID = -1;
         this.createdWorkspaceID = -1;
-    }
-    
-    private void cleanAmsDatabase() {
-        
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.amsDataSource);
-        
-        String deleteNodePrincipalRuleSql = "DELETE FROM \"nodepcpl_rule\" WHERE id > 0;";
-        String deleteNodePrincipalSql = "DELETE FROM \"node_principal\";";
-        String deleteUserSql = "DELETE FROM \"user\" WHERE id > 0;";
-        String deletePrincipalSql = "DELETE FROM \"principal\" WHERE id > 0;";
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        template.update(deleteNodePrincipalRuleSql, map);
-        template.update(deleteNodePrincipalSql, map);
-        template.update(deleteUserSql, map);
-        template.update(deletePrincipalSql, map);
     }
     
     
@@ -502,14 +172,15 @@ public class WorkspaceSteps {
         assertTrue("corpusstructure database was not initialised", this.archiveObjectsDB.getStatus());
     }
     
-    @Given("a node with ID $nodeID which is the top node")
+    @Given("a top node with ID $nodeID")
     public void aNodeWithIDWhichIsTheTopNode(@Named("nodeID") int nodeArchiveID) throws IOException {
         String filename = nodeArchiveID + ".cmdi";
-        URL nodeArchiveURL = copyFileToArchiveFolder(filename, true);
+        URL nodeArchiveURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, filename);
+        this.topNodeURL = nodeArchiveURL;
         int nodeType = 2;
         String nodeFormat = "text/cmdi";
         int parentNodeID = -1;
-        insertNodeInCSDB(nodeArchiveID, nodeArchiveURL, nodeType, nodeFormat, true, parentNodeID);
+        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, nodeArchiveID, nodeArchiveURL, nodeType, nodeFormat, true, parentNodeID);
         
         Node node = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(nodeArchiveID));
         assertNotNull("Node with ID " + nodeArchiveID + " does not exist in the corpusstructure database", node);
@@ -524,10 +195,10 @@ public class WorkspaceSteps {
         assertNotNull("Node with ID " + parentNodeID + " does not exist in the corpusstructure database", parentNode);
 
         String childFilename = childNodeID + ".cmdi";
-        URL childNodeURL = copyFileToArchiveFolder(childFilename, false);
+        URL childNodeURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, childFilename);
         int childNodeType = 2;
         String childNodeFormat = "text/cmdi";
-        insertNodeInCSDB(childNodeID, childNodeURL, childNodeType, childNodeFormat, false, parentNodeID);
+        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, childNodeID, childNodeURL, childNodeType, childNodeFormat, false, parentNodeID);
         
         Node[] childNodes = this.corpusStructureDB.getChildrenNodes(NodeIdUtils.TONODEID(parentNodeID));
         assertNotNull("Node with ID " + parentNodeID + " should have children", childNodes);
@@ -543,7 +214,7 @@ public class WorkspaceSteps {
     public void aUserWithID(String userID, int nodeID) {
         
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
-        insertDataInAmsDB();
+        WorkspaceStepsHelper.insertDataInAmsDB(this.amsDataSource);
         
         assertNotNull("Principal with ID " + userID + " is null", this.ams2Bridge.getPrincipalSrv().getPrincipal(userID));
         assertTrue("Principal with ID " + userID + " has no write access to the node with ID " + nodeID, this.ams2Bridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(nodeID)));
@@ -557,7 +228,7 @@ public class WorkspaceSteps {
 //        this.currentUserID = userID;
 //        this.createdWorkspaceID = workspaceID;
 //        
-//        insertWorkspaceInDB(workspaceID, userID);
+//        WorkspaceStepsHelper.insertWorkspaceInDB(this.lamusDataSource, this.workspaceBaseDirectory, this.archiveFolder, workspaceID, userID);
 //
 //        //filesystem
 //        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -576,7 +247,7 @@ public class WorkspaceSteps {
 //        
 //        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
 //        
-//        insertWorkspaceInDB(workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
+//        WorkspaceStepsHelper.insertWorkspaceInDB(this.lamusDataSource, this.workspaceBaseDirectory, this.archiveFolder, workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
 //
 //        // filesystem
 //        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -601,7 +272,7 @@ public class WorkspaceSteps {
         
         OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
         
-        insertWorkspaceInDBWithNewlyLinkedNode(workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
+        WorkspaceStepsHelper.insertWorkspaceInDBWithNewlyLinkedNode(this.lamusDataSource, this.workspaceBaseDirectory, workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -636,7 +307,7 @@ public class WorkspaceSteps {
         assertNotNull("Top node of workspace " + workspaceID + " should not be null", topNode);
         assertEquals("URL of top node is different from expected", topNodeFile.toURI().toURL(), topNode.getWorkspaceURL());
         
-        Collection<WorkspaceNode> childNodes = this.workspaceDao.getChildWorkspaceNodes(workspaceID);
+        Collection<WorkspaceNode> childNodes = this.workspaceDao.getChildWorkspaceNodes(topNode.getWorkspaceNodeID());
         assertNotNull("List of child nodes of top node should not be null", childNodes);
         assertTrue("Top node should have one child", childNodes.size() == 1);
         WorkspaceNode childNode = childNodes.iterator().next();
@@ -786,17 +457,24 @@ public class WorkspaceSteps {
         assertTrue("Metadata document " + parentNodeURL + " should have one reference", childReferences.size() == 1);
         
         URI childNodeURI = this.archiveObjectsDB.getObjectURI(NodeIdUtils.TONODEID(newNodeID));
+        
+        String childHandleInArchive = this.archiveObjectsDB.getObjectPID(NodeIdUtils.TONODEID(newNodeID));
 
         assertNotNull("URI of the child node in the database should not be null", childNodeURI);
+        assertTrue(childReferences.get(0) instanceof HandleCarrier);
+        String childHandleInReference = ((HandleCarrier) childReferences.get(0)).getHandle();
         
-        URI childRelativeURI = childReferences.get(0).getURI();
-        File parentFile = new File(parentNodeURL.toString());
-        File childFileInDocument = new File(FilenameUtils.getFullPath(parentFile.getPath()), childRelativeURI.toString());
-        File expectedChildFile = new File(childNodeURI.toString());
+//        URI childRelativeURI = childReferences.get(0).getURI();
+//        File parentFile = new File(parentNodeURL.toString());
+//        File childFileInDocument = new File(FilenameUtils.getFullPath(parentFile.getPath()), childRelativeURI.toString());
+//        File expectedChildFile = new File(childNodeURI.toString());
         
-        assertEquals("URI of the child reference in the metadata document is different from expected",
+//        assertEquals("URI of the child reference in the metadata document is different from expected",
 //                childNodeURI, childReferences.get(0).getURI());
-                expectedChildFile, childFileInDocument);
+//                expectedChildFile, childFileInDocument);
+        
+        assertEquals("Handle in reference from parent file is different from the one stored in the archive for that same node",
+                childHandleInArchive, childHandleInReference);
         
     }
     
@@ -811,5 +489,5 @@ public class WorkspaceSteps {
         
     }
     
-    //TODO OTHER CHECKS MISSING... CRAWLER AND OTHER STUFF
+    //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF
 }

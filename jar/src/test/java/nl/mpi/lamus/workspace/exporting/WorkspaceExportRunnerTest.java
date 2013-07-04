@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -107,7 +108,7 @@ public class WorkspaceExportRunnerTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL, testChildURL, testChildURL, WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         

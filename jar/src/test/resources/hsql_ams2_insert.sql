@@ -26,7 +26,7 @@ INSERT INTO "nodepcpl_rule"  VALUES(-230, NULL, 230, 1,    0, NULL, NULL, NULL, 
 INSERT INTO "nodepcpl_rule"  VALUES(-240, NULL, 240, 1,    0, NULL, NULL, NULL,  0, now(), 0, now());
 INSERT INTO "nodepcpl_rule"  VALUES(-250, NULL, 250, 1,    0, NULL, NULL, NULL,  0, now(), 0, now());
 
-INSERT INTO "nodepcpl_rule"	 VALUES(-270, NULL, 270, 0,  125, NULL, NULL, NULL,	 0, now(), 0, now());
+INSERT INTO "nodepcpl_rule"  VALUES(-270, NULL, 270, 0,  125, NULL, NULL, NULL,	 0, now(), 0, now());
 
 INSERT INTO "nodepcpl_rule"  VALUES( 000, NULL, 000, 1, 1000, NULL, NULL, NULL,  0, now(), 0, now());
 

@@ -102,7 +102,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
      * @see CorpusStructureBridge#addNewNodeToCorpusStructure(java.net.URL, java.lang.String)
      */
     @Override
-    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, AccessInfo accessRights) {
+    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, AccessInfo accessRights, String pid) {
         
         URI inTableContextURI = null;
         try {
@@ -123,9 +123,9 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
         
         long size = 1; //TODO check the real size?
         
-        //TODO determine pid before???
+        //TODO At this point the PID must have been already assigned
         
-        String newNodeID = archiveObjectsDBW.newArchiveObject(inTableContextURI, null, currentTimestamp, onsite, size, currentTimestamp, accessRights);
+        String newNodeID = archiveObjectsDBW.newArchiveObject(inTableContextURI, pid, currentTimestamp, onsite, size, currentTimestamp, accessRights);
         
         return NodeIdUtils.TOINT(newNodeID);
     }
@@ -151,32 +151,34 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
     @Override
     public void ensureChecksum(int nodeArchiveID, URL nodeArchiveURL) {
         
-        if(archiveObjectsDBW.isOnSite(nodeArchiveURL.getPath())) {
+        if(archiveObjectsDBW.isOnSite(NodeIdUtils.TONODEID(nodeArchiveID))) {
             File nodeArchiveFile = FileUtils.toFile(nodeArchiveURL);
             if(nodeArchiveFile.exists() && nodeArchiveFile.canRead() && nodeArchiveFile.isFile()) {
                 String checksum = Checksum.create(nodeArchiveFile.getPath());
                 
                 //TODO TRY TO GET OLD CHECKSUM???
                 if(archiveObjectsDBW.getObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID)) != null) {
-                    throw new UnsupportedOperationException("not implemented yet");
+                    throw new UnsupportedOperationException("LamusCorpusStructureBridge.ensureChecksum (when existing checksum not null) not implemented yet");
                 } else {
                 
                     archiveObjectsDBW.setObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID), checksum);
                 }
             } else {
-                throw new UnsupportedOperationException("not implemented yet");
+                throw new UnsupportedOperationException("LamusCorpusStructureBridge.ensureChecksum (when nodeArchiveFile doesn't exist OR can't be read OR is not file) not implemented yet");
             }
         } else {
-            throw new UnsupportedOperationException("not implemented yet");
+            throw new UnsupportedOperationException("LamusCorpusStructureBridge.ensureChecksum (when node is not on site) not implemented yet");
         }
     }
 
+    
+    //TODO This should be done somewhere else and in a different way...
     @Override
     public String calculatePID(int nodeArchiveID) {
         
         String handlePrefix = archiveObjectsDBW.getArchiveRoots().getHandlePrefix();
         if(handlePrefix == null) {
-            throw new UnsupportedOperationException("not implemented yet");
+            throw new UnsupportedOperationException("LamusCorpusStructureBridge.calculatePID (when handle prefix is null) not implemented yet");
         }
         return "hdl:" + NodeIdUtils.nodeIdToHandle(NodeIdUtils.TONODEID(nodeArchiveID), handlePrefix);
         //TODO move protocol to a properties file

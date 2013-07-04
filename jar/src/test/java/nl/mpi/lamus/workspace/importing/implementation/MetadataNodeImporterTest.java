@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.UnknownNodeException;
@@ -154,7 +155,7 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
@@ -186,7 +187,7 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
@@ -292,15 +293,16 @@ public class MetadataNodeImporterTest {
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
         final URL parentURL = new URL("http://some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         final OurURL testChildURL = new OurURL("http://some.url/node.something");
         final URI testChildURI = new URI("http://some.url/node.something");
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
@@ -331,15 +333,16 @@ public class MetadataNodeImporterTest {
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
         final URL parentURL = new URL("http://some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         final OurURL testChildURL = new OurURL("http://some.url/node.something");
         final URI testChildURI = new URI("http://some.url/node.something");
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
@@ -367,15 +370,16 @@ public class MetadataNodeImporterTest {
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
         final URL parentURL = new URL("http://some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         final OurURL testChildURL = new OurURL("http://some.url/node.something");
         final URI testChildURI = new URI("http://some.url/node.something");
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
@@ -412,15 +416,16 @@ public class MetadataNodeImporterTest {
         final int testChildWorkspaceNodeID = 10;
         final int testChildArchiveID = 100;
         final URL parentURL = new URL("http://some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         final OurURL testChildURL = new OurURL("http://some.url/node.something");
         final URI testChildURI = new URI("http://some.url/node.something");
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testChildArchiveID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         

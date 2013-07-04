@@ -23,6 +23,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
@@ -188,6 +189,8 @@ public class LamusCorpusStructureBridgeTest {
         final Date currentDate = Calendar.getInstance().getTime();
         final Timestamp currentTimestamp = new Timestamp(currentDate.getTime());
         
+        final String pid = UUID.randomUUID().toString();
+        
         final boolean onsite = Boolean.TRUE;
         
         final long size = 1; //TODO pass the real size? it will eventually be fixed by the crawler... (?)
@@ -206,11 +209,11 @@ public class LamusCorpusStructureBridgeTest {
             
             //TODO determine pid before???
             
-            oneOf(mockArchiveObjectsDBW).newArchiveObject(nodeURIWithContext, null, currentTimestamp, onsite, size, currentTimestamp, mockAccessInfo);
+            oneOf(mockArchiveObjectsDBW).newArchiveObject(nodeURIWithContext, pid, currentTimestamp, onsite, size, currentTimestamp, mockAccessInfo);
                 will(returnValue(newNodeID));
         }});
         
-        int result = corpusStructureBridge.addNewNodeToCorpusStructure(nodeArchiveURL, mockAccessInfo);
+        int result = corpusStructureBridge.addNewNodeToCorpusStructure(nodeArchiveURL, mockAccessInfo, pid);
         
         assertEquals("Resulting nodeID different from expected", NodeIdUtils.TOINT(newNodeID), result);
     }
@@ -248,7 +251,7 @@ public class LamusCorpusStructureBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveObjectsDBW).isOnSite(nodeArchiveURL.getPath()); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveObjectsDBW).isOnSite(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(Boolean.TRUE));
             
             //TODO mock FileUtils.toFile... return mockFile...
             oneOf(mockFile).exists(); will(returnValue(Boolean.TRUE));

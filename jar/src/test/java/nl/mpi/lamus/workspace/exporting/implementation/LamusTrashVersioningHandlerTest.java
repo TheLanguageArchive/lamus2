@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
@@ -313,7 +314,7 @@ public class LamusTrashVersioningHandlerTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = "somePID";
+        final String testPid = UUID.randomUUID().toString();
         final WorkspaceNode nodeToReturn = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspaceID, testArchiveNodeID, testSchemaLocation,
                 testDisplayValue, "", testNodeType, testNodeURL.toURL(), testNodeURL.toURL(), testNodeURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         

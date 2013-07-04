@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
@@ -173,7 +174,7 @@ public class LamusTrashCanHandlerTest {
         final String nodeName = "some_name";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
-        final String nodePid = "somepid";
+        final String nodePid = UUID.randomUUID().toString();
         final String nodeFormat = "";
         
         return new LamusWorkspaceNode(wsNodeID, wsID, archiveNodeID, nodeSchemaURI,

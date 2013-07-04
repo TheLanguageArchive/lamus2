@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -131,7 +132,7 @@ public class AddedNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String parentNodePid = "0000-0001";
+        final String parentNodePid = UUID.randomUUID().toString();
         final String parentNodeFormat = "text/cmdi";
         
         final int nodeWsID = 10;
@@ -146,7 +147,7 @@ public class AddedNodeExporterTest {
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         final String nodeFormat = "application/pdf";
         final URI nodeSchemaLocation = new URI("http://some.location");
-        final String nodePid = "0000-0002";
+        final String nodePid = UUID.randomUUID().toString();
         final WorkspaceNode currentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeArchiveID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, null, nodeOriginURL, nodeStatus, nodePid, nodeFormat);
         
@@ -163,16 +164,16 @@ public class AddedNodeExporterTest {
             oneOf(mockArchiveFileLocationProvider).getAvailableFile(parentNodeArchiveURL.getPath(), nodeFilename); will(returnValue(nextAvailableResourceFile));
             
             oneOf(mockCorpusStructureBridge).getDefaultAccessInfoForUser(testWorkspace.getUserID()); will(returnValue(mockAccessInfo));
-            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableResourceFile.toURI().toURL(), mockAccessInfo);
+            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableResourceFile.toURI().toURL(), mockAccessInfo, nodePid);
                 will(returnValue(newNodeArchiveID));
                 
-            oneOf(mockCorpusStructureBridge).calculatePID(newNodeArchiveID); will(returnValue(nodePid));
+//            oneOf(mockCorpusStructureBridge).calculatePID(newNodeArchiveID); will(returnValue(nodePid));
 
-            oneOf(mockCorpusStructureBridge).updateArchiveObjectsNodePID(newNodeArchiveID, nodePid);
+//            oneOf(mockCorpusStructureBridge).updateArchiveObjectsNodePID(newNodeArchiveID, nodePid);
             
 //            oneOf(mockMetadataAPI).getMetadataDocument(parentNodeArchiveURL); will(returnValue(mockParentCmdiDocument));
             oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL); will(returnValue(mockParentCmdiDocument));
-            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsFile.toURI()); will(returnValue(mockResourceProxy));
+            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(new URI(currentNode.getPid())); will(returnValue(mockResourceProxy));
             oneOf(mockResourceProxy).setHandle(nodePid);
             
             oneOf(mockWorkspaceFileHandler).copyResourceFile(currentNode, nodeWsFile, nextAvailableResourceFile);
@@ -182,7 +183,7 @@ public class AddedNodeExporterTest {
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
 
             
-            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, currentNode.getArchiveURL());
+            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, nextAvailableResourceFile.toURI().toURL());
             //add node to searchdb
             //calculate urid
             //set urid in db(?) and metadata
@@ -218,7 +219,7 @@ public class AddedNodeExporterTest {
             // this way child files would have the pids calculated in advance,
                 // so the references in the parent can be set before the files are copied to their archive location
         
-        fail("not implemented yet");
+        fail("AddedNodeExporterTest.exportUploadedMetadataNode not implemented yet");
     }
     
 }

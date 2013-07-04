@@ -32,7 +32,7 @@ public interface CorpusStructureBridge {
      * @param username user who will get access to the node
      * @return 
      */
-    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, AccessInfo accessRights);
+    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, AccessInfo accessRights, String pid);
     
     public boolean linkNodesInCorpusStructure(int parentNodeArchiveID, int childNodeArchiveID);
     

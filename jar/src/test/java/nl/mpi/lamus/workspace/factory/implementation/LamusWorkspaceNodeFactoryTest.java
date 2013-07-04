@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -118,7 +119,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI schemaLocation = new URI("http://some.location");
-        final String pid = "somePID";
+        final String pid = UUID.randomUUID().toString();
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY; //TODO change this
         final URI fileLocation = nodeURL.toURI();
         
@@ -126,10 +127,10 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setName(displayValue);
         expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
-        expectedNode.setFormat(nodeFormat); //TODO not implemented yet
+        expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
         expectedNode.setPid(pid);
-        expectedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY); //TODO not implemented yet
+        expectedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
 
         context.checking(new Expectations() {{
         

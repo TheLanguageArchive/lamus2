@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import nl.mpi.corpusstructure.AccessInfo;
@@ -155,14 +156,17 @@ public class AddedNodeExporter implements NodeExporter {
         int currentNodeNewArchiveID = -1;
         AccessInfo currentNodeAccessRights = corpusStructureBridge.getDefaultAccessInfoForUser(workspace.getUserID());
         try {
-            currentNodeNewArchiveID = corpusStructureBridge.addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), currentNodeAccessRights); //TODO IMPLEMENT METHOD AND ADD PARAMETERS
-            //TODO use return value
+            currentNodeNewArchiveID = 
+                    corpusStructureBridge.addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), currentNodeAccessRights, currentNode.getPid());
+            
+            //TODO PID should have already been assigned when the node was uploaded/linked...
+            
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
         
-        String currentNodeNewArchivePID = corpusStructureBridge.calculatePID(currentNodeNewArchiveID);
-        corpusStructureBridge.updateArchiveObjectsNodePID(currentNodeNewArchiveID, currentNodeNewArchivePID);
+//        String currentNodeNewArchivePID = corpusStructureBridge.calculatePID(currentNodeNewArchiveID);
+//        corpusStructureBridge.updateArchiveObjectsNodePID(currentNodeNewArchiveID, currentNodeNewArchivePID);
         
         CMDIDocument parentDocument = null;
         
@@ -184,16 +188,16 @@ public class AddedNodeExporter implements NodeExporter {
         ResourceProxy currentNodeReference = null;
         
         if(currentNode.isMetadata()) {
-            throw new UnsupportedOperationException("not implemented yet");
+            throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is Metadata) not implemented yet");
         } else {
             try {
-                currentNodeReference = parentDocument.getDocumentReferenceByURI(currentNode.getWorkspaceURL().toURI());
+                currentNodeReference = parentDocument.getDocumentReferenceByURI(new URI(currentNode.getPid())); //currentNode.getWorkspaceURL().toURI());
             } catch (URISyntaxException ex) {
                 throw new UnsupportedOperationException("exception not handled yet", ex);
             }
         }
         
-        currentNodeReference.setHandle(currentNodeNewArchivePID);
+        currentNodeReference.setHandle(currentNode.getPid()); //TODO but maybe it should be set already...
         
         
 //        File currentNodeOriginFile = new File(currentNode.getOriginURL().getPath());
@@ -205,19 +209,22 @@ public class AddedNodeExporter implements NodeExporter {
             try {
                 workspaceFileHandler.copyResourceFile(currentNode, currentNodeWorkspaceFile, nextAvailableFile);
             } catch (WorkspaceNodeFilesystemException ex) {
-                throw new UnsupportedOperationException("exception not handler yet", ex);
+                throw new UnsupportedOperationException("exception not handled yet", ex);
             }
         }
-        
-        //TODO will this be done by the crawler??
-//        corpusStructureBridge.linkNodesInCorpusStructure(parentNode.getArchiveNodeID(), currentNodeNewArchiveID);
-        
-        corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, currentNode.getArchiveURL());
+        try {
+            //TODO will this be done by the crawler??
+    //        corpusStructureBridge.linkNodesInCorpusStructure(parentNode.getArchiveNodeID(), currentNodeNewArchiveID);
+            
+            corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, nextAvailableFile.toURI().toURL());
+        } catch (MalformedURLException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        }
         
         if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
             searchClientBridge.addNode(currentNodeNewArchiveID);
         } else {
-            throw new UnsupportedOperationException("not implemented yet");
+            throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
         }
         
     }

@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -130,7 +131,7 @@ public class GeneralNodeExporterTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "text/cmdi";
         final URI nodeSchemaLocation = new URI("http://some.location");
-        final String nodePid = "0000-0001";
+        final String nodePid = UUID.randomUUID().toString();
         final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeArchiveID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeArchiveURL, nodeArchiveURL, WorkspaceNodeStatus.NODE_ISCOPY, nodePid, nodeFormat);
         workspace.setTopNodeID(nodeWsID);

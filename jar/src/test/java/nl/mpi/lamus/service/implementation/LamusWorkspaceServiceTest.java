@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
@@ -262,7 +263,7 @@ public class LamusWorkspaceServiceTest {
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = "some:fake-pid";
+        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, archiveNodeID, profileSchemaURI, name, title, type, wsURL, archiveURL, originURL, status, pid, format);
         

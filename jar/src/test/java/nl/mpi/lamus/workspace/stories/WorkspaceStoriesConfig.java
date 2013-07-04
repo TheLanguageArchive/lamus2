@@ -138,6 +138,7 @@ public class WorkspaceStoriesConfig {
                 .setName("corpusstructure")
                 .addScript("classpath:hsql_corpusstructure_drop.sql")
                 .addScript("classpath:hsql_corpusstructure_create.sql")
+                .addScript("classpath:hsql_corpusstructure_insert.sql")
                 .build();
     }
     

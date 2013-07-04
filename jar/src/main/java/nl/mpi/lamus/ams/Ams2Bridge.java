@@ -463,7 +463,7 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     @Override
     public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
             
-            throw new UnsupportedOperationException("not implemented yet");
+            throw new UnsupportedOperationException("Ams2Bridge.callAccessRightsManagementSystem not implemented yet");
             
 //		try {
 //			// build & check target url

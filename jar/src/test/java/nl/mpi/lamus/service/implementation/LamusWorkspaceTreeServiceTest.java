@@ -17,6 +17,7 @@ package nl.mpi.lamus.service.implementation;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -82,7 +83,7 @@ public class LamusWorkspaceTreeServiceTest {
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = "some:fake-pid";
+        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
         
         final WorkspaceNode node = new LamusWorkspaceNode(
@@ -116,7 +117,7 @@ public class LamusWorkspaceTreeServiceTest {
         final int parentArchiveNodeID = 5;
         String parentName = "parent_name";
         String parentTitle = "parent_title";
-        String parentPid = "some:parent-fake-pid";
+        String parentPid = UUID.randomUUID().toString();
                 
         final int nodeID = 1;
         int archiveNodeID = 10;
@@ -128,7 +129,7 @@ public class LamusWorkspaceTreeServiceTest {
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = "some:fake-pid";
+        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
 
         final WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(

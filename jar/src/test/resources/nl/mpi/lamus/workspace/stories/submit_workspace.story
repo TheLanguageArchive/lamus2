@@ -11,7 +11,7 @@ Submitting workspaces
 Scenario: submit workspace with an added node
 
 Given an archive
-And a node with ID 0 which is the top node
+And a top node with ID 0
 And a node with ID 1 which is a child of node with ID 0
 And a user with ID testUser that has read and write access to the node with ID 1
 And a workspace with ID 1 created by user with ID testUser in node with ID 1 to which a new node has been linked

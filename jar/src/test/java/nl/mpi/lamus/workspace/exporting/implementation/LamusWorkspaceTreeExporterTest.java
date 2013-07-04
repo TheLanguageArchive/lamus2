@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
@@ -93,7 +94,7 @@ public class LamusWorkspaceTreeExporterTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI schemaLocation = new URI("http://some.location");
-        final String nodePid = "0000-0001";
+        final String nodePid = UUID.randomUUID().toString();
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, archiveNodeID, schemaLocation,
                 nodeName, "", nodeType, nodeURL, nodeURL, nodeURL, WorkspaceNodeStatus.NODE_ISCOPY, nodePid, nodeFormat);
         
@@ -104,7 +105,7 @@ public class LamusWorkspaceTreeExporterTest {
         final String childNodeName = "someOtherName";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
         final String childNodeFormat = "";
-        final String childNodePid = "0000-0002";
+        final String childNodePid = UUID.randomUUID().toString();
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, childArchiveNodeID, schemaLocation,
                 childNodeName, "", childNodeType, childWorkspaceURL, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodePid, childNodeFormat);
         

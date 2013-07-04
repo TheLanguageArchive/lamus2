@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
@@ -99,7 +100,7 @@ public class DeletedNodeExporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "text/plain";
         final URI testNodeSchemaLocation = new URI("http://some.location");
-        final String testNodePid = "somePID";
+        final String testNodePid = UUID.randomUUID().toString();
         final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testArchiveNodeID, testNodeSchemaLocation,
                 testNodeDisplayValue, "", testNodeType, testNodeWorkspaceURL, testNodeArchiveURL, testNodeArchiveURL, WorkspaceNodeStatus.NODE_DELETED, testNodePid, testNodeFormat);
         

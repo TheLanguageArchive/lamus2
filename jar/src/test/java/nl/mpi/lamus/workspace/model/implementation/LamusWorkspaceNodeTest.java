@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -43,7 +44,7 @@ public class LamusWorkspaceNodeTest {
     private WorkspaceNodeType workspaceNodeType = WorkspaceNodeType.METADATA;
     private URL nodeURL;
     private WorkspaceNodeStatus workspaceNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-    private String workspaceNodePid = "some/pid";
+    private String workspaceNodePid = UUID.randomUUID().toString();
     private String workspaceNodeFormat = "someFormat";
     
     public LamusWorkspaceNodeTest() {

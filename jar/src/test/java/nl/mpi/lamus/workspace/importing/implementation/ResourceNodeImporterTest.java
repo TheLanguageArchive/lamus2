@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -146,14 +147,15 @@ public class ResourceNodeImporterTest {
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final String childNodePid = "somePid";
+        final String childNodePid = UUID.randomUUID().toString();
         final URI childLinkURI = new URI("http://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
         final OurURL childNodeUrl = new OurURL(childLinkURI.toURL());
         final OurURL childNodeUrlWithContext = new OurURL("file:/some.uri/filename.txt");
         final URL parentURL = new URL("file:/some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeArchiveID, childNodeSchemaLocation,
                 childNodeLabel, "", childNodeType, childLinkURI.toURL(), childLinkURI.toURL(), childLinkURI.toURL(), WorkspaceNodeStatus.NODE_CREATED, childNodePid, childNodeMimetype);
         final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLink);
@@ -203,9 +205,10 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URL parentURL = new URL("file:/some.uri/filename.cmdi");
+        final String parentPid = UUID.randomUUID().toString();
         final int childNodeArchiveID = 100;
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
         
         try {
             nodeImporterWithoutWorkspace.importNode(-1, testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
