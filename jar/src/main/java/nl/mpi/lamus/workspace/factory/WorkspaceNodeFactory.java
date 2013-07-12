@@ -40,7 +40,7 @@ public interface WorkspaceNodeFactory {
      */
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
     
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, MetadataDocument document)
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document)
             throws MalformedURLException;
     
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,

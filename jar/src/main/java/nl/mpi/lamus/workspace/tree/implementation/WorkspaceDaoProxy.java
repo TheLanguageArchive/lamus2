@@ -129,6 +129,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public void updateNodeWorkspaceURL(WorkspaceNode node) {
         this.getWorkspaceDao().updateNodeWorkspaceURL(node);
     }
+    
+    @Override
+    public void updateNodeArchiveURL(WorkspaceNode node) {
+        this.getWorkspaceDao().updateNodeArchiveURL(node);
+    }
 
     @Override
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink) {

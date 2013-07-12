@@ -15,6 +15,9 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.util.ArrayList;
+import java.util.List;
+import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
@@ -52,6 +55,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     /**
      * @see NodeAccessChecker#canCreateWorkspace(java.lang.String, int)
      */
+    @Override
     public boolean canCreateWorkspace(String userID, int archiveNodeID) {
         
         if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {
@@ -86,6 +90,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     /**
      * @see WorkspaceAccessChecker#hasAccessToWorkspace(java.lang.String, int)
      */
+    @Override
     public boolean hasAccessToWorkspace(String userID, int workspaceID) {
         
         
@@ -103,5 +108,18 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             logger.warn("User with ID " + userID + " does not have access to workspace with ID " + workspaceID);
             return false;
         }
+    }
+    
+    @Override
+    public AccessInfo getDefaultAccessInfoForUser(String userID) {
+        
+        List<String> users = new ArrayList<String>();
+        users.add(userID);
+        
+        AccessInfo defaultAccessRights = AccessInfo.create(AccessInfo.NOBODY, AccessInfo.NOBODY, AccessInfo.ACCESS_LEVEL_NONE);
+        defaultAccessRights.setReadUsers(users);
+        defaultAccessRights.setWriteUsers(users);
+        
+        return defaultAccessRights;
     }
 }

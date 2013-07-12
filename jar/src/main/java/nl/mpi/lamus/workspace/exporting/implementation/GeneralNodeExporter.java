@@ -67,20 +67,22 @@ public class GeneralNodeExporter implements NodeExporter {
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         
-        MetadataDocument nodeDocument = null;
-        try {
-            nodeDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
-        } catch (IOException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        } catch (MetadataException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
-        
-        File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
-        File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
-        StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
-        
-        if(WorkspaceNodeType.METADATA.equals(currentNode.getType())) {
+        if(currentNode.isMetadata()) {
+            
+            workspaceTreeExporter.explore(workspace, currentNode);
+
+            MetadataDocument nodeDocument = null;
+            try {
+                nodeDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
+            } catch (IOException ex) {
+                throw new UnsupportedOperationException("exception not handled yet", ex);
+            } catch (MetadataException ex) {
+                throw new UnsupportedOperationException("exception not handled yet", ex);
+            }
+
+            File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
+            File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
+            StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
         
             try {
                 workspaceFileHandler.copyMetadataFile(currentNode, metadataAPI, nodeDocument, nodeWsFile, nodeArchiveStreamResult);
@@ -88,11 +90,15 @@ public class GeneralNodeExporter implements NodeExporter {
                 throw new UnsupportedOperationException("exception not handled yet", ex);
             }
         
-            workspaceTreeExporter.explore(workspace, currentNode);
+            
         } else {
             
             //TODO resources
+                // they were not copied from the archive to the workspace, so should not be copied back...
+                // they might need some database update, due to some possible changes in their information...
         }
+        
+        //TODO Update node in corpusstructure?
     }
     
 }

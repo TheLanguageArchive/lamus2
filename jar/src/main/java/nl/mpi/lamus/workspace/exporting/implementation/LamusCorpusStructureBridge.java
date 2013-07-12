@@ -21,8 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
@@ -30,6 +28,7 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
@@ -51,15 +50,17 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
     private final ArchiveObjectsDBWrite archiveObjectsDBW;
     private final DateTimeHelper dateTimeHelper;
     private final ArchiveFileHelper archiveFileHelper;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
     
     @Autowired
     public LamusCorpusStructureBridge(
             @Qualifier("ArchiveObjectsDB") ArchiveObjectsDBWrite aodbw,
-            DateTimeHelper dtHelper, ArchiveFileHelper afHelper) {
+            DateTimeHelper dtHelper, ArchiveFileHelper afHelper, WorkspaceAccessChecker wsAccessChecker) {
         
         this.archiveObjectsDBW = aodbw;
         this.dateTimeHelper = dtHelper;
         this.archiveFileHelper = afHelper;
+        this.workspaceAccessChecker = wsAccessChecker;
     }
 
     @Override
@@ -102,7 +103,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
      * @see CorpusStructureBridge#addNewNodeToCorpusStructure(java.net.URL, java.lang.String)
      */
     @Override
-    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, AccessInfo accessRights, String pid) {
+    public int addNewNodeToCorpusStructure(URL nodeArchiveURL, String pid, String userID) {
         
         URI inTableContextURI = null;
         try {
@@ -125,6 +126,8 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
         
         //TODO At this point the PID must have been already assigned
         
+        AccessInfo accessRights = workspaceAccessChecker.getDefaultAccessInfoForUser(userID);
+        
         String newNodeID = archiveObjectsDBW.newArchiveObject(inTableContextURI, pid, currentTimestamp, onsite, size, currentTimestamp, accessRights);
         
         return NodeIdUtils.TOINT(newNodeID);
@@ -133,19 +136,6 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge {
     @Override
     public boolean linkNodesInCorpusStructure(int parentNodeArchiveID, int childNodeArchiveID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public AccessInfo getDefaultAccessInfoForUser(String userID) {
-        
-        List<String> users = new ArrayList<String>();
-        users.add(userID);
-        
-        AccessInfo defaultAccessRights = AccessInfo.create(AccessInfo.NOBODY, AccessInfo.NOBODY, AccessInfo.ACCESS_LEVEL_NONE);
-        defaultAccessRights.setReadUsers(users);
-        defaultAccessRights.setWriteUsers(users);
-        
-        return defaultAccessRights;
     }
 
     @Override

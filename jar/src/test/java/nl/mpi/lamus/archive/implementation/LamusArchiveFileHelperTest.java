@@ -24,6 +24,7 @@ import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -467,5 +468,53 @@ public class LamusArchiveFileHelperTest {
         testArchiveFileHelper.createFileAndDirectories(file);
         
         assertTrue("File should have been created", file.exists());
+    }
+    
+    @Test
+    public void getDirectoryForFileTypeWritten() {
+        
+        final String parentDirectory = "/some/path";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR;
+        final String expectedDirectory = "/some/path/Annotations";
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForFileTypeLexical() {
+        
+        final String parentDirectory = "/some/path";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_LEX;
+        final String expectedDirectory = "/some/path/Annotations";
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForFileTypeMedia() {
+        
+        final String parentDirectory = "/some/path";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_MR;
+        final String expectedDirectory = "/some/path/Media";
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForFileTypeMetadata() {
+        
+        final String parentDirectory = "/some/path";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/some/path";
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
 }

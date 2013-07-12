@@ -510,6 +510,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return listToReturn;
     }
     
+    /**
+     * @see WorkspaceDao#updateNodeWorkspaceURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void updateNodeWorkspaceURL(WorkspaceNode node) {
         
@@ -528,6 +531,29 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
         logger.info("Workspace URL of node " + node.getWorkspaceNodeID() + " updated to " + node.getWorkspaceURL());
+    }
+    
+    /**
+     * @see WorkspaceDao#updateNodeArchiveURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void updateNodeArchiveURL(WorkspaceNode node) {
+        
+        logger.debug("Updating archive URL for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URL to: " + node.getArchiveURL());
+        
+        String nodeArchiveURLStr = null;
+        if(node.getArchiveURL() != null) {
+            nodeArchiveURLStr = node.getArchiveURL().toString();
+        }
+        
+        String updateSql = "UPDATE node SET archive_url = :archive_url"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("archive_url", nodeArchiveURLStr)
+                .addValue("workspace_node_id", node.getWorkspaceNodeID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Archive URL of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURL());
     }
 
     /**

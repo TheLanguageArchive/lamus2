@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.ams.AmsBridge;
@@ -30,8 +31,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.*;
 
 /**
@@ -204,5 +204,17 @@ public class LamusWorkspaceAccessCheckerTest {
         
         boolean result = nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID);
         assertFalse("Result should be false when the workspace does not exist.", result);
+    }
+    
+    @Test
+    public void getDefaultAccessInfoForUser() {
+        
+        final String username = "someuser@mpi.nl";
+        
+        AccessInfo result = nodeAccessChecker.getDefaultAccessInfoForUser(username);
+        
+        assertEquals("Default access level value different from expected", AccessInfo.ACCESS_LEVEL_NONE, result.getAccessLevel());
+        assertEquals("Default read rights different from expected", username, result.getReadRights().trim());
+        assertEquals("Default write rights different from expected", username, result.getWriteRights().trim());
     }
 }

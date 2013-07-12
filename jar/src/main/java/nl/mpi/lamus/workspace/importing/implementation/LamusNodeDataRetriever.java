@@ -63,6 +63,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         this.archiveFileHelper = archiveFileHelper;
     }
 
+    @Override
     public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
             throws IOException, MetadataException, UnknownNodeException {
         
@@ -77,6 +78,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         return document;
     }
     
+    @Override
     public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException {
         
         OurURL resourceURL = null;
@@ -84,6 +86,8 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         if(resourceReference instanceof HandleCarrier) {
             String resourceHandle = ((HandleCarrier) resourceReference).getHandle();
             resourceURL = this.archiveObjectsDB.getObjectURLForPid(resourceHandle);
+            
+            //TODO can't assume that the link always has a handle
         }
         
         if(resourceURL == null) {
@@ -99,6 +103,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    @Override
     public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceURLWithContext, int nodeArchiveID) {
         
         // if not onsite, don't use typechecker
@@ -145,6 +150,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    @Override
     public TypecheckedResults getResourceFileChecked(int nodeArchiveID, Reference resourceReference,
             OurURL resourceURL, OurURL resourceURLWithContext) throws TypeCheckerException {
         
@@ -166,6 +172,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    @Override
     public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults) {
         
         String resourceReferenceMimetype = resourceReference.getMimetype();

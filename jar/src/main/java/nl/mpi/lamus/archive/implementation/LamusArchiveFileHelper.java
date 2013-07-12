@@ -24,6 +24,7 @@ import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -223,18 +224,18 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
     
     @Override
-    public File getFinalFile(String parentDirectory, String fileNameAttempt) {
+    public File getFinalFile(String baseDirectory, String fileNameAttempt) {
         
         int suffix = 1;
         String attemptSuffix = "";
         
         File fileAttempt =
-                new File(parentDirectory, FilenameUtils.getBaseName(fileNameAttempt) + attemptSuffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileNameAttempt));
+                new File(baseDirectory, FilenameUtils.getBaseName(fileNameAttempt) + attemptSuffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileNameAttempt));
         
         while ((fileAttempt.exists()) && (suffix < 10000)) {
             suffix++;
 
-            fileAttempt = new File(parentDirectory,
+            fileAttempt = new File(baseDirectory,
                     FilenameUtils.getBaseName(fileNameAttempt) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileNameAttempt));
         }
         if (suffix >= 10000) {
@@ -252,5 +253,22 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         File parentFile = fileToCreate.getAbsoluteFile().getParentFile();
         FileUtils.forceMkdir(parentFile);
         FileUtils.touch(fileToCreate);
+    }
+    
+    @Override
+    public String getDirectoryForFileType(String parentDirectory, WorkspaceNodeType nodeType) {
+        
+        if(WorkspaceNodeType.RESOURCE_WR.equals(nodeType) ||
+                WorkspaceNodeType.RESOURCE_LEX.equals(nodeType)) {
+            return FilenameUtils.concat(parentDirectory, "Annotations"); //TODO put this string in some properties file? constants class?
+        } else if(WorkspaceNodeType.RESOURCE_MR.equals(nodeType)) {
+            return FilenameUtils.concat(parentDirectory, "Media"); //TODO put this string in some properties file? constants class?
+        }
+        
+        //TODO if Metadata, keep same directory or add folder?
+        
+        //TODO are there Info files?
+        
+        return parentDirectory;
     }
 }

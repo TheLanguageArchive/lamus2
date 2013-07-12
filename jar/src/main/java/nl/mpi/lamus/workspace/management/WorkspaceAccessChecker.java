@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import nl.mpi.corpusstructure.AccessInfo;
+
 /**
  *
  * Interface for the archive node access checking.
@@ -39,4 +41,6 @@ public interface WorkspaceAccessChecker {
      * @return true if the given user has access to the given workspace
      */
     public boolean hasAccessToWorkspace(String userID, int workspaceID);
+    
+    public AccessInfo getDefaultAccessInfoForUser(String userID);
 }

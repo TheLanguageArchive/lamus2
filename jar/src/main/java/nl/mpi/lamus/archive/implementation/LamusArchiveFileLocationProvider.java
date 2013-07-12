@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,13 +98,14 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
 //    }
 
     @Override
-    public File getAvailableFile(String parentPath, String filenameAttempt) throws IOException {
+    public File getAvailableFile(String parentPath, String filenameAttempt, WorkspaceNodeType nodeType) throws IOException {
         
 //        String filename = FilenameUtils.getName(file.getPath());
         
         String correctedFilename = archiveFileHelper.correctPathElement(filenameAttempt, "getAvailableFile");
         String parentDirectory = FilenameUtils.getFullPath(parentPath);
-        File finalFile = archiveFileHelper.getFinalFile(parentDirectory, correctedFilename);
+        String baseDirectoryForFileType = archiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        File finalFile = archiveFileHelper.getFinalFile(baseDirectoryForFileType, correctedFilename);
         
         archiveFileHelper.createFileAndDirectories(finalFile);
         

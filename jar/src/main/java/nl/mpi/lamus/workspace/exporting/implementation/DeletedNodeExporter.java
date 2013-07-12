@@ -38,7 +38,7 @@ public class DeletedNodeExporter implements NodeExporter {
     private final CorpusStructureBridge corpusStructureBridge;
     private final SearchClientBridge searchClientBridge;
     
-//    private Workspace workspace = null;
+    private Workspace workspace;
     
     public DeletedNodeExporter(TrashVersioningHandler tvHandler, TrashCanHandler tcHandler, CorpusStructureBridge csBridge, SearchClientBridge sClientBridge) {
         
@@ -50,12 +50,12 @@ public class DeletedNodeExporter implements NodeExporter {
     
     @Override
     public Workspace getWorkspace() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.workspace;
     }
     
     @Override
     public void setWorkspace(Workspace workspace) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.workspace = workspace;
     }
 
     @Override

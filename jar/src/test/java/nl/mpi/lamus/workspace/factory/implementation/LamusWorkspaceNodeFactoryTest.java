@@ -134,7 +134,7 @@ public class LamusWorkspaceNodeFactoryTest {
 
         context.checking(new Expectations() {{
         
-            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getFileLocation(); will(returnValue(fileLocation));
+//            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getFileLocation(); will(returnValue(fileLocation));
             exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getDisplayValue(); will(returnValue(displayValue));
             //TODO get type
             //TODO get format
@@ -143,7 +143,7 @@ public class LamusWorkspaceNodeFactoryTest {
             oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getHandle(); will(returnValue(pid));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveID,
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveID, nodeURL, pid,
                 mockTestReferencingMetadataDocumentHandleCarrier);
         
         assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);

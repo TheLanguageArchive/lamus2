@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 
 /**
@@ -93,8 +94,9 @@ public interface ArchiveFileHelper {
     
     public File getArchiveLocationForNodeID(int archiveNodeID);
     
-    public File getFinalFile(String parentDirectory, String fileNameAttempt);
+    public File getFinalFile(String baseDirectory, String fileNameAttempt);
     
     public void createFileAndDirectories(File fileToCreate) throws IOException;
     
+    public String getDirectoryForFileType(String parentDirectory, WorkspaceNodeType nodeType);
 }

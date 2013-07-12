@@ -17,6 +17,7 @@ package nl.mpi.lamus.archive;
 
 import java.io.File;
 import java.io.IOException;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
  *
@@ -27,5 +28,5 @@ public interface ArchiveFileLocationProvider {
 //    public File getNextAvailableMetadataFile(URL parentArchiveURL, String childNodeName, URL childOriginURL);
     
     //TODO HOW WILL THIS METHOD BE?
-    public File getAvailableFile(String parentNodePath, String filename) throws IOException;
+    public File getAvailableFile(String parentNodePath, String filename, WorkspaceNodeType nodeType) throws IOException;
 }

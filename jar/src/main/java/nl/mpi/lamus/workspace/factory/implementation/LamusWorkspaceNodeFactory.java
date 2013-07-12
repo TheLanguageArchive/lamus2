@@ -63,27 +63,31 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, MetadataDocument document)
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document)
             throws MalformedURLException {
         
-        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID,
-                document.getFileLocation().toURL(), document.getFileLocation().toURL());
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
+//                document.getFileLocation().toURL(), document.getFileLocation().toURL());
         node.setName(document.getDisplayValue());
         node.setTitle(document.getDisplayValue());
         node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
         node.setFormat(""); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
-        String nodePid = WorkspacePidValue.NONE.toString();
+        String nodePID = archiveNodePID;
+//        String nodePid = WorkspacePidValue.NONE.toString();
         //TODO Generate a new Handle at this point
 
 	if (document instanceof HandleCarrier) {
-	    nodePid = ((HandleCarrier) document).getHandle();
+	    nodePID = ((HandleCarrier) document).getHandle();
 	} else {
+            
+            //TODO can't assume that the document always has a handle
+            
 	    logger.warn("Metadata document '" + document.getFileLocation().toString() + "' does not contain a handle.");
 	}
         
-        node.setPid(nodePid);
+        node.setPid(nodePID);
         node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
         
         return node;

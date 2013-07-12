@@ -31,6 +31,7 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
@@ -68,6 +69,7 @@ public class LamusCorpusStructureBridgeTest {
     @Mock AccessInfo mockAccessInfo;
     @Mock DateTimeHelper mockDateTimeHelper;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
+    @Mock WorkspaceAccessChecker mockWorkspaceAccessChecker;
     
     @Mock File mockFile;
     
@@ -87,7 +89,7 @@ public class LamusCorpusStructureBridgeTest {
     @Before
     public void setUp() {
         
-        corpusStructureBridge = new LamusCorpusStructureBridge(mockArchiveObjectsDBW, mockDateTimeHelper, mockArchiveFileHelper);
+        corpusStructureBridge = new LamusCorpusStructureBridge(mockArchiveObjectsDBW, mockDateTimeHelper, mockArchiveFileHelper, mockWorkspaceAccessChecker);
     }
     
     @After
@@ -191,6 +193,8 @@ public class LamusCorpusStructureBridgeTest {
         
         final String pid = UUID.randomUUID().toString();
         
+        final String userID = "someUser";
+        
         final boolean onsite = Boolean.TRUE;
         
         final long size = 1; //TODO pass the real size? it will eventually be fixed by the crawler... (?)
@@ -207,28 +211,18 @@ public class LamusCorpusStructureBridgeTest {
             
             oneOf(mockArchiveFileHelper).isUrlLocal(nodeArchiveOurURL); will(returnValue(onsite));
             
+            
+            oneOf(mockWorkspaceAccessChecker).getDefaultAccessInfoForUser(userID); will(returnValue(mockAccessInfo));
+            
             //TODO determine pid before???
             
             oneOf(mockArchiveObjectsDBW).newArchiveObject(nodeURIWithContext, pid, currentTimestamp, onsite, size, currentTimestamp, mockAccessInfo);
                 will(returnValue(newNodeID));
         }});
         
-        int result = corpusStructureBridge.addNewNodeToCorpusStructure(nodeArchiveURL, mockAccessInfo, pid);
+        int result = corpusStructureBridge.addNewNodeToCorpusStructure(nodeArchiveURL, pid, userID);
         
         assertEquals("Resulting nodeID different from expected", NodeIdUtils.TOINT(newNodeID), result);
-    }
-    
-    
-    @Test
-    public void getDefaultAccessInfoForUser() {
-        
-        final String username = "someuser@mpi.nl";
-        
-        AccessInfo result = corpusStructureBridge.getDefaultAccessInfoForUser(username);
-        
-        assertEquals("Default access level value different from expected", AccessInfo.ACCESS_LEVEL_NONE, result.getAccessLevel());
-        assertEquals("Default read rights different from expected", username, result.getReadRights().trim());
-        assertEquals("Default write rights different from expected", username, result.getWriteRights().trim());
     }
     
     @Test

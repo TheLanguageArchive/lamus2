@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -160,9 +161,15 @@ public class MetadataNodeImporterTest {
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinker).linkNodes(null, testChildNode, null);
@@ -192,9 +199,15 @@ public class MetadataNodeImporterTest {
                 testDisplayValue, "", testNodeType, testChildURL.toURL(), testChildURL.toURL(), testChildURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestNonReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestNonReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinker).linkNodes(null, testChildNode, null);
@@ -210,11 +223,18 @@ public class MetadataNodeImporterTest {
         IOException, MetadataException, NodeExplorerException {
 
         final int testChildArchiveID = 100;
+        final OurURL testChildURL = new OurURL("http://some.url/node.something");
+        final String testPid = UUID.randomUUID().toString();
         
         final IOException expectedException = new IOException("this is an exception thrown by the method 'getMetadataDocument'");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(throwException(expectedException));
         }});
         
@@ -236,11 +256,18 @@ public class MetadataNodeImporterTest {
         IOException, MetadataException, NodeExplorerException {
 
         final int testChildArchiveID = 100;
+        final OurURL testChildURL = new OurURL("http://some.url/node.something");
+        final String testPid = UUID.randomUUID().toString();
         
         final MetadataException expectedException = new MetadataException("this is an exception thrown by the method 'getMetadataDocument'");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(throwException(expectedException));
         }});
         
@@ -262,11 +289,16 @@ public class MetadataNodeImporterTest {
         IOException, MetadataException, NodeExplorerException {
 
         final int testChildArchiveID = 100;
+        final OurURL testChildURL = new OurURL("http://some.url/node.something");
+        final String testPid = UUID.randomUUID().toString();
         
         final UnknownNodeException expectedException = new UnknownNodeException("this is an exception thrown by the method 'getMetadataDocument'");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid);// will(returnValue(testChildURL));
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(throwException(expectedException));
         }});
         
@@ -275,7 +307,7 @@ public class MetadataNodeImporterTest {
             fail("Should have thrown exception");
         } catch(NodeImporterException ex) {
             assertNotNull(ex);
-            String errorMessage = "Error getting object URL for node ID " + testChildArchiveID;
+            String errorMessage = "Error getting information for node ID " + testChildArchiveID;
             assertEquals(errorMessage, ex.getMessage());
             assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
             assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
@@ -309,9 +341,15 @@ public class MetadataNodeImporterTest {
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);
@@ -349,9 +387,15 @@ public class MetadataNodeImporterTest {
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestNonReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestNonReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);
@@ -388,9 +432,15 @@ public class MetadataNodeImporterTest {
         final MalformedURLException expectedException = new MalformedURLException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
             oneOf(mockTestReferencingMetadataDocumentWithHandle).getFileLocation(); will(returnValue(testChildURI));
         }});
@@ -436,9 +486,15 @@ public class MetadataNodeImporterTest {
                     testChildNode, null);
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
+            
+            oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
+            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
+//            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildArchiveID,
+                    testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);

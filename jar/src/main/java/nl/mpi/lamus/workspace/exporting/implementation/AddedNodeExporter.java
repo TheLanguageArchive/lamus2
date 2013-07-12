@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.logging.Level;
+import javax.xml.transform.stream.StreamResult;
 import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -34,6 +36,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
@@ -87,64 +90,23 @@ public class AddedNodeExporter implements NodeExporter {
 
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        
-        // node
-        // virtpaths
-        // subnodes
-        // keep directory structure?
-        
-        
-        // for each subnode
-        
-            // metadata?
-                // get virt path...?
-            // else if deleted or unknown type
-                // ...
-
-            // external?
-                // ...
-
-            // keepdirstruct && fromarchive && ! wasunlinked ? (i.e. already existed in the archive and - do not rename already archived files / directories...' (allow resource basename rename, though))
-
-            // metadata?
-                // recursion
-            // else
-                // change name (and url) if old and new name are different and, if so
-                    // get resource file for url
-                    // move file to new location
-                    // setWsDbArchiveUrl...
-                    // wsdb setnodenametitle...
-                    // continue loop
-        
-            // corpus or catalogue?
-                // not in archive before?
-                    // calculate url based on parent, if possible
-                    // setWsDbArchiveUrl...
-                // else
-                    // ...
-            // else session?
-                // not in archive before and protocol is file (?)
-                    // oldsessionfile (?)
-                    // get next session name available
-                    // if ?
-                        // if ?
-                        // eventually move file and updata wsdb...
-        
-        
-        
         
         String parentArchivePath = parentNode.getArchiveURL().getPath();
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
         
         File nextAvailableFile = null;
+        URL newNodeArchiveURL = null;
         
         try {
-            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename);
+            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename, currentNode.getType());
+            newNodeArchiveURL = nextAvailableFile.toURI().toURL();
+        } catch (MalformedURLException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
         } catch (IOException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
+        currentNode.setArchiveURL(newNodeArchiveURL);
+        workspaceDao.updateNodeArchiveURL(currentNode);
         
         //TODO WHEN METADATA, CALL (RECURSIVELY) exploreTree FOR CHILDREN IN THE BEGINNING
             // this way child files would have the pids calculated in advance,
@@ -153,69 +115,38 @@ public class AddedNodeExporter implements NodeExporter {
             workspaceTreeExporter.explore(workspace, currentNode);
         }
         
-        int currentNodeNewArchiveID = -1;
-        AccessInfo currentNodeAccessRights = corpusStructureBridge.getDefaultAccessInfoForUser(workspace.getUserID());
-        try {
-            currentNodeNewArchiveID = 
-                    corpusStructureBridge.addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), currentNodeAccessRights, currentNode.getPid());
+        int currentNodeNewArchiveID = corpusStructureBridge.addNewNodeToCorpusStructure(
+                    newNodeArchiveURL, currentNode.getPid(), workspace.getUserID());
             
             //TODO PID should have already been assigned when the node was uploaded/linked...
-            
-        } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
         
-//        String currentNodeNewArchivePID = corpusStructureBridge.calculatePID(currentNodeNewArchiveID);
-//        corpusStructureBridge.updateArchiveObjectsNodePID(currentNodeNewArchiveID, currentNodeNewArchivePID);
-        
-        CMDIDocument parentDocument = null;
-        
-        try {
-            
-//            MetadataDocument tempDocument = metadataAPI.getMetadataDocument(parentNode.getArchiveURL());
-            MetadataDocument tempDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
-            if(tempDocument instanceof CMDIDocument) {
-                parentDocument = (CMDIDocument) tempDocument;
-            } else {
-                throw new UnsupportedOperationException("not handled yet");
-            }
-        } catch (IOException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        } catch (MetadataException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
-        
-        ResourceProxy currentNodeReference = null;
-        
+        MetadataDocument currentDocument = null;
         if(currentNode.isMetadata()) {
-            throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is Metadata) not implemented yet");
-        } else {
             try {
-                currentNodeReference = parentDocument.getDocumentReferenceByURI(new URI(currentNode.getPid())); //currentNode.getWorkspaceURL().toURI());
-            } catch (URISyntaxException ex) {
+                currentDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
+                
+            } catch (IOException ex) {
+                throw new UnsupportedOperationException("exception not handled yet", ex);
+            } catch (MetadataException ex) {
                 throw new UnsupportedOperationException("exception not handled yet", ex);
             }
         }
         
-        currentNodeReference.setHandle(currentNode.getPid()); //TODO but maybe it should be set already...
-        
-        
-//        File currentNodeOriginFile = new File(currentNode.getOriginURL().getPath());
         File currentNodeWorkspaceFile = new File(currentNode.getWorkspaceURL().getPath());
         
-        if(currentNode.isMetadata()) {
-            
-        } else {
-            try {
+        try {
+            if(currentNode.isMetadata()) {
+                StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
+                workspaceFileHandler.copyMetadataFile(currentNode, metadataAPI, currentDocument, currentNodeWorkspaceFile, targetStreamResult);
+            } else {
                 workspaceFileHandler.copyResourceFile(currentNode, currentNodeWorkspaceFile, nextAvailableFile);
-            } catch (WorkspaceNodeFilesystemException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
             }
+        } catch (WorkspaceNodeFilesystemException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
         }
+        
         try {
             //TODO will this be done by the crawler??
-    //        corpusStructureBridge.linkNodesInCorpusStructure(parentNode.getArchiveNodeID(), currentNodeNewArchiveID);
-            
             corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, nextAvailableFile.toURI().toURL());
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);

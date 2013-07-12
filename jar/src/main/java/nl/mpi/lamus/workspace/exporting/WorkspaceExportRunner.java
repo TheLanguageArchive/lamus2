@@ -104,7 +104,9 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
         topNodeExporter.exportNode(null, topNode);
         
+        //TODO Export deleted nodes...
         
+        //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem
         
         //TODO call crawler

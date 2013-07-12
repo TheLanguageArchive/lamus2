@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -37,6 +38,7 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.*;
+import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,9 +120,18 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	//TODO also, the node file should already exist in the workspace directory
 
         
+        
+        String childNodeArchivePID;
+        OurURL childNodeArchiveURL;
+        
         MetadataDocument childDocument;
         try {
-            childDocument = nodeDataRetriever.getArchiveNodeMetadataDocument(childNodeArchiveID);
+            childNodeArchivePID = archiveObjectsDB.getObjectPID(NodeIdUtils.TONODEID(childNodeArchiveID));
+            childNodeArchiveURL = archiveObjectsDB.getObjectURLForPid(childNodeArchivePID);
+            
+            childDocument = metadataAPI.getMetadataDocument(childNodeArchiveURL.toURL());
+//            childDocument = nodeDataRetriever.getArchiveNodeMetadataDocument(childNodeArchiveID);
+            
         } catch (IOException ioex) {
 	    String errorMessage = "Error importing Metadata Document for node with ID " + childNodeArchiveID;
 	    logger.error(errorMessage, ioex);
@@ -130,14 +141,14 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    logger.error(errorMessage, mdex);
 	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), mdex);
         } catch (UnknownNodeException unex) {
-	    String errorMessage = "Error getting object URL for node ID " + childNodeArchiveID;
+	    String errorMessage = "Error getting information for node ID " + childNodeArchiveID;
 	    logger.error(errorMessage, unex);
 	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
         
         WorkspaceNode childNode;
         try {
-            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childNodeArchiveID, childDocument);
+            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childNodeArchiveID, childNodeArchiveURL.toURL(), childNodeArchivePID, childDocument);
         } catch (MalformedURLException muex) {
             String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
             logger.error(errorMessage, muex);

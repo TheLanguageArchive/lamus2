@@ -115,11 +115,6 @@ public class GeneralNodeExporterTest {
          * option 2 - find a way of checking efficiently for differences, and copy only if they exist
          */
         
-        
-//        final int parentNodeWsID = 1;
-//        final int parentNodeArchiveID = 50;
-//        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/parentnode.cmdi");
-        
         final int nodeWsID = 10;
         final int nodeArchiveID = 100;
         final String nodeFilename = "someNode.cmdi";
@@ -145,14 +140,133 @@ public class GeneralNodeExporterTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
             
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
         }});
         
         generalNodeExporter.exportNode(null, node);
+    }
+    
+    @Test
+    public void exportOtherMetadataNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceNodeFilesystemException {
+        
+        /*
+         * File already exists in the archive.
+         * Should it be copied anyway?
+         * If not, there should be some indication about it being unchanged.
+         * But maybe there is a risk that afterwards the file will be moved (because of something changing in the parent, for instance) - but still the file can be moved as it is...
+         * 
+         * option 1 - copy always in any case
+         * option 2 - find a way of checking efficiently for differences, and copy only if they exist
+         */
+        
+        final int parentNodeWsID = 1;
+        final int parentNodeArchiveID = 50;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String parentNodePid = UUID.randomUUID().toString();
+        final String metadataFormat = "text/cmdi";
+        
+        final int nodeWsID = 10;
+        final int nodeArchiveID = 100;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final String nodePid = UUID.randomUUID().toString();
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), parentNodeArchiveID, nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, parentNodePid, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeArchiveID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, nodePid, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveID(nodeArchiveID);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
+            
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
+        }});
+        
+        generalNodeExporter.exportNode(parentNode, node);
+    }
+    
+    @Test
+    public void exportResourceNode() throws MalformedURLException, URISyntaxException {
+        
+        /*
+         * File already exists in the archive.
+         * Should it be copied anyway?
+         * If not, there should be some indication about it being unchanged.
+         * But maybe there is a risk that afterwards the file will be moved (because of something changing in the parent, for instance) - but still the file can be moved as it is...
+         * 
+         * option 1 - copy always in any case
+         * option 2 - find a way of checking efficiently for differences, and copy only if they exist
+         */
+        
+        final int parentNodeWsID = 1;
+        final int parentNodeArchiveID = 50;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String parentNodePid = UUID.randomUUID().toString();
+        final String metadataFormat = "text/cmdi";
+        
+        final int nodeWsID = 10;
+        final int nodeArchiveID = 100;
+        final String nodeName = "someNode";
+        final String pdfExtension = "pdf";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + pdfExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final String nodePid = UUID.randomUUID().toString();
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), parentNodeArchiveID, nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, parentNodePid, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeArchiveID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, nodePid, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveID(nodeArchiveID);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        
+        context.checking(new Expectations() {{
+            
+            //TODO what to expect here?
+                // resources are not copied to the workspace, so if they need to be copied back, it means they are replacements,
+                    // and therefore don't belong in this exporter...
+        }});
+        
+        generalNodeExporter.exportNode(parentNode, node);
     }
 }
