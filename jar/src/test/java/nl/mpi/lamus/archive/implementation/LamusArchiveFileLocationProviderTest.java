@@ -198,7 +198,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentDirname, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileType, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile);
             
@@ -231,7 +231,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentDirname, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileType, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile); will(throwException(ioException));
             

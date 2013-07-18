@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.corpusstructure.UnknownNodeException;
@@ -127,7 +128,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         MetadataDocument childDocument;
         try {
             childNodeArchivePID = archiveObjectsDB.getObjectPID(NodeIdUtils.TONODEID(childNodeArchiveID));
-            childNodeArchiveURL = archiveObjectsDB.getObjectURLForPid(childNodeArchivePID);
+//            childNodeArchiveURL = archiveObjectsDB.getObjectURLForPid(childNodeArchivePID);
+            childNodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
             
             childDocument = metadataAPI.getMetadataDocument(childNodeArchiveURL.toURL());
 //            childDocument = nodeDataRetriever.getArchiveNodeMetadataDocument(childNodeArchiveID);

@@ -29,6 +29,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,11 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             
             if(currentLink instanceof HandleCarrier) {
                 String linkHandle = ((HandleCarrier) currentLink).getHandle();
-                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
+//                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
+                
+                OurURL linkArchiveURL = this.archiveObjectsDB.getObjectURLForPid(linkHandle);
+                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectId(linkArchiveURL);
+                
             } else {
                 //TODO Get the URL/nodeID some other way...
                 currentNodeArchiveIdStr = null;

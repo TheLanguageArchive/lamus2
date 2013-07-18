@@ -88,7 +88,7 @@ public class WorkspaceStoriesConfig {
 //    }
     
     private void createTemporaryDirectory() throws IOException {
-        temporaryDirectory = new File("/temp/lamusStoriesTestDirectory/");
+        temporaryDirectory = new File("/tmp/lamusStoriesTestDirectory/");
         
         FileUtils.forceMkdir(temporaryDirectory);
         FileUtils.forceDeleteOnExit(temporaryDirectory);
@@ -138,7 +138,7 @@ public class WorkspaceStoriesConfig {
                 .setName("corpusstructure")
                 .addScript("classpath:hsql_corpusstructure_drop.sql")
                 .addScript("classpath:hsql_corpusstructure_create.sql")
-                .addScript("classpath:hsql_corpusstructure_insert.sql")
+                .addScript("classpath:hsql_corpusstructure_insert_basic.sql")
                 .build();
     }
     
@@ -188,7 +188,7 @@ public class WorkspaceStoriesConfig {
                 .setName("ams2")
                 .addScript("classpath:hsql_ams2_drop.sql")
                 .addScript("classpath:hsql_ams2_create.sql")
-                .addScript("classpath:hsql_ams2_insert.sql")
+                .addScript("classpath:hsql_ams2_insert_basic.sql")
                 .build();
     }
     

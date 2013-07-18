@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.corpusstructure.UnknownNodeException;
@@ -163,7 +164,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -201,7 +204,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -231,7 +236,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -264,7 +271,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -297,7 +306,8 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid);// will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid);// will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(throwException(expectedException));
         }});
@@ -343,7 +353,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -389,7 +401,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -434,7 +448,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -488,7 +504,9 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveObjectsDB).getObjectPID(NodeIdUtils.TONODEID(testChildArchiveID)); will(returnValue(testPid));
-            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testPid); will(returnValue(testChildURL));
+            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext());
+                will(returnValue(testChildURL));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL());
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);

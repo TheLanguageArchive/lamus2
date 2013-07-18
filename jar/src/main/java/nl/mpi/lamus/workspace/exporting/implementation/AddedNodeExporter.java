@@ -154,9 +154,9 @@ public class AddedNodeExporter implements NodeExporter {
         
         if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
             searchClientBridge.addNode(currentNodeNewArchiveID);
-        } else {
-            throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
-        }
+        }// else {
+           // throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
+        //}
         
     }
 }

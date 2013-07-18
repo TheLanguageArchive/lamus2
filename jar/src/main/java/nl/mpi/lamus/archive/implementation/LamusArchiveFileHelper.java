@@ -256,19 +256,23 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
     
     @Override
-    public String getDirectoryForFileType(String parentDirectory, WorkspaceNodeType nodeType) {
+    public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
         
-        if(WorkspaceNodeType.RESOURCE_WR.equals(nodeType) ||
-                WorkspaceNodeType.RESOURCE_LEX.equals(nodeType)) {
-            return FilenameUtils.concat(parentDirectory, "Annotations"); //TODO put this string in some properties file? constants class?
+        String parentDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
+        String parentBaseName = FilenameUtils.getBaseName(parentPath);
+        String baseDirectory = FilenameUtils.concat(parentDirectory, parentBaseName);
+        String returnDirectory = baseDirectory;
+        
+        if(WorkspaceNodeType.RESOURCE_WR.equals(nodeType) || WorkspaceNodeType.RESOURCE_LEX.equals(nodeType)) {
+            returnDirectory = FilenameUtils.concat(baseDirectory, "Annotations"); //TODO put this string in some properties file? constants class?
         } else if(WorkspaceNodeType.RESOURCE_MR.equals(nodeType)) {
-            return FilenameUtils.concat(parentDirectory, "Media"); //TODO put this string in some properties file? constants class?
+            returnDirectory = FilenameUtils.concat(baseDirectory, "Media"); //TODO put this string in some properties file? constants class?
         }
         
         //TODO if Metadata, keep same directory or add folder?
         
         //TODO are there Info files?
         
-        return parentDirectory;
+        return returnDirectory;
     }
 }

@@ -19,71 +19,30 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.sql.Timestamp;
 import java.util.*;
 import javax.sql.DataSource;
 import nl.mpi.corpusstructure.*;
 import nl.mpi.lamus.ams.Ams2Bridge;
-import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.dao.implementation.LamusJdbcWorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.filesystem.implementation.LamusWorkspaceDirectoryHandler;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.service.implementation.LamusWorkspaceService;
-import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.factory.implementation.LamusWorkspaceFactory;
-import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
-import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceAccessChecker;
-import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
-import nl.mpi.lat.ams.dao.*;
-import nl.mpi.lat.ams.service.LicenseService;
-import nl.mpi.lat.ams.service.RuleService;
-import nl.mpi.lat.ams.service.impl.*;
-import nl.mpi.lat.auth.authentication.EncryptionService;
-import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-import nl.mpi.lat.auth.principal.PrincipalService;
-import nl.mpi.lat.fabric.FabricService;
-import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
-import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.util.OurURL;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.FileUtils;
-import org.hibernate.SessionFactory;
 import org.jbehave.core.annotations.*;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
@@ -103,7 +62,7 @@ public class WorkspaceSteps {
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     
-    private URL topNodeURL;
+//    private URL topNodeURL;
     
     @Autowired
     @Qualifier("corpusstructureDataSource")
@@ -142,9 +101,16 @@ public class WorkspaceSteps {
     
     private int createdWorkspaceID;
     
+    private int createdWorkspaceTopNodeArchiveID;
+    private int createdWorkspaceTopNodeWsID;
     
-    @BeforeStory
-    public void beforeStory() throws IOException {
+    private URL newlyInsertedNodeUrl;
+    
+    private String oldNodeNameInArchive;
+    
+    
+    @BeforeScenario
+    public void beforeEachScenario() throws IOException {
         WorkspaceStepsHelper.clearLamusDatabaseAndFilesystem(this.lamusDataSource, this.workspaceBaseDirectory);
         WorkspaceStepsHelper.clearCsDatabaseAndFilesystem(this.corpusstructureDataSource, this.archiveFolder);
         WorkspaceStepsHelper.clearAmsDatabase(this.amsDataSource);
@@ -152,19 +118,27 @@ public class WorkspaceSteps {
     }
     
     private void clearVariables() {
-        this.topNodeURL = null;
+//        this.topNodeURL = null;
         this.createdWorkspace = null;
         this.currentUserID = null;
         this.selectedNodeID = -1;
         this.createdWorkspaceID = -1;
+        this.createdWorkspaceTopNodeArchiveID = -1;
+        this.createdWorkspaceTopNodeWsID = -1;
+        this.newlyInsertedNodeUrl = null;
+        this.oldNodeNameInArchive = null;
     }
     
     
     @Given("an archive")
-    public void anArchive() {
+    public void anArchive() throws IOException {
         
         assertNotNull("archiveFolder null, was not correctly injected", this.archiveFolder);
         assertTrue("archiveFolder does not exist, was not properly created", this.archiveFolder.exists());
+
+        WorkspaceStepsHelper.insertArchiveInDBFromScript(this.corpusstructureDataSource);
+        
+        WorkspaceStepsHelper.copyArchiveFromOriginalLocation(this.archiveFolder);
         
         assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
         assertNotNull("archiveObjectsDB null, was not correctly injected", this.archiveObjectsDB);
@@ -172,40 +146,40 @@ public class WorkspaceSteps {
         assertTrue("corpusstructure database was not initialised", this.archiveObjectsDB.getStatus());
     }
     
-    @Given("a top node with ID $nodeID")
-    public void aNodeWithIDWhichIsTheTopNode(@Named("nodeID") int nodeArchiveID) throws IOException {
-        String filename = nodeArchiveID + ".cmdi";
-        URL nodeArchiveURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, filename);
-        this.topNodeURL = nodeArchiveURL;
-        int nodeType = 2;
-        String nodeFormat = "text/cmdi";
-        int parentNodeID = -1;
-        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, nodeArchiveID, nodeArchiveURL, nodeType, nodeFormat, true, parentNodeID);
-        
-        Node node = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(nodeArchiveID));
-        assertNotNull("Node with ID " + nodeArchiveID + " does not exist in the corpusstructure database", node);
-        
-        this.selectedNodeID = nodeArchiveID;
-    }
+//    @Given("a top node with ID $nodeID")
+//    public void aNodeWithIDWhichIsTheTopNode(@Named("nodeID") int nodeArchiveID) throws IOException {
+////        String filename = nodeArchiveID + ".cmdi";
+////        URL nodeArchiveURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, filename);
+////        this.topNodeURL = nodeArchiveURL;
+////        int nodeType = 2;
+////        String nodeFormat = "text/cmdi";
+////        int parentNodeID = -1;
+////        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, nodeArchiveID, nodeArchiveURL, nodeType, nodeFormat, true, parentNodeID);
+////        
+//        Node node = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(nodeArchiveID));
+//        assertNotNull("Node with ID " + nodeArchiveID + " does not exist in the corpusstructure database", node);
+//        
+//        this.selectedNodeID = nodeArchiveID;
+//    }
     
-    @Given("a node with ID $childNodeID which is a child of node with ID $parentNodeID")
+    @Given("a metadata node with ID $childNodeID which is a child of node with ID $parentNodeID")
     public void aNodeWithIDWhichIsAChildOfNodeWIthID(@Named("childNodeID") int childNodeID, @Named("parentNodeID") int parentNodeID) throws IOException {
-        
+//        
         Node parentNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(parentNodeID));
         assertNotNull("Node with ID " + parentNodeID + " does not exist in the corpusstructure database", parentNode);
-
-        String childFilename = childNodeID + ".cmdi";
-        URL childNodeURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, childFilename);
-        int childNodeType = 2;
-        String childNodeFormat = "text/cmdi";
-        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, childNodeID, childNodeURL, childNodeType, childNodeFormat, false, parentNodeID);
-        
+//
+//        String childFilename = childNodeID + ".cmdi";
+//        URL childNodeURL = WorkspaceStepsHelper.copyFileToArchiveFolder(this.archiveFolder, childFilename);
+//        int childNodeType = 2;
+//        String childNodeFormat = "text/cmdi";
+//        WorkspaceStepsHelper.insertNodeInCSDB(this.corpusstructureDataSource, childNodeID, childNodeURL, childNodeType, childNodeFormat, false, parentNodeID);
+//        
         Node[] childNodes = this.corpusStructureDB.getChildrenNodes(NodeIdUtils.TONODEID(parentNodeID));
         assertNotNull("Node with ID " + parentNodeID + " should have children", childNodes);
-        assertTrue("Node with ID " + parentNodeID + " should have one child", childNodes.length == 1);
-        assertNotNull("Node with ID " + parentNodeID + " should have one non-null child", childNodes[0]);
-        assertTrue("Node with ID " + parentNodeID + " should have one child with ID " + childNodeID, NodeIdUtils.TOINT(childNodes[0].getNodeId()) == childNodeID);
-                
+//        assertTrue("Node with ID " + parentNodeID + " should have one child", childNodes.length == 1);
+//        assertNotNull("Node with ID " + parentNodeID + " should have one non-null child", childNodes[0]);
+//        assertTrue("Node with ID " + parentNodeID + " should have one child with ID " + childNodeID, NodeIdUtils.TOINT(childNodes[0].getNodeId()) == childNodeID);
+//                
         Node childNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(childNodeID));
         assertNotNull("Node with ID " + childNodeID + " does not exist in the corpusstructure database", childNode);
     }
@@ -214,7 +188,9 @@ public class WorkspaceSteps {
     public void aUserWithID(String userID, int nodeID) {
         
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
-        WorkspaceStepsHelper.insertDataInAmsDB(this.amsDataSource);
+//        WorkspaceStepsHelper.insertDataInAmsDB(this.amsDataSource);
+        
+        WorkspaceStepsHelper.insertAmsDataInDBFromScript(this.amsDataSource);
         
         assertNotNull("Principal with ID " + userID + " is null", this.ams2Bridge.getPrincipalSrv().getPrincipal(userID));
         assertTrue("Principal with ID " + userID + " has no write access to the node with ID " + nodeID, this.ams2Bridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(nodeID)));
@@ -258,8 +234,9 @@ public class WorkspaceSteps {
 //        assertNotNull("retrievedWorkspace null, was not properly created in the database", retrievedWorkspace);
 //    }
     
-    @Given("a workspace with ID $workspaceID created by user with ID $userID in node with ID $nodeID to which a new node has been linked")
-    public void aWorkspaceWithIDCreatedByUserWithIDInNodeWithIDToWhichANewNodeHasBeenLinked(int workspaceID, String userID, int nodeArchiveID)
+    @Given("a workspace with ID $workspaceID created by $userID in node $topNodeArchiveID")
+    public void aWorkspaceWithIDCreatedByUserInNodeToWhichNodeHasBeenLinked(
+            int workspaceID, String userID, int topNodeArchiveID)
             throws MalformedURLException, FileNotFoundException, IOException, MetadataException {
         
         //TODO copy resource file (zorro pdf) to workspace folder
@@ -269,19 +246,23 @@ public class WorkspaceSteps {
         
         this.currentUserID = userID;
         this.createdWorkspaceID = workspaceID;
+        this.createdWorkspaceTopNodeArchiveID = topNodeArchiveID;
         
-        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-        
-        WorkspaceStepsHelper.insertWorkspaceInDBWithNewlyLinkedNode(this.lamusDataSource, this.workspaceBaseDirectory, workspaceID, userID, nodeArchiveID, nodeArchiveURL.toURL());
+        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(topNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        String nodeArchiveFilename = FilenameUtils.getName(nodeArchiveURL.getPath());
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        
+        WorkspaceStepsHelper.insertWorkspaceInDBFromScript(this.lamusDataSource, workspaceID);
+        
+        WorkspaceStepsHelper.copyWorkspaceFromOriginalLocation(workspaceDirectory, workspaceID, nodeArchiveFilename);
+        
         assertTrue("Workspace directory for workspace " + workspaceID + " should have been created", workspaceDirectory.exists());
-        File topNodeFile = new File(workspaceDirectory, nodeArchiveID + ".cmdi");
-        assertTrue("File for node " + nodeArchiveID + " should have been created", topNodeFile.exists());
-        int resourceNodeID = nodeArchiveID + 1;
-        File resourceFile = new File(workspaceDirectory, resourceNodeID + ".pdf");
-        assertTrue("File for resource " + resourceNodeID + " should have been created", resourceFile.exists());
+        
+        File topNodeFile = new File(workspaceDirectory, nodeArchiveFilename);
+        assertTrue("File for node " + topNodeArchiveID + " should have been created", topNodeFile.exists());
+
         
         // metadata
         MetadataDocument topNodeDocument = metadataAPI.getMetadataDocument(topNodeFile.toURI().toURL());
@@ -291,13 +272,7 @@ public class WorkspaceSteps {
         ReferencingMetadataDocument referencingTopNodeDocument = (ReferencingMetadataDocument) topNodeDocument;
         List<Reference> childReferences = referencingTopNodeDocument.getDocumentReferences();
         assertNotNull("List of references in metadata document " + topNodeFile.getPath() + " should not be null", childReferences);
-        assertTrue("Metadata document " + topNodeFile.getPath() + " should have one reference", childReferences.size() == 1);
-        
-        //TODO reference in parent file has to be set properly
-        childReferences.get(0).setURI(resourceFile.toURI());
-        
-        assertEquals("URI of the child reference in the metadata document is different from expected",
-                resourceFile.toURI(), childReferences.get(0).getURI());
+        assertTrue("Metadata document " + topNodeFile.getPath() + " should have references", childReferences.size() > 0);
 
         // database
         Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(workspaceID);
@@ -306,18 +281,53 @@ public class WorkspaceSteps {
         WorkspaceNode topNode = this.workspaceDao.getWorkspaceNode(retrievedWorkspace.getTopNodeID());
         assertNotNull("Top node of workspace " + workspaceID + " should not be null", topNode);
         assertEquals("URL of top node is different from expected", topNodeFile.toURI().toURL(), topNode.getWorkspaceURL());
+        this.createdWorkspaceTopNodeWsID = topNode.getWorkspaceNodeID();
+    }
+    
+    @Given("$filename has been linked to the workspace")
+    public void fileHasBeenLinkedToTheWorkspace(String filename) throws MalformedURLException {
         
-        Collection<WorkspaceNode> childNodes = this.workspaceDao.getChildWorkspaceNodes(topNode.getWorkspaceNodeID());
+        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        String nodeArchiveFilename = FilenameUtils.getName(nodeArchiveURL.getPath());
+        
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
+        
+        File resourceDirectory = new File(workspaceDirectory, FilenameUtils.getBaseName(nodeArchiveFilename));
+        File resourceFile = new File(resourceDirectory, filename);
+        
+        
+        Collection<WorkspaceNode> childNodes = this.workspaceDao.getChildWorkspaceNodes(this.createdWorkspaceTopNodeWsID);
         assertNotNull("List of child nodes of top node should not be null", childNodes);
-        assertTrue("Top node should have one child", childNodes.size() == 1);
+        assertTrue("Top node should have children", childNodes.size() > 0);
         WorkspaceNode childNode = childNodes.iterator().next();
         assertNotNull("Child of top node should not be null", childNode);
         assertEquals("Child of top node different from expected", resourceFile.toURI().toURL(), childNode.getWorkspaceURL());
     }
     
-    @When("that user chooses to create a workspace in that node")
-    public void thatUserChoosesToCreateAWorkspaceInThatNode() {
+    @Given("the top node has had its name changed")
+    public void theTopNodeHasHadItsNameChanged() throws IOException, MetadataException {
+        
+        Node archiveNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID));
+        assertNotNull(archiveNode);
+        WorkspaceNode wsNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
+        assertNotNull(wsNode);
+        assertFalse("The name of the node in the workspace should be different from its old name in the archive", archiveNode.getName().equals(wsNode.getName()));
+        
+        this.oldNodeNameInArchive = archiveNode.getName();
+        
+//        MetadataDocument document = this.metadataAPI.getMetadataDocument(wsNode.getWorkspaceURL());
+        //TODO There's no such fixed concept (name) in CMDI...
+            // Does this make sense in the database anyway?
+        
+//        assertEquals("The name of the node in the metadata document should be similar to the name in the workspace database", wsNode.getName(), document.getName());
+    }
+    
+    
+    @When("that user chooses to create a workspace in the node with ID $nodeID")
+    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(int nodeID) {
 
+        this.selectedNodeID =  nodeID;
+        
         assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
         assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
@@ -355,13 +365,8 @@ public class WorkspaceSteps {
         assertTrue("Result of the workspace submission should be true", result);
     }
     
-    @Then("a workspace is created in that node for that user")
-    public void aWorkspaceIsCreatedInThatNodeForThatUser() throws InterruptedException {
-        
-        
-        // filesystem
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspace.getWorkspaceID());
-        assertTrue("Workspace directory for workspace " + this.createdWorkspace.getWorkspaceID() + " does not exist", workspaceDirectory.exists());
+    @Then("the workspace is created in the database")
+    public void theWorkspaceIsCreatedInTheDatabase() throws InterruptedException {
         
         // database
         Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(this.createdWorkspace.getWorkspaceID());
@@ -371,9 +376,29 @@ public class WorkspaceSteps {
         assertEquals("selectedNodeID (" + this.selectedNodeID + ") does not match the ID of the top node in the retrieved workspace (" + retrievedWorkspaceTopNode.getArchiveNodeID() + ")", this.selectedNodeID, retrievedWorkspaceTopNode.getArchiveNodeID());
         
         assertEquals("retrieved workspace does not have the expected status (expected = " + WorkspaceStatus.INITIALISED + "; retrieved = " + retrievedWorkspace.getStatus() + ")", WorkspaceStatus.INITIALISED, retrievedWorkspace.getStatus());
+        
+        //TODO check all nodes that should be there...
     }
     
-    @Then("the workspace is deleted")
+    @Then("the workspace files are present in the proper location in the filesystem")
+    public void theWorkspaceFilesArePresentInTheProperLocationInTheFilesystem() {
+        
+        // filesystem
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspace.getWorkspaceID());
+        assertTrue("Workspace directory for workspace " + this.createdWorkspace.getWorkspaceID() + " does not exist", workspaceDirectory.exists());
+        
+        //TODO check all files that should be there...
+        
+        OurURL wsTopNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(this.selectedNodeID), ArchiveAccessContext.getFileUrlContext());
+        String wsTopNodeFilename = FilenameUtils.getName(wsTopNodeURL.toString());
+        File wsTopNodeFile = new File(workspaceDirectory, wsTopNodeFilename);
+        assertTrue("Top node file doesn't exist in the workspace directory", wsTopNodeFile.exists());
+        
+        // the workspace won't include the child nodes, unless they are also metadata nodes
+    }
+    
+    
+    @Then("the workspace is removed both from database and filesystem")
     public void theWorkspaceIsDeleted() {
         
         // filesystem
@@ -396,13 +421,13 @@ public class WorkspaceSteps {
 //         // (what checks need to be made to evaluate that)
 //    }
     
-    @Then("the status of the workspace with ID $workspaceID is marked as successfully submitted")
-    public void theWorkspaceStatusIsMarkedAsSuccessfullySubmitted(int workspaceID) {
+    @Then("the status of the workspace is marked as successfully submitted")
+    public void theWorkspaceStatusIsMarkedAsSuccessfullySubmitted() {
         
         //TODO assert that the workspace is now marked as successfully submitted
             //TODO (maybe some other assertions)
         
-        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        Workspace workspace = this.workspaceDao.getWorkspace(this.createdWorkspaceID);
         
         assertNotNull(workspace);
         assertEquals("Workspace status different from expected", WorkspaceStatus.SUBMITTED, workspace.getStatus());
@@ -410,40 +435,47 @@ public class WorkspaceSteps {
         //TODO some other assertions?
     }
     
-    @Then("the end date of the workspace with ID $workspaceID is set")
-    public void theEndDateOfTheWorkspaceWithIDIsSet(int workspaceID) {
+    @Then("the end date of the workspace is set")
+    public void theEndDateOfTheWorkspaceWithIDIsSet() {
         
-        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        Workspace workspace = this.workspaceDao.getWorkspace(this.createdWorkspaceID);
         
         assertNotNull(workspace);
         assertNotNull("End date of workspace should be set", workspace.getEndDate());
     }
     
-    @Then("And the new node, with the new ID $newNodeID, is properly linked in the database, from parent node with ID $parentNodeID")
-    public void theNewNodeWithTheNewIDIsProperlyLinkedInTheDatabaseFromTheParentNodeWithID(int newNodeID, int parentNodeID) {
+    @Then("the new node is properly linked in the database, from parent node with ID $parentNodeID")
+    public void theNewNodeIsProperlyLinkedInTheDatabaseFromTheParentNodeWithID(int parentNodeID) {
         
         //TODO assert that the new node is linked in the database
         
         URL parentNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(parentNodeID), ArchiveAccessContext.FILE_UX_URL).toURL();
         assertNotNull(parentNodeURL);
-        String parentFilename = FilenameUtils.getName(parentNodeURL.getPath());
-        assertEquals(parentNodeID + ".cmdi", parentFilename);
-        URL newNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(newNodeID), ArchiveAccessContext.FILE_UX_URL).toURL();
-        assertNotNull("New node does not exist with ID " + newNodeID, newNodeURL);
-        String newNodeFilename = FilenameUtils.getName(newNodeURL.getPath());
-        assertEquals("New node has a filename in the database different from expected", newNodeID + ".pdf", newNodeFilename);
-        Node[] childNodes = this.corpusStructureDB.getChildrenNodes(NodeIdUtils.TONODEID(parentNodeID));
-        assertNotNull("Node " + parentNodeID + " should have children in the corpusstructure database", childNodes);
-        assertTrue("Number of children of node " + parentNodeID + " should be one", childNodes.length == 1);
-        assertEquals("Child of node " + parentNodeID + " has an ID different from expected",
-                newNodeID, NodeIdUtils.TOINT(childNodes[0].getNodeId()));
+//        String parentFilename = FilenameUtils.getName(parentNodeURL.getPath());
+//        assertEquals(parentNodeID + ".cmdi", parentFilename);
+        
+        Node[] children = this.corpusStructureDB.getChildrenNodes(NodeIdUtils.TONODEID(parentNodeID));
+        assertNotNull(children);
+        assertTrue("The node should have linked children in the database", children.length > 0);
+        
+        
+        
+//        URL newNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(newNodeID), ArchiveAccessContext.FILE_UX_URL).toURL();
+//        assertNotNull("New node does not exist with ID " + newNodeID, newNodeURL);
+//        String newNodeFilename = FilenameUtils.getName(newNodeURL.getPath());
+//        assertEquals("New node has a filename in the database different from expected", newNodeID + ".pdf", newNodeFilename);
+//        Node[] childNodes = this.corpusStructureDB.getChildrenNodes(NodeIdUtils.TONODEID(parentNodeID));
+//        assertNotNull("Node " + parentNodeID + " should have children in the corpusstructure database", childNodes);
+//        assertTrue("Number of children of node " + parentNodeID + " should be one", childNodes.length == 1);
+//        assertEquals("Child of node " + parentNodeID + " has an ID different from expected",
+//                newNodeID, NodeIdUtils.TOINT(childNodes[0].getNodeId()));
         
         // URL is already confirmed above (URL retrieved for nodeID
         
     }
     
-    @Then("the new node, with ID $newNodeID, is properly linked from the parent file (node with ID $parentNodeID)")
-    public void theNewNodeIsProperlyLinkedFromTheParentFile(int newNodeID, int parentNodeID) throws IOException, MetadataException {
+    @Then("the new node, $nodeFilename, is properly linked from the parent file (node with ID $parentNodeID) and exists in the corpusstructure database")
+    public void theNewNodeIsProperlyLinkedFromTheParentFile(String nodeFilename, int parentNodeID) throws IOException, MetadataException {
         
         URL parentNodeURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(parentNodeID), ArchiveAccessContext.getFileUrlContext()).toURL();
         MetadataDocument parentDocument = this.metadataAPI.getMetadataDocument(parentNodeURL);
@@ -454,39 +486,99 @@ public class WorkspaceSteps {
         ReferencingMetadataDocument referencingParentDocument = (ReferencingMetadataDocument) parentDocument;
         List<Reference> childReferences = referencingParentDocument.getDocumentReferences();
         assertNotNull("List of references in metadata document " + parentNodeURL + " should not be null", childReferences);
-        assertTrue("Metadata document " + parentNodeURL + " should have one reference", childReferences.size() == 1);
+        assertTrue("Metadata document " + parentNodeURL + " should have references", childReferences.size() > 0);
         
-        URI childNodeURI = this.archiveObjectsDB.getObjectURI(NodeIdUtils.TONODEID(newNodeID));
+        boolean childFound = false;
+        String childHandle = null;
         
-        String childHandleInArchive = this.archiveObjectsDB.getObjectPID(NodeIdUtils.TONODEID(newNodeID));
-
-        assertNotNull("URI of the child node in the database should not be null", childNodeURI);
-        assertTrue(childReferences.get(0) instanceof HandleCarrier);
-        String childHandleInReference = ((HandleCarrier) childReferences.get(0)).getHandle();
+        for(Reference child : childReferences) {
+            
+            if(child instanceof HandleCarrier) {
+                childHandle = ((HandleCarrier)child).getHandle();
+            } else {
+                continue;
+            }
+            
+            OurURL childUrl = this.archiveObjectsDB.getObjectURLForPid(childHandle);
+            if(childUrl.toString().contains(nodeFilename)) {
+                childFound = true;
+                String childID = this.archiveObjectsDB.getObjectId(childUrl);
+                OurURL childUrlWithContext = this.archiveObjectsDB.getObjectURL(childID, ArchiveAccessContext.FILE_UX_URL);
+                this.newlyInsertedNodeUrl = childUrlWithContext.toURL();
+                break;
+            }
+        }
         
-//        URI childRelativeURI = childReferences.get(0).getURI();
-//        File parentFile = new File(parentNodeURL.toString());
-//        File childFileInDocument = new File(FilenameUtils.getFullPath(parentFile.getPath()), childRelativeURI.toString());
-//        File expectedChildFile = new File(childNodeURI.toString());
-        
-//        assertEquals("URI of the child reference in the metadata document is different from expected",
-//                childNodeURI, childReferences.get(0).getURI());
-//                expectedChildFile, childFileInDocument);
-        
-        assertEquals("Handle in reference from parent file is different from the one stored in the archive for that same node",
-                childHandleInArchive, childHandleInReference);
+        assertTrue("Expected child was not found", childFound);
         
     }
     
-    @Then("the file corresponding to the node with ID $newNodeID is present in the proper location in the filesystem, under the directory of the parent node :parentNodeID")
-    public void theFileCorrespondingToTheNodeWithIDIsPresentInTheProperLocationInTheFilesystem(int newNodeID, int parentNodeID) {
+    @Then("$filename is present in the proper location in the filesystem, under the directory of the parent node $parentNodeID")
+    public void thenewFileIsPresentInTheProperLocationInTheFilesystemUnderTheDirectoryOfTheParentNode(String filename, int parentNodeID) {
         
-        File parentNodeDirectory = new File(this.archiveFolder, "" + parentNodeID);
-        assertTrue(parentNodeDirectory.exists());
+//        File parentNodeDirectory = new File(this.archiveFolder, "" + parentNodeID);
+//        assertTrue(parentNodeDirectory.exists());
         
-        File newNodeFile = new File(parentNodeDirectory, newNodeID + ".pdf");
-        assertTrue("File for node " + newNodeID + " should exist in the proper location: " + newNodeFile.getPath(), newNodeFile.exists());
+        URL parentURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(parentNodeID), ArchiveAccessContext.FILE_UX_URL).toURL();
         
+        String parentPath = FilenameUtils.getFullPathNoEndSeparator(parentURL.getPath());
+        
+        
+        String expectedPath = null;
+        
+        if(!"cmdi".equals(FilenameUtils.getExtension(filename))) {
+            String resourcePath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.getPath()));
+            if("pdf".equals(FilenameUtils.getExtension(filename))) {
+                String writtenResourcePath = FilenameUtils.concat(resourcePath, "Annotations");
+                expectedPath = writtenResourcePath;
+            } else if("jpg".equals(FilenameUtils.getExtension(filename))) {
+                String mediaResourcePath = FilenameUtils.concat(resourcePath, "Media");
+            } else {
+                expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
+            }
+        } else {
+            expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
+        }
+        File expectedNodeFile = new File(expectedPath, filename);
+        
+//        File baseDirectoryForWrittenResource = new File(this.archiveFolder, "Annotations");
+//        File newNodeFile = new File(baseDirectoryForWrittenResource, newNodeID + ".pdf");
+//        assertTrue("File for node " + newNodeID + " should exist in the proper location: " + newNodeFile.getPath(), newNodeFile.exists());
+        
+        assertTrue("New file doesn't exist in the expected location: " + expectedNodeFile.getAbsolutePath(), expectedNodeFile.exists());
+        
+    }
+    
+    @Then("the children of $filename are also present in the database and in the filesystem")
+    public void theChildrenOfFileAreAlsoPresentInTheDatabase(String filename) throws IOException, MetadataException {
+        
+        MetadataDocument document = this.metadataAPI.getMetadataDocument(this.newlyInsertedNodeUrl);
+        assertTrue("Metadata document doesn't contain references" ,document instanceof ReferencingMetadataDocument);
+        List<Reference> references = ((ReferencingMetadataDocument) document).getDocumentReferences();
+        assertNotNull("List of references in metadata document shouldn't be null", references);
+        assertTrue("List of references in metadata document should have size larger than 0", references.size() > 0);
+        
+        for(Reference ref : references) {
+            assertTrue("Reference should contain a handle", ref instanceof HandleCarrier);
+            String handle = ((HandleCarrier) ref).getHandle();
+            assertNotNull("Handle should not be null", handle);
+            OurURL refURL = this.archiveObjectsDB.getObjectURLForPid(handle);
+            assertNotNull("Child not found in database", refURL);
+            
+            String refID = this.archiveObjectsDB.getObjectId(refURL);
+            OurURL refURLWithContext = this.archiveObjectsDB.getObjectURL(refID, ArchiveAccessContext.FILE_UX_URL);
+            
+            File refFile = new File(refURLWithContext.getPath());
+            assertTrue("Child doesn't exist in the filesystem", refFile.exists());
+        }
+    }
+    
+    @Then("the name of the node with ID $archiveNodeID has changed both in the database and in the filesystem")
+    public void theNameOfTheNodeWithIDHasChanged(int archiveNodeID) {
+        
+        Node changedNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(archiveNodeID));
+        
+        assertFalse("Name of the node in the archive should have changed", this.oldNodeNameInArchive.equals(changedNode.getName()));
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

@@ -485,11 +485,11 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getDirectoryForFileTypeLexical() {
         
-        final String parentDirectory = "/some/path";
+        final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_LEX;
-        final String expectedDirectory = "/some/path/Annotations";
+        final String expectedDirectory = "/some/path/parent/Annotations";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
@@ -497,11 +497,11 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getDirectoryForFileTypeMedia() {
         
-        final String parentDirectory = "/some/path";
+        final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_MR;
-        final String expectedDirectory = "/some/path/Media";
+        final String expectedDirectory = "/some/path/parent/Media";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
@@ -509,11 +509,11 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getDirectoryForFileTypeMetadata() {
         
-        final String parentDirectory = "/some/path";
+        final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/some/path";
+        final String expectedDirectory = "/some/path/parent";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }

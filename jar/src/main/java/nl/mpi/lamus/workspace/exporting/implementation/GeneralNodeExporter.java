@@ -89,6 +89,10 @@ public class GeneralNodeExporter implements NodeExporter {
             } catch (WorkspaceNodeFilesystemException ex) {
                 throw new UnsupportedOperationException("exception not handled yet", ex);
             }
+            
+            
+            
+            //TODO CHECK FOR CHANGES IN DB... OR IS IT TO BE DONE BY THE CRAWLER???
         
             
         } else {

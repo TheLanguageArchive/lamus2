@@ -68,5 +68,5 @@ public interface WorkspaceFileHandler {
      * @param workspaceNode node with which to construct the File object.
      * @return File object
      */
-    public File getFileForWorkspaceNode(WorkspaceNode workspaceNode);
+    public File getFileForImportedWorkspaceNode(WorkspaceNode workspaceNode);
 }

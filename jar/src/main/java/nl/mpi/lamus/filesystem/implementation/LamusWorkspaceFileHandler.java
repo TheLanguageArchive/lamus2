@@ -28,6 +28,7 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,12 +96,13 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     }
 
     /**
-     * @see WorkspaceFileHandler#getFileForWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceFileHandler#getFileForImportedWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public File getFileForWorkspaceNode(WorkspaceNode workspaceNode) {
+    public File getFileForImportedWorkspaceNode(WorkspaceNode workspaceNode) {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
-        File workspaceNodeFile = new File(workspaceDirectory, "" + workspaceNode.getWorkspaceNodeID());
+        String nodeFilename = FilenameUtils.getName(workspaceNode.getArchiveURL().toString());
+        File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
         return workspaceNodeFile;
     }
 }

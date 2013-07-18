@@ -273,7 +273,7 @@ public class LamusCorpusStructureBridgeTest {
         
         final int nodeArchiveID = 11;
         final String protocol = "hdl:";
-        final String handlePrefix = "000/";
+        final String handlePrefix = "SOMETHING/";
         final String completeHandle = handlePrefix + ":0000-0001";
         final String completeHandleWithProtocol = protocol + completeHandle;
         
@@ -296,7 +296,7 @@ public class LamusCorpusStructureBridgeTest {
         
         final int nodeArchiveID = 100;
         final String protocol = "hdl:";
-        final String handlePrefix = "000/";
+        final String handlePrefix = "SOMETHING/";
         final String completeHandle = handlePrefix + ":0000-0001";
         final String completeHandleWithProtocol = protocol + completeHandle;
         

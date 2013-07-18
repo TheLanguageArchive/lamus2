@@ -37,6 +37,7 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.type.CMDITypeException;
+import org.apache.commons.io.FilenameUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -241,9 +242,10 @@ public class LamusWorkspaceFileHandlerTest {
         WorkspaceNode testWorkspaceNode = createTestWorkspaceNode(testWorkspace.getWorkspaceID());
         
         File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
-        File expectedNodeFile = new File(expectedWorkspaceDirectory, "" + testWorkspaceNode.getWorkspaceNodeID());
+        String nodeFilename = FilenameUtils.getName(testWorkspaceNode.getArchiveURL().toString());
+        File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
         
-        File retrievedFile = workspaceFileHandler.getFileForWorkspaceNode(testWorkspaceNode);
+        File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(testWorkspaceNode);
         
         assertEquals(expectedNodeFile, retrievedFile);
     }

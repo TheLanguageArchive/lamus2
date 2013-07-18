@@ -56,7 +56,7 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
     public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument metadataDocument)
         throws WorkspaceNodeFilesystemException {
         
-	File nodeFile = workspaceFileHandler.getFileForWorkspaceNode(node);
+	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(node);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 
         workspaceFileHandler.copyMetadataFile(node, metadataAPI, metadataDocument, nodeFile, streamResult);

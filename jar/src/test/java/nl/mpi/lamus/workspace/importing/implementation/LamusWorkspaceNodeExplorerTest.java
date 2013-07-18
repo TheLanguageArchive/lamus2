@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.corpusstructure.ArchiveAccessContext;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
@@ -32,6 +33,7 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
+import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -91,9 +93,9 @@ public class LamusWorkspaceNodeExplorerTest {
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
         final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
         
-        final String metadataLinkHandle = "hdl:LOCAL/00-0000-0000-0000-0000-1";
+        final String metadataLinkHandle = "hdl:SOMETHING/00-0000-0000-0000-0000-1";
         metadataLink.setHandle(metadataLinkHandle);
-        final String resourceLinkHandle = "hdl:LOCAL/00-0000-0000-0000-0000-2";
+        final String resourceLinkHandle = "hdl:SOMETHING/00-0000-0000-0000-0000-2";
         resourceLink.setHandle(resourceLinkHandle);
         
         final Collection<Reference> testLinks = new ArrayList<Reference>();
@@ -107,12 +109,21 @@ public class LamusWorkspaceNodeExplorerTest {
         testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
         testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
         
+        final OurURL metadataURL = new OurURL("https://testURL.mpi.nl/test.cmdi");
+        final OurURL resourceURL = new OurURL("http://testURL.mpi.nl/test.jpg");
+        final OurURL[] urls = new OurURL[testLinks.size()];
+        urls[0] = metadataURL;
+        urls[1] = resourceURL;
+        
         context.checking(new Expectations() {{
             
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
                 
-                oneOf(mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
+//                oneOf(mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
+                
+                oneOf(mockArchiveObjectsDB).getObjectURLForPid(((HandleCarrier)currentLink).getHandle()); will(returnValue(urls[current]));
+                oneOf(mockArchiveObjectsDB).getObjectId(urls[current]); will(returnValue(testLinksArchiveIDs[current]));
                 
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));

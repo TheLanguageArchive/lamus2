@@ -36,7 +36,11 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 
 /**
  *
@@ -54,6 +58,27 @@ public class WorkspaceStepsHelper {
         URL fileURL = testFile.toURI().toURL();
         
         return fileURL;
+    }
+    
+    static void copyArchiveFromOriginalLocation(File archiveFolder) throws IOException {
+        
+        URL testArchiveTopNodeUrl = WorkspaceStepsHelper.class.getClassLoader().getResource("test_mini_archive/parent_collection.cmdi");
+        
+        File testArchiveTopNodeDirectoryOriginalLocation = 
+                new File(FilenameUtils.getFullPathNoEndSeparator(testArchiveTopNodeUrl.getPath()));
+        
+        FileUtils.copyDirectory(testArchiveTopNodeDirectoryOriginalLocation, archiveFolder);
+    }
+    
+    static void copyWorkspaceFromOriginalLocation(File workspaceFolder, int workspaceID, String topNodeFileName) throws IOException {
+        
+        URL testWorkspaceTopNodeUrl = WorkspaceStepsHelper.class.getClassLoader().
+                getResource("test_workspace" + workspaceID + File.separator + topNodeFileName);
+        
+        File testArchiveNodeDirectoryOriginalLocation = 
+                new File(FilenameUtils.getFullPathNoEndSeparator(testWorkspaceTopNodeUrl.getPath()));
+        
+        FileUtils.copyDirectory(testArchiveNodeDirectoryOriginalLocation, workspaceFolder);
     }
     
     static void insertNodeInCSDB(DataSource corpusstructureDataSource, int nodeID, URL fileURL, int nodeType, String nodeFormat, boolean isFirstNode, int parentNodeID) {
@@ -234,20 +259,58 @@ public class WorkspaceStepsHelper {
         IOUtils.copy(testIn, testOut);
     }
     
-    static void insertWorkspaceInDBWithNewlyLinkedNode(DataSource lamusDataSource, File workspaceBaseDirectory, int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL)
+    static void insertArchiveInDBFromScript(DataSource corpusstructureDataSource) {
+        
+        String scriptPath = "hsql_corpusstructure_insert.sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(corpusstructureDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
+    }
+    
+    static void insertAmsDataInDBFromScript(DataSource amsDataSource) {
+        
+        String scriptPath = "hsql_ams2_insert.sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(amsDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
+    }
+    
+    static void insertWorkspaceInDBFromScript(DataSource lamusDataSource, int workspaceID) {
+        
+        String scriptPath = "hsql_lamus2_insertws" + workspaceID + FilenameUtils.EXTENSION_SEPARATOR + "sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(lamusDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
+    }
+    
+    static void insertWorkspaceInDBWithNewlyLinkedNode(DataSource lamusDataSource, File workspaceBaseDirectory,
+            int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL, String type)
             throws MalformedURLException, FileNotFoundException, IOException {
         
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
         File topNodeFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
-        int resourceNodeArchiveID = topNodeArchiveID + 1;
-        File resourceFile = new File(workspaceDirectory, resourceNodeArchiveID + ".pdf");
-        File resourceOriginFile = new File("/some/directory/" + resourceNodeArchiveID + ".pdf");
+        int childNodeArchiveID = topNodeArchiveID + 1;
+        File childFile = null;
+        File childOriginFile = null;
 
         String topNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + topNodeArchiveID;
         String topNodeFormat = "text/x-cmdi+xml";
-        String resourceNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + resourceNodeArchiveID;
-        String resourceNodeFormat = "application/pdf";
+        String childNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + childNodeArchiveID;
+        String childNodeFormat = "";
+        WorkspaceNodeType childNodeType = null;
+        
+        if("resource".equals(type)) {
+            childNodeFormat = "application/pdf";
+            childFile = new File(workspaceDirectory, childNodeArchiveID + ".pdf");
+            childOriginFile = new File("/some/directory/" + childNodeArchiveID + ".pdf");
+            childNodeType = WorkspaceNodeType.RESOURCE_WR;
+        } else if("metadata".equals(type)) {
+            childNodeFormat = "text/cmdi";
+            childFile = new File(workspaceDirectory, childNodeArchiveID + ".cmdi");
+            childOriginFile = new File("/some/directory/" + childNodeArchiveID + ".cmdi");
+            childNodeType = WorkspaceNodeType.METADATA;
+        }
         
         String insertString = "";
         NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(lamusDataSource);
@@ -258,19 +321,23 @@ public class WorkspaceStepsHelper {
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
                 topNodePID, topNodeFormat,
                 workspaceID, topNodeFile);
-        insertWorkspaceNode(insertString, template, map, topNodeArchiveID, resourceNodeArchiveID, null, resourceOriginFile.toURI().toURL(),
-                WorkspaceNodeType.RESOURCE_WR, WorkspaceNodeStatus.NODE_UPLOADED,
-                resourceNodePID, resourceNodeFormat,
-                workspaceID, resourceFile);
+        insertWorkspaceNode(insertString, template, map, topNodeArchiveID, childNodeArchiveID, null, childOriginFile.toURI().toURL(),
+                childNodeType, WorkspaceNodeStatus.NODE_UPLOADED,
+                childNodePID, childNodeFormat,
+                workspaceID, childFile);
         
         workspaceDirectory.mkdirs();
         
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeArchiveID + ".cmdi");
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeArchiveID + ".cmdi" + type);
         OutputStream testOut = new FileOutputStream(topNodeFile);
         IOUtils.copy(testIn, testOut);
         
-        testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + resourceNodeArchiveID + ".pdf");
-        testOut = new FileOutputStream(resourceFile);
+        if("resource".equals(type)) {
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + childNodeArchiveID + ".pdf");
+        } else if("metadata".equals(type)) {
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + childNodeArchiveID + ".cmdi");
+        }
+        testOut = new FileOutputStream(childFile);
         IOUtils.copy(testIn, testOut);
     }
     
@@ -335,54 +402,83 @@ public class WorkspaceStepsHelper {
     
     static void clearCsDatabaseAndFilesystem(DataSource corpusstructureDataSource, File archiveFolder) throws IOException {
         
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(corpusstructureDataSource);
+//        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(corpusstructureDataSource);
+//        
+//        String deleteCorpusStructureSql = "DELETE FROM corpusstructure;";
+//        String deleteCorpusNodesSql = "DELETE FROM corpusnodes;";
+//        String deleteArchiveObjectsSql = "DELETE FROM archiveobjects;";
+//        String deleteAccessGroupsSql = "DELETE FROM accessgroups;";
+//        
+//        Map<String, String> map = new HashMap<String, String>();
+//        
+//        template.update(deleteCorpusStructureSql, map);
+//        template.update(deleteCorpusNodesSql, map);
+//        template.update(deleteArchiveObjectsSql, map);
+//        template.update(deleteAccessGroupsSql, map);
         
-        String deleteCorpusStructureSql = "DELETE FROM corpusstructure;";
-        String deleteCorpusNodesSql = "DELETE FROM corpusnodes;";
-        String deleteArchiveObjectsSql = "DELETE FROM archiveobjects;";
-        String deleteAccessGroupsSql = "DELETE FROM accessgroups;";
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        template.update(deleteCorpusStructureSql, map);
-        template.update(deleteCorpusNodesSql, map);
-        template.update(deleteArchiveObjectsSql, map);
-        template.update(deleteAccessGroupsSql, map);
+        String scriptPath = "hsql_corpusstructure_delete.sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(corpusstructureDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
         
         FileUtils.cleanDirectory(archiveFolder);
     }
     
     static void clearLamusDatabaseAndFilesystem(DataSource lamusDataSource, File workspaceBaseDirectory) throws IOException {
         
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(lamusDataSource);
+//        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(lamusDataSource);
+//        
+//        String deleteNodeLinkSql = "DELETE FROM node_link;";
+//        String deleteNodeSql = "DELETE FROM node;";
+//        String deleteWorkspaceSql = "DELETE FROM workspace;";
+//        
+//        Map<String, String> map = new HashMap<String, String>();
+//        
+//        template.update(deleteNodeLinkSql, map);
+//        template.update(deleteNodeSql, map);
+//        template.update(deleteWorkspaceSql, map);
         
-        String deleteNodeLinkSql = "DELETE FROM node_link;";
-        String deleteNodeSql = "DELETE FROM node;";
-        String deleteWorkspaceSql = "DELETE FROM workspace;";
-        
-        Map<String, String> map = new HashMap<String, String>();
-        
-        template.update(deleteNodeLinkSql, map);
-        template.update(deleteNodeSql, map);
-        template.update(deleteWorkspaceSql, map);
+        String scriptPath = "hsql_lamus2_delete.sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(lamusDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
         
         FileUtils.cleanDirectory(workspaceBaseDirectory);
     }
     
     static void clearAmsDatabase(DataSource amsDataSource) {
         
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(amsDataSource);
+//        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(amsDataSource);
         
-        String deleteNodePrincipalRuleSql = "DELETE FROM \"nodepcpl_rule\" WHERE id > 0;";
-        String deleteNodePrincipalSql = "DELETE FROM \"node_principal\";";
-        String deleteUserSql = "DELETE FROM \"user\" WHERE id > 0;";
-        String deletePrincipalSql = "DELETE FROM \"principal\" WHERE id > 0;";
+//        String deleteNodePrincipalRuleSql = "DELETE FROM \"nodepcpl_rule\";";// WHERE id > 0;";
+//        String deleteNodePrincipalSql = "DELETE FROM \"node_principal\";";
+//        
+//        String deletePrincipalRuleSql = "DELETE FROM \"principal_rule\";";
+//        
+//        String deleteLicenseSql = "DELETE FROM \"license\";";
+//        String deleteRuleSql = "DELETE FROM \"rule\";";
+//        
+//        String deleteUserSql = "DELETE FROM \"user\";";// WHERE id > 0;";
+//        String deletePrincipalSql = "DELETE FROM \"principal\";";// WHERE id > 0;";
+//        
+//        Map<String, String> map = new HashMap<String, String>();
+//        
+//        template.update(deleteNodePrincipalRuleSql, map);
+//        template.update(deleteNodePrincipalSql, map);
+//        
+//        template.update(deletePrincipalRuleSql, map);
+//        
+//        template.update(deleteLicenseSql, map);
+//        template.update(deleteRuleSql, map);
+//        
+//        template.update(deleteUserSql, map);
+//        template.update(deletePrincipalSql, map);
         
-        Map<String, String> map = new HashMap<String, String>();
         
-        template.update(deleteNodePrincipalRuleSql, map);
-        template.update(deleteNodePrincipalSql, map);
-        template.update(deleteUserSql, map);
-        template.update(deletePrincipalSql, map);
+        String scriptPath = "hsql_ams2_delete.sql";
+        Resource scriptResource = new ClassPathResource(scriptPath);
+        JdbcTemplate template = new JdbcTemplate(amsDataSource);
+        JdbcTestUtils.executeSqlScript(template, scriptResource, false);
+        
     }
 }

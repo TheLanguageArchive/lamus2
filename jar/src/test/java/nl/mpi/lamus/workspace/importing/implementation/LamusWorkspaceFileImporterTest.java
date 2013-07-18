@@ -93,7 +93,7 @@ public class LamusWorkspaceFileImporterTest {
         
         context.checking(new Expectations() {{
         
-            oneOf(mockWorkspaceFileHandler).getFileForWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(
                     mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
@@ -113,7 +113,7 @@ public class LamusWorkspaceFileImporterTest {
         final URI testURI = new URI("urn:namespace-id:resource-id"); // a URI which is not a URL
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceFileHandler).getFileForWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(
                     mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);

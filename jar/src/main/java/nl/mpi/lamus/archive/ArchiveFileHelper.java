@@ -98,5 +98,5 @@ public interface ArchiveFileHelper {
     
     public void createFileAndDirectories(File fileToCreate) throws IOException;
     
-    public String getDirectoryForFileType(String parentDirectory, WorkspaceNodeType nodeType);
+    public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType);
 }
