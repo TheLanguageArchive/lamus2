@@ -15,11 +15,9 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -62,9 +60,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         return node;
     }
 
+    /**
+     * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, int, java.net.URL, java.lang.String, nl.mpi.metadata.api.model.MetadataDocument)
+     */
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document)
-            throws MalformedURLException {
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
 //                document.getFileLocation().toURL(), document.getFileLocation().toURL());
@@ -93,6 +93,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         return node;
     }
     
+    /**
+     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, int, java.net.URL, nl.mpi.metadata.api.model.Reference, nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String)
+     */
     @Override
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
             Reference resourceReference, WorkspaceNodeType type, String mimetype) {

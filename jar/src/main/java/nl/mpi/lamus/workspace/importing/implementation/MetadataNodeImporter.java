@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Node importer specific for metadata files.
+ * @see NodeImporter
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -149,13 +150,13 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         }
         
         WorkspaceNode childNode;
-        try {
+//        try {
             childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childNodeArchiveID, childNodeArchiveURL.toURL(), childNodeArchivePID, childDocument);
-        } catch (MalformedURLException muex) {
-            String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
-            logger.error(errorMessage, muex);
-            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
-        }
+//        } catch (MalformedURLException muex) {
+//            String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
+//            logger.error(errorMessage, muex);
+//            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
+//        }
         
         workspaceDao.addWorkspaceNode(childNode);
         

@@ -27,14 +27,14 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Importer specific for the top node of the workspace.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -53,11 +53,17 @@ public class TopNodeImporter {
                 parentNodeReferenceFactory, wsNodelinkFactory, fileHandler, workspaceNodeExplorer);
     }
     
+    /**
+     * Imports the top node into the workspace, by invoking the correct importer
+     * with only the parameters that matter in this case.
+     * 
+     * @param workspaceID ID of the workspace
+     * @param childNodeArchiveID archive ID of the current node
+     * @throws NodeImporterException if there is a problem during the import
+     * @throws NodeExplorerException if there is a problem in the recursive exploration of the tree
+     */
     public void importNode(int workspaceID, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException {
         metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveID);
     }
     
-//    public void setWorkspace(Workspace workspace) {
-//        metadataNodeImporter.setWorkspace(workspace);
-//    }
 }

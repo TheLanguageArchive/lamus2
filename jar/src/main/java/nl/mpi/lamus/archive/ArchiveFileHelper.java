@@ -18,12 +18,12 @@ package nl.mpi.lamus.archive;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 
 /**
- *
+ * Contains some helper methods regarding some archive operations.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface ArchiveFileHelper {
@@ -86,17 +86,56 @@ public interface ArchiveFileHelper {
     
 //    public String fileExtensionToLowerCase(String name);
     
+    /**
+     * Checks if the given file's size is above the size limit of the typechecker
+     * @param fileToCheck File to be checked
+     * @return true if the file is larger than the typechecker size limit
+     */
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck);
     
+    
+    /**
+     * Checks if the given file is located in the orphans directory
+     * @param fileToCheck File object to be checked
+     * @return true if file is located in the orphans directory
+     */
     public boolean isFileInOrphansDirectory(File fileToCheck);
     
+    /**
+     * Checks if the given URL is our internal archive
+     * @param urlToCheck URL to be checked
+     * @return true if URL is local
+     */
     public boolean isUrlLocal(OurURL urlToCheck);
     
+    /**
+     * Gets the physical location in the archive for the given node
+     * @param archiveNodeID ID of the node
+     * @return File object corresponding to the file location
+     */
     public File getArchiveLocationForNodeID(int archiveNodeID);
     
+    /**
+     * Adjusts the given filename, if necessary, depending on the files already
+     * existing in the directory, so it can be created without conflicts
+     * @param baseDirectory Directory where the file is supposed to be created
+     * @param fileNameAttempt Attempted filename, which can be adjusted if there are conflicts
+     * @return File object for the adjusted (or not) filename
+     */
     public File getFinalFile(String baseDirectory, String fileNameAttempt);
     
+    /**
+     * Creates the file and parent directories, if needed, for the given File object
+     * @param fileToCreate File to be created
+     * @throws IOException if there are problems with the creation of the file or directories
+     */
     public void createFileAndDirectories(File fileToCreate) throws IOException;
     
+    /**
+     * Determines the path for files of the given type, based on the path of the parent node
+     * @param parentPath Path of the parent node
+     * @param nodeType Type of the node
+     * @return Directory where the node should be located
+     */
     public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType);
 }

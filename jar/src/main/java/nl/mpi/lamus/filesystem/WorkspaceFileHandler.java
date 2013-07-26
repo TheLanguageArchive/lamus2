@@ -18,7 +18,6 @@ package nl.mpi.lamus.filesystem;
 import java.io.File;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -31,25 +30,28 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 public interface WorkspaceFileHandler {
     
     /**
-     * Copies the given metadata file into the workspace directory.
+     * Copies the given metadata file into the given location.
      * 
-     * @param workspace workspace where the file should copied to
      * @param workspaceNode node corresponding to the file
      * @param metadataAPI instance of the MetadataAPI
      * @param metadataDocument MetadataDocument corresponding to the file
-     * @param originNodeFile File object corresponding to the file
-     * @param targetNodeFileStreamResult StreamResult object corresponding to the file
+     * @param originNodeFile File object corresponding to the file origin
+     * @param targetNodeFileStreamResult StreamResult object corresponding to the target file
      * @throws FailedToCreateWorkspaceNodeFileException if there is some problem with the file copy
      */
-    
-    //TODO REVIEW THESE METHODS
-    
-    
     public void copyMetadataFile(WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile,
             StreamResult targetNodeFileStreamResult)
             throws WorkspaceNodeFilesystemException;
-    
+
+    /**
+     * Copies the given resource file into the given location
+     * 
+     * @param workspaceNode node corresponding to the file
+     * @param originNodeFile File object corresponding to the file origin
+     * @param targetNodeFile File object corresponding to the target file
+     * @throws WorkspaceNodeFilesystemException if there is some problem with the file copy
+     */
     public void copyResourceFile(WorkspaceNode workspaceNode,
             File originNodeFile, File targetNodeFile)
             throws WorkspaceNodeFilesystemException;

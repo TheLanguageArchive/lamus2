@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceTreeExporter
  * @author guisil
  */
 @Component
@@ -42,6 +42,9 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
         this.nodeExporterFactory = exporterFactory;
     }
     
+    /**
+     * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void explore(Workspace workspace, WorkspaceNode node) {
         

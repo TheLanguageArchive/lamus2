@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.service;
 
-import java.util.List;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**

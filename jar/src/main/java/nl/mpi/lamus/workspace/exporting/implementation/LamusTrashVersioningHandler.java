@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see TrashVersioningHandler
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -53,6 +53,10 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
         this.archiveFileHelper = afHelper;
     }
 
+    /**
+     * @see TrashVersioningHandler#retireNodeVersion(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
     public boolean retireNodeVersion(WorkspaceNode node) {
         
         String stringNodeID = NodeIdUtils.TONODEID(node.getArchiveNodeID());
@@ -63,6 +67,10 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
         return false;
     }
     
+    /**
+     * @see TrashVersioningHandler#getDirectoryForNodeVersion(int)
+     */
+    @Override
     public File getDirectoryForNodeVersion(int workspaceID) {
         
         int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -82,6 +90,10 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
         return subSubDirectory;
     }
     
+    /**
+     * @see TrashVersioningHandler#getTargetFileForNodeVersion(java.io.File, int, java.net.URL)
+     */
+    @Override
     public File getTargetFileForNodeVersion(File baseDirectory, int archiveNodeID, URL archiveNodeURL) {
         
         File archiveNodeFile = new File(archiveNodeURL.getPath());
@@ -93,6 +105,10 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
         return targetFile;
     }
 
+    /**
+     * @see TrashVersioningHandler#canWriteTargetDirectory(java.io.File)
+     */
+    @Override
     public boolean canWriteTargetDirectory(File targetDirectory) {
         
         if(!targetDirectory.exists()) {
@@ -113,7 +129,13 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
         return true;
     }
 
+    /**
+     * @see TrashVersioningHandler#moveFileToTargetLocation(java.io.File, java.io.File)
+     */
+    @Override
     public boolean moveFileToTargetLocation(File currentFile, File targetFile) {
+        
+        //TODO is this necessary?
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

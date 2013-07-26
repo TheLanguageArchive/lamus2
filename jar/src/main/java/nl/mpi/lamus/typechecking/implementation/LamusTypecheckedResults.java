@@ -20,7 +20,8 @@ import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
- *
+ * @see TypecheckedResults
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusTypecheckedResults implements TypecheckedResults {
@@ -37,22 +38,42 @@ public class LamusTypecheckedResults implements TypecheckedResults {
         this.typecheckerJudgement = judgement;
     }
     
+    /**
+     * @see TypecheckedResults#getCheckedNodeType()
+     */
+    @Override
     public WorkspaceNodeType getCheckedNodeType() {
         return checkedNodeType;
     }
 
+    /**
+     * @see TypecheckedResults#getCheckedMimetype()
+     */
+    @Override
     public String getCheckedMimetype() {
         return checkedMimetype;
     }
     
+    /**
+     * @see TypecheckedResults#getAnalysis()
+     */
+    @Override
     public String getAnalysis() {
         return analysis;
     }
 
+    /**
+     * @see TypecheckedResults#getTypecheckerJudgement()
+     */
+    @Override
     public TypecheckerJudgement getTypecheckerJudgement() {
         return typecheckerJudgement;
     }
     
+    /**
+     * @see TypecheckedResults#isTypeUnspecified()
+     */
+    @Override
     public boolean isTypeUnspecified() {
         if(checkedMimetype.startsWith("Un")) { //TODO use a better way to identify these cases
             return true;

@@ -20,7 +20,8 @@ import nl.mpi.archiving.tree.GenericTreeModelProviderImpl;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- *
+ * @see GenericTreeModelProviderImpl
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class WorkspaceTreeModelProvider extends GenericTreeModelProviderImpl implements Serializable {
@@ -29,6 +30,9 @@ public class WorkspaceTreeModelProvider extends GenericTreeModelProviderImpl imp
         super(workspaceRootNode);
     }
     
+    /**
+     * @see GenericTreeModelProviderImpl#onDetach()
+     */
     @Override
     public void onDetach() {
 	super.onDetach();

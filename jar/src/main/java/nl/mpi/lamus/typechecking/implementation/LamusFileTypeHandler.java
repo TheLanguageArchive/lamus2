@@ -54,14 +54,26 @@ public class LamusFileTypeHandler implements FileTypeHandler {
         this.typeMapper = typeMapper;
     }
 
+    /**
+     * @see FileTypeHandler#getTypecheckHandler()
+     */
+    @Override
     public TypecheckHandler getTypecheckHandler() {
         return this.typecheckHandler;
     }
 
+    /**
+     * @see FileTypeHandler#getMimetype()
+     */
+    @Override
     public String getMimetype() {
         return this.mimetype;
     }
 
+    /**
+     * @see FileTypeHandler#getAnalysis()
+     */
+    @Override
     public String getAnalysis() {
         if (analysis.startsWith("true ")) {
             return analysis.substring(5);
@@ -72,10 +84,18 @@ public class LamusFileTypeHandler implements FileTypeHandler {
         return analysis;
     }
 
+    /**
+     * @see FileTypeHandler#getNodeType()
+     */
+    @Override
     public WorkspaceNodeType getNodeType() {
         return this.nodeType;
     }
 
+    /**
+     * @see FileTypeHandler#checkType(nl.mpi.util.OurURL, java.lang.String, java.lang.String)
+     */
+    @Override
     public void checkType(OurURL resourceURL, String filename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException {
         
         if(mimetype == null) {
@@ -170,6 +190,10 @@ public class LamusFileTypeHandler implements FileTypeHandler {
         }
     }
 
+    /**
+     * @see FileTypeHandler#setValues(java.lang.String)
+     */
+    @Override
     public void setValues(String mimetype) {
         this.mimetype = mimetype;
         this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
@@ -192,6 +216,7 @@ public class LamusFileTypeHandler implements FileTypeHandler {
 //        return checkResult;
 //    }
     
+
     private void setValuesForResult(String checkResult, boolean isCheckingName, OurURL resourceURL, String filename) {
         
         if(isCheckingName) {
@@ -212,6 +237,10 @@ public class LamusFileTypeHandler implements FileTypeHandler {
         this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
     }
     
+    /**
+     * @see FileTypeHandler#isResourceArchivable(nl.mpi.util.OurURL, nl.mpi.lamus.typechecking.TypecheckerJudgement, java.lang.StringBuilder)
+     */
+    @Override
     public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForCorpus, StringBuilder message) {
         
         boolean isArchivable = false;
@@ -236,6 +265,10 @@ public class LamusFileTypeHandler implements FileTypeHandler {
         return isArchivable;
     }
     
+    /**
+     * @see FileTypeHandler#getTypecheckedResults()
+     */
+    @Override
     public TypecheckedResults getTypecheckedResults() {
         
         return new LamusTypecheckedResults(nodeType, mimetype, analysis, typecheckHandler.getTypecheckJudgement());

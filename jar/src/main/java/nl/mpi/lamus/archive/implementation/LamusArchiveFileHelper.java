@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see ArchiveFileHelper
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -178,6 +178,9 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return orphansFolder; 
     }
     
+    /**
+     * @see ArchiveFileHelper#isFileSizeAboveTypeReCheckSizeLimit(java.io.File)
+     */
     @Override
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
         if(fileToCheck.length() > typeRecheckSizeLimitInBytes) {
@@ -186,33 +189,44 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return false;
     }
     
-    
-    //TODO This method should be more robust
-     // it should not only check if the file's path contains the directory name
-     // it should check if the path is actually the same as the complete path for the orphans of that workspace
-    
+    /**
+     * @see ArchiveFileHelper#isFileInOrphansDirectory(java.io.File)
+     */
     @Override
     public boolean isFileInOrphansDirectory(File fileToCheck) {
+        
+        //TODO This method should be more robust
+            // it should not only check if the file's path contains the directory name
+            // it should check if the path is actually the same as the complete path for the orphans of that workspace
+
+        
         if (orphansDirectoryBaseName != null &&
             fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryBaseName)) {
             return true;
         }
         return false;
     }
-    
-    //TODO Should this check be done in some different way?
-     // currently the CS database indicates if a file is local or not,
-     // but that's not always correct
-    //TODO check if protocol is "file" and if there is no host...?
-    
+
+    /**
+     * @see ArchiveFileHelper#isUrlLocal(nl.mpi.util.OurURL)
+     */
     @Override
     public boolean isUrlLocal(OurURL urlToCheck) {
+        
+        //TODO Should this check be done in some different way?
+            // currently the CS database indicates if a file is local or not,
+            // but that's not always correct
+        //TODO check if protocol is "file" and if there is no host...?
+        
         if("file".equals(urlToCheck.getProtocol())) {
             return true;
         }
         return false;
     }
 
+    /**
+     * @see ArchiveFileHelper#getArchiveLocationForNodeID(int)
+     */
     @Override
     public File getArchiveLocationForNodeID(int archiveNodeID) {
         
@@ -223,6 +237,9 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return fileWithContext;
     }
     
+    /**
+     * @see ArchiveFileHelper#getFinalFile(java.lang.String, java.lang.String)
+     */
     @Override
     public File getFinalFile(String baseDirectory, String fileNameAttempt) {
         
@@ -247,6 +264,9 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return fileAttempt;
     }
     
+    /**
+     * @see ArchiveFileHelper#createFileAndDirectories(java.io.File)
+     */
     @Override
     public void createFileAndDirectories(File fileToCreate) throws IOException {
         
@@ -255,6 +275,9 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         FileUtils.touch(fileToCreate);
     }
     
+    /**
+     * @see ArchiveFileHelper#getDirectoryForFileType(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     */
     @Override
     public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
         

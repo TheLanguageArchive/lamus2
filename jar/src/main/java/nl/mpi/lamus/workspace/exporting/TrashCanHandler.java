@@ -19,10 +19,18 @@ import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Provides methods related with the trash can folder,
+ * which contains files that were deleted from the archive.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface TrashCanHandler {
-    
+
+    /**
+     * Moves the given node's file to the trashcan
+     * 
+     * @param nodeToMove Node to be moved
+     * @return URL of the node after being moved
+     */
     public URL moveFileToTrashCan(WorkspaceNode nodeToMove);
 }

@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -40,9 +39,29 @@ public interface WorkspaceNodeFactory {
      */
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
     
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document)
-            throws MalformedURLException;
-    
+    /**
+     * Creates a metadata WorkspaceNode with the given values.
+     * 
+     * @param workspaceID ID of the workspace to which the node should be connected
+     * @param archiveNodeID archive ID of the node
+     * @param archiveNodeURL archive URL of the node
+     * @param archiveNodePID PID of the node
+     * @param document MetadataDocument object corresponding to the file
+     * @return created WorkspaceNode object
+     */
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document);
+
+    /**
+     * Creates a resource WorkspaceNode with the given values.
+     * 
+     * @param workspaceID ID of the workspace to which the node should be connected
+     * @param archiveNodeID archive ID of the node
+     * @param url archiveURL of the node
+     * @param resourceReference Reference to the node, in the parent metadata file
+     * @param type Type of the node
+     * @param mimetype Mimetype of the file
+     * @return created WorkspaceNode object
+     */
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
             Reference resourceReference, WorkspaceNodeType type, String mimetype);
 }

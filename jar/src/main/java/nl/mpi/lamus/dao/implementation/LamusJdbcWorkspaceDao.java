@@ -456,6 +456,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return workspaceNodeToReturn;
     }
     
+    /**
+     * @see WorkspaceDao#getWorkspaceTopNode(int)
+     */
     @Override
     public WorkspaceNode getWorkspaceTopNode(int workspaceID) {
 

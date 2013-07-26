@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
+import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -34,7 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Class responsible for exporting nodes that are not applicable
+ * to the other, more specific exporters.
+ * @see NodeExporter
+ * 
  * @author guisil
  */
 public class GeneralNodeExporter implements NodeExporter {
@@ -46,30 +50,47 @@ public class GeneralNodeExporter implements NodeExporter {
     private MetadataAPI metadataAPI;
     private WorkspaceFileHandler workspaceFileHandler;
     private WorkspaceTreeExporter workspaceTreeExporter;
+    private CorpusStructureBridge corpusStructureBridge;
     
-    public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler, WorkspaceTreeExporter wsTreeExporter) {
+    public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler, WorkspaceTreeExporter wsTreeExporter,
+            CorpusStructureBridge csBridge) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
+        this.corpusStructureBridge = csBridge;
     }
     
+    /**
+     * @see NodeExporter#getWorkspace()
+     */
     @Override
     public Workspace getWorkspace() {
         return this.workspace;
     }
 
+    /**
+     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
     }
 
+    /**
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         
         if(currentNode.isMetadata()) {
             
             workspaceTreeExporter.explore(workspace, currentNode);
+            
+            if(!corpusStructureBridge.ensureChecksum(currentNode.getArchiveNodeID(), currentNode.getWorkspaceURL())) {
+                return;
+                //TODO IS THIS ENOUGH IN THIS CASE?
+            }
 
             MetadataDocument nodeDocument = null;
             try {
@@ -93,6 +114,9 @@ public class GeneralNodeExporter implements NodeExporter {
             
             
             //TODO CHECK FOR CHANGES IN DB... OR IS IT TO BE DONE BY THE CRAWLER???
+                // check if checksum is different
+                    // if not, do nothing
+                    // if so
         
             
         } else {
@@ -100,6 +124,7 @@ public class GeneralNodeExporter implements NodeExporter {
             //TODO resources
                 // they were not copied from the archive to the workspace, so should not be copied back...
                 // they might need some database update, due to some possible changes in their information...
+                    // the file itself shouldn't have changed, otherwise it's a replaced node
         }
         
         //TODO Update node in corpusstructure?

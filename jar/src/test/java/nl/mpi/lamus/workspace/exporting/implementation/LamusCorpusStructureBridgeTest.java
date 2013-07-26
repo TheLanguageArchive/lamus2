@@ -226,35 +226,48 @@ public class LamusCorpusStructureBridgeTest {
     }
     
     @Test
-    public void ensureChecksum() throws MalformedURLException {
+    public void getChecksum() throws MalformedURLException {
         
-        final int nodeArchiveID = 11;
         final URL nodeArchiveURL = new URL("file:/archive/some/url/file.cmdi");
         
         final String fakeChecksum = "thisisafakechecksum";
         
-        //TODO is file local?
-        //TODO does file exist?
-        //TODO can file be read?
-        //TODO is file a file?
-        //TODO warn about possible long time if file is large
-        //TODO calculate checksum
-        //TODO checksum is the same as before (in case node already existed)?
-            //TODO if checksum is different from existing one, update it in db
-        
-        
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveObjectsDBW).isOnSite(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(Boolean.TRUE));
-            
-            //TODO mock FileUtils.toFile... return mockFile...
             oneOf(mockFile).exists(); will(returnValue(Boolean.TRUE));
             oneOf(mockFile).canRead(); will(returnValue(Boolean.TRUE));
             oneOf(mockFile).isFile(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockFile).getPath(); will(returnValue(nodeArchiveURL.getPath()));
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        stub(method(Checksum.class, "create", String.class)).toReturn(fakeChecksum);
+        
+        String result = corpusStructureBridge.getChecksum(nodeArchiveURL);
+        
+        assertEquals("Returned checksum different from expected", fakeChecksum, result);
+    }
+    
+    @Test
+    public void ensureChecksumNewlyAddedNode() throws MalformedURLException {
+        
+        final int nodeArchiveID = 11;
+        final URL nodeArchiveURL = new URL("file:/archive/some/url/file.cmdi");
+        
+        final String fakeChecksum = "thisisafakechecksum";
+
+        
+        context.checking(new Expectations() {{
             
-            //TODO TRY TO GET OLD CHECKSUM ???
+            //TODO is this necessary?
+            oneOf(mockArchiveObjectsDBW).isOnSite(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFile).exists(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).canRead(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).getPath(); will(returnValue(nodeArchiveURL.getPath()));
+            
             oneOf(mockArchiveObjectsDBW).getObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(null));
             
             //TODO large file?
@@ -262,10 +275,79 @@ public class LamusCorpusStructureBridgeTest {
             
         }});
         
-        stub(method(FileUtils.class, "toFile")).toReturn(mockFile);
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
         stub(method(Checksum.class, "create", String.class)).toReturn(fakeChecksum);
         
-        corpusStructureBridge.ensureChecksum(nodeArchiveID, nodeArchiveURL);
+        boolean result = corpusStructureBridge.ensureChecksum(nodeArchiveID, nodeArchiveURL);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void ensureChecksumUnchangedNode() throws MalformedURLException {
+        
+        final int nodeArchiveID = 11;
+        final URL nodeArchiveURL = new URL("file:/archive/some/url/file.cmdi");
+        
+        final String oldFakeChecksum = "thisistheoldfakechecksum";
+        
+        
+        context.checking(new Expectations() {{
+            
+            //TODO is this necessary
+            oneOf(mockArchiveObjectsDBW).isOnSite(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFile).exists(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).canRead(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).getPath(); will(returnValue(nodeArchiveURL.getPath()));
+            
+            oneOf(mockArchiveObjectsDBW).getObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(oldFakeChecksum));
+            
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        stub(method(Checksum.class, "create", String.class)).toReturn(oldFakeChecksum);
+        
+        boolean result = corpusStructureBridge.ensureChecksum(nodeArchiveID, nodeArchiveURL);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void ensureChecksumChangedNode() throws MalformedURLException {
+        
+        final int nodeArchiveID = 11;
+        final URL nodeArchiveURL = new URL("file:/archive/some/url/file.cmdi");
+        
+        final String oldFakeChecksum = "thisistheoldfakechecksum";
+        final String newFakeChecksum = "thisisthenewfakechecksum";
+        
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockArchiveObjectsDBW).isOnSite(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFile).exists(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).canRead(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFile).isFile(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFile).getPath(); will(returnValue(nodeArchiveURL.getPath()));
+            
+            //TODO TRY TO GET OLD CHECKSUM ???
+            oneOf(mockArchiveObjectsDBW).getObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID)); will(returnValue(oldFakeChecksum));
+            
+            //TODO large file?
+            oneOf(mockArchiveObjectsDBW).setObjectChecksum(NodeIdUtils.TONODEID(nodeArchiveID), newFakeChecksum);
+            
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        stub(method(Checksum.class, "create", String.class)).toReturn(newFakeChecksum);
+        
+        boolean result = corpusStructureBridge.ensureChecksum(nodeArchiveID, nodeArchiveURL);
+        
+        assertTrue("Result should be true", result);
     }
     
     @Test

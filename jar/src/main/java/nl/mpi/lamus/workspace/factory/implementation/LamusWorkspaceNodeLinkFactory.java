@@ -22,12 +22,16 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceNodeLinkFactory
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
 public class LamusWorkspaceNodeLinkFactory implements WorkspaceNodeLinkFactory {
 
+    /**
+     * @see WorkspaceNodeLinkFactory#getNewWorkspaceNodeLink(int, int, java.net.URI)
+     */
+    @Override
     public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childURI) {
         return new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
     }

@@ -19,7 +19,8 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Factory for node exporters.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface NodeExporterFactory {

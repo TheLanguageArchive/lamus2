@@ -33,6 +33,7 @@ public class LamusWorkspaceParentNodeReferenceFactory implements WorkspaceParent
     /**
      * @see WorkspaceParentNodeReferenceFactory#getNewWorkspaceParentNodeReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
      */
+    @Override
     public WorkspaceParentNodeReference getNewWorkspaceParentNodeReference(WorkspaceNode parentNode, Reference childLink) {
         
         WorkspaceParentNodeReference referenceToReturn = null;

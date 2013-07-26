@@ -18,18 +18,33 @@ package nl.mpi.lamus.typechecking;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
- *
+ * Container for the results of the typechecker regarding a resource.
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface TypecheckedResults {
     
+    /**
+     * @return type of the checked resource
+     */
     public WorkspaceNodeType getCheckedNodeType();
     
+    /**
+     * @return mimetype of the checked resource
+     */
     public String getCheckedMimetype();
     
+    /**
+     * @return String containing the analysis of the checked resource
+     */
     public String getAnalysis();
     
+    /**
+     * @return judgement of the checked resource
+     */
     public TypecheckerJudgement getTypecheckerJudgement();
     
+    /**
+     * @return true if the type of the checked resource is unspecified
+     */
     public boolean isTypeUnspecified();
 }

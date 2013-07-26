@@ -20,12 +20,19 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Class used to explore the workspace tree during the export process.
+ * 
  * @author guisil
  */
 public interface WorkspaceTreeExporter {
     
-    
+    /**
+     * Explores the given node, invoking the correct exporter class
+     * for each of the children.
+     * 
+     * @param workspace Workspace being exported
+     * @param node Node to be explored
+     */
     public void explore(Workspace workspace, WorkspaceNode node);
     
 }

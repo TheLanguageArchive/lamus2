@@ -19,10 +19,15 @@ import java.io.Serializable;
 import nl.mpi.lamus.dao.WorkspaceDao;
 
 /**
- *
+ * Factory for WorkspaceDao objects.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceDaoFactory extends Serializable {
     
+    /**
+     * Creates a new WorkspaceDao object
+     * @return created WorkspaceDao object
+     */
     public WorkspaceDao createWorkspaceDao();
 }

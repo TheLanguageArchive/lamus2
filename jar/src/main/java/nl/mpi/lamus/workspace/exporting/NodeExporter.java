@@ -19,15 +19,29 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Generic interface for a node exporter.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface NodeExporter {
     
+    /**
+     * Gets the workspace to which the exporter is associated
+     * @return Workspace object
+     */
     public Workspace getWorkspace();
     
+    /**
+     * Sets the workspace to which the exporter is associated
+     * @param workspace Workspace object
+     */
     public void setWorkspace(Workspace workspace);
     
+    /**
+     * Exports the given node from the workspace to the archive
+     * @param parentNode Parent of the node to export
+     * @param currentNode Node to export
+     */
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode);
     
 }

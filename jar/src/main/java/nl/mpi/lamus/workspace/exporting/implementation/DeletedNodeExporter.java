@@ -28,6 +28,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * Class responsible for exporting nodes that were deleted
  * and should be moved to the trash can in the filesystem and have
  * their record in the database updated accordingly.
+ * @see NodeExporter
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -48,16 +49,25 @@ public class DeletedNodeExporter implements NodeExporter {
         this.searchClientBridge = sClientBridge;
     }
     
+    /**
+     * @see NodeExporter#getWorkspace()
+     */
     @Override
     public Workspace getWorkspace() {
         return this.workspace;
     }
     
+    /**
+     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
     }
 
+    /**
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         

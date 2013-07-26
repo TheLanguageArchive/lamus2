@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 /**
  * Checker for node access. If a user needs access to a certain node in the
  * archive in order to create a workspace, this is the class to use.
+ * @see WorkspaceAccessChecker
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -110,6 +111,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         }
     }
     
+    /**
+     * @see WorkspaceAccessChecker#getDefaultAccessInfoForUser(java.lang.String)
+     */
     @Override
     public AccessInfo getDefaultAccessInfoForUser(String userID) {
         

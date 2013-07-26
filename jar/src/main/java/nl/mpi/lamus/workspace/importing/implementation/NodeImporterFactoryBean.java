@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * FactoryBean for the node importers.
+ * @see FactoryBean
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -75,8 +76,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     private Class<? extends NodeImporter> nodeImporterType; 
     
     /**
-     * Returns the right node importer for the current defined type.
-     * 
+     * @see FactoryBean#getObject()
      * @return Instance of the node importer
      * @throws Exception in case of creation errors
      */
@@ -95,7 +95,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     }
 
     /**
-     * Returns the type of object created by the FactoryBean
+     * @see FactoryBean#getObjectType()
      * @return type of the node importer
      */
     @Override
@@ -117,6 +117,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     }
 
     /**
+     * @see FactoryBean#isSingleton()
      * @return true if the created object is a singleton
      */
     @Override

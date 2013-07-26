@@ -23,21 +23,31 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * Class responsible for exporting nodes that were replaced.
  * It takes care of the replacement in the database and in the filesystem,
  * as well as versioning (the old node will be kept as a version).
+ * @see NodeExporter
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class ReplacedNodeExporter implements NodeExporter {
 
+    /**
+     * @see NodeExporter#getWorkspace()
+     */
     @Override
     public Workspace getWorkspace() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    /**
+     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     @Override
     public void setWorkspace(Workspace workspace) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

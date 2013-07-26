@@ -47,6 +47,7 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
     /**
      * @see WorkspaceFactory#getNewWorkspace(java.lang.String, int)
      */
+    @Override
     public Workspace getNewWorkspace(String userID, int archiveTopNodeID) {
         
         long usedStorageSpace = this.amsBridge.getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));

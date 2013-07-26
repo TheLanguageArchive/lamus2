@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see TrashCanHandler
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -48,6 +48,10 @@ public class LamusTrashCanHandler implements TrashCanHandler {
         this.archiveFileHelper = fileHelper;
     }
 
+    /**
+     * @see TrashCanHandler#moveFileToTrashCan(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
     public URL moveFileToTrashCan(WorkspaceNode nodeToMove) {
         
         //TODO consistency checks?

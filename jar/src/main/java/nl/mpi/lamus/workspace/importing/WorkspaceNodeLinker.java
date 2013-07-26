@@ -19,11 +19,18 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 
 /**
- *
+ * Provides a way to link two nodes in the database.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceNodeLinker {
     
+    /**
+     * Links two nodes
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     * @param childLink Reference to the child node from the parent metadata file
+     */
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
     
 }

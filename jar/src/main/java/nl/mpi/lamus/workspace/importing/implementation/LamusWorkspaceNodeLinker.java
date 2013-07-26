@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceNodeLinker
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -47,9 +47,11 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
         this.workspaceDao = wDao;
     }
 
+    /**
+     * @see WorkspaceNodeLinker#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
+     */
+    @Override
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
-        
-        
         
         WorkspaceParentNodeReference parentNodeReference =
 		workspaceParentNodeReferenceFactory.getNewWorkspaceParentNodeReference(parentNode, childLink);

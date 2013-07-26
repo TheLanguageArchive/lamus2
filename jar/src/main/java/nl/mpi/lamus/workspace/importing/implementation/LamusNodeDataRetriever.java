@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see NodeDataRetriever
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -63,6 +63,9 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         this.archiveFileHelper = archiveFileHelper;
     }
 
+    /**
+     * @see NodeDataRetriever#getArchiveNodeMetadataDocument(int)
+     */
     @Override
     public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
             throws IOException, MetadataException, UnknownNodeException {
@@ -78,6 +81,9 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         return document;
     }
     
+    /**
+     * @see NodeDataRetriever#getResourceURL(nl.mpi.metadata.api.model.Reference)
+     */
     @Override
     public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException {
         
@@ -103,6 +109,9 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    /**
+     * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, nl.mpi.util.OurURL, int)
+     */
     @Override
     public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceURLWithContext, int nodeArchiveID) {
         
@@ -150,6 +159,9 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    /**
+     * @see NodeDataRetriever#getResourceFileChecked(int, nl.mpi.metadata.api.model.Reference, nl.mpi.util.OurURL, nl.mpi.util.OurURL)
+     */
     @Override
     public TypecheckedResults getResourceFileChecked(int nodeArchiveID, Reference resourceReference,
             OurURL resourceURL, OurURL resourceURLWithContext) throws TypeCheckerException {
@@ -172,6 +184,9 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     //TODO review this method
     
+    /**
+     * @see NodeDataRetriever#verifyTypecheckedResults(nl.mpi.util.OurURL, nl.mpi.metadata.api.model.Reference, nl.mpi.lamus.typechecking.TypecheckedResults)
+     */
     @Override
     public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults) {
         

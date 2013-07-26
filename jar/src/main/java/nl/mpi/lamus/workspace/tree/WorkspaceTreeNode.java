@@ -22,6 +22,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * Interface that extends both GenericTreeNode and WorkspaceNode.
  * It is intended to be used as the source for
  * the graphical representation of the workspace tree.
+ * @see GenericTreeNode
+ * @see WorkspaceNode
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -30,20 +32,24 @@ public interface WorkspaceTreeNode extends GenericTreeNode, WorkspaceNode {
     /**
      * @see GenericTreeNode#getChild(int)
      */
+    @Override
     public WorkspaceTreeNode getChild(int index);
     
     /**
      * @see GenericTreeNode#getChildCount()
      */
+    @Override
     public int getChildCount();
     
     /**
      * @see GenericTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
      */
+    @Override
     public int getIndexOfChild(GenericTreeNode child); 
     
     /**
      * @see GenericTreeNode#getParent()
      */
+    @Override
     public WorkspaceTreeNode getParent();
 }

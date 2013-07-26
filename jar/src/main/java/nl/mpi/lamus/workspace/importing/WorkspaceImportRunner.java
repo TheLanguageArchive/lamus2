@@ -75,6 +75,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     /**
      * The import process is started in a separate thread.
      * The nodes will be explored and copied, starting with the top node.
+     * @return true if import is successful
      */
     @Override
     public Boolean call() throws NodeImporterException, NodeExplorerException {

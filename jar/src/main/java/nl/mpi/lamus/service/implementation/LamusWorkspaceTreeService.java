@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.service.implementation;
 
-import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -42,6 +41,7 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
     /**
      * @see WorkspaceTreeService#getTreeNode(int, int)
      */
+    @Override
     public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentTreeNode) {
         
         WorkspaceNode child = this.workspaceDao.getWorkspaceNode(nodeID);

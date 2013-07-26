@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
 import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
@@ -28,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see SearchClientBridge
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -43,7 +42,9 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
         this.searchClient = sClient;
     }
     
-    
+    /**
+     * @see SearchClientBridge#addNode(int)
+     */
     @Override
     public void addNode(int archiveNodeID) {
         try {
@@ -55,6 +56,9 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
         searchClient.close();
     }
     
+    /**
+     * @see SearchClientBridge#removeNode(int)
+     */
     @Override
     public void removeNode(int archiveNodeID) {
         try {
@@ -66,6 +70,9 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
         searchClient.close();
     }
 
+    /**
+     * @see SearchClientBridge#removeNode(int)
+     */
     @Override
     public boolean isFormatSearchable(String format) {
         

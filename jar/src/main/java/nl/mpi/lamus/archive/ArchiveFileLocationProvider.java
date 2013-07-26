@@ -20,13 +20,22 @@ import java.io.IOException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
- *
+ * Interface providing methods that deal with the location of files in the archive.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface ArchiveFileLocationProvider {
     
-//    public File getNextAvailableMetadataFile(URL parentArchiveURL, String childNodeName, URL childOriginURL);
-    
-    //TODO HOW WILL THIS METHOD BE?
-    public File getAvailableFile(String parentNodePath, String filename, WorkspaceNodeType nodeType) throws IOException;
+    /**
+     * Provides an available location for the given node,
+     * adjusting the attemped filename if necessary.
+     * This method will also trigger the creation of the necessary folders and
+     * an empty file in the correct location, so it becomes unavailable for other nodes.
+     * @param parentNodePath Path where the parent node is located
+     * @param filenameAttempt Attempted filename for the node
+     * @param nodeType Type of the node
+     * @return File object corresponding to the available location
+     * @throws IOException when there are problems in the creation of file or folders
+     */
+    public File getAvailableFile(String parentNodePath, String filenameAttempt, WorkspaceNodeType nodeType) throws IOException;
 }

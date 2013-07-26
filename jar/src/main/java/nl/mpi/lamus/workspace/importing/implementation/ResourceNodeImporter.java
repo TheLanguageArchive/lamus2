@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Node importer specific for resource files.
+ * @see NodeImporter
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */

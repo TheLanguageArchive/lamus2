@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see NodeExporterFactory
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -70,6 +70,9 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private DeletedNodeExporter deletedNodeExporter;
     private GeneralNodeExporter generalNodeExporter;
     
+    /**
+     * @see NodeExporterFactory#getNodeExporterForNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node) {
         
@@ -105,7 +108,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     
     private NodeExporter getGeneralNodeExporter(Workspace workspace) {
         if(generalNodeExporter == null) {
-            generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler, workspaceTreeExporter);
+            generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler, workspaceTreeExporter, corpusStructureBridge);
         }
         generalNodeExporter.setWorkspace(workspace);
         return generalNodeExporter;

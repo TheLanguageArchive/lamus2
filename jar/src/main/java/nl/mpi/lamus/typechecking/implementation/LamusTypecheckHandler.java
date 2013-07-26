@@ -40,38 +40,33 @@ public class LamusTypecheckHandler implements TypecheckHandler {
     }
 
     /**
-     * Passes a stream to the typechecker and fills in the result.
-     * 
-     * @param iStream input stream of the file to check
-     * @param filename name of the file to check
-     * @throws IOException 
+     * @see TypecheckHandler#typecheck(java.io.InputStream, java.lang.String)
      */
+    @Override
     public void typecheck(InputStream iStream, String filename) throws IOException {
         typecheckResult = typechecker.checkStream( iStream, filename.toLowerCase() );
     }
     
     /**
-     * Checks if, given the typechecker result, the file is archivable.
-     * 
-     * @return true if the file is considered archivable
+     * @see TypecheckHandler#isFileArchivable()
      */
+    @Override
     public boolean isFileArchivable() {
         return FileType.resultToBoolean(typecheckResult);
     }
     
     /**
-     * @return the most recent type check result
+     * @see TypecheckHandler#getTypecheckResult()
      */
+    @Override
     public String getTypecheckResult() {
         return this.typecheckResult;
     }
     
     /**
-     * Gets the message returned by the typechecker for the most recent result
-     * and converts it into the corresponding TypecheckerJudgement value.
-     * 
-     * @return the judgement of the typechecker for the most recent result
+     * @see TypecheckHandler#getTypecheckJudgement()
      */
+    @Override
     public TypecheckerJudgement getTypecheckJudgement() {
         typecheckJudgementMessage = FileType.resultToJudgement(typecheckResult);
         
@@ -85,8 +80,9 @@ public class LamusTypecheckHandler implements TypecheckHandler {
     }
     
     /**
-     * @return the file format corresponding to the most recent result
+     * @see TypecheckHandler#getTypecheckMimetype()
      */
+    @Override
     public String getTypecheckMimetype() {
         return FileType.resultToMPIType(typecheckResult);
     }

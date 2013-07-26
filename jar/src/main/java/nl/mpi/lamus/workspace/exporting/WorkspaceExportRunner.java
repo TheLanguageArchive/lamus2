@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -24,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Runner that will trigger a thread that performs
+ * the export of the nodes from the workspace back into the archive.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -57,7 +58,12 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
         this.keepUnlinkedFiles = keepUnlinkedFiles;
     }
-    
+
+    /**
+     * The export process is started in a separate thread.
+     * The nodes will be explored and copied, starting with the top node.
+     * @return true if export is successful
+     */
     @Override
     public Boolean call() {
         

@@ -21,12 +21,16 @@ import nl.mpi.lamus.util.DateTimeHelper;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see DateTimeHelper
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
 public class LamusDateTimeHelper implements DateTimeHelper {
 
+    /**
+     * @see DateTimeHelper#getCurrentDateTime()
+     */
+    @Override
     public Date getCurrentDateTime() {
         return Calendar.getInstance().getTime();
     }

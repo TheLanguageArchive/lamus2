@@ -29,9 +29,11 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
+import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
@@ -106,7 +108,7 @@ public class WorkspaceSteps {
     
     private URL newlyInsertedNodeUrl;
     
-    private String oldNodeNameInArchive;
+    private String oldNodeArchiveChecksum;
     
     
     @BeforeScenario
@@ -126,7 +128,7 @@ public class WorkspaceSteps {
         this.createdWorkspaceTopNodeArchiveID = -1;
         this.createdWorkspaceTopNodeWsID = -1;
         this.newlyInsertedNodeUrl = null;
-        this.oldNodeNameInArchive = null;
+        this.oldNodeArchiveChecksum = null;
     }
     
     
@@ -304,8 +306,8 @@ public class WorkspaceSteps {
         assertEquals("Child of top node different from expected", resourceFile.toURI().toURL(), childNode.getWorkspaceURL());
     }
     
-    @Given("the top node has had its name changed")
-    public void theTopNodeHasHadItsNameChanged() throws IOException, MetadataException {
+    @Given("the top node has had some metadata added")
+    public void theTopNodeHasHadSomeMetadataAdded() throws IOException, MetadataException {
         
         Node archiveNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID));
         assertNotNull(archiveNode);
@@ -313,13 +315,13 @@ public class WorkspaceSteps {
         assertNotNull(wsNode);
         assertFalse("The name of the node in the workspace should be different from its old name in the archive", archiveNode.getName().equals(wsNode.getName()));
         
-        this.oldNodeNameInArchive = archiveNode.getName();
+        this.oldNodeArchiveChecksum = this.archiveObjectsDB.getObjectChecksum(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID));
         
-//        MetadataDocument document = this.metadataAPI.getMetadataDocument(wsNode.getWorkspaceURL());
+        MetadataDocument document = this.metadataAPI.getMetadataDocument(wsNode.getWorkspaceURL());
         //TODO There's no such fixed concept (name) in CMDI...
             // Does this make sense in the database anyway?
         
-//        assertEquals("The name of the node in the metadata document should be similar to the name in the workspace database", wsNode.getName(), document.getName());
+        document.putHeaderInformation(new HeaderInfo(CMDIConstants.CMD_HEADER_MD_COLLECTION_DISPLAY_NAME, "somename"));
     }
     
     
@@ -576,9 +578,9 @@ public class WorkspaceSteps {
     @Then("the name of the node with ID $archiveNodeID has changed both in the database and in the filesystem")
     public void theNameOfTheNodeWithIDHasChanged(int archiveNodeID) {
         
-        Node changedNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(archiveNodeID));
+        String changedNodeChecksum = this.archiveObjectsDB.getObjectChecksum(NodeIdUtils.TONODEID(archiveNodeID));
         
-        assertFalse("Name of the node in the archive should have changed", this.oldNodeNameInArchive.equals(changedNode.getName()));
+        assertFalse("Name of the node in the archive should have changed", this.oldNodeArchiveChecksum.equals(changedNodeChecksum));
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

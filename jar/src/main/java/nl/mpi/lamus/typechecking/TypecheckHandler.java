@@ -19,40 +19,39 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- *
+ * Interface that provides a bridge to interact with the typechecker.
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface TypecheckHandler {
     
     /**
-     * 
-     * @param iStream
-     * @param filename
-     * @throws IOException 
+     * Passes a stream to the typechecker and fills in the result.
+     * @param iStream input stream of the file to check
+     * @param filename name of the file to check
+     * @throws IOException if some issue happens with the typechecker
      */
     public void typecheck(InputStream iStream, String filename) throws IOException;
     
     /**
-     * 
-     * @return 
+     * Checks if, given the typechecker result, the file is archivable.
+     * @return true if the file is considered archivable
      */
     public boolean isFileArchivable();
     
     /**
-     * 
-     * @return 
+     * @return the most recent type check result
      */
     public String getTypecheckResult();
     
     /**
-     * 
-     * @return 
+     * Gets the message returned by the typechecker for the most recent result
+     * and converts it into the corresponding TypecheckerJudgement value.
+     * @return the judgement of the typechecker for the most recent result
      */
     public TypecheckerJudgement getTypecheckJudgement();
     
     /**
-     * 
-     * @return 
+     * @return the file format corresponding to the most recent result
      */
     public String getTypecheckMimetype();
 }

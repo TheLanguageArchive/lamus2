@@ -16,7 +16,8 @@
 package nl.mpi.lamus.typechecking;
 
 /**
- *
+ * Enumeration containing the possible types of resources,
+ * according to the typechecker.
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public enum TypecheckerJudgement {

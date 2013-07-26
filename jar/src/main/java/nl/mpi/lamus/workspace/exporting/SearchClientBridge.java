@@ -16,14 +16,30 @@
 package nl.mpi.lamus.workspace.exporting;
 
 /**
- *
+ * Interface for some operations to be performed using the annotation search client.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface SearchClientBridge {
     
+    /**
+     * Adds the given node to the annotation search database
+     * 
+     * @param archiveNodeID ID of the node to add
+     */
     public void addNode(int archiveNodeID);
     
+    /**
+     * Removes the given node from the annotation search database
+     * 
+     * @param archiveNodeID ID of the node to remove
+     */
     public void removeNode(int archiveNodeID);
     
+    /**
+     * Checks if the given file format is usable in the annotation search database
+     * @param format Format to be checked
+     * @return true if the format is searchable
+     */
     public boolean isFormatSearchable(String format);
 }

@@ -18,11 +18,16 @@ package nl.mpi.lamus.util;
 import java.util.Date;
 
 /**
- *
+ * Helper class that provides date and time related methods,
+ * mostly to improve testability of the application.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface DateTimeHelper {
     
+    /**
+     * @return a Date object representing the current date and time
+     */
     public Date getCurrentDateTime();
     
 }

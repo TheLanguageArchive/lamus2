@@ -31,7 +31,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
- *
+ * @see WorkspaceTreeNode
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements WorkspaceTreeNode {
@@ -73,18 +74,34 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
         this.workspaceDao = dao;
     }
 
+    /**
+     * @see WorkspaceTreeNode#getChild(int)
+     */
+    @Override
     public WorkspaceTreeNode getChild(int index) {
         return this.getChildren().get(index);
     }
 
+    /**
+     * @see WorkspaceTreeNode#getChildCount()
+     */
+    @Override
     public int getChildCount() {
         return this.getChildren().size();
     }
 
+    /**
+     * @see WorkspaceTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
+     */
+    @Override
     public int getIndexOfChild(GenericTreeNode child) {
         return this.getChildren().indexOf(child);
     }
 
+    /**
+     * @see WorkspaceTreeNode#getParent()
+     */
+    @Override
     public WorkspaceTreeNode getParent() {
         return this.parentTreeNode;
     }

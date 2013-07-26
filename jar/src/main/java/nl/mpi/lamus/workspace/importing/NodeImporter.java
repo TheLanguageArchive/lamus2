@@ -35,12 +35,13 @@ public interface NodeImporter<R extends Reference> {
      * information in the archive database as well as in the file itself and
      * the parent node.
      * 
+     * @param workspaceID ID of the workspace
      * @param parentNode parent of the node to be imported
      * @param parentDocument metadata document corresponding to the parent node
      * @param childLink reference corresponding to the current node
      * @param childNodeArchiveID archive ID of the current node
-     * @throws FileImporterException if there is a problem during the import
-     * @throws FileExplorerException if there is a problem in the recursive exploration of the tree
+     * @throws NodeImporterException if there is a problem during the import
+     * @throws NodeExplorerException if there is a problem in the recursive exploration of the tree
      */
     public void importNode(int workspaceID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException;

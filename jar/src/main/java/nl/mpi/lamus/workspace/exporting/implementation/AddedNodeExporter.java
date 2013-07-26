@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class responsible for exporting nodes that were newly added
  * and are supposed to get a new location in the archive.
+ * @see NodeExporter
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
@@ -78,16 +79,25 @@ public class AddedNodeExporter implements NodeExporter {
         this.workspaceTreeExporter = wsTreeExporter;
     }
     
+    /**
+     * @see NodeExporter#getWorkspace()
+     */
     @Override
     public Workspace getWorkspace() {
         return this.workspace;
     }
     
+    /**
+     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     */
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
     }
 
+    /**
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
         

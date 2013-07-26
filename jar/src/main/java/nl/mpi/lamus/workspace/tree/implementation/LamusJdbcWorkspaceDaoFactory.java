@@ -26,7 +26,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceDaoFactory
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -38,6 +39,10 @@ public class LamusJdbcWorkspaceDaoFactory implements WorkspaceDaoFactory {
     @Qualifier("lamusDataSource")
     private transient DataSource lamusDataSource;
     
+    /**
+     * @see WorkspaceDaoFactory#createWorkspaceDao()
+     */
+    @Override
     public WorkspaceDao createWorkspaceDao() {
         logger.debug("Creating new LamusJdbcWorkspaceDao");
 	return new LamusJdbcWorkspaceDao(lamusDataSource);

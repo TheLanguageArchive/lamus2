@@ -57,7 +57,7 @@ Given an archive
 And a metadata node with ID 3 which is a child of node with ID 0
 And a user with ID testUser that has read and write access to the node with ID 3
 And a workspace with ID 3 created by testUser in node 3
-And the top node has had its name changed
+And the top node has had some metadata added
 !-- ...
 When that user chooses to submit the workspace
 Then the status of the workspace is marked as successfully submitted
@@ -69,18 +69,5 @@ And the name of the node with ID 3 has changed both in the database and in the f
 
 
 
-!-- Scenario: submit an existing workspace
+!-- Scenario: submit workspace with a replaced node
 
-!-- Given an archive
-!-- And a node with ID 1
-
-!-- And a node with ID 2 which is a child of node with ID 1
-
-!-- And a user with ID testUser that has read and write access to the node with ID 1
-!-- And a workspace with ID 1 created by user with ID testUser in node with ID 1
-
-!-- And that user deletes node with ID 2
-
-!-- When that user chooses to submit the workspace
-!-- Then the workspace is successfully submitted
-!-- And node with ID 2 was successfully deleted

@@ -20,18 +20,53 @@ import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- *
+ * Provides methods related with the trash can folder,
+ * more specifically with versioning of deleted files.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface TrashVersioningHandler {
     
+    /**
+     * Retires the given node, as an old version.
+     * 
+     * @param node Node to be retired
+     * @return true if everything went well
+     */
     public boolean retireNodeVersion(WorkspaceNode node);
     
+    /**
+     * Determines the directory where the versioned node should be located.
+     * 
+     * @param workspaceID ID of the workspace where the node belongs
+     * @return File object corresponding to the directory for the workspace's versioned files
+     */
     public File getDirectoryForNodeVersion(int workspaceID);
     
+    /**
+     * Renames the file for the standard naming of versioned nodes.
+     * 
+     * @param baseDirectory Base directory where the file will be located
+     * @param archiveNodeID ID of the node to be versioned
+     * @param archiveNodeURL URL of the node to be versioned
+     * @return File object corresponding to the renamed version file
+     */
     public File getTargetFileForNodeVersion(File baseDirectory, int archiveNodeID, URL archiveNodeURL);
     
+    /**
+     * Checks if the target directory is writable.
+     * 
+     * @param targetDirectory Target directory for the versioned file
+     * @return true if the directory is writable
+     */
     public boolean canWriteTargetDirectory(File targetDirectory);
     
+    /**
+     * Moves the versioned file to the target directory.
+     * 
+     * @param currentFile File to be moved
+     * @param targetFile target location
+     * @return true if the file was successfully moved
+     */
     public boolean moveFileToTargetLocation(File currentFile, File targetFile);
 }

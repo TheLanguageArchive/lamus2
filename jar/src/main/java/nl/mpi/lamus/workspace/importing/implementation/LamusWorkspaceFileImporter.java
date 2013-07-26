@@ -22,7 +22,6 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceFileImporter
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -52,6 +51,9 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
         this.metadataAPI = mAPI;
     }
 
+    /**
+     * @see WorkspaceFileImporter#importMetadataFileToWorkspace(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
+     */
     @Override
     public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument metadataDocument)
         throws WorkspaceNodeFilesystemException {

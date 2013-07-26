@@ -16,16 +16,22 @@
 package nl.mpi.lamus.workspace.importing;
 
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.MetadataDocument;
 
 /**
- *
+ * Handles the import of files from the archive to the workspace.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceFileImporter {
     
+    /**
+     * Imports metadata files from the archive to the workspace
+     * @param node WorkspaceNode object corresponding to the node being imported
+     * @param document MetadataDocument object corresponding to the node being imported
+     * @throws WorkspaceNodeFilesystemException when there is an issue with the import
+     */
     public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument document)
             throws WorkspaceNodeFilesystemException;
     

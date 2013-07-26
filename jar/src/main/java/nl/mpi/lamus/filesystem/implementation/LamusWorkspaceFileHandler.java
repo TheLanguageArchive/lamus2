@@ -17,7 +17,6 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -74,6 +73,9 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         }
     }
     
+    /**
+     * @see WorkspaceFileHandler#copyResourceFile(nl.mpi.lamus.workspace.model.WorkspaceNode, java.io.File, java.io.File)
+     */
     @Override
     public void copyResourceFile(WorkspaceNode workspaceNode,
             File originNodeFile, File targetNodeFile) throws WorkspaceNodeFilesystemException {
