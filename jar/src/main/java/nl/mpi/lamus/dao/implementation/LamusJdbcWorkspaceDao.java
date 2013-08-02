@@ -514,6 +514,42 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
+     * @see WorkspaceDao#getParentWorkspaceNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getParentWorkspaceNodes(int workspaceNodeID) {
+        
+        logger.debug("Retrieving list containing parent nodes of the node with ID: " + workspaceNodeID);
+        
+        String queryWorkspaceNodeListSql = "SELECT * FROM node WHERE workspace_node_id IN "
+                + "(SELECT parent_workspace_node_id FROM node_link WHERE child_workspace_node_id = :child_workspace_node_id)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("child_workspace_node_id", workspaceNodeID);
+        
+        Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        
+        return listToReturn;
+    }
+    
+    /**
+     * @see WorkspaceDao#getDeletedTopNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceID) {
+        
+        logger.debug("Retrieving list containing deleted top nodes of the workspace with ID: " + workspaceID);
+        
+        String queryDeletedTopNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
+                + " AND workspace_id = :workspace_id AND status like :status;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("workspace_id", workspaceID)
+                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
+        
+        Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryDeletedTopNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        
+        return listToReturn;
+    }
+    
+    /**
      * @see WorkspaceDao#updateNodeWorkspaceURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override

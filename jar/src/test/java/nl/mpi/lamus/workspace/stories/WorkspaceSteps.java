@@ -64,6 +64,10 @@ public class WorkspaceSteps {
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     
+    @Autowired
+    @Qualifier("trashCanBaseDirectory")
+    private File trashCanFolder;
+    
 //    private URL topNodeURL;
     
     @Autowired
@@ -109,6 +113,9 @@ public class WorkspaceSteps {
     private URL newlyInsertedNodeUrl;
     
     private String oldNodeArchiveChecksum;
+
+    private int deletedNodeArchiveID;
+    private int deletedNodeWsID;
     
     
     @BeforeScenario
@@ -237,7 +244,7 @@ public class WorkspaceSteps {
 //    }
     
     @Given("a workspace with ID $workspaceID created by $userID in node $topNodeArchiveID")
-    public void aWorkspaceWithIDCreatedByUserInNodeToWhichNodeHasBeenLinked(
+    public void aWorkspaceWithIDCreatedByUserInNode(
             int workspaceID, String userID, int topNodeArchiveID)
             throws MalformedURLException, FileNotFoundException, IOException, MetadataException {
         
@@ -324,6 +331,28 @@ public class WorkspaceSteps {
         document.putHeaderInformation(new HeaderInfo(CMDIConstants.CMD_HEADER_MD_COLLECTION_DISPLAY_NAME, "somename"));
     }
     
+    @Given("one of the resource nodes, $filename, is deleted")
+    public void oneOfTheResourceNodesIsDeleted(String filename) {
+        
+        //TODO make sure the file is not among the retrieved nodes of the workspace
+            // and that the node is marked as deleted in the workspace database, and is not linked to any node
+        
+        Collection<WorkspaceNode> workspaceNodes = this.workspaceDao.getNodesForWorkspace(createdWorkspaceID);
+        for(WorkspaceNode node : workspaceNodes) {
+            if(node.getArchiveURL().getPath().contains(filename)) {
+                assertEquals("Status of the node should be deleted", WorkspaceNodeStatus.NODE_DELETED, node.getStatus());
+                this.deletedNodeArchiveID = node.getArchiveNodeID();
+                this.deletedNodeWsID = node.getWorkspaceID();
+                break;
+            }
+        }
+        
+        Collection<WorkspaceNode> nodeChildren = this.workspaceDao.getChildWorkspaceNodes(this.deletedNodeWsID);
+        assertTrue("List of child nodes should be empty", nodeChildren.isEmpty());
+        Collection<WorkspaceNode> nodeParents = this.workspaceDao.getParentWorkspaceNodes(this.deletedNodeWsID);
+        assertTrue("List of parent nodes should be empty", nodeParents.isEmpty());
+    }
+    
     
     @When("that user chooses to create a workspace in the node with ID $nodeID")
     public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(int nodeID) {
@@ -361,7 +390,6 @@ public class WorkspaceSteps {
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
         
         //TODO more assertions missing?
-        
         boolean result = this.workspaceService.submitWorkspace(currentUserID, createdWorkspaceID/*, keepUnlinkedFiles*/);
         
         assertTrue("Result of the workspace submission should be true", result);
@@ -581,6 +609,25 @@ public class WorkspaceSteps {
         String changedNodeChecksum = this.archiveObjectsDB.getObjectChecksum(NodeIdUtils.TONODEID(archiveNodeID));
         
         assertFalse("Name of the node in the archive should have changed", this.oldNodeArchiveChecksum.equals(changedNodeChecksum));
+    }
+    
+    @Then("the deleted node has been moved to the trash folder in the filesystem")
+    public void theDeletedNodeIsMarkedAsDeletedInTheDatabaseAndShouldNotBeLinkedToAnyNode() {
+        
+        String deletedNodePath = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(this.deletedNodeArchiveID), ArchiveAccessContext.FILE_UX_URL).toString();
+        assertTrue("Deleted node should be located in the trash can folder", deletedNodePath.contains(this.trashCanFolder.getPath()));
+        
+        File deletedNodeFile = new File(deletedNodePath);
+        assertNotNull("Deleted node file object should not be null", deletedNodeFile);
+        
+        
+        //TODO This would be done only by the ArchiveCrawler? So at this point there would still be a link in the database...
+        
+//        CorpusNode deletedCorpusNode = this.corpusStructureDB.getCorpusNode(NodeIdUtils.TONODEID(this.deletedNodeArchiveID));
+//        assertNull("Deleted corpus node object should be null", deletedCorpusNode);
+        
+        
+        //TODO some more checks?
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

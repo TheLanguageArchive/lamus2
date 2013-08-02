@@ -91,7 +91,6 @@ public class WorkspaceStoriesConfig {
         temporaryDirectory = new File("/tmp/lamusStoriesTestDirectory/");
         
         FileUtils.forceMkdir(temporaryDirectory);
-        FileUtils.forceDeleteOnExit(temporaryDirectory);
     }
     
     @Bean
@@ -104,6 +103,9 @@ public class WorkspaceStoriesConfig {
 //        File archiveFolder = testFolder.newFolder("archiveFolder");
         File archiveFolder = new File(temporaryDirectory, "archiveFolder");
         archiveFolder.mkdirs();
+        
+        FileUtils.forceDeleteOnExit(archiveFolder);
+        
         return archiveFolder;
     }
     
@@ -554,6 +556,9 @@ public class WorkspaceStoriesConfig {
 //        File workspaceBaseFolder = testFolder.newFolder("workspaceFolders");
         File workspaceBaseFolder = new File(temporaryDirectory, "workspaceFolders");
         workspaceBaseFolder.mkdirs();
+        
+        FileUtils.forceDeleteOnExit(workspaceBaseFolder);
+        
         return workspaceBaseFolder;
     }
     
@@ -567,6 +572,9 @@ public class WorkspaceStoriesConfig {
 //        File trashcanBaseFolder = testFolder.newFolder("trashcanFolder");
         File trashcanBaseFolder = new File(temporaryDirectory, "trashcanFolder");
         trashcanBaseFolder.mkdirs();
+        
+        FileUtils.forceDeleteOnExit(trashcanBaseFolder);
+        
         return trashcanBaseFolder;
     }
     

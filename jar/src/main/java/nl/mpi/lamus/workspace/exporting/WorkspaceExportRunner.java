@@ -33,14 +33,16 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
+    private DeletedNodesExportHandler deletedNodesExportHandler;
     
     private Workspace workspace;
     private boolean keepUnlinkedFiles;
 
     @Autowired
-    public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory) {
+    public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory, DeletedNodesExportHandler dnExportHandler) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
+        this.deletedNodesExportHandler = dnExportHandler;
     }
     
     /**
@@ -104,13 +106,14 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 //            currentNodeExporter.exportNode(currentNode);
 //        }
         
-        WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
+        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(this.workspace.getWorkspaceID());
 //        workspaceTreeExporter.explore(topNode);
         
-        NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
+        NodeExporter topNodeExporter = this.nodeExporterFactory.getNodeExporterForNode(this.workspace, topNode);
         topNodeExporter.exportNode(null, topNode);
         
         //TODO Export deleted nodes...
+        this.deletedNodesExportHandler.exploreDeletedNodes(this.workspace);
         
         //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem

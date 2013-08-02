@@ -7,12 +7,6 @@ These should cover different possibilities:
 - the workspace has replaced node(s)
 
 
-
-!-- Scenario: submit workspace without changes
-
-!-- Scenario: submit workspace with a deleted node
-  !--  ADD ALSO STORIES FOR DELETING NODE
-
 Scenario: submit workspace with an added resource node
 
 Given an archive
@@ -31,7 +25,7 @@ And eclipse_shortcuts.pdf is present in the proper location in the filesystem, u
 !-- ...
 
 
-!-- Scenario: submit workspace with an added metadata node
+Scenario: submit workspace with an added metadata node
 
 Given an archive
 And a metadata node with ID 2 which is a child of node with ID 0
@@ -50,8 +44,7 @@ And the children of Zorro.cmdi are also present in the database and in the files
 !-- ...
 
 
-
-!-- Scenario: submit workspace with a changed node
+Scenario: submit workspace with a changed node
 
 Given an archive
 And a metadata node with ID 3 which is a child of node with ID 0
@@ -67,6 +60,31 @@ And the name of the node with ID 3 has changed both in the database and in the f
 !-- ...
 
 
+Scenario: submit workspace without changes
+Given an archive
+And a metadata node with ID 3 which is a child of node with ID 0
+And a user with ID testUser that has read and write access to the node with ID 3
+And a workspace with ID 4 created by testUser in node 3
+When that user chooses to submit the workspace
+Then the status of the workspace is marked as successfully submitted
+And the end date of the workspace is set
+And no changes were made to the archive
+!-- And an email notification is sent to the user
+!-- ...
+
+
+Scenario: submit workspace with a deleted node
+Given an archive
+And a metadata node with ID 3 which is a child of node with ID 0
+And a user with ID testUser that has read and write access to the node with ID 3
+And a workspace with ID 5 created by testUser in node 3
+And one of the resource nodes, phist_crookedmagic.jpg, is deleted
+When that user chooses to submit the workspace
+Then the status of the workspace is marked as successfully submitted
+And the end date of the workspace is set
+And the deleted node has been moved to the trash folder in the filesystem
+!-- And an email notification is sent to the user
+!-- ...
 
 
 !-- Scenario: submit workspace with a replaced node

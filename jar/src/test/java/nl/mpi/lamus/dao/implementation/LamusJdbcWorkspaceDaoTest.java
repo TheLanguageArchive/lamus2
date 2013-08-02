@@ -849,7 +849,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Collection<WorkspaceNode> result = this.workspaceDao.getChildWorkspaceNodes(parentNode.getWorkspaceNodeID());
         
         assertNotNull("The returned list of nodes should not be null", result);
-        assertEquals("Returned list of nodes should be empty", 0, result.size());
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
     }
 
     @Test
@@ -903,6 +903,102 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 //        assertNotNull("The returned list of tree nodes should not be null", result);
 //        assertEquals("Returned list of tree nodes should be empty", 0, result.size());
 //    }
+    
+    @Test
+    public void getExistingParentNodes() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, Boolean.TRUE, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(parentNode));
+    }
+    
+    @Test
+    public void getNonExistingParentNodes() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void getParentNodesFromNonExistingChild() throws URISyntaxException, MalformedURLException {
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getParentWorkspaceNodes(2);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void getTheOnlyDeletedNode() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
+        setNodeAsDeleted(testNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(testNode));
+    }
+    
+    @Test
+    public void getDeletedNodeWithChildren() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, Boolean.TRUE, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
+        setNodeAsDeleted(parentNode);
+        setNodeAsDeleted(childNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(parentNode));
+    }
+    
+    @Test
+    public void getSeveralDeletedNodes() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, Boolean.TRUE, Boolean.TRUE);
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
+        setNodeAsDeleted(firstNode);
+        setNodeAsDeleted(secondNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 2, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(firstNode));
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(secondNode));
+    }
+    
+    @Test
+    public void getNonExistingDeletedTopNodes() {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
+    }
+    
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);
@@ -929,7 +1025,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         String insertWorkspaceSql = "INSERT INTO workspace (user_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, message, archive_info)" +
                         "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertWorkspaceSql,
+        jdbcTemplate.update(insertWorkspaceSql,
                 testWorkspace.getUserID(),
                 new Timestamp(testWorkspace.getStartDate().getTime()),
                 endDate,
@@ -952,7 +1048,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, -1, Boolean.FALSE, Boolean.FALSE);
         
         String insertNodeSql = "INSERT INTO node (workspace_id, name, type, format, status) values (?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
+        jdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
                 testWorkspaceNode.getName(), testWorkspaceNode.getType(),
                 testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
         
@@ -968,7 +1064,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         String insertNodeSql = "INSERT INTO node (workspace_id, archive_node_id, profile_schema_uri, workspace_url, archive_url, origin_url, name, type, format, status) "
                 + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        simpleJdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(), testWorkspaceNode.getArchiveNodeID(),
+        jdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(), testWorkspaceNode.getArchiveNodeID(),
                 testWorkspaceNode.getProfileSchemaURI(), testWorkspaceNode.getWorkspaceURL(),
                 testWorkspaceNode.getArchiveURL(), testWorkspaceNode.getOriginURL(), testWorkspaceNode.getName(),
                 testWorkspaceNode.getType(), testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
@@ -1009,27 +1105,27 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
             topNodeArchiveURLStr = topNode.getArchiveURL().toString();
         }
         String updateWorkspaceSql = "UPDATE workspace SET top_node_id = ?, top_node_archive_id = ?, top_node_archive_url = ? WHERE workspace_id = ?";
-        simpleJdbcTemplate.update(updateWorkspaceSql, workspace.getTopNodeID(), workspace.getTopNodeArchiveID(), topNodeArchiveURLStr, workspace.getWorkspaceID());
+        jdbcTemplate.update(updateWorkspaceSql, workspace.getTopNodeID(), workspace.getTopNodeArchiveID(), topNodeArchiveURLStr, workspace.getWorkspaceID());
     }
     
     private int getIdentityFromDB() {
         
         String identitySql = "CALL IDENTITY();";
-        int id = simpleJdbcTemplate.queryForInt(identitySql);
+        int id = jdbcTemplate.queryForInt(identitySql);
         return id;
     }
     
     private Workspace getWorkspaceFromDB(int workspaceID) {
         
         String selectSql = "SELECT * FROM workspace WHERE workspace_id = ?";
-        Workspace workspace = (Workspace) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
+        Workspace workspace = (Workspace) jdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
         return workspace;
     }
     
     private WorkspaceNode getNodeFromDB(int nodeID) {
         
         String selectSql = "SELECT * FROM node WHERE workspace_node_id = ?";
-        WorkspaceNode node = (WorkspaceNode) simpleJdbcTemplate.queryForObject(selectSql, new WorkspaceNodeRowMapper(), nodeID);
+        WorkspaceNode node = (WorkspaceNode) jdbcTemplate.queryForObject(selectSql, new WorkspaceNodeRowMapper(), nodeID);
         return node;
     }
 
@@ -1051,14 +1147,22 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         String insertNodeSql = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
                 + "values (?, ?, ?)";
-        simpleJdbcTemplate.update(insertNodeSql, link.getParentWorkspaceNodeID(), link.getChildWorkspaceNodeID(),
+        jdbcTemplate.update(insertNodeSql, link.getParentWorkspaceNodeID(), link.getChildWorkspaceNodeID(),
                 link.getChildURI());
+    }
+    
+    private void setNodeAsDeleted(WorkspaceNode node) {
+        
+        String updateNodeSql = "UPDATE node SET status = ? WHERE workspace_node_id = ?";
+        jdbcTemplate.update(updateNodeSql, WorkspaceNodeStatus.NODE_DELETED.toString(), node.getWorkspaceNodeID());
+        node.setStatus(WorkspaceNodeStatus.NODE_DELETED);
     }
     
 }
 
 class WorkspaceRowMapper implements RowMapper<Workspace> {
 
+    @Override
     public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
         
         URL topNodeArchiveURL = null;
@@ -1101,6 +1205,7 @@ class WorkspaceRowMapper implements RowMapper<Workspace> {
 
 class WorkspaceNodeRowMapper implements RowMapper<WorkspaceNode> {
 
+    @Override
     public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
         
             int archiveNodeID = -1;

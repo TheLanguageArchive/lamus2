@@ -62,6 +62,7 @@ public class WorkspaceExportRunnerTest {
     @Mock WorkspaceDao mockWorkspaceDao;
 //    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock NodeExporterFactory mockNodeExporterFactory;
+    @Mock DeletedNodesExportHandler mockDeletedNodesExportHandler;
     
     @Mock NodeExporter mockNodeExporter;
     
@@ -80,7 +81,7 @@ public class WorkspaceExportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory);
+        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockDeletedNodesExportHandler);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -140,6 +141,9 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
             
             oneOf(mockNodeExporter).exportNode(null, testNode);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockDeletedNodesExportHandler).exploreDeletedNodes(mockWorkspace);
                 then(exporting.is("finished"));
         }});
         

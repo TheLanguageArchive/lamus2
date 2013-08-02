@@ -142,6 +142,23 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID);
     
     /**
+     * Retrieves a collection containing the parent nodes of the node with the
+     * given ID.
+     * 
+     * @param workspaceNodeID ID of the child node
+     * @return Collection of nodes that have the given node as child
+     */
+    public Collection<WorkspaceNode> getParentWorkspaceNodes(int workspaceNodeID);
+    
+    /**
+     * Retrieves a collection containing the nodes that were deleted
+     * and have no parent.
+     * @param workspaceNodeID ID of the workspace
+     * @return Collection of deleted nodes that have no parent
+     */
+    public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceNodeID);
+    
+    /**
      * Updates the Workspace URL of the given node.
      * 
      * @param node WorkspaceNode object to be updated
