@@ -117,12 +117,15 @@ public class WorkspaceSteps {
     private int deletedNodeArchiveID;
     private int deletedNodeWsID;
     
+    private TreeSnapshot selectedTreeArchiveSnapshot;
+    
     
     @BeforeScenario
     public void beforeEachScenario() throws IOException {
-        WorkspaceStepsHelper.clearLamusDatabaseAndFilesystem(this.lamusDataSource, this.workspaceBaseDirectory);
-        WorkspaceStepsHelper.clearCsDatabaseAndFilesystem(this.corpusstructureDataSource, this.archiveFolder);
+        WorkspaceStepsHelper.clearLamusDatabase(this.lamusDataSource);
+        WorkspaceStepsHelper.clearCsDatabase(this.corpusstructureDataSource);
         WorkspaceStepsHelper.clearAmsDatabase(this.amsDataSource);
+        WorkspaceStepsHelper.clearDirectories(this.archiveFolder, this.workspaceBaseDirectory, this.trashCanFolder);
         clearVariables();
     }
     
@@ -257,7 +260,9 @@ public class WorkspaceSteps {
         this.createdWorkspaceID = workspaceID;
         this.createdWorkspaceTopNodeArchiveID = topNodeArchiveID;
         
-        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(topNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        this.selectedTreeArchiveSnapshot = WorkspaceStepsHelper.createSelectedTreeArchiveSnapshot(this.corpusStructureDB, this.archiveObjectsDB, this.createdWorkspaceTopNodeArchiveID);
+        
+        OurURL nodeArchiveURL = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(topNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
         String nodeArchiveFilename = FilenameUtils.getName(nodeArchiveURL.getPath());
         
         // filesystem
@@ -628,6 +633,14 @@ public class WorkspaceSteps {
         
         
         //TODO some more checks?
+    }
+    
+    @Then("no changes were made to the archive")
+    public void noChangesWereMadeToTheArchive() {
+        
+        TreeSnapshot finalSelectedTreeSnapshot = WorkspaceStepsHelper.createSelectedTreeArchiveSnapshot(this.corpusStructureDB, this.archiveObjectsDB, this.createdWorkspaceTopNodeArchiveID);
+        boolean snapshotsAreSimilar = finalSelectedTreeSnapshot.equals(this.selectedTreeArchiveSnapshot);
+        assertTrue("Snapshot of the selected tree different from expected", snapshotsAreSimilar);
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

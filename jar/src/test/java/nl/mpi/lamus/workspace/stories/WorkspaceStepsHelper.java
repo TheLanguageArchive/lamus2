@@ -25,10 +25,14 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -400,7 +404,7 @@ public class WorkspaceStepsHelper {
         }
     }
     
-    static void clearCsDatabaseAndFilesystem(DataSource corpusstructureDataSource, File archiveFolder) throws IOException {
+    static void clearCsDatabase(DataSource corpusstructureDataSource) {
         
 //        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(corpusstructureDataSource);
 //        
@@ -420,11 +424,9 @@ public class WorkspaceStepsHelper {
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(corpusstructureDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
-        
-        FileUtils.cleanDirectory(archiveFolder);
     }
     
-    static void clearLamusDatabaseAndFilesystem(DataSource lamusDataSource, File workspaceBaseDirectory) throws IOException {
+    static void clearLamusDatabase(DataSource lamusDataSource) {
         
 //        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(lamusDataSource);
 //        
@@ -442,8 +444,6 @@ public class WorkspaceStepsHelper {
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(lamusDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
-        
-        FileUtils.cleanDirectory(workspaceBaseDirectory);
     }
     
     static void clearAmsDatabase(DataSource amsDataSource) {
@@ -479,6 +479,31 @@ public class WorkspaceStepsHelper {
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(amsDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
+    }
+    
+    static void clearDirectories(File archiveDirectory, File workspaceBaseDirectory, File trashcanDirectory) throws IOException {
         
+        FileUtils.cleanDirectory(archiveDirectory);
+        FileUtils.cleanDirectory(workspaceBaseDirectory);
+        FileUtils.cleanDirectory(trashcanDirectory);
+    }
+    
+    static TreeSnapshot createSelectedTreeArchiveSnapshot(CorpusStructureDB csDB, ArchiveObjectsDB aoDB, int selectedNode) {
+        
+        Timestamp topNodeTimestamp = aoDB.getObjectTimestamp(NodeIdUtils.TONODEID(selectedNode));
+        String topNodeChecksum = aoDB.getObjectChecksum(NodeIdUtils.TONODEID(selectedNode));
+        NodeSnapshot topNodeSnapshot = new NodeSnapshot(NodeIdUtils.TONODEID(selectedNode), topNodeTimestamp, topNodeChecksum);
+        List<NodeSnapshot> otherNodeSnapshots = new ArrayList<NodeSnapshot>();
+        
+        String[] descendantsIDs = csDB.getDescendants(NodeIdUtils.TONODEID(selectedNode), -1, "*");
+        for(String descendantID : descendantsIDs) {
+            Timestamp descendantTimestamp = aoDB.getObjectTimestamp(descendantID);
+            String descendantChecksum = aoDB.getObjectChecksum(descendantID);
+            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantID, topNodeTimestamp, topNodeChecksum);
+            otherNodeSnapshots.add(descendantSnapshot);
+        }
+        
+        TreeSnapshot treeSnapshot = new TreeSnapshot(topNodeSnapshot, otherNodeSnapshots);
+        return treeSnapshot;
     }
 }
