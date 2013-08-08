@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.stories;
+package nl.mpi.lamus.workspace.stories.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,9 +138,9 @@ public class WorkspaceStoriesConfig {
         corpusstructureDataSource = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.HSQL)
                 .setName("corpusstructure")
-                .addScript("classpath:hsql_corpusstructure_drop.sql")
-                .addScript("classpath:hsql_corpusstructure_create.sql")
-                .addScript("classpath:hsql_corpusstructure_insert_basic.sql")
+                .addScript("hsql_corpusstructure_drop.sql")
+                .addScript("hsql_corpusstructure_create.sql")
+                .addScript("hsql_corpusstructure_insert_basic.sql")
                 .build();
     }
     
@@ -188,9 +188,9 @@ public class WorkspaceStoriesConfig {
         amsDataSource = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.HSQL)
                 .setName("ams2")
-                .addScript("classpath:hsql_ams2_drop.sql")
-                .addScript("classpath:hsql_ams2_create.sql")
-                .addScript("classpath:hsql_ams2_insert_basic.sql")
+                .addScript("hsql_ams2_drop.sql")
+                .addScript("hsql_ams2_create.sql")
+                .addScript("hsql_ams2_insert_basic.sql")
                 .build();
     }
     

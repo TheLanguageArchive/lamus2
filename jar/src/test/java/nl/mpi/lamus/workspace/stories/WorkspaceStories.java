@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.stories;
 
+import nl.mpi.lamus.workspace.stories.config.WorkspaceStoriesConfig;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;

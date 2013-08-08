@@ -14,32 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.stories;
+package nl.mpi.lamus.workspace.stories.utils;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 /**
  *
  * @author guisil
  */
-public class NodeSnapshot {
+public class TreeSnapshot {
     
-    private String id;
-    private Timestamp timestamp;
-    private String checksum;
+    private NodeSnapshot topNodeSnapshot;
+    private List<NodeSnapshot> otherNodesSnapshots;
     
-    public NodeSnapshot(String id, Timestamp timestamp, String checksum) {
-        this.id = id;
-        this.timestamp = timestamp;
-        this.checksum = checksum;
+    public TreeSnapshot(NodeSnapshot topNodeSnapshot, List<NodeSnapshot> otherNodesSnapshot) {
+        this.topNodeSnapshot = topNodeSnapshot;
+        this.otherNodesSnapshots = otherNodesSnapshot;
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + (this.id != null ? this.id.hashCode() : 0);
-        hash = 97 * hash + (this.timestamp != null ? this.timestamp.hashCode() : 0);
-        hash = 97 * hash + (this.checksum != null ? this.checksum.hashCode() : 0);
+        int hash = 3;
+        hash = 53 * hash + (this.topNodeSnapshot != null ? this.topNodeSnapshot.hashCode() : 0);
+        hash = 53 * hash + (this.otherNodesSnapshots != null ? this.otherNodesSnapshots.hashCode() : 0);
         return hash;
     }
 
@@ -51,16 +48,15 @@ public class NodeSnapshot {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NodeSnapshot other = (NodeSnapshot) obj;
-        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+        final TreeSnapshot other = (TreeSnapshot) obj;
+        if (this.topNodeSnapshot != other.topNodeSnapshot && (this.topNodeSnapshot == null || !this.topNodeSnapshot.equals(other.topNodeSnapshot))) {
             return false;
         }
-        if (this.timestamp != other.timestamp && (this.timestamp == null || !this.timestamp.equals(other.timestamp))) {
-            return false;
-        }
-        if ((this.checksum == null) ? (other.checksum != null) : !this.checksum.equals(other.checksum)) {
+        if (this.otherNodesSnapshots != other.otherNodesSnapshots && (this.otherNodesSnapshots == null || !this.otherNodesSnapshots.equals(other.otherNodesSnapshots))) {
             return false;
         }
         return true;
     }
+    
+    
 }

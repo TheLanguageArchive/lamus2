@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.stories;
+package nl.mpi.lamus.workspace.stories.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,7 +54,7 @@ public class WorkspaceStepsHelper {
         
     static URL copyFileToArchiveFolder(File archiveFolder, String filename) throws IOException {
 
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files/" + filename);
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files/" + filename);
         File testFile = new File(archiveFolder, filename);
         OutputStream testOut = new FileOutputStream(testFile);
         IOUtils.copy(testIn, testOut);
@@ -66,7 +66,7 @@ public class WorkspaceStepsHelper {
     
     static void copyArchiveFromOriginalLocation(File archiveFolder) throws IOException {
         
-        URL testArchiveTopNodeUrl = WorkspaceStepsHelper.class.getClassLoader().getResource("test_mini_archive/parent_collection.cmdi");
+        URL testArchiveTopNodeUrl = WorkspaceStepsHelper.class.getClassLoader().getResource("test_files/test_mini_archive/parent_collection.cmdi");
         
         File testArchiveTopNodeDirectoryOriginalLocation = 
                 new File(FilenameUtils.getFullPathNoEndSeparator(testArchiveTopNodeUrl.getPath()));
@@ -77,7 +77,7 @@ public class WorkspaceStepsHelper {
     static void copyWorkspaceFromOriginalLocation(File workspaceFolder, int workspaceID, String topNodeFileName) throws IOException {
         
         URL testWorkspaceTopNodeUrl = WorkspaceStepsHelper.class.getClassLoader().
-                getResource("test_workspace" + workspaceID + File.separator + topNodeFileName);
+                getResource("test_files/test_workspace" + workspaceID + File.separator + topNodeFileName);
         
         File testArchiveNodeDirectoryOriginalLocation = 
                 new File(FilenameUtils.getFullPathNoEndSeparator(testWorkspaceTopNodeUrl.getPath()));
@@ -102,7 +102,7 @@ public class WorkspaceStepsHelper {
                 + "VALUES (:nodeid, :url, :crawltime, :onsite, :readrights, :writerights, :pid, :accesslevel);";
         map.clear();
         map.put("nodeid", "" + nodeID);
-        map.put("url", fileURL.toString()); //"http://someserver.mpi.nl/corpora/Node_CMDIfied_IMDI.cmdi");
+        map.put("url", fileURL.toString());
         map.put("crawltime", new Timestamp(Calendar.getInstance().getTimeInMillis()).toString());
         map.put("onsite", Boolean.toString(true));
         map.put("readrights", "everybody");
@@ -258,7 +258,7 @@ public class WorkspaceStepsHelper {
                 workspaceID, testFile);
         
         workspaceDirectory.mkdirs();
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files/" + topNodeArchiveID + ".cmdi");
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files/" + topNodeArchiveID + ".cmdi");
         OutputStream testOut = new FileOutputStream(testFile);
         IOUtils.copy(testIn, testOut);
     }
@@ -332,14 +332,14 @@ public class WorkspaceStepsHelper {
         
         workspaceDirectory.mkdirs();
         
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + topNodeArchiveID + ".cmdi" + type);
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + topNodeArchiveID + ".cmdi" + type);
         OutputStream testOut = new FileOutputStream(topNodeFile);
         IOUtils.copy(testIn, testOut);
         
         if("resource".equals(type)) {
-            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + childNodeArchiveID + ".pdf");
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childNodeArchiveID + ".pdf");
         } else if("metadata".equals(type)) {
-            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("example_archive_files_linked/" + childNodeArchiveID + ".cmdi");
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childNodeArchiveID + ".cmdi");
         }
         testOut = new FileOutputStream(childFile);
         IOUtils.copy(testIn, testOut);
