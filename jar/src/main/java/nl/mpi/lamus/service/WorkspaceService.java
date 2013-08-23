@@ -15,10 +15,12 @@
  */
 package nl.mpi.lamus.service;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.apache.commons.fileupload.FileItem;
 
 /**
  *
@@ -94,4 +96,12 @@ public interface WorkspaceService extends Serializable {
      */
     public Collection<WorkspaceNode> getChildNodes(int nodeID);
     
+    /**
+     * Uploads the given files into the workspace.
+     * 
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @param fileItems Files to be uploaded
+     */
+    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
 }

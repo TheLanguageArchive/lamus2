@@ -31,6 +31,8 @@ import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import org.apache.commons.fileupload.FileItem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -48,6 +50,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
+    @Mock private WorkspaceUploader mockWorkspaceUploader;
     
     public LamusWorkspaceServiceTest() {
     }
@@ -62,7 +65,7 @@ public class LamusWorkspaceServiceTest {
     
     @Before
     public void setUp() {
-        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao);
+        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao, mockWorkspaceUploader);
     }
     
     @After
@@ -293,5 +296,22 @@ public class LamusWorkspaceServiceTest {
         Collection<WorkspaceNode> retrievedChildNodes = service.getChildNodes(nodeID);
         assertNotNull("Returned list of nodes should not be null", retrievedChildNodes);
         assertEquals("Returned list of nodes is different from expected", expectedChildNodes, retrievedChildNodes);
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspaceWithAccess() {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceUploader).uploadFiles(workspaceID, fileItems);
+        }});
+        
+        service.uploadFilesIntoWorkspace(userID, workspaceID, fileItems);
     }
 }

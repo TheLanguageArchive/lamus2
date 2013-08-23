@@ -32,8 +32,10 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
+import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
+import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -54,6 +56,7 @@ public class LamusWorkspaceNodeFactoryTest {
     
     @Mock TestReferencingMetadataDocumentHandleCarrier mockTestReferencingMetadataDocumentHandleCarrier;
     @Mock MetadataDocumentType mockMetadataDocumentType;
+    @Mock TestReferenceHandleCarrier mockTestReferenceHandleCarrier;
     
     public LamusWorkspaceNodeFactoryTest() {
     }
@@ -149,7 +152,68 @@ public class LamusWorkspaceNodeFactoryTest {
         assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);
     }
     
+    @Test
+    public void workspaceResourceNodeCorrectlyInitialised() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        final int archiveNodeID = 100;
+        final URL nodeURL = new URL("file:/archive/folder/file.txt");
+        final String displayValue = FilenameUtils.getName(nodeURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
+        final String nodeMimetype = "";
+        final String nodePid = UUID.randomUUID().toString();
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_VIRTUAL; //TODO change this
+        
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, archiveNodeID, nodeURL, nodeURL);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle("(type=" + nodeMimetype + ")"); //TODO CHANGE THIS
+        expectedNode.setType(nodeType);
+        expectedNode.setFormat(nodeMimetype);
+        expectedNode.setPid(nodePid);
+        expectedNode.setStatus(nodeStatus);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockTestReferenceHandleCarrier).getHandle(); will(returnValue(nodePid));
+        }});
+        
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceResourceNode(workspaceID, archiveNodeID, nodeURL, mockTestReferenceHandleCarrier, nodeType, nodeMimetype);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void workspaceNodeFromFile() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final URL originURL = new URL("file:/local/folder/file.txt");
+        final URL workspaceURL = new URL("file:/workspace/folder/file.txt");
+        final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
+        final String nodeMimetype = "";
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED; //TODO change this
+        
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setOriginURL(originURL);
+        expectedNode.setWorkspaceURL(workspaceURL);
+        expectedNode.setType(nodeType);
+        expectedNode.setFormat(nodeMimetype);
+        expectedNode.setStatus(nodeStatus);
+        
+        
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(workspaceID, originURL, workspaceURL, nodeType, nodeMimetype, nodeStatus);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
     interface TestReferencingMetadataDocumentHandleCarrier extends ReferencingMetadataDocument, HandleCarrier {
 
+    }
+    
+    interface TestReferenceHandleCarrier extends Reference, HandleCarrier {
+        
     }
 }

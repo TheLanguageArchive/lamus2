@@ -265,7 +265,7 @@ public class WorkspaceStepsHelper {
     
     static void insertArchiveInDBFromScript(DataSource corpusstructureDataSource) {
         
-        String scriptPath = "hsql_corpusstructure_insert.sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_corpusstructure_insert.sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(corpusstructureDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
@@ -273,7 +273,7 @@ public class WorkspaceStepsHelper {
     
     static void insertAmsDataInDBFromScript(DataSource amsDataSource) {
         
-        String scriptPath = "hsql_ams2_insert.sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_ams2_insert.sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(amsDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
@@ -281,7 +281,7 @@ public class WorkspaceStepsHelper {
     
     static void insertWorkspaceInDBFromScript(DataSource lamusDataSource, int workspaceID) {
         
-        String scriptPath = "hsql_lamus2_insertws" + workspaceID + FilenameUtils.EXTENSION_SEPARATOR + "sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_lamus2_insertws" + workspaceID + FilenameUtils.EXTENSION_SEPARATOR + "sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(lamusDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
@@ -420,7 +420,7 @@ public class WorkspaceStepsHelper {
 //        template.update(deleteArchiveObjectsSql, map);
 //        template.update(deleteAccessGroupsSql, map);
         
-        String scriptPath = "hsql_corpusstructure_delete.sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_corpusstructure_delete.sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(corpusstructureDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
@@ -440,7 +440,7 @@ public class WorkspaceStepsHelper {
 //        template.update(deleteNodeSql, map);
 //        template.update(deleteWorkspaceSql, map);
         
-        String scriptPath = "hsql_lamus2_delete.sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_lamus2_delete.sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(lamusDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);
@@ -475,7 +475,7 @@ public class WorkspaceStepsHelper {
 //        template.update(deletePrincipalSql, map);
         
         
-        String scriptPath = "hsql_ams2_delete.sql";
+        String scriptPath = "nl/mpi/lamus/workspace/stories/utils/hsql_ams2_delete.sql";
         Resource scriptResource = new ClassPathResource(scriptPath);
         JdbcTemplate template = new JdbcTemplate(amsDataSource);
         JdbcTestUtils.executeSqlScript(template, scriptResource, false);

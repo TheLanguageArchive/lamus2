@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import java.io.File;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -22,6 +23,8 @@ import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import org.apache.commons.fileupload.FileItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +40,14 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceAccessChecker nodeAccessChecker;
     private final WorkspaceManager workspaceManager;
     protected final WorkspaceDao workspaceDao;
+    protected final WorkspaceUploader workspaceUploader;
 
     public LamusWorkspaceService(WorkspaceAccessChecker accessChecker, WorkspaceManager workspaceManager,
-            WorkspaceDao workspaceDao) {
+            WorkspaceDao workspaceDao, WorkspaceUploader workspaceUploader) {
         this.nodeAccessChecker = accessChecker;
         this.workspaceManager = workspaceManager;
         this.workspaceDao = workspaceDao;
+        this.workspaceUploader = workspaceUploader;
     }
     
     
@@ -157,5 +162,22 @@ public class LamusWorkspaceService implements WorkspaceService {
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
         
         return this.workspaceDao.getChildWorkspaceNodes(nodeID);
+    }
+
+    /**
+     * @see WorkspaceService#uploadFilesIntoWorkspace(java.lang.String, int, java.util.Collection)
+     */
+    @Override
+    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
+        
+        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+            
+            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Throw an exception instead?
+            logger.error("Cannot upload files to workspace with ID " + workspaceID);
+        } else {
+        
+            this.workspaceUploader.uploadFiles(workspaceID, fileItems);
+        }
     }
 }

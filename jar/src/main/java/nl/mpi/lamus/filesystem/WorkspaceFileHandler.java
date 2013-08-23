@@ -17,6 +17,7 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -55,6 +56,16 @@ public interface WorkspaceFileHandler {
     public void copyResourceFile(WorkspaceNode workspaceNode,
             File originNodeFile, File targetNodeFile)
             throws WorkspaceNodeFilesystemException;
+    
+    /**
+     * Copies the given file to the given location
+     * 
+     * @param workspaceID ID of the workspace
+     * @param originFile File object corresponding to the file origin
+     * @param targetNodeFile File object corresponding to the target file
+     */
+    public void copyFile(int workspaceID, File originFile, File targetNodeFile)
+            throws WorkspaceFilesystemException;
     
     /**
      * Gets a StreamResult object based on the given file.

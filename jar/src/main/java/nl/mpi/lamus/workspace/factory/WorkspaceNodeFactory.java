@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.factory;
 
 import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
@@ -64,4 +65,18 @@ public interface WorkspaceNodeFactory {
      */
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
             Reference resourceReference, WorkspaceNodeType type, String mimetype);
+
+    /**
+     * Creates a WorkspaceNode with the given values.
+     * 
+     * @param workspaceID ID of the workspace to which the node should be connected
+     * @param originURL URL of the original file location (mostly for uploaded files)
+     * @param workspaceURL URL of the file location in the workspace
+     * @param type Type of the node
+     * @param mimetype Mimetype of the file
+     * @param status Status of the node
+     * @return 
+     */
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
+            WorkspaceNodeType type, String mimetype, WorkspaceNodeStatus status);
 }

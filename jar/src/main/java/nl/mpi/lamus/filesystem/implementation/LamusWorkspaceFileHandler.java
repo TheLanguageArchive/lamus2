@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -88,6 +89,22 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         }
     }
     
+    //TODO standardise the copy methods
+    
+    /**
+     * @see WorkspaceFileHandler#copyFile(int, java.io.File, java.io.File)
+     */
+    @Override
+    public void copyFile(int workspaceID, File originFile, File targetNodeFile) throws WorkspaceFilesystemException {
+        try {
+            FileUtils.copyFile(originFile, targetNodeFile);
+        } catch (IOException ioex) {
+            String errorMessage = "Problem writing file " + targetNodeFile.getAbsolutePath();
+            logger.error(errorMessage, ioex);
+            throw new WorkspaceFilesystemException(errorMessage, workspaceID, ioex);
+        }
+    }
+    
     /**
      * @see WorkspaceFileHandler#getStreamResultForWorkspaceNodeFile(java.io.File)
      */
@@ -107,4 +124,5 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
         return workspaceNodeFile;
     }
+
 }

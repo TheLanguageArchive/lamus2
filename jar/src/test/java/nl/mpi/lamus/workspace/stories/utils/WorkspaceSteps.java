@@ -36,6 +36,10 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.util.OurURL;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.annotations.*;
@@ -395,9 +399,45 @@ public class WorkspaceSteps {
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
         
         //TODO more assertions missing?
-        boolean result = this.workspaceService.submitWorkspace(currentUserID, createdWorkspaceID/*, keepUnlinkedFiles*/);
+        boolean result = this.workspaceService.submitWorkspace(this.currentUserID, this.createdWorkspaceID/*, keepUnlinkedFiles*/);
         
         assertTrue("Result of the workspace submission should be true", result);
+    }
+    
+    @When("that user chooses to upload a metadata file into the workspace")
+    public void thatUserChoosesToUploadAMetadataFileIntoTheWorkspace() throws IOException {
+        
+        assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
+        assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
+        assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
+        assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
+        
+        Collection<File> filesToUpload = new ArrayList<File>();
+        File fileToUpload = new File("test_files/files_to_upload/RandomMetadataFile.cmdi");
+        filesToUpload.add(fileToUpload);
+        
+        
+        InputStream inStream = WorkspaceSteps.class.getClassLoader().getResourceAsStream("test_files/files_to_upload/RandomMetadataFile.cmdi");
+        int availableBytes = inStream.available();
+        
+        File outFile = new File("/temp/someTempFile.cmdi");
+        FileItem fileItem = new DiskFileItem("fileUpload", "text/x-cmdi+xml", Boolean.FALSE, "RandomMetadataFile.cmdi", availableBytes, outFile);
+        OutputStream outStream = fileItem.getOutputStream();
+        
+        int read = 0;
+        byte[] bytes = new byte[1024];
+        while ((read = inStream.read(bytes)) != -1) {
+            outStream.write(bytes, 0, read);
+        }
+        
+        inStream.close();
+        outStream.flush();
+        outStream.close();
+
+        Collection<FileItem> fileItems = new ArrayList<FileItem>();
+        fileItems.add(fileItem);
+        
+        this.workspaceService.uploadFilesIntoWorkspace(this.currentUserID, this.createdWorkspaceID, fileItems);
     }
     
     @Then("the workspace is created in the database")

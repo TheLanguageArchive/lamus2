@@ -138,9 +138,9 @@ public class WorkspaceStoriesConfig {
         corpusstructureDataSource = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.HSQL)
                 .setName("corpusstructure")
-                .addScript("hsql_corpusstructure_drop.sql")
-                .addScript("hsql_corpusstructure_create.sql")
-                .addScript("hsql_corpusstructure_insert_basic.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_corpusstructure_drop.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_corpusstructure_create.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_corpusstructure_insert_basic.sql")
                 .build();
     }
     
@@ -188,9 +188,9 @@ public class WorkspaceStoriesConfig {
         amsDataSource = new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.HSQL)
                 .setName("ams2")
-                .addScript("hsql_ams2_drop.sql")
-                .addScript("hsql_ams2_create.sql")
-                .addScript("hsql_ams2_insert_basic.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_ams2_drop.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_ams2_create.sql")
+                .addScript("classpath:nl/mpi/lamus/workspace/stories/config/hsql_ams2_insert_basic.sql")
                 .build();
     }
     

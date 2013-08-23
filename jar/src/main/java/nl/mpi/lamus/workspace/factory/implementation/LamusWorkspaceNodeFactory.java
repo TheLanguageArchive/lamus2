@@ -26,6 +26,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,12 +101,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
             Reference resourceReference, WorkspaceNodeType type, String mimetype) {
         
-        String name = this.archiveFileHelper.getFileTitle(url.toString());
+        String name = FilenameUtils.getName(url.getPath());
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID,
                 url, url);
         node.setName(name);
-        node.setTitle("(type=" + mimetype + ")");
+        node.setTitle("(type=" + mimetype + ")"); //TODO CHANGE THIS
         node.setType(type);
         node.setFormat(mimetype);
         
@@ -122,6 +123,28 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         //ALWAYS?
         node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
         
+        
+        return node;
+    }
+
+    /**
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URL, java.net.URL,
+     *      nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus)
+     */
+    @Override
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
+        WorkspaceNodeType type, String mimetype, WorkspaceNodeStatus status) {
+        
+        WorkspaceNode node = new LamusWorkspaceNode();
+        node.setWorkspaceID(workspaceID);
+        String displayValue = FilenameUtils.getName(FilenameUtils.getName(workspaceURL.getPath()));
+        node.setName(displayValue);
+        node.setTitle(displayValue);
+        node.setOriginURL(originURL);
+        node.setWorkspaceURL(workspaceURL);
+        node.setType(type);
+        node.setFormat(mimetype);
+        node.setStatus(status);
         
         return node;
     }
