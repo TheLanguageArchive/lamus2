@@ -27,7 +27,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ResourceReference;
@@ -55,7 +55,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     @Autowired
     private NodeDataRetriever nodeDataRetriever;
     @Autowired
-    private WorkspaceNodeLinker workspaceNodeLinker;
+    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
     @Autowired
     private WorkspaceFileImporter workspaceFileImporter;
     @Autowired
@@ -88,7 +88,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
                     workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory);
         } else {
             return new MetadataNodeImporter(
-                    archiveObjectsDB, workspaceDao, metadataApi, nodeDataRetriever, workspaceNodeLinker, workspaceFileImporter,
+                    archiveObjectsDB, workspaceDao, metadataApi, nodeDataRetriever, workspaceNodeLinkManager, workspaceFileImporter,
                     workspaceNodeFactory, workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory,
                     workspaceFileHandler, workspaceNodeExplorer);
         }

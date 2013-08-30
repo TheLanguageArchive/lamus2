@@ -16,16 +16,15 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -40,11 +39,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * @see WorkspaceNodeLinker
+ * @see WorkspaceNodeLinkManager
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
-public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
+public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     
     private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
@@ -53,7 +52,7 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
     private final WorkspaceFileHandler workspaceFileHandler;
     
     @Autowired
-    public LamusWorkspaceNodeLinker(WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
+    public LamusWorkspaceNodeLinkManager(WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
             WorkspaceNodeLinkFactory nodeLinkFactory, WorkspaceDao wsDao, MetadataAPI mdAPI,
             WorkspaceFileHandler wsFileHandler) {
         
@@ -65,7 +64,7 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
     }
 
     /**
-     * @see WorkspaceNodeLinker#linkNodesWithReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
+     * @see WorkspaceNodeLinkManager#linkNodesWithReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
      */
     @Override
     public void linkNodesWithReference(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
@@ -92,7 +91,7 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
     }
 
     /**
-     * @see WorkspaceNodeLinker#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceNodeLinkManager#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) {
@@ -147,6 +146,55 @@ public class LamusWorkspaceNodeLinker implements WorkspaceNodeLinker {
         }
         
         this.workspaceDao.addWorkspaceNodeLink(nodeLink);
+    }
+
+    @Override
+    public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) {
+        
+        MetadataDocument tempParentDocument;
+        try {
+            tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
+        } catch (IOException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        } catch (MetadataException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        }
+        
+        ReferencingMetadataDocument parentDocument;
+        if(tempParentDocument instanceof ReferencingMetadataDocument) {
+            parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+        } else {
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+
+        try {
+            URI childURI;
+            
+            if(!childNode.getPid().isEmpty()) {
+                childURI = new URI(childNode.getPid());
+            } else {
+                childURI = childNode.getWorkspaceURL().toURI();
+            }
+            
+            Reference childReference = parentDocument.getDocumentReferenceByURI(childURI);
+            parentDocument.removeDocumentReference(childReference);
+            
+            StreamResult parentStreamResult =
+                    this.workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(parentNode.getWorkspaceURL()));
+                
+            this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
+                
+        } catch (URISyntaxException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        } catch (MetadataException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        } catch (IOException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        } catch (TransformerException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        }
+        
+        this.workspaceDao.deleteWorkspaceNodeLink(parentNode.getWorkspaceID(), parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
     }
     
 }

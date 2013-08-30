@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
@@ -52,7 +52,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
-    @Mock private WorkspaceNodeLinker mockWorkspaceNodeLinker;
+    @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
@@ -72,7 +72,7 @@ public class LamusWorkspaceServiceTest {
     public void setUp() {
         service = new LamusWorkspaceService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinker);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager);
     }
     
     @After
@@ -330,17 +330,33 @@ public class LamusWorkspaceServiceTest {
         final int workspaceID = 1;
         final String userID = "testUser";
         
-        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
-        
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNodeLinker).linkNodes(mockParentNode, mockChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
         }});
         
         service.linkNodes(userID, mockParentNode, mockChildNode);
     }
     
     //TODO linkNodesWithoutAccess
+    
+    @Test
+    public void unlinkNodesWithAcces() {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodes(mockParentNode, mockChildNode);
+        }});
+        
+        service.unlinkNodes(userID, mockParentNode, mockChildNode);
+    }
+    
+    //TODO unlinkNodesWithoutAccess
 }

@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -42,15 +42,15 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceManager workspaceManager;
     protected final WorkspaceDao workspaceDao;
     private final WorkspaceUploader workspaceUploader;
-    private final WorkspaceNodeLinker workspaceNodeLinker;
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
 
     public LamusWorkspaceService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
-            WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinker wsnLinker) {
+            WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager) {
         this.nodeAccessChecker = aChecker;
         this.workspaceManager = wsManager;
         this.workspaceDao = wsDao;
         this.workspaceUploader = wsUploader;
-        this.workspaceNodeLinker = wsnLinker;
+        this.workspaceNodeLinkManager = wsnLinkManager;
     }
     
     
@@ -177,11 +177,29 @@ public class LamusWorkspaceService implements WorkspaceService {
             
             //TODO Inform the user of the reason why the workspace can't be submitted
             //TODO Throw an exception instead?
-            logger.error("Cannot upload files to workspace with ID " + parentNode.getWorkspaceID());
+            logger.error("Cannot link files in workspace with ID " + parentNode.getWorkspaceID());
         } else {
             
-            this.workspaceNodeLinker.linkNodes(parentNode, childNode);
+            this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
         }
+    }
+    
+    /**
+     * @see WorkspaceService#unlinkNodes(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
+        
+        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, parentNode.getWorkspaceID())) {
+            
+            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Throw an exception instead?
+            logger.error("Cannot unlink files in workspace with ID " + parentNode.getWorkspaceID());
+        } else {
+            
+            this.workspaceNodeLinkManager.unlinkNodes(parentNode, childNode);
+        }
+
     }
 
     /**

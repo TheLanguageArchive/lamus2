@@ -24,7 +24,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.jmock.Expectations;
@@ -57,7 +57,7 @@ public class TopNodeImporterTest {
     @Mock WorkspaceDao mockWsDao;
     @Mock MetadataAPI metadataAPI;
     @Mock NodeDataRetriever mockNodeDataRetriever;
-    @Mock WorkspaceNodeLinker mockNodeLinker;
+    @Mock WorkspaceNodeLinkManager mockNodeLinkManager;
     @Mock WorkspaceFileImporter mockFileImporter;
     @Mock WorkspaceNodeFactory mockNodeFactory;
     @Mock WorkspaceParentNodeReferenceFactory mockParentNodeReferenceFactory;
@@ -83,7 +83,7 @@ public class TopNodeImporterTest {
     public void setUp() {
         
         topNodeImporter = new TopNodeImporter(mockAoDB, mockWsDao, metadataAPI, mockNodeDataRetriever,
-                mockNodeLinker, mockFileImporter, mockNodeFactory, mockParentNodeReferenceFactory,
+                mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockParentNodeReferenceFactory,
                 mockWsNodeLinkFactory, mockFileHandler, mockWorkspaceNodeExplorer);
         
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);

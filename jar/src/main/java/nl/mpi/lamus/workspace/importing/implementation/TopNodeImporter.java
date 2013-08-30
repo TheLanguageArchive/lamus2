@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,12 +44,12 @@ public class TopNodeImporter {
     
     @Autowired
     public TopNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
-	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinker nodeLinker, WorkspaceFileImporter fileImporter,
+	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
             WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
 	    WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
 	    WorkspaceNodeExplorer workspaceNodeExplorer) {
 
-	metadataNodeImporter = new MetadataNodeImporter(aoDB, wsDao, mAPI, nodeDataRetriever, nodeLinker, fileImporter, nodeFactory,
+	metadataNodeImporter = new MetadataNodeImporter(aoDB, wsDao, mAPI, nodeDataRetriever, nodeLinkManager, fileImporter, nodeFactory,
                 parentNodeReferenceFactory, wsNodelinkFactory, fileHandler, workspaceNodeExplorer);
     }
     

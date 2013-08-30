@@ -168,7 +168,7 @@ public interface WorkspaceDao {
     /**
      * Updates the Archive URL of the given node.
      * 
-     * @param node  WorkspaceNode object to be updated
+     * @param node WorkspaceNode object to be updated
      */
     public void updateNodeArchiveURL(WorkspaceNode node);
     
@@ -177,4 +177,12 @@ public interface WorkspaceDao {
      * @param link WorkspaceNodeLink object to insert into the database
      */
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink);
+    
+    /**
+     * Deletes a link between two nodes (parent and child) from the database.
+     * @param workspaceID ID of the workspace
+     * @param parentNodeID ID of the parent node
+     * @param childNodeID ID of the child node
+     */
+    public void deleteWorkspaceNodeLink(int workspaceID, int parentNodeID, int childNodeID);
 }

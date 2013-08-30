@@ -34,7 +34,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
@@ -60,7 +60,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private final MetadataAPI metadataAPI;
     
     private final NodeDataRetriever nodeDataRetriever;
-    private final WorkspaceNodeLinker workspaceNodeLinker;
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
     private final WorkspaceFileImporter workspaceFileImporter;
     
     private final WorkspaceNodeFactory workspaceNodeFactory;
@@ -73,7 +73,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     
     @Autowired
     public MetadataNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
-	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinker nodeLinker, WorkspaceFileImporter fileImporter,
+	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
             WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
 	    WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
 	    WorkspaceNodeExplorer workspaceNodeExplorer) {
@@ -83,7 +83,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	this.metadataAPI = mAPI;
         
         this.nodeDataRetriever = nodeDataRetriever;
-        this.workspaceNodeLinker = nodeLinker;
+        this.workspaceNodeLinkManager = nodeLinkManager;
         this.workspaceFileImporter = fileImporter;
         
 	this.workspaceNodeFactory = nodeFactory;
@@ -161,7 +161,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         workspaceDao.addWorkspaceNode(childNode);
         
         
-        workspaceNodeLinker.linkNodesWithReference(parentNode, childNode, childLink);
+        workspaceNodeLinkManager.linkNodesWithReference(parentNode, childNode, childLink);
         
         
         try {

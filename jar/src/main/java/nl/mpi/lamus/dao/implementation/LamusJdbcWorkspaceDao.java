@@ -175,7 +175,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         String deleteNodeLinkSql = "DELETE FROM node_link WHERE parent_workspace_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeSql = "DELETE FROM node WHERE workspace_ID = :workspace_id;";
-        String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id";
+        String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
@@ -617,6 +617,24 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
         logger.info("Link added to the database. Parent node ID: " + nodeLink.getParentWorkspaceNodeID()
                 + "; Child node ID: " + nodeLink.getChildWorkspaceNodeID());
+    }
+    
+    /**
+     * @see WorkspaceDao#deleteWorkspaceNodeLink(int, int, int)
+     */
+    @Override
+    public void deleteWorkspaceNodeLink(int workspaceID, int parentNodeID, int childNodeID) {
+        
+        logger.debug("Deleting link between nodes " + parentNodeID + " and " + childNodeID + ", in workspace " + workspaceID);
+        
+        String deleteNodeLinkSql =
+                "DELETE FROM node_link WHERE parent_workspace_node_id = :parent_node_id AND child_workspace_node_id = :child_node_id;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("parent_node_id", parentNodeID)
+                .addValue("child_node_id", childNodeID);
+        this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
+        
+        logger.info("Node link between nodes " + parentNodeID + " and " + childNodeID + ", in workspace " + workspaceID + " was deleted");
     }
 
     

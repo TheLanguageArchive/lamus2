@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -999,6 +1000,29 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Returned list of nodes should be empty", result.isEmpty());
     }
     
+    
+    @Test
+    public void deleteWorkspaceNodeLink() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfRows = countRowsInTable("node_link");
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        WorkspaceNode childNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
+        int intermediateNumberOfRows = countRowsInTable("node_link");
+        assertTrue("Node link was not inserted in the database", intermediateNumberOfRows == initialNumberOfRows + 1);
+        
+        this.workspaceDao.deleteWorkspaceNodeLink(
+                testWorkspace.getWorkspaceID(), parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
+        int finalNumberOfRows = countRowsInTable("node_link");
+        
+        assertTrue("Node link was not deleted from the database", finalNumberOfRows == intermediateNumberOfRows - 1);
+        
+        WorkspaceNodeLink nodeLink = getNodeLinkFromDB(parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
+        assertNull("Node link should not exist in the database", nodeLink);
+    }
+    
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);
@@ -1118,15 +1142,37 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     private Workspace getWorkspaceFromDB(int workspaceID) {
         
         String selectSql = "SELECT * FROM workspace WHERE workspace_id = ?";
-        Workspace workspace = (Workspace) jdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
+        Workspace workspace;
+        try {
+            workspace = (Workspace) jdbcTemplate.queryForObject(selectSql, new WorkspaceRowMapper(), workspaceID);
+        } catch(EmptyResultDataAccessException ex) {
+            workspace = null;
+        }
         return workspace;
     }
     
     private WorkspaceNode getNodeFromDB(int nodeID) {
         
         String selectSql = "SELECT * FROM node WHERE workspace_node_id = ?";
-        WorkspaceNode node = (WorkspaceNode) jdbcTemplate.queryForObject(selectSql, new WorkspaceNodeRowMapper(), nodeID);
+        WorkspaceNode node;
+        try {
+            node = (WorkspaceNode) jdbcTemplate.queryForObject(selectSql, new WorkspaceNodeRowMapper(), nodeID);
+        } catch(EmptyResultDataAccessException ex) {
+            node = null;
+        }
         return node;
+    }
+    
+    private WorkspaceNodeLink getNodeLinkFromDB(int parentID, int childID) {
+        
+        String selectSql = "SELECT * FROM node_link WHERE parent_workspace_node_id = ? AND child_workspace_node_id = ?";
+        WorkspaceNodeLink nodeLink;
+        try {
+            nodeLink = (WorkspaceNodeLink) jdbcTemplate.queryForObject(selectSql, new WorkspaceNodeLinkRowMapper(), parentID, childID);
+        } catch(EmptyResultDataAccessException ex) {
+            nodeLink = null;
+        }
+        return nodeLink;
     }
 
     private Workspace copyWorkspace(Workspace ws) {
@@ -1261,5 +1307,26 @@ class WorkspaceNodeRowMapper implements RowMapper<WorkspaceNode> {
                     rs.getString("format"));
             return workspaceNode;
     }
- 
+}
+
+class WorkspaceNodeLinkRowMapper implements RowMapper<WorkspaceNodeLink> {
+        
+    @Override
+    public WorkspaceNodeLink mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+        URI childURI = null;
+        if(rs.getString("child_uri") != null) {
+            try {
+                childURI = new URI(rs.getString("child_uri"));
+            } catch (URISyntaxException ex) {
+                fail("Child URI has an invalid syntax; null used instead");
+            }
+        }
+
+        WorkspaceNodeLink workspaceNodeLink = new LamusWorkspaceNodeLink(
+                rs.getInt("parent_workspace_node_id"),
+                rs.getInt("child_workspace_node_id"),
+                childURI);
+        return workspaceNodeLink;
+    }
 }

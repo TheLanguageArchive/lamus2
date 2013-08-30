@@ -19,11 +19,11 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 
 /**
- * Provides a way to link two nodes in the database.
+ * Provides a way to link or unlink nodes in a workspace.
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceNodeLinker {
+public interface WorkspaceNodeLinkManager {
     
     /**
      * Links, in the workspace, two nodes that were already linked in the archive
@@ -43,4 +43,11 @@ public interface WorkspaceNodeLinker {
      */
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
     
+    /**
+     * Unlinks, in the workspace, two nodes.
+     * 
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     */
+    public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
 }

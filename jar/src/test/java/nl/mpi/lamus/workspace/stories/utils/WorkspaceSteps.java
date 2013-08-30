@@ -133,6 +133,9 @@ public class WorkspaceSteps {
     private WorkspaceNode uploadedFileNode;
     private WorkspaceNode uploadedFileParentNode;
     
+    private WorkspaceNode unlinkedParentNode;
+    private WorkspaceNode unlinkedChildNode;
+    
     
     @BeforeScenario
     public void beforeEachScenario() throws IOException {
@@ -162,6 +165,9 @@ public class WorkspaceSteps {
         this.uploadedFileInOriginalLocation = null;
         this.uploadedFileNode = null;
         this.uploadedFileParentNode = null;
+        
+        this.unlinkedParentNode = null;
+        this.unlinkedChildNode = null;
     }
     
     
@@ -521,6 +527,20 @@ public class WorkspaceSteps {
         this.workspaceService.linkNodes(this.currentUserID, wsTopNode, this.uploadedFileNode);
     }
     
+    @When("that user chooses to unlink a $type file from the workspace tree")
+    public void thatUserChoosesToUnlinkAFileFromTheWorkspaceTree() {
+        
+        WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
+        this.unlinkedParentNode = wsTopNode;
+        
+        Collection<WorkspaceNode> childNodes = this.workspaceDao.getChildWorkspaceNodes(wsTopNode.getWorkspaceNodeID());
+        assertTrue("Should have only one child", childNodes.size() == 1);
+        WorkspaceNode childNode = childNodes.iterator().next();
+        this.unlinkedChildNode = childNode;
+        
+        this.workspaceService.unlinkNodes(this.currentUserID, wsTopNode, childNode);
+    }
+    
     @Then("the workspace is created in the database")
     public void theWorkspaceIsCreatedInTheDatabase() throws InterruptedException {
         
@@ -835,6 +855,44 @@ public class WorkspaceSteps {
         }
         
         assertTrue("Child reference not found", referenceFound);
+    }
+    
+    @Then("that file in no longer linked to the former parent node in the database")
+    public void thatFileIsNoLongerLinkedToTheFormerParentnodeInTheDatabase() {
+        
+        Collection<WorkspaceNode> childNodes =
+                this.workspaceDao.getChildWorkspaceNodes(this.unlinkedParentNode.getWorkspaceNodeID());
+        
+        boolean nodeFound = Boolean.FALSE;
+        for(WorkspaceNode node : childNodes) {
+            if(this.unlinkedChildNode.getWorkspaceNodeID() == node.getWorkspaceNodeID()) {
+                nodeFound = true;
+                break;
+            }
+        }
+        
+        assertFalse("Unlinked node should not be linked to the former parent", nodeFound);
+    }
+    
+    @Then("that file is no longer included in the former parent node, as a reference")
+    public void thatFileIsNoLongerIncludedInTheFormerParentNodeAsAReference() throws IOException, MetadataException, URISyntaxException {
+        
+        MetadataDocument tempParentDocument =
+                this.metadataAPI.getMetadataDocument(this.unlinkedParentNode.getWorkspaceURL());
+        assertTrue("Parent document not a ReferencingMetadataDocument", tempParentDocument instanceof ReferencingMetadataDocument);
+
+        ReferencingMetadataDocument parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+        List<Reference> references = parentDocument.getDocumentReferences();
+        
+        boolean referenceFound = false;
+        for(Reference ref : references) {
+            if(this.unlinkedChildNode.getWorkspaceURL().toURI().equals(ref.getURI())) {
+                referenceFound = true;
+                break;
+            }
+        }
+        
+        assertFalse("Reference to unlinked child should not exist in the former parent", referenceFound);
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
@@ -48,7 +48,7 @@ public class LamusWorkspaceTreeServiceTest {
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
-    @Mock private WorkspaceNodeLinker mockWorkspaceNodeLinker;
+    @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     
     public LamusWorkspaceTreeServiceTest() {
     }
@@ -65,7 +65,7 @@ public class LamusWorkspaceTreeServiceTest {
     public void setUp() {
         service = new LamusWorkspaceTreeService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinker);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager);
     }
     
     @After
