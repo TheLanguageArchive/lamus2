@@ -119,10 +119,15 @@ public class LamusProperties {
     @Value("${workspace_upload_directory_name}")
     private String workspaceUploadDirectoryName;
     @Bean
-    @Qualifier("workspaceUploadDirectory")
-    public File workspaceUploadDirectory() {
-        return new File(workspaceBaseDirectory, workspaceUploadDirectoryName);
+    @Qualifier("workspaceUploadDirectoryName")
+    public String workspaceUploadDirectoryName() {
+        return workspaceUploadDirectoryName;
     }
+//    @Bean
+//    @Qualifier("workspaceUploadDirectory")
+//    public File workspaceUploadDirectory() {
+//        return new File(workspaceBaseDirectory, workspaceUploadDirectoryName);
+//    }
 
     @Value("${trashcan_base_directory}")
     private String trashCanBaseDirectory;

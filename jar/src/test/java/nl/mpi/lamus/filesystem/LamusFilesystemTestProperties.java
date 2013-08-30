@@ -39,4 +39,10 @@ public class LamusFilesystemTestProperties {
         File baseDirectory = testFolder.newFolder("workspace_base_directory");
         return baseDirectory;
     }
+    
+    @Bean
+    @Qualifier("workspaceUploadDirectoryName")
+    public String workspaceUploadDirectoryName() {
+        return "upload";
+    }
 }

@@ -40,6 +40,10 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
+    
+    @Autowired
+    @Qualifier("workspaceUploadDirectoryName")
+    private String workspaceUploadDirectoryName;
 
     /**
      * @see WorkspaceDirectoryHandler#createWorkspaceDirectory(nl.mpi.lamus.workspace.model.Workspace)
@@ -49,7 +53,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         
         logger.debug("Creating directory for workspace " + workspaceID);
         
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceDirectory = this.getDirectoryForWorkspace(workspaceID);
         
         if(workspaceDirectory.exists()) {
             logger.info("Directory for workspace " + workspaceID + " already exists");
@@ -69,7 +73,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     @Override
     public void deleteWorkspaceDirectory(int workspaceID) throws IOException {
         
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceDirectory = this.getDirectoryForWorkspace(workspaceID);
         
         if(!workspaceDirectory.exists()) {
             logger.info("Directory for workspace " + workspaceID + " doesn't exist");
@@ -86,7 +90,34 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
         
         logger.debug("Checking if directory for workspace " + workspace.getWorkspaceID() + " exists");
         
-        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspace.getWorkspaceID());
+        File workspaceDirectory = this.getDirectoryForWorkspace(workspace.getWorkspaceID());
         return workspaceDirectory.exists();
+    }
+
+    @Override
+    public File getDirectoryForWorkspace(int workspaceID) {
+        return new File(this.workspaceBaseDirectory, "" + workspaceID);
+    }
+
+    @Override
+    public File getUploadDirectoryForWorkspace(int workspaceID) {
+        File workspaceDirectory = this.getDirectoryForWorkspace(workspaceID);
+        return new File(workspaceDirectory, this.workspaceUploadDirectoryName);
+    }
+    
+    @Override
+    public void createUploadDirectoryForWorkspace(int workspaceID) throws WorkspaceFilesystemException {
+        File workspaceUploadDirectory = getUploadDirectoryForWorkspace(workspaceID);
+        
+        if(workspaceUploadDirectory.exists()) {
+            logger.info("Upload directory for workspace " + workspaceID + " already exists");
+        } else {
+            if(workspaceUploadDirectory.mkdirs()) {
+                logger.info("Upload directory for workspace " + workspaceID + " successfully created");
+            } else {
+                String errorMessage = "Upload directory for workspace " + workspaceID + " could not be created";
+                throw new WorkspaceFilesystemException(errorMessage, workspaceID, null);
+            }
+        }
     }
 }

@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.importing;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -64,15 +65,14 @@ public interface NodeDataRetriever {
     
     /**
      * Invokes typechecking for the given resource.
-     * @param nodeArchiveID ID of the resource in the archive
-     * @param resourceReference Reference to the resource, from the parent metadata file
      * @param resourceURL URL of the resource
-     * @param resourceURLWithContext URL with the actual location of the resource
      * @return results of the typechecker
      * @throws TypeCheckerException if the typechecker runs into some problem
      */
-    public TypecheckedResults getResourceFileChecked(int nodeArchiveID, Reference resourceReference,
-            OurURL resourceURL, OurURL resourceURLWithContext) throws TypeCheckerException;
+    public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException;
+    
+    //TODO Should this replace the other method???
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
     
     /**
      * Verifies the results of the typechecker.

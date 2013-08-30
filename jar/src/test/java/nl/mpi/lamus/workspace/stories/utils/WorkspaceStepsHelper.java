@@ -27,6 +27,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import javax.sql.DataSource;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -83,6 +86,14 @@ public class WorkspaceStepsHelper {
                 new File(FilenameUtils.getFullPathNoEndSeparator(testWorkspaceTopNodeUrl.getPath()));
         
         FileUtils.copyDirectory(testArchiveNodeDirectoryOriginalLocation, workspaceFolder);
+    }
+    
+    static void copyFileToWorkspaceUploadDirectory(File workspaceUploadDirectory, String fileLocation) throws IOException {
+        
+        URL fileUrl = WorkspaceStepsHelper.class.getClassLoader().getResource(fileLocation);
+        File fileOrigin = new File(FilenameUtils.getFullPath(fileUrl.getPath()), FilenameUtils.getName(fileUrl.getPath()));
+        File fileDestination = new File(workspaceUploadDirectory, FilenameUtils.getName(fileUrl.getPath()));
+        FileUtils.copyFile(fileOrigin, fileDestination);
     }
     
     static void insertNodeInCSDB(DataSource corpusstructureDataSource, int nodeID, URL fileURL, int nodeType, String nodeFormat, boolean isFirstNode, int parentNodeID) {
@@ -254,7 +265,7 @@ public class WorkspaceStepsHelper {
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
         insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                topNodePID, topNodeFormat,
+                topNodePID, topNodeFormat, "testNode",
                 workspaceID, testFile);
         
         workspaceDirectory.mkdirs();
@@ -323,11 +334,11 @@ public class WorkspaceStepsHelper {
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
         insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                topNodePID, topNodeFormat,
+                topNodePID, topNodeFormat, "testNode",
                 workspaceID, topNodeFile);
         insertWorkspaceNode(insertString, template, map, topNodeArchiveID, childNodeArchiveID, null, childOriginFile.toURI().toURL(),
                 childNodeType, WorkspaceNodeStatus.NODE_UPLOADED,
-                childNodePID, childNodeFormat,
+                childNodePID, childNodeFormat, "testNode",
                 workspaceID, childFile);
         
         workspaceDirectory.mkdirs();
@@ -345,7 +356,7 @@ public class WorkspaceStepsHelper {
         IOUtils.copy(testIn, testOut);
     }
     
-    static void insertWorkspace(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
+    static private void insertWorkspace(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
             int workspaceID, String userID, String currentDate) {
         
         insertString = "INSERT INTO workspace (workspace_id, user_id, start_date, session_start_date, status, message) "
@@ -360,9 +371,9 @@ public class WorkspaceStepsHelper {
         template.update(insertString, map);
     }
     
-    static void insertWorkspaceNode(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
+    static private void insertWorkspaceNode(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
             int parentNodeArchiveID, int nodeArchiveID, URL nodeArchiveURL, URL nodeOriginURL, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
-            String nodePID, String nodeFormat,
+            String nodePID, String nodeFormat, String nodeName,
             int workspaceID, File nodeFile) throws MalformedURLException {
         
         insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_node_id, archive_url, origin_url, name, type, workspace_url, status, pid, format) "
@@ -393,7 +404,7 @@ public class WorkspaceStepsHelper {
             map.put("top_node_archive_url", nodeArchiveURL.toString());
             map.put("workspace_id", "" + workspaceID);
             template.update(insertString, map);
-        } else {
+        } else if (parentNodeArchiveID > -1) {
             insertString = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
                     + "VALUES (:parent_workspace_node_id, :child_workspace_node_id, :child_uri);";
             map.clear();
@@ -402,6 +413,20 @@ public class WorkspaceStepsHelper {
             map.put("child_uri", nodeFile.toURI().toString());
             template.update(insertString, map);
         }
+    }
+    
+    static void insertNodeInWSDB(DataSource lamusDataSource, File file, int workspaceID,
+            WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus, String nodePID, String nodeFormat) throws MalformedURLException {
+        
+        String insertString = "";
+        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(lamusDataSource);
+        Map<String, String> map = new HashMap<String, String>();
+        
+        URL fileURL = file.toURI().toURL();
+        String filename = FilenameUtils.getName(fileURL.getPath());
+        
+        insertWorkspaceNode(insertString, template, map,
+                -2, -1, null, fileURL, nodeType, nodeStatus, nodePID, nodeFormat, filename, workspaceID, file);
     }
     
     static void clearCsDatabase(DataSource corpusstructureDataSource) {
@@ -505,5 +530,19 @@ public class WorkspaceStepsHelper {
         
         TreeSnapshot treeSnapshot = new TreeSnapshot(topNodeSnapshot, otherNodeSnapshots);
         return treeSnapshot;
+    }
+    
+    static Collection<WorkspaceNode> findWorkspaceNodeForFile(WorkspaceDao workspaceDao, int workspaceID, File file) {
+        
+        Collection<WorkspaceNode> workspaceNodes = workspaceDao.getNodesForWorkspace(workspaceID);
+        Collection<WorkspaceNode> nodesFound = new ArrayList<WorkspaceNode>();
+        for(WorkspaceNode currentNode : workspaceNodes) {
+            String nodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
+            if(file.getName().equals(nodeFilename)) {
+                nodesFound.add(currentNode);
+            }
+        }
+        
+        return nodesFound;
     }
 }

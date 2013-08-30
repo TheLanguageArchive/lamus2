@@ -175,7 +175,7 @@ public class MetadataNodeImporterTest {
                     testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinker).linkNodes(null, testChildNode, null);
+            oneOf(mockWorkspaceNodeLinker).linkNodesWithReference(null, testChildNode, null);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildNode, mockTestReferencingMetadataDocumentWithHandle);
         
@@ -215,7 +215,7 @@ public class MetadataNodeImporterTest {
                     testChildURL.toURL(), testPid, mockTestNonReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinker).linkNodes(null, testChildNode, null);
+            oneOf(mockWorkspaceNodeLinker).linkNodesWithReference(null, testChildNode, null);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
@@ -364,7 +364,7 @@ public class MetadataNodeImporterTest {
                     testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinker).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildNode, mockTestReferencingMetadataDocumentWithHandle);
             
@@ -412,7 +412,7 @@ public class MetadataNodeImporterTest {
                     testChildURL.toURL(), testPid, mockTestNonReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinker).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
@@ -515,7 +515,7 @@ public class MetadataNodeImporterTest {
                     testChildURL.toURL(), testPid, mockTestReferencingMetadataDocumentWithHandle);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinker).linkNodes(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinker).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildNode, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
         }});

@@ -17,20 +17,33 @@
 package nl.mpi.lamus.workspace.upload.implementation;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.typechecking.FileTypeHandler;
+import nl.mpi.lamus.typechecking.TypecheckedResults;
+import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
+import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.util.OurURL;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,25 +52,47 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import static org.hamcrest.Matchers.*;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author guisil
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({FileUtils.class})
 public class LamusWorkspaceUploaderTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    private WorkspaceUploader uploader;
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Mock NodeDataRetriever mockNodeDataRetriever;
-    @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock TypecheckerConfiguration mockTypecheckerConfiguration;
+    @Mock FileTypeHandler mockFileTypeHandler;
     
-    private File workspaceUploadDirectory = new File("/lamus/workspace/upload");
+    @Mock FileItem mockFileItem;
+    @Mock InputStream mockInputStream;
+    @Mock File mockUploadedFile;
+    @Mock File mockWorkspaceTopNodeFile;
+    @Mock WorkspaceNode mockWorkspaceTopNode;
+    @Mock TypecheckedResults mockTypecheckedResults;
+    
+    private WorkspaceUploader uploader;
+    
+    private File workspaceBaseDirectory = new File("/lamus/workspaces");
+    private String workspaceUploadDirectoryName = "upload";
+//    private File workspaceUploadDirectory = new File("/lamus/workspace/upload");
     
     public LamusWorkspaceUploaderTest() {
     }
@@ -72,8 +107,10 @@ public class LamusWorkspaceUploaderTest {
     
     @Before
     public void setUp() {
-        uploader = new LamusWorkspaceUploader(mockNodeDataRetriever, mockWorkspaceFileHandler, mockWorkspaceNodeFactory, mockWorkspaceDao);
-        ReflectionTestUtils.setField(uploader, "workspaceUploadDirectory", workspaceUploadDirectory);
+        uploader = new LamusWorkspaceUploader(mockNodeDataRetriever,
+                mockWorkspaceDirectoryHandler, mockWorkspaceNodeFactory,
+                mockWorkspaceDao, mockTypecheckerConfiguration,
+                mockFileTypeHandler);
     }
     
     @After
@@ -84,52 +121,86 @@ public class LamusWorkspaceUploaderTest {
      * Test of uploadFiles method, of class LamusWorkspaceUploader.
      */
     @Test
-    public void uploadFiles() {
+    public void uploadFiles() throws Exception {
         
         final int workspaceID = 1;
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchivePath = new File("/archive/some/node.cmdi");
+        
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
+        final String fileItemName = "randomWrittenResourceFile.txt";
+        
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        final File uploadedFile = new File(workspaceUploadDirectory, fileItemName);
+        final URI uploadedFileURI = uploadedFile.toURI();
+        final URL uploadedFileURL = uploadedFileURI.toURL();
+        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
+        final String fileMimetype = "text/plain";
+        
         final Collection<FileItem> fileItems = new ArrayList<FileItem>();
+        fileItems.add(mockFileItem);
+        // only one item in this case, so the expectations don't need a loop
+        
+        //TODO Is the originURL really necessary??
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, -1, null, null);
+        uploadedNode.setName(fileItemName);
+        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
+        uploadedNode.setType(fileType);
+        uploadedNode.setFormat(fileMimetype);
+        uploadedNode.setWorkspaceURL(uploadedFileURL);
+        
         
         //TODO copy each file from its current location into the workspace directory
         //TODO create a new node for each file and add it to the database, with appropriate links
         //TODO how to check the linked files?
-        
-        for(FileItem item : fileItems) {
             
             context.checking(new Expectations() {{
                 
-                //typechecker
-                    //nodeDataRetriever.shouldResourceBeTypechecked - based on its eventual location in the workspace
-                    //nodeDataRetriever.getResourceTypechecked
-                    //nodeDataRetriever.verifyTypecheckResults
-
-//                oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLink, childNodeUrlWithContext, childNodeArchiveID);
-//                    will(returnValue(true));
-//                
-//                oneOf(mockNodeDataRetriever).getResourceFileChecked(childNodeArchiveID, mockChildLink, childNodeUrl, childNodeUrlWithContext);
-//                    will(returnValue(mockTypecheckedResults));
-//                
-//                oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childNodeUrl, mockChildLink, mockTypecheckedResults);
-//                
-//                oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(childNodeType));
-//                oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
-
+                oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+                oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+                oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+                
+                oneOf(mockFileItem).getName(); will(returnValue(fileItemName));
+                oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
+                
+                // Assume that all resource files should be typechecked, independently of size?
+                
+                oneOf(mockFileItem).getInputStream(); will(returnValue(mockInputStream));
+//                oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileOurURL);
+                oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, fileItemName);
+                    will(returnValue(mockTypecheckedResults));
+                    
+                //TODO Is this method really necessary???
+//                oneOf(mockNodeDataRetriever).verifyTypecheckedResults(fileOurUrl, mockChildLink, mockTypecheckedResults);
+                    
+                oneOf(mockWorkspaceTopNode).getArchiveURL(); will(returnValue(workspaceTopNodeArchiveURL));
+                
+                oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
+                    will(returnValue(acceptableJudgement));
+                oneOf(mockFileTypeHandler).isResourceArchivable(
+                        with(equal(uploadedFileOurURL)), with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+                    will(returnValue(Boolean.TRUE));
+                
                 
                 //everything ok?
                 
-                //copyFileToUnlinkedNodesFolder
-                    // workspaceFileHandler.copyFile
-//                oneOf(mockWorkspaceFileHandler).copyFile(workspaceID, workspaceUploadDirectory, workspaceUploadDirectory);
+                oneOf(mockFileItem).write(mockUploadedFile);
+
+                oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(fileType));
+                oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
                 
-                //workspaceNodeFactory.getNewWorkspaceNodeFromFile - from destination file
-//                oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, null, null, WorkspaceNodeType.UNKNOWN, null, WorkspaceNodeStatus.NODE_ISCOPY);
+                oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
+                        workspaceID, null, uploadedFileURL, fileType, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    will(returnValue(uploadedNode));
 
-                //workspaceDao.addWorkspaceNode
-//                oneOf(mockWorkspaceDao).addWorkspaceNode(null);
+                oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
             }});
-        }
-        
-
-        
+            
+            stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
+            stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
         
         //checklinks???
         //checklinks???

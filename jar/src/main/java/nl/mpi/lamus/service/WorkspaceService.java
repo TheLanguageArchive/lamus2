@@ -97,6 +97,15 @@ public interface WorkspaceService extends Serializable {
     public Collection<WorkspaceNode> getChildNodes(int nodeID);
     
     /**
+     * Links two nodes in a workspace.
+     * 
+     * @param userID ID of the user
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     */
+    public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode);
+    
+    /**
      * Uploads the given files into the workspace.
      * 
      * @param userID ID of the user

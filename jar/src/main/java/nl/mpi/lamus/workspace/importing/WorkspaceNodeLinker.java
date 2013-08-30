@@ -26,11 +26,21 @@ import nl.mpi.metadata.api.model.Reference;
 public interface WorkspaceNodeLinker {
     
     /**
-     * Links two nodes
+     * Links, in the workspace, two nodes that were already linked in the archive
+     * (for instance, when importing set of nodes from the archive in order to create a workspace).
+     * 
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      * @param childLink Reference to the child node from the parent metadata file
      */
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
+    public void linkNodesWithReference(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
+    
+    /**
+     * Links, in the workspace, two nodes.
+     * 
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     */
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
     
 }

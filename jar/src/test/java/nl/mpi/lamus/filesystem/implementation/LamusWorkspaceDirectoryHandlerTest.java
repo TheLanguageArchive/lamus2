@@ -51,9 +51,14 @@ public class LamusWorkspaceDirectoryHandlerTest {
     
     @Autowired
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
+    
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
+    
+    @Autowired
+    @Qualifier("workspaceUploadDirectoryName")
+    private String workspaceUploadDirectoryName;
     
     public LamusWorkspaceDirectoryHandlerTest() {
     }
@@ -113,8 +118,6 @@ public class LamusWorkspaceDirectoryHandlerTest {
     
     @Test
     public void throwsExceptionWhenWorkspaceDirectoryCreationFails() throws WorkspaceFilesystemException{
-        
-//        testFolder.delete();
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -184,7 +187,8 @@ public class LamusWorkspaceDirectoryHandlerTest {
 
     }
     
-    @Test public void workspaceDirectoryDoesNotExist() {
+    @Test
+    public void workspaceDirectoryDoesNotExist() {
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
@@ -198,4 +202,76 @@ public class LamusWorkspaceDirectoryHandlerTest {
         assertFalse("Workspace directory wasn't supposed to be created", workspaceDirectory.exists());
     }
     
+    @Test
+    public void getDirectoryForWorkspace() {
+        
+        int workspaceID = 1;
+        File expectedDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File retrievedDirectory = this.workspaceDirectoryHandler.getDirectoryForWorkspace(workspaceID);
+        
+        assertEquals("Retrieved directory different from expected", expectedDirectory, retrievedDirectory);
+    }
+    
+    @Test
+    public void getUploadDirectoryForWorkspace() {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File expectedDirectory = new File(workspaceDirectory, "upload");
+        File retrievedDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+        assertEquals("Retrieved directory different from expected", expectedDirectory, retrievedDirectory);
+    }
+    
+    @Test
+    public void uploadDirectoryForWorkspaceNeedsToBeCreated() throws WorkspaceFilesystemException {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUploadDirectoryName);
+        
+        this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
+        
+        assertTrue("Workspace upload directory wasn't created", workspaceUploadDirectory.exists());
+    }
+    
+    @Test
+    public void uploadDirectoryForWorkspaceAlreadyExists() throws WorkspaceFilesystemException {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUploadDirectoryName);
+        boolean isDirectoryCreated = workspaceUploadDirectory.mkdirs();
+        assertTrue("Workspace upload directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Workspace upload directory wasn't created", workspaceUploadDirectory.exists());
+        
+        this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
+        
+        assertTrue("Workspace upload directory wasn't created", workspaceUploadDirectory.exists());
+    }
+    
+    @Test
+    public void throwsExceptionWhenUploadDirectoryForWorkspaceCreationFails() throws WorkspaceFilesystemException{
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        boolean isDirectoryCreated = workspaceDirectory.mkdirs();
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
+        workspaceDirectory.setWritable(false);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUploadDirectoryName);
+
+        String errorMessage = "Upload directory for workspace " + workspaceID + " could not be created";
+        
+        try {
+            this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
+            fail("Exception was not thrown");
+        } catch(WorkspaceFilesystemException ex) {
+            assertEquals(workspaceID, ex.getWorkspaceID());
+            assertEquals(errorMessage, ex.getMessage());
+        }
+
+        assertFalse("Workspace upload directory shouldn't have been created,"
+                + " since there should be no permissions for that.", workspaceUploadDirectory.exists());
+    }
 }

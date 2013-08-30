@@ -579,10 +579,17 @@ public class WorkspaceStoriesConfig {
     }
     
     @Bean
+    @Qualifier("workspaceUploadDirectoryName")
+    public String workspaceUploadDirectoryName() {
+        return "upload";
+    }
+    
+    @Bean
     @Qualifier("customTypecheckerFolderToConfigFileMap")
     public Map<String, String> customTypecheckerFolderToConfigFileMap() {
         
         Map<String, String> mapToReturn = new HashMap<String, String>();
+        mapToReturn.put("dummyLocation", "dummyConfigFile.txt");
         
         return mapToReturn;
     }

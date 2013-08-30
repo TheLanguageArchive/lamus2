@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import nl.mpi.corpusstructure.ArchiveAccessContext;
@@ -160,17 +161,16 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     //TODO review this method
     
     /**
-     * @see NodeDataRetriever#getResourceFileChecked(int, nl.mpi.metadata.api.model.Reference, nl.mpi.util.OurURL, nl.mpi.util.OurURL)
+     * @see NodeDataRetriever#triggerResourceFileCheck(nl.mpi.util.OurURL)
      */
     @Override
-    public TypecheckedResults getResourceFileChecked(int nodeArchiveID, Reference resourceReference,
-            OurURL resourceURL, OurURL resourceURLWithContext) throws TypeCheckerException {
+    public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException {
         
         String resourceFileName = archiveFileHelper.getFileBasename(resourceURL.toString());
         
         //TODO get file type using typechecker
 
-        fileTypeHandler.checkType(resourceURLWithContext, resourceFileName,/* childType,*/ null);
+        fileTypeHandler.checkType(resourceURL, resourceFileName,/* childType,*/ null);
         
         //TODO what to pass as node type?
         //TODO use mimetype from CMDI?
@@ -178,6 +178,17 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
                 // but anyway these files are already in the archive, so is it really needed to perform a type check?
             
         //TODO etc...        
+        
+        return fileTypeHandler.getTypecheckedResults();
+    }
+    
+    /**
+     * @see NodeDataRetriever#triggerResourceFileCheck(java.io.InputStream, java.lang.String)
+     */
+    @Override
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException {
+        
+        fileTypeHandler.checkType(resourceInputStream, resourceFilename, null);
         
         return fileTypeHandler.getTypecheckedResults();
     }

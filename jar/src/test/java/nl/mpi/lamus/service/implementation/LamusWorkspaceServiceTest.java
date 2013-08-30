@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinker;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
@@ -51,6 +52,10 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
+    @Mock private WorkspaceNodeLinker mockWorkspaceNodeLinker;
+    
+    @Mock private WorkspaceNode mockParentNode;
+    @Mock private WorkspaceNode mockChildNode;
     
     public LamusWorkspaceServiceTest() {
     }
@@ -65,7 +70,9 @@ public class LamusWorkspaceServiceTest {
     
     @Before
     public void setUp() {
-        service = new LamusWorkspaceService(mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao, mockWorkspaceUploader);
+        service = new LamusWorkspaceService(
+                mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
+                mockWorkspaceUploader, mockWorkspaceNodeLinker);
     }
     
     @After
@@ -314,4 +321,26 @@ public class LamusWorkspaceServiceTest {
         
         service.uploadFilesIntoWorkspace(userID, workspaceID, fileItems);
     }
+    
+    //TODO uploadFileIntoWorkspaceWithoutAccess
+    
+    @Test
+    public void linkNodesWithAccess() {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNodeLinker).linkNodes(mockParentNode, mockChildNode);
+        }});
+        
+        service.linkNodes(userID, mockParentNode, mockChildNode);
+    }
+    
+    //TODO linkNodesWithoutAccess
 }

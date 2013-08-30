@@ -161,7 +161,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         workspaceDao.addWorkspaceNode(childNode);
         
         
-        workspaceNodeLinker.linkNodes(parentNode, childNode, childLink);
+        workspaceNodeLinker.linkNodesWithReference(parentNode, childNode, childLink);
         
         
         try {

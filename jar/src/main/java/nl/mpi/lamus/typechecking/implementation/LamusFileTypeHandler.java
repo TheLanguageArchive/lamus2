@@ -33,7 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see FileTypeHandler
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Component
@@ -189,6 +190,110 @@ public class LamusFileTypeHandler implements FileTypeHandler {
             setValues(this.mimetype);
         }
     }
+    
+    /**
+     * @see FileTypeHandler#checkType(java.io.InputStream, java.lang.String, java.lang.String)
+     */
+    @Override
+    public void checkType(InputStream resourceInputStream, String resourceFilename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException {
+        
+        if(mimetype == null) {
+            this.mimetype = "Unknown";
+        } else {
+            this.mimetype = mimetype;
+        }
+        
+        boolean tryName = false; // whether to use a name based method as fallback
+        
+        if ((mimetype == null) || mimetype.equals("Unknown") || mimetype.equals("Unspecified")) {
+            
+//            InputStream iStream = null;
+            
+//            if (resourceURL == null) {
+//                try {
+//                
+//                    logger.debug("LamusFileTypeHandler.checkType: File contents unavailable, using name based method for " + filename);
+//                    tryName = true;
+//                    this.typecheckHandler.typecheck(null, filename.toLowerCase());
+//                    this.analysis = "okay (name)";
+//                    this.mimetype = this.typecheckHandler.getTypecheckMimetype();
+//                    if(this.mimetype == null) {
+//                        String checkResult = this.typecheckHandler.getTypecheckResult();
+//                        logger.warn("LamusFileTypeHandler.checkType: No archivable file type for file NAME: " + filename + "; result: " + checkResult);
+//                        this.mimetype = "Unknown";
+//                        this.analysis = checkResult;
+//                    }
+//                } catch(IOException ioe) {
+//                    String errorMessage = "LamusFileTypeHandler.checkType: File type checker could not access file: " + filename;
+//                    logger.warn(errorMessage);
+//                    this.mimetype = "Unknown"; // do NOT use filename as fallback if file is not accessible
+//                    this.analysis = "Read error for " + filename + " - " + ioe.getMessage();
+//                    throw new TypeCheckerException(errorMessage, ioe);
+//                }
+//            } else {
+                
+                try {
+//                    iStream = resourceURL.openStream();
+//                    if((filename.endsWith("/") || filename.indexOf(".") == -1) &&
+//                        !"file".equals(resourceURL.getProtocol())) {
+//                        filename += "/index.html"; // assumption for http: and similar ending with "/"
+//                    }
+
+//                    this.typecheckHandler.typecheck(iStream, filename.toLowerCase());
+                    this.typecheckHandler.typecheck(resourceInputStream, resourceFilename.toLowerCase());
+
+                    this.mimetype = this.typecheckHandler.getTypecheckMimetype();
+
+                    if (this.mimetype == null) {
+//                        logger.warn("LamusFileTypeHandler.checkType: No archivable file type for FILE: " + resourceURL + " (" + filename + "); result: "+
+                        logger.warn("LamusFileTypeHandler.checkType: No archivable file type for FILE: " + resourceFilename + "; result: " +
+                                this.typecheckHandler.getTypecheckResult());
+                        this.mimetype = "Unknown";
+                        this.analysis = this.typecheckHandler.getTypecheckResult();
+                    } else {
+                        this.analysis = "okay (content, name)";
+                    }
+                } catch (IOException ioe) {
+                    String errorMessage = "LamusFileTypeHandler.checkType: File type checker could not access file: " + resourceFilename; //+ resourceURL;
+                    logger.warn(errorMessage);
+                    this.mimetype = "Unknown";
+                    this.analysis = "Read error for " + /*resourceURL*/ resourceFilename + " - " + ioe.getMessage();
+                    throw new TypeCheckerException(errorMessage, ioe);
+                } //finally {
+//                    IOUtils.closeQuietly(iStream);
+//                }
+//            }
+                
+                
+                
+                // do NOT derive file name from URL, as the URL could be an extension-free WorkSpace URL...
+//                try {
+//                    iStream = resourceURL.openStream();
+//                } catch (IOException ioex) {
+//                    String errorMessage = "LamusFileTypeHandler.checkType: error opening stream to check file";
+//                    logger.error(errorMessage, ioex);
+//                    throw new TypeCheckerException(errorMessage, ioex);
+//                }
+                
+                //TODO ????
+//                if ((filename.endsWith("/") || filename.indexOf(".")==-1) &&
+//                    !"file".equals(resourceURL.getProtocol())) {
+//                    filename += "/index.html"; // assumption for http: and similar ending with "/"
+//                }
+                //TODO ????
+//            }
+            
+            String checkResult = this.typecheckHandler.getTypecheckResult();
+//            setValuesForResult(checkResult, tryName, resourceURL, filename);
+            setValuesForResult(checkResult, tryName, resourceFilename);
+        } else {
+        
+            setValues(this.mimetype);
+        }
+    }
+    
+    
+    
 
     /**
      * @see FileTypeHandler#setValues(java.lang.String)
@@ -230,6 +335,27 @@ public class LamusFileTypeHandler implements FileTypeHandler {
                 logger.warn("LamusFileTypeHandler.checkType: No archivable file type for file NAME: " + resourceURL + " result: " + checkResult);
             } else {
                 logger.warn("LamusFileTypeHandler.checkType: No archivable file type for FILE: " + resourceURL+" (" + filename+") result: " + checkResult);
+            }
+            this.mimetype = "Unknown"; // but do NOT use filename as fallback
+            this.analysis = checkResult;
+        }
+        this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
+    }
+    
+    //TODO Should this replace the other method???
+    private void setValuesForResult(String checkResult, boolean isCheckingName, String filename) {
+        
+        if(isCheckingName) {
+            this.analysis = "okay (name)";
+        } else {
+            this.analysis = "okay (content, name)";
+        }
+        this.mimetype = FileType.resultToMimeType(checkResult);
+        if (this.mimetype == null) { // no archivable file format, or wrong name
+            if(isCheckingName) {
+                logger.warn("LamusFileTypeHandler.checkType: No archivable file type for file NAME: " + filename + " result: " + checkResult);
+            } else {
+                logger.warn("LamusFileTypeHandler.checkType: No archivable file type for FILE: " + filename + "; result: " + checkResult);
             }
             this.mimetype = "Unknown"; // but do NOT use filename as fallback
             this.analysis = checkResult;

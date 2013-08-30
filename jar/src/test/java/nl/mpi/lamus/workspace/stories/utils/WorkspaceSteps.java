@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.stories.utils;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import javax.sql.DataSource;
@@ -72,6 +73,10 @@ public class WorkspaceSteps {
     @Qualifier("trashCanBaseDirectory")
     private File trashCanFolder;
     
+    @Autowired
+    @Qualifier("workspaceUploadDirectoryName")
+    private String workspaceUplodaDirectoryName;
+    
 //    private URL topNodeURL;
     
     @Autowired
@@ -123,6 +128,11 @@ public class WorkspaceSteps {
     
     private TreeSnapshot selectedTreeArchiveSnapshot;
     
+//    private List<File> uploadedFiles;
+    private String uploadedFileInOriginalLocation;
+    private WorkspaceNode uploadedFileNode;
+    private WorkspaceNode uploadedFileParentNode;
+    
     
     @BeforeScenario
     public void beforeEachScenario() throws IOException {
@@ -143,6 +153,15 @@ public class WorkspaceSteps {
         this.createdWorkspaceTopNodeWsID = -1;
         this.newlyInsertedNodeUrl = null;
         this.oldNodeArchiveChecksum = null;
+        
+        this.deletedNodeArchiveID = -1;
+        this.deletedNodeWsID = -1;
+        
+        this.selectedTreeArchiveSnapshot = null;
+        
+        this.uploadedFileInOriginalLocation = null;
+        this.uploadedFileNode = null;
+        this.uploadedFileParentNode = null;
     }
     
     
@@ -362,6 +381,47 @@ public class WorkspaceSteps {
         assertTrue("List of parent nodes should be empty", nodeParents.isEmpty());
     }
     
+    @Given("a $type file was uploaded into the workspace")
+    public void aFileWasUploadedIntoTheWorkspace(String type) throws IOException {
+        
+        String filename = null;
+        String fileLocationToUpload = null;
+        WorkspaceNodeType nodeType = null;
+        String fileMimetype = null;
+        if("metadata".equals(type)) {
+            filename = "RandomMetadataFile.cmdi";
+            fileLocationToUpload = "test_files/files_to_upload/" + filename;
+            nodeType = WorkspaceNodeType.METADATA;
+            fileMimetype = "text/x-cmdi+xml";
+        } else if("resource".equals(type)) {
+            filename = "RandomWrittenResourceFile.txt";
+            fileLocationToUpload = "test_files/files_to_upload/" + filename;
+            nodeType = WorkspaceNodeType.RESOURCE_WR;
+            fileMimetype = "text/plain";
+        }
+        
+        this.uploadedFileInOriginalLocation = fileLocationToUpload;
+        
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUplodaDirectoryName);
+        File uploadedFile = new File(workspaceUploadDirectory, FilenameUtils.getName(this.uploadedFileInOriginalLocation));
+        
+        WorkspaceStepsHelper.copyFileToWorkspaceUploadDirectory(workspaceUploadDirectory, fileLocationToUpload);
+        assertTrue("Uploaded file should exist in the upload directory of the workspace", uploadedFile.exists());
+        
+        WorkspaceStepsHelper.insertNodeInWSDB(this.lamusDataSource, uploadedFile,
+                this.createdWorkspaceID, nodeType, WorkspaceNodeStatus.NODE_UPLOADED, null, fileMimetype);
+        
+        
+        Collection<WorkspaceNode> nodesFound =
+                WorkspaceStepsHelper.findWorkspaceNodeForFile(this.workspaceDao, this.createdWorkspaceID, uploadedFile);
+        
+        assertNotNull("Node for uploaded file not found: list null", nodesFound);
+        assertFalse("Node for uploaded file not found: list empty", nodesFound.isEmpty());
+        assertEquals("Found more than one node for uploaded file: list size = " + nodesFound.size(), 1, nodesFound.size());
+        this.uploadedFileNode = nodesFound.iterator().next();
+    }
+    
     
     @When("that user chooses to create a workspace in the node with ID $nodeID")
     public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(int nodeID) {
@@ -404,24 +464,32 @@ public class WorkspaceSteps {
         assertTrue("Result of the workspace submission should be true", result);
     }
     
-    @When("that user chooses to upload a metadata file into the workspace")
-    public void thatUserChoosesToUploadAMetadataFileIntoTheWorkspace() throws IOException {
+    @When("that user chooses to upload a $type file into the workspace")
+    public void thatUserChoosesToUploadAFileIntoTheWorkspace(String type) throws IOException {
         
         assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
         assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
         
-        Collection<File> filesToUpload = new ArrayList<File>();
-        File fileToUpload = new File("test_files/files_to_upload/RandomMetadataFile.cmdi");
-        filesToUpload.add(fileToUpload);
+        String fileLocationToUpload = null;
+        String filename = null;
+        File outFile = null;
+        if("metadata".equals(type)) {
+            filename = "RandomMetadataFile.cmdi";
+            fileLocationToUpload = "test_files/files_to_upload/" + filename;
+             outFile = new File(this.workspaceBaseDirectory, filename);
+        } else if("resource".equals(type)) {
+            filename = "RandomWrittenResourceFile.txt";
+            fileLocationToUpload = "test_files/files_to_upload/" + filename;
+            outFile = new File(this.workspaceBaseDirectory, filename);
+        }
         
         
-        InputStream inStream = WorkspaceSteps.class.getClassLoader().getResourceAsStream("test_files/files_to_upload/RandomMetadataFile.cmdi");
+        InputStream inStream = WorkspaceSteps.class.getClassLoader().getResourceAsStream(fileLocationToUpload);
         int availableBytes = inStream.available();
         
-        File outFile = new File("/temp/someTempFile.cmdi");
-        FileItem fileItem = new DiskFileItem("fileUpload", "text/x-cmdi+xml", Boolean.FALSE, "RandomMetadataFile.cmdi", availableBytes, outFile);
+        FileItem fileItem = new DiskFileItem("fileUpload", "text/x-cmdi+xml", Boolean.FALSE, filename, availableBytes, outFile);
         OutputStream outStream = fileItem.getOutputStream();
         
         int read = 0;
@@ -438,6 +506,19 @@ public class WorkspaceSteps {
         fileItems.add(fileItem);
         
         this.workspaceService.uploadFilesIntoWorkspace(this.currentUserID, this.createdWorkspaceID, fileItems);
+        
+//        this.uploadedFiles = new ArrayList<File>();
+//        this.uploadedFiles.add(fileToUpload);
+        this.uploadedFileInOriginalLocation = fileLocationToUpload;
+    }
+    
+    @When("that user chooses to link the uploaded file to the top node of the workspace")
+    public void thatUserChoosesToLinkTheUploadedFileIntoTheWorkspaceTree() {
+        
+        WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
+        this.uploadedFileParentNode = wsTopNode;
+        
+        this.workspaceService.linkNodes(this.currentUserID, wsTopNode, this.uploadedFileNode);
     }
     
     @Then("the workspace is created in the database")
@@ -683,5 +764,79 @@ public class WorkspaceSteps {
         assertTrue("Snapshot of the selected tree different from expected", snapshotsAreSimilar);
     }
     
+    @Then("the uploaded file is present in the workspace folder")
+    public void theUploadedFileIsPresentInTheWorkspaceFolder() {
+        
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUplodaDirectoryName);
+        File uploadedFile = new File(workspaceUploadDirectory, FilenameUtils.getName(this.uploadedFileInOriginalLocation));
+        
+        assertTrue("File doesn't exist in expected location", uploadedFile.exists());
+    }
+    
+    @Then("the uploaded file is present in the database")
+    public void theUploadedFileIsPresentInTheDatabase() {
+        
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
+        File workspaceUploadDirectory = new File(workspaceDirectory, this.workspaceUplodaDirectoryName);
+        File uploadedFile = new File(workspaceUploadDirectory, FilenameUtils.getName(this.uploadedFileInOriginalLocation));
+        
+        Collection<WorkspaceNode> nodesFound =
+                WorkspaceStepsHelper.findWorkspaceNodeForFile(this.workspaceDao, this.createdWorkspaceID, uploadedFile);
+        
+        assertNotNull("Node for uploaded file not found: list null", nodesFound);
+        assertFalse("Node for uploaded file not found: list empty", nodesFound.isEmpty());
+        assertEquals("Found more than one node for uploaded file: list size = " + nodesFound.size(), 1, nodesFound.size());
+        this.uploadedFileNode = nodesFound.iterator().next();
+    }
+    
+    @Then("the uploaded file has no parent node")
+    public void theUploadedFileHasNoParentNode() {
+        
+        Collection<WorkspaceNode> parentNodes = this.workspaceDao.getParentWorkspaceNodes(this.uploadedFileNode.getWorkspaceNodeID());
+        
+        assertNotNull("Parents list should not be null", parentNodes);
+        assertTrue("Parents list should be empty", parentNodes.isEmpty());
+    }
+    
+    @Then("that file is linked to the parent node in the database")
+    public void thatFileIsLinkedToTheParentNodeInTheDatabase() {
+        
+        Collection<WorkspaceNode> childNodes =
+                this.workspaceDao.getChildWorkspaceNodes(this.uploadedFileParentNode.getWorkspaceNodeID());
+        
+        boolean nodeFound = Boolean.FALSE;
+        for(WorkspaceNode node : childNodes) {
+            if(this.uploadedFileNode.getWorkspaceNodeID() == node.getWorkspaceNodeID()) {
+                nodeFound = true;
+                break;
+            }
+        }
+        
+        assertTrue("Uploaded node not found among child nodes", nodeFound);
+    }
+    
+    @Then("that file is included in the parent node, as a reference")
+    public void thatFileIsIncludedInTheParentNodeAsAReference() throws IOException, MetadataException, URISyntaxException {
+        
+        MetadataDocument tempParentDocument =
+                this.metadataAPI.getMetadataDocument(this.uploadedFileParentNode.getWorkspaceURL());
+        assertTrue("Parent document not a ReferencingMetadataDocument", tempParentDocument instanceof ReferencingMetadataDocument);
+
+        ReferencingMetadataDocument parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+        List<Reference> references = parentDocument.getDocumentReferences();
+        
+        boolean referenceFound = false;
+        for(Reference ref : references) {
+            if(this.uploadedFileNode.getWorkspaceURL().toURI().equals(ref.getURI())) {
+                referenceFound = true;
+                break;
+            }
+        }
+        
+        assertTrue("Child reference not found", referenceFound);
+    }
+    
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF
+    
 }

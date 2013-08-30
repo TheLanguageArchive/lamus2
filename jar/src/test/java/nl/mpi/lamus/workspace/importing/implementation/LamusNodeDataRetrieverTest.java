@@ -259,25 +259,24 @@ public class LamusNodeDataRetrieverTest {
     }
     
     @Test
-    public void testGetResourceFileChecked() throws MalformedURLException, TypeCheckerException {
+    public void testTriggerResourceFileCheck() throws MalformedURLException, TypeCheckerException {
         
-        final int resourceNodeArchiveID = 10;
-        final OurURL resourceURL = new OurURL("file:/some.file.txt");
+        final OurURL resourceOurURL = new OurURL("file:/some.file.txt");
         final String fileBaseName = "some.file.txt";
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileHelper).getFileBasename(resourceURL.toString()); will(returnValue(fileBaseName));
-            oneOf(mockFileTypeHandler).checkType(resourceURL, fileBaseName, null);
+            oneOf(mockArchiveFileHelper).getFileBasename(resourceOurURL.toString()); will(returnValue(fileBaseName));
+            oneOf(mockFileTypeHandler).checkType(resourceOurURL, fileBaseName, null);
             oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
         }});
         
-        TypecheckedResults results = testNodeDataRetriever.getResourceFileChecked(
-                resourceNodeArchiveID, mockReferenceWithHandle, resourceURL, resourceURL);
+        TypecheckedResults results = testNodeDataRetriever.triggerResourceFileCheck(resourceOurURL);
         assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
     }
     
     //TODO test remaining method
+    //TODO Is this really necessary?
     
 //    @Test
 //    public void testVerifyTypecheckedResults() throws MalformedURLException {

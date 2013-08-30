@@ -128,7 +128,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             try {
 
                 // REALLY NECESSARY TO CALL A SEPARATE CLASS FOR THIS?
-                typecheckedResults = nodeDataRetriever.getResourceFileChecked(childNodeArchiveID, childLink, childURL, childURLWithContext);
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childURLWithContext);
 
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";

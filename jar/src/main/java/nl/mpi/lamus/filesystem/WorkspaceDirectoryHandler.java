@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.filesystem;
 
+import java.io.File;
 import java.io.IOException;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -48,4 +49,10 @@ public interface WorkspaceDirectoryHandler {
      * @return true if the directory exists
      */
     public boolean workspaceDirectoryExists(Workspace workspace);
+    
+    public File getDirectoryForWorkspace(int workspaceID);
+    
+    public File getUploadDirectoryForWorkspace(int workspaceID);
+    
+    public void createUploadDirectoryForWorkspace(int workspaceID) throws WorkspaceFilesystemException;
 }

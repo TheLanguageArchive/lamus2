@@ -173,7 +173,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLink, childNodeUrlWithContext, childNodeArchiveID);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).getResourceFileChecked(childNodeArchiveID, mockChildLink, childNodeUrl, childNodeUrlWithContext);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childNodeUrlWithContext);
                 will(returnValue(mockTypecheckedResults));
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childNodeUrl, mockChildLink, mockTypecheckedResults);

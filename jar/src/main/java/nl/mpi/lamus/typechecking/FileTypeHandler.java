@@ -15,12 +15,14 @@
  */
 package nl.mpi.lamus.typechecking;
 
+import java.io.InputStream;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 
 /**
- *
+ * Class used to retrieved and analyse the results from the typechecker.
+ * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface FileTypeHandler {
@@ -69,20 +71,28 @@ public interface FileTypeHandler {
      */
     public void checkType(OurURL resourceURL, String filename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException;
     
+    //TODO Should this replace the other method???
+    public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws TypeCheckerException;
+    
     /**
-     * store the outcome of calculateCV, or override it, as done by DataMoverIn
+     * Stores the outcome of calculateCV, or override it, as done by DataMoverIn
      * @param format a mimetype or Unknown or Unspecified
      */
     public void setValues(String mimetype);
     
     /**
-     * 
-     * @param resourceURL
-     * @param acceptableJudgementForNode
-     * @param message
-     * @return 
+     * Checks if the resource is archivable, given an acceptable judgement
+     * for the archive location where it would be archived
+     * @param resourceURL URL of the resource
+     * @param acceptableJudgementForNode Acceptable judgement for the archive location
+     * @param message Message to be built according to the results of the method
+     * @return true if the judgement for the given resource is within the acceptable values
      */
     public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
     
+    /**
+     * Getter for the typechecked results of the resource
+     * @return TypecheckedResults object
+     */
     public TypecheckedResults getTypecheckedResults();
 }
