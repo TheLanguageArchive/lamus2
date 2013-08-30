@@ -41,10 +41,13 @@ public class LamusTypecheckerConfigurationTest {
     private TypecheckerConfiguration typecheckerConfiguration;
     
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
+    private String specialConfigIncludedFolder = "/included_folder";
+    private String specialConfigFile = "/specialConfigFile.txt";
     
     public LamusTypecheckerConfigurationTest() {
         
-        customTypecheckerFolderToConfigFileMap = new HashMap<String, String>();
+        this.customTypecheckerFolderToConfigFileMap = new HashMap<String, String>();
+        this.customTypecheckerFolderToConfigFileMap.put(this.specialConfigIncludedFolder, this.specialConfigFile);
     }
     
     @BeforeClass
@@ -57,9 +60,9 @@ public class LamusTypecheckerConfigurationTest {
     
     @Before
     public void setUp() {
-        typecheckerConfiguration = new LamusTypecheckerConfiguration();
+        this.typecheckerConfiguration = new LamusTypecheckerConfiguration();
         
-        ReflectionTestUtils.setField(typecheckerConfiguration, "customTypecheckerFolderToConfigFileMap", customTypecheckerFolderToConfigFileMap);
+        ReflectionTestUtils.setField(this.typecheckerConfiguration, "customTypecheckerFolderToConfigFileMap", this.customTypecheckerFolderToConfigFileMap);
     }
     
     @After
@@ -75,13 +78,20 @@ public class LamusTypecheckerConfigurationTest {
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.UNARCHIVABLE;
         File location = new File("/random_folder");
         
-        TypecheckerJudgement retrievedJudgement = typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        TypecheckerJudgement retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
         
         assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
     }
     
     @Test
     public void getAcceptableJudgementForSpecialLocation() {
-        fail("not implemented yet");
+        
+        //TODO change this in order to support multiple configurations
+        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
+        File location = new File(this.specialConfigIncludedFolder);
+        
+        TypecheckerJudgement retrivedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrivedJudgement);
     }
 }
