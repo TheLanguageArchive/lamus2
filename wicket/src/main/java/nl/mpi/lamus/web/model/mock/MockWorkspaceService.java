@@ -172,4 +172,9 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
