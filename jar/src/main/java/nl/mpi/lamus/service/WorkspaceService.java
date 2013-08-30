@@ -114,6 +114,13 @@ public interface WorkspaceService extends Serializable {
     public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode);
     
     /**
+     * Deletes a node in the workspace.
+     * @param userID ID of the user
+     * @param node WorkspaceNode object corresponding to the node that should be deleted
+     */
+    public void deleteNode(String userID, WorkspaceNode node);
+    
+    /**
      * Uploads the given files into the workspace.
      * 
      * @param userID ID of the user

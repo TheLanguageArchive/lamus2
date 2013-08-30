@@ -50,4 +50,10 @@ public interface WorkspaceNodeLinkManager {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
+    
+    /**
+     * Unlinks, in the workspace, a node from all its parent nodes.
+     * @param childNode WorkspaceNode object corresponding to the node to be unlinked
+     */
+    public void unlinkNodeFromAllParents(WorkspaceNode childNode);
 }

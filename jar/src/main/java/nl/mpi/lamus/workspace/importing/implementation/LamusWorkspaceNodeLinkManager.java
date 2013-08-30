@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -195,6 +196,17 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         
         this.workspaceDao.deleteWorkspaceNodeLink(parentNode.getWorkspaceID(), parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
+    }
+
+    @Override
+    public void unlinkNodeFromAllParents(WorkspaceNode childNode) {
+        
+        Collection<WorkspaceNode> parentNodes =
+                this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
+        
+        for(WorkspaceNode parent : parentNodes) {
+            this.unlinkNodes(parent, childNode);
+        }
     }
     
 }

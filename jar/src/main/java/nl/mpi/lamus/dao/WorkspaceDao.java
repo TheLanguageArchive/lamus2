@@ -108,6 +108,13 @@ public interface WorkspaceDao {
     public void addWorkspaceNode(WorkspaceNode node);
     
     /**
+     * Sets a node as deleted in the database
+     * @param workspaceID ID of the workspace
+     * @param nodeID ID of the node
+     */
+    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID);
+    
+    /**
      * Retrieves the node with the given ID.
      * 
      * @param workspaceNodeID ID of the node to retrieve

@@ -343,7 +343,7 @@ public class LamusWorkspaceServiceTest {
     //TODO linkNodesWithoutAccess
     
     @Test
-    public void unlinkNodesWithAcces() {
+    public void unlinkNodesWithAccess() {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -359,4 +359,27 @@ public class LamusWorkspaceServiceTest {
     }
     
     //TODO unlinkNodesWithoutAccess
+    
+    @Test
+    public void deleteNodeWithAccess() {
+        
+        final int workspaceID = 1;
+        final int nodeID = 4;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockChildNode);
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+        }});
+        
+        service.deleteNode(userID, mockChildNode);
+    }
+    
+    //TODO deleteNodeWithoutAccess
+
 }

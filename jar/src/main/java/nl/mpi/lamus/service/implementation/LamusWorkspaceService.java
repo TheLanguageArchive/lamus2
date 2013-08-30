@@ -175,9 +175,9 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, parentNode.getWorkspaceID())) {
             
-            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Inform the user of the reason why the nodes can't be linked
             //TODO Throw an exception instead?
-            logger.error("Cannot link files in workspace with ID " + parentNode.getWorkspaceID());
+            logger.error("Cannot link nodes in workspace with ID " + parentNode.getWorkspaceID());
         } else {
             
             this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
@@ -192,14 +192,31 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, parentNode.getWorkspaceID())) {
             
-            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Inform the user of the reason why the nodes can't be unlinked
             //TODO Throw an exception instead?
-            logger.error("Cannot unlink files in workspace with ID " + parentNode.getWorkspaceID());
+            logger.error("Cannot unlink nodes in workspace with ID " + parentNode.getWorkspaceID());
         } else {
             
             this.workspaceNodeLinkManager.unlinkNodes(parentNode, childNode);
         }
-
+    }
+    
+    /**
+     * @see WorkspaceService#deleteNode(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void deleteNode(String userID, WorkspaceNode node) {
+        
+        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, node.getWorkspaceID())) {
+            
+            //TODO Inform the user of the reason why the node can't be deleted
+            //TODO Throw an exception instead?
+            logger.error("Cannot delete node in workspace with ID " + node.getWorkspaceID());
+        } else {
+            
+            this.workspaceNodeLinkManager.unlinkNodeFromAllParents(node);
+            this.workspaceDao.setWorkspaceNodeAsDeleted(node.getWorkspaceID(), node.getWorkspaceNodeID());
+        }
     }
 
     /**
@@ -210,7 +227,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
             
-            //TODO Inform the user of the reason why the workspace can't be submitted
+            //TODO Inform the user of the reason why the files can't be uploaded
             //TODO Throw an exception instead?
             logger.error("Cannot upload files to workspace with ID " + workspaceID);
         } else {

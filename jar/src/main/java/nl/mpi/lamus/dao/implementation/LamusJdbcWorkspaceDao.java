@@ -431,6 +431,24 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.info("Node added to the database. Node ID: " + node.getWorkspaceNodeID());
     }
+    
+    /**
+     * @see WorkspaceDao#setWorkspaceNodeAsDeleted(int, int)
+     */
+    @Override
+    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID) {
+        
+        logger.debug("Setting node " + nodeID + " in workspace " + workspaceID + " as deleted");
+        
+        String updateSql = "UPDATE node SET status = :status"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("status", WorkspaceNodeStatus.NODE_DELETED)
+                .addValue("workspace_node_id", nodeID);
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Node " + nodeID + " in workspace " + workspaceID + " was set as deleted");
+    }
 
     /**
      * @see WorkspaceDao#getWorkspaceNode(int)

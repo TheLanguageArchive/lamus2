@@ -1023,6 +1023,27 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertNull("Node link should not exist in the database", nodeLink);
     }
     
+    @Test
+    public void setWorkspaceNodeAsDeleted() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfRows = countRowsInTable("node");
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        int intermediateNumberOfRows = countRowsInTable("node");
+        assertTrue("Node was not inserted in the database", intermediateNumberOfRows == initialNumberOfRows + 1);
+        
+        this.workspaceDao.setWorkspaceNodeAsDeleted(
+                testWorkspace.getWorkspaceID(), testNode.getWorkspaceNodeID());
+        int finalNumberOfRows = countRowsInTable("node");
+        
+        assertTrue("Node should not be deleted from the database, just set as deleted", finalNumberOfRows == intermediateNumberOfRows);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        assertNotNull("Node should exist in the database", retrievedNode);
+        assertEquals("Not should be set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode.getStatus());
+    }
+    
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);
