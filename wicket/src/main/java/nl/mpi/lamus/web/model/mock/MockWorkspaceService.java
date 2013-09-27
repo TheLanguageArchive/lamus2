@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.model.mock;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -50,13 +51,13 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     /**
      * Creates a workspace starting in a given archive node, for a given user.
      *
-     * @param archiveNodeID archive ID of the node
+     * @param archiveNodeURI archive URI of the node
      * @param userID ID of the user
      * @return Workspace object
      */
     @Override
-    public Workspace createWorkspace(String userID, int archiveNodeID) {
-	logger.info("call to createWorkspace({}, {})", userID, archiveNodeID);
+    public Workspace createWorkspace(String userID, URI archiveNodeURI) {
+	logger.info("call to createWorkspace({}, {})", userID, archiveNodeURI);
 	return workspace;
     }
 

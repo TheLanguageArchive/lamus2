@@ -39,19 +39,15 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     private WorkspaceTreeNode parent;
     private int workspaceNodeID;
     private int workspaceID;
-
-    //TODO Worth having???
-    private int archiveNodeID;
-    
     private URI profileSchemaURI;
     private String name;
     private String title;
     private WorkspaceNodeType type;
     private URL workspaceURL;
+    private URI archiveURI;
     private URL archiveURL;
     private URL originURL;
     private WorkspaceNodeStatus status;
-    private String pid;
     private String format;
     private Collection<WorkspaceParentNodeReference> parentNodesReferences;
 
@@ -104,16 +100,6 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     @Override
     public void setWorkspaceID(int workspaceID) {
         this.workspaceID = workspaceID;
-    }
-
-    @Override
-    public int getArchiveNodeID() {
-        return archiveNodeID;
-    }
-    
-    @Override
-    public void setArchiveNodeID(int archiveNodeID) {
-        this.archiveNodeID = archiveNodeID;
     }
 
     @Override
@@ -172,6 +158,16 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     }
 
     @Override
+    public URI getArchiveURI() {
+        return archiveURI;
+    }
+    
+    @Override
+    public void setArchiveURI(URI archiveURI) {
+        this.archiveURI = archiveURI;
+    }
+    
+    @Override
     public URL getArchiveURL() {
         return archiveURL;
     }
@@ -199,16 +195,6 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     @Override
     public void setStatus(WorkspaceNodeStatus status) {
         this.status = status;
-    }
-
-    @Override
-    public String getPid() {
-        return pid;
-    }
-
-    @Override
-    public void setPid(String pid) {
-        this.pid = pid;
     }
 
     @Override
