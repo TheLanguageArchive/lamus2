@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.web.model.mock;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -31,8 +31,7 @@ public class MockWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
-    private int topNodeArchiveID;
-    private URL topNodeArchiveURL;
+    private URI topNodeArchiveURI;
     private Date startDate;
     private Date endDate;
     private Date sessionStartDate;
@@ -114,13 +113,13 @@ public class MockWorkspace implements Workspace {
     }
 
     @Override
-    public URL getTopNodeArchiveURL() {
-	return topNodeArchiveURL;
+    public URI getTopNodeArchiveURI() {
+	return topNodeArchiveURI;
     }
 
     @Override
-    public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
-	this.topNodeArchiveURL = topNodeArchiveURL;
+    public void setTopNodeArchiveURI(URI topNodeArchiveURI) {
+	this.topNodeArchiveURI = topNodeArchiveURI;
     }
     
     @Override
@@ -131,16 +130,6 @@ public class MockWorkspace implements Workspace {
     @Override
     public void setTopNodeID(int topNodeID) {
         this.topNodeID = topNodeID;
-    }
-
-    @Override
-    public int getTopNodeArchiveID() {
-	return topNodeArchiveID;
-    }
-
-    @Override
-    public void setTopNodeArchiveID(int topNodeArchiveID) {
-	this.topNodeArchiveID = topNodeArchiveID;
     }
 
     @Override
