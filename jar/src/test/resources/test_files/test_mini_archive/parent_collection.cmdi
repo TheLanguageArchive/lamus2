@@ -7,21 +7,21 @@
       <MdCreator>guisil</MdCreator>
       <MdCreationDate>2013-07-15+02:00</MdCreationDate>
       <MdProfile>clarin.eu:cr1:p_1284723009187</MdProfile>
-      <MdSelfLink>hdl:SOMETHING/3E9487E0-ED34-11E2-91E2-0800200C9A66</MdSelfLink>
+      <MdSelfLink>node:000</MdSelfLink>
    </Header>
    <Resources>
       <ResourceProxyList>
          <ResourceProxy id="res_112bddf2-68e3-4b49-9918-75132ddcd8ad">
             <ResourceType>Metadata</ResourceType>
-            <ResourceRef>hdl:SOMETHING/3E9487E1-ED34-11E2-91E2-0800200C9A66</ResourceRef>
+            <ResourceRef>node:001</ResourceRef>
          </ResourceProxy>
          <ResourceProxy id="res_c346b797-c5aa-47cf-96f7-2f0b1bb9b8f3">
             <ResourceType>Metadata</ResourceType>
-            <ResourceRef>hdl:SOMETHING/3E9487E2-ED34-11E2-91E2-0800200C9A66</ResourceRef>
+            <ResourceRef>node:002</ResourceRef>
          </ResourceProxy>
          <ResourceProxy id="res_375dfa66-afbf-44ca-9ee2-b7c3cc2a23e5">
             <ResourceType>Metadata</ResourceType>
-            <ResourceRef>hdl:SOMETHING/3E9487E3-ED34-11E2-91E2-0800200C9A66</ResourceRef>
+            <ResourceRef>node:003</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
       <JournalFileProxyList/>

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.dao;
 
+import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -95,10 +96,10 @@ public interface WorkspaceDao {
     /**
      * Checks if the archive node with the given ID is locked
      * (is part of any existing workspace)
-     * @param archiveNodeID ID of the archive node to be checked
+     * @param archiveNodeURI URI of the archive node to be checked
      * @return true if the given archive node is locked
      */
-    public boolean isNodeLocked(int archiveNodeID);
+    public boolean isNodeLocked(URI archiveNodeURI);
     
     /**
      * Inserts a node into the database.
@@ -173,11 +174,11 @@ public interface WorkspaceDao {
     public void updateNodeWorkspaceURL(WorkspaceNode node);
     
     /**
-     * Updates the Archive URL of the given node.
+     * Updates the Archive URI of the given node.
      * 
      * @param node WorkspaceNode object to be updated
      */
-    public void updateNodeArchiveURL(WorkspaceNode node);
+    public void updateNodeArchiveUriUrl(WorkspaceNode node);
     
     /**
      * Inserts a link between two nodes (parent and child) into the database.

@@ -120,7 +120,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
 //            this.nodeDataRetriever.verifyTypecheckedResults(uploadedFileOurURL, null, typecheckedResults);
             
-            File workspaceTopNodeFile = FileUtils.toFile(topNode.getArchiveURL());
+            URL topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+            
+            File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
             TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
             StringBuilder message = new StringBuilder();
             boolean archivable = this.fileTypeHandler.isResourceArchivable(uploadedFileOurURL, acceptableJudgement, message);

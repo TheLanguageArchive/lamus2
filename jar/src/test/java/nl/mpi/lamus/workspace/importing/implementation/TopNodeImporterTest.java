@@ -15,7 +15,10 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import java.net.URI;
+import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -53,7 +56,8 @@ public class TopNodeImporterTest {
     
     @Mock MetadataNodeImporter mockMetadataNodeImporter;
     
-    @Mock ArchiveObjectsDB mockAoDB;
+    @Mock CorpusStructureProvider mockCsProvider;
+    @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWsDao;
     @Mock MetadataAPI metadataAPI;
     @Mock NodeDataRetriever mockNodeDataRetriever;
@@ -82,7 +86,7 @@ public class TopNodeImporterTest {
     @Before
     public void setUp() {
         
-        topNodeImporter = new TopNodeImporter(mockAoDB, mockWsDao, metadataAPI, mockNodeDataRetriever,
+        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, metadataAPI, mockNodeDataRetriever,
                 mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockParentNodeReferenceFactory,
                 mockWsNodeLinkFactory, mockFileHandler, mockWorkspaceNodeExplorer);
         
@@ -100,13 +104,13 @@ public class TopNodeImporterTest {
     public void testImportNode() throws Exception {
         
         final int workspaceID = 1;
-        final int nodeArchiveID = 10;
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataNodeImporter).importNode(workspaceID, null, null, null, nodeArchiveID);
+            oneOf(mockMetadataNodeImporter).importNode(workspaceID, null, null, null, nodeArchiveURI);
         }});
         
-        topNodeImporter.importNode(workspaceID, nodeArchiveID);
+        topNodeImporter.importNode(workspaceID, nodeArchiveURI);
     }
 
     /**

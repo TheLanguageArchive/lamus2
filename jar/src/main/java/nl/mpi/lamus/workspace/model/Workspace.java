@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.model;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.net.URL;
 import java.util.Date;
 
@@ -37,9 +38,9 @@ public interface Workspace extends Serializable {
     
     public void setTopNodeID(int topNodeID);
     
-    public int getTopNodeArchiveID();
+    public URI getTopNodeArchiveURI();
     
-    public void setTopNodeArchiveID(int topNodeArchiveID);
+    public void setTopNodeArchiveURI(URI topNodeArchiveURI);
     
     public URL getTopNodeArchiveURL();
     

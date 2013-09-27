@@ -19,6 +19,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -90,10 +92,11 @@ public class LamusWorkspaceFileImporterTest {
     public void importMetadataFileToWorkspace() throws WorkspaceNodeFilesystemException, MalformedURLException, URISyntaxException {
         
         final URI testURI = new URI("http://some.uri");
+        final URL testURL = testURI.toURL();
         
         context.checking(new Expectations() {{
         
-            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(testURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(
                     mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
@@ -102,7 +105,7 @@ public class LamusWorkspaceFileImporterTest {
             oneOf(mockWorkspaceDao).updateNodeWorkspaceURL(mockWorkspaceNode);
         }});
         
-        fileImporter.importMetadataFileToWorkspace(mockWorkspaceNode, mockMetadataDocument);
+        fileImporter.importMetadataFileToWorkspace(testURL, mockWorkspaceNode, mockMetadataDocument);
     }
     
     @Test
@@ -110,29 +113,34 @@ public class LamusWorkspaceFileImporterTest {
         
         final int workspaceID = 1;
         
-        final URI testURI = new URI("urn:namespace-id:resource-id"); // a URI which is not a URL
+        final URI wsFileURI = new URI("file.cmdi"); // a URI which is not a URL
+        final URL archiveURL = new URL("file:/archive/some.url/file.cmdi");
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(
                     mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
-            oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
+            oneOf(mockNodeFile).toURI(); will(returnValue(wsFileURI));
             
                 
-            oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
+            oneOf(mockNodeFile).toURI(); will(returnValue(wsFileURI));
             oneOf(mockWorkspaceNode).getWorkspaceID(); will(returnValue(workspaceID));
         }});
         
         try {
-            fileImporter.importMetadataFileToWorkspace(mockWorkspaceNode, mockMetadataDocument);
+            fileImporter.importMetadataFileToWorkspace(archiveURL, mockWorkspaceNode, mockMetadataDocument);
             fail("Should have thrown exception");
         } catch(WorkspaceNodeFilesystemException ex) {
             assertNotNull(ex);
-            String errorMessage = "Failed to create URL from the Workspace file location: " + testURI;
+            String errorMessage = "Failed to create URL from the Workspace file location: " + wsFileURI;
             assertEquals(errorMessage, ex.getMessage());
             assertEquals(workspaceID, ex.getWorkspaceID());
-            assertEquals(MalformedURLException.class, ex.getCause().getClass());
+            assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
+        } catch(Exception ex) {
+            assertNotNull(ex);
         }
     }
+    
+    //TODO MalformedURLException
 }

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.net.URL;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -28,11 +29,12 @@ public interface WorkspaceFileImporter {
     
     /**
      * Imports metadata files from the archive to the workspace
+     * @param archiveNodeURL URL of the node in the archive
      * @param node WorkspaceNode object corresponding to the node being imported
      * @param document MetadataDocument object corresponding to the node being imported
      * @throws WorkspaceNodeFilesystemException when there is an issue with the import
      */
-    public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument document)
+    public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode node, MetadataDocument document)
             throws WorkspaceNodeFilesystemException;
     
 }

@@ -18,9 +18,16 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -78,8 +85,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             
             Workspace workspace = this.workspaceDao.getWorkspace(childNode.getWorkspaceID());
             workspace.setTopNodeID(childNode.getWorkspaceNodeID());
-	    workspace.setTopNodeArchiveID(childNode.getArchiveNodeID());
-	    workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
+	    workspace.setTopNodeArchiveURI(childNode.getArchiveURI());
+            workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
+            
 	    this.workspaceDao.updateWorkspaceTopNode(workspace);
 	} else {
 	    //TODO add information about parent link
@@ -169,15 +177,23 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
 
         try {
-            URI childURI;
+//            URI childURI;
             
-            if(!childNode.getPid().isEmpty()) {
-                childURI = new URI(childNode.getPid());
-            } else {
-                childURI = childNode.getWorkspaceURL().toURI();
+//            if(!childNode.getPid().isEmpty()) {
+//                childURI = new URI(childNode.getPid());
+//            } else {
+//                childURI = childNode.getWorkspaceURL().toURI();
+//            }
+
+            URI uriToQuery = childNode.getArchiveURI();
+            
+            if(uriToQuery == null) {
+                uriToQuery = childNode.getWorkspaceURL().toURI();
             }
             
-            Reference childReference = parentDocument.getDocumentReferenceByURI(childURI);
+            //TODO CHECK IF URI IS NULL OR NOT... HOW TO USE URL TO RETRIEVE REFERENCE?
+            
+            Reference childReference = parentDocument.getDocumentReferenceByURI(uriToQuery);
             parentDocument.removeDocumentReference(childReference);
             
             StreamResult parentStreamResult =

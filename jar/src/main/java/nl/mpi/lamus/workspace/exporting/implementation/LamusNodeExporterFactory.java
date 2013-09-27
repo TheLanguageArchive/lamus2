@@ -15,6 +15,9 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -23,8 +26,8 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
-import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -40,13 +43,13 @@ import org.springframework.stereotype.Component;
 public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     @Autowired
-    private TrashVersioningHandler trashVersioningHandler;
-    
-    @Autowired
-    private TrashCanHandler trashCanHandler;
-    
-    @Autowired
     private CorpusStructureBridge corpusStructureBridge;
+
+    @Autowired
+    private CorpusStructureProvider corpusStructureProvider;
+    
+    @Autowired
+    private CorpusstructureWriter corpusstructureWriter;
     
     @Autowired
     private SearchClientBridge searchClientBridge;
@@ -65,6 +68,15 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     
     @Autowired
     private WorkspaceDao workspaceDao;
+    
+    @Autowired
+    private NodeDataRetriever nodeDataRetriever;
+    
+    @Autowired
+    private NodeResolver nodeResolver;
+    
+    @Autowired
+    private TrashCanHandler trashCanHandler;
     
     private AddedNodeExporter addedNodeExporter;
     private DeletedNodeExporter deletedNodeExporter;
@@ -92,7 +104,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private AddedNodeExporter getAddedNodeExporter(Workspace workspace) {
         if(addedNodeExporter == null) {
             addedNodeExporter = new AddedNodeExporter(archiveFileLocationProvider, workspaceFileHandler,
-                    metadataAPI, corpusStructureBridge, workspaceDao, searchClientBridge, workspaceTreeExporter);
+                    metadataAPI, corpusStructureBridge, workspaceDao, searchClientBridge, workspaceTreeExporter,
+                    nodeDataRetriever, corpusStructureProvider, nodeResolver);
         }
         addedNodeExporter.setWorkspace(workspace);
         return addedNodeExporter;
@@ -100,7 +113,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     private NodeExporter getDeletedNodeExporter(Workspace workspace) {
         if(deletedNodeExporter == null) {
-            deletedNodeExporter = new DeletedNodeExporter(trashVersioningHandler, trashCanHandler, corpusStructureBridge, searchClientBridge);
+            deletedNodeExporter = new DeletedNodeExporter(trashCanHandler,
+                    corpusStructureProvider, corpusstructureWriter, searchClientBridge);
         }
         deletedNodeExporter.setWorkspace(workspace);
         return deletedNodeExporter;
@@ -108,7 +122,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     
     private NodeExporter getGeneralNodeExporter(Workspace workspace) {
         if(generalNodeExporter == null) {
-            generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler, workspaceTreeExporter, corpusStructureBridge);
+            generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler,
+                    workspaceTreeExporter, corpusStructureBridge, corpusStructureProvider);
         }
         generalNodeExporter.setWorkspace(workspace);
         return generalNodeExporter;

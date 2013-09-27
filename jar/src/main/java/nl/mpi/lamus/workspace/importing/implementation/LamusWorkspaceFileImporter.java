@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -52,25 +53,30 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
     }
 
     /**
-     * @see WorkspaceFileImporter#importMetadataFileToWorkspace(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
+     * @see WorkspaceFileImporter#importMetadataFileToWorkspace(java.net.URL, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public void importMetadataFileToWorkspace(WorkspaceNode node, MetadataDocument metadataDocument)
+    public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
         throws WorkspaceNodeFilesystemException {
         
-	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(node);
+	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, workspaceNode);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 
-        workspaceFileHandler.copyMetadataFile(node, metadataAPI, metadataDocument, nodeFile, streamResult);
+        workspaceFileHandler.copyMetadataFile(workspaceNode, metadataAPI, metadataDocument, nodeFile, streamResult);
         
         try {
-            node.setWorkspaceURL(nodeFile.toURI().toURL());
-        } catch (MalformedURLException mfex) {
-            String errorMessage = "Failed to create URL from the Workspace file location: " + nodeFile.toURI();
-            logger.error(errorMessage, mfex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, node, mfex);
+            workspaceNode.setWorkspaceURL(nodeFile.toURI().toURL());
+        } catch(MalformedURLException mfex) {
+            throwWorkspaceNodeFilesystemUrlException(mfex, nodeFile, workspaceNode);
+        } catch(IllegalArgumentException iaex) {
+            throwWorkspaceNodeFilesystemUrlException(iaex, nodeFile, workspaceNode);
         }
-        this.workspaceDao.updateNodeWorkspaceURL(node);
+        this.workspaceDao.updateNodeWorkspaceURL(workspaceNode);
     }
     
+    private void throwWorkspaceNodeFilesystemUrlException(Exception ex, File file, WorkspaceNode node) throws WorkspaceNodeFilesystemException {
+        String errorMessage = "Failed to create URL from the Workspace file location: " + file.toURI();
+        logger.error(errorMessage, ex);
+        throw new WorkspaceNodeFilesystemException(errorMessage, node, ex);
+    }
 }

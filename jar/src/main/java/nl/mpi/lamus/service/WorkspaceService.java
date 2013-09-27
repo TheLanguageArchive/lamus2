@@ -15,8 +15,8 @@
  */
 package nl.mpi.lamus.service;
 
-import java.io.File;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -31,11 +31,11 @@ public interface WorkspaceService extends Serializable {
     /**
      * Creates a workspace starting in a given archive node, for a given user.
      * 
-     * @param archiveNodeID archive ID of the node
      * @param userID ID of the user
+     * @param archiveNodeURI URI of the node in the archive
      * @return Workspace object
      */
-    public Workspace createWorkspace(String userID, int archiveNodeID);
+    public Workspace createWorkspace(String userID, URI archiveNodeURI);
     
     /**
      * Deletes the workspace with the given ID.

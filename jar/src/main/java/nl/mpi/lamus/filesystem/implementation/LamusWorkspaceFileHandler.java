@@ -17,6 +17,7 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -115,13 +116,19 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     }
 
     /**
-     * @see WorkspaceFileHandler#getFileForImportedWorkspaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceFileHandler#getFileForImportedWorkspaceNode(java.net.URL, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public File getFileForImportedWorkspaceNode(WorkspaceNode workspaceNode) {
+    public File getFileForImportedWorkspaceNode(URL archiveNodeURL, WorkspaceNode workspaceNode) {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
-        String nodeFilename = FilenameUtils.getName(workspaceNode.getArchiveURL().toString());
+        String nodeFilename = FilenameUtils.getName(archiveNodeURL.toString());
+        
+        
+        //TODO Should it be based on the name in the node's metadata??
         File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
+        
+        
+        
         return workspaceNodeFile;
     }
 

@@ -15,7 +15,9 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
-import nl.mpi.corpusstructure.NodeIdUtils;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
@@ -84,7 +86,7 @@ public class LamusWorkspaceFactoryTest {
     @Qualifier("defaultMaxStorageSpaceInBytes")
     private long defaultMaxStorageSpaceInBytes;
     
-    private int archiveTopNodeID;
+    private URI archiveTopNodeURI;
     private String userID;
     
     public LamusWorkspaceFactoryTest() {
@@ -99,8 +101,8 @@ public class LamusWorkspaceFactoryTest {
     }
     
     @Before
-    public void setUp() {
-        archiveTopNodeID = 10;
+    public void setUp() throws URISyntaxException {
+        archiveTopNodeURI = new URI(UUID.randomUUID().toString());
         userID = "testUser";
         ReflectionTestUtils.setField(factory, "amsBridge", mockAmsBridge);
     }
@@ -122,13 +124,13 @@ public class LamusWorkspaceFactoryTest {
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(expectedMaxStorageSpace));
         }});
         
-        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
+        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeURI);
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);
@@ -153,13 +155,13 @@ public class LamusWorkspaceFactoryTest {
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(valueNotDefined));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(expectedMaxStorageSpace));
         }});
         
-        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
+        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeURI);
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);
@@ -184,13 +186,13 @@ public class LamusWorkspaceFactoryTest {
         WorkspaceStatus expectedStatus = WorkspaceStatus.UNINITIALISED;
         
         context.checking(new Expectations() {{
-            oneOf (mockAmsBridge).getUsedStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getUsedStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(expectedUsedStorageSpace));
-            oneOf (mockAmsBridge).getMaxStorageSpace(userID, NodeIdUtils.TONODEID(archiveTopNodeID));
+            oneOf (mockAmsBridge).getMaxStorageSpace(userID, archiveTopNodeURI);
                 will(returnValue(valueNotDefined));
         }});
         
-        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeID);
+        Workspace testWorkspace = factory.getNewWorkspace(userID, archiveTopNodeURI);
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);

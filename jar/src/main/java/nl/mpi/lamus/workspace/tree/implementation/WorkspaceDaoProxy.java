@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.tree.implementation;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -126,11 +127,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
-     * @see WorkspaceDao#isNodeLocked(int)
+     * @see WorkspaceDao#isNodeLocked(java.net.URI)
      */
     @Override
-    public boolean isNodeLocked(int archiveNodeID) {
-        return this.getWorkspaceDao().isNodeLocked(archiveNodeID);
+    public boolean isNodeLocked(URI archiveNodeURI) {
+        return this.getWorkspaceDao().isNodeLocked(archiveNodeURI);
     }
 
     /**
@@ -206,11 +207,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
-     * @see WorkspaceDao#updateNodeArchiveURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceDao#updateNodeArchiveUriUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void updateNodeArchiveURL(WorkspaceNode node) {
-        this.getWorkspaceDao().updateNodeArchiveURL(node);
+    public void updateNodeArchiveUriUrl(WorkspaceNode node) {
+        this.getWorkspaceDao().updateNodeArchiveUriUrl(node);
     }
 
     /**

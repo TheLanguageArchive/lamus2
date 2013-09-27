@@ -16,6 +16,7 @@
 package nl.mpi.lamus.service.implementation;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -55,17 +56,17 @@ public class LamusWorkspaceService implements WorkspaceService {
     
     
     /**
-     * @see WorkspaceService#createWorkspace(java.lang.String, int)
+     * @see WorkspaceService#createWorkspace(java.lang.String, java.net.URI)
      */
     @Override
-    public Workspace createWorkspace(String userID, int archiveNodeID) {
+    public Workspace createWorkspace(String userID, URI archiveNodeURI) {
 
-        if(!this.nodeAccessChecker.canCreateWorkspace(userID, archiveNodeID)) {
+        if(!this.nodeAccessChecker.canCreateWorkspace(userID, archiveNodeURI)) {
             
             //TODO Inform the user of the reason why the workspace can't be created (either there is already a workspace from the same user or from a different one)
             //TODO Throw an exception instead?
             
-            logger.error("Cannot create workspace in node with archive ID " + archiveNodeID);
+            logger.error("Cannot create workspace in node " + archiveNodeURI);
             return null;
         }
         
@@ -74,7 +75,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
         
 
-        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeID);
+        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeURI);
         
         
 

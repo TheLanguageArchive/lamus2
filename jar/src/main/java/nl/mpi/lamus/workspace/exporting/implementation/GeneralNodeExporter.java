@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
@@ -31,6 +34,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.util.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +55,17 @@ public class GeneralNodeExporter implements NodeExporter {
     private WorkspaceFileHandler workspaceFileHandler;
     private WorkspaceTreeExporter workspaceTreeExporter;
     private CorpusStructureBridge corpusStructureBridge;
+    private CorpusStructureProvider corpusStructureProvider;
     
-    public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler, WorkspaceTreeExporter wsTreeExporter,
-            CorpusStructureBridge csBridge) {
+    public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler,
+            WorkspaceTreeExporter wsTreeExporter, CorpusStructureBridge csBridge,
+            CorpusStructureProvider csProvider) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
         this.corpusStructureBridge = csBridge;
+        this.corpusStructureProvider = csProvider;
     }
     
     /**
@@ -87,10 +94,27 @@ public class GeneralNodeExporter implements NodeExporter {
             
             workspaceTreeExporter.explore(workspace, currentNode);
             
-            if(!corpusStructureBridge.ensureChecksum(currentNode.getArchiveNodeID(), currentNode.getWorkspaceURL())) {
-                return;
-                //TODO IS THIS ENOUGH IN THIS CASE?
+//            if(!corpusStructureBridge.ensureChecksum(currentNode.getArchiveNodeID(), currentNode.getWorkspaceURL())) {
+//                return;
+//                //TODO IS THIS ENOUGH IN THIS CASE?
+//            }
+            
+            CorpusNode corpusNode;
+            try {
+                corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+            } catch (UnknownNodeException ex) {
+                throw new UnsupportedOperationException("exception not handled yet", ex);
             }
+            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
+            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
+            
+            if(workspaceChecksum.equals(archiveChecksum)) {
+                return;
+            }
+            
+            
+            //TODO IF NODE WAS NOT CHANGED, RETURN
+            
 
             MetadataDocument nodeDocument = null;
             try {

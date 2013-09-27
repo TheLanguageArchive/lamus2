@@ -15,7 +15,8 @@
  */
 package nl.mpi.lamus.workspace.management;
 
-import nl.mpi.corpusstructure.AccessInfo;
+import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 
 /**
  * Interface for the archive node access checking.
@@ -27,10 +28,10 @@ public interface WorkspaceAccessChecker {
     /**
      * Checks if a given user has write access to the given archive node.
      * @param userID ID of the user who needs to create a workspace
-     * @param archiveNodeID ID of the node in which the workspace is supposed to be created
+     * @param archiveNodeURI URI of the node in which the workspace is supposed to be created
      * @return true if the given user has write access to the given node
      */
-    public boolean canCreateWorkspace(String userID, int archiveNodeID);
+    public boolean canCreateWorkspace(String userID, URI archiveNodeURI);
     
     /**
      * Checks if the given user has access to the given workspace

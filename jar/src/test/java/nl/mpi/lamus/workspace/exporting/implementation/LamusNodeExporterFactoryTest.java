@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -28,8 +30,6 @@ import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
-import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
-import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -57,8 +57,8 @@ public class LamusNodeExporterFactoryTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Mock TrashVersioningHandler mockTrashVersioningHandler;
-    @Mock TrashCanHandler mockTrashCanHandler;
+    @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock CorpusstructureWriter mockCorpusstructureWriter;
     @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock SearchClientBridge mockSearchClientBridge;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
@@ -87,7 +87,7 @@ public class LamusNodeExporterFactoryTest {
     @Before
     public void setUp() {
         
-        workspace = new LamusWorkspace(1, "someUser", -1, -1, null,
+        workspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         
@@ -103,15 +103,16 @@ public class LamusNodeExporterFactoryTest {
         
         final int workspaceID = 1;
         final int workspaceNodeID = 10;
-        final int archiveNodeID = 100;
-        final URL nodeURL = new URL("http://some.url/node.something");
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
-        final String nodePid = UUID.randomUUID().toString();
-        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, archiveNodeID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeURL, nodeURL, nodeURL, WorkspaceNodeStatus.NODE_UPLOADED, nodePid, nodeFormat);
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
         
         NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
         

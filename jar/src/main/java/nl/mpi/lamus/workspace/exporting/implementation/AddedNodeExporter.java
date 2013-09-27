@@ -23,6 +23,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.AccessInfo;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -32,6 +36,7 @@ import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -64,12 +69,17 @@ public class AddedNodeExporter implements NodeExporter {
     private final WorkspaceDao workspaceDao;
     private final SearchClientBridge searchClientBridge;
     private final WorkspaceTreeExporter workspaceTreeExporter;
+    private final NodeDataRetriever nodeDataRetriever;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final NodeResolver nodeResolver;
     
     private Workspace workspace;
     
     public AddedNodeExporter(ArchiveFileLocationProvider aflProvider, WorkspaceFileHandler wsFileHandler,
             MetadataAPI mdAPI, CorpusStructureBridge csBridge, WorkspaceDao wsDao,
-            SearchClientBridge scBridge, WorkspaceTreeExporter wsTreeExporter) {
+            SearchClientBridge scBridge, WorkspaceTreeExporter wsTreeExporter,
+            NodeDataRetriever nodeDataRetriever,
+            CorpusStructureProvider csProvider, NodeResolver nodeResolver) {
         this.archiveFileLocationProvider = aflProvider;
         this.workspaceFileHandler = wsFileHandler;
         this.metadataAPI = mdAPI;
@@ -77,6 +87,9 @@ public class AddedNodeExporter implements NodeExporter {
         this.workspaceDao = wsDao;
         this.searchClientBridge = scBridge;
         this.workspaceTreeExporter = wsTreeExporter;
+        this.nodeDataRetriever = nodeDataRetriever;
+        this.corpusStructureProvider = csProvider;
+        this.nodeResolver = nodeResolver;
     }
     
     /**
@@ -115,8 +128,9 @@ public class AddedNodeExporter implements NodeExporter {
         } catch (IOException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
-        currentNode.setArchiveURL(newNodeArchiveURL);
-        workspaceDao.updateNodeArchiveURL(currentNode);
+//        currentNode.setArchiveURL(newNodeArchiveURL);
+        nodeDataRetriever.setNewArchiveURI(currentNode);
+        workspaceDao.updateNodeArchiveUriUrl(currentNode);
         
         //TODO WHEN METADATA, CALL (RECURSIVELY) exploreTree FOR CHILDREN IN THE BEGINNING
             // this way child files would have the pids calculated in advance,
@@ -125,8 +139,8 @@ public class AddedNodeExporter implements NodeExporter {
             workspaceTreeExporter.explore(workspace, currentNode);
         }
         
-        int currentNodeNewArchiveID = corpusStructureBridge.addNewNodeToCorpusStructure(
-                    newNodeArchiveURL, currentNode.getPid(), workspace.getUserID());
+//        int currentNodeNewArchiveID = corpusStructureBridge.addNewNodeToCorpusStructure(
+//                    newNodeArchiveURL, currentNode.getPid(), workspace.getUserID());
             
             //TODO PID should have already been assigned when the node was uploaded/linked...
         
@@ -155,15 +169,15 @@ public class AddedNodeExporter implements NodeExporter {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
         
-        try {
-            //TODO will this be done by the crawler??
-            corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, nextAvailableFile.toURI().toURL());
-        } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
+//        try {
+//            //TODO will this be done by the crawler??
+//            corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, nextAvailableFile.toURI().toURL());
+//        } catch (MalformedURLException ex) {
+//            throw new UnsupportedOperationException("exception not handled yet", ex);
+//        }
         
         if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
-            searchClientBridge.addNode(currentNodeNewArchiveID);
+            searchClientBridge.addNode(currentNode.getArchiveURI());
         }// else {
            // throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
         //}

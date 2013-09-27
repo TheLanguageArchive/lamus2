@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -126,6 +127,7 @@ public class LamusWorkspaceUploaderTest {
         final int workspaceID = 1;
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File workspaceTopNodeArchivePath = new File("/archive/some/node.cmdi");
+        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
         
         final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
         final String fileItemName = "randomWrittenResourceFile.txt";
@@ -145,7 +147,7 @@ public class LamusWorkspaceUploaderTest {
         // only one item in this case, so the expectations don't need a loop
         
         //TODO Is the originURL really necessary??
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, -1, null, null);
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
         uploadedNode.setName(fileItemName);
         uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
         uploadedNode.setType(fileType);
@@ -176,7 +178,10 @@ public class LamusWorkspaceUploaderTest {
                 //TODO Is this method really necessary???
 //                oneOf(mockNodeDataRetriever).verifyTypecheckedResults(fileOurUrl, mockChildLink, mockTypecheckedResults);
                     
-                oneOf(mockWorkspaceTopNode).getArchiveURL(); will(returnValue(workspaceTopNodeArchiveURL));
+                oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+                oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI); will(returnValue(workspaceTopNodeArchiveURL));
+                    
+//                oneOf(mockWorkspaceTopNode).getArchiveURL(); will(returnValue(workspaceTopNodeArchiveURL));
                 
                 oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
                     will(returnValue(acceptableJudgement));

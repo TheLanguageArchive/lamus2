@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.exporting;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -33,7 +34,7 @@ public interface TrashVersioningHandler {
      * @param node Node to be retired
      * @return true if everything went well
      */
-    public boolean retireNodeVersion(WorkspaceNode node);
+//    public boolean retireNodeVersion(WorkspaceNode node);
     
     /**
      * Determines the directory where the versioned node should be located.
@@ -47,11 +48,11 @@ public interface TrashVersioningHandler {
      * Renames the file for the standard naming of versioned nodes.
      * 
      * @param baseDirectory Base directory where the file will be located
-     * @param archiveNodeID ID of the node to be versioned
+     * @param archiveNodeURI URI of the node to be versioned
      * @param archiveNodeURL URL of the node to be versioned
      * @return File object corresponding to the renamed version file
      */
-    public File getTargetFileForNodeVersion(File baseDirectory, int archiveNodeID, URL archiveNodeURL);
+    public File getTargetFileForNodeVersion(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL);
     
     /**
      * Checks if the target directory is writable.

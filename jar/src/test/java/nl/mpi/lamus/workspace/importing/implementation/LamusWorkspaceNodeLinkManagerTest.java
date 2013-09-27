@@ -26,6 +26,10 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -100,7 +104,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Mock File mockParentFile;
     @Mock StreamResult mockParentStreamResult;
-            
+    
+    
     public LamusWorkspaceNodeLinkManagerTest() {
     }
     
@@ -149,22 +154,22 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
 
     @Test
-    public void linkNodesWithReferenceWithNullParentNode() throws MalformedURLException {
+    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException, UnknownNodeException {
         
         final int childNodeID = 2;
-        final int childNodeArchiveID = 4;
-        final URL childNodeURL = new URL("http://some.url");
+        final URI childNodeURI = new URI(UUID.randomUUID().toString());
+        final URL childNodeURL = new URL("file:/archive/somewhere/node.cmdi");
         final int workspaceID = 1;
         
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(null, mockChildReference);
                 will(returnValue(null));
-            
+                
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspace).setTopNodeID(childNodeID);
-            oneOf(mockChildNode).getArchiveNodeID(); will(returnValue(childNodeArchiveID));
-            oneOf(mockWorkspace).setTopNodeArchiveID(childNodeArchiveID);
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childNodeURI));
+            oneOf(mockWorkspace).setTopNodeArchiveURI(childNodeURI);
             oneOf(mockChildNode).getArchiveURL(); will(returnValue(childNodeURL));
             oneOf(mockWorkspace).setTopNodeArchiveURL(childNodeURL);
             
@@ -176,7 +181,9 @@ public class LamusWorkspaceNodeLinkManagerTest {
         nodeLinkManager.linkNodesWithReference(null, mockChildNode, mockChildReference);
     }
   
-    //TODO
+    //TODO top node -> UnknownNodeException
+    
+    
     
 //    @Test
 //    public void linkNodesWithNullChildReference() {
@@ -277,21 +284,22 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesWithPid() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodesWithURI() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 3;
-        final String childPid = UUID.randomUUID().toString();
-        final URI childURI = new URI(childPid);
+        final URI childURI = new URI(UUID.randomUUID().toString());
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            exactly(2).of(mockChildNode).getPid(); will(returnValue(childPid));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            
             oneOf(mockParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReferenceWithHandle));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
             
@@ -312,23 +320,23 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesWithoutPid() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodesWithoutURI() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 3;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
-        final URI childURI = childURL.toURI();
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockChildNode).getPid(); will(returnValue(""));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
-            oneOf(mockParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReference));
+            
+            oneOf(mockParentDocument).getDocumentReferenceByURI(childURL.toURI()); will(returnValue(mockChildReference));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReference); will(returnValue(mockChildReference));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
@@ -348,15 +356,14 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodeWithHandleWithOneParent() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodeWithURIWithOneParent() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 4;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
-        final String childPid = UUID.randomUUID().toString();
-        final URI childURI = new URI(childPid);
+        final URI childURI = new URI(UUID.randomUUID().toString());
         
         final Collection<WorkspaceNode> parentNodes = new ArrayList<WorkspaceNode>();
         parentNodes.add(mockParentNode);
@@ -372,7 +379,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            exactly(2).of(mockChildNode).getPid(); will(returnValue(childPid));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            
             oneOf(mockParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReferenceWithHandle));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
             
@@ -393,7 +401,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodeWithHandleWithSeveralParents() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodeWithURIWithSeveralParents() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -406,8 +414,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int childNodeID = 4;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
-        final String childPid = UUID.randomUUID().toString();
-        final URI childURI = new URI(childPid);
+        final URI childURI = new URI(UUID.randomUUID().toString());
         
         final Collection<WorkspaceNode> parentNodes = new ArrayList<WorkspaceNode>();
         parentNodes.add(mockParentNode);
@@ -425,7 +432,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            exactly(2).of(mockChildNode).getPid(); will(returnValue(childPid));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            
             oneOf(mockParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReferenceWithHandle));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
             
@@ -446,7 +454,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockOtherParentNode).getWorkspaceURL(); will(returnValue(otherParentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(otherParentURL); will(returnValue(mockOtherParentDocument));
             
-            exactly(2).of(mockChildNode).getPid(); will(returnValue(childPid));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            
             oneOf(mockOtherParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReferenceWithHandle));
             oneOf(mockOtherParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
             

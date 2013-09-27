@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.net.URI;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exception.NodeExplorerException;
@@ -45,7 +46,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     private final TopNodeImporter topNodeImporter;
     
     private Workspace workspace = null;
-    private int topNodeArchiveID = -1;
+    private URI topNodeArchiveURI = null;
     
     @Autowired
     public WorkspaceImportRunner(WorkspaceDao workspaceDao, WorkspaceNodeExplorer workspaceFileExplorer,
@@ -65,11 +66,11 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     }
     
     /**
-     * Setter for the archive ID of the top node of the workspace
-     * @param nodeArchiveID archive ID of the top node of the workspace
+     * Setter for the archive URI of the top node of the workspace
+     * @param nodeArchiveURI archive URI of the top node of the workspace
      */
-    public void setTopNodeArchiveID(int nodeArchiveID) {
-        this.topNodeArchiveID = nodeArchiveID;
+    public void setTopNodeArchiveURI(URI nodeArchiveURI) {
+        this.topNodeArchiveURI = nodeArchiveURI;
     }
     
     /**
@@ -88,7 +89,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             //TODO create some other method that takes something else than a Reference
             // or have a separate method for importing the top node
 //            topNodeImporter.importNode(null, null, null, topNodeArchiveID);
-            topNodeImporter.importNode(workspace.getWorkspaceID(), topNodeArchiveID);
+            topNodeImporter.importNode(workspace.getWorkspaceID(), topNodeArchiveURI);
 
             
             //TODO import successful? notify main thread, change workspace status, etc...

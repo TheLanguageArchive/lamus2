@@ -109,13 +109,6 @@ public interface ArchiveFileHelper {
     public boolean isUrlLocal(OurURL urlToCheck);
     
     /**
-     * Gets the physical location in the archive for the given node
-     * @param archiveNodeID ID of the node
-     * @return File object corresponding to the file location
-     */
-    public File getArchiveLocationForNodeID(int archiveNodeID);
-    
-    /**
      * Adjusts the given filename, if necessary, depending on the files already
      * existing in the directory, so it can be created without conflicts
      * @param baseDirectory Directory where the file is supposed to be created

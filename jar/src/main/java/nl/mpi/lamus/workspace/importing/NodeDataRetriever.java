@@ -18,9 +18,12 @@ package nl.mpi.lamus.workspace.importing;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
@@ -42,8 +45,8 @@ public interface NodeDataRetriever {
      * @throws MetadataException if there is some metadata issue retrieving the document
      * @throws UnknownNodeException if there is some issue retrieving the node from the database
      */
-    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
-            throws IOException, MetadataException, UnknownNodeException;
+//    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
+//            throws IOException, MetadataException, UnknownNodeException;
 
     /**
      * Retrieves the URL of a resource, given its reference from the parent file
@@ -52,16 +55,22 @@ public interface NodeDataRetriever {
      * @throws MalformedURLException if the Reference doesn't contain a handle or a valid URL
      * @throws UnknownNodeException if the Reference contains a handle, but the node can't be found in the database
      */
-    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException;
+//    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException;
+    
+    /**
+     * Retrieves the archive URL (location) for the given URI (probably an archive handle)
+     * @param nodeArchiveURI URI of the node in the archive
+     * @return URL of the node in the archive
+     */
+    public URL getNodeArchiveURL(URI nodeArchiveURI);
     
     /**
      * Decides if a resource should be typechecked (depending on its location and size).
      * @param resourceReference Reference to the resource, from the parent metadata file
-     * @param resourceURLWithContext URL with the actual location of the resource
-     * @param nodeArchiveID ID of the resource in the archive
+     * @param resourceOurURL URL with the actual location of the resource
      * @return true if resource should be typechecked
      */
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceURLWithContext, int nodeArchiveID);
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceOurURL);
     
     /**
      * Invokes typechecking for the given resource.
@@ -81,4 +90,10 @@ public interface NodeDataRetriever {
      * @param typecheckedResults Object containing the result of the typechecker
      */
     public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults);
+        
+    /**
+     * Generates a new archive URI and sets it in the given node
+     * @param node node for which the URI should be generated
+     */
+    public void setNewArchiveURI(WorkspaceNode node);
 }

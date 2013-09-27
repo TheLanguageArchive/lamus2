@@ -80,29 +80,27 @@ public class LamusWorkspaceTreeServiceTest {
 
         final int nodeID = 1;
         final int workspaceID = 1;
-        int archiveNodeID = 10;
         URI profileSchemaURI = null;
         String name = "node_name";
         String title = "node_title";
         WorkspaceNodeType type = WorkspaceNodeType.METADATA;
         URL wsURL = null;
+        URI archiveURI = null;
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
         
         final WorkspaceNode node = new LamusWorkspaceNode(
-                nodeID, workspaceID, archiveNodeID, profileSchemaURI,
-                name, title, type, wsURL, archiveURL, originURL,
-                status, pid, format);
+                nodeID, workspaceID, profileSchemaURI,
+                name, title, type, wsURL, archiveURI,
+                archiveURL, originURL, status, format);
         
         final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
                 node, null, mockWorkspaceDao);
         
         context.checking(new Expectations() {{
             
-//            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, null); will(returnValue(treeNodeToRetrieve));
             oneOf(mockWorkspaceDao).getWorkspaceNode(nodeID); will(returnValue(node));
         }});
         
@@ -120,40 +118,36 @@ public class LamusWorkspaceTreeServiceTest {
 
         final int parentNodeID = 0;
         final int workspaceID = 1;
-        final int parentArchiveNodeID = 5;
         String parentName = "parent_name";
         String parentTitle = "parent_title";
-        String parentPid = UUID.randomUUID().toString();
                 
         final int nodeID = 1;
-        int archiveNodeID = 10;
         URI profileSchemaURI = null;
         String name = "node_name";
         String title = "node_title";
         WorkspaceNodeType type = WorkspaceNodeType.METADATA;
         URL wsURL = null;
+        URI archiveURI = null;
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
 
         final WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(
-                parentNodeID, workspaceID, parentArchiveNodeID, profileSchemaURI,
-                parentName, parentTitle, type, originURL, archiveURL, originURL,
-                status, pid, format, null, mockWorkspaceDao);
+                parentNodeID, workspaceID, profileSchemaURI,
+                parentName, parentTitle, type, wsURL, archiveURI,
+                archiveURL, originURL, status, format, null, mockWorkspaceDao);
         
         final WorkspaceNode node = new LamusWorkspaceNode(
-                nodeID, workspaceID, archiveNodeID, profileSchemaURI,
-                name, title, type, wsURL, archiveURL, originURL,
-                status, pid, format);
+                nodeID, workspaceID, profileSchemaURI,
+                name, title, type, wsURL, archiveURI,
+                archiveURL, originURL, status, format);
         
         final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
                 node, parentTreeNode, mockWorkspaceDao);
         
         context.checking(new Expectations() {{
             
-//            oneOf(mockWorkspaceDao).getWorkspaceTreeNode(nodeID, parentTreeNode); will(returnValue(treeNodeToRetrieve));
             oneOf(mockWorkspaceDao).getWorkspaceNode(nodeID); will(returnValue(node));
         }});
         

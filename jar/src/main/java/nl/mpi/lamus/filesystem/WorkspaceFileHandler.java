@@ -16,6 +16,7 @@
 package nl.mpi.lamus.filesystem;
 
 import java.io.File;
+import java.net.URL;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
@@ -78,8 +79,9 @@ public interface WorkspaceFileHandler {
     /**
      * Construct a File object corresponding to the given node.
      * 
+     * @param archiveNodeURL URL of the node in the archive
      * @param workspaceNode node with which to construct the File object.
      * @return File object
      */
-    public File getFileForImportedWorkspaceNode(WorkspaceNode workspaceNode);
+    public File getFileForImportedWorkspaceNode(URL archiveNodeURL, WorkspaceNode workspaceNode);
 }

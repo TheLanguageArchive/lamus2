@@ -93,26 +93,28 @@ public class LamusDeletedNodesExportHandlerTest {
         final Collection<WorkspaceNode> deletedTopNodes = new ArrayList<WorkspaceNode>();
         
         final int firstNodeID = 10;
-        final int firstNodeArchiveID = 100;
-        final URL firstNodeURL = new URL("http://some.url/node.something");
+        final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL firstNodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL firstNodeArchiveURL = firstNodeOriginURL;
+        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
         final String firstNodeDisplayValue = "someName";
         final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = new URI("http://some.location");
-        final String firstNodePid = UUID.randomUUID().toString();
-        final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeArchiveID, firstNodeSchemaLocation,
-                firstNodeDisplayValue, "", firstNodeType, firstNodeURL, firstNodeURL, firstNodeURL, WorkspaceNodeStatus.NODE_ISCOPY, firstNodePid, firstNodeFormat);
+        final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
+                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, firstNodeFormat);
         
         final int secondNodeID = 10;
-        final int secondNodeArchiveID = 100;
-        final URL secondNodeURL = new URL("http://some.url/node.something");
+        final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
+        final URL secondNodeOriginURL = new URL("file:/some.url/node.cmdi");
+        final URL secondNodeArchiveURL = secondNodeOriginURL;
+        final URI secondNodeURI = new URI(UUID.randomUUID().toString());
         final String secondNodeDisplayValue = "someName";
         final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = new URI("http://some.location");
-        final String secondNodePid = UUID.randomUUID().toString();
-        final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeArchiveID, secondNodeSchemaLocation,
-                secondNodeDisplayValue, "", secondNodeType, secondNodeURL, secondNodeURL, secondNodeURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodePid, secondNodeFormat);
+        final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
+                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
         
         deletedTopNodes.add(firstNode);
         deletedTopNodes.add(secondNode);

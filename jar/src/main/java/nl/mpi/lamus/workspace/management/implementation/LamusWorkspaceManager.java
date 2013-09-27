@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.management.implementation;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -73,12 +74,12 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     }
     
     /**
-     * @see WorkspaceManager#createWorkspace(java.lang.String, int)
+     * @see WorkspaceManager#createWorkspace(java.lang.String, java.net.URI)
      */
     @Override
-    public Workspace createWorkspace(String userID, int topNodeArchiveID) {
+    public Workspace createWorkspace(String userID, URI topArchiveNodeURI) {
         
-        Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topNodeArchiveID);
+        Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topArchiveNodeURI);
         newWorkspace.setStatusMessageInitialising();
         workspaceDao.addWorkspace(newWorkspace);
         try {
@@ -89,7 +90,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         }
         
         workspaceImportRunner.setWorkspace(newWorkspace);
-        workspaceImportRunner.setTopNodeArchiveID(topNodeArchiveID);
+        workspaceImportRunner.setTopNodeArchiveURI(topArchiveNodeURI);
         
         //TODO use Callable and Future instead of Runnable, in order to get the result of the thread
         

@@ -82,18 +82,16 @@ public class LamusWorkspaceNodeFactoryTest {
      * Test of getNewWorkspaceNode method, of class LamusWorkspaceNodeFactory.
      */
     @Test
-    public void workspaceNodeCorrectlyInitialised() throws MalformedURLException {
+    public void workspaceNodeCorrectlyInitialised() throws URISyntaxException, MalformedURLException {
 
         int testWorkspaceID = 10;
-        int testArchiveNodeID = 100;
-        URL testArchiveNodeURL = new URL("http://some.url");
+        URI testArchiveNodeURI = new URI(UUID.randomUUID().toString());
+        URL testArchiveNodeURL = new URL("file:/archive/folder/node.cmdi");
         
-        WorkspaceNode testWorkspaceNode = factory.getNewWorkspaceNode(testWorkspaceID, testArchiveNodeID, testArchiveNodeURL);
+        WorkspaceNode testWorkspaceNode = factory.getNewWorkspaceNode(testWorkspaceID, testArchiveNodeURI, testArchiveNodeURL);
         
         assertEquals(testWorkspaceID, testWorkspaceNode.getWorkspaceID());
-        assertEquals(testArchiveNodeID, testWorkspaceNode.getArchiveNodeID());
-        assertEquals(testArchiveNodeURL, testWorkspaceNode.getArchiveURL());
-        assertEquals(testArchiveNodeURL, testWorkspaceNode.getOriginURL());
+        assertEquals(testArchiveNodeURI, testWorkspaceNode.getArchiveURI());
     }
     
     @Test
@@ -102,8 +100,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final String userID = "someUser";
         final int topNodeID = 1;
-        final int topNodeArchiveID = 2;
-        final URL topNodeArchiveURL = new URL("http://top.url");
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final Date endDate = null;
         final long usedSpace = 0;
@@ -113,26 +111,24 @@ public class LamusWorkspaceNodeFactoryTest {
         final String archiveInfo = "info...";
         
         final Workspace testWorkspace = new LamusWorkspace(
-                workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL, startDate, endDate, startDate, endDate,
+                workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, endDate, startDate, endDate,
                 usedSpace, maxSpace, status, message, archiveInfo);
         
-        final int nodeArchiveID = 100;
-        final URL nodeURL = new URL("http://some.url/node.something");
+        final URI nodeArchiveURI = topNodeArchiveURI;
+        final URL nodeArchiveURL = topNodeArchiveURL;
         final String displayValue = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI schemaLocation = new URI("http://some.location");
-        final String pid = UUID.randomUUID().toString();
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY; //TODO change this
-        final URI fileLocation = nodeURL.toURI();
         
-        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveID, nodeURL, nodeURL);
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
         expectedNode.setName(displayValue);
         expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
-        expectedNode.setPid(pid);
         expectedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
 
         context.checking(new Expectations() {{
@@ -143,41 +139,38 @@ public class LamusWorkspaceNodeFactoryTest {
             //TODO get format
             oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
-            oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getHandle(); will(returnValue(pid));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveID, nodeURL, pid,
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveURI, nodeArchiveURL,
                 mockTestReferencingMetadataDocumentHandleCarrier);
         
         assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);
     }
     
     @Test
-    public void workspaceResourceNodeCorrectlyInitialised() throws MalformedURLException {
+    public void workspaceResourceNodeCorrectlyInitialised() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final int archiveNodeID = 100;
-        final URL nodeURL = new URL("file:/archive/folder/file.txt");
-        final String displayValue = FilenameUtils.getName(nodeURL.getPath());
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String nodeName = "someName.txt";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
-        final String nodeMimetype = "";
-        final String nodePid = UUID.randomUUID().toString();
+        final String nodeMimetype = "text/plain";
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_VIRTUAL; //TODO change this
         
-        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, archiveNodeID, nodeURL, nodeURL);
-        expectedNode.setName(displayValue);
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
+        expectedNode.setName(nodeName);
         expectedNode.setTitle("(type=" + nodeMimetype + ")"); //TODO CHANGE THIS
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeMimetype);
-        expectedNode.setPid(nodePid);
         expectedNode.setStatus(nodeStatus);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockTestReferenceHandleCarrier).getHandle(); will(returnValue(nodePid));
+//            oneOf(mockTestReferenceHandleCarrier).getHandle(); will(returnValue(nodePid));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceResourceNode(workspaceID, archiveNodeID, nodeURL, mockTestReferenceHandleCarrier, nodeType, nodeMimetype);
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceResourceNode(workspaceID, nodeArchiveURI, nodeArchiveURL, mockTestReferenceHandleCarrier, nodeType, nodeMimetype, nodeName);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }

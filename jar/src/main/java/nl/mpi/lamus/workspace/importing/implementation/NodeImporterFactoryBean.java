@@ -15,7 +15,8 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -33,7 +34,6 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ResourceReference;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,8 +46,9 @@ import org.springframework.stereotype.Component;
 public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
 
     @Autowired
-    @Qualifier("ArchiveObjectsDB")
-    private ArchiveObjectsDB archiveObjectsDB;
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private NodeResolver nodeResolver;
     @Autowired
     private WorkspaceDao workspaceDao;
     @Autowired
@@ -83,12 +84,12 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     @Override
     public NodeImporter getObject() throws Exception {
         if(ResourceNodeImporter.class.equals(nodeImporterType)) {
-            return new ResourceNodeImporter(archiveObjectsDB, workspaceDao, nodeDataRetriever,
+            return new ResourceNodeImporter(corpusStructureProvider, nodeResolver, workspaceDao, nodeDataRetriever,
                     archiveFileHelper, fileTypeHandler, workspaceNodeFactory,
                     workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory);
         } else {
             return new MetadataNodeImporter(
-                    archiveObjectsDB, workspaceDao, metadataApi, nodeDataRetriever, workspaceNodeLinkManager, workspaceFileImporter,
+                    corpusStructureProvider, nodeResolver, workspaceDao, metadataApi, nodeDataRetriever, workspaceNodeLinkManager, workspaceFileImporter,
                     workspaceNodeFactory, workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory,
                     workspaceFileHandler, workspaceNodeExplorer);
         }

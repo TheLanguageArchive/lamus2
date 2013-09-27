@@ -83,16 +83,16 @@ public class LamusWorkspaceServiceTest {
      * 
      */
     @Test
-    public void createWorkspaceNoAccess() throws MalformedURLException {
+    public void createWorkspaceNoAccess() throws MalformedURLException, URISyntaxException {
         
-        final int archiveNodeID = 10;
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(Boolean.FALSE));
+            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
         }});
         
-        Workspace result = service.createWorkspace(userID, archiveNodeID);
+        Workspace result = service.createWorkspace(userID, archiveNodeURI);
         assertNull("Returned workspace should be null when it cannot be created.", result);
     }
     
@@ -100,21 +100,21 @@ public class LamusWorkspaceServiceTest {
      * 
      */
     @Test
-    public void createWorkspaceSuccess() throws MalformedURLException {
+    public void createWorkspaceSuccess() throws MalformedURLException, URISyntaxException {
         
-        final int archiveNodeID = 10;
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeID); will(returnValue(Boolean.TRUE));
+            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             //allow other calls
-            oneOf (mockWorkspaceManager).createWorkspace(userID, archiveNodeID); will(returnValue(newWorkspace));
+            oneOf (mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
         }});
         
-        Workspace result = service.createWorkspace(userID, archiveNodeID);
+        Workspace result = service.createWorkspace(userID, archiveNodeURI);
         assertNotNull("Returned workspace should not be null when it can be created", result);
         assertEquals("Returned workspace is different from expected", result, newWorkspace);
     }
@@ -135,20 +135,20 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void getExistingWorkspace() throws MalformedURLException {
+    public void getExistingWorkspace() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
-        final int topNodeArchiveID = 2;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -162,13 +162,13 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void listUserWorkspaces() throws MalformedURLException {
+    public void listUserWorkspaces() throws URISyntaxException, MalformedURLException {
         
         final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
-        Workspace workspace1 = new LamusWorkspace(1, userID, 10, 0, new URL("http://some/url/node.cmdi"),
+        Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
-        Workspace workspace2 = new LamusWorkspace(2, userID, 11, 1, new URL("http://someother/url/node.cmdi"),
+        Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         final Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace1);
@@ -185,20 +185,20 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void openExistingWorkspace() throws MalformedURLException {
+    public void openExistingWorkspace() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
-        final int topNodeArchiveID = 2;
-        final URL topNodeArchiveURL = new URL("http://some/url/node.cmdi");
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         final Date startDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
         final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveID, topNodeArchiveURL,
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
         context.checking(new Expectations() {{
@@ -264,18 +264,17 @@ public class LamusWorkspaceServiceTest {
         
         final int nodeID = 1;
         final int workspaceID = 1;
-        final int archiveNodeID = 10;
         URI profileSchemaURI = null;
         String name = "node_name";
         String title = "node_title";
         WorkspaceNodeType type = WorkspaceNodeType.METADATA;
         URL wsURL = null;
+        URI archiveURI = null;
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
-        String pid = UUID.randomUUID().toString();
         String format = "cmdi";
-        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, archiveNodeID, profileSchemaURI, name, title, type, wsURL, archiveURL, originURL, status, pid, format);
+        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL, archiveURI, archiveURL, originURL, status, format);
         
         context.checking(new Expectations() {{
             
@@ -292,7 +291,7 @@ public class LamusWorkspaceServiceTest {
         
         final int nodeID = 1;
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<WorkspaceNode>();
-        final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, 20, null, "name", "title", WorkspaceNodeType.RESOURCE_MR, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "pid", "jpeg");
+        final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE_MR, null, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "jpeg");
         expectedChildNodes.add(childNode);
         
         context.checking(new Expectations() {{

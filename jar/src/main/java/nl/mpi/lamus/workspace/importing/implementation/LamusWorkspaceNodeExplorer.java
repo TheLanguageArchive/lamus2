@@ -16,8 +16,6 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.util.Collection;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exception.NodeExplorerException;
@@ -46,15 +44,13 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeExplorer.class);
     
-    private final ArchiveObjectsDB archiveObjectsDB;
     private final WorkspaceDao workspaceDao;
     private final NodeImporterFactoryBean nodeImporterFactoryBean;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
-    public LamusWorkspaceNodeExplorer(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
+    public LamusWorkspaceNodeExplorer(WorkspaceDao wsDao,
         NodeImporterFactoryBean nodeImporterFactoryBean, ArchiveFileHelper aFileHelper) {
-        this.archiveObjectsDB = aoDB;
         this.workspaceDao = wsDao;
         this.nodeImporterFactoryBean = nodeImporterFactoryBean;
         this.archiveFileHelper = aFileHelper;
@@ -75,28 +71,30 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
         
             //TODO check if the file does exist
 
-            String currentNodeArchiveIdStr;
+//            String currentNodeArchiveIdStr;
+//            
+//            if(currentLink instanceof HandleCarrier) {
+//                String linkHandle = ((HandleCarrier) currentLink).getHandle();
+////                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
+//                
+//                OurURL linkArchiveURL = this.archiveObjectsDB.getObjectURLForPid(linkHandle);
+//                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectId(linkArchiveURL);
+//                
+//            } else {
+//                //TODO Get the URL/nodeID some other way...
+//                currentNodeArchiveIdStr = null;
+//            }
+//            
+//            if(currentNodeArchiveIdStr == null) {
+//                
+//                //TODO node doesn't exist?
+//                String errorMessage = "PROBLEMS GETTING NODE ID";
+//                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), null);
+//            }
             
-            if(currentLink instanceof HandleCarrier) {
-                String linkHandle = ((HandleCarrier) currentLink).getHandle();
-//                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
-                
-                OurURL linkArchiveURL = this.archiveObjectsDB.getObjectURLForPid(linkHandle);
-                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectId(linkArchiveURL);
-                
-            } else {
-                //TODO Get the URL/nodeID some other way...
-                currentNodeArchiveIdStr = null;
-            }
             
-            if(currentNodeArchiveIdStr == null) {
-                
-                //TODO node doesn't exist?
-                String errorMessage = "PROBLEMS GETTING NODE ID";
-                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), null);
-            }
 
-            int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
+//            int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
             
             //TODO check here if it's already locked or not?
             
@@ -112,7 +110,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             }
             
 //            linkImporterToUse.setWorkspace(workspace);
-            linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentNodeArchiveID);
+            linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentLink.getURI());
         }
     }
     

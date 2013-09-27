@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.UUID;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
@@ -62,7 +63,7 @@ public class LamusWorkspaceParentNodeReferenceFactoryTest {
     @Test
     public void workspaceParentNodeReferenceObjectIsCorrectlyInitialised() throws MalformedURLException, URISyntaxException {
 
-        WorkspaceNode testParentNode = new LamusWorkspaceNode(1, 10, new URL("http://some.url"), new URL("http://some.url"));
+        WorkspaceNode testParentNode = new LamusWorkspaceNode(1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node.cmdi"));
         Reference testChildLink = new MetadataResourceProxy("someID", new URI("http://some.uri"), "cmdi");
         
         WorkspaceParentNodeReference testParentNodeReference = factory.getNewWorkspaceParentNodeReference(testParentNode, testChildLink);

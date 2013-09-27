@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import java.net.URI;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -29,10 +30,10 @@ public interface WorkspaceManager {
      * (copying the corresponding data from the archive).
      * 
      * @param userID ID of the user who is creating the workspace
-     * @param archiveNodeID ID of the archive node where the workspace is being created
+     * @param topArchiveNodeURI URI of the archive node where the workspace is being created
      * @return the object corresponding to the created workspace
      */
-    public Workspace createWorkspace(String userID, int archiveNodeID);
+    public Workspace createWorkspace(String userID, URI topArchiveNodeURI);
     
     /**
      * Triggers the deletion of a workspace

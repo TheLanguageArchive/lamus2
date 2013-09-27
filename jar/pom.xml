@@ -186,11 +186,35 @@
                 </exclusion>
             </exclusions>-->
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>corpusstructure-api</artifactId>
             <version>1.7.9</version>
+        </dependency>-->
+        
+        
+<!--        <dependency>
+            <groupId>nl.mpi</groupId>
+            <artifactId>corpusstructure-tree-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>-->
+        <dependency>
+            <groupId>nl.mpi.corpusstructure</groupId>
+            <artifactId>corpus-structure-2-provider</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>nl.mpi.corpusstructure</groupId>
+            <artifactId>corpus-structure-2-adapter</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.mpi.corpusstructure</groupId>
+            <artifactId>corpus-structure-2-writer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>ams2</artifactId>
@@ -237,6 +261,12 @@
             <groupId>nl.mpi.annot.search</groupId>
             <artifactId>annot-search-lib</artifactId>
             <version>1.2.2</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>nl.mpi.metadata-browser</groupId>
+            <artifactId>metadata-browser-cmdi</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         
     </dependencies>

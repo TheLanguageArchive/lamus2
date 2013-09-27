@@ -17,10 +17,11 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import nl.mpi.corpusstructure.ArchiveAccessContext;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
-import nl.mpi.corpusstructure.UnknownNodeException;
+import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
@@ -40,7 +41,6 @@ import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Node importer specific for resource files.
@@ -52,7 +52,8 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceNodeImporter.class);
     
-    private final ArchiveObjectsDB archiveObjectsDB;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
     
     private final NodeDataRetriever nodeDataRetriever;
@@ -66,11 +67,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private int workspaceID = -1;
     
     @Autowired
-    public ResourceNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao,
+    public ResourceNodeImporter(CorpusStructureProvider csProvider,
+            NodeResolver nodeResolver, WorkspaceDao wsDao,
             NodeDataRetriever nodeDataRetriever ,ArchiveFileHelper archiveFileHelper, FileTypeHandler fileTypeHandler,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceParentNodeReferenceFactory wsParentNodeReferenceFactory,
             WorkspaceNodeLinkFactory wsNodeLinkFactory) {
-        this.archiveObjectsDB = aoDB;
+        this.corpusStructureProvider = csProvider;
+        this.nodeResolver = nodeResolver;
         this.workspaceDao = wsDao;
         this.archiveFileHelper = archiveFileHelper;
         this.fileTypeHandler = fileTypeHandler;
@@ -86,7 +89,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
      */
     @Override
     public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, int childNodeArchiveID) throws NodeImporterException {
+            Reference childLink, URI childNodeArchiveURI) throws NodeImporterException {
         
         workspaceID = wsID;
         
@@ -97,38 +100,47 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         }
    
         URI childURI = childLink.getURI();
-        OurURL childURL = null;
+        CorpusNode childCorpusNode = null;
+        URL childURL = null;
+        OurURL childOurURL = null;
         try {
-            childURL = nodeDataRetriever.getResourceURL(childLink);
+            
+            childCorpusNode = corpusStructureProvider.getNode(childURI);
+            childURL = nodeResolver.getUrl(childCorpusNode);
+            
+//            childURL = nodeDataRetriever.getResourceURL(childLink);
             if(childURL == null) {
                 String errorMessage = "Error getting URL for link " + childLink.getURI();
                 logger.error(errorMessage);
                 throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
             }
+            childOurURL = new OurURL(childURL.toString());
+            
         } catch (MalformedURLException muex) {
             String errorMessage = "Error getting URL for link " + childLink.getURI();
             logger.error(errorMessage, muex);
             throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
         } catch (UnknownNodeException unex) {
-	    String errorMessage = "Error getting object URL for node ID " + childNodeArchiveID;
+	    String errorMessage = "Error getting object URL for node " + childURI;
 	    logger.error(errorMessage, unex);
 	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
 
         
         //TODO change this call - reuse/refactor the new method in ArchiveFileHelper instead
-        OurURL childURLWithContext = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+//        OurURL childURLWithContext = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+        
 
         WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();
 
-        if(nodeDataRetriever.shouldResourceBeTypechecked(childLink, childURLWithContext, childNodeArchiveID)) {
+        if(nodeDataRetriever.shouldResourceBeTypechecked(childLink, childOurURL)) {
             
             TypecheckedResults typecheckedResults = null;    
             try {
 
                 // REALLY NECESSARY TO CALL A SEPARATE CLASS FOR THIS?
-                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childURLWithContext);
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childOurURL);
 
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
@@ -136,7 +148,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
                 throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), tcex);
             }
             
-            nodeDataRetriever.verifyTypecheckedResults(childURL, childLink, typecheckedResults);
+            nodeDataRetriever.verifyTypecheckedResults(childOurURL, childLink, typecheckedResults);
             
             childType = typecheckedResults.getCheckedNodeType();
             childMimetype = typecheckedResults.getCheckedMimetype();
@@ -145,7 +157,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspaceID, childNodeArchiveID, childURLWithContext.toURL(), childLink, childType, childMimetype);
+                workspaceID, childURI, childURL, childLink, childType, childMimetype, childCorpusNode.getName());
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

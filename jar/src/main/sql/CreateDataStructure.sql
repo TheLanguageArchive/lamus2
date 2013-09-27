@@ -2,7 +2,7 @@ CREATE TABLE workspace (
 	workspace_id                SERIAL                          NOT NULL,
 	user_id                     varchar(30)                     NOT NULL,
 	top_node_id                 integer,
-        top_node_archive_id         integer,
+        top_node_archive_uri        varchar(255),
         top_node_archive_url        varchar(255),
 	start_date                  timestamp(6) with time zone     NOT NULL,
 	end_date                    timestamp(6) with time zone,
@@ -18,16 +18,15 @@ CREATE TABLE workspace (
 CREATE TABLE node (
 	workspace_node_id           SERIAL                          NOT NULL,
 	workspace_id                integer                         NOT NULL,
-	archive_node_id             integer,
 	profile_schema_uri          varchar(255),
 	name                        varchar(255)                    NOT NULL,
 	title                       varchar(255),
         type                        varchar(255)                    NOT NULL,
 	workspace_url               varchar(255),
-	archive_url                 varchar(255),
+	archive_uri                 varchar(255),
+        archive_url                 varchar(255),
 	origin_url                  varchar(255),
 	status                      varchar(255)                    NOT NULL,
-	pid                         varchar(255),
 	format                      varchar(255)                    NOT NULL,
 	PRIMARY KEY (workspace_node_id));
 	

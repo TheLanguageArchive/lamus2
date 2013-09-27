@@ -49,10 +49,10 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
         WorkspaceNode child = this.workspaceDao.getWorkspaceNode(nodeID);
         
         WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
-                        child.getWorkspaceNodeID(), child.getWorkspaceID(), child.getArchiveNodeID(),
+                        child.getWorkspaceNodeID(), child.getWorkspaceID(),
                         child.getProfileSchemaURI(), child.getName(), child.getTitle(),
-                        child.getType(), child.getWorkspaceURL(), child.getArchiveURL(),
-                        child.getOriginURL(), child.getStatus(), child.getPid(),
+                        child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
+                        child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
                         child.getFormat(), parentTreeNode, this.workspaceDao);
         
         return treeNode;

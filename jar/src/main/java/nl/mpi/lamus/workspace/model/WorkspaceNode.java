@@ -34,10 +34,6 @@ public interface WorkspaceNode extends Serializable {
     
     public void setWorkspaceID(int workspaceID);
     
-    public int getArchiveNodeID();
-    
-    public void setArchiveNodeID(int archiveNodeID);
-    
     public URI getProfileSchemaURI();
     
     public void setProfileSchemaURI(URI profileSchemaURI);
@@ -60,6 +56,10 @@ public interface WorkspaceNode extends Serializable {
     
     public void setWorkspaceURL(URL workspaceURL);
     
+    public URI getArchiveURI();
+    
+    public void setArchiveURI(URI archiveURI);
+    
     public URL getArchiveURL();
     
     public void setArchiveURL(URL archiveURL);
@@ -71,10 +71,6 @@ public interface WorkspaceNode extends Serializable {
     public WorkspaceNodeStatus getStatus();
     
     public void setStatus(WorkspaceNodeStatus status);
-    
-    public String getPid();
-    
-    public void setPid(String pid);
     
     public String getFormat();
     

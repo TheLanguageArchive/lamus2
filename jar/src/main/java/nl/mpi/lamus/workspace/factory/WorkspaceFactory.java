@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
+import java.net.URI;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -29,9 +30,9 @@ public interface WorkspaceFactory {
      * injected or set as a default value.
      * 
      * @param userID ID of the user who is creating the workspace
-     * @param archiveTopNodeID ID of the archive node to be used as the top node
+     * @param archiveTopNodeURI URI of the archive node to be used as the top node
      * @return created Workspace object
      */
-    public Workspace getNewWorkspace(String userID, int archiveNodeID);
+    public Workspace getNewWorkspace(String userID, URI archiveTopNodeURI);
     
 }

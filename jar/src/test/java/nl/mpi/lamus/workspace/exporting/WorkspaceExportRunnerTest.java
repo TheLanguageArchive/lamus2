@@ -103,15 +103,16 @@ public class WorkspaceExportRunnerTest {
         final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
         
         final int testChildWorkspaceNodeID = 10;
-        final int testChildArchiveID = 100;
-        final URL testChildURL = new URL("http://some.url/node.something");
+        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
+        final URL testChildArchiveURL = testChildOriginURL;
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = UUID.randomUUID().toString();
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testChildArchiveID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildURL, testChildURL, testChildURL, WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         workspaceNodes.add(testNode);
         

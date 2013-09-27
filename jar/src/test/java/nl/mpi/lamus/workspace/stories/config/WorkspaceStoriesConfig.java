@@ -23,12 +23,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.sql.DataSource;
 import nl.mpi.annot.search.lib.SearchClient;
+import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+import nl.mpi.archiving.corpusstructure.adapter.model.AdapterAccessInfo;
+import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.workspace.stories.utils.WorkspaceStepsCorpusStructureProviderFactory;
 import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
 import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
 import nl.mpi.lat.ams.authentication.impl.LdapAuthenticationSrv;
@@ -109,6 +117,48 @@ public class WorkspaceStoriesConfig {
         return archiveFolder;
     }
     
+    
+    private WorkspaceStepsCorpusStructureProviderFactory csProviderFactory;
+    private CorpusStructureProvider csProvider;
+    
+    private void corpusStructureProviderFactory() {
+        if(csProviderFactory == null) {
+            csProviderFactory = new WorkspaceStepsCorpusStructureProviderFactory("jdbc:hsqldb:mem:corpusstructure");
+        }
+    }
+    
+    @Bean
+    public CorpusStructureProvider corpusStructureProvider() {
+        corpusStructureProviderFactory();
+        if(csProvider == null) {
+            corpusstructureDataSource();
+            csProvider = csProviderFactory.createCorpusStructureDB();
+        }
+        return csProvider;
+    }
+    
+    private NodeResolver nodeResolver;
+    
+    @Bean
+    public NodeResolver nodeResolver() {
+        corpusStructureProviderFactory();
+        if(nodeResolver == null) {
+            corpusstructureDataSource();
+            nodeResolver = csProviderFactory.createNodeResolver();
+        }
+        return nodeResolver;
+    }
+    
+    private CorpusstructureWriter corpusstructureWriter;
+    
+    @Bean
+    public CorpusstructureWriter corpusstructureWriter() {
+        
+        //TODO Not implemented yet, and anyway it probably shouldn't be needed by LAMUS, which should only invoke the crawler
+        return null;
+    }
+    
+    
     @Bean
     @Qualifier("ArchiveObjectsDB")
     public CorpusStructureDBWriteImpl archiveObjectsDB() {
@@ -119,7 +169,7 @@ public class WorkspaceStoriesConfig {
 
     private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
         if(csDBWrite == null) {
-            corpusstructureDataSouce();
+            corpusstructureDataSource();
             csDBWrite = new CorpusStructureDBWriteImpl("jdbc:hsqldb:mem:corpusstructure", false, "sa", "");
         }
         return csDBWrite;
@@ -127,7 +177,7 @@ public class WorkspaceStoriesConfig {
 
     @Bean
     @Qualifier("corpusstructureDataSource")
-    public DataSource corpusstructureDataSouce() {
+    public DataSource corpusstructureDataSource() {
         if(corpusstructureDataSource == null) {
             createCorpusstructureDB();
         }
@@ -493,6 +543,18 @@ public class WorkspaceStoriesConfig {
         return new FileType();
     }
     
+    private AccessInfo defaultAccessInfo;
+    
+    @Bean
+    public AccessInfo defaultAccessInfo() {
+        
+        if(defaultAccessInfo == null) {
+            nl.mpi.corpusstructure.AccessInfo oldAccessInfo = nl.mpi.corpusstructure.AccessInfo.create(
+                    nl.mpi.corpusstructure.AccessInfo.EVERYBODY, nl.mpi.corpusstructure.AccessInfo.EVERYBODY, nl.mpi.corpusstructure.AccessInfo.ACCESS_LEVEL_NONE);
+            defaultAccessInfo = new AdapterAccessInfo(oldAccessInfo);
+        }
+        return defaultAccessInfo;
+    }
     
     
     // PROPERTIES

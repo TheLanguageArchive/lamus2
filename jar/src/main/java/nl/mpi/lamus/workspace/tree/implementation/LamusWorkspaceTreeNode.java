@@ -41,15 +41,15 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     private WorkspaceTreeNode parentTreeNode;
     private WorkspaceDao workspaceDao;
     
-    public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID, int archiveNodeID,
+    public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-            URL workspaceURL, URL archiveURL, URL originURL,
-            WorkspaceNodeStatus status, String pid, String format,
+            URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+            WorkspaceNodeStatus status, String format,
             WorkspaceTreeNode parent, WorkspaceDao dao) {
         
-        super(workspaceNodeID, workspaceID, archiveNodeID, profileSchemaURI,
-                name, title, type, workspaceURL, archiveURL, originURL,
-                status, pid, format);
+        super(workspaceNodeID, workspaceID, profileSchemaURI,
+                name, title, type, workspaceURL, archiveURI, archiveURL, originURL,
+                status, format);
         
         if(dao == null) {
             throw new IllegalArgumentException("The WorkspaceService object should not be null.");
@@ -61,10 +61,10 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     
     public LamusWorkspaceTreeNode(WorkspaceNode node, WorkspaceTreeNode parent, WorkspaceDao dao) {
         
-        super(node.getWorkspaceNodeID(), node.getWorkspaceID(), node.getArchiveNodeID(),
+        super(node.getWorkspaceNodeID(), node.getWorkspaceID(),
                 node.getProfileSchemaURI(), node.getName(), node.getTitle(), node.getType(),
-                node.getWorkspaceURL(), node.getArchiveURL(), node.getOriginURL(),
-                node.getStatus(), node.getPid(), node.getFormat());
+                node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURL(),
+                node.getStatus(), node.getFormat());
         
         if(dao == null) {
             throw new IllegalArgumentException("The WorkspaceService object should not be null.");
@@ -114,10 +114,10 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
             Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
             for(WorkspaceNode child : children) {
                 WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
-                        child.getWorkspaceNodeID(), child.getWorkspaceID(), child.getArchiveNodeID(),
+                        child.getWorkspaceNodeID(), child.getWorkspaceID(),
                         child.getProfileSchemaURI(), child.getName(), child.getTitle(),
-                        child.getType(), child.getWorkspaceURL(), child.getArchiveURL(),
-                        child.getOriginURL(), child.getStatus(), child.getPid(),
+                        child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
+                        child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
                         child.getFormat(), this, this.workspaceDao);
                 this.childrenTreeNodes.add(treeNode);
             }

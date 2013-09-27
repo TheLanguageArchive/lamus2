@@ -16,9 +16,12 @@
 package nl.mpi.lamus.workspace.model.implementation;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import static org.junit.Assert.*;
@@ -33,7 +36,7 @@ public class LamusWorkspaceTest {
     private int workspaceID = 1;
     private String userID = "someUser";
     private int topNodeID = 1;
-    private int topNodeArchiveID = 10;
+    private URI topNodeArchiveURI;
     private URL topNodeArchiveURL;
     private Date testDate = Calendar.getInstance().getTime();
     private long usedStorageSpace = 0L;
@@ -54,8 +57,9 @@ public class LamusWorkspaceTest {
     }
     
     @Before
-    public void setUp() throws MalformedURLException {
-        this.topNodeArchiveURL = new URL("http://some.url");
+    public void setUp() throws URISyntaxException, MalformedURLException {
+        this.topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        this.topNodeArchiveURL = new URL("file:/some/archive/folder/node.cmdi");
     }
     
     @After
@@ -87,7 +91,7 @@ public class LamusWorkspaceTest {
     public void constructorWithAllParametersProperlyCreatesWorkspace() {
 
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -95,8 +99,7 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'workspaceID' is not the expected one.", this.workspaceID, testWorkspace.getWorkspaceID());
         assertEquals("Value for 'userID' is not the expected one.", this.userID, testWorkspace.getUserID());
         assertEquals("Value for 'topNodeID' is not the expected one.", this.topNodeID, testWorkspace.getTopNodeID());
-        assertEquals("Value for 'topNodeArchiveID' is not the expected one.", this.topNodeArchiveID, testWorkspace.getTopNodeArchiveID());
-        assertEquals("Value for 'topNodeArchiveURL' is not the expected one.", this.topNodeArchiveURL, testWorkspace.getTopNodeArchiveURL());
+        assertEquals("Value for 'topNodeArchiveURI' is not the expected one.", this.topNodeArchiveURI, testWorkspace.getTopNodeArchiveURI());
         assertEquals("Value for 'startDate' is not the expected one.", this.testDate, testWorkspace.getStartDate());
         assertEquals("Value for 'endDate' is not the expected one.", this.testDate, testWorkspace.getEndDate());
         assertEquals("Value for 'sessionStartDate' is not the expected one.", this.testDate, testWorkspace.getSessionStartDate());
@@ -115,7 +118,7 @@ public class LamusWorkspaceTest {
     public void constructorWithAllParametersReceivesNullDates() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 null, null, null, null,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -136,7 +139,7 @@ public class LamusWorkspaceTest {
         Date localTestDate = localCalendar.getTime();
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 localTestDate, localTestDate, localTestDate, localTestDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -161,13 +164,13 @@ public class LamusWorkspaceTest {
     public void workspacesAreEqual() {
 
         Workspace testWorkspace1 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
         Workspace testWorkspace2 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -179,13 +182,13 @@ public class LamusWorkspaceTest {
     public void workspacesHaveSameHashCode() {
 
         Workspace testWorkspace1 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
         Workspace testWorkspace2 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -204,13 +207,13 @@ public class LamusWorkspaceTest {
         Date differentDate = newCalendar.getTime();
 
         Workspace testWorkspace1 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
         Workspace testWorkspace2 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, differentDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -226,13 +229,13 @@ public class LamusWorkspaceTest {
         Date differentDate = newCalendar.getTime();
 
         Workspace testWorkspace1 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
         Workspace testWorkspace2 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, differentDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -244,13 +247,13 @@ public class LamusWorkspaceTest {
     public void workspacesComparedWithObjectOfDifferentType() {
 
         Workspace testWorkspace1 = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         
         Object testWorkspace2 = new SomeOtherWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -265,7 +268,7 @@ public class LamusWorkspaceTest {
     public void getStartDateReturnsEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -282,7 +285,7 @@ public class LamusWorkspaceTest {
     public void setStartDateSetsProperlyEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -305,7 +308,7 @@ public class LamusWorkspaceTest {
     public void getEndDateReturnsEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -322,7 +325,7 @@ public class LamusWorkspaceTest {
     public void setEndDateSetsProperlyEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -345,7 +348,7 @@ public class LamusWorkspaceTest {
     public void getSessionStartDateReturnsEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -362,7 +365,7 @@ public class LamusWorkspaceTest {
     public void setSessionStartDateSetsProperlyEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -385,7 +388,7 @@ public class LamusWorkspaceTest {
     public void getSessionEndDateReturnsEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -402,7 +405,7 @@ public class LamusWorkspaceTest {
     public void setSessionEndDateSetsProperlyEqualButNotSameObject() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
@@ -422,14 +425,14 @@ public class LamusWorkspaceTest {
     public void testToString() {
         
         Workspace testWorkspace = new LamusWorkspace(
-                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveID, this.topNodeArchiveURL,
+                this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
                 this.status, this.message, this.archiveInfo);
         String expectedString = "Workspace ID: " + testWorkspace.getWorkspaceID()
                 + ", User ID: " + testWorkspace.getUserID()
                 + ", Top Node ID: " + testWorkspace.getTopNodeID()
-                + ", Top Node Archive ID: " + testWorkspace.getTopNodeArchiveID()
+                + ", Top Node Archive URI: " + testWorkspace.getTopNodeArchiveURI()
                 + ", Top Node Archive URL: " + testWorkspace.getTopNodeArchiveURL()
                 + ", Start Date: " + testWorkspace.getStartDate()
                 + ", End Date: " + testWorkspace.getEndDate()
@@ -470,7 +473,7 @@ class SomeOtherWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
-    private int topNodeArchiveID;
+    private URI topNodeArchiveURI;
     private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
@@ -493,13 +496,13 @@ class SomeOtherWorkspace implements Workspace {
         //TODO set message, etc
     }
     
-    public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, int topNodeArchiveID, URL topNodeArchiveURL,
+    public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
-        this.topNodeArchiveID = topNodeArchiveID;
+        this.topNodeArchiveURI = topNodeArchiveURI;
         this.topNodeArchiveURL = topNodeArchiveURL;
         if(startDate != null) {
             this.startDate = (Date) startDate.clone();
@@ -551,20 +554,20 @@ class SomeOtherWorkspace implements Workspace {
     }
     
     @Override
-    public int getTopNodeArchiveID() {
-        return this.topNodeArchiveID;
+    public URI getTopNodeArchiveURI() {
+        return this.topNodeArchiveURI;
     }
 
     @Override
-    public void setTopNodeArchiveID(int topNodeID) {
-        this.topNodeArchiveID = topNodeID;
+    public void setTopNodeArchiveURI(URI topNodeArchiveURI) {
+        this.topNodeArchiveURI = topNodeArchiveURI;
     }
     
     @Override
     public URL getTopNodeArchiveURL() {
         return this.topNodeArchiveURL;
     }
-
+    
     @Override
     public void setTopNodeArchiveURL(URL topNodeArchiveURL) {
         this.topNodeArchiveURL = topNodeArchiveURL;

@@ -35,19 +35,15 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     
     private int workspaceNodeID;
     private int workspaceID;
-
-    //TODO Worth having???
-    private int archiveNodeID;
-    
     private URI profileSchemaURI;
     private String name;
     private String title;
     private WorkspaceNodeType type;
     private URL workspaceURL;
+    private URI archiveURI;
     private URL archiveURL;
     private URL originURL;
     private WorkspaceNodeStatus status;
-    private String pid;
     private String format;
     private Collection<WorkspaceParentNodeReference> parentNodesReferences;
     
@@ -55,30 +51,28 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         
     }
     
-    public LamusWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveURL, URL originURL) {
+    public LamusWorkspaceNode(int workspaceID, URI archiveURI, URL archiveURL) {
         this.workspaceID = workspaceID;
-        this.archiveNodeID = archiveNodeID;
+        this.archiveURI = archiveURI;
         this.archiveURL = archiveURL;
-        this.originURL = originURL;
     }
     
-    public LamusWorkspaceNode(int workspaceNodeID, int workspaceID, int archiveNodeID,
+    public LamusWorkspaceNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-            URL workspaceURL, URL archiveURL, URL originURL,
-            WorkspaceNodeStatus status, String pid, String format) {
+            URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+            WorkspaceNodeStatus status, String format) {
         
         this.workspaceNodeID = workspaceNodeID;
         this.workspaceID = workspaceID;
-        this.archiveNodeID = archiveNodeID;
         this.profileSchemaURI = profileSchemaURI;
         this.name = name;
         this.title = title;
         this.type = type;
         this.workspaceURL = workspaceURL;
+        this.archiveURI = archiveURI;
         this.archiveURL = archiveURL;
         this.originURL = originURL;
         this.status = status;
-        this.pid = pid;
         this.format = format;
     }
 
@@ -100,16 +94,6 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     @Override
     public void setWorkspaceID(int workspaceID) {
         this.workspaceID = workspaceID;
-    }
-
-    @Override
-    public int getArchiveNodeID() {
-        return this.archiveNodeID;
-    }
-    
-    @Override
-    public void setArchiveNodeID(int archiveNodeID) {
-        this.archiveNodeID = archiveNodeID;
     }
 
     @Override
@@ -168,6 +152,16 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
 
     @Override
+    public URI getArchiveURI() {
+        return this.archiveURI;
+    }
+    
+    @Override
+    public void setArchiveURI(URI archiveURI) {
+        this.archiveURI = archiveURI;
+    }
+    
+    @Override
     public URL getArchiveURL() {
         return this.archiveURL;
     }
@@ -195,16 +189,6 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     @Override
     public void setStatus(WorkspaceNodeStatus status) {
         this.status = status;
-    }
-
-    @Override
-    public String getPid() {
-        return this.pid;
-    }
-
-    @Override
-    public void setPid(String pid) {
-        this.pid = pid;
     }
 
     @Override
@@ -242,16 +226,15 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         HashCodeBuilder hashCodeB = new HashCodeBuilder()
                 .append(this.workspaceNodeID)
                 .append(this.workspaceID)
-                .append(this.archiveNodeID)
                 .append(this.profileSchemaURI)
                 .append(this.name)
                 .append(this.title)
                 .append(this.type)
                 .append(this.workspaceURL)
+                .append(this.archiveURI)
                 .append(this.archiveURL)
                 .append(this.originURL)
                 .append(this.status)
-                .append(this.pid)
                 .append(this.format);
                 
         return hashCodeB.toHashCode();
@@ -272,16 +255,15 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         EqualsBuilder equalsB = new EqualsBuilder()
                 .append(this.workspaceNodeID, other.getWorkspaceNodeID())
                 .append(this.workspaceID, other.getWorkspaceID())
-                .append(this.archiveNodeID, other.getArchiveNodeID())
                 .append(this.profileSchemaURI, other.getProfileSchemaURI())
                 .append(this.name, other.getName())
                 .append(this.title, other.getTitle())
                 .append(this.type, other.getType())
                 .append(this.workspaceURL, other.getWorkspaceURL())
+                .append(this.archiveURI, other.getArchiveURI())
                 .append(this.archiveURL, other.getArchiveURL())
                 .append(this.originURL, other.getOriginURL())
                 .append(this.status, other.getStatus())
-                .append(this.pid, other.getPid())
                 .append(this.format, other.getFormat());
         
         return equalsB.isEquals();
@@ -291,11 +273,11 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     public String toString() {
         
         String stringResult = "Workspace Node ID: " + this.workspaceNodeID + ", Workspace ID: " + this.workspaceID +
-                ", Archive Node ID: " + this.archiveNodeID + ", Profile Schema URI: " + this.profileSchemaURI +
+                ", Profile Schema URI: " + this.profileSchemaURI +
                 ", Name: " + this.name + ", Title: " + this.title +
                 ", Type: " + this.type + ", Workspace URL: " + this.workspaceURL +
-                ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURL +
-                ", Status: " + this.status + ", PID: " + this.pid + ", Format: " + this.format;
+                ", Archive URI: " + this.archiveURI + ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURL +
+                ", Status: " + this.status + ", Format: " + this.format;
         
         return stringResult;
     }

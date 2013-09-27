@@ -18,6 +18,7 @@ package nl.mpi.lamus.ams;
 //import nl.mpi.lat.ams.model.NodeAuth;
 //import nl.mpi.lat.ams.model.NodeLicense;
 //import nl.mpi.lat.ams.model.NodePcplLicense;
+import java.net.URI;
 import nl.mpi.lat.ams.model.NodePcplRule;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
@@ -312,14 +313,21 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 	}
      */
     /**
-     * @see lams.ams.AmsBridge#hasWriteAccess(java.lang.String,
-     * nl.mpi.util.OurURL)
+     * @see nl.mpi.lamus.ams.AmsBridge#hasWriteAccess(java.lang.String, java.net.URI)
      */
     @Override
-    public boolean hasWriteAccess(String userId, String nodeIdStr) {
-        LatPrincipal user = this.getPrincipalSrv().getUser(userId);
-        NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
-        return this.getAuthorizationSrv().isWriteable(user, target);
+    public boolean hasWriteAccess(String userId, URI archiveNodeURI) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        LatPrincipal user = this.getPrincipalSrv().getUser(userId);
+//        NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
+//        return this.getAuthorizationSrv().isWriteable(user, target);
+        
+        
+        
+        return true;
+        
     }
 
     /**
@@ -337,56 +345,62 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     }
 
     /**
-     * @see lams.ams.AmsBridge#setUsedStorageSpace(java.lang.String,
-     * nl.mpi.util.OurURL, long)
+     * @see nl.mpi.lamus.ams.AmsBridge#setUsedStorageSpace(java.lang.String, java.net.URI, long)
      */
     @Override
-    public void setUsedStorageSpace(String uid, String nodeIdStr, long val) {
-        try {
-            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-            if (target == null) {
-                logger.error("found no NPR target for setting DomainEditor options");
-                return;
-            }
-            // npr is just a mimic, 
-            //	e.g. for ArchiveManager role incorporating DomainEditor options
-            if (target.isVirtual()) {
-                logger.debug("caught virtual " + target);
-                return;
-            }
-            // evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
-            Integer mb = convertLongBToIntMB(val);
-            target.setUsedStorageMB(mb);
-            this.getAuthorizationSrv().save(target.getParent());
-
-            // trigger recalculation to re-export modified data from ams2 to csdb
-            // NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
-            // <=> max- vs. used-storage-space is checked & handled in lamus itself
-//		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
-        } catch (RuntimeException rE) {
-            logger.error("could not set UsedStorageSpace", rE);
-            return;
-        }
+    public void setUsedStorageSpace(String uid, URI archiveNodeURI, long val) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        try {
+//            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+//            if (target == null) {
+//                logger.error("found no NPR target for setting DomainEditor options");
+//                return;
+//            }
+//            // npr is just a mimic, 
+//            //	e.g. for ArchiveManager role incorporating DomainEditor options
+//            if (target.isVirtual()) {
+//                logger.debug("caught virtual " + target);
+//                return;
+//            }
+//            // evil down cast: "only" 2^31 MB = 2^51 bytes space allowed
+//            Integer mb = convertLongBToIntMB(val);
+//            target.setUsedStorageMB(mb);
+//            this.getAuthorizationSrv().save(target.getParent());
+//
+//            // trigger recalculation to re-export modified data from ams2 to csdb
+//            // NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
+//            // <=> max- vs. used-storage-space is checked & handled in lamus itself
+////		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
+//        } catch (RuntimeException rE) {
+//            logger.error("could not set UsedStorageSpace", rE);
+//            return;
+//        }
     }
 
     /**
-     * @see lams.ams.AmsBridge#getUsedStorageSpace(java.lang.String,
-     * nl.mpi.util.OurURL)
+     * @see nl.mpi.lamus.ams.AmsBridge#getUsedStorageSpace(java.lang.String, java.net.URI)
      */
     @Override
-    public long getUsedStorageSpace(String uid, String nodeIdStr) {
-        try {
-            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-            long usedStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
-            if (target != null && target.getUsedStorageMB() != null) {
-                usedStorageInBytes = convertIntMBToLongB(target.getUsedStorageMB());
-            }
-            return usedStorageInBytes;
-        } catch (RuntimeException rE) {
-            logger.error("could not determine UsedStorageSpace, providing error-default "
-                    + AmsBridge.ERROR_MB, rE);
-            return AmsBridge.ERROR_MB.longValue();
-        }
+    public long getUsedStorageSpace(String uid, URI archiveNodeURI) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        try {
+//            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+//            long usedStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+//            if (target != null && target.getUsedStorageMB() != null) {
+//                usedStorageInBytes = convertIntMBToLongB(target.getUsedStorageMB());
+//            }
+//            return usedStorageInBytes;
+//        } catch (RuntimeException rE) {
+//            logger.error("could not determine UsedStorageSpace, providing error-default "
+//                    + AmsBridge.ERROR_MB, rE);
+//            return AmsBridge.ERROR_MB.longValue();
+//        }
+        
+        return 0;
     }
     
     private long convertIntMBToLongB(int valueInMB) {
@@ -400,25 +414,29 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     }
 
     /**
-     * @see lams.ams.AmsBridge#getMaxStorageSpace(java.lang.String,
-     * nl.mpi.util.OurURL)
+     * @see nl.mpi.lamus.ams.AmsBridge#getMaxStorageSpace(java.lang.String, java.net.URI)
      */
     @Override
-    public long getMaxStorageSpace(String uid, String nodeIdStr) {
-        try {
-            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
-            // no target -> no domain-editor(options)
-            long maxStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
-            if (target != null && target.getMaxStorageMB() != null) {
-                maxStorageInBytes = convertIntMBToLongB(target.getMaxStorageMB());
-            }
-            //contract from ams2-api: value null means unlimited = MAX_MB
-            return maxStorageInBytes;
-        } catch (RuntimeException rE) {
-            logger.error("could not determine MaxStorageSpace, providing error-default "
-                    + ERROR_MB, rE);
-            return ERROR_MB.longValue();
-        }
+    public long getMaxStorageSpace(String uid, URI archiveNodeURI) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        try {
+//            NodePcplRule target = this.getDomEditorRuleOpts(uid, nodeIdStr);
+//            // no target -> no domain-editor(options)
+//            long maxStorageInBytes = AmsBridge.DEFAULT_MB.longValue();
+//            if (target != null && target.getMaxStorageMB() != null) {
+//                maxStorageInBytes = convertIntMBToLongB(target.getMaxStorageMB());
+//            }
+//            //contract from ams2-api: value null means unlimited = MAX_MB
+//            return maxStorageInBytes;
+//        } catch (RuntimeException rE) {
+//            logger.error("could not determine MaxStorageSpace, providing error-default "
+//                    + ERROR_MB, rE);
+//            return ERROR_MB.longValue();
+//        }
+        
+        return 1024 * 1024 * 1024;
     }
     /**
      * @see lams.ams.AmsBridge#getMailAddress(java.lang.String)
@@ -458,10 +476,10 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		return result;
 //	}
     /**
-     * @see lams.ams.AmsBridge#callAccessRightsManagementSystem(String)
+     * @see nl.mpi.lamus.ams.AmsBridge#callAccessRightsManagementSystem(java.net.URI)
      */
     @Override
-    public void callAccessRightsManagementSystem(String recalcDomainMpiID) {
+    public void callAccessRightsManagementSystem(URI recalcDomainArchiveURI) {
             
             throw new UnsupportedOperationException("Ams2Bridge.callAccessRightsManagementSystem not implemented yet");
             

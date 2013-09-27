@@ -7,13 +7,13 @@
       <MdCreator>guisil</MdCreator>
       <MdCreationDate>2013-07-15+02:00</MdCreationDate>
       <MdProfile>clarin.eu:cr1:p_1345561703683</MdProfile>
-      <MdSelfLink>hdl:SOMETHING/hdl:SOMETHING/3E9487E5-ED34-11E2-91E2-0800200C9A66</MdSelfLink>
+      <MdSelfLink>file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2/Zorro.cmdi</MdSelfLink>
    </Header>
    <Resources>
       <ResourceProxyList>
          <ResourceProxy id="res_efcde34d-56eb-4af0-8d14-20d884f74883">
             <ResourceType mimetype="application/pdf">Resource</ResourceType>
-            <ResourceRef>hdl:SOMETHING/3E94AEF0-ED34-11E2-91E2-0800200C9A66</ResourceRef>
+            <ResourceRef>file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2/Zorro/Zorro_07sep1967.pdf</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
       <JournalFileProxyList/>

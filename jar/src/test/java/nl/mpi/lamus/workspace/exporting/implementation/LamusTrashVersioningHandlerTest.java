@@ -79,7 +79,7 @@ public class LamusTrashVersioningHandlerTest {
     @Before
     public void setUp() {
         
-        versioningHandler = new LamusTrashVersioningHandler(mockVersioningAPI, mockArchiveFileHelper);
+        versioningHandler = new LamusTrashVersioningHandler(mockArchiveFileHelper);
         
         ReflectionTestUtils.setField(versioningHandler, "trashCanBaseDirectory", trashCanBaseDirectory);
     }
@@ -89,57 +89,57 @@ public class LamusTrashVersioningHandlerTest {
     }
 
 
-    @Test
-    public void retireVersionSucceeds() throws MalformedURLException, URISyntaxException {
-        
-        final int testArchiveNodeID = 100;
-        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true); will(returnValue(true));
-        }});
-        
-        
-        boolean result = versioningHandler.retireNodeVersion(testNode);
-        
-        assertTrue("Result should be true", result);
-    }
-    
-    @Test
-    public void retireVersionFails() throws MalformedURLException, URISyntaxException {
-        
-        final int testArchiveNodeID = 100;
-        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
-        
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true); will(returnValue(false));
-        }});
-        
-        
-        boolean result = versioningHandler.retireNodeVersion(testNode);
-        
-        assertFalse("Result should be false", result);
-    }
-    
-    @Test
-    public void retireVersionInvalidNodeID() throws MalformedURLException, URISyntaxException {
-        
-        final int testArchiveNodeID = -1;
-        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
-        
-        context.checking(new Expectations() {{
-            
-            never(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true);
-        }});
-        
-        
-        boolean result = versioningHandler.retireNodeVersion(testNode);
-        
-        assertFalse("Result should be false", result);
-    }
+//    @Test
+//    public void retireVersionSucceeds() throws MalformedURLException, URISyntaxException {
+//        
+//        final int testArchiveNodeID = 100;
+//        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true); will(returnValue(true));
+//        }});
+//        
+//        
+//        boolean result = versioningHandler.retireNodeVersion(testNode);
+//        
+//        assertTrue("Result should be true", result);
+//    }
+//    
+//    @Test
+//    public void retireVersionFails() throws MalformedURLException, URISyntaxException {
+//        
+//        final int testArchiveNodeID = 100;
+//        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
+//        
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true); will(returnValue(false));
+//        }});
+//        
+//        
+//        boolean result = versioningHandler.retireNodeVersion(testNode);
+//        
+//        assertFalse("Result should be false", result);
+//    }
+//    
+//    @Test
+//    public void retireVersionInvalidNodeID() throws MalformedURLException, URISyntaxException {
+//        
+//        final int testArchiveNodeID = -1;
+//        final WorkspaceNode testNode = getTestNode(testArchiveNodeID);
+//        
+//        context.checking(new Expectations() {{
+//            
+//            never(mockVersioningAPI).setVersionStatus(NodeIdUtils.TONODEID(testArchiveNodeID), true);
+//        }});
+//        
+//        
+//        boolean result = versioningHandler.retireNodeVersion(testNode);
+//        
+//        assertFalse("Result should be false", result);
+//    }
 
     @Test
     public void getDirectoryForNodeVersion() {
@@ -166,18 +166,18 @@ public class LamusTrashVersioningHandlerTest {
     }
     
     @Test
-    public void getTargetFileForNodeVersion() throws MalformedURLException {
+    public void getTargetFileForNodeVersion() throws MalformedURLException, URISyntaxException {
         
-        final int testArchiveNodeID = 100;
-        final URL testNodeURL = new URL("http://some.url/node.something");
-        final File testNodeFile = new File(testNodeURL.getPath());
-        final String fileBaseName = "node.something";
+        final URI testArchiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URL testNodeArchiveURL = new URL("file:/lat/corpora/archive/node.cmdi");
+        final File testNodeFile = new File(testNodeArchiveURL.getPath());
+        final String fileBaseName = "node.cmdi";
         
         final String versionDirectoryName = "2013-05";
         final File versionFullDirectory = new File(trashCanBaseDirectory, versionDirectoryName);
         
         StringBuilder fileNameBuilder = new StringBuilder();
-        fileNameBuilder.append("v").append(testArchiveNodeID).append("__.").append(fileBaseName);
+        fileNameBuilder.append("v").append(testArchiveNodeURI).append("__.").append(fileBaseName);
         File expectedTargetFile = new File(versionFullDirectory, fileNameBuilder.toString());
         
         context.checking(new Expectations() {{
@@ -185,7 +185,7 @@ public class LamusTrashVersioningHandlerTest {
             oneOf(mockArchiveFileHelper).getFileBasename(testNodeFile.getPath()); will(returnValue(fileBaseName));
         }});
         
-        File result = versioningHandler.getTargetFileForNodeVersion(versionFullDirectory, testArchiveNodeID, testNodeURL);
+        File result = versioningHandler.getTargetFileForNodeVersion(versionFullDirectory, testArchiveNodeURI, testNodeArchiveURL);
         
         assertEquals("Returned file name different from expected", expectedTargetFile, result);
     }
@@ -293,30 +293,28 @@ public class LamusTrashVersioningHandlerTest {
     
     private WorkspaceNode getTestNode() throws MalformedURLException, URISyntaxException {
         
-        final int testArchiveNodeID = 100;
-        return getTestNode(testArchiveNodeID);
+        final URI testArchiveNodeURI = new URI(UUID.randomUUID().toString());
+        return getTestNode(testArchiveNodeURI);
     }
     
-    private WorkspaceNode getTestNode(int archiveNodeID) throws MalformedURLException, URISyntaxException {
+    private WorkspaceNode getTestNode(URI archiveNodeURI) throws MalformedURLException, URISyntaxException {
         
-        final OurURL testNodeURL = new OurURL("http://some.url/node.something");
-        return getTestNode(archiveNodeID, testNodeURL);
+        final URL testNodeArchiveURL = new URL("file:/lat/corpora/archive/node.cmdi");
+        return getTestNode(archiveNodeURI, testNodeArchiveURL);
     }
     
-    private WorkspaceNode getTestNode(int archiveNodeID, OurURL archiveNodeURL) throws MalformedURLException, URISyntaxException {
+    private WorkspaceNode getTestNode(URI archiveNodeURI, URL archiveNodeURL) throws MalformedURLException, URISyntaxException {
         
         final int testWorkspaceID = 1;
         
         final int testWorkspaceNodeID = 10;
-        final int testArchiveNodeID = archiveNodeID;
-        final OurURL testNodeURL = archiveNodeURL;
+        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final String testPid = UUID.randomUUID().toString();
-        final WorkspaceNode nodeToReturn = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspaceID, testArchiveNodeID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, testNodeURL.toURL(), testNodeURL.toURL(), testNodeURL.toURL(), WorkspaceNodeStatus.NODE_ISCOPY, testPid, testNodeFormat);
+        final WorkspaceNode nodeToReturn = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, testNodeWsURL, archiveNodeURI, archiveNodeURL, archiveNodeURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         return nodeToReturn;
     }

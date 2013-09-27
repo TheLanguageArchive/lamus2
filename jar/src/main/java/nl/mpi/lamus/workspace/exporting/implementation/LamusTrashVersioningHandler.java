@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Calendar;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -40,7 +41,7 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusTrashVersioningHandler.class);
     
-    private final VersioningAPI versioningAPI;
+//    private final VersioningAPI versioningAPI;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
@@ -48,24 +49,24 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
     private File trashCanBaseDirectory;
     
     @Autowired
-    public LamusTrashVersioningHandler(VersioningAPI vAPI, ArchiveFileHelper afHelper) {
-        this.versioningAPI = vAPI;
+    public LamusTrashVersioningHandler(ArchiveFileHelper afHelper) {
+//        this.versioningAPI = vAPI;
         this.archiveFileHelper = afHelper;
     }
 
     /**
      * @see TrashVersioningHandler#retireNodeVersion(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
-    @Override
-    public boolean retireNodeVersion(WorkspaceNode node) {
-        
-        String stringNodeID = NodeIdUtils.TONODEID(node.getArchiveNodeID());
-        
-        if(NodeIdUtils.isNodeId(stringNodeID)) {
-            return versioningAPI.setVersionStatus(stringNodeID, true);
-        }
-        return false;
-    }
+//    @Override
+//    public boolean retireNodeVersion(WorkspaceNode node) {
+//        
+//        String stringNodeID = NodeIdUtils.TONODEID(node.getArchiveNodeID());
+//        
+//        if(NodeIdUtils.isNodeId(stringNodeID)) {
+//            return versioningAPI.setVersionStatus(stringNodeID, true);
+//        }
+//        return false;
+//    }
     
     /**
      * @see TrashVersioningHandler#getDirectoryForNodeVersion(int)
@@ -91,14 +92,14 @@ public class LamusTrashVersioningHandler implements TrashVersioningHandler {
     }
     
     /**
-     * @see TrashVersioningHandler#getTargetFileForNodeVersion(java.io.File, int, java.net.URL)
+     * @see TrashVersioningHandler#getTargetFileForNodeVersion(java.io.File, java.net.URI, java.net.URL)
      */
     @Override
-    public File getTargetFileForNodeVersion(File baseDirectory, int archiveNodeID, URL archiveNodeURL) {
+    public File getTargetFileForNodeVersion(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL) {
         
         File archiveNodeFile = new File(archiveNodeURL.getPath());
         String fileBaseName = archiveFileHelper.getFileBasename(archiveNodeFile.getPath());
-        StringBuilder fileNameBuilder = new StringBuilder().append("v").append(archiveNodeID).append("__.").append(fileBaseName);
+        StringBuilder fileNameBuilder = new StringBuilder().append("v").append(archiveNodeURI).append("__.").append(fileBaseName);
         
         File targetFile = new File(baseDirectory, fileNameBuilder.toString());
         

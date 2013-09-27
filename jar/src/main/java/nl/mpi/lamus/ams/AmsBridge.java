@@ -1,5 +1,7 @@
 package nl.mpi.lamus.ams;
 
+import java.net.URI;
+
 /**
  * $Id$
  *
@@ -51,37 +53,37 @@ public interface AmsBridge {
 //	public boolean validateUser(String username, String password);
 	
 	/**
-	 * determines whether given user (uid) has write access to given resource
+	 * determines whether given user (uid) has write access to given archive node
 	 * @param userId  destined user's uid
-	 * @param nodeIdStr MPI String ID of the destined resource to check 
+	 * @param archiveNodeURI URI of the archive node to be checked
 	 * @return true/false according to whether given user (uid) has write access to given resource
 	 */
-	public boolean hasWriteAccess(String userId, String nodeIdStr);
+	public boolean hasWriteAccess(String userId, URI archiveNodeURI);
 	
 	/**
-	 * sets the used-storage-space for the given user(uid) on the given resource(nodeIdStr)
+	 * sets the used-storage-space for the given user(uid) on the given archive node
 	 * to given value
 	 * @param uid target user's uid
-	 * @param nodeIdStr MPI String ID of the target resource
+	 * @param archiveNodeURI URI of the archive node
 	 * @param val value to be set
 	 */
-	public void setUsedStorageSpace(String uid, String nodeIdStr, long val);
+	public void setUsedStorageSpace(String uid, URI archiveNodeURI, long val);
 
 	/**
-	 * provides the used-storage-space of the given user(uid) on the given resource(nodeIdStr)
+	 * provides the used-storage-space of the given user(uid) on the given archive node
 	 * @param uid destined user's uid
-	 * @param nodeIdStr MPI String ID of the target resource
+	 * @param archiveURI URI of the archive ndoe
 	 * @return  the used-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 */
-	public long getUsedStorageSpace(String uid, String nodeIdStr);
+	public long getUsedStorageSpace(String uid, URI archiveNodeURI);
 
 	/**
-	 * provides the maximum-storage-space of the given user(uid) on the given resource(nodeIdStr)
+	 * provides the maximum-storage-space of the given user(uid) on the given archive node
 	 * @param uid destined user's uid
-	 * @param nodeIdStr MPI String ID of the target resource
+	 * @param archiveNodeURI URI of the archive node
 	 * @return maximum-storage-space of the given user(uid) on the given resource(nodeIdStr)
 	 */
-	public long getMaxStorageSpace(String uid, String nodeIdStr);
+	public long getMaxStorageSpace(String uid, URI archiveNodeURI);
 
 	/**
 	 * provides the email address of given user(uid)
@@ -102,7 +104,7 @@ public interface AmsBridge {
 	 * Recalculate the resource access rights for the updated part of the archive,
 	 * propagate them to the Apache htaccess file and signal the webserver
 	 */
-	public void callAccessRightsManagementSystem(String recalcDomainMpiID);
+	public void callAccessRightsManagementSystem(URI recalcDomainArchiveURI);
 
 	/**
 	 * Applies the necessary procedures to replace a node in AMS:

@@ -88,26 +88,25 @@ public class LamusWorkspaceTreeExporterTest {
         
         final int workspaceID = 1;
         final int workspaceNodeID = 10;
-        final int archiveNodeID = 100;
-        final URL nodeURL = new URL("http://some.url/someName.cmdi");
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI schemaLocation = new URI("http://some.location");
-        final String nodePid = UUID.randomUUID().toString();
-        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, archiveNodeID, schemaLocation,
-                nodeName, "", nodeType, nodeURL, nodeURL, nodeURL, WorkspaceNodeStatus.NODE_ISCOPY, nodePid, nodeFormat);
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
         
         final int childWorkspaceNodeID = 20;
-        final int childArchiveNodeID = -1;
-        final URL childWorkspaceURL = new URL("file://workspace/folder/someOtherName.pdf");
+        final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URL childOriginURL = new URL("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
         final String childNodeFormat = "";
-        final String childNodePid = UUID.randomUUID().toString();
-        final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, childArchiveNodeID, schemaLocation,
-                childNodeName, "", childNodeType, childWorkspaceURL, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodePid, childNodeFormat);
+        final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
+                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodeFormat);
         
         final Collection<WorkspaceNode> children = new ArrayList<WorkspaceNode>();
         children.add(childNode);

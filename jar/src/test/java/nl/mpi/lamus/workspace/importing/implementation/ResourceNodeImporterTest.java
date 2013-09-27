@@ -21,9 +21,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
-import nl.mpi.corpusstructure.ArchiveAccessContext;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
@@ -86,15 +86,16 @@ public class ResourceNodeImporterTest {
     
     private NodeImporter nodeImporter;
     private NodeImporter nodeImporterWithoutWorkspace;
-    @Mock ArchiveObjectsDB mockArchiveObjectsDB;
+    
+    @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWorkspaceDao;
-    
     @Mock NodeDataRetriever mockNodeDataRetriever;
-    
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceParentNodeReferenceFactory mockWorkspaceParentNodeReferenceFactory;
     @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
+    
     private Workspace testWorkspace;
     
     @Mock ReferencingMetadataDocument mockReferencingMetadataDocument;
@@ -102,6 +103,7 @@ public class ResourceNodeImporterTest {
     @Mock FileTypeHandler mockFileTypeHandler;
     
     @Mock TypecheckedResults mockTypecheckedResults;
+    @Mock CorpusNode mockCorpusNode;
     
     private final int workspaceID = 1;
     
@@ -118,14 +120,14 @@ public class ResourceNodeImporterTest {
     
     @Before
     public void setUp() {
-        testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, -1, null,
+        testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
-        nodeImporter = new ResourceNodeImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeDataRetriever,
+        nodeImporter = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockNodeDataRetriever,
                 mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
 //        nodeImporter.setWorkspace(testWorkspace);
-        nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeDataRetriever,
+        nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockNodeDataRetriever,
                 mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
                 mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
     }
@@ -142,60 +144,72 @@ public class ResourceNodeImporterTest {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
-        final int childNodeArchiveID = 100;
-        final String childNodeLabel = "file name label";
+        final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final String childNodePid = UUID.randomUUID().toString();
-        final URI childLinkURI = new URI("http://some.uri/filename.txt"); //TODO Where to get this from? What to do with it?
-        final OurURL childNodeUrl = new OurURL(childLinkURI.toURL());
-        final OurURL childNodeUrlWithContext = new OurURL("file:/some.uri/filename.txt");
-        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
-        final String parentPid = UUID.randomUUID().toString();
+        final URI childURI = new URI(UUID.randomUUID().toString());
+        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
+        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final URL childArchiveURL = childOriginURL;
+        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
         
-        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
-        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeArchiveID, childNodeSchemaLocation,
-                childNodeLabel, "", childNodeType, childLinkURI.toURL(), childLinkURI.toURL(), childLinkURI.toURL(), WorkspaceNodeStatus.NODE_CREATED, childNodePid, childNodeMimetype);
+        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
         final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLink);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childLinkURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockChildLink).getURI(); will(returnValue(childLinkURI));
-            oneOf(mockNodeDataRetriever).getResourceURL(mockChildLink); will(returnValue(childNodeUrl));
+            oneOf(mockChildLink).getURI(); will(returnValue(childURI));
+//            oneOf(mockNodeDataRetriever).getResourceURL(mockChildLink); will(returnValue(childNodeUrl));
 
-            oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-                will(returnValue(childNodeUrlWithContext));
+//            oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+//                will(returnValue(childNodeUrlWithContext));
+            
+            
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
+            
+            
             
             oneOf(mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLink, childNodeUrlWithContext, childNodeArchiveID);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLink, childOurURL);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childNodeUrlWithContext);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
                 will(returnValue(mockTypecheckedResults));
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childNodeUrl, mockChildLink, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLink, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(childNodeType));
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
-                
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID,
-                    childNodeUrlWithContext.toURL(), mockChildLink, childNodeType, childNodeMimetype);
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
+                    childURI, childArchiveURL, mockChildLink, childNodeType, childNodeMimetype, childNodeName);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
             oneOf (mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(testParentNode, mockChildLink);
                 will(returnValue(testParentNodeReference));
-            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childLinkURI);
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
         }});
         
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
+        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
         
     }
     
@@ -204,14 +218,16 @@ public class ResourceNodeImporterTest {
         
         final int parentWorkspaceNodeID = 1;
         final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
-        final String parentPid = UUID.randomUUID().toString();
-        final int childNodeArchiveID = 100;
-        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, parentPid, "cmdi");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI childURI = new URI(UUID.randomUUID().toString());
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         
         try {
-            nodeImporterWithoutWorkspace.importNode(-1, testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
+            nodeImporterWithoutWorkspace.importNode(-1, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
             fail("Should have thrown NodeImporterException");
         } catch(NodeImporterException ex) {
             assertNotNull(ex);

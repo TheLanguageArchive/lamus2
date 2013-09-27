@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
+import java.net.URI;
 import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -34,37 +35,37 @@ public interface WorkspaceNodeFactory {
      * injected or set as a default value.
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
-     * @param archiveNodeID archive ID of the node
+     * @param archiveNodeURI archive URI of the node
      * @param archiveNodeURL archive URL of the node
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL);
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL);
     
     /**
      * Creates a metadata WorkspaceNode with the given values.
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
-     * @param archiveNodeID archive ID of the node
+     * @param archiveNodeURI archive URI of the node
      * @param archiveNodeURL archive URL of the node
-     * @param archiveNodePID PID of the node
      * @param document MetadataDocument object corresponding to the file
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document);
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document);
 
     /**
      * Creates a resource WorkspaceNode with the given values.
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
-     * @param archiveNodeID archive ID of the node
-     * @param url archiveURL of the node
+     * @param archiveNodeURI archive URI of the node
+     * @param archiveNodeURL archive URL of the node
      * @param resourceReference Reference to the node, in the parent metadata file
      * @param type Type of the node
      * @param mimetype Mimetype of the file
+     * @param name name of the node
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
-            Reference resourceReference, WorkspaceNodeType type, String mimetype);
+    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            Reference resourceReference, WorkspaceNodeType type, String mimetype, String name);
 
     /**
      * Creates a WorkspaceNode with the given values.

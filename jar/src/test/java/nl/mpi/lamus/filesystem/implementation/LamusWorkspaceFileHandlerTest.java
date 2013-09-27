@@ -18,8 +18,10 @@ package nl.mpi.lamus.filesystem.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.UUID;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -119,11 +121,13 @@ public class LamusWorkspaceFileHandlerTest {
         TransformerException, MetadataException, WorkspaceNodeFilesystemException,
         CMDITypeException, ParserConfigurationException, SAXException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
-        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         context.checking(new Expectations() {{
             oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -138,11 +142,13 @@ public class LamusWorkspaceFileHandlerTest {
         TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
         SAXException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
-        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         final IOException expectedExceptionCause = new IOException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
@@ -169,11 +175,13 @@ public class LamusWorkspaceFileHandlerTest {
         TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
         SAXException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
-        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         final TransformerException expectedExceptionCause = new TransformerException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
@@ -200,11 +208,13 @@ public class LamusWorkspaceFileHandlerTest {
         TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
         SAXException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
-        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         final MetadataException expectedExceptionCause = new MetadataException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
@@ -227,12 +237,14 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, WorkspaceNodeFilesystemException {
+    public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, WorkspaceNodeFilesystemException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory);
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
         
         File originFile = new File(testNode.getWorkspaceURL().getPath());
         File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
@@ -243,12 +255,14 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void copyResourceFileThrowsException() throws MalformedURLException, IOException {
+    public void copyResourceFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory);
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
         
         File originFile = new File(testNode.getWorkspaceURL().getPath());
         File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
@@ -309,13 +323,15 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void getStreamResultForWorkspaceNodeFileSuccessfully() throws MalformedURLException {
+    public void getStreamResultForWorkspaceNodeFileSuccessfully() throws MalformedURLException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
-        File testNodeFile = new File(workspaceDirectory, testWorkspaceNode.getArchiveURL().getFile());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         StreamResult retrievedStreamResult = 
                 workspaceFileHandler.getStreamResultForNodeFile(testNodeFile);
@@ -324,16 +340,18 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void getFileForWorkspaceNodeSuccessfully() throws IOException {
+    public void getFileForWorkspaceNodeSuccessfully() throws IOException, URISyntaxException {
         
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID());
+        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
         
         File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
-        String nodeFilename = FilenameUtils.getName(testWorkspaceNode.getArchiveURL().toString());
+//        String nodeFilename = FilenameUtils.getName(testWorkspaceNode.getArchiveURL().toString());
         File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
         
-        File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(testWorkspaceNode);
+        File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, testWorkspaceNode);
         
         assertEquals(expectedNodeFile, retrievedFile);
     }
@@ -371,12 +389,11 @@ public class LamusWorkspaceFileHandlerTest {
         return uploadDirectory;
     }
         
-    private WorkspaceNode createTestMetadataWorkspaceNode(int workspaceID) throws MalformedURLException {
-        int archiveNodeID = 100;
-        URL archiveNodeURL = new URL("http://some.url/someNode.cmdi");
-        WorkspaceNode node = new LamusWorkspaceNode(
-                workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
-        node.setName("someNode");
+    private WorkspaceNode createTestMetadataWorkspaceNode(int workspaceID, String filename) throws URISyntaxException, MalformedURLException {
+        URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        URL archiveNodeURL = new URL("file:/workspace/folder/node.cmdi");
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
+        node.setName(filename);
         node.setType(WorkspaceNodeType.METADATA);
         node.setFormat("someFormat");
         node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
@@ -384,16 +401,16 @@ public class LamusWorkspaceFileHandlerTest {
         return node;
     }
     
-    private WorkspaceNode createTestResourceWorkspaceNode(int workspaceID, File workspaceDirectory) throws MalformedURLException, IOException {
-        int archiveNodeID = 100;
-        URL archiveNodeURL = new URL("http://some.url/someNode.txt");
+    private WorkspaceNode createTestResourceWorkspaceNode(int workspaceID, File workspaceDirectory, String filename) throws IOException, URISyntaxException {
+        URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        URL archiveNodeURL = new URL("file:/workspace/folder/node.cmdi");
         WorkspaceNode node = new LamusWorkspaceNode(
-                workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
+                workspaceID, archiveNodeURI, archiveNodeURL);
         
-        File workspaceNodeFile = new File(workspaceDirectory, "someNode.txt");
+        File workspaceNodeFile = new File(workspaceDirectory, filename);
         workspaceNodeFile.createNewFile();
         node.setWorkspaceURL(workspaceNodeFile.toURI().toURL());
-        node.setName("someNode");
+        node.setName(filename);
         node.setType(WorkspaceNodeType.RESOURCE_WR);
         node.setFormat("someFormat");
         node.setStatus(WorkspaceNodeStatus.NODE_CREATED);

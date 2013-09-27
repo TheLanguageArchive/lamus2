@@ -21,11 +21,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
-import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -54,10 +56,13 @@ public class DeletedNodeExporterTest {
     private NodeExporter deletedNodeExporter;
     private Workspace testWorkspace;
     
-    @Mock TrashVersioningHandler mockTrashVersioningHandler;
     @Mock TrashCanHandler mockTrashCanHandler;
-    @Mock CorpusStructureBridge mockCorpusStructureBridge;
+    @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock CorpusstructureWriter mockCorpusstructureWriter;
     @Mock SearchClientBridge mockSearchClientBridge;
+    
+    @Mock WorkspaceNode mockWorkspaceNode;
+    @Mock CorpusNode mockCorpusNode;
     
     public DeletedNodeExporterTest() {
     }
@@ -72,9 +77,11 @@ public class DeletedNodeExporterTest {
     
     @Before
     public void setUp() {
-        deletedNodeExporter = new DeletedNodeExporter(mockTrashVersioningHandler, mockTrashCanHandler, mockCorpusStructureBridge, mockSearchClientBridge);
+        deletedNodeExporter = new DeletedNodeExporter(mockTrashCanHandler,
+                mockCorpusStructureProvider, mockCorpusstructureWriter,
+                mockSearchClientBridge);
         
-        testWorkspace = new LamusWorkspace(1, "someUser", -1, -1, null,
+        testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         deletedNodeExporter.setWorkspace(testWorkspace);
@@ -89,34 +96,39 @@ public class DeletedNodeExporterTest {
      * Test of exportNode method, of class DeletedNodeExporter.
      */
     @Test
-    public void exportNode() throws MalformedURLException, URISyntaxException {
+    public void exportNode() throws MalformedURLException, URISyntaxException, UnknownNodeException {
         
         final int testWorkspaceNodeID = 10;
-        final int testArchiveNodeID = 100;
-        final String testBaseName = "node.something";
-        final URL testNodeWorkspaceURL = new URL("file:/workspace/some.url");
-        final URL testNodeArchiveURL = new URL("file://archive/some.url/" + testBaseName);
-        final String testNodeDisplayValue = "someName";
+        final String testBaseName = "node.txt";
+        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
+        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+        final URL testNodeArchiveURL = testNodeOriginURL;
+        
+        final String testNodeDisplayValue = "node";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "text/plain";
         final URI testNodeSchemaLocation = new URI("http://some.location");
-        final String testNodePid = UUID.randomUUID().toString();
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testArchiveNodeID, testNodeSchemaLocation,
-                testNodeDisplayValue, "", testNodeType, testNodeWorkspaceURL, testNodeArchiveURL, testNodeArchiveURL, WorkspaceNodeStatus.NODE_DELETED, testNodePid, testNodeFormat);
+
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
+                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
         
-        final StringBuilder testNodeVersionFileNameBuilder = new StringBuilder().append("v").append(testArchiveNodeID).append("__.").append(testBaseName);
+//        final StringBuilder testNodeVersionFileNameBuilder = new StringBuilder().append("v").append(testArchiveNodeID).append("__.").append(testBaseName);
         
-        final URL testNodeVersionArchiveURL = new URL("file:/some.location");
+        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         context.checking(new Expectations() {{
             
-            oneOf(mockTrashVersioningHandler).retireNodeVersion(testNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockTrashCanHandler).moveFileToTrashCan(testNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
             
-            oneOf(mockCorpusStructureBridge).updateArchiveObjectsNodeURL(testArchiveNodeID, testNodeArchiveURL, testNodeVersionArchiveURL);
+            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
             
-            oneOf(mockSearchClientBridge).removeNode(testArchiveNodeID);
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
         }});
         
@@ -131,7 +143,7 @@ public class DeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        deletedNodeExporter.exportNode(null, testNode);
+        deletedNodeExporter.exportNode(null, mockWorkspaceNode);
         
     }
     

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.model.implementation;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class LamusWorkspace implements Workspace {
     private int workspaceID;
     private String userID;
     private int topNodeID;
-    private int topNodeArchiveID;
+    private URI topNodeArchiveURI;
     private URL topNodeArchiveURL;
     private Date startDate;
     private Date endDate;
@@ -68,7 +69,7 @@ public class LamusWorkspace implements Workspace {
      * 
      * @param workspaceID
      * @param userID
-     * @param topNodeArchiveID
+     * @param topNodeArchiveURI
      * @param topNodeArchiveURL
      * @param startDate
      * @param endDate
@@ -80,13 +81,13 @@ public class LamusWorkspace implements Workspace {
      * @param message
      * @param archiveInfo 
      */
-    public LamusWorkspace(int workspaceID, String userID, int topNodeID, int topNodeArchiveID, URL topNodeArchiveURL,
+    public LamusWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
-        this.topNodeArchiveID = topNodeArchiveID;
+        this.topNodeArchiveURI = topNodeArchiveURI;
         this.topNodeArchiveURL = topNodeArchiveURL;
         if(startDate != null) {
             this.startDate = (Date) startDate.clone();
@@ -138,13 +139,13 @@ public class LamusWorkspace implements Workspace {
     }
     
     @Override
-    public int getTopNodeArchiveID() {
-        return this.topNodeArchiveID;
+    public URI getTopNodeArchiveURI() {
+        return this.topNodeArchiveURI;
     }
-
+    
     @Override
-    public void setTopNodeArchiveID(int topNodeArchiveID) {
-        this.topNodeArchiveID = topNodeArchiveID;
+    public void setTopNodeArchiveURI(URI topNodeArchiveURI) {
+        this.topNodeArchiveURI = topNodeArchiveURI;
     }
     
     @Override
@@ -229,14 +230,6 @@ public class LamusWorkspace implements Workspace {
         this.sessionEndDate = toSet;
     }
     
-//    public void updateStartDates() {
-//        throw new UnsupportedOperationException("not yet implemented");
-//    }
-//    
-//    public void updateEndDates() {
-//        throw new UnsupportedOperationException("not yet implemented");
-//    }
-    
     @Override
     public long getUsedStorageSpace() {
         return this.usedStorageSpace;
@@ -318,7 +311,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID)
                 .append(this.userID)
                 .append(this.topNodeID)
-                .append(this.topNodeArchiveID)
+                .append(this.topNodeArchiveURI)
                 .append(this.topNodeArchiveURL)
                 .append(this.startDate)
                 .append(this.endDate)
@@ -356,7 +349,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.workspaceID, other.getWorkspaceID())
                 .append(this.userID, other.getUserID())
                 .append(this.topNodeID, other.getTopNodeID())
-                .append(this.topNodeArchiveID, other.getTopNodeArchiveID())
+                .append(this.topNodeArchiveURI, other.getTopNodeArchiveURI())
                 .append(this.topNodeArchiveURL, other.getTopNodeArchiveURL())
                 .append(this.startDate, other.getStartDate())
                 .append(this.endDate, other.getEndDate())
@@ -375,7 +368,8 @@ public class LamusWorkspace implements Workspace {
     public String toString() {
         
         String stringResult = "Workspace ID: " + this.workspaceID + ", User ID: " + this.userID +
-                ", Top Node ID: " + this.topNodeID + ", Top Node Archive ID: " + this.topNodeArchiveID + ", Top Node Archive URL: " + this.topNodeArchiveURL +
+                ", Top Node ID: " + this.topNodeID + ", Top Node Archive URI: " + this.topNodeArchiveURI +
+                ", Top Node Archive URL: " + this.topNodeArchiveURL +
                 ", Start Date: " + this.startDate + ", End Date: " + this.endDate +
                 ", Session Start Date: " + this.sessionStartDate + ", Session End Date: " + this.sessionEndDate +
                 ", Used Storage Space: " + this.usedStorageSpace + ", Max Storage Space: " + this.maxStorageSpace +

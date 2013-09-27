@@ -15,12 +15,17 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
-import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -34,18 +39,20 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  */
 public class DeletedNodeExporter implements NodeExporter {
 
-    private final TrashVersioningHandler trashVersioningHandler;
     private final TrashCanHandler trashCanHandler;
-    private final CorpusStructureBridge corpusStructureBridge;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final CorpusstructureWriter corpusstructureWriter;
     private final SearchClientBridge searchClientBridge;
     
     private Workspace workspace;
     
-    public DeletedNodeExporter(TrashVersioningHandler tvHandler, TrashCanHandler tcHandler, CorpusStructureBridge csBridge, SearchClientBridge sClientBridge) {
-        
-        this.trashVersioningHandler = tvHandler;
-        this.trashCanHandler = tcHandler;
-        this.corpusStructureBridge = csBridge;
+    public DeletedNodeExporter(TrashCanHandler trashCanHandler,
+            CorpusStructureProvider csProvider, CorpusstructureWriter csWriter,
+            SearchClientBridge sClientBridge) {
+
+        this.trashCanHandler = trashCanHandler;
+        this.corpusStructureProvider = csProvider;
+        this.corpusstructureWriter = csWriter;
         this.searchClientBridge = sClientBridge;
     }
     
@@ -70,20 +77,23 @@ public class DeletedNodeExporter implements NodeExporter {
      */
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
+
+        //TODO What to do with this URL? Update it and use to inform the crawler of the change?
         
-        if(!trashVersioningHandler.retireNodeVersion(currentNode)) {
-            //TODO log error / throw exception
+        URL trashedNodeArchiveURL = this.trashCanHandler.moveFileToTrashCan(currentNode);
+        currentNode.setArchiveURL(trashedNodeArchiveURL);
+        
+        CorpusNode node;
+        try {
+            node = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+        } catch (UnknownNodeException ex) {
+            throw new UnsupportedOperationException("Exception not handled yet", ex);
         }
         
-        URL trashedNodeArchiveURL = trashCanHandler.moveFileToTrashCan(currentNode);
+        //TODO Is this needed? Isn't LAMUS only supposed to change things in the filesystem, leaving the database changes for the crawler?
+        this.corpusstructureWriter.deleteNode(node);
         
-        //TODO check if URL is good
-        
-        if(!corpusStructureBridge.updateArchiveObjectsNodeURL(currentNode.getArchiveNodeID(), currentNode.getArchiveURL(), trashedNodeArchiveURL)) {
-            //TODO log error / throw exception
-        }
-        
-        searchClientBridge.removeNode(currentNode.getArchiveNodeID());
+        searchClientBridge.removeNode(currentNode.getArchiveURI());
         
         //TODO REMOVE LINK FROM PARENT (IF THERE IS ONE)
     }

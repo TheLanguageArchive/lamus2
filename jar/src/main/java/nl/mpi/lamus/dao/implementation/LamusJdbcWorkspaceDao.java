@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.*;
@@ -78,7 +79,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .usingColumns(
                     "user_id",
                     "top_node_id",
-                    "top_node_archive_id",
+                    "top_node_archive_uri",
                     "top_node_archive_url",
                     "start_date",
                     "end_date",
@@ -96,16 +97,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .usingGeneratedKeyColumns("workspace_node_id")
                 .usingColumns(
                     "workspace_id",
-                    "archive_node_id",
                     "profile_schema_uri",
                     "name",
                     "title",
                     "type",
                     "workspace_url",
+                    "archive_uri",
                     "archive_url",
                     "origin_url",
                     "status",
-                    "pid",
                     "format");
         //TODO Inject table and column names
         
@@ -125,11 +125,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     @Override
     public void addWorkspace(Workspace workspace) {
         
-        logger.debug("Adding workspace to the database in node with ID: " + workspace.getTopNodeArchiveID());
+        logger.debug("Adding workspace to the database in node " + workspace.getTopNodeArchiveURI());
 
-        String topNodeArchiveURLStr = null;
+        String topNodeArchiveUriStr = null;
+        if(workspace.getTopNodeArchiveURI() != null) {
+            topNodeArchiveUriStr = workspace.getTopNodeArchiveURI().toString();
+        }
+        String topNodeArchiveUrlStr = null;
         if(workspace.getTopNodeArchiveURL() != null) {
-            topNodeArchiveURLStr = workspace.getTopNodeArchiveURL().toString();
+            topNodeArchiveUrlStr = workspace.getTopNodeArchiveURL().toString();
         }
         
         //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
@@ -150,8 +154,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("user_id", workspace.getUserID())
                 .addValue("top_node_id", workspace.getTopNodeID())
-                .addValue("top_node_archive_id", workspace.getTopNodeArchiveID())
-                .addValue("top_node_archive_url", topNodeArchiveURLStr)
+                .addValue("top_node_archive_uri", topNodeArchiveUriStr)
+                .addValue("top_node_archive_url", topNodeArchiveUrlStr)
                 .addValue("start_date", startDate)
                 .addValue("session_start_date", sessionStartDate)
                 .addValue("used_storage_space", workspace.getUsedStorageSpace())
@@ -191,24 +195,29 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     public void updateWorkspaceTopNode(Workspace workspace) {
         
         logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID()
-                + "; setting top node to: workspace ID = " + workspace.getTopNodeID() + "; archive ID = " + workspace.getTopNodeArchiveID());
+                + "; setting top node to: workspace ID = " + workspace.getTopNodeID() + "; archive URI = " + workspace.getTopNodeArchiveURI());
         
-        String topNodeArchiveURLStr = null;
+        String topNodeArchiveUriStr = null;
+        if(workspace.getTopNodeArchiveURI() != null) {
+            topNodeArchiveUriStr = workspace.getTopNodeArchiveURI().toString();
+        }
+        String topNodeArchiveUrlStr = null;
         if(workspace.getTopNodeArchiveURL() != null) {
-            topNodeArchiveURLStr = workspace.getTopNodeArchiveURL().toString();
+            topNodeArchiveUrlStr = workspace.getTopNodeArchiveURL().toString();
         }
         
-        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_id = :top_node_archive_id, top_node_archive_url = :top_node_archive_url"
+        String updateSql = "UPDATE workspace SET top_node_id = :top_node_id,"
+                + " top_node_archive_uri = :top_node_archive_uri, top_node_archive_url = :top_node_archive_url"
                 + " WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("top_node_id", workspace.getTopNodeID())
-                .addValue("top_node_archive_id", workspace.getTopNodeArchiveID())
-                .addValue("top_node_archive_url", topNodeArchiveURLStr)
+                .addValue("top_node_archive_uri", topNodeArchiveUriStr)
+                .addValue("top_node_archive_url", topNodeArchiveUrlStr)
                 .addValue("workspace_id", workspace.getWorkspaceID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
         logger.info("Top node of workspace " + workspace.getWorkspaceID()
-                + " updated to; workspace ID = " + workspace.getTopNodeID() + "; archive ID = " + workspace.getTopNodeArchiveID());
+                + " updated to: workspace ID = " + workspace.getTopNodeID() + "; archive URI = " + workspace.getTopNodeArchiveURI());
     }
     
     /**
@@ -347,15 +356,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 //    }
 
     /**
-     * @see WorkspaceDao#isNodeLocked(int)
+     * @see WorkspaceDao#isNodeLocked(java.net.URI)
      */
     @Override
-    public boolean isNodeLocked(int archiveNodeID) {
+    public boolean isNodeLocked(URI archiveNodeURI) {
         
-        logger.debug("Checking if node with archive ID " + archiveNodeID + " is locked");
+        logger.debug("Checking if node " + archiveNodeURI + " is locked");
         
-        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_node_id = :archive_node_id";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("archive_node_id", archiveNodeID);
+        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_uri = :uri";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("uri", archiveNodeURI.toString());
         
         RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
             @Override
@@ -369,14 +378,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
         } catch(EmptyResultDataAccessException eex) {
-            logger.info("Node with archive ID " + archiveNodeID + " is not locked (there is no existing workspace that contains this node).");
+            logger.info("Node " + archiveNodeURI.toString() + " is not locked (there is no existing workspace that contains this node).");
             return false;
         } catch(IncorrectResultSizeDataAccessException iex) {
-            logger.warn("Node with archive ID " + archiveNodeID + " is locked more than once.");
+            logger.warn("Node " + archiveNodeURI.toString() + " is locked more than once.");
             return true;
         }
 
-        logger.info("Node with archive ID " + archiveNodeID + " is locked (there is already a workspace that contains this node).");
+        logger.info("Node " + archiveNodeURI + " is locked (there is already a workspace that contains this node).");
         return true;
     }
 
@@ -400,9 +409,13 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         if(node.getWorkspaceURL() != null) {
             workspaceURLStr = node.getWorkspaceURL().toString();
         }
-        String archiveURLStr = null;
+        String archiveUriStr = null;
+        if(node.getArchiveURI() != null) {
+            archiveUriStr = node.getArchiveURI().toString();
+        }
+        String archiveUrlStr = null;
         if(node.getArchiveURL() != null) {
-            archiveURLStr = node.getArchiveURL().toString();
+            archiveUrlStr = node.getArchiveURL().toString();
         }
         String originURLStr = null;
         if(node.getOriginURL() != null) {
@@ -415,16 +428,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("workspace_id", node.getWorkspaceID())
-                .addValue("archive_node_id", node.getArchiveNodeID())
                 .addValue("profile_schema_uri", profileSchemaURIStr)
                 .addValue("name", node.getName())
                 .addValue("title", node.getTitle())
                 .addValue("type", typeStr)
                 .addValue("workspace_url", workspaceURLStr)
-                .addValue("archive_url", archiveURLStr)
+                .addValue("archive_uri", archiveUriStr)
+                .addValue("archive_url", archiveUrlStr)
                 .addValue("origin_url", originURLStr)
                 .addValue("status", statusStr)
-                .addValue("pid", node.getPid())
                 .addValue("format", node.getFormat());
         Number newID = this.insertWorkspaceNode.executeAndReturnKey(parameters);
         node.setWorkspaceNodeID(newID.intValue());
@@ -591,26 +603,31 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#updateNodeArchiveURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceDao#updateNodeArchiveUriUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void updateNodeArchiveURL(WorkspaceNode node) {
+    public void updateNodeArchiveUriUrl(WorkspaceNode node) {
         
-        logger.debug("Updating archive URL for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URL to: " + node.getArchiveURL());
+        logger.debug("Updating archive URL for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URI to: " + node.getArchiveURI());
         
-        String nodeArchiveURLStr = null;
+        String nodeArchiveUriStr = null;
+        if(node.getArchiveURI() != null) {
+            nodeArchiveUriStr = node.getArchiveURI().toString();
+        }
+        String nodeArchiveUrlStr = null;
         if(node.getArchiveURL() != null) {
-            nodeArchiveURLStr = node.getArchiveURL().toString();
+            nodeArchiveUrlStr = node.getArchiveURL().toString();
         }
         
-        String updateSql = "UPDATE node SET archive_url = :archive_url"
+        String updateSql = "UPDATE node SET archive_uri = :archive_uri, archive_url = :archive_url"
                 + " WHERE workspace_node_id = :workspace_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("archive_url", nodeArchiveURLStr)
+                .addValue("archive_uri", nodeArchiveUriStr)
+                .addValue("archive_url", nodeArchiveUrlStr)
                 .addValue("workspace_node_id", node.getWorkspaceNodeID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
-        logger.info("Archive URL of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURL());
+        logger.info("Archive URI of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURI());
     }
 
     /**
@@ -663,6 +680,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         @Override
         public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
+            URI topNodeArchiveURI = null;
+            if(rs.getString("top_node_archive_uri") != null) {
+                try {
+                    topNodeArchiveURI = new URI(rs.getString("top_node_archive_uri"));
+                } catch (URISyntaxException ex) {
+                    logger.warn("Top Node Archive URI is malformed; null used instead", ex);
+                }
+            }
             URL topNodeArchiveURL = null;
             if(rs.getString("top_node_archive_url") != null) {
                 try {
@@ -684,7 +709,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     rs.getInt("workspace_id"),
                     rs.getString("user_id"),
                     rs.getInt("top_node_id"),
-                    rs.getInt("top_node_archive_id"),
+                    topNodeArchiveURI,
                     topNodeArchiveURL,
                     new Date(rs.getTimestamp("start_date").getTime()),
                     endDate,
@@ -707,10 +732,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         @Override
         public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-            int archiveNodeID = -1;
-            if(rs.getString("archive_node_id") != null) {
-                archiveNodeID = rs.getInt("archive_node_id");
-            }
             URI profileSchemaURI = null;
             if(rs.getString("profile_schema_uri") != null) {
                 try {
@@ -725,6 +746,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     workspaceURL = new URL(rs.getString("workspace_url"));
                 } catch (MalformedURLException ex) {
                     logger.warn("Workspace URL is malformed; null used instead", ex);
+                }
+            }
+            URI archiveURI = null;
+            if(rs.getString("archive_uri") != null) {
+                try {
+                    archiveURI = new URI(rs.getString("archive_uri"));
+                } catch (URISyntaxException ex) {
+                    logger.warn("Archive URI is malformed; null used instead", ex);
                 }
             }
             URL archiveURL = null;
@@ -747,16 +776,15 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
             WorkspaceNode workspaceNode = new LamusWorkspaceNode(
                     rs.getInt("workspace_node_id"),
                     rs.getInt("workspace_id"),
-                    archiveNodeID,
                     profileSchemaURI,
                     rs.getString("name"),
                     rs.getString("title"),
                     WorkspaceNodeType.valueOf(rs.getString("type")),
                     workspaceURL,
+                    archiveURI,
                     archiveURL,
                     originURL,
                     WorkspaceNodeStatus.valueOf(rs.getString("status")),
-                    rs.getString("pid"),
                     rs.getString("format"));
             return workspaceNode;
         }

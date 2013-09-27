@@ -15,19 +15,22 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import nl.mpi.corpusstructure.AccessInfo;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,38 +45,49 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
-    private final ArchiveObjectsDB archiveObjectsDB;
+//    private final ArchiveObjectsDB archiveObjectsDB;
+    private final CorpusStructureProvider corpusStructureProvider;
     private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;
     
     @Autowired
-    public LamusWorkspaceAccessChecker(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB archiveObjectsDB, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
-        this.archiveObjectsDB = archiveObjectsDB;
+    private AccessInfo defaultAccessInfo;
+    
+    @Autowired
+    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
+        this.corpusStructureProvider = csProvider;
         this.amsBridge = amsBridge;
         this.workspaceDao = workspaceDao;
     }
 
     /**
-     * @see NodeAccessChecker#canCreateWorkspace(java.lang.String, int)
+     * @see WorkspaceAccessChecker#canCreateWorkspace(java.lang.String, java.net.URI)
      */
     @Override
-    public boolean canCreateWorkspace(String userID, int archiveNodeID) {
+    public boolean canCreateWorkspace(String userID, URI archiveNodeURI) {
         
-        if(!this.archiveObjectsDB.isOnSite(NodeIdUtils.TONODEID(archiveNodeID))) {
-            logger.warn("Node with archive ID " + archiveNodeID + " is not on site (it is an external node)");
+        CorpusNode node = null;
+        try {
+            node = this.corpusStructureProvider.getNode(archiveNodeURI);
+        } catch (UnknownNodeException ex) {
+            logger.warn("Node " + archiveNodeURI.toString() + " is not known in the archive", ex);
+            return false;
+        }
+        if(!node.isOnSite()) {
+            logger.warn("Node " + archiveNodeURI.toString() + " is not on site (it is an external node)");
             return false;
             //TODO ExternalNodeException
         }
-        if(!this.amsBridge.hasWriteAccess(userID, NodeIdUtils.TONODEID(archiveNodeID))) {
-            logger.warn("User " + userID + " has no write access on the node with archive ID " + archiveNodeID);
+        if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
+            logger.warn("User " + userID + " has no write access on the node " + archiveNodeURI.toString());
             return false;
             //TODO NoWriteAccessException
         }
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
         
-        if(this.workspaceDao.isNodeLocked(archiveNodeID)) {
-            logger.warn("Node with archive ID " + archiveNodeID + " is locked");
+        if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
+            logger.warn("Node " + archiveNodeURI + " is locked");
             return false;
             //TODO LockedNodeException
         }
@@ -83,7 +97,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
             // if there was a way of checking just the leave nodes, it would be a bit easier
 
-        logger.info("A workspace can be created in node with archive ID " + archiveNodeID);
+        logger.info("A workspace can be created in node " + archiveNodeURI);
         
         return true;
     }
@@ -120,9 +134,21 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         List<String> users = new ArrayList<String>();
         users.add(userID);
         
-        AccessInfo defaultAccessRights = AccessInfo.create(AccessInfo.NOBODY, AccessInfo.NOBODY, AccessInfo.ACCESS_LEVEL_NONE);
-        defaultAccessRights.setReadUsers(users);
-        defaultAccessRights.setWriteUsers(users);
+//        AccessInfo defaultAccessRights = AccessInfo.create(AccessInfo.NOBODY, AccessInfo.NOBODY, AccessInfo.ACCESS_LEVEL_NONE);
+        AccessInfo defaultAccessRights = null;
+        try {
+            defaultAccessRights = (AccessInfo) BeanUtils.cloneBean(this.defaultAccessInfo);
+            defaultAccessRights.setReadUsers(users);
+            defaultAccessRights.setWriteUsers(users);
+        } catch (IllegalAccessException ex) {
+            throw new UnsupportedOperationException("Exception not handled yet", ex);
+        } catch (InstantiationException ex) {
+            throw new UnsupportedOperationException("Exception not handled yet", ex);
+        } catch (InvocationTargetException ex) {
+            throw new UnsupportedOperationException("Exception not handled yet", ex);
+        } catch (NoSuchMethodException ex) {
+            throw new UnsupportedOperationException("Exception not handled yet", ex);
+        }
         
         return defaultAccessRights;
     }

@@ -17,7 +17,9 @@ package nl.mpi.lamus.spring;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.lamus.mock.MockAccessInfo;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.context.annotation.Bean;
@@ -48,5 +50,16 @@ public class LamusBeans {
     @Bean
     public FileType typeChecker() {
         return new FileType();
+    }
+    
+    private AccessInfo defaultAccessInfo;
+    
+    @Bean
+    public AccessInfo defaultAccessInfo() {
+        
+        if(this.defaultAccessInfo == null) {
+            this.defaultAccessInfo = new MockAccessInfo();
+        }
+        return this.defaultAccessInfo;
     }
 }

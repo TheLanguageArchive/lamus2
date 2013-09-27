@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
+import java.net.URI;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -50,75 +51,52 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, int, java.net.URL)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, java.net.URI, java.net.URL)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceNode(int workspaceID, int archiveNodeID, URL archiveNodeURL) {
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL) {
         
-        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         //TODO add other values as well
 
         return node;
     }
 
+    
+    //TODO CREATING NEW NODES WITH ALREADY THE ARCHIVE NODE URI???
+    
+    
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, int, java.net.URL, java.lang.String, nl.mpi.metadata.api.model.MetadataDocument)
+     * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, int archiveNodeID, URL archiveNodeURL, String archiveNodePID, MetadataDocument document) {
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document) {
         
-        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID, archiveNodeURL, archiveNodeURL);
-//                document.getFileLocation().toURL(), document.getFileLocation().toURL());
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(document.getDisplayValue());
         node.setTitle(document.getDisplayValue());
         node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
         node.setFormat(""); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
-        String nodePID = archiveNodePID;
-//        String nodePid = WorkspacePidValue.NONE.toString();
-        //TODO Generate a new Handle at this point
-
-	if (document instanceof HandleCarrier) {
-	    nodePID = ((HandleCarrier) document).getHandle();
-	} else {
-            
-            //TODO can't assume that the document always has a handle
-            
-	    logger.warn("Metadata document '" + document.getFileLocation().toString() + "' does not contain a handle.");
-	}
-        
-        node.setPid(nodePID);
         node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
         
         return node;
     }
     
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, int, java.net.URL, nl.mpi.metadata.api.model.Reference, nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String)
+     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.Reference,
+     *      nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, java.lang.String)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, int archiveNodeID, URL url,
-            Reference resourceReference, WorkspaceNodeType type, String mimetype) {
+    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            Reference resourceReference, WorkspaceNodeType type, String mimetype, String name) {
         
-        String name = FilenameUtils.getName(url.getPath());
-        
-        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeID,
-                url, url);
+        WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(name);
         node.setTitle("(type=" + mimetype + ")"); //TODO CHANGE THIS
         node.setType(type);
         node.setFormat(mimetype);
-        
-        String nodePid = WorkspacePidValue.NONE.toString();
-        //TODO Generate a new Handle at this point?
-        
-        if(resourceReference instanceof HandleCarrier) {
-            nodePid = ((HandleCarrier) resourceReference).getHandle();
-        } else {
-            logger.warn("Resource reference '" + url.toString() + "' does not contain a handle.");
-        }
-        node.setPid(nodePid);
         
         //ALWAYS?
         node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);

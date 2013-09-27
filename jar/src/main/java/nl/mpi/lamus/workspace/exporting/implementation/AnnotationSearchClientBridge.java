@@ -16,10 +16,10 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,31 +43,37 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
     }
     
     /**
-     * @see SearchClientBridge#addNode(int)
+     * @see SearchClientBridge#addNode(java.net.URI)
      */
     @Override
-    public void addNode(int archiveNodeID) {
-        try {
-            searchClient.add(NodeIdUtils.TONODEID(archiveNodeID));
-        } catch (SQLException ex) {
-            logger.error("Problems when calling Annex in order to add node " + archiveNodeID + " to the annotation search database", ex);
-            //TODO throw another exception? return something??
-        }
-        searchClient.close();
+    public void addNode(URI archiveNodeURI) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        try {
+//            searchClient.add(NodeIdUtils.TONODEID(archiveNodeID));
+//        } catch (SQLException ex) {
+//            logger.error("Problems when calling Annex in order to add node " + archiveNodeID + " to the annotation search database", ex);
+//            //TODO throw another exception? return something??
+//        }
+//        searchClient.close();
     }
     
     /**
-     * @see SearchClientBridge#removeNode(int)
+     * @see SearchClientBridge#removeNode(java.net.URI)
      */
     @Override
-    public void removeNode(int archiveNodeID) {
-        try {
-            searchClient.remove(NodeIdUtils.TONODEID(archiveNodeID));
-        } catch (SQLException ex) {
-            logger.error("Problems when calling Annex in order to remove node " + archiveNodeID + " from the annotation search database", ex);
-            //TODO throw another exception? return something??
-        }
-        searchClient.close();
+    public void removeNode(URI archiveNodeURI) {
+        
+//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
+        
+//        try {
+//            searchClient.remove(NodeIdUtils.TONODEID(archiveNodeID));
+//        } catch (SQLException ex) {
+//            logger.error("Problems when calling Annex in order to remove node " + archiveNodeID + " from the annotation search database", ex);
+//            //TODO throw another exception? return something??
+//        }
+//        searchClient.close();
     }
 
     /**

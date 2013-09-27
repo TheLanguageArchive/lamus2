@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.net.URI;
 import nl.mpi.lamus.workspace.exception.NodeExplorerException;
 import nl.mpi.lamus.workspace.exception.NodeImporterException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -39,10 +40,10 @@ public interface NodeImporter<R extends Reference> {
      * @param parentNode parent of the node to be imported
      * @param parentDocument metadata document corresponding to the parent node
      * @param childLink reference corresponding to the current node
-     * @param childNodeArchiveID archive ID of the current node
+     * @param childArchiveURI URI of the current node in the archive
      * @throws NodeImporterException if there is a problem during the import
      * @throws NodeExplorerException if there is a problem in the recursive exploration of the tree
      */
     public void importNode(int workspaceID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException;
+            Reference childLink, URI childArchiveURI) throws NodeImporterException, NodeExplorerException;
 }

@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import java.net.URI;
+
 /**
  * Interface for some operations to be performed using the annotation search client.
  * 
@@ -25,16 +27,16 @@ public interface SearchClientBridge {
     /**
      * Adds the given node to the annotation search database
      * 
-     * @param archiveNodeID ID of the node to add
+     * @param archiveNodeURI URI of the node to add
      */
-    public void addNode(int archiveNodeID);
+    public void addNode(URI archiveNodeURI);
     
     /**
      * Removes the given node from the annotation search database
      * 
-     * @param archiveNodeID ID of the node to remove
+     * @param archiveNodeURI URI of the node to remove
      */
-    public void removeNode(int archiveNodeID);
+    public void removeNode(URI archiveNodeURI);
     
     /**
      * Checks if the given file format is usable in the annotation search database

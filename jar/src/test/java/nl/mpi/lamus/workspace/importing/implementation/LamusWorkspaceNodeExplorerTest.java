@@ -18,9 +18,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import nl.mpi.corpusstructure.ArchiveAccessContext;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
@@ -50,7 +47,6 @@ public class LamusWorkspaceNodeExplorerTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private WorkspaceNodeExplorer nodeExplorer;
-    @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private NodeImporterFactoryBean mockNodeImporterFactoryBean;
     @Mock private ArchiveFileHelper mockArchiveFileHelper;
@@ -75,7 +71,7 @@ public class LamusWorkspaceNodeExplorerTest {
     
     @Before
     public void setUp() {
-        nodeExplorer = new LamusWorkspaceNodeExplorer(mockArchiveObjectsDB, mockWorkspaceDao, mockNodeImporterFactoryBean, mockArchiveFileHelper);
+        nodeExplorer = new LamusWorkspaceNodeExplorer(mockWorkspaceDao, mockNodeImporterFactoryBean, mockArchiveFileHelper);
     }
     
     @After
@@ -101,13 +97,6 @@ public class LamusWorkspaceNodeExplorerTest {
         final Collection<Reference> testLinks = new ArrayList<Reference>();
         testLinks.add(metadataLink);
         testLinks.add(resourceLink);
-
-        
-        final String metadataLink_archiveIDStr = "MPI123#";
-        final String resourceLink_archiveIDStr = "MPI456#";
-        final String[] testLinksArchiveIDs = new String[testLinks.size()];
-        testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
-        testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
         
         final OurURL metadataURL = new OurURL("https://testURL.mpi.nl/test.cmdi");
         final OurURL resourceURL = new OurURL("http://testURL.mpi.nl/test.jpg");
@@ -122,14 +111,14 @@ public class LamusWorkspaceNodeExplorerTest {
                 
 //                oneOf(mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
                 
-                oneOf(mockArchiveObjectsDB).getObjectURLForPid(((HandleCarrier)currentLink).getHandle()); will(returnValue(urls[current]));
-                oneOf(mockArchiveObjectsDB).getObjectId(urls[current]); will(returnValue(testLinksArchiveIDs[current]));
+//                oneOf(mockArchiveObjectsDB).getObjectURLForPid(((HandleCarrier)currentLink).getHandle()); will(returnValue(urls[current]));
+//                oneOf(mockArchiveObjectsDB).getObjectId(urls[current]); will(returnValue(testLinksArchiveIDs[current]));
                 
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
 //                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
                 oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
-                oneOf(mockNodeImporter).importNode(workspaceID, mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
+                oneOf(mockNodeImporter).importNode(workspaceID, mockNodeToExplore, mockNodeDocument, currentLink, currentLink.getURI());
                 
                 current++;
             }

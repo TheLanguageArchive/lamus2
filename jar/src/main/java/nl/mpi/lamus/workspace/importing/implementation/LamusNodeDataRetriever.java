@@ -16,29 +16,28 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import nl.mpi.corpusstructure.ArchiveAccessContext;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
-import nl.mpi.corpusstructure.UnknownNodeException;
+import java.util.UUID;
+import java.util.logging.Level;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.HandleCarrier;
-import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -50,15 +49,18 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusNodeDataRetriever.class);
     
-    private final ArchiveObjectsDB archiveObjectsDB;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final NodeResolver nodeResolver;
     private final MetadataAPI metadataAPI;
     private final FileTypeHandler fileTypeHandler;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
-    public LamusNodeDataRetriever(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, MetadataAPI mAPI,
+    public LamusNodeDataRetriever(CorpusStructureProvider csProvider,
+        NodeResolver nodeResolver, MetadataAPI mAPI,
         FileTypeHandler fileTypeHandler, ArchiveFileHelper archiveFileHelper) {
-        this.archiveObjectsDB = aoDB;
+        this.corpusStructureProvider = csProvider;
+        this.nodeResolver = nodeResolver;
         this.metadataAPI = mAPI;
         this.fileTypeHandler = fileTypeHandler;
         this.archiveFileHelper = archiveFileHelper;
@@ -67,58 +69,72 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     /**
      * @see NodeDataRetriever#getArchiveNodeMetadataDocument(int)
      */
-    @Override
-    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
-            throws IOException, MetadataException, UnknownNodeException {
-        
-        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-	if (tempUrl == null) {
-	    throw new UnknownNodeException("No known URL for node with ID " + nodeArchiveID);
-	}
-	URL nodeArchiveURL = tempUrl.toURL();
-
-	MetadataDocument document = metadataAPI.getMetadataDocument(nodeArchiveURL);
-
-        return document;
-    }
-    
+//    @Override
+//    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
+//            throws IOException, MetadataException, UnknownNodeException {
+//        
+//        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
+//	if (tempUrl == null) {
+//	    throw new UnknownNodeException("No known URL for node with ID " + nodeArchiveID);
+//	}
+//	URL nodeArchiveURL = tempUrl.toURL();
+//
+//	MetadataDocument document = metadataAPI.getMetadataDocument(nodeArchiveURL);
+//
+//        return document;
+//    }
+//    
     /**
      * @see NodeDataRetriever#getResourceURL(nl.mpi.metadata.api.model.Reference)
      */
-    @Override
-    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException {
-        
-        OurURL resourceURL = null;
-        
-        if(resourceReference instanceof HandleCarrier) {
-            String resourceHandle = ((HandleCarrier) resourceReference).getHandle();
-            resourceURL = this.archiveObjectsDB.getObjectURLForPid(resourceHandle);
-            
-            //TODO can't assume that the link always has a handle
-        }
-        
-        if(resourceURL == null) {
-            
-            //TODO Something else
-                //TODO get URL from nodeID instead?
-            
-            resourceURL = new OurURL(resourceReference.getURI().toURL());
-        }
-        
-        return resourceURL;
-    }
+//    @Override
+//    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException {
+//        
+//        OurURL resourceURL = null;
+//        
+//        if(resourceReference instanceof HandleCarrier) {
+//            String resourceHandle = ((HandleCarrier) resourceReference).getHandle();
+//            resourceURL = this.archiveObjectsDB.getObjectURLForPid(resourceHandle);
+//            
+//            //TODO can't assume that the link always has a handle
+//        }
+//        
+//        if(resourceURL == null) {
+//            
+//            //TODO Something else
+//                //TODO get URL from nodeID instead?
+//            
+//            resourceURL = new OurURL(resourceReference.getURI().toURL());
+//        }
+//        
+//        return resourceURL;
+//    }
     
     //TODO review this method
+    
+    @Override
+    public URL getNodeArchiveURL(URI nodeArchiveURI) {
+        
+        try {
+            CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
+            URL nodeArchiveURL = nodeResolver.getUrl(archiveNode);
+            return nodeArchiveURL;
+            
+        } catch (UnknownNodeException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        }
+        
+    }
     
     /**
      * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, nl.mpi.util.OurURL, int)
      */
     @Override
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceURLWithContext, int nodeArchiveID) {
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceOurURL) {
         
         // if not onsite, don't use typechecker
         boolean performTypeCheck = true;
-        if(!archiveFileHelper.isUrlLocal(resourceURLWithContext)) {
+        if(!archiveFileHelper.isUrlLocal(resourceOurURL)) {
             
             //TODO is this call supposed to be like this?
             fileTypeHandler.setValues(resourceReference.getMimetype());
@@ -128,7 +144,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
             
             performTypeCheck = false;
         } else {
-                File resFile = new File(resourceURLWithContext.getPath());
+                File resFile = new File(resourceOurURL.getPath());
                 //TODO check if file is larger than the checker limit
                     // if so, do not typecheck
                 if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
@@ -223,6 +239,24 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
                 }
             }
         }
+    }
+
+    /**
+     * @see NodeDataRetriever#setNewArchiveURI(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void setNewArchiveURI(WorkspaceNode node) {
+        
+        //TODO Maybe it should be generated in a different way?
+        
+        URI newArchiveURI;
+        try {
+            newArchiveURI = new URI(UUID.randomUUID().toString());
+        } catch (URISyntaxException ex) {
+            throw new UnsupportedOperationException("exception not handled yet", ex);
+        }
+        
+        node.setArchiveURI(newArchiveURI);
     }
     
 }

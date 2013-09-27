@@ -15,6 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,10 +58,11 @@ public class WorkspaceImportRunnerTest {
     private final NodeImporterFactoryBean mockFileImporterFactoryBean = context.mock(NodeImporterFactoryBean.class);
     
     private final Workspace mockWorkspace = context.mock(Workspace.class);
-    private final int topNodeArchiveID = 10;
+    private final URI topNodeArchiveURI;
     private final int workspaceID = 1;
 
-    public WorkspaceImportRunnerTest() {
+    public WorkspaceImportRunnerTest() throws URISyntaxException {
+        topNodeArchiveURI = new URI(UUID.randomUUID().toString());
     }
 
     @BeforeClass
@@ -74,7 +78,7 @@ public class WorkspaceImportRunnerTest {
         workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockWorkspaceFileExplorer,
                 mockFileImporterFactoryBean, mockTopNodeImporter);
         workspaceImportRunner.setWorkspace(mockWorkspace);
-        workspaceImportRunner.setTopNodeArchiveID(topNodeArchiveID);
+        workspaceImportRunner.setTopNodeArchiveURI(topNodeArchiveURI);
     }
     
     @After
@@ -96,7 +100,7 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
-            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveID);
+            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveURI);
                 when(importing.isNot("finished"));
             oneOf(mockWorkspace).setStatusMessageInitialised();
                 when(importing.isNot("finished"));
@@ -171,7 +175,7 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
-            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveID);
+            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveURI);
                 will(throwException(expectedExceptionCause));
             
             oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();
@@ -214,7 +218,7 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
-            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveID);
+            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveURI);
                 will(throwException(expectedExceptionCause));
             
             oneOf(mockWorkspace).setStatusMessageErrorDuringInitialisation();

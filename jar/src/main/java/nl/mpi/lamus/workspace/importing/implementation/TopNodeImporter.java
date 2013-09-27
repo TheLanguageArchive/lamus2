@@ -15,7 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exception.NodeExplorerException;
@@ -29,7 +31,6 @@ import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,13 +44,15 @@ public class TopNodeImporter {
     private MetadataNodeImporter metadataNodeImporter;
     
     @Autowired
-    public TopNodeImporter(@Qualifier("ArchiveObjectsDB") ArchiveObjectsDB aoDB, WorkspaceDao wsDao, MetadataAPI mAPI,
+    public TopNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
+            WorkspaceDao wsDao, MetadataAPI mAPI,
 	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
             WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
 	    WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
 	    WorkspaceNodeExplorer workspaceNodeExplorer) {
 
-	metadataNodeImporter = new MetadataNodeImporter(aoDB, wsDao, mAPI, nodeDataRetriever, nodeLinkManager, fileImporter, nodeFactory,
+	metadataNodeImporter = new MetadataNodeImporter(csProvider, nodeResolver, wsDao, mAPI,
+                nodeDataRetriever, nodeLinkManager, fileImporter, nodeFactory,
                 parentNodeReferenceFactory, wsNodelinkFactory, fileHandler, workspaceNodeExplorer);
     }
     
@@ -58,12 +61,12 @@ public class TopNodeImporter {
      * with only the parameters that matter in this case.
      * 
      * @param workspaceID ID of the workspace
-     * @param childNodeArchiveID archive ID of the current node
+     * @param childNodeArchiveURI archive URI of the current node
      * @throws NodeImporterException if there is a problem during the import
      * @throws NodeExplorerException if there is a problem in the recursive exploration of the tree
      */
-    public void importNode(int workspaceID, int childNodeArchiveID) throws NodeImporterException, NodeExplorerException {
-        metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveID);
+    public void importNode(int workspaceID, URI childNodeArchiveURI) throws NodeImporterException, NodeExplorerException {
+        metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveURI);
     }
     
 }

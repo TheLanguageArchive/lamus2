@@ -22,6 +22,7 @@ import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,9 @@ public class LamusTrashCanHandler implements TrashCanHandler {
         //TODO consistency checks?
         
         
-        File currentFile = archiveFileHelper.getArchiveLocationForNodeID(nodeToMove.getArchiveNodeID());
+//        File currentFile = archiveFileHelper.getArchiveLocationForNodeID(nodeToMove.getArchiveNodeID());
+        
+        File currentFile = FileUtils.toFile(nodeToMove.getArchiveURL());
         
         File versionDirectory = trashVersioningHandler.getDirectoryForNodeVersion(nodeToMove.getWorkspaceID());
 
@@ -65,7 +68,7 @@ public class LamusTrashCanHandler implements TrashCanHandler {
             return null;
         }
         
-        File versionFile = trashVersioningHandler.getTargetFileForNodeVersion(versionDirectory, nodeToMove.getArchiveNodeID(), nodeToMove.getArchiveURL());
+        File versionFile = trashVersioningHandler.getTargetFileForNodeVersion(versionDirectory, nodeToMove.getArchiveURI(), nodeToMove.getArchiveURL());
         
         if(!trashVersioningHandler.moveFileToTargetLocation(currentFile, versionFile)) {
             return null;

@@ -23,15 +23,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.sql.DataSource;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.corpusstructure.NodeIdUtils;
@@ -118,7 +126,7 @@ public class WorkspaceStepsHelper {
         map.put("onsite", Boolean.toString(true));
         map.put("readrights", "everybody");
         map.put("writerights", "everybody");
-        map.put("pid", "hdl:SOMETHING/00-0000-0000-0000-0000-" + nodeID);
+        map.put("pid", "node:" + nodeID);
         map.put("accesslevel", "1");
         template.update(insertString, map);
 
@@ -245,17 +253,19 @@ public class WorkspaceStepsHelper {
         template.update(insertString, map);        
     }
     
-    static void insertWorkspaceInDB(DataSource lamusDataSource, File workspaceBaseDirectory, File archiveFolder, int workspaceID, String userID) throws FileNotFoundException, IOException {
-        insertWorkspaceInDB(lamusDataSource, workspaceBaseDirectory, workspaceID, userID, 1, new File(archiveFolder, "1.cmdi").toURI().toURL());
+    static void insertWorkspaceInDB(DataSource lamusDataSource, File workspaceBaseDirectory, File archiveFolder, int workspaceID, String userID)
+            throws FileNotFoundException, IOException, URISyntaxException {
+        insertWorkspaceInDB(lamusDataSource, workspaceBaseDirectory, workspaceID, userID, 1, new File(archiveFolder, "1.cmdi").toURI().toURL(), new URI(UUID.randomUUID().toString()));
     }
     
-    static void insertWorkspaceInDB(DataSource lamusDataSource, File workspaceBaseDirectory, int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL) throws FileNotFoundException, IOException {
+    static void insertWorkspaceInDB(DataSource lamusDataSource, File workspaceBaseDirectory, int workspaceID, String userID, int topWsNodeID, URL topNodeArchiveURL, URI topNodeArchiveURI)
+            throws FileNotFoundException, IOException {
 
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        File testFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
+        File testFile = new File(workspaceDirectory, topWsNodeID + ".cmdi");
         
-        String topNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + topNodeArchiveID;
+//        String topNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + topWsNodeID;
         String topNodeFormat = "text/x-cmdi+xml";
         
         String insertString = "";
@@ -263,13 +273,13 @@ public class WorkspaceStepsHelper {
         Map<String, String> map = new HashMap<String, String>();
         
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
+        insertWorkspaceNode(insertString, template, map, -1, topWsNodeID, topNodeArchiveURL, topNodeArchiveURI, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                topNodePID, topNodeFormat, "testNode",
+                topNodeFormat, "testNode",
                 workspaceID, testFile);
         
         workspaceDirectory.mkdirs();
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files/" + topNodeArchiveID + ".cmdi");
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files/" + topWsNodeID + ".cmdi");
         OutputStream testOut = new FileOutputStream(testFile);
         IOUtils.copy(testIn, testOut);
     }
@@ -299,31 +309,31 @@ public class WorkspaceStepsHelper {
     }
     
     static void insertWorkspaceInDBWithNewlyLinkedNode(DataSource lamusDataSource, File workspaceBaseDirectory,
-            int workspaceID, String userID, int topNodeArchiveID, URL topNodeArchiveURL, String type)
+            int workspaceID, String userID, int topNodeWsID, URL topNodeArchiveURL, URI topNodeArchiveURI, String type)
             throws MalformedURLException, FileNotFoundException, IOException {
         
         String currentDate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        File topNodeFile = new File(workspaceDirectory, topNodeArchiveID + ".cmdi");
-        int childNodeArchiveID = topNodeArchiveID + 1;
+        File topNodeFile = new File(workspaceDirectory, topNodeWsID + ".cmdi");
+        int childWsNodeID = topNodeWsID + 1;
         File childFile = null;
         File childOriginFile = null;
 
-        String topNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + topNodeArchiveID;
+        String topNodePID = "node:" + topNodeWsID;
         String topNodeFormat = "text/x-cmdi+xml";
-        String childNodePID = "hdl:SOMETHING/00-0000-0000-0000-0000-" + childNodeArchiveID;
+        String childNodePID = "node:" + childWsNodeID;
         String childNodeFormat = "";
         WorkspaceNodeType childNodeType = null;
         
         if("resource".equals(type)) {
             childNodeFormat = "application/pdf";
-            childFile = new File(workspaceDirectory, childNodeArchiveID + ".pdf");
-            childOriginFile = new File("/some/directory/" + childNodeArchiveID + ".pdf");
+            childFile = new File(workspaceDirectory, childWsNodeID + ".pdf");
+            childOriginFile = new File("/some/directory/" + childWsNodeID + ".pdf");
             childNodeType = WorkspaceNodeType.RESOURCE_WR;
         } else if("metadata".equals(type)) {
             childNodeFormat = "text/cmdi";
-            childFile = new File(workspaceDirectory, childNodeArchiveID + ".cmdi");
-            childOriginFile = new File("/some/directory/" + childNodeArchiveID + ".cmdi");
+            childFile = new File(workspaceDirectory, childWsNodeID + ".cmdi");
+            childOriginFile = new File("/some/directory/" + childWsNodeID + ".cmdi");
             childNodeType = WorkspaceNodeType.METADATA;
         }
         
@@ -332,25 +342,25 @@ public class WorkspaceStepsHelper {
         Map<String, String> map = new HashMap<String, String>();
 
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
-        insertWorkspaceNode(insertString, template, map, -1, topNodeArchiveID, topNodeArchiveURL, topNodeArchiveURL,
+        insertWorkspaceNode(insertString, template, map, -1, topNodeWsID, topNodeArchiveURL, topNodeArchiveURI, topNodeArchiveURL,
                 WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
-                topNodePID, topNodeFormat, "testNode",
+                topNodeFormat, "testNode",
                 workspaceID, topNodeFile);
-        insertWorkspaceNode(insertString, template, map, topNodeArchiveID, childNodeArchiveID, null, childOriginFile.toURI().toURL(),
+        insertWorkspaceNode(insertString, template, map, topNodeWsID, childWsNodeID, null, null, childOriginFile.toURI().toURL(),
                 childNodeType, WorkspaceNodeStatus.NODE_UPLOADED,
-                childNodePID, childNodeFormat, "testNode",
+                childNodeFormat, "testNode",
                 workspaceID, childFile);
         
         workspaceDirectory.mkdirs();
         
-        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + topNodeArchiveID + ".cmdi" + type);
+        InputStream testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + topNodeWsID + ".cmdi" + type);
         OutputStream testOut = new FileOutputStream(topNodeFile);
         IOUtils.copy(testIn, testOut);
         
         if("resource".equals(type)) {
-            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childNodeArchiveID + ".pdf");
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childWsNodeID + ".pdf");
         } else if("metadata".equals(type)) {
-            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childNodeArchiveID + ".cmdi");
+            testIn = WorkspaceStepsHelper.class.getClassLoader().getResourceAsStream("test_files/example_archive_files_linked/" + childWsNodeID + ".cmdi");
         }
         testOut = new FileOutputStream(childFile);
         IOUtils.copy(testIn, testOut);
@@ -372,50 +382,50 @@ public class WorkspaceStepsHelper {
     }
     
     static private void insertWorkspaceNode(String insertString, NamedParameterJdbcTemplate template, Map<String, String> map,
-            int parentNodeArchiveID, int nodeArchiveID, URL nodeArchiveURL, URL nodeOriginURL, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
-            String nodePID, String nodeFormat, String nodeName,
+            int parentWsNodeID, int wsNodeID, URL nodeArchiveURL, URI nodeArchiveURI, URL nodeOriginURL, WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus,
+            String nodeFormat, String nodeName,
             int workspaceID, File nodeFile) throws MalformedURLException {
         
-        insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_node_id, archive_url, origin_url, name, type, workspace_url, status, pid, format) "
-                + "VALUES (:workspace_node_id, :workspace_id, :archive_node_id, :archive_url, :origin_url, :name, :type, :workspace_url, :status, :pid, :format);";
+        insertString = "INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, origin_url, name, type, workspace_url, status, format) "
+                + "VALUES (:workspace_node_id, :workspace_id, :archive_url, :archive_uri, :origin_url, :name, :type, :workspace_url, :status, :format);";
         map.clear();
-        map.put("workspace_node_id", "" + nodeArchiveID);
+        map.put("workspace_node_id", "" + wsNodeID);
         map.put("workspace_id", "" + workspaceID);
-        if(parentNodeArchiveID == -1) {
-            map.put("archive_node_id", "" + nodeArchiveID);
-        } else {
-            map.put("archive_node_id", "-1");
-        }
+//        if(parentNodeArchiveID == -1) {
+//            map.put("archive_node_id", "" + nodeArchiveID);
+//        } else {
+//            map.put("archive_node_id", "-1");
+//        }
         map.put("archive_url", (nodeArchiveURL != null ? nodeArchiveURL.toString() : ""));
+        map.put("archive_uri", (nodeArchiveURI != null ? nodeArchiveURI.toString() : ""));
         map.put("origin_url", (nodeOriginURL != null ? nodeOriginURL.toString() : ""));
         map.put("name", "testNode");
         map.put("type", nodeType.toString());
         map.put("workspace_url", nodeFile.toURI().toURL().toString());
         map.put("status", nodeStatus.toString());
-        map.put("pid", nodePID);
         map.put("format", nodeFormat);
         template.update(insertString, map);
         
-        if(parentNodeArchiveID == -1) {
-            insertString = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_id = :top_node_archive_id, top_node_archive_url = :top_node_archive_url WHERE workspace_id = :workspace_id;";
+        if(parentWsNodeID == -1 && nodeArchiveURL != null && nodeArchiveURI != null) {
+            insertString = "UPDATE workspace SET top_node_id = :top_node_id, top_node_archive_url = :top_node_archive_url, top_node_archive_uri = :top_node_archive_uri WHERE workspace_id = :workspace_id;";
             map.clear();
-            map.put("top_node_id", "" + nodeArchiveID);
-            map.put("top_node_archive_id", "" + nodeArchiveID);
+            map.put("top_node_id", "" + wsNodeID);
             map.put("top_node_archive_url", nodeArchiveURL.toString());
+            map.put("top_node_archive_uri", nodeArchiveURI.toString());
             map.put("workspace_id", "" + workspaceID);
             template.update(insertString, map);
-        } else if (parentNodeArchiveID > -1) {
+        } else if (parentWsNodeID > -1) {
             insertString = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
                     + "VALUES (:parent_workspace_node_id, :child_workspace_node_id, :child_uri);";
             map.clear();
-            map.put("parent_workspace_node_id", "" + parentNodeArchiveID);
-            map.put("child_workspace_node_id", "" + nodeArchiveID);
-            map.put("child_uri", nodeFile.toURI().toString());
+            map.put("parent_workspace_node_id", "" + parentWsNodeID);
+            map.put("child_workspace_node_id", "" + wsNodeID);
+            map.put("child_uri", (nodeArchiveURI != null ? nodeArchiveURI.toString() : ""));
             template.update(insertString, map);
         }
     }
     
-    static void insertNodeInWSDB(DataSource lamusDataSource, File file, int workspaceID,
+    static void insertNodeWithoutParentInWSDB(DataSource lamusDataSource, File file, int workspaceID, int wsNodeID,
             WorkspaceNodeType nodeType, WorkspaceNodeStatus nodeStatus, String nodePID, String nodeFormat) throws MalformedURLException {
         
         String insertString = "";
@@ -426,7 +436,7 @@ public class WorkspaceStepsHelper {
         String filename = FilenameUtils.getName(fileURL.getPath());
         
         insertWorkspaceNode(insertString, template, map,
-                -2, -1, null, fileURL, nodeType, nodeStatus, nodePID, nodeFormat, filename, workspaceID, file);
+                -1, wsNodeID, null, null, fileURL, nodeType, nodeStatus, nodeFormat, filename, workspaceID, file);
     }
     
     static void clearCsDatabase(DataSource corpusstructureDataSource) {
@@ -513,22 +523,37 @@ public class WorkspaceStepsHelper {
         FileUtils.cleanDirectory(trashcanDirectory);
     }
     
-    static TreeSnapshot createSelectedTreeArchiveSnapshot(CorpusStructureDB csDB, ArchiveObjectsDB aoDB, int selectedNode) {
+    static TreeSnapshot createSelectedTreeArchiveSnapshot(CorpusStructureProvider csProvider, URI selectedNodeURI) throws UnknownNodeException {
         
-        Timestamp topNodeTimestamp = aoDB.getObjectTimestamp(NodeIdUtils.TONODEID(selectedNode));
-        String topNodeChecksum = aoDB.getObjectChecksum(NodeIdUtils.TONODEID(selectedNode));
-        NodeSnapshot topNodeSnapshot = new NodeSnapshot(NodeIdUtils.TONODEID(selectedNode), topNodeTimestamp, topNodeChecksum);
+//        Timestamp topNodeTimestamp = aoDB.getObjectTimestamp(NodeIdUtils.TONODEID(selectedNode));
+        CorpusNode selectedNode = csProvider.getNode(selectedNodeURI);
+        Date selectedNodeDate = selectedNode.getFileInfo().getFileTime();
+//        String topNodeChecksum = aoDB.getObjectChecksum(NodeIdUtils.TONODEID(selectedNode));
+        String selectedNodeChecksum = selectedNode.getFileInfo().getChecksum();
+//        NodeSnapshot topNodeSnapshot = new NodeSnapshot(NodeIdUtils.TONODEID(selectedNode), topNodeTimestamp, topNodeChecksum);
+        NodeSnapshot selectedNodeSnapshot = new NodeSnapshot(selectedNodeURI, selectedNodeDate, selectedNodeChecksum);
         List<NodeSnapshot> otherNodeSnapshots = new ArrayList<NodeSnapshot>();
         
-        String[] descendantsIDs = csDB.getDescendants(NodeIdUtils.TONODEID(selectedNode), -1, "*");
-        for(String descendantID : descendantsIDs) {
-            Timestamp descendantTimestamp = aoDB.getObjectTimestamp(descendantID);
-            String descendantChecksum = aoDB.getObjectChecksum(descendantID);
-            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantID, topNodeTimestamp, topNodeChecksum);
+//        String[] descendantsIDs = csDB.getDescendants(NodeIdUtils.TONODEID(selectedNode), -1, "*");
+        
+        //TODO CorpusNodeType doesn't allow to select in this method "ALL TYPES" (previously '-1'); using a workaround at the moment
+        List<String> allFormats = new ArrayList<String>();
+        allFormats.add("*");
+        List<URI> descendantsURIs = csProvider.getDescendants(selectedNodeURI, CorpusNodeType.RESOURCE_OTHER, allFormats);
+//        for(String descendantID : descendantsIDs) {
+        for(URI descendantURI : descendantsURIs) {
+//            Timestamp descendantTimestamp = aoDB.getObjectTimestamp(descendantID);
+            CorpusNode descendantNode = csProvider.getNode(descendantURI);
+            Date descendantTimestamp = descendantNode.getFileInfo().getFileTime();
+//            String descendantChecksum = aoDB.getObjectChecksum(descendantID);
+            String descendantChecksum = descendantNode.getFileInfo().getChecksum();
+//            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantID, topNodeTimestamp, topNodeChecksum);
+            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantURI, selectedNodeDate, descendantChecksum);
             otherNodeSnapshots.add(descendantSnapshot);
         }
         
-        TreeSnapshot treeSnapshot = new TreeSnapshot(topNodeSnapshot, otherNodeSnapshots);
+//        TreeSnapshot treeSnapshot = new TreeSnapshot(topNodeSnapshot, otherNodeSnapshots);
+        TreeSnapshot treeSnapshot = new TreeSnapshot(selectedNodeSnapshot, otherNodeSnapshots);
         return treeSnapshot;
     }
     
