@@ -23,7 +23,7 @@ import nl.mpi.archiving.corpusstructure.core.AccessInfo;
  */
 
 /**
- *
+ * Mock implementation of the AccessInfo interface
  * @author guisil
  */
 public class MockAccessInfo implements AccessInfo {

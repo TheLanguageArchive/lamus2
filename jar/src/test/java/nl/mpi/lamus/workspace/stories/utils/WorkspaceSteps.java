@@ -39,6 +39,8 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.identifierresolver.IdentifierResolver;
+import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -107,6 +109,9 @@ public class WorkspaceSteps {
     private MetadataAPI metadataAPI;
     
     @Autowired
+    private IdentifierResolver identifierResolver;
+    
+    @Autowired
     private Ams2Bridge ams2Bridge;
 
     @Autowired
@@ -134,6 +139,7 @@ public class WorkspaceSteps {
 
 //    private int deletedNodeArchiveID;
     private URI deletedNodeArchiveURI;
+    private URL deletedNodeArchiveURL;
     private int deletedNodeWsID;
     
     private TreeSnapshot selectedTreeArchiveSnapshot;
@@ -147,6 +153,8 @@ public class WorkspaceSteps {
     
     private WorkspaceNode deletedWsNodeParent;
     private WorkspaceNode deletedWsNode;
+    
+    private int numberOfChildNodesAfterLinking;
     
     
     @BeforeScenario
@@ -173,6 +181,7 @@ public class WorkspaceSteps {
         
 //        this.deletedNodeArchiveID = -1;
         this.deletedNodeArchiveURI = null;
+        this.deletedNodeArchiveURL = null;
         this.deletedNodeWsID = -1;
         
         this.selectedTreeArchiveSnapshot = null;
@@ -183,6 +192,8 @@ public class WorkspaceSteps {
         
         this.unlinkedParentNode = null;
         this.unlinkedChildNode = null;
+        
+        this.numberOfChildNodesAfterLinking = -1;
     }
     
     
@@ -330,6 +341,8 @@ public class WorkspaceSteps {
         WorkspaceNode childNode = childNodes.iterator().next();
         assertNotNull("Child of top node should not be null", childNode);
         assertEquals("Child of top node different from expected", resourceFile.toURI().toURL(), childNode.getWorkspaceURL());
+        
+        this.numberOfChildNodesAfterLinking = childNodes.size();
     }
     
     @Given("the top node has had some metadata added")
@@ -368,6 +381,7 @@ public class WorkspaceSteps {
                 //TODO FIX NODEID...
 //                this.deletedNodeArchiveID = node.getArchiveNodeID();
                 this.deletedNodeArchiveURI = node.getArchiveURI();
+                this.deletedNodeArchiveURL = node.getArchiveURL();
                 this.deletedNodeWsID = node.getWorkspaceID();
                 break;
             }
@@ -657,8 +671,9 @@ public class WorkspaceSteps {
         
     }
     
-    @Then("the new node, $nodeFilename, is properly linked from the parent file (node with URI $parentNodeUriStr) and exists in the corpusstructure database")
-    public void theNewNodeIsProperlyLinkedFromTheParentFile(String nodeFilename, String parentNodeUriStr) throws IOException, MetadataException, UnknownNodeException, URISyntaxException {
+    @Then("the new node is properly linked from the parent file (node with URI $parentNodeUriStr) and was assigned an archive handle")
+    public void theNewNodeIsProperlyLinkedFromTheParentFileAndWasAssignedAnArchiveHandle(String parentNodeUriStr)
+            throws IOException, MetadataException, UnknownNodeException, URISyntaxException {
         
         URI parentNodeURI = new URI(parentNodeUriStr);
         
@@ -675,38 +690,36 @@ public class WorkspaceSteps {
         assertNotNull("List of references in metadata document " + parentNodeURL + " should not be null", childReferences);
         assertTrue("Metadata document " + parentNodeURL + " should have references", childReferences.size() > 0);
         
-        boolean childFound = false;
-//        String childHandle;
+        assertEquals("Number of child references is different from expected", this.numberOfChildNodesAfterLinking, childReferences.size());
+        
+        boolean allChildrenHaveHandle = Boolean.TRUE;
         
         for(Reference child : childReferences) {
             
-//            if(child instanceof HandleCarrier) {
-//                childHandle = ((HandleCarrier)child).getHandle();
-//            } else {
-//                continue;
-//            }
-            
-//            OurURL childUrl = this.archiveObjectsDB.getObjectURLForPid(childHandle);
-            CorpusNode childNode = this.corpusStructureProvider.getNode(child.getURI());
-            URL childURL = this.nodeResolver.getUrl(childNode);
-//            if(childUrl.toString().contains(nodeFilename)) {
-            if(childURL.toString().contains(nodeFilename)) {
-                childFound = true;
-//                String childID = this.archiveObjectsDB.getObjectId(childUrl);
-//                OurURL childUrlWithContext = this.archiveObjectsDB.getObjectURL(childID, ArchiveAccessContext.FILE_UX_URL);
-//                this.newlyInsertedNodeUrl = childUrlWithContext.toURL();
-                this.newlyInsertedNodeUrl = childURL;
-                break;
+            if(child instanceof HandleCarrier) {
+                String handle = ((HandleCarrier) child).getHandle();
+                if(handle != null && !handle.isEmpty()) {
+                    continue;
+                }
             }
+            allChildrenHaveHandle = Boolean.FALSE;
+            break;
         }
         
-        assertTrue("Expected child was not found", childFound);
+        assertTrue("Child didn't get a handle assigned", allChildrenHaveHandle);
+    }
+    
+    @Then("the new node exists in the corpusstructure database and is properly linked there")
+    public void theNewNodeExistsInTheCorpusstructureDatabaseAndIsProperlyLinkedThere() {
         
+        //TODO this should still fail because the node will only be added to the database by the crawler, which is not implemented yet
+        
+        fail("crawler is not implemented yet");
     }
     
     @Then("$filename is present in the proper location in the filesystem, under the directory of the parent node $parentNodeUriStr")
-    public void thenewFileIsPresentInTheProperLocationInTheFilesystemUnderTheDirectoryOfTheParentNode(String filename, String parentNodeUriStr)
-            throws UnknownNodeException, URISyntaxException {
+    public void theNewFileIsPresentInTheProperLocationInTheFilesystemUnderTheDirectoryOfTheParentNode(String filename, String parentNodeUriStr)
+            throws UnknownNodeException, URISyntaxException, MalformedURLException {
         
         URI parentNodeURI = new URI(parentNodeUriStr);
         
@@ -717,32 +730,21 @@ public class WorkspaceSteps {
         String parentPath = FilenameUtils.getFullPathNoEndSeparator(parentURL.getPath());
         
         
-        String expectedPath = null;
+        File expectedNodeFile = WorkspaceStepsHelper.getExpectedFileLocationForChildNode(filename, parentPath, parentURL);
         
-        if(!"cmdi".equals(FilenameUtils.getExtension(filename))) {
-            String resourcePath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.getPath()));
-            if("pdf".equals(FilenameUtils.getExtension(filename))) {
-                String writtenResourcePath = FilenameUtils.concat(resourcePath, "Annotations");
-                expectedPath = writtenResourcePath;
-            } else if("jpg".equals(FilenameUtils.getExtension(filename))) {
-                String mediaResourcePath = FilenameUtils.concat(resourcePath, "Media");
-            } else {
-                expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
-            }
-        } else {
-            expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
-        }
-        File expectedNodeFile = new File(expectedPath, filename);
+        this.newlyInsertedNodeUrl = expectedNodeFile.toURI().toURL();
         
         assertTrue("New file doesn't exist in the expected location: " + expectedNodeFile.getAbsolutePath(), expectedNodeFile.exists());
         
     }
     
-    @Then("the children of $filename are also present in the database and in the filesystem")
-    public void theChildrenOfFileAreAlsoPresentInTheDatabase(String filename) throws IOException, MetadataException, UnknownNodeException {
+    @Then("the children of $filename are also present in the filesystem and were assigned archive handles")
+    public void theChildrenOfFileAreAlsoPresentInTheFilesystemAndWereAssignedArchiveHandles(String filename)
+            throws IOException, MetadataException {
         
         MetadataDocument document = this.metadataAPI.getMetadataDocument(this.newlyInsertedNodeUrl);
-        assertTrue("Metadata document doesn't contain references" ,document instanceof ReferencingMetadataDocument);
+        assertTrue("Metadata document doesn't contain references" , document instanceof ReferencingMetadataDocument);
+        
         List<Reference> references = ((ReferencingMetadataDocument) document).getDocumentReferences();
         assertNotNull("List of references in metadata document shouldn't be null", references);
         assertTrue("List of references in metadata document should have size larger than 0", references.size() > 0);
@@ -751,7 +753,26 @@ public class WorkspaceSteps {
             assertTrue("Reference should contain a handle", ref instanceof HandleCarrier);
             String handle = ((HandleCarrier) ref).getHandle();
             assertNotNull("Handle should not be null", handle);
-//            OurURL refURL = this.archiveObjectsDB.getObjectURLForPid(handle);
+            
+            URI refResolvedURI = this.identifierResolver.resolveIdentifier(document, ref.getURI());
+            URL refResolvedURL = refResolvedURI.toURL();
+            File refResolvedFile = FileUtils.toFile(refResolvedURL);
+            assertTrue("Child " + refResolvedURL + " does not exist in the expected location", refResolvedFile.exists());
+        }
+    }
+    
+    @Then("the children of $filename are also present in the database")
+    public void theChildrenOfFileAreAlsoPresentInTheDatabase(String filename)
+            throws IOException, MetadataException, UnknownNodeException {
+        
+        MetadataDocument document = this.metadataAPI.getMetadataDocument(this.newlyInsertedNodeUrl);
+        assertTrue("Metadata document doesn't contain references" , document instanceof ReferencingMetadataDocument);
+        List<Reference> references = ((ReferencingMetadataDocument) document).getDocumentReferences();
+        assertNotNull("List of references in metadata document shouldn't be null", references);
+        assertTrue("List of references in metadata document should have size larger than 0", references.size() > 0);
+        
+        for(Reference ref : references) {
+            
             CorpusNode refNode = this.corpusStructureProvider.getNode(ref.getURI());
             URL refURL = this.nodeResolver.getUrl(refNode);
             assertNotNull("Child not found in database", refURL);
@@ -760,38 +781,56 @@ public class WorkspaceSteps {
 //            OurURL refURLWithContext = this.archiveObjectsDB.getObjectURL(refID, ArchiveAccessContext.FILE_UX_URL);
             
 //            File refFile = new File(refURLWithContext.getPath());
-            File refFile = new File(refURL.getPath());
-            assertTrue("Child doesn't exist in the filesystem", refFile.exists());
+//            File refFile = new File(refURL.getPath());
+//            assertTrue("Child doesn't exist in the filesystem", refFile.exists());
         }
     }
     
-    @Then("the name of the node with URI $archiveNodeUriStr has changed both in the database and in the filesystem")
-    public void theNameOfTheNodeWithIDHasChanged(String archiveNodeUriStr) throws UnknownNodeException, URISyntaxException {
+    @Then("the metadata of the node with URI $archiveNodeUriStr has changed in the filesystem")
+    public void theMetadataOfTheNodeWithURIHasChangedInTheFilesystem(String archiveNodeUriStr)
+            throws UnknownNodeException, URISyntaxException {
         
         URI archiveNodeURI = new URI(archiveNodeUriStr);
+        CorpusNode changedNode = this.corpusStructureProvider.getNode(archiveNodeURI);
+        URL changedNodeURL = this.nodeResolver.getUrl(changedNode);
+        String changedNodeChecksum = Checksum.create(changedNodeURL.getPath());
         
-//        String changedNodeChecksum = this.archiveObjectsDB.getObjectChecksum(NodeIdUtils.TONODEID(archiveNodeID));
+        assertFalse("Name of the node in the archive should have changed", this.oldNodeArchiveChecksum.equals(changedNodeChecksum));
+    }
+    
+    @Then("the metadata of the node with URI $archiveNodeUriStr has changed in the database")
+    public void theMetadataOfTheNodeWithURIHasChangedInTheDatabase(String archiveNodeUriStr) throws URISyntaxException, UnknownNodeException {
+
+        URI archiveNodeURI = new URI(archiveNodeUriStr);
         CorpusNode changedNode = this.corpusStructureProvider.getNode(archiveNodeURI);
         String changedNodeChecksum = changedNode.getFileInfo().getChecksum();
         
         assertFalse("Name of the node in the archive should have changed", this.oldNodeArchiveChecksum.equals(changedNodeChecksum));
+        
     }
     
     @Then("the deleted node has been moved to the trash folder in the filesystem")
     public void theDeletedNodeIsMarkedAsDeletedInTheDatabaseAndShouldNotBeLinkedToAnyNode() throws UnknownNodeException {
         
-//        String deletedNodePath = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(this.deletedNodeArchiveID), ArchiveAccessContext.FILE_UX_URL).toString();
+        File expectedFile = WorkspaceStepsHelper.getExpectedFileLocationForDeletedNode(
+                this.trashCanFolder, this.createdWorkspaceID, this.deletedNodeArchiveURL, this.deletedNodeArchiveURI);
+        
+        assertTrue("Deleted file is not present in expected trash can location", expectedFile.exists());
+        
+    }
+    
+    @Then("the deleted node has been updated in the database")
+    public void theDeletedNodeHasBeenUpdatedInTheDatabase() throws UnknownNodeException {
+        
+        File expectedFile = WorkspaceStepsHelper.getExpectedFileLocationForDeletedNode(
+                this.trashCanFolder, this.createdWorkspaceID, this.deletedNodeArchiveURL, this.deletedNodeArchiveURI);
+        
         CorpusNode deletedNode = this.corpusStructureProvider.getNode(this.deletedNodeArchiveURI);
-        URL deletedNodeURL = this.nodeResolver.getUrl(deletedNode);
-        String deletedNodePath = deletedNodeURL.getPath();
-        assertTrue("Deleted node should be located in the trash can folder", deletedNodePath.contains(this.trashCanFolder.getPath()));
-        
-        File deletedNodeFile = new File(deletedNodePath);
+        URL deletedNodeDbURL = this.nodeResolver.getUrl(deletedNode);
+        String deletedNodeDbPath = deletedNodeDbURL.getPath();
+        File deletedNodeFile = new File(deletedNodeDbPath);
         assertNotNull("Deleted node file object should not be null", deletedNodeFile);
-        
-        //TODO This would be done only by the ArchiveCrawler? So at this point there would still be a link in the database...
-        
-        //TODO some more checks?
+        assertEquals("Deleted node location in DB is different from expected", expectedFile, deletedNodeFile);
     }
     
     @Then("no changes were made to the archive")

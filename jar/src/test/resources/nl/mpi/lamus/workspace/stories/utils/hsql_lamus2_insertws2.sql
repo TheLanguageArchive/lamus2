@@ -7,13 +7,13 @@ INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, ori
         'collection2', 'METADATA', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2.cmdi', 'NODE_ISCOPY',
         'text/cmdi');
 INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, origin_url, name, type, workspace_url, status, format) 
-    VALUES (3, 2, '', 'file:/some/random/folder/Zorro.cmdi', '',
+    VALUES (3, 2, null, null, 'file:/some/random/folder/Zorro.cmdi',
         'Zorro', 'METADATA', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2/Zorro.cmdi', 'NODE_UPLOADED',
         'text/cmdi');
 INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, origin_url, name, type, workspace_url, status, format) 
-    VALUES (4, 2, '', 'file:/some/random/folder/Zorro/Zorro_07sep1967.pdf', '',
-        'Zorro07sep1967', 'RESOURCE_WR', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2/Zorro/Zorro_07sep1967.pdf', 'NODE_UPLOADED',
-        'application/pdf');
+    VALUES (4, 2, null, null, 'file:/some/random/folder/Zorro/Zorro_07sep1967.pdf',
+        'Zorro07sep1967', 'RESOURCE_WR', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/2/collection2/Zorro/Zorro_07sep1967.pdf',
+        'NODE_UPLOADED', 'application/pdf');
 
 
 UPDATE workspace SET top_node_id = 2,

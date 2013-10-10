@@ -570,4 +570,40 @@ public class WorkspaceStepsHelper {
         
         return nodesFound;
     }
+    
+    static File getExpectedFileLocationForDeletedNode(
+            File trashCanFolder, int createdWorkspaceID, URL deletedNodeArchiveURL, URI deletedNodeArchiveURI) {
+        
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        String yearMonth = "" + year + "-" + (month < 10 ? "0" + month: month);
+        File trashYearMonthFolder = new File(trashCanFolder, yearMonth);
+        File trashWorkspaceFolder = new File(trashYearMonthFolder, "" + createdWorkspaceID);
+        
+        String deletedNodeFilename = FilenameUtils.getName(deletedNodeArchiveURL.getPath());
+        String versionFilename = "v" + deletedNodeArchiveURI + "__." + deletedNodeFilename;
+        
+        return new File(trashWorkspaceFolder, versionFilename);
+    }
+    
+    static File getExpectedFileLocationForChildNode(String filename, String parentPath, URL parentURL) {
+        
+        String expectedPath = null;
+        
+        if(!"cmdi".equals(FilenameUtils.getExtension(filename))) {
+            String resourcePath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.getPath()));
+            if("pdf".equals(FilenameUtils.getExtension(filename))) {
+                String writtenResourcePath = FilenameUtils.concat(resourcePath, "Annotations");
+                expectedPath = writtenResourcePath;
+            } else if("jpg".equals(FilenameUtils.getExtension(filename))) {
+                String mediaResourcePath = FilenameUtils.concat(resourcePath, "Media");
+            } else {
+                expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
+            }
+        } else {
+            expectedPath = FilenameUtils.concat(parentPath, FilenameUtils.getBaseName(parentURL.toString()));
+        }
+        
+        return new File(expectedPath, filename);
+    }
 }

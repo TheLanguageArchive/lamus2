@@ -36,6 +36,7 @@ import nl.mpi.corpusstructure.CorpusStructureDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.mock.MockCorpusstructureWriter;
 import nl.mpi.lamus.workspace.stories.utils.WorkspaceStepsCorpusStructureProviderFactory;
 import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
 import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
@@ -54,6 +55,8 @@ import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
 import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
+import nl.mpi.metadata.identifierresolver.IdentifierResolver;
+import nl.mpi.metadata.identifierresolver.URLResolver;
 import nl.mpi.versioning.manager.VersioningAPI;
 import org.apache.commons.io.FileUtils;
 import org.delaman.ldap.ArchiveUserAuthImpl;
@@ -154,8 +157,10 @@ public class WorkspaceStoriesConfig {
     @Bean
     public CorpusstructureWriter corpusstructureWriter() {
         
-        //TODO Not implemented yet, and anyway it probably shouldn't be needed by LAMUS, which should only invoke the crawler
-        return null;
+        if(corpusstructureWriter == null) {
+            corpusstructureWriter = new MockCorpusstructureWriter();
+        }
+        return corpusstructureWriter;
     }
     
     
@@ -537,6 +542,10 @@ public class WorkspaceStoriesConfig {
         return new CMDIApi();
     }
     
+    @Bean
+    public IdentifierResolver identifierResolver() {
+        return new URLResolver();
+    }
     
     @Bean
     public FileType typeChecker() {

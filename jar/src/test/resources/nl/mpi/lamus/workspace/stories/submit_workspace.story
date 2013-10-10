@@ -18,8 +18,9 @@ And eclipse_shortcuts.pdf has been linked to the workspace
 When that user chooses to submit the workspace
 Then the status of the workspace is marked as successfully submitted
 And the end date of the workspace is set
-And the new node, eclipse_shortcuts.pdf, is properly linked from the parent file (node with URI node:001) and exists in the corpusstructure database
 And eclipse_shortcuts.pdf is present in the proper location in the filesystem, under the directory of the parent node node:001
+And the new node is properly linked from the parent file (node with URI node:001) and was assigned an archive handle
+And the new node exists in the corpusstructure database and is properly linked there
 !-- And an email notification is sent to the user
 !-- ...
 
@@ -35,9 +36,11 @@ And Zorro.cmdi has been linked to the workspace
 When that user chooses to submit the workspace
 Then the status of the workspace is marked as successfully submitted
 And the end date of the workspace is set
-And the new node, Zorro.cmdi, is properly linked from the parent file (node with URI node:002) and exists in the corpusstructure database
-And Zorro.cmdi is present in the proper location in the filesystem, under the directory of the parent node 2
-And the children of Zorro.cmdi are also present in the database and in the filesystem
+And Zorro.cmdi is present in the proper location in the filesystem, under the directory of the parent node node:002
+And the new node is properly linked from the parent file (node with URI node:002) and was assigned an archive handle
+And the children of Zorro.cmdi are also present in the filesystem and were assigned archive handles
+And the new node exists in the corpusstructure database and is properly linked there
+And the children of Zorro.cmdi are also present in the database
 !-- And an email notification is sent to the user
 !-- ...
 
@@ -53,7 +56,8 @@ And the top node has had some metadata added
 When that user chooses to submit the workspace
 Then the status of the workspace is marked as successfully submitted
 And the end date of the workspace is set
-And the name of the node with URI node:003 has changed both in the database and in the filesystem
+And the metadata of the node with URI node:003 has changed in the filesystem
+And the metadata of the node with URI node:003 has changed in the database
 !-- And an email notification is sent to the user
 !-- ...
 
@@ -81,6 +85,7 @@ When that user chooses to submit the workspace
 Then the status of the workspace is marked as successfully submitted
 And the end date of the workspace is set
 And the deleted node has been moved to the trash folder in the filesystem
+And the deleted node has been updated in the database
 !-- And an email notification is sent to the user
 !-- ...
 

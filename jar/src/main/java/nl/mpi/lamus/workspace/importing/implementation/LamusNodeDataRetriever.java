@@ -242,10 +242,10 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
 
     /**
-     * @see NodeDataRetriever#setNewArchiveURI(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeDataRetriever#getNewArchiveURI()
      */
     @Override
-    public void setNewArchiveURI(WorkspaceNode node) {
+    public URI getNewArchiveURI() {
         
         //TODO Maybe it should be generated in a different way?
         
@@ -256,7 +256,8 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
         
-        node.setArchiveURI(newArchiveURI);
+//        node.setArchiveURI(newArchiveURI);
+        return newArchiveURI;
     }
     
 }

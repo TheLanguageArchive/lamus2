@@ -680,18 +680,20 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         @Override
         public Workspace mapRow(ResultSet rs, int rowNum) throws SQLException {
+            String topNodeArchiveURIStr = rs.getString("top_node_archive_uri");
             URI topNodeArchiveURI = null;
-            if(rs.getString("top_node_archive_uri") != null) {
+            if(topNodeArchiveURIStr != null && !topNodeArchiveURIStr.isEmpty()) {
                 try {
-                    topNodeArchiveURI = new URI(rs.getString("top_node_archive_uri"));
+                    topNodeArchiveURI = new URI(topNodeArchiveURIStr);
                 } catch (URISyntaxException ex) {
                     logger.warn("Top Node Archive URI is malformed; null used instead", ex);
                 }
             }
+            String topNodeArchiveURLStr = rs.getString("top_node_archive_url");
             URL topNodeArchiveURL = null;
-            if(rs.getString("top_node_archive_url") != null) {
+            if(topNodeArchiveURLStr != null && !topNodeArchiveURLStr.isEmpty()) {
                 try {
-                    topNodeArchiveURL = new URL(rs.getString("top_node_archive_url"));
+                    topNodeArchiveURL = new URL(topNodeArchiveURLStr);
                 } catch (MalformedURLException ex) {
                     logger.warn("Top Node Archive URL is malformed; null used instead", ex);
                 }
@@ -732,42 +734,47 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         @Override
         public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
 
+            String profileSchemaURIStr = rs.getString("profile_schema_uri");
             URI profileSchemaURI = null;
-            if(rs.getString("profile_schema_uri") != null) {
+            if(profileSchemaURIStr != null && !profileSchemaURIStr.isEmpty()) {
                 try {
-                    profileSchemaURI = new URI(rs.getString("profile_schema_uri"));
+                    profileSchemaURI = new URI(profileSchemaURIStr);
                 } catch (URISyntaxException ex) {
                     logger.warn("Profile Schema URI has invalid syntax; null used instead", ex);
                 }
             }
+            String workspaceURLStr = rs.getString("workspace_url");
             URL workspaceURL = null;
-            if(rs.getString("workspace_url") != null) {
+            if(workspaceURLStr != null && !workspaceURLStr.isEmpty()) {
                 try {
-                    workspaceURL = new URL(rs.getString("workspace_url"));
+                    workspaceURL = new URL(workspaceURLStr);
                 } catch (MalformedURLException ex) {
                     logger.warn("Workspace URL is malformed; null used instead", ex);
                 }
             }
+            String archiveURIStr = rs.getString("archive_uri");
             URI archiveURI = null;
-            if(rs.getString("archive_uri") != null) {
+            if(archiveURIStr != null && !archiveURIStr.isEmpty()) {
                 try {
-                    archiveURI = new URI(rs.getString("archive_uri"));
+                    archiveURI = new URI(archiveURIStr);
                 } catch (URISyntaxException ex) {
                     logger.warn("Archive URI is malformed; null used instead", ex);
                 }
             }
+            String archiveURLStr = rs.getString("archive_url");
             URL archiveURL = null;
-            if(rs.getString("archive_url") != null) {
+            if(archiveURLStr != null) {
                 try {
-                    archiveURL = new URL(rs.getString("archive_url"));
+                    archiveURL = new URL(archiveURLStr);
                 } catch (MalformedURLException ex) {
                     logger.warn("Archive URL is malformed; null used instead", ex);
                 }
             }
+            String originURLStr = rs.getString("origin_url");
             URL originURL = null;
-            if(rs.getString("origin_url") != null) {
+            if(originURLStr != null) {
                 try {
-                    originURL = new URL(rs.getString("origin_url"));
+                    originURL = new URL(originURLStr);
                 } catch (MalformedURLException ex) {
                     logger.warn("Origin URL is malformed; null used instead", ex);
                 }

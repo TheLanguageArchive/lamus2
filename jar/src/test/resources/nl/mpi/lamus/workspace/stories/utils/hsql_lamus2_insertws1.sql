@@ -7,9 +7,9 @@ INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, ori
         'collection1', 'METADATA', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/1/collection1.cmdi', 'NODE_ISCOPY',
         'text/cmdi');
 INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, origin_url, name, type, workspace_url, status, format) 
-    VALUES (1, 1, '', 'file:/some/random/folder/eclipse_shortcuts.pdf', '',
-        'eclipse_shortcuts', 'RESOURCE_WR', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/1/collection1/eclipse_shortcuts.pdf', 'NODE_UPLOADED',
-        'application/pdf');
+    VALUES (1, 1, null, null, 'file:/some/random/folder/eclipse_shortcuts.pdf',
+        'eclipse_shortcuts', 'RESOURCE_WR', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/1/collection1/eclipse_shortcuts.pdf',
+        'NODE_UPLOADED', 'application/pdf');
 
 UPDATE workspace SET top_node_id = 0,
         top_node_archive_url = 'file:/tmp/lamusStoriesTestDirectory/archiveFolder/parent_collection/collection1.cmdi',

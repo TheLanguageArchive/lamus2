@@ -92,8 +92,9 @@ public interface NodeDataRetriever {
     public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults);
         
     /**
-     * Generates a new archive URI and sets it in the given node
-     * @param node node for which the URI should be generated
+     * Generates a new archive URI
+     * 
+     * @return generated archive URI
      */
-    public void setNewArchiveURI(WorkspaceNode node);
+    public URI getNewArchiveURI();
 }

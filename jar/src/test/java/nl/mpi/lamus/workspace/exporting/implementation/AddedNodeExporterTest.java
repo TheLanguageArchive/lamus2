@@ -155,19 +155,26 @@ public class AddedNodeExporterTest {
         
         
         final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeNewArchiveURL = new URL("file:/archive/somewhere/" + nodeFilename);
+
         final File nodeOriginFile = new File(nodeOriginURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         final String nodeFormat = "application/pdf";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode currentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, null, null, nodeOriginURL, nodeStatus, nodeFormat);
+        
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeFilename);
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        
+        final WorkspaceNode intermediateCurrentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, null, nodeNewArchiveURL, nodeOriginURL, nodeStatus, nodeFormat);
+        final WorkspaceNode updatedCurrentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeNewArchiveURI, nodeNewArchiveURL, nodeOriginURL, nodeStatus, nodeFormat);
         
         final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
                 parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURL, parentNodeStatus, parentNodeFormat);
         
-        final File nextAvailableFile = new File("/archive/root/somenode/node.pdf");
         final String resourceType = nodeFormat; //"WRITTEN_RESOURCE"; //TODO What should be this like? Is it needed?
         
 //        final int newNodeArchiveID = 100;
@@ -178,14 +185,14 @@ public class AddedNodeExporterTest {
                 will(returnValue(nextAvailableFile));
             
                 //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).setNewArchiveURI(currentNode);
+            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
                 
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(currentNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
             
 //            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), nodePid, testWorkspace.getUserID());
 //                will(returnValue(newNodeArchiveID));
             
-            oneOf(mockWorkspaceFileHandler).copyResourceFile(currentNode, nodeWsFile, nextAvailableFile);
+            oneOf(mockWorkspaceFileHandler).copyResourceFile(updatedCurrentNode, nodeWsFile, nextAvailableFile);
                 
             //TODO new node is added and linked in database
 
@@ -248,19 +255,25 @@ public class AddedNodeExporterTest {
         
         
         final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeNewArchiveURL = new URL("file:/archive/somewhere/" + nodeFilename);
         final File nodeOriginFile = new File(nodeOriginURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         final String nodeFormat = "text/cmdi";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode currentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, null, null, nodeOriginURL, nodeStatus, nodeFormat);
+        
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeFilename);
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        
+        final WorkspaceNode intermediateCurrentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, null, nodeNewArchiveURL, nodeOriginURL, nodeStatus, nodeFormat);
+        final WorkspaceNode updatedCurrentNode = new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeNewArchiveURI, nodeNewArchiveURL, nodeOriginURL, nodeStatus, nodeFormat);
         
         final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
                 parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURL, parentNodeStatus, parentNodeFormat);
         
-        final File nextAvailableFile = new File("/archive/root/somenode/node.cmdi");
         final String resourceType = nodeFormat; //"WRITTEN_RESOURCE"; //TODO What should be this like? Is it needed?
         
         final int newNodeArchiveID = 100;
@@ -271,12 +284,11 @@ public class AddedNodeExporterTest {
                 will(returnValue(nextAvailableFile));
             
                 //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).setNewArchiveURI(currentNode);
+            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
                 
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(currentNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
             
-            
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, currentNode);
+            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, updatedCurrentNode);
                     
 //            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), nodePid, testWorkspace.getUserID());
 //                will(returnValue(newNodeArchiveID));
@@ -284,7 +296,7 @@ public class AddedNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(currentNode, mockMetadataAPI, mockChildCmdiDocument, nodeWsFile, mockStreamResult);
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(updatedCurrentNode, mockMetadataAPI, mockChildCmdiDocument, nodeWsFile, mockStreamResult);
             
             //TODO new node is added and linked in database
 

@@ -318,12 +318,16 @@ public class LamusNodeDataRetrieverTest {
 //    }
     
     
-    public void setNewArchiveURI() {
+    public void getNewArchiveURI() {
         
-        context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNode).setArchiveURI(with(aNonNull(URI.class)));
-        }});
+//        context.checking(new Expectations() {{
+//            oneOf(mockWorkspaceNode).setArchiveURI(with(aNonNull(URI.class)));
+//        }});
         
-        testNodeDataRetriever.setNewArchiveURI(mockWorkspaceNode);
+        URI retrievedURI = testNodeDataRetriever.getNewArchiveURI();
+        
+        assertNotNull("URI should not be null", retrievedURI);
+        
+        //TODO assert that URI complies with expected format, etc (archive policies regarding handles)
     }
 }

@@ -128,8 +128,9 @@ public class AddedNodeExporter implements NodeExporter {
         } catch (IOException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
-//        currentNode.setArchiveURL(newNodeArchiveURL);
-        nodeDataRetriever.setNewArchiveURI(currentNode);
+        currentNode.setArchiveURL(newNodeArchiveURL);
+        URI newNodeArchiveURI = nodeDataRetriever.getNewArchiveURI();
+        currentNode.setArchiveURI(newNodeArchiveURI);
         workspaceDao.updateNodeArchiveUriUrl(currentNode);
         
         //TODO WHEN METADATA, CALL (RECURSIVELY) exploreTree FOR CHILDREN IN THE BEGINNING
