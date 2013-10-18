@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
@@ -68,7 +68,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     }
 
     @Override
-    public int getIndexOfChild(GenericTreeNode child) {
+    public int getIndexOfChild(LinkedTreeNode child) {
         return children.indexOf(child);
     }
 

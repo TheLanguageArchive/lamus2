@@ -16,14 +16,14 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.archiving.tree.GenericTreeModelProvider;
-import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -44,8 +44,8 @@ public final class WorkspacePage extends LamusPage {
     @SpringBean
     private WorkspaceTreeService workspaceTreeService;
     @SpringBean(name = "workspaceTreeProviderFactory")
-    private GenericTreeModelProviderFactory workspaceTreeProviderFactory;
-    private GenericTreeModelProvider workspaceTreeProvider;
+    private WorkspaceTreeModelProviderFactory workspaceTreeProviderFactory;
+    private LinkedTreeModelProvider workspaceTreeProvider;
     // Page model
     private final IModel<Workspace> model;
     private final Form nodeIdForm;
@@ -111,7 +111,7 @@ public final class WorkspacePage extends LamusPage {
     private Form createNodeInfoForm(final String id) {
 	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
-	form.add(new Label("archiveNodeID"));
+	form.add(new Label("archiveURI"));
 	form.add(new Label("archiveURL"));
 	form.add(new Label("workspaceID"));
 	form.add(new Label("type"));

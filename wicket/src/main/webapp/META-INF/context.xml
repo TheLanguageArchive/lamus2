@@ -1,2 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context antiJARLocking="true" path="/lamus2-pages"/>
+<Context antiJARLocking="true" path="/lamus2-pages">
+    
+    <Parameter name="spring.profiles.default" value="cmdi-production" description="Default Spring profile, may be overridden using spring.profiles.active" />
+
+    <!-- 
+	Spring profile for runtime. Actual beans may come from dependency, also see contextConfigLocation parameter in web.xml. 
+
+	Profiles:
+	    * cmdi-production: combines all production profiles
+	     * cmdi-production-providers: only the metadata browser providers/services beans
+	     * cmdi-production-csdb: only the corpus structure database beans
+	    
+	    * cmdi-mock-csdb: mock implementation of CMDI CSDB
+	    * cmdi-adapter-csdb: adapter implementation of corpus structure provider that connects to the 'old' (IMDI) corpus structure API
+    -->
+
+    <Parameter name="spring.profiles.active" value="production, cmdi-production, cmdi-production-providers, cmdi-adapter-csdb" />
+    
+</Context>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.model.mock;
+package nl.mpi.lamus.web.spring.production;
 
-import nl.mpi.archiving.tree.LinkedTreeModelProvider;
-import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProvider;
+import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  *
- * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author guisil
  */
-public class MockGenericTreeModelProviderFactory extends WorkspaceTreeModelProviderFactory {
+@Configuration
+@Profile("production")
+public class WorkspaceTreeBeans {
     
-    @Override
-    public LinkedTreeModelProvider createTreeModelProvider(WorkspaceTreeNode rootNode) {
-        return new WorkspaceTreeModelProvider(rootNode);
+    @Bean
+    public GenericTreeModelProviderFactory workspaceTreeProviderFactory() {
+        return new WorkspaceTreeModelProviderFactory();
     }
-    
 }

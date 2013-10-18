@@ -10,23 +10,40 @@
 	      The value might be either "development" (reloading when templates change)
 	      or "deployment". If no configuration is found, "development" is the default.
 	-->
-    <listener>
+<!--    <listener>
 	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
     <context-param>  
 	<param-name>contextConfigLocation</param-name>  
 	<param-value>classpath*:config/**/*.xml</param-value>  
-    </context-param>
+    </context-param>-->
 
     <context-param>
-	<param-name>spring.profiles.active</param-name>
+        <param-name>contextClass</param-name>
+        <param-value>
+            org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+        </param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>nl.mpi.lamus</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+
+    <!--<context-param>-->
+	<!--<param-name>spring.profiles.active</param-name>-->
 	<!-- 
 	    Available profiles:
 		'mock': using only mocks
 		'corpusstructure': using the CorpusstructureAPI for the archive tree
 	-->
-	<param-value>mock</param-value>
-    </context-param>
+<!--	<param-value>mock</param-value>-->
+    <!--</context-param>-->
     
     <filter>
 	<filter-name>wicket.lamus2</filter-name>

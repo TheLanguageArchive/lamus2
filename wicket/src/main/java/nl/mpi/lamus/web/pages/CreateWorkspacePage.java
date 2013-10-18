@@ -17,7 +17,7 @@
 package nl.mpi.lamus.web.pages;
 
 import java.net.URI;
-import nl.mpi.archiving.tree.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
@@ -92,13 +92,13 @@ public final class CreateWorkspacePage extends LamusPage {
     private Form createNodeIdForm(final String id) {
 	final Form<CorpusNode> form = new Form<CorpusNode>(id);
 	form.add(new Label("name"));
-	form.add(new Label("nodeId"));
+	form.add(new Label("nodeURI"));
 
 	final Button submitButton = new Button("createWorkspace") {
 	    @Override
 	    public void onSubmit() {
 		final String currentUserId = LamusSession.get().getUserId();
-		final URI selectedNodeURI = form.getModelObject().getUri();
+		final URI selectedNodeURI = form.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
 		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
 		// Show page for newly created workspace

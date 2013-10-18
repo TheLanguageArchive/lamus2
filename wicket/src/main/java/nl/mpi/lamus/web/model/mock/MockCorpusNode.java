@@ -19,28 +19,40 @@ package nl.mpi.lamus.web.model.mock;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import nl.mpi.archiving.tree.CorpusNode;
-import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.FileInfo;
+import nl.mpi.archiving.tree.LinkedTreeNode;
+import nl.mpi.archiving.tree.corpusstructure.CorpusStructureArchiveNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MockCorpusNode implements CorpusNode, Serializable {
+public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable {
 
-    private GenericTreeNode parent;
-    private List<GenericTreeNode> children = Collections.emptyList();
+    private CorpusStructureArchiveNode parent;
+    private List<CorpusStructureArchiveNode> children = Collections.emptyList();
     private String name = "";
-    private int nodeId;
+//    private int nodeId;
     private URI nodeUri;
+    
+    private URI profile;
+    private FileInfo fileInfo;
+    private CorpusNodeType nodeType;
+    private AccessInfo authorization;
+    private Date lastUpdate;
+    private boolean isOnSite;
+    private String format;
 
-    public void setChildren(List<GenericTreeNode> children) {
+    public void setChildren(List<CorpusStructureArchiveNode> children) {
 	this.children = children;
     }
 
     @Override
-    public GenericTreeNode getChild(int index) {
+    public CorpusStructureArchiveNode getChild(int index) {
 	return children.get(index);
     }
 
@@ -50,7 +62,7 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     }
 
     @Override
-    public int getIndexOfChild(GenericTreeNode child) {
+    public int getIndexOfChild(LinkedTreeNode child) {
 	return children.indexOf(child);
     }
 
@@ -64,22 +76,22 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     }
 
     @Override
-    public GenericTreeNode getParent() {
+    public CorpusStructureArchiveNode getParent() {
 	return parent;
     }
 
-    public void setParent(GenericTreeNode parent) {
+    public void setParent(CorpusStructureArchiveNode parent) {
 	this.parent = parent;
     }
 
-    @Override
-    public int getNodeId() {
-	return nodeId;
-    }
+//    @Override
+//    public int getNodeId() {
+//	return nodeId;
+//    }
 
-    public void setNodeId(int nodeId) {
-	this.nodeId = nodeId;
-    }
+//    public void setNodeId(int nodeId) {
+//	this.nodeId = nodeId;
+//    }
 
     @Override
     public String toString() {
@@ -87,11 +99,74 @@ public class MockCorpusNode implements CorpusNode, Serializable {
     }
 
     @Override
-    public URI getUri() {
+    public URI getNodeURI() {
 	return nodeUri;
     }
 
-    public void setUri(URI nodeUri) {
-	this.nodeUri = nodeUri;
+    public void setNodeURI(URI nodeURI) {
+	this.nodeUri = nodeURI;
+    }
+
+    @Override
+    public URI getProfile() {
+        return profile;
+    }
+    
+    public void setProfile(URI profile) {
+        this.profile = profile;
+    }
+
+    @Override
+    public FileInfo getFileInfo() {
+        return fileInfo;
+    }
+    
+    public void setFileInfo(FileInfo fileInfo) {
+        this.fileInfo = fileInfo;
+    }
+
+    @Override
+    public CorpusNodeType getType() {
+        return nodeType;
+    }
+    
+    public void setType(CorpusNodeType nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    @Override
+    public AccessInfo getAuthorization() {
+        return authorization;
+    }
+    
+    public void setAuthorization(AccessInfo authorization) {
+        this.authorization = authorization;
+    }
+
+    @Override
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+    
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public boolean isOnSite() {
+        return isOnSite;
+    }
+    
+    public void setIsOnSite(boolean isOnSite) {
+        this.isOnSite = isOnSite;
+    }
+
+    @Override
+    public String getFormat() {
+        return format;
+    }
+    
+    public void setFormat(String format) {
+        this.format = format;
     }
 }
