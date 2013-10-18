@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
  * @author	last modified by $Author$, created by mategg
  * @version	$Revision$
  */
-@Component
+//@Component
 public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     
     private final static Logger logger = LoggerFactory.getLogger(Ams2Bridge.class);

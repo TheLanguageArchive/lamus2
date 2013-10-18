@@ -16,22 +16,22 @@
 package nl.mpi.lamus.workspace.tree.implementation;
 
 import java.io.Serializable;
-import nl.mpi.archiving.tree.GenericTreeModelProviderImpl;
+import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * @see GenericTreeModelProviderImpl
+ * @see LinkedTreeModelProvider
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceTreeModelProvider extends GenericTreeModelProviderImpl implements Serializable {
+public class WorkspaceTreeModelProvider extends LinkedTreeModelProvider implements Serializable {
     
     public WorkspaceTreeModelProvider(WorkspaceTreeNode workspaceRootNode) {
         super(workspaceRootNode);
     }
     
     /**
-     * @see GenericTreeModelProviderImpl#onDetach()
+     * @see LinkedTreeModelProvider#onDetach()
      */
     @Override
     public void onDetach() {

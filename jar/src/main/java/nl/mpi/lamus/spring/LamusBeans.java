@@ -18,8 +18,12 @@ package nl.mpi.lamus.spring;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.lamus.ams.Ams2Bridge;
+import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.mock.MockAccessInfo;
+import nl.mpi.lamus.mock.MockCorpusstructureWriter;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.context.annotation.Bean;
@@ -62,4 +66,18 @@ public class LamusBeans {
         }
         return this.defaultAccessInfo;
     }
+    
+    
+    //TODO Load beans from AMS
+    @Bean
+    public AmsBridge amsBridge() {
+        return new Ams2Bridge();
+    }
+    
+    //TODO Proper implementation of CorpusstructureWriter
+    @Bean
+    public CorpusstructureWriter corpusstructureWriter() {
+        return new MockCorpusstructureWriter();
+    }
+    
 }

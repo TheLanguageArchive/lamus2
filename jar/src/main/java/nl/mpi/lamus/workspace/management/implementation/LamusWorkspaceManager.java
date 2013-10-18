@@ -124,7 +124,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             return null;
         }
         
-        return newWorkspace;
+        // updated workspace
+        Workspace toReturn = workspaceDao.getWorkspace(newWorkspace.getWorkspaceID());
+        
+        return toReturn;
     }
     
     /**

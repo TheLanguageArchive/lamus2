@@ -36,8 +36,10 @@ import org.springframework.context.annotation.Profile;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Configuration
-@Profile("production")
+
+//TODO Unused for the moment... To be re-enabled when AMS is better connected with LAMUS
+//@Configuration
+//@Profile("production")
 public class Ams2BridgeBeans {
     
     private SpringContextLoader contextLoader;

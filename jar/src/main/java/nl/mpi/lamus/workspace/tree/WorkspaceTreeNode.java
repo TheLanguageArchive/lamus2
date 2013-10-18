@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.workspace.tree;
 
-import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -27,7 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceTreeNode extends GenericTreeNode, WorkspaceNode {
+public interface WorkspaceTreeNode extends LinkedTreeNode, WorkspaceNode {
     
     /**
      * @see GenericTreeNode#getChild(int)
@@ -45,7 +45,7 @@ public interface WorkspaceTreeNode extends GenericTreeNode, WorkspaceNode {
      * @see GenericTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
      */
     @Override
-    public int getIndexOfChild(GenericTreeNode child); 
+    public int getIndexOfChild(LinkedTreeNode child); 
     
     /**
      * @see GenericTreeNode#getParent()

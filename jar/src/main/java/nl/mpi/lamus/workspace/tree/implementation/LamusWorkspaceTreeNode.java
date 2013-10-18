@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -94,7 +94,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      * @see WorkspaceTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
      */
     @Override
-    public int getIndexOfChild(GenericTreeNode child) {
+    public int getIndexOfChild(LinkedTreeNode child) {
         return this.getChildren().indexOf(child);
     }
 
