@@ -17,7 +17,8 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.session.LamusSession;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -54,6 +55,7 @@ public class LamusPage extends WebPage {
     @Override
     public void renderHead(IHeaderResponse response) {
         super.renderHead(response);
-        response.renderCSSReference(CSS_RESOURCE_REFERENCE);
+//        response.renderCSSReference(CSS_RESOURCE_REFERENCE);
+        response.render(CssHeaderItem.forReference(CSS_RESOURCE_REFERENCE));
     }
 }

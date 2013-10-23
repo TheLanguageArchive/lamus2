@@ -19,7 +19,7 @@ package nl.mpi.lamus.web.spring.mock;
 import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
-import nl.mpi.archiving.tree.GenericTreeNode;
+//import nl.mpi.archiving.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.model.mock.MockGenericTreeModelProviderFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +42,7 @@ public class MockWorkspaceTreeBeans {
     
 //    @Bean
 //    @Qualifier("workspaceRootNode")
-//    public GenericTreeNode workspaceRootNode() {
+//    public WorkspaceTreeNode workspaceRootNode() {
 //        
 //        MockCorpusNode workspaceRootNode = new MockCorpusNode();
 //        workspaceRootNode.setName("Workspace");

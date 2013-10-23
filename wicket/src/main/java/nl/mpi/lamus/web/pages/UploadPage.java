@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Eelco Hillenius
  */
 @SuppressWarnings("serial")
-public class UploadPage extends LamusPage {
+public class UploadPage extends WorkspacePage {
 
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
 
@@ -154,8 +154,11 @@ public class UploadPage extends LamusPage {
      * @param parameters Page parameters
      */
     public UploadPage(IModel<Workspace> model) {
+        
+        super(model);
+        
 
-        add(new ButtonPage("buttonpage", model));
+//        add(new ButtonPage("buttonpage", model));
         Folder uploadFolder = getUploadFolder();
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");

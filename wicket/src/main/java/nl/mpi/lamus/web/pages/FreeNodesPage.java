@@ -40,7 +40,7 @@ import org.apache.wicket.util.file.Folder;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public class FreeNodesPage extends LamusPage {
+public class FreeNodesPage extends WorkspacePage {
 
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
 
@@ -87,8 +87,11 @@ public class FreeNodesPage extends LamusPage {
      * @param parameters Page parameters
      */
     public FreeNodesPage(IModel<Workspace> model) {
+        
+        super(model);
+        
 
-        add(new ButtonPage("buttonpage", model));
+//        add(new ButtonPage("buttonpage", model));
         Folder uploadFolder = getUploadFolder();
 
 

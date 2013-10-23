@@ -19,7 +19,7 @@ package nl.mpi.lamus.web.pages;
 import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
-import nl.mpi.archiving.tree.GenericTreeNode;
+import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -32,7 +32,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.tree.LinkType;
+import org.apache.wicket.extensions.markup.html.tree.LinkType;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -67,8 +67,8 @@ public final class CreateWorkspacePage extends LamusPage {
 	tree.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
 	    @Override
 	    public void nodeSelectionChanged(AjaxRequestTarget target, ArchiveTreePanel treePanel) {
-		final GenericTreeNode node = (GenericTreeNode) treePanel.getSelectedNodes().iterator().next();
-		nodeIdForm.setModel(new CompoundPropertyModel<GenericTreeNode>(node));
+		final LinkedTreeNode node = (LinkedTreeNode) treePanel.getSelectedNodes().iterator().next();
+		nodeIdForm.setModel(new CompoundPropertyModel<LinkedTreeNode>(node));
 
 		if (target != null) {
 		    // Ajax, refresh nodeIdForm
