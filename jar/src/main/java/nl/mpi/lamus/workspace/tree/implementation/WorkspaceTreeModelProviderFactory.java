@@ -27,7 +27,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 public class WorkspaceTreeModelProviderFactory implements GenericTreeModelProviderFactory<WorkspaceTreeNode> {
 
     /**
-     * @see GenericTreeModelProviderFactory#createTreeModelProvider(nl.mpi.archiving.tree.GenericTreeNode)
+     * @see GenericTreeModelProviderFactory#createTreeModelProvider(nl.mpi.archiving.tree.WorkspaceTreeNode)
      */
     @Override
     public LinkedTreeModelProvider createTreeModelProvider(WorkspaceTreeNode rootNode) {

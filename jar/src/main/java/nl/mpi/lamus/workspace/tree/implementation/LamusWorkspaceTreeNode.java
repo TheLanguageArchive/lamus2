@@ -91,7 +91,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     }
 
     /**
-     * @see WorkspaceTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
+     * @see WorkspaceTreeNode#getIndexOfChild(nl.mpi.archiving.tree.LinkedTreeNode)
      */
     @Override
     public int getIndexOfChild(LinkedTreeNode child) {

@@ -19,7 +19,7 @@ import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- * Interface that extends both GenericTreeNode and WorkspaceNode.
+ * Interface that extends both LinkedTreeNode and WorkspaceNode.
  * It is intended to be used as the source for
  * the graphical representation of the workspace tree.
  * @see GenericTreeNode

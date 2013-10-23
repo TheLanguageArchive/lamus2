@@ -455,7 +455,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         String updateSql = "UPDATE node SET status = :status"
                 + " WHERE workspace_node_id = :workspace_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("status", WorkspaceNodeStatus.NODE_DELETED)
+                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString())
                 .addValue("workspace_node_id", nodeID);
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
