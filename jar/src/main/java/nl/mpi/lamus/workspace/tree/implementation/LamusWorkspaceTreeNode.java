@@ -32,46 +32,45 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * @see WorkspaceTreeNode
- * 
+ *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements WorkspaceTreeNode {
-    
-    private List<WorkspaceTreeNode> childrenTreeNodes;
+
     private WorkspaceTreeNode parentTreeNode;
     private WorkspaceDao workspaceDao;
-    
+
     public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID,
-            URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-            URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
-            WorkspaceNodeStatus status, String format,
-            WorkspaceTreeNode parent, WorkspaceDao dao) {
-        
-        super(workspaceNodeID, workspaceID, profileSchemaURI,
-                name, title, type, workspaceURL, archiveURI, archiveURL, originURL,
-                status, format);
-        
-        if(dao == null) {
-            throw new IllegalArgumentException("The WorkspaceService object should not be null.");
-        }
-        
-        this.parentTreeNode = parent;
-        this.workspaceDao = dao;
+	    URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
+	    URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+	    WorkspaceNodeStatus status, String format,
+	    WorkspaceTreeNode parent, WorkspaceDao dao) {
+
+	super(workspaceNodeID, workspaceID, profileSchemaURI,
+		name, title, type, workspaceURL, archiveURI, archiveURL, originURL,
+		status, format);
+
+	if (dao == null) {
+	    throw new IllegalArgumentException("The WorkspaceService object should not be null.");
+	}
+
+	this.parentTreeNode = parent;
+	this.workspaceDao = dao;
     }
-    
+
     public LamusWorkspaceTreeNode(WorkspaceNode node, WorkspaceTreeNode parent, WorkspaceDao dao) {
-        
-        super(node.getWorkspaceNodeID(), node.getWorkspaceID(),
-                node.getProfileSchemaURI(), node.getName(), node.getTitle(), node.getType(),
-                node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURL(),
-                node.getStatus(), node.getFormat());
-        
-        if(dao == null) {
-            throw new IllegalArgumentException("The WorkspaceService object should not be null.");
-        }
-        
-        this.parentTreeNode = parent;
-        this.workspaceDao = dao;
+
+	super(node.getWorkspaceNodeID(), node.getWorkspaceID(),
+		node.getProfileSchemaURI(), node.getName(), node.getTitle(), node.getType(),
+		node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURL(),
+		node.getStatus(), node.getFormat());
+
+	if (dao == null) {
+	    throw new IllegalArgumentException("The WorkspaceService object should not be null.");
+	}
+
+	this.parentTreeNode = parent;
+	this.workspaceDao = dao;
     }
 
     /**
@@ -79,7 +78,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public WorkspaceTreeNode getChild(int index) {
-        return this.getChildren().get(index);
+	return this.getChildren().get(index);
     }
 
     /**
@@ -87,7 +86,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public int getChildCount() {
-        return this.getChildren().size();
+	return this.getChildren().size();
     }
 
     /**
@@ -95,7 +94,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public int getIndexOfChild(LinkedTreeNode child) {
-        return this.getChildren().indexOf(child);
+	return this.getChildren().indexOf(child);
     }
 
     /**
@@ -103,61 +102,56 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public WorkspaceTreeNode getParent() {
-        return this.parentTreeNode;
-    }
-    
-    private List<WorkspaceTreeNode> getChildren() {
-        
-        if(this.childrenTreeNodes == null) {
-            
-            this.childrenTreeNodes = new ArrayList<WorkspaceTreeNode>();
-            Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
-            for(WorkspaceNode child : children) {
-                WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
-                        child.getWorkspaceNodeID(), child.getWorkspaceID(),
-                        child.getProfileSchemaURI(), child.getName(), child.getTitle(),
-                        child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
-                        child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
-                        child.getFormat(), this, this.workspaceDao);
-                this.childrenTreeNodes.add(treeNode);
-            }
-        }
-        return this.childrenTreeNodes;
+	return this.parentTreeNode;
     }
 
-    
+    private List<WorkspaceTreeNode> getChildren() {
+	Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
+	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<WorkspaceTreeNode>(children.size());
+	for (WorkspaceNode child : children) {
+	    WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
+		    child.getWorkspaceNodeID(), child.getWorkspaceID(),
+		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
+		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
+		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
+		    child.getFormat(), this, this.workspaceDao);
+	    childrenTreeNodes.add(treeNode);
+	}
+	return childrenTreeNodes;
+    }
+
     @Override
     public int hashCode() {
-        
-        HashCodeBuilder hashCodeB = new HashCodeBuilder()
-                .appendSuper(super.hashCode())
-                .append(this.parentTreeNode);
-                
-        return hashCodeB.toHashCode();
+
+	HashCodeBuilder hashCodeB = new HashCodeBuilder()
+		.appendSuper(super.hashCode())
+		.append(this.parentTreeNode);
+
+	return hashCodeB.toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        
-        if(this == obj) {
-            return true;
-        }
-        if(!(obj instanceof LamusWorkspaceTreeNode)) {
-            return false;
-        }
-        LamusWorkspaceTreeNode other = (LamusWorkspaceTreeNode) obj;
-        
-        
-        EqualsBuilder equalsB = new EqualsBuilder()
-                .appendSuper(super.equals(obj))
-                .append(this.parentTreeNode, other.getParent());
-        
-        return equalsB.isEquals();
+
+	if (this == obj) {
+	    return true;
+	}
+	if (!(obj instanceof LamusWorkspaceTreeNode)) {
+	    return false;
+	}
+	LamusWorkspaceTreeNode other = (LamusWorkspaceTreeNode) obj;
+
+
+	EqualsBuilder equalsB = new EqualsBuilder()
+		.appendSuper(super.equals(obj))
+		.append(this.parentTreeNode, other.getParent());
+
+	return equalsB.isEquals();
     }
-    
+
     @Override
     public String toString() {
-        
-        return this.getName();
+
+	return this.getName();
     }
 }

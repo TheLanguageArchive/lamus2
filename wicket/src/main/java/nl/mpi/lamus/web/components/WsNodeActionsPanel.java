@@ -18,21 +18,12 @@ package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.web.pages.WorkspacePage;
 import nl.mpi.lamus.web.session.LamusSession;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.util.CollectionModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -40,61 +31,32 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * @author guisil
  */
 public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNode>> {
-    
+
     @SpringBean
     private WorkspaceService workspaceService;
-    
-//    private IModel<WorkspaceNode> model;
     private final Form<Collection<WorkspaceTreeNode>> form;
-    
+
     public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
 	super(id, model);
-        
-//        this.model = model;
-        
-        form = new Form<Collection<WorkspaceTreeNode>>("wsNodeActionsForm", model);
-        
-        final Button deleteNodeButton = new Button("deleteNodeButton") {
+	form = new Form<Collection<WorkspaceTreeNode>>("wsNodeActionsForm", model);
 
-            @Override
-            public void onSubmit() {
-                if(WsNodeActionsPanel.this.getModelObject().iterator().hasNext()) {
-                    final String currentUserId = LamusSession.get().getUserId();
-                    workspaceService.deleteNode(currentUserId, WsNodeActionsPanel.this.getModelObject().iterator().next());
-                    
-                    
-                    IModel<Collection<WorkspaceTreeNode>> newModel = new CollectionModel<WorkspaceTreeNode>();
-                    
-                    
-                    form.setModel(newModel);
-                    
-                    
-                    WsNodeActionsPanel.this.setModel(newModel);
-                    
-                }
-            }
+	final Button deleteNodeButton = new Button("deleteNodeButton") {
+	    @Override
+	    public void onSubmit() {
+		if (WsNodeActionsPanel.this.getModelObject().iterator().hasNext()) {
+		    final String currentUserId = LamusSession.get().getUserId();
+		    final WorkspaceTreeNode node = WsNodeActionsPanel.this.getModelObject().iterator().next();
+		    workspaceService.deleteNode(currentUserId, node);
+		    afterWorkspaceChanged();
+		}
+	    }
+	};
 
-//            @Override
-//            public boolean isVisible() {
-//                return form.getModelObject() != null;
-//            }
-            
-        };
-        
-        form.add(deleteNodeButton);
-        add(form);
-        
+	form.add(deleteNodeButton);
+	add(form);
+
     }
 
-//    set
-//    
-//    @Override
-//    protected void onModelChanged() {
-//        super.onModelChanged(); //To change body of generated methods, choose Tools | Templates.
-//        
-//        this.model = getModel();
-//        
-//        form.setModel(this.model);
-//    }
-    
+    public void afterWorkspaceChanged() {
+    }
 }
