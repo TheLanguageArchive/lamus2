@@ -20,7 +20,7 @@ import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.web.components.WsNodeActionsPanel;
+import nl.mpi.lamus.web.components.WsTreeNodeActionsPanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
@@ -50,7 +50,7 @@ public class WorkspacePage extends LamusPage {
     private final IModel<Workspace> model;
     private final Form nodeIdForm;
     private ArchiveTreePanel wsTreePanel;
-    private final WsNodeActionsPanel wsNodeActionsPanel;
+    private final WsTreeNodeActionsPanel wsNodeActionsPanel;
 
     public WorkspacePage(final IModel<Workspace> model) {
 	super();
@@ -63,12 +63,13 @@ public class WorkspacePage extends LamusPage {
 	add(wsTreePanel);
 	add(new ButtonPage("buttonpage", model));
 
-	wsNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
+	wsNodeActionsPanel = new WsTreeNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
 	    @Override
-	    public void afterWorkspaceChanged() {
+	    public void refreshStuff() {
 		wsTreePanel = createWorkspaceTreePanel("workspaceTree");
 		WorkspacePage.this.addOrReplace(wsTreePanel);
 	    }
+            
 	};
 
 	wsNodeActionsPanel.setOutputMarkupId(true);
@@ -100,7 +101,7 @@ public class WorkspacePage extends LamusPage {
 		}
 	    }
 	});
-	treePanel.setLinkType(LinkType.REGULAR);
+	treePanel.setLinkType(LinkType.AJAX_FALLBACK);
 	return treePanel;
     }
 
