@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,6 +38,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 
@@ -46,7 +48,9 @@ import org.junit.*;
  */
 public class LamusWorkspaceServiceTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     private WorkspaceService service;
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceManager mockWorkspaceManager;
@@ -56,6 +60,8 @@ public class LamusWorkspaceServiceTest {
     
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
+    @Mock private File mockWorkspaceUploadDirectory;
+    @Mock private Collection<WorkspaceNode> mockUnlinkedNodesList;
     
     public LamusWorkspaceServiceTest() {
     }
@@ -324,6 +330,22 @@ public class LamusWorkspaceServiceTest {
     //TODO uploadFileIntoWorkspaceWithoutAccess
     
     @Test
+    public void getWorkspaceUploadDirectory() {
+        
+        final int workspaceID = 1;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).getWorkspaceUploadDirectory(workspaceID);
+                will(returnValue(mockWorkspaceUploadDirectory));
+        }});
+        
+        File result = service.getWorkspaceUploadDirectory(workspaceID);
+        
+        assertEquals("Retrieved directory different from expected", mockWorkspaceUploadDirectory, result);
+    }
+    
+    @Test
     public void linkNodesWithAccess() {
         
         final int workspaceID = 1;
@@ -380,5 +402,21 @@ public class LamusWorkspaceServiceTest {
     }
     
     //TODO deleteNodeWithoutAccess
+    
+    @Test
+    public void listUnlinkedNodes() {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            //TODO should this be done everywhere?
+//            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).listUnlinkedNodes(workspaceID); will(returnValue(mockUnlinkedNodesList));
+        }});
+        
+        service.listUnlinkedNodes(userID, workspaceID);
+    }
 
 }

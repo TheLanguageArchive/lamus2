@@ -25,25 +25,25 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  *
  * @author guisil
  */
-public class DeleteNodesAction implements WsTreeNodesAction {
+public class UnlinkNodesAction implements WsTreeNodesAction {
 
-    private final String name = "Delete";
+    private final String name = "Unlink";
     
     private final WorkspaceService workspaceService;
     
-    public DeleteNodesAction(WorkspaceService wsService) {
+    public UnlinkNodesAction(WorkspaceService wsService) {
         this.workspaceService = wsService;
     }
-
+    
     @Override
     public String getName() {
         return this.name;
     }
-    
+
     @Override
     public void execute(String userID, Collection<WorkspaceTreeNode> nodes) {
         for(WorkspaceTreeNode currentNode : nodes) {
-            this.workspaceService.deleteNode(userID, currentNode);
+            this.workspaceService.unlinkNodes(userID, currentNode.getParent(), currentNode);
         }
     }
     

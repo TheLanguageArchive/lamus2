@@ -569,15 +569,39 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Retrieving list containing deleted top nodes of the workspace with ID: " + workspaceID);
         
         String queryDeletedTopNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
-                + " AND workspace_id = :workspace_id AND status like :status;";
+                + " AND workspace_id = :workspace_id AND status LIKE :status;";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("workspace_id", workspaceID)
                 .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
         
-        Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryDeletedTopNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        Collection<WorkspaceNode> listToReturn =
+                this.namedParameterJdbcTemplate.query(queryDeletedTopNodeListSql, namedParameters, new WorkspaceNodeMapper());
         
         return listToReturn;
     }
+
+    /**
+     * @see WorkspaceDao#listUnlinkedNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
+        
+        logger.debug("Retrieving list containing unlinked nodes of the workspace with ID: " + workspaceID);
+        
+        String queryUnlinkedNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
+                + " AND workspace_id = :workspace_id AND status NOT LIKE :status"
+                + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("workspace_id", workspaceID)
+                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
+        
+        Collection<WorkspaceNode> listToReturn =
+                this.namedParameterJdbcTemplate.query(queryUnlinkedNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        
+        return listToReturn;
+    }
+    
+    
     
     /**
      * @see WorkspaceDao#updateNodeWorkspaceURL(nl.mpi.lamus.workspace.model.WorkspaceNode)

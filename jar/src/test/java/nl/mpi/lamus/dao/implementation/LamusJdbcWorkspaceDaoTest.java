@@ -1060,6 +1060,54 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Returned list of nodes should be empty", result.isEmpty());
     }
     
+    @Test
+    public void listUnlinkedNodesOneNode() throws URISyntaxException, MalformedURLException {
+        
+        //TODO get all nodes that have no parent link in the node_link table
+            // THIS HAS TO EXCLUDE THE TOP NODE
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        URI childURI = new URI(UUID.randomUUID().toString());
+        URL childURL = new URL("file:/archive/folder/childnode.cmdi");
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
+        URI unlinkedURI = new URI(UUID.randomUUID().toString());
+        URL unlinkedURL = new URL("file:/archive/folder/unlinkednode.cmdi");
+        WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, Boolean.TRUE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("List of unlinked nodes should not be null", result);
+        assertTrue("List of unlinked nodes has a different size than what was expected", result.size() == 1);
+        assertEquals("Node in the list of unlinked nodes different from expected", unlinkedNode, result.iterator().next());
+    }
+
+    @Test
+    public void listUnlinkedNodesZeroNodes() throws URISyntaxException, MalformedURLException {
+        
+        //TODO get all nodes that have no parent link in the node_link table
+            // THIS HAS TO EXCLUDE THE TOP NODE
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        URI childURI = new URI(UUID.randomUUID().toString());
+        URL childURL = new URL("file:/archive/folder/childnode.cmdi");
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("List of unlinked nodes should not be null", result);
+        assertTrue("List of unlinked nodes has a different size than what was expected", result.isEmpty());
+    }
+
     
     @Test
     public void deleteWorkspaceNodeLink() throws URISyntaxException, MalformedURLException {

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
@@ -128,4 +129,20 @@ public interface WorkspaceService extends Serializable {
      * @param fileItems Files to be uploaded
      */
     public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
+    
+    /**
+     * Returns the upload directory for the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return Upload directory
+     */
+    public File getWorkspaceUploadDirectory(int workspaceID);
+    
+    /**
+     * Lists the unlinked nodes of the given workspace.
+     * 
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @return List of unlinked nodes
+     */
+    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID);
 }

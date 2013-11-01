@@ -167,6 +167,14 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceNodeID);
     
     /**
+     * Retrieves a collection containing the nodes that have no parent
+     * (unlinked nodes).
+     * @param workspaceID ID of the workspace
+     * @return Collection of unlinked nodes in the workspace
+     */
+    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID);
+    
+    /**
      * Updates the Workspace URL of the given node.
      * 
      * @param node WorkspaceNode object to be updated

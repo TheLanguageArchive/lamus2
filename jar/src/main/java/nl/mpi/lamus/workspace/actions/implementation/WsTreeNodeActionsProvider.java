@@ -51,21 +51,23 @@ public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
     public WsTreeNodeActionsProvider(WorkspaceService wsService) {
         writtenResourcesActions = new ArrayList<WsTreeNodesAction>();
         writtenResourcesActions.add(new DeleteNodesAction(wsService));
+        writtenResourcesActions.add(new UnlinkNodesAction(wsService));
         
         mediaResourcesActions = new ArrayList<WsTreeNodesAction>();
         mediaResourcesActions.add(new DeleteNodesAction(wsService));
+        mediaResourcesActions.add(new UnlinkNodesAction(wsService));
         
         lexicalResourcesActions = new ArrayList<WsTreeNodesAction>();
         lexicalResourcesActions.add(new DeleteNodesAction(wsService));
+        lexicalResourcesActions.add(new UnlinkNodesAction(wsService));
         
         metadataActions = new ArrayList<WsTreeNodesAction>();
         metadataActions.add(new DeleteNodesAction(wsService));
+        metadataActions.add(new UnlinkNodesAction(wsService));
         
         metadataCollectionActions = new ArrayList<WsTreeNodesAction>();
-        metadataCollectionActions.add(new DeleteNodesAction(wsService));
         
         multipleNodesActions = new ArrayList<WsTreeNodesAction>();
-        multipleNodesActions.add(new DeleteNodesAction(wsService));
     }
     
     @Override

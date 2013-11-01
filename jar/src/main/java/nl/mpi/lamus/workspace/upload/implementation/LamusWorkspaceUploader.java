@@ -76,7 +76,18 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.typecheckerConfiguration = typecheckerConfig;
         this.fileTypeHandler = fileTypeHandler;
     }
+
+    /**
+     * @see WorkspaceUploader#getWorkspaceUploadDirectory(int)
+     */
+    @Override
+    public File getWorkspaceUploadDirectory(int workspaceID) {
+        return this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+    }
     
+    /**
+     * @see WorkspaceUploader#uploadFiles(int, java.util.Collection)
+     */
     @Override
     public void uploadFiles(int workspaceID, Collection<FileItem> fileItems) {
         

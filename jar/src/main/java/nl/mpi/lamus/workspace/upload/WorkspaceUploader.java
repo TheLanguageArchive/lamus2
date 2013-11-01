@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.upload;
 
+import java.io.File;
 import java.util.Collection;
 import org.apache.commons.fileupload.FileItem;
 
@@ -24,6 +25,18 @@ import org.apache.commons.fileupload.FileItem;
  * @author guisil
  */
 public interface WorkspaceUploader {
+
+    /**
+     * Returns the Upload directory for the given workspace
+     * @param workspaceID ID of the workspace
+     * @return Upload directory
+     */
+    public File getWorkspaceUploadDirectory(int workspaceID);
     
+    /**
+     * Uploads the given collection of files into the given workspace
+     * @param workspaceID ID of the workspace
+     * @param fileItems Collection of file items to be uploaded
+     */
     public void uploadFiles(int workspaceID, Collection<FileItem> fileItems);
 }

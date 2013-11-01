@@ -199,6 +199,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#listUnlinkedNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
+        return this.getWorkspaceDao().listUnlinkedNodes(workspaceID);
+    }
+
+    /**
      * @see WorkspaceDao#updateNodeWorkspaceURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override

@@ -37,7 +37,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
-public class DeleteNodeActionTest {
+public class DeleteNodesActionTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
@@ -49,7 +49,8 @@ public class DeleteNodeActionTest {
     
     private String expectedActionName = "Delete";
     
-    public DeleteNodeActionTest() {
+    
+    public DeleteNodesActionTest() {
     }
     
     @BeforeClass

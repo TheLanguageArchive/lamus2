@@ -40,7 +40,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
-public class WsNodeActionsProviderTest {
+public class WsTreeNodeActionsProviderTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
@@ -66,7 +66,7 @@ public class WsNodeActionsProviderTest {
     private List<WsTreeNodesAction> expectedMultipleNodesActions;
     
     
-    public WsNodeActionsProviderTest() {
+    public WsTreeNodeActionsProviderTest() {
     }
     
     @BeforeClass
@@ -83,26 +83,28 @@ public class WsNodeActionsProviderTest {
         
         expectedWrittenResourceNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedWrittenResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
+        expectedWrittenResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "writtenResourcesActions", expectedWrittenResourceNodeActions);
         
         expectedMediaResourceNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedMediaResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
+        expectedMediaResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "mediaResourcesActions", expectedMediaResourceNodeActions);
         
         expectedLexicalResourceNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedLexicalResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
+        expectedLexicalResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "lexicalResourcesActions", expectedLexicalResourceNodeActions);
         
         expectedMetadataNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedMetadataNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
+        expectedMetadataNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataActions", expectedMetadataNodeActions);
         
         expectedMetadataCollectionNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedMetadataCollectionNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataCollectionActions", expectedMetadataCollectionNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<WsTreeNodesAction>();
-        expectedMultipleNodesActions.add(new DeleteNodesAction(mockWorkspaceService));
         ReflectionTestUtils.setField(wsNodeActionsProvider, "multipleNodesActions", expectedMultipleNodesActions);
     }
     

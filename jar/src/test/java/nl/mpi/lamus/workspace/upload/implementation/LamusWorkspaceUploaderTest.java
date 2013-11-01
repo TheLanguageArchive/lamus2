@@ -118,9 +118,22 @@ public class LamusWorkspaceUploaderTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of uploadFiles method, of class LamusWorkspaceUploader.
-     */
+    @Test
+    public void getUploadDirectory() {
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID);
+                will(returnValue(workspaceUploadDirectory));
+        }});
+        
+        File result = uploader.getWorkspaceUploadDirectory(workspaceID);
+        
+        assertEquals("Retrieved file different from expected", workspaceUploadDirectory, result);
+    }
+    
     @Test
     public void uploadFiles() throws Exception {
         

@@ -236,4 +236,27 @@ public class LamusWorkspaceService implements WorkspaceService {
             this.workspaceUploader.uploadFiles(workspaceID, fileItems);
         }
     }
+
+    /**
+     * @see WorkspaceService#getWorkspaceUploadDirectory(int)
+     */
+    @Override
+    public File getWorkspaceUploadDirectory(int workspaceID) {
+        return this.workspaceUploader.getWorkspaceUploadDirectory(workspaceID);
+    }
+
+    /**
+     * @see WorkspaceService#listUnlinkedNodes(java.lang.String, int)
+     */
+    @Override
+    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
+        
+//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+//            
+//            throw new UnsupportedOperationException("not implemented yet");
+//        } else {
+            
+            return this.workspaceDao.listUnlinkedNodes(workspaceID);
+//        }
+    }
 }
