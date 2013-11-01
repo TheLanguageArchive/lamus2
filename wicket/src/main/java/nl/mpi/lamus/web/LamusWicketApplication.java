@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web;
 
+import java.io.File;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
@@ -25,12 +26,21 @@ import org.apache.wicket.request.Response;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.apache.wicket.util.file.Folder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class LamusWicketApplication extends WebApplication {
 
     // service to be injected
     @SpringBean
     private LamusSessionFactory sessionFactory;
+
+    @Autowired
+    @Qualifier("workspaceBaseDirectory")
+    private File workspaceBaseDirectory;
+    @Autowired
+    @Qualifier("workspaceUploadDirectoryName")
+    private String uploadFolderName;
     
     private Folder uploadFolder = null;
 
@@ -50,7 +60,17 @@ public class LamusWicketApplication extends WebApplication {
         getResourceSettings().setThrowExceptionOnMissingResource(false);
 
         //uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
-        uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
+        
+        //TODO retrieve/construct this folder in some other way
+        if(uploadFolderName != null && !uploadFolderName.isEmpty()) {
+            uploadFolder = new Folder(new File(workspaceBaseDirectory, uploadFolderName));
+        }
+        
+        if(uploadFolder == null) {
+            //TODO have some other fallback value?
+            uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
+        }
+        
         // Ensure folder exists
         uploadFolder.mkdirs();
 
@@ -65,7 +85,7 @@ public class LamusWicketApplication extends WebApplication {
     /**
      * @return the folder for uploads
      */
-    public Folder getUploadFolder()
+    public File getUploadFolder()
     {
         return uploadFolder;
     }

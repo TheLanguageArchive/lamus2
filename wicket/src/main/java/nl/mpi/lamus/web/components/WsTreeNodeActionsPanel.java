@@ -60,6 +60,7 @@ public class WsTreeNodeActionsPanel extends GenericPanel<Collection<WorkspaceTre
 //	};
         
         
+        //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
         
 //        final Button deleteNodeButton = new WsTreeNodeActionButton("deleteNodeButton", model.getObject(), action);

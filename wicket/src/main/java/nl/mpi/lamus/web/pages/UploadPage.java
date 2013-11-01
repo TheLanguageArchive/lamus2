@@ -17,10 +17,15 @@
 package nl.mpi.lamus.web.pages;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.LamusWicketApplication;
+import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.wicket.Application;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.basic.Label;
@@ -35,6 +40,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.util.file.Files;
 import org.apache.wicket.util.file.Folder;
 import org.slf4j.Logger;
@@ -52,6 +58,11 @@ public class UploadPage extends WorkspacePage {
 
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
 
+    @SpringBean
+    private WorkspaceService workspaceService;
+    
+    private final IModel<Workspace> model;
+    
     /**
      * List view for files in upload folder.
      */
@@ -122,7 +133,7 @@ public class UploadPage extends WorkspacePage {
             if (uploads != null) {
                 for (FileUpload upload : uploads) {
                     // Create a new file
-                    File newFile = new File(getUploadFolder(), upload.getClientFileName());
+                    File newFile = new File(getUploadFolder(UploadPage.this.model.getObject().getWorkspaceID()), upload.getClientFileName());
 
                     // Check new file, delete if it already existed
                     checkFileExists(newFile);
@@ -157,9 +168,13 @@ public class UploadPage extends WorkspacePage {
         
         super(model);
         
+        this.model = model;
+        
+        final String currentUserID = LamusSession.get().getUserId();
 
 //        add(new ButtonPage("buttonpage", model));
-        Folder uploadFolder = getUploadFolder();
+        File uploadFolder = getUploadFolder(this.model.getObject().getWorkspaceID());
+        
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
 
@@ -173,7 +188,24 @@ public class UploadPage extends WorkspacePage {
             
             @Override
             protected List<File> load() {
-                return Arrays.asList(getUploadFolder().listFiles());
+//                return Arrays.asList(getUploadFolder().listFiles());
+                
+                Collection<WorkspaceNode> unlinkedNodes =
+                        workspaceService.listUnlinkedNodes(currentUserID, UploadPage.this.model.getObject().getWorkspaceID());
+                
+                
+                //TODO change FileListView so that receives WorkspaceNodes and presents them as such
+                
+                List<File> filesList = new ArrayList<File>();
+                
+                for(WorkspaceNode node : unlinkedNodes) {
+                    File file = (node.getWorkspaceURL() != null ?
+                            new File(node.getWorkspaceURL().getPath()) :
+                            new File(node.getArchiveURL().getPath()));
+                    filesList.add(file);
+                }
+                
+                return filesList;
             }
         });
         add(fileListView);
@@ -206,7 +238,8 @@ public class UploadPage extends WorkspacePage {
      *
      * @return Folder folderPath
      */
-    private Folder getUploadFolder() {
-        return ((LamusWicketApplication) Application.get()).getUploadFolder();
+    private File getUploadFolder(int workspaceID) {
+//        return ((LamusWicketApplication) Application.get()).getUploadFolder();
+        return workspaceService.getWorkspaceUploadDirectory(workspaceID);
     }
 }

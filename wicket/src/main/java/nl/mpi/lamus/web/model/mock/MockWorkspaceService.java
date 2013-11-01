@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.model.mock;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -181,6 +182,16 @@ public class MockWorkspaceService implements WorkspaceTreeService {
 
     @Override
     public void deleteNode(String userID, WorkspaceNode node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public File getWorkspaceUploadDirectory(int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
