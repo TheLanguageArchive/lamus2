@@ -55,6 +55,14 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
     
+    @Autowired
+    @Qualifier("metadataDirectoryName")
+    private String metadataDirectoryName;
+    @Autowired
+    @Qualifier("resourcesDirectoryName")
+    private String resourcesDirectoryName;
+    
+    
     /**
      * 
      * @param fullname
@@ -259,20 +267,11 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
         
         String parentDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
-        String parentBaseName = FilenameUtils.getBaseName(parentPath);
-        String baseDirectory = FilenameUtils.concat(parentDirectory, parentBaseName);
-        String returnDirectory = baseDirectory;
         
-        if(WorkspaceNodeType.RESOURCE_WR.equals(nodeType) || WorkspaceNodeType.RESOURCE_LEX.equals(nodeType)) {
-            returnDirectory = FilenameUtils.concat(baseDirectory, "Annotations"); //TODO put this string in some properties file? constants class?
-        } else if(WorkspaceNodeType.RESOURCE_MR.equals(nodeType)) {
-            returnDirectory = FilenameUtils.concat(baseDirectory, "Media"); //TODO put this string in some properties file? constants class?
+        if(WorkspaceNodeType.METADATA.equals(nodeType)) {
+            return FilenameUtils.concat(parentDirectory, this.metadataDirectoryName);
+        } else {
+            return FilenameUtils.concat(parentDirectory, this.resourcesDirectoryName);
         }
-        
-        //TODO if Metadata, keep same directory or add folder?
-        
-        //TODO are there Info files?
-        
-        return returnDirectory;
     }
 }

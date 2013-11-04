@@ -58,6 +58,9 @@ public class LamusArchiveFileHelperTest {
     private String orphansDirectoryBaseName = "sessions";
     private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
+    private final String metadataDirectoryName = "Metadata";
+    private final String resourcesDirectoryName = "Resources";
+    
     public LamusArchiveFileHelperTest() {
     }
 
@@ -76,6 +79,9 @@ public class LamusArchiveFileHelperTest {
         ReflectionTestUtils.setField(testArchiveFileHelper, "corpusDirectoryBaseName", corpusDirectoryBaseName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "orphansDirectoryBaseName", orphansDirectoryBaseName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "typeRecheckSizeLimitInBytes", typeRecheckSizeLimitInBytes);
+        
+        ReflectionTestUtils.setField(testArchiveFileHelper, "metadataDirectoryName", metadataDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "resourcesDirectoryName", resourcesDirectoryName);
     }
     
     @After
@@ -438,11 +444,11 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getDirectoryForFileTypeWritten() {
         
-        final String parentDirectory = "/some/path";
+        final String parentpath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR;
-        final String expectedDirectory = "/some/path/Annotations";
+        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentDirectory, nodeType);
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
@@ -452,7 +458,7 @@ public class LamusArchiveFileHelperTest {
         
         final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_LEX;
-        final String expectedDirectory = "/some/path/parent/Annotations";
+        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
@@ -464,7 +470,7 @@ public class LamusArchiveFileHelperTest {
         
         final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_MR;
-        final String expectedDirectory = "/some/path/parent/Media";
+        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
@@ -476,7 +482,7 @@ public class LamusArchiveFileHelperTest {
         
         final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/some/path/parent";
+        final String expectedDirectory = "/some/path/" + metadataDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         

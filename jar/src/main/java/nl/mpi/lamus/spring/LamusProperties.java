@@ -129,6 +129,23 @@ public class LamusProperties {
 //        return new File(workspaceBaseDirectory, workspaceUploadDirectoryName);
 //    }
 
+    @Value("${metadata_directory_name}")
+    private String metadataDirectoryName;
+    @Bean
+    @Qualifier("metadataDirectoryName")
+    public String metadataDirectoryName() {
+        return metadataDirectoryName;
+    }
+    
+    @Value("${resources_directory_name}")
+    private String resourcesDirectoryName;
+    @Bean
+    @Qualifier("resourcesDirectoryName")
+    public String resourcesDirectoryName() {
+        return resourcesDirectoryName;
+    }
+    
+    
     @Value("${trashcan_base_directory}")
     private String trashCanBaseDirectory;
     @Bean
