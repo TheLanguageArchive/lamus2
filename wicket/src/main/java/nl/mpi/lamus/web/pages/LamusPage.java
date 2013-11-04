@@ -38,7 +38,6 @@ public class LamusPage extends WebPage {
 
     public LamusPage() {
         this("Lamus2 Language Archive Management and Upload System");
-	add(new FeedbackPanel("feedbackPanel"));
     }
 
     /**
@@ -48,6 +47,7 @@ public class LamusPage extends WebPage {
      */
     public LamusPage(String pageTitle) {
         super();
+	add(new FeedbackPanel("feedbackPanel"));
         add(new Image("image", LANA_IMAGE_RESOURCE_REFERENCE));
 
         add(new Label("pageTitle", pageTitle));
