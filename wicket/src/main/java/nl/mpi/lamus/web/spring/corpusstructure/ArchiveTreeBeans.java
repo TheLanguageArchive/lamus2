@@ -16,8 +16,9 @@
  */
 package nl.mpi.lamus.web.spring.corpusstructure;
 
+import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
-import nl.mpi.archiving.tree.corpusstructure.CorpusStructureDBFactoryImpl;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
 import nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +42,7 @@ public class ArchiveTreeBeans {
     }
     
     @Bean
-    public CorpusStructureDBFactoryImpl corpusStructureDbFactory() {
-        return new CorpusStructureDBFactoryImpl("java:comp/env/jdbc/CSDB");
+    public CorpusStructureProviderFactory corpusStructureDbFactory() {
+        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
     }
 }
