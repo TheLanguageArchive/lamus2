@@ -22,6 +22,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
@@ -37,6 +38,7 @@ public class LamusPage extends WebPage {
 
     public LamusPage() {
         this("Lamus2 Language Archive Management and Upload System");
+	add(new FeedbackPanel("feedbackPanel"));
     }
 
     /**

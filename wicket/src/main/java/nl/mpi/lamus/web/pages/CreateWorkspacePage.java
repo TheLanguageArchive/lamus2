@@ -27,12 +27,14 @@ import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -101,9 +103,14 @@ public final class CreateWorkspacePage extends LamusPage {
 		final URI selectedNodeURI = form.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
 		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
-		// Show page for newly created workspace
-		final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
-		setResponsePage(resultPage);
+		if (createdWorkspace == null) {
+		    //TODO: This will probably be replaced with exception handling once they get thrown from the createWorkspace method
+		    Session.get().error("Workspace was not created");
+		} else {
+		    // Show page for newly created workspace
+		    final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
+		    setResponsePage(resultPage);
+		}
 	    }
 	};
 	form.add(submitButton);
