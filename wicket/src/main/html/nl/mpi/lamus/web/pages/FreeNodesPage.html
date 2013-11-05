@@ -17,22 +17,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns:wicket="http://wicket.apache.org">
-<head>
-    <title>Unlinked Files</title>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
-</head>
-<body>
-<wicket:extend>
-    <div>
-      <h4>Current unlinked files in the workspace:</h4>
-      <table>
-        <tr wicket:id="fileList">
-            <td width="200"><span wicket:id="file">(file)</span></td>
-            <td><a href="#" wicket:id="delete"><img wicket:id="image2" src="delete.gif" border="0"/></a></td>
-        </tr>
-      </table>
-    </div>
-    <!--<br/><div wicket:id="buttonpage" />-->
-    </wicket:extend>
-</body>
+    <head>
+        <title>Unlinked Files</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    </head>
+    <body>
+        <wicket:extend>
+            <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
+        </wicket:extend>
+    </body>
 </html>

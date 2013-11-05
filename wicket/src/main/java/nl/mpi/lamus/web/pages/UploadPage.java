@@ -17,32 +17,19 @@
 package nl.mpi.lamus.web.pages;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.LamusWicketApplication;
+import nl.mpi.lamus.web.components.UnlinkedNodesPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import org.apache.wicket.Application;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.apache.wicket.util.file.Files;
-import org.apache.wicket.util.file.Folder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,42 +50,7 @@ public class UploadPage extends WorkspacePage {
     
     private final IModel<Workspace> model;
     
-    /**
-     * List view for files in upload folder.
-     */
-    private class FileListView extends ListView<File> {
 
-        /**
-         * Construct.
-         *
-         * @param name Component name
-         * @param files The file list model
-         */
-        public FileListView(String name, final IModel<List<File>> files) {
-            super(name, files);
-        }
-
-        /**
-         * @see ListView#populateItem(ListItem) Add clickable icon to remove
-         * unwanted uploaded files
-         */
-        @Override
-        protected void populateItem(ListItem<File> listItem) {
-            final File file = listItem.getModelObject();
-            listItem.add(new Label("file", file.getName()));
-            Link link = new Link("delete") {
-
-                @Override
-                public void onClick() {
-                    Files.remove(file);
-                    info("Deleted " + file);
-                }
-            };
-            link.add(new Image("image2", DELETE_IMAGE_RESOURCE_REFERENCE));
-            listItem.add(link);
-        }
-    }
-    
     /**
      * Form for uploads.
      */
@@ -133,14 +85,18 @@ public class UploadPage extends WorkspacePage {
             if (uploads != null) {
                 for (FileUpload upload : uploads) {
                     // Create a new file
-                    File newFile = new File(getUploadFolder(UploadPage.this.model.getObject().getWorkspaceID()), upload.getClientFileName());
+//                    File newFile = new File(getUploadFolder(UploadPage.this.model.getObject().getWorkspaceID()), upload.getClientFileName());
 
-                    // Check new file, delete if it already existed
-                    checkFileExists(newFile);
+                    File newFile = new File(upload.getClientFileName());
+                    
+                    if(newFile.isDirectory()) {
+                        continue;
+                    }
+
                     try {
-                        // Save to new file
-                        newFile.createNewFile();
-                        upload.writeTo(newFile);
+                        
+                        workspaceService.uploadFileIntoWorkspace(
+                                LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
 
                         UploadPage.this.info("saved file: " + upload.getClientFileName());
                     } catch (Exception e) {
@@ -157,7 +113,7 @@ public class UploadPage extends WorkspacePage {
     /**
      * Reference to listview for easy access.
      */
-    private final FileListView fileListView;
+//    private final WorkspaceNodeListView nodeListView;
 
     /**
      * Constructor.
@@ -172,9 +128,6 @@ public class UploadPage extends WorkspacePage {
         
         final String currentUserID = LamusSession.get().getUserId();
 
-//        add(new ButtonPage("buttonpage", model));
-        File uploadFolder = getUploadFolder(this.model.getObject().getWorkspaceID());
-        
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
 
@@ -183,32 +136,11 @@ public class UploadPage extends WorkspacePage {
 
 
         // Add folder view
-        add(new Label("dir", uploadFolder.getAbsolutePath()));
-        fileListView = new FileListView("fileList", new LoadableDetachableModel<List<File>>() {
-            
-            @Override
-            protected List<File> load() {
-//                return Arrays.asList(getUploadFolder().listFiles());
-                
-                Collection<WorkspaceNode> unlinkedNodes =
-                        workspaceService.listUnlinkedNodes(currentUserID, UploadPage.this.model.getObject().getWorkspaceID());
-                
-                
-                //TODO change FileListView so that receives WorkspaceNodes and presents them as such
-                
-                List<File> filesList = new ArrayList<File>();
-                
-                for(WorkspaceNode node : unlinkedNodes) {
-                    File file = (node.getWorkspaceURL() != null ?
-                            new File(node.getWorkspaceURL().getPath()) :
-                            new File(node.getArchiveURL().getPath()));
-                    filesList.add(file);
-                }
-                
-                return filesList;
-            }
-        });
-        add(fileListView);
+     
+        add(new UnlinkedNodesPanel("unlinkedNodesPanel", model));
+        
+        
+        
 
         // Add upload form with progress bar that uses HTML <input type="file" multiple />, so it can upload
         // more than one file in browsers which support "multiple" attribute
@@ -218,28 +150,5 @@ public class UploadPage extends WorkspacePage {
                 progressUploadForm.fileUploadField));
         add(progressUploadForm);
     }
-  
-    /**
-     * Check whether the file allready exists, and if so, try to delete it.
-     *
-     * @param newFile the file to check
-     */
-    private void checkFileExists(File newFile) {
-        if (newFile.exists()) {
-            // Try to delete the file
-            if (!Files.remove(newFile)) {
-                throw new IllegalStateException("Unable to overwrite " + newFile.getAbsolutePath());
-            }
-        }
-    }
 
-    /**
-     * getter
-     *
-     * @return Folder folderPath
-     */
-    private File getUploadFolder(int workspaceID) {
-//        return ((LamusWicketApplication) Application.get()).getUploadFolder();
-        return workspaceService.getWorkspaceUploadDirectory(workspaceID);
-    }
 }

@@ -17,9 +17,11 @@
 package nl.mpi.lamus.web.model.mock;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -166,11 +168,6 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     }
 
     @Override
-    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -186,12 +183,17 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     }
 
     @Override
-    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
+    public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public File getWorkspaceUploadDirectory(int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
