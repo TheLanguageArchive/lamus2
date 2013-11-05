@@ -754,8 +754,7 @@ public class WorkspaceSteps {
             String handle = ((HandleCarrier) ref).getHandle();
             assertNotNull("Handle should not be null", handle);
             
-            URI refResolvedURI = this.identifierResolver.resolveIdentifier(document, ref.getURI());
-            URL refResolvedURL = refResolvedURI.toURL();
+            URL refResolvedURL = this.identifierResolver.resolveIdentifier(document, ref.getURI());
             File refResolvedFile = FileUtils.toFile(refResolvedURL);
             assertTrue("Child " + refResolvedURL + " does not exist in the expected location", refResolvedFile.exists());
         }
