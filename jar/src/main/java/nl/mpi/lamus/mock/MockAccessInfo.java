@@ -1,9 +1,11 @@
 package nl.mpi.lamus.mock;
 
-
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
 
 /*
  * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
@@ -21,93 +23,86 @@ import nl.mpi.archiving.corpusstructure.core.AccessInfo;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  * Mock implementation of the AccessInfo interface
+ *
  * @author guisil
  */
 public class MockAccessInfo implements AccessInfo {
 
     private int accessLevel = -1;
-    private String readRights = "NOBODY";
-    private String writeRights = "NOBODY";
+    private Collection<ArchiveUser> readRights = Collections.emptyList();
+    private Collection<ArchiveUser> writeRights = Collections.emptyList();
     private List<String> readUsers = new ArrayList<String>();
     private List<String> writeUsers = new ArrayList<String>();
-    
+
     public MockAccessInfo() {
-        
     }
-    
+
     @Override
     public int getAccessLevel() {
-        return this.accessLevel;
+	return this.accessLevel;
     }
 
     @Override
-    public String getReadRights() {
-        return this.readRights;
+    public Collection<ArchiveUser> getReadRights() {
+	return this.readRights;
     }
 
     @Override
-    public String getWriteRights() {
-        return writeRights;
+    public Collection<ArchiveUser> getWriteRights() {
+	return writeRights;
     }
 
     @Override
     public boolean hasReadAccess(String username) {
-        return readUsers.contains(username);
+	return readUsers.contains(username);
     }
 
     @Override
     public boolean hasWriteAccess(String username) {
-        return writeUsers.contains(username);
+	return writeUsers.contains(username);
     }
 
-    @Override
     public void setAccessLevel(int accessLevel) {
-        this.accessLevel = accessLevel;
+	this.accessLevel = accessLevel;
     }
 
-    @Override
-    public void setReadRights(String privs) {
+    public void setReadRights(Collection<ArchiveUser> privs) {
         this.readRights = privs;
     }
 
-    @Override
     public void setReadRule(String privs) {
-        // do nothing
+	// do nothing
     }
 
-    @Override
-    public void setReadUsers(List users) {
-        this.readUsers = users;
-        for(String user : (List<String>)users) {
-            if(!this.readRights.isEmpty()) {
-                this.readRights = this.readRights.concat(",");
-            }
-            this.readRights = this.readRights.concat(user);
-        }
+    public void setReadUsers(List<String> users) {
+	this.readUsers = users;
+	readRights = new ArrayList<ArchiveUser>(users.size());
+	for (final String user : users) {
+	    readRights.add(new ArchiveUser() {
+		@Override
+		public String getUid() {
+		    return user;
+		}
+	    });
+	}
     }
-
-    @Override
-    public void setWriteRights(String privs) {
+    
+    public void setWriteRights(Collection<ArchiveUser> privs) {
         this.writeRights = privs;
     }
 
-    @Override
-    public void setWriteRule(String privs) {
-        // do nothing
+    public void setWriteUsers(List<String> users) {
+	this.writeUsers = users;
+	writeRights = new ArrayList<ArchiveUser>(users.size());
+	for (final String user : users) {
+	    writeRights.add(new ArchiveUser() {
+		@Override
+		public String getUid() {
+		    return user;
+		}
+	    });
+	}
     }
-
-    @Override
-    public void setWriteUsers(List users) {
-        this.writeUsers = users;
-        for(String user : (List<String>)users) {
-            if(!this.writeRights.isEmpty()) {
-                this.writeRights = this.writeRights.concat(",");
-            }
-            this.writeRights = this.writeRights.concat(user);
-        }
-    }
-    
 }
