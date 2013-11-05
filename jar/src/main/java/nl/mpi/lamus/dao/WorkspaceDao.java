@@ -17,6 +17,7 @@ package nl.mpi.lamus.dao;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -170,9 +171,9 @@ public interface WorkspaceDao {
      * Retrieves a collection containing the nodes that have no parent
      * (unlinked nodes).
      * @param workspaceID ID of the workspace
-     * @return Collection of unlinked nodes in the workspace
+     * @return List of unlinked nodes in the workspace
      */
-    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID);
+    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID);
     
     /**
      * Updates the Workspace URL of the given node.

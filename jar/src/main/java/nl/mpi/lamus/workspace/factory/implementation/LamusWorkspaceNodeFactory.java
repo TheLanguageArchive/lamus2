@@ -70,11 +70,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document) {
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        node.setName(document.getDisplayValue());
-        node.setTitle(document.getDisplayValue());
+        node.setName(name);
+        node.setTitle(name);
         node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
         node.setFormat(""); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());

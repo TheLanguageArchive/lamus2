@@ -16,17 +16,20 @@
 package nl.mpi.lamus.service.implementation;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import org.apache.commons.fileupload.FileItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,19 +226,19 @@ public class LamusWorkspaceService implements WorkspaceService {
     /**
      * @see WorkspaceService#uploadFilesIntoWorkspace(java.lang.String, int, java.util.Collection)
      */
-    @Override
-    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
-        
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
-            
-            //TODO Inform the user of the reason why the files can't be uploaded
-            //TODO Throw an exception instead?
-            logger.error("Cannot upload files to workspace with ID " + workspaceID);
-        } else {
-        
-            this.workspaceUploader.uploadFiles(workspaceID, fileItems);
-        }
-    }
+//    @Override
+//    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
+//        
+//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+//            
+//            //TODO Inform the user of the reason why the files can't be uploaded
+//            //TODO Throw an exception instead?
+//            logger.error("Cannot upload files to workspace with ID " + workspaceID);
+//        } else {
+//        
+//            this.workspaceUploader.uploadFiles(workspaceID, fileItems);
+//        }
+//    }
 
     /**
      * @see WorkspaceService#getWorkspaceUploadDirectory(int)
@@ -246,10 +249,24 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
 
     /**
+     * @see WorkspaceService#uploadFileIntoWorkspace(java.lang.String, int, java.io.InputStream, java.lang.String)
+     */
+    @Override
+    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException {
+//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+//            
+//            throw new UnsupportedOperationException("not implemented yet");
+//        } else {
+            
+            this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
+//        }
+    }
+    
+    /**
      * @see WorkspaceService#listUnlinkedNodes(java.lang.String, int)
      */
     @Override
-    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
+    public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
         
 //        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
 //            
@@ -259,4 +276,5 @@ public class LamusWorkspaceService implements WorkspaceService {
             return this.workspaceDao.listUnlinkedNodes(workspaceID);
 //        }
     }
+    
 }

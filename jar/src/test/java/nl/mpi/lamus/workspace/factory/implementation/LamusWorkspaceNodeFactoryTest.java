@@ -117,15 +117,15 @@ public class LamusWorkspaceNodeFactoryTest {
         
         final URI nodeArchiveURI = topNodeArchiveURI;
         final URL nodeArchiveURL = topNodeArchiveURL;
-        final String displayValue = "someName";
+        final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
         final URI schemaLocation = new URI("http://some.location");
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY; //TODO change this
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(nodeName);
+        expectedNode.setTitle(nodeName);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
@@ -134,7 +134,7 @@ public class LamusWorkspaceNodeFactoryTest {
         context.checking(new Expectations() {{
         
 //            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getFileLocation(); will(returnValue(fileLocation));
-            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getDisplayValue(); will(returnValue(displayValue));
+//            exactly(2).of(mockTestReferencingMetadataDocumentHandleCarrier).getDisplayValue(); will(returnValue(nodeName));
             //TODO get type
             //TODO get format
             oneOf(mockTestReferencingMetadataDocumentHandleCarrier).getDocumentType(); will(returnValue(mockMetadataDocumentType));
@@ -142,7 +142,7 @@ public class LamusWorkspaceNodeFactoryTest {
         }});
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceMetadataNode(workspaceID, nodeArchiveURI, nodeArchiveURL,
-                mockTestReferencingMetadataDocumentHandleCarrier);
+                mockTestReferencingMetadataDocumentHandleCarrier, nodeName);
         
         assertEquals("Retrieved workspace node is different from expected", expectedNode, retrievedNode);
     }

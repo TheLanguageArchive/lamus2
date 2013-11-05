@@ -18,7 +18,6 @@ package nl.mpi.lamus.filesystem.implementation;
 import java.io.File;
 import java.io.IOException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
      * @see WorkspaceDirectoryHandler#createWorkspaceDirectory(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
-    public void createWorkspaceDirectory(int workspaceID) throws WorkspaceFilesystemException {
+    public void createWorkspaceDirectory(int workspaceID) throws IOException {
         
         logger.debug("Creating directory for workspace " + workspaceID);
         
@@ -62,7 +61,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
                 logger.info("Directory for workspace " + workspaceID + " successfully created");
             } else {
                 String errorMessage = "Directory for workspace " + workspaceID + " could not be created";
-                throw new WorkspaceFilesystemException(errorMessage, workspaceID, null);
+                throw new IOException(errorMessage);
             }
         }
     }
@@ -106,7 +105,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     }
     
     @Override
-    public void createUploadDirectoryForWorkspace(int workspaceID) throws WorkspaceFilesystemException {
+    public void createUploadDirectoryForWorkspace(int workspaceID) throws IOException {
         File workspaceUploadDirectory = getUploadDirectoryForWorkspace(workspaceID);
         
         if(workspaceUploadDirectory.exists()) {
@@ -116,7 +115,7 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
                 logger.info("Upload directory for workspace " + workspaceID + " successfully created");
             } else {
                 String errorMessage = "Upload directory for workspace " + workspaceID + " could not be created";
-                throw new WorkspaceFilesystemException(errorMessage, workspaceID, null);
+                throw new IOException(errorMessage);
             }
         }
     }

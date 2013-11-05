@@ -25,7 +25,6 @@ import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.util.DateTimeHelper;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -84,7 +83,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceDao.addWorkspace(newWorkspace);
         try {
             workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace.getWorkspaceID());
-        } catch(WorkspaceFilesystemException ex) {
+        } catch(IOException ex) {
             logger.error(ex.getMessage(), ex);
             return null;
         }

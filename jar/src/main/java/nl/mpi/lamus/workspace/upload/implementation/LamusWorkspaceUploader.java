@@ -22,16 +22,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -39,12 +36,10 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.util.OurURL;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -88,75 +83,126 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     /**
      * @see WorkspaceUploader#uploadFiles(int, java.util.Collection)
      */
+//    @Override
+//    public void uploadFiles(int workspaceID, Collection<FileItem> fileItems) {
+//        
+//        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
+//        File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+//        
+//        //TODO too much repetition... do this some other way?
+//        try {
+//            this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
+//        } catch (IOException ex) {
+//            throw new UnsupportedOperationException("exception not handled yet", ex);
+//        }
+//        
+//        for(FileItem item : fileItems) {
+//            
+//            String itemName = item.getName();
+//            
+//            File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, itemName);
+//            URL uploadedFileURL;
+//            OurURL uploadedFileOurURL;
+//            try {
+//                uploadedFileURL = uploadedFile.toURI().toURL();
+//                uploadedFileOurURL = new OurURL(uploadedFileURL);
+//            } catch (MalformedURLException ex) {
+//                throw new UnsupportedOperationException("exception not handled yet", ex);
+//            }
+//            
+//            InputStream itemInputStream;
+//            try {
+//                itemInputStream = item.getInputStream();
+//            } catch (IOException ex) {
+//                throw new UnsupportedOperationException("exception not handled yet", ex);
+//            }
+//            
+//            TypecheckedResults typecheckedResults;
+//            try {
+//                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(itemInputStream, itemName);
+//            } catch (TypeCheckerException ex) {
+//                throw new UnsupportedOperationException("exception not handled yet", ex);
+//            }
+//            
+////            this.nodeDataRetriever.verifyTypecheckedResults(uploadedFileOurURL, null, typecheckedResults);
+//            
+//            URL topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+//            
+//            File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
+//            TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
+//            StringBuilder message = new StringBuilder();
+//            boolean archivable = this.fileTypeHandler.isCheckedResourceArchivable(uploadedFileOurURL, acceptableJudgement, message);
+//            
+//            if(!archivable) {
+//                logger.error("File [" + item.getName() + "] not archivable: " + message);
+//                //TODO show this error also in some other way?
+//                continue;
+//            }
+//            try {
+//                item.write(uploadedFile);
+//            } catch (Exception ex) {
+//                throw new UnsupportedOperationException("exception not handled yet", ex);
+//            }
+//            
+//            WorkspaceNodeType nodeType = typecheckedResults.getCheckedNodeType();
+//            String nodeMimetype = typecheckedResults.getCheckedMimetype();
+//            
+//            WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
+//                    workspaceID, null, uploadedFileURL, nodeType, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+//            
+//            this.workspaceDao.addWorkspaceNode(uploadedNode);
+//        }
+//    }
+
     @Override
-    public void uploadFiles(int workspaceID, Collection<FileItem> fileItems) {
+    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStreamToCheck, String filename) throws IOException, TypeCheckerException {
         
-        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
-        //TODO too much repetition... do this some other way?
+        this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
+        
+        File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, filename);
+        URL uploadedFileURL;
+        OurURL uploadedFileOurURL;
         try {
-            this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
-        } catch (WorkspaceFilesystemException ex) {
+            uploadedFileURL = uploadedFile.toURI().toURL();
+//            uploadedFileOurURL = new OurURL(uploadedFileURL);
+        } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("exception not handled yet", ex);
         }
+
+            
         
-        for(FileItem item : fileItems) {
+        TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(inputStreamToCheck, filename);
+        
+        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
+        URL topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
             
-            String itemName = item.getName();
-            
-            File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, itemName);
-            URL uploadedFileURL;
-            OurURL uploadedFileOurURL;
-            try {
-                uploadedFileURL = uploadedFile.toURI().toURL();
-                uploadedFileOurURL = new OurURL(uploadedFileURL);
-            } catch (MalformedURLException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
-            }
-            
-            InputStream itemInputStream;
-            try {
-                itemInputStream = item.getInputStream();
-            } catch (IOException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
-            }
-            
-            TypecheckedResults typecheckedResults;
-            try {
-                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(itemInputStream, itemName);
-            } catch (TypeCheckerException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
-            }
-            
-//            this.nodeDataRetriever.verifyTypecheckedResults(uploadedFileOurURL, null, typecheckedResults);
-            
-            URL topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-            
-            File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
-            TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
-            StringBuilder message = new StringBuilder();
-            boolean archivable = this.fileTypeHandler.isResourceArchivable(uploadedFileOurURL, acceptableJudgement, message);
-            
-            if(!archivable) {
-                logger.error("File [" + item.getName() + "] not archivable: " + message);
-                //TODO show this error also in some other way?
-                continue;
-            }
-            try {
-                item.write(uploadedFile);
-            } catch (Exception ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
-            }
-            
-            WorkspaceNodeType nodeType = typecheckedResults.getCheckedNodeType();
-            String nodeMimetype = typecheckedResults.getCheckedMimetype();
-            
-            WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, null, uploadedFileURL, nodeType, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
-            
-            this.workspaceDao.addWorkspaceNode(uploadedNode);
+        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
+        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
+        
+        StringBuilder message = new StringBuilder();
+        boolean isArchivable = this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
+        
+        if(!isArchivable) {
+            logger.error("File [" + filename + "] not archivable: " + message);
+
+            throw new TypeCheckerException(message.toString(), null);
         }
+
+        FileUtils.copyInputStreamToFile(inputStreamToCheck, uploadedFile);
+            
+        WorkspaceNodeType nodeType = typecheckedResults.getCheckedNodeType();
+        String nodeMimetype = typecheckedResults.getCheckedMimetype();
+            
+        WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
+                workspaceID, null, uploadedFileURL, nodeType, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+
+        
+        this.workspaceDao.addWorkspaceNode(uploadedNode);
+        
+        
+        //TODO return something
     }
-    
+
 }

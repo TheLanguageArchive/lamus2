@@ -48,9 +48,10 @@ public interface WorkspaceNodeFactory {
      * @param archiveNodeURI archive URI of the node
      * @param archiveNodeURL archive URL of the node
      * @param document MetadataDocument object corresponding to the file
+     * @param name Name of the node
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document);
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name);
 
     /**
      * Creates a resource WorkspaceNode with the given values.

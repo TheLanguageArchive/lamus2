@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.tree.implementation;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -202,7 +203,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      * @see WorkspaceDao#listUnlinkedNodes(int)
      */
     @Override
-    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
+    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
         return this.getWorkspaceDao().listUnlinkedNodes(workspaceID);
     }
 

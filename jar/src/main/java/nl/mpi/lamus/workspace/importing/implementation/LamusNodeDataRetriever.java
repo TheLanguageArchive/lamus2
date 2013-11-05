@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -202,7 +203,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
      * @see NodeDataRetriever#triggerResourceFileCheck(java.io.InputStream, java.lang.String)
      */
     @Override
-    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException {
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws IOException {
         
         fileTypeHandler.checkType(resourceInputStream, resourceFilename, null);
         

@@ -16,6 +16,8 @@
 package nl.mpi.lamus.service.implementation;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -61,7 +65,10 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
     @Mock private File mockWorkspaceUploadDirectory;
-    @Mock private Collection<WorkspaceNode> mockUnlinkedNodesList;
+    @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
+    @Mock private InputStream mockInputStream;
+    @Mock private Collection<File> mockUploadedFiles;
+
     
     public LamusWorkspaceServiceTest() {
     }
@@ -310,22 +317,22 @@ public class LamusWorkspaceServiceTest {
         assertEquals("Returned list of nodes is different from expected", expectedChildNodes, retrievedChildNodes);
     }
     
-    @Test
-    public void uploadFileIntoWorkspaceWithAccess() {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        
-        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceUploader).uploadFiles(workspaceID, fileItems);
-        }});
-        
-        service.uploadFilesIntoWorkspace(userID, workspaceID, fileItems);
-    }
+//    @Test
+//    public void uploadFileIntoWorkspaceWithAccess() {
+//        
+//        final int workspaceID = 1;
+//        final String userID = "testUser";
+//        
+//        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+//            oneOf(mockWorkspaceUploader).uploadFiles(workspaceID, fileItems);
+//        }});
+//        
+//        service.uploadFilesIntoWorkspace(userID, workspaceID, fileItems);
+//    }
     
     //TODO uploadFileIntoWorkspaceWithoutAccess
     
@@ -343,6 +350,65 @@ public class LamusWorkspaceServiceTest {
         File result = service.getWorkspaceUploadDirectory(workspaceID);
         
         assertEquals("Retrieved directory different from expected", mockWorkspaceUploadDirectory, result);
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+        }});
+        
+        service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        final IOException ioException = new IOException("some error message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(throwException(ioException));
+        }});
+        
+        try {
+            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            assertEquals("Exception thrown different frome expected", ioException, ex);
+        }
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        final TypeCheckerException typeCheckerException = new TypeCheckerException("some error message", null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(throwException(typeCheckerException));
+        }});
+        
+        try {
+            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+            fail("An exception should have been thrown");
+        } catch(TypeCheckerException ex) {
+            assertEquals("Exception thrown different from expected", typeCheckerException, ex);
+        }
     }
     
     @Test

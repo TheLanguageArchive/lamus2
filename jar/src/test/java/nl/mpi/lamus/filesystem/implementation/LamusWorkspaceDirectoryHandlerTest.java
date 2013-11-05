@@ -86,7 +86,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
      * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
      */
     @Test
-    public void workspaceDirectoryHasToBeCreated() throws WorkspaceFilesystemException {
+    public void workspaceDirectoryHasToBeCreated() throws IOException {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -101,7 +101,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
      * Test of createWorkspaceDirectory method, of class WorkspaceFilesystemUtils.
      */
     @Test
-    public void workspaceDirectoryAlreadyExists() throws WorkspaceFilesystemException {
+    public void workspaceDirectoryAlreadyExists() throws IOException {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -117,7 +117,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     }
     
     @Test
-    public void throwsExceptionWhenWorkspaceDirectoryCreationFails() throws WorkspaceFilesystemException{
+    public void throwsExceptionWhenWorkspaceDirectoryCreationFails() throws IOException {
         
         Workspace testWorkspace = new LamusWorkspace("someUser", 0L, 10000000L);
         testWorkspace.setWorkspaceID(1);
@@ -128,8 +128,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         try {
             this.workspaceDirectoryHandler.createWorkspaceDirectory(testWorkspace.getWorkspaceID());
             fail("Exception was not thrown");
-        } catch(WorkspaceFilesystemException ex) {
-            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+        } catch(IOException ex) {
             assertEquals(errorMessage, ex.getMessage());
         }
 
@@ -224,7 +223,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     }
     
     @Test
-    public void uploadDirectoryForWorkspaceNeedsToBeCreated() throws WorkspaceFilesystemException {
+    public void uploadDirectoryForWorkspaceNeedsToBeCreated() throws IOException {
         
         int workspaceID = 1;
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -236,7 +235,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
     }
     
     @Test
-    public void uploadDirectoryForWorkspaceAlreadyExists() throws WorkspaceFilesystemException {
+    public void uploadDirectoryForWorkspaceAlreadyExists() throws IOException {
         
         int workspaceID = 1;
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
@@ -266,8 +265,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         try {
             this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
             fail("Exception was not thrown");
-        } catch(WorkspaceFilesystemException ex) {
-            assertEquals(workspaceID, ex.getWorkspaceID());
+        } catch(IOException ex) {
             assertEquals(errorMessage, ex.getMessage());
         }
 

@@ -81,7 +81,7 @@ public interface NodeDataRetriever {
     public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException;
     
     //TODO Should this replace the other method???
-    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws IOException;
     
     /**
      * Verifies the results of the typechecker.

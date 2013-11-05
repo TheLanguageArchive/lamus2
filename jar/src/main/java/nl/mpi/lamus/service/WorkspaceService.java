@@ -16,12 +16,15 @@
 package nl.mpi.lamus.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import org.apache.commons.fileupload.FileItem;
 
 /**
  *
@@ -128,8 +131,8 @@ public interface WorkspaceService extends Serializable {
      * @param workspaceID ID of the workspace
      * @param fileItems Files to be uploaded
      */
-    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
-    
+//    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
+
     /**
      * Returns the upload directory for the given workspace.
      * @param workspaceID ID of the workspace
@@ -138,11 +141,24 @@ public interface WorkspaceService extends Serializable {
     public File getWorkspaceUploadDirectory(int workspaceID);
     
     /**
+     * Given an InputStream and filename, upload the file into the workspace,
+     * in case it's archivable.
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @param inputStream InputStream to be uploaded
+     * @param filename name of the file to upload
+     * @throws IOException 
+     * @throws TypeCheckerException
+     */
+    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException;
+    
+    /**
      * Lists the unlinked nodes of the given workspace.
      * 
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
      * @return List of unlinked nodes
      */
-    public Collection<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID);
+    public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID);
+    
 }

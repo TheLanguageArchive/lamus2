@@ -195,7 +195,7 @@ public class LamusFileTypeHandler implements FileTypeHandler {
      * @see FileTypeHandler#checkType(java.io.InputStream, java.lang.String, java.lang.String)
      */
     @Override
-    public void checkType(InputStream resourceInputStream, String resourceFilename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException {
+    public void checkType(InputStream resourceInputStream, String resourceFilename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws IOException {
         
         if(mimetype == null) {
             this.mimetype = "Unknown";
@@ -258,7 +258,7 @@ public class LamusFileTypeHandler implements FileTypeHandler {
                     logger.warn(errorMessage);
                     this.mimetype = "Unknown";
                     this.analysis = "Read error for " + /*resourceURL*/ resourceFilename + " - " + ioe.getMessage();
-                    throw new TypeCheckerException(errorMessage, ioe);
+                    throw new IOException(errorMessage, ioe);
                 } //finally {
 //                    IOUtils.closeQuietly(iStream);
 //                }
@@ -364,29 +364,25 @@ public class LamusFileTypeHandler implements FileTypeHandler {
     }
     
     /**
-     * @see FileTypeHandler#isResourceArchivable(nl.mpi.util.OurURL, nl.mpi.lamus.typechecking.TypecheckerJudgement, java.lang.StringBuilder)
+     * @see FileTypeHandler#isCheckedResourceArchivable(nl.mpi.lamus.typechecking.TypecheckerJudgement, java.lang.StringBuilder)
      */
     @Override
-    public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForCorpus, StringBuilder message) {
+    public boolean isCheckedResourceArchivable(TypecheckerJudgement acceptableJudgementForCorpus, StringBuilder message) {
         
         boolean isArchivable = false;
         TypecheckerJudgement judgement = this.typecheckHandler.getTypecheckJudgement();
         
         if(judgement.compareTo(acceptableJudgementForCorpus) >= 0) {
             isArchivable = true;
-            message.append("Resource with URL '").
-                    append(resourceURL).
-                    append("' is archivable. Judgement '").
+            message.append("Resource is archivable. Judgement '").
                     append(judgement).
                     append("' acceptable.");
         } else {
-            message.append("Resource with URL '").
-                    append(resourceURL).
-                    append("' is archivable. Judgement '").
+            message.append("Resource is not archivable. Judgement '").
                     append(judgement).
-                    append("' not acceptable - minimum is ").
+                    append("' not acceptable - minimum is '").
                     append(acceptableJudgementForCorpus).
-                    append(".");
+                    append("'.");
         }
         return isArchivable;
     }

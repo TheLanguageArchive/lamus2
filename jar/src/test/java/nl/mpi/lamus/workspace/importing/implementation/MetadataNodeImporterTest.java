@@ -155,13 +155,13 @@ public class MetadataNodeImporterTest {
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final String testDisplayValue = "someName";
+        final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final URI testChildURI = new URI(UUID.randomUUID().toString());
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -172,11 +172,13 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(null, testChildNode, null);
@@ -198,13 +200,13 @@ public class MetadataNodeImporterTest {
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final String testDisplayValue = "someName";
+        final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final URI testChildURI = new URI(UUID.randomUUID().toString());
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -215,11 +217,13 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(null, testChildNode, null);
@@ -236,6 +240,7 @@ public class MetadataNodeImporterTest {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI(UUID.randomUUID().toString());
+        final String testChildName = "someName";
         
         final IOException expectedException = new IOException("this is an exception thrown by the method 'getMetadataDocument'");
         
@@ -248,6 +253,7 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -273,6 +279,7 @@ public class MetadataNodeImporterTest {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI(UUID.randomUUID().toString());
+        final String testChildName = "someName";
         
         final MetadataException expectedException = new MetadataException("this is an exception thrown by the method 'getMetadataDocument'");
         
@@ -285,6 +292,7 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
@@ -355,14 +363,14 @@ public class MetadataNodeImporterTest {
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
         final URI testChildURI = new URI(UUID.randomUUID().toString());
-        final String testDisplayValue = "someName";
+        final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -375,11 +383,13 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
@@ -407,14 +417,14 @@ public class MetadataNodeImporterTest {
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
         final URI testChildURI = new URI(UUID.randomUUID().toString());
-        final String testDisplayValue = "someName";
+        final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -427,11 +437,13 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
@@ -510,14 +522,14 @@ public class MetadataNodeImporterTest {
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
         final URI testChildURI = new URI(UUID.randomUUID().toString());
-        final String testDisplayValue = "someName";
+        final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -534,11 +546,13 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
             
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
 //            oneOf(mockNodeDataRetriever).getArchiveNodeMetadataDocument(testChildArchiveID);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
             oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);

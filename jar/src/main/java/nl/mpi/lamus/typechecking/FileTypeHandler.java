@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.typechecking;
 
+import java.io.IOException;
 import java.io.InputStream;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -72,7 +73,7 @@ public interface FileTypeHandler {
     public void checkType(OurURL resourceURL, String filename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException;
     
     //TODO Should this replace the other method???
-    public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws TypeCheckerException;
+    public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws IOException;
     
     /**
      * Stores the outcome of calculateCV, or override it, as done by DataMoverIn
@@ -81,14 +82,13 @@ public interface FileTypeHandler {
     public void setValues(String mimetype);
     
     /**
-     * Checks if the resource is archivable, given an acceptable judgement
-     * for the archive location where it would be archived
-     * @param resourceURL URL of the resource
+     * Checks if the resource is archivable by comparing a given acceptable judgement
+     * for the archive location where it would be archived and the previously typecheck results.
      * @param acceptableJudgementForNode Acceptable judgement for the archive location
      * @param message Message to be built according to the results of the method
      * @return true if the judgement for the given resource is within the acceptable values
      */
-    public boolean isResourceArchivable(OurURL resourceURL, TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
+    public boolean isCheckedResourceArchivable(TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
     
     /**
      * Getter for the typechecked results of the resource

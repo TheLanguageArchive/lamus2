@@ -17,7 +17,6 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import java.io.IOException;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -33,7 +32,7 @@ public interface WorkspaceDirectoryHandler {
      * @param workspaceID ID of the workspace for which the directory should be created
      * @throws FailedToCreateWorkspaceDirectoryException if the directory creation fails
      */
-    public void createWorkspaceDirectory(int workspaceID) throws WorkspaceFilesystemException;
+    public void createWorkspaceDirectory(int workspaceID) throws IOException;
     
     /**
      * Deletes the directory for the given workspace.
@@ -54,5 +53,5 @@ public interface WorkspaceDirectoryHandler {
     
     public File getUploadDirectoryForWorkspace(int workspaceID);
     
-    public void createUploadDirectoryForWorkspace(int workspaceID) throws WorkspaceFilesystemException;
+    public void createUploadDirectoryForWorkspace(int workspaceID) throws IOException;
 }

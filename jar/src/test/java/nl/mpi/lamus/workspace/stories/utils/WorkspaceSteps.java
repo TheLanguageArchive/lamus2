@@ -525,9 +525,11 @@ public class WorkspaceSteps {
         Collection<FileItem> fileItems = new ArrayList<FileItem>();
         fileItems.add(fileItem);
         
-        this.workspaceService.uploadFilesIntoWorkspace(this.currentUserID, this.createdWorkspaceID, fileItems);
+//        this.workspaceService.uploadFilesIntoWorkspace(this.currentUserID, this.createdWorkspaceID, fileItems);
+//        
+//        this.uploadedFileInOriginalLocation = fileLocationToUpload;
         
-        this.uploadedFileInOriginalLocation = fileLocationToUpload;
+        throw new UnsupportedOperationException("Adjust this story to cope with the refactored methods");
     }
     
     @When("that user chooses to link the uploaded node to the top node of the workspace")

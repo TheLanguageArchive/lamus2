@@ -29,7 +29,6 @@ import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.util.DateTimeHelper;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -90,7 +89,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void createWorkspaceSuccessfully() throws WorkspaceFilesystemException, InterruptedException, ExecutionException, URISyntaxException {
+    public void createWorkspaceSuccessfully() throws InterruptedException, ExecutionException, URISyntaxException, IOException {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final int workspaceID = 10;
         final String userID = "someUser";
@@ -132,7 +131,7 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void creationOfWorkspaceDirectoryFails() throws WorkspaceFilesystemException, URISyntaxException {
+    public void creationOfWorkspaceDirectoryFails() throws URISyntaxException, IOException {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
@@ -144,7 +143,7 @@ public class LamusWorkspaceManagerTest {
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
-                will(throwException(new WorkspaceFilesystemException(errorMessage, newWorkspace.getWorkspaceID(), null)));
+                will(throwException(new IOException(errorMessage)));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeURI);

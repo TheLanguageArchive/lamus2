@@ -17,7 +17,10 @@
 package nl.mpi.lamus.workspace.upload;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
+import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import org.apache.commons.fileupload.FileItem;
 
 /**
@@ -38,5 +41,17 @@ public interface WorkspaceUploader {
      * @param workspaceID ID of the workspace
      * @param fileItems Collection of file items to be uploaded
      */
-    public void uploadFiles(int workspaceID, Collection<FileItem> fileItems);
+//    public void uploadFiles(int workspaceID, Collection<FileItem> fileItems);
+    
+    /**
+     * Given an InputStream and the filename, this method triggers a
+     * typecheck and uploads the file, if archivable.
+     * @param workspaceID ID of the workspace
+     * @param inputStream InputStream to upload
+     * @param filename name of the file to upload
+     * @throws IOException 
+     * @throws TypeCheckerException 
+     */
+    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException;
+    
 }

@@ -287,22 +287,40 @@ public class LamusFileTypeHandlerTest {
     }
     
     @Test
-    public void isResourceArchivable() throws MalformedURLException {
+    public void checkedResourceIsArchivable() {
         
         final TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        OurURL testURL = new OurURL("http://resource.imdi");
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
         StringBuilder message = new StringBuilder();
-        String expectedMessage = "Resource with URL '" + testURL 
-                    + "' is archivable. Judgement '" + expectedJudgement + "' acceptable.";
+        String expectedMessage = "Resource is archivable. Judgement '" + expectedJudgement + "' acceptable.";
         
         context.checking(new Expectations() {{
             
             oneOf(mockTypecheckHandler).getTypecheckJudgement(); will(returnValue(expectedJudgement));
         }});
         
-        boolean isArchivable = fileTypeHandler.isResourceArchivable(testURL, TypecheckerJudgement.ARCHIVABLE_LONGTERM, message);
+        boolean isArchivable = fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
         
-        assertTrue(isArchivable);
+        assertTrue("Result should have been true", isArchivable);
         assertEquals(message.toString(), expectedMessage);
+    }
+    
+    @Test
+    public void checkedResourceIsNotArchivable() {
+        
+        final TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
+        StringBuilder message = new StringBuilder();
+        String expectedMessage = "Resource is not archivable. Judgement '" + expectedJudgement + "' not acceptable - minimum is '" + acceptableJudgement + "'.";
+        
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockTypecheckHandler).getTypecheckJudgement(); will(returnValue(expectedJudgement));
+        }});
+        
+        boolean isArchivable = fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
+        
+        assertFalse("Result should have been false", isArchivable);
     }
 }

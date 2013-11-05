@@ -126,6 +126,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         
         URL childArchiveURL;
+        String childName;
         
         MetadataDocument childDocument;
         try {
@@ -135,6 +136,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             
             CorpusNode childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
             childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+            childName = childCorpusNode.getName();
             
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 //            childDocument = nodeDataRetriever.getArchiveNodeMetadataDocument(childNodeArchiveID);
@@ -155,7 +157,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         WorkspaceNode childNode;
 //        try {
-            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument);
+            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName);
 //        } catch (MalformedURLException muex) {
 //            String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
 //            logger.error(errorMessage, muex);

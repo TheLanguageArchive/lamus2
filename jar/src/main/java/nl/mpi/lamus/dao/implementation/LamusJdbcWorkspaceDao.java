@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -584,7 +585,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      * @see WorkspaceDao#listUnlinkedNodes(int)
      */
     @Override
-    public Collection<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
+    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
         
         logger.debug("Retrieving list containing unlinked nodes of the workspace with ID: " + workspaceID);
         
@@ -595,7 +596,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("workspace_id", workspaceID)
                 .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
         
-        Collection<WorkspaceNode> listToReturn =
+        List<WorkspaceNode> listToReturn =
                 this.namedParameterJdbcTemplate.query(queryUnlinkedNodeListSql, namedParameters, new WorkspaceNodeMapper());
         
         return listToReturn;

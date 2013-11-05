@@ -1079,7 +1079,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL unlinkedURL = new URL("file:/archive/folder/unlinkednode.cmdi");
         WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, Boolean.TRUE);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        List<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("List of unlinked nodes should not be null", result);
         assertTrue("List of unlinked nodes has a different size than what was expected", result.size() == 1);
@@ -1102,7 +1102,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        List<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("List of unlinked nodes should not be null", result);
         assertTrue("List of unlinked nodes has a different size than what was expected", result.isEmpty());

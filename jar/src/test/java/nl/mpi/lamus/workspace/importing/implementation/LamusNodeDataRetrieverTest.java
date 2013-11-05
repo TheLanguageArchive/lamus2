@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -97,6 +98,8 @@ public class LamusNodeDataRetrieverTest {
     @Mock TypecheckedResults mockTypecheckedResults;
     @Mock CorpusNode mockCorpusNode;
     @Mock WorkspaceNode mockWorkspaceNode;
+    
+    @Mock InputStream mockInputStream;
     
     public LamusNodeDataRetrieverTest() {
     }
@@ -300,6 +303,45 @@ public class LamusNodeDataRetrieverTest {
     
     //TODO test remaining method
     //TODO Is this really necessary?
+    
+    
+    
+    @Test
+    public void testTriggerFileStreamCheck() throws IOException {
+        
+        final String filename = "file.txt";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename, null);
+            oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
+        }});
+        
+        TypecheckedResults results = testNodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+        assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
+    }
+
+    @Test
+    public void testTriggerFileStreamCheckThrowsException() throws IOException {
+        
+        final String filename = "file.txt";
+        final IOException ioException = new IOException("some error message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename, null);
+                will(throwException(ioException));
+        }});
+        
+        try {
+            testNodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            assertEquals("Exception thrown different from expected", ioException, ex);
+        }
+        
+    }
+    
     
 //    @Test
 //    public void testVerifyTypecheckedResults() throws MalformedURLException {
