@@ -56,10 +56,10 @@ public class LamusBeans {
         return new FileType();
     }
     
-    private AccessInfo defaultAccessInfo;
+    private MockAccessInfo defaultAccessInfo;
     
     @Bean
-    public AccessInfo defaultAccessInfo() {
+    public MockAccessInfo defaultAccessInfo() {
         
         if(this.defaultAccessInfo == null) {
             this.defaultAccessInfo = new MockAccessInfo();

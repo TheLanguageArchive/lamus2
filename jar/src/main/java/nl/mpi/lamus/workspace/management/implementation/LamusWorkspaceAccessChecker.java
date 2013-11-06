@@ -25,6 +25,7 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.mock.MockAccessInfo;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.commons.beanutils.BeanUtils;
@@ -51,7 +52,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private final WorkspaceDao workspaceDao;
     
     @Autowired
-    private AccessInfo defaultAccessInfo;
+    private MockAccessInfo defaultAccessInfo;
     
     @Autowired
     public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
@@ -135,9 +136,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         users.add(userID);
         
 //        AccessInfo defaultAccessRights = AccessInfo.create(AccessInfo.NOBODY, AccessInfo.NOBODY, AccessInfo.ACCESS_LEVEL_NONE);
-        AccessInfo defaultAccessRights = null;
+        MockAccessInfo defaultAccessRights = null;
         try {
-            defaultAccessRights = (AccessInfo) BeanUtils.cloneBean(this.defaultAccessInfo);
+            defaultAccessRights = (MockAccessInfo) BeanUtils.cloneBean(this.defaultAccessInfo);
             defaultAccessRights.setReadUsers(users);
             defaultAccessRights.setWriteUsers(users);
         } catch (IllegalAccessException ex) {
