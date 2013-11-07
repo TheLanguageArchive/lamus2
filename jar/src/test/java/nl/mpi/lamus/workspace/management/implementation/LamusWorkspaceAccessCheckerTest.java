@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.AccessLevel;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -252,7 +253,7 @@ public class LamusWorkspaceAccessCheckerTest {
         
         AccessInfo result = nodeAccessChecker.getDefaultAccessInfoForUser(username);
         
-        assertEquals("Default access level value different from expected", AccessInfo.ACCESS_LEVEL_NONE, result.getAccessLevel());
+        assertEquals("Default access level value different from expected", AccessLevel.ACCESS_LEVEL_UNKNOWN, result.getAccessLevel());
         assertTrue("Default read rights different from expected", result.getReadRights().contains(username));
         assertTrue("Default write rights different from expected", result.getWriteRights().contains(username));
     }

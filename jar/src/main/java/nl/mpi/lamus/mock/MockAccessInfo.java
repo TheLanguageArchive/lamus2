@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.AccessInfo;
+import nl.mpi.archiving.corpusstructure.core.AccessLevel;
 import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
 
 /*
@@ -30,7 +31,7 @@ import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
  */
 public class MockAccessInfo implements AccessInfo {
 
-    private int accessLevel = -1;
+    private AccessLevel accessLevel = AccessLevel.ACCESS_LEVEL_UNKNOWN;
     private Collection<ArchiveUser> readRights = Collections.emptyList();
     private Collection<ArchiveUser> writeRights = Collections.emptyList();
     private List<String> readUsers = new ArrayList<String>();
@@ -40,7 +41,7 @@ public class MockAccessInfo implements AccessInfo {
     }
 
     @Override
-    public int getAccessLevel() {
+    public AccessLevel getAccessLevel() {
 	return this.accessLevel;
     }
 
@@ -64,7 +65,7 @@ public class MockAccessInfo implements AccessInfo {
 	return writeUsers.contains(username);
     }
 
-    public void setAccessLevel(int accessLevel) {
+    public void setAccessLevel(AccessLevel accessLevel) {
 	this.accessLevel = accessLevel;
     }
 
