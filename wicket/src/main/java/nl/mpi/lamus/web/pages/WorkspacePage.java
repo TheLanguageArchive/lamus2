@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.util.Collection;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
@@ -51,6 +52,9 @@ public class WorkspacePage extends LamusPage {
     private final Form nodeIdForm;
     private ArchiveTreePanel wsTreePanel;
     private final WsTreeNodeActionsPanel wsNodeActionsPanel;
+    
+    //TODO Make it possible to have multiple selection
+    private WorkspaceTreeNode selectedNode;
 
     public WorkspacePage(final IModel<Workspace> model) {
 	super();
@@ -66,8 +70,7 @@ public class WorkspacePage extends LamusPage {
 	wsNodeActionsPanel = new WsTreeNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
 	    @Override
 	    public void refreshStuff() {
-		wsTreePanel = createWorkspaceTreePanel("workspaceTree");
-		WorkspacePage.this.addOrReplace(wsTreePanel);
+		WorkspacePage.this.refreshStuff();
 	    }
             
 	};
@@ -91,8 +94,13 @@ public class WorkspacePage extends LamusPage {
 	treePanel.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
 	    @Override
 	    public void nodeSelectionChanged(AjaxRequestTarget target, ArchiveTreePanel treePanel) {
-		final WorkspaceTreeNode node = (WorkspaceTreeNode) treePanel.getSelectedNodes().iterator().next();
-		nodeIdForm.setModel(new CompoundPropertyModel<WorkspaceTreeNode>(node));
+		
+                final WorkspaceTreeNode node = (WorkspaceTreeNode) treePanel.getSelectedNodes().iterator().next();
+                
+                setSelectedNode(node);
+		
+                
+                nodeIdForm.setModel(new CompoundPropertyModel<WorkspaceTreeNode>(node));
 		wsNodeActionsPanel.setModelObject(wsTreePanel.getSelectedNodes());
 
 		if (target != null) {
@@ -140,5 +148,18 @@ public class WorkspacePage extends LamusPage {
 	add(formContainer);
 
 	return form;
+    }
+    
+    protected WorkspaceTreeNode getSelectedNode() {
+        return this.selectedNode;
+    }
+    
+    private void setSelectedNode(WorkspaceTreeNode selectedNode) {
+        this.selectedNode = selectedNode;
+    }
+    
+    protected void refreshStuff() {
+        wsTreePanel = createWorkspaceTreePanel("workspaceTree");
+        addOrReplace(wsTreePanel);
     }
 }

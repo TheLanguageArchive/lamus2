@@ -56,7 +56,7 @@ public final class ButtonPage extends Panel {
                 @Override
                 public void onSubmit() {
                     final UploadPage resultPage = new UploadPage(model);
-		setResponsePage(resultPage);
+                    setResponsePage(resultPage);
                 }
             };
             add(uploadFilesButton);
@@ -75,10 +75,20 @@ public final class ButtonPage extends Panel {
                 @Override
                 public void onSubmit() {
                     final FreeNodesPage resultPage = new FreeNodesPage(model);
-		setResponsePage(resultPage);
+                    setResponsePage(resultPage);
                 }
             };
             add(unlinkedFilesButton);
+            
+            final Button linkNodesButton = new Button("linkNodesButton") {
+
+                @Override
+                public void onSubmit() {
+                    final LinkNodesPage resultPage = new LinkNodesPage(model);
+                    setResponsePage(resultPage);
+                }
+            };
+            add(linkNodesButton);
             
             final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {
                 
@@ -97,7 +107,7 @@ public final class ButtonPage extends Panel {
                 @Override
                 public void onSubmit() {
                     final IndexPage resultPage = new IndexPage();
-		setResponsePage(resultPage);
+                    setResponsePage(resultPage);
                 }
             };
             add(indexPageButton);

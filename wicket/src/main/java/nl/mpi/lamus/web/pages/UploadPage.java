@@ -126,7 +126,7 @@ public class UploadPage extends WorkspacePage {
         
         this.model = model;
         
-        final String currentUserID = LamusSession.get().getUserId();
+//        final String currentUserID = LamusSession.get().getUserId();
 
         // Create feedback panels
         final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
