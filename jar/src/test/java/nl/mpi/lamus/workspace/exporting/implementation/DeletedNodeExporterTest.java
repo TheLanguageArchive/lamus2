@@ -24,7 +24,6 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
@@ -58,7 +57,6 @@ public class DeletedNodeExporterTest {
     
     @Mock TrashCanHandler mockTrashCanHandler;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock CorpusstructureWriter mockCorpusstructureWriter;
     @Mock SearchClientBridge mockSearchClientBridge;
     
     @Mock WorkspaceNode mockWorkspaceNode;
@@ -78,8 +76,7 @@ public class DeletedNodeExporterTest {
     @Before
     public void setUp() {
         deletedNodeExporter = new DeletedNodeExporter(mockTrashCanHandler,
-                mockCorpusStructureProvider, mockCorpusstructureWriter,
-                mockSearchClientBridge);
+                mockCorpusStructureProvider, mockSearchClientBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -125,7 +122,7 @@ public class DeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
             
-            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
+//            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);

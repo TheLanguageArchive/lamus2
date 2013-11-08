@@ -17,15 +17,12 @@
 package nl.mpi.lamus.workspace.actions;
 
 import java.io.Serializable;
-import java.util.Collection;
-import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Based on the NodeAction interface of the Metadata Browser
- * 
+ *
  * @author guisil
  */
-public interface WsTreeNodesAction extends WsNodesAction {
+public interface WsNodesAction extends Serializable {
     
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes);
+    public String getName();
 }

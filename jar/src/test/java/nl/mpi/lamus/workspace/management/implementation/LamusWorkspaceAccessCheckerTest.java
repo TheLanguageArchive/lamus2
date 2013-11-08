@@ -254,7 +254,7 @@ public class LamusWorkspaceAccessCheckerTest {
         AccessInfo result = nodeAccessChecker.getDefaultAccessInfoForUser(username);
         
         assertEquals("Default access level value different from expected", AccessLevel.ACCESS_LEVEL_UNKNOWN, result.getAccessLevel());
-        assertTrue("Default read rights different from expected", result.getReadRights().contains(username));
-        assertTrue("Default write rights different from expected", result.getWriteRights().contains(username));
+        assertTrue("Default read rights different from expected", result.hasReadAccess(username));
+        assertTrue("Default write rights different from expected", result.hasWriteAccess(username));
     }
 }

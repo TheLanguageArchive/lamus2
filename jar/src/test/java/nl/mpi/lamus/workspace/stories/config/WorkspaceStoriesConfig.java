@@ -29,14 +29,12 @@ import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
-import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWrite;
 import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
-import nl.mpi.lamus.mock.MockCorpusstructureWriter;
 import nl.mpi.lamus.workspace.stories.utils.WorkspaceStepsCorpusStructureProviderFactory;
 import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
 import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
@@ -151,18 +149,6 @@ public class WorkspaceStoriesConfig {
         }
         return nodeResolver;
     }
-    
-    private CorpusstructureWriter corpusstructureWriter;
-    
-    @Bean
-    public CorpusstructureWriter corpusstructureWriter() {
-        
-        if(corpusstructureWriter == null) {
-            corpusstructureWriter = new MockCorpusstructureWriter();
-        }
-        return corpusstructureWriter;
-    }
-    
     
     @Bean
     @Qualifier("ArchiveObjectsDB")

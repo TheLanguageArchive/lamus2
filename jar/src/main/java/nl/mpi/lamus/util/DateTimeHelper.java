@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.util;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -23,7 +24,7 @@ import java.util.Date;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface DateTimeHelper {
+public interface DateTimeHelper extends Serializable {
     
     /**
      * @return a Date object representing the current date and time

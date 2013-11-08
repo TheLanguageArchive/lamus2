@@ -15,14 +15,10 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
@@ -41,18 +37,15 @@ public class DeletedNodeExporter implements NodeExporter {
 
     private final TrashCanHandler trashCanHandler;
     private final CorpusStructureProvider corpusStructureProvider;
-    private final CorpusstructureWriter corpusstructureWriter;
     private final SearchClientBridge searchClientBridge;
     
     private Workspace workspace;
     
     public DeletedNodeExporter(TrashCanHandler trashCanHandler,
-            CorpusStructureProvider csProvider, CorpusstructureWriter csWriter,
-            SearchClientBridge sClientBridge) {
+            CorpusStructureProvider csProvider, SearchClientBridge sClientBridge) {
 
         this.trashCanHandler = trashCanHandler;
         this.corpusStructureProvider = csProvider;
-        this.corpusstructureWriter = csWriter;
         this.searchClientBridge = sClientBridge;
     }
     
@@ -91,7 +84,7 @@ public class DeletedNodeExporter implements NodeExporter {
         }
         
         //TODO Is this needed? Isn't LAMUS only supposed to change things in the filesystem, leaving the database changes for the crawler?
-        this.corpusstructureWriter.deleteNode(node);
+//        this.corpusstructureWriter.deleteNode(node);
         
         searchClientBridge.removeNode(currentNode.getArchiveURI());
         

@@ -30,12 +30,15 @@ public class LamusNodeTypeMapper implements NodeTypeMapper {
 
     //TODO do this in some better way
     private final Collection<String> writtenResourcesMimetypes;
+    private final Collection<String> mediaResourcesMimetypes;
     
     public LamusNodeTypeMapper() {
         writtenResourcesMimetypes = new ArrayList<String>();
         writtenResourcesMimetypes.add("text/plain");
         writtenResourcesMimetypes.add("application/pdf");
         
+        mediaResourcesMimetypes = new ArrayList<String>();
+        mediaResourcesMimetypes.add("image/jpeg");
         //TODO other types... do this in some better way
     }
     
@@ -48,6 +51,9 @@ public class LamusNodeTypeMapper implements NodeTypeMapper {
         
         if(writtenResourcesMimetypes.contains(mimetype)) { // THIS IS JUST A MOCK EXAMPLE
             return WorkspaceNodeType.RESOURCE_WR;
+        }
+        if(mediaResourcesMimetypes.contains(mimetype)) {
+            return WorkspaceNodeType.RESOURCE_MR;
         }
         
         return WorkspaceNodeType.UNKNOWN;

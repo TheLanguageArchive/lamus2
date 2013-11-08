@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import java.io.Serializable;
 import java.net.URI;
 import nl.mpi.lamus.workspace.model.Workspace;
 
@@ -23,7 +24,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceManager {
+public interface WorkspaceManager extends Serializable {
     
     /**
      * Triggers the creation of a workspace 

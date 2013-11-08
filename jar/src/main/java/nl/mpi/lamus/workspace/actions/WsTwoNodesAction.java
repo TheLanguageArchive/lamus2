@@ -16,16 +16,14 @@
  */
 package nl.mpi.lamus.workspace.actions;
 
-import java.io.Serializable;
 import java.util.Collection;
-import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- * Based on the NodeAction interface of the Metadata Browser
- * 
+ *
  * @author guisil
  */
-public interface WsTreeNodesAction extends WsNodesAction {
+public interface WsTwoNodesAction extends WsNodesAction {
     
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes);
+    public void execute(String userID, WorkspaceNode selectedNode, Collection<WorkspaceNode> otherNodes);
 }

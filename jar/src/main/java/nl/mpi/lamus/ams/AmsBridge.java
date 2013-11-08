@@ -1,5 +1,6 @@
 package nl.mpi.lamus.ams;
 
+import java.io.Serializable;
 import java.net.URI;
 
 /**
@@ -13,7 +14,7 @@ import java.net.URI;
  * @author	last modified by $Author$, created by mategg
  * @version	$Revision$
  */
-public interface AmsBridge {
+public interface AmsBridge extends Serializable {
 	
 	/**
 	 * contract from original ams1 impl: default value for storagespace getters

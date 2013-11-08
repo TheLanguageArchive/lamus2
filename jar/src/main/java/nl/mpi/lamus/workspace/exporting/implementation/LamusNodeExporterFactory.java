@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -47,9 +46,6 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     @Autowired
     private CorpusStructureProvider corpusStructureProvider;
-    
-    @Autowired
-    private CorpusstructureWriter corpusstructureWriter;
     
     @Autowired
     private SearchClientBridge searchClientBridge;
@@ -114,7 +110,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private NodeExporter getDeletedNodeExporter(Workspace workspace) {
         if(deletedNodeExporter == null) {
             deletedNodeExporter = new DeletedNodeExporter(trashCanHandler,
-                    corpusStructureProvider, corpusstructureWriter, searchClientBridge);
+                    corpusStructureProvider, searchClientBridge);
         }
         deletedNodeExporter.setWorkspace(workspace);
         return deletedNodeExporter;

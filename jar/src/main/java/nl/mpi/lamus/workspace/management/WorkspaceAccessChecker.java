@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import java.io.Serializable;
 import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 
@@ -23,7 +24,7 @@ import nl.mpi.archiving.corpusstructure.core.AccessInfo;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceAccessChecker {
+public interface WorkspaceAccessChecker extends Serializable {
 
     /**
      * Checks if a given user has write access to the given archive node.

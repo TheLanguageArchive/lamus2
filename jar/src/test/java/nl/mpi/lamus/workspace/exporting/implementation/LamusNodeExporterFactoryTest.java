@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.writer.CorpusstructureWriter;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -58,7 +57,6 @@ public class LamusNodeExporterFactoryTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock CorpusstructureWriter mockCorpusstructureWriter;
     @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock SearchClientBridge mockSearchClientBridge;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;

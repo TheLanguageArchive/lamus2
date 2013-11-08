@@ -1,5 +1,6 @@
 package nl.mpi.lamus.mock;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +30,7 @@ import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
  *
  * @author guisil
  */
-public class MockAccessInfo implements AccessInfo {
+public class MockAccessInfo implements AccessInfo, Serializable {
 
     private AccessLevel accessLevel = AccessLevel.ACCESS_LEVEL_UNKNOWN;
     private Collection<ArchiveUser> readRights = Collections.emptyList();
