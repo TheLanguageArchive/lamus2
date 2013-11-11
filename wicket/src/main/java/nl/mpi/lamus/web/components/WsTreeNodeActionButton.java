@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
+import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -32,17 +33,19 @@ public class WsTreeNodeActionButton extends Button {
     
     private final Collection<WorkspaceTreeNode> nodes;
     private final WsTreeNodesAction action;
+    private WorkspaceService workspaceService;
     
-    public WsTreeNodeActionButton(String id, Collection<WorkspaceTreeNode> nodes, WsTreeNodesAction action) {
+    public WsTreeNodeActionButton(String id, Collection<WorkspaceTreeNode> nodes, WsTreeNodesAction action, WorkspaceService wsService) {
         super(id, new Model<String>(action.getName()));
         this.nodes = nodes;
         this.action = action;
+        this.workspaceService = wsService;
     }
     
     @Override
     public void onSubmit() {
         final String currentUserId = LamusSession.get().getUserId();
-        this.action.execute(currentUserId, this.nodes);
+        this.action.execute(currentUserId, this.nodes, this.workspaceService);
         
         refreshStuff();
     }

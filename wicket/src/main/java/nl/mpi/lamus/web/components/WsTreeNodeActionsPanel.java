@@ -95,7 +95,9 @@ public class WsTreeNodeActionsPanel extends GenericPanel<Collection<WorkspaceTre
             @Override
             protected void populateItem(ListItem<WsTreeNodesAction> li) {
                 
-                li.add(new WsTreeNodeActionButton("nodeActionButton", WsTreeNodeActionsPanel.this.getModelObject(), li.getModelObject()) {
+                li.add(new WsTreeNodeActionButton(
+                        "nodeActionButton", WsTreeNodeActionsPanel.this.getModelObject(), li.getModelObject(),
+                        WsTreeNodeActionsPanel.this.workspaceService) {
 
                     @Override
                     public void refreshStuff() {

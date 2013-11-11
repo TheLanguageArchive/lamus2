@@ -17,7 +17,6 @@
 package nl.mpi.lamus.web.pages;
 
 import java.util.Collection;
-import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.LinkNodesPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
@@ -27,16 +26,12 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  *
  * @author guisil
  */
 public class LinkNodesPage extends WorkspacePage {
-    
-    @SpringBean
-    private WorkspaceService workspaceService;
     
     private final IModel<Workspace> model;
     
@@ -54,7 +49,7 @@ public class LinkNodesPage extends WorkspacePage {
 
             @Override
             protected LinkNodesAction load() {
-                return new LinkNodesAction(workspaceService);
+                return new LinkNodesAction(workspaceTreeService);
             }
             
             

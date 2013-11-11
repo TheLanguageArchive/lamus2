@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import java.util.Collection;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
@@ -44,7 +43,7 @@ public class WorkspacePage extends LamusPage {
 
     // Services to be injected
     @SpringBean
-    private WorkspaceTreeService workspaceTreeService;
+    protected WorkspaceTreeService workspaceTreeService;
     @SpringBean(name = "workspaceTreeProviderFactory")
     private WorkspaceTreeModelProviderFactory workspaceTreeProviderFactory;
     // Page model
