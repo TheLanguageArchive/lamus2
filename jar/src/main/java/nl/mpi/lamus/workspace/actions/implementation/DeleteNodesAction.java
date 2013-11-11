@@ -29,11 +29,6 @@ public class DeleteNodesAction implements WsTreeNodesAction {
 
     private final String name = "Delete";
     
-    private final WorkspaceService workspaceService;
-    
-    public DeleteNodesAction(WorkspaceService wsService) {
-        this.workspaceService = wsService;
-    }
 
     @Override
     public String getName() {
@@ -41,9 +36,9 @@ public class DeleteNodesAction implements WsTreeNodesAction {
     }
     
     @Override
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes) {
+    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService) {
         for(WorkspaceTreeNode currentNode : nodes) {
-            this.workspaceService.deleteNode(userID, currentNode);
+            wsService.deleteNode(userID, currentNode);
         }
     }
     

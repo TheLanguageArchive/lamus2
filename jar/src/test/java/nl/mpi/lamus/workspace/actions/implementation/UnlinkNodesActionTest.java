@@ -64,7 +64,7 @@ public class UnlinkNodesActionTest {
     
     @Before
     public void setUp() {
-        unlinkNodesAction = new UnlinkNodesAction(mockWorkspaceService);
+        unlinkNodesAction = new UnlinkNodesAction();
         ReflectionTestUtils.setField(unlinkNodesAction, "name", expectedActionName);
     }
     
@@ -93,7 +93,7 @@ public class UnlinkNodesActionTest {
             oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockWorkspaceNodeOne);
         }});
 
-        unlinkNodesAction.execute(userID, nodes);
+        unlinkNodesAction.execute(userID, nodes, mockWorkspaceService);
     }
     
     @Test
@@ -111,6 +111,6 @@ public class UnlinkNodesActionTest {
             oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockWorkspaceNodeTwo);
         }});
 
-        unlinkNodesAction.execute(userID, nodes);
+        unlinkNodesAction.execute(userID, nodes, mockWorkspaceService);
     }
 }

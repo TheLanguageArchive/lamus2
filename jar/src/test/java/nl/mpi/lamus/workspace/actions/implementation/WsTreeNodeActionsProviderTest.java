@@ -79,26 +79,26 @@ public class WsTreeNodeActionsProviderTest {
     
     @Before
     public void setUp() {
-        wsNodeActionsProvider = new WsTreeNodeActionsProvider(mockWorkspaceService);
+        wsNodeActionsProvider = new WsTreeNodeActionsProvider();
         
         expectedWrittenResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedWrittenResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
-        expectedWrittenResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
+        expectedWrittenResourceNodeActions.add(new DeleteNodesAction());
+        expectedWrittenResourceNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "writtenResourcesActions", expectedWrittenResourceNodeActions);
         
         expectedMediaResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedMediaResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
-        expectedMediaResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
+        expectedMediaResourceNodeActions.add(new DeleteNodesAction());
+        expectedMediaResourceNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "mediaResourcesActions", expectedMediaResourceNodeActions);
         
         expectedLexicalResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedLexicalResourceNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
-        expectedLexicalResourceNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
+        expectedLexicalResourceNodeActions.add(new DeleteNodesAction());
+        expectedLexicalResourceNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "lexicalResourcesActions", expectedLexicalResourceNodeActions);
         
         expectedMetadataNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedMetadataNodeActions.add(new DeleteNodesAction(mockWorkspaceService));
-        expectedMetadataNodeActions.add(new UnlinkNodesAction(mockWorkspaceService));
+        expectedMetadataNodeActions.add(new DeleteNodesAction());
+        expectedMetadataNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataActions", expectedMetadataNodeActions);
         
         expectedMetadataCollectionNodeActions = new ArrayList<WsTreeNodesAction>();

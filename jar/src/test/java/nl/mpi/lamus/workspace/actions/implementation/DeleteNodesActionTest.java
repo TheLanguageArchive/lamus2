@@ -63,7 +63,7 @@ public class DeleteNodesActionTest {
     
     @Before
     public void setUp() {
-        deleteNodesAction = new DeleteNodesAction(mockWorkspaceService);
+        deleteNodesAction = new DeleteNodesAction();
         ReflectionTestUtils.setField(deleteNodesAction, "name", expectedActionName);
     }
     
@@ -91,7 +91,7 @@ public class DeleteNodesActionTest {
             oneOf(mockWorkspaceService).deleteNode(userID, mockWorkspaceNodeOne);
         }});
 
-        deleteNodesAction.execute(userID, nodes);
+        deleteNodesAction.execute(userID, nodes, mockWorkspaceService);
     }
     
     @Test
@@ -107,6 +107,6 @@ public class DeleteNodesActionTest {
             oneOf(mockWorkspaceService).deleteNode(userID, mockWorkspaceNodeTwo);
         }});
 
-        deleteNodesAction.execute(userID, nodes);
+        deleteNodesAction.execute(userID, nodes, mockWorkspaceService);
     }
 }

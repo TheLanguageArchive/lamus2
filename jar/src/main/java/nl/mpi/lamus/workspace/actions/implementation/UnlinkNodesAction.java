@@ -29,11 +29,6 @@ public class UnlinkNodesAction implements WsTreeNodesAction {
 
     private final String name = "Unlink";
     
-    private final WorkspaceService workspaceService;
-    
-    public UnlinkNodesAction(WorkspaceService wsService) {
-        this.workspaceService = wsService;
-    }
     
     @Override
     public String getName() {
@@ -41,9 +36,9 @@ public class UnlinkNodesAction implements WsTreeNodesAction {
     }
 
     @Override
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes) {
+    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService) {
         for(WorkspaceTreeNode currentNode : nodes) {
-            this.workspaceService.unlinkNodes(userID, currentNode.getParent(), currentNode);
+            wsService.unlinkNodes(userID, currentNode.getParent(), currentNode);
         }
     }
     

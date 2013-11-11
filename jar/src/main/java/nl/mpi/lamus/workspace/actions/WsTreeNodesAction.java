@@ -16,8 +16,8 @@
  */
 package nl.mpi.lamus.workspace.actions;
 
-import java.io.Serializable;
 import java.util.Collection;
+import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -27,5 +27,5 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  */
 public interface WsTreeNodesAction extends WsNodesAction {
     
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes);
+    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService);
 }

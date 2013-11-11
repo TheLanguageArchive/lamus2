@@ -47,23 +47,22 @@ public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
     private final List<WsTreeNodesAction> multipleNodesActions;
     
     
-    @Autowired
-    public WsTreeNodeActionsProvider(WorkspaceService wsService) {
+    public WsTreeNodeActionsProvider() {
         writtenResourcesActions = new ArrayList<WsTreeNodesAction>();
-        writtenResourcesActions.add(new DeleteNodesAction(wsService));
-        writtenResourcesActions.add(new UnlinkNodesAction(wsService));
+        writtenResourcesActions.add(new DeleteNodesAction());
+        writtenResourcesActions.add(new UnlinkNodesAction());
         
         mediaResourcesActions = new ArrayList<WsTreeNodesAction>();
-        mediaResourcesActions.add(new DeleteNodesAction(wsService));
-        mediaResourcesActions.add(new UnlinkNodesAction(wsService));
+        mediaResourcesActions.add(new DeleteNodesAction());
+        mediaResourcesActions.add(new UnlinkNodesAction());
         
         lexicalResourcesActions = new ArrayList<WsTreeNodesAction>();
-        lexicalResourcesActions.add(new DeleteNodesAction(wsService));
-        lexicalResourcesActions.add(new UnlinkNodesAction(wsService));
+        lexicalResourcesActions.add(new DeleteNodesAction());
+        lexicalResourcesActions.add(new UnlinkNodesAction());
         
         metadataActions = new ArrayList<WsTreeNodesAction>();
-        metadataActions.add(new DeleteNodesAction(wsService));
-        metadataActions.add(new UnlinkNodesAction(wsService));
+        metadataActions.add(new DeleteNodesAction());
+        metadataActions.add(new UnlinkNodesAction());
         
         metadataCollectionActions = new ArrayList<WsTreeNodesAction>();
         
