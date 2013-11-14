@@ -24,13 +24,19 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.spring.injection.annot.SpringBean;
+//import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.apache.wicket.util.file.Folder;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-public class LamusWicketApplication extends WebApplication {
+public class LamusWicketApplication extends WebApplication implements ApplicationContextAware {
 
+    private ApplicationContext applicationContext;
+    
     // service to be injected
     @SpringBean
     private LamusSessionFactory sessionFactory;
@@ -56,7 +62,8 @@ public class LamusWicketApplication extends WebApplication {
     @Override
     protected void init() {
 	super.init();	
-	getComponentInstantiationListeners().add(new SpringComponentInjector(this));
+	getComponentInstantiationListeners().add(
+                new SpringComponentInjector(this, applicationContext, true));
         getResourceSettings().setThrowExceptionOnMissingResource(false);
 
         //uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
@@ -82,6 +89,13 @@ public class LamusWicketApplication extends WebApplication {
 	return sessionFactory.createSession(this, request, response);
     }
     
+    
+    @Override
+    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+        this.applicationContext = ac;
+    }
+    
+    
     /**
      * @return the folder for uploads
      */
@@ -89,4 +103,5 @@ public class LamusWicketApplication extends WebApplication {
     {
         return uploadFolder;
     }
+
 }

@@ -24,6 +24,7 @@ import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
@@ -43,13 +44,18 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public final class CreateWorkspacePage extends LamusPage {
+public class CreateWorkspacePage extends LamusPage {
 
     // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
+    
     @SpringBean(name = "createWorkspaceTreeProvider")
     private GenericTreeModelProvider archiveTreeProvider;
+    
+    @SpringBean
+    private LamusWicketPagesProvider pagesProvider;
+    
     // Page components
     private final Form nodeIdForm;
 
@@ -108,8 +114,8 @@ public final class CreateWorkspacePage extends LamusPage {
 		    Session.get().error("Workspace was not created");
 		} else {
 		    // Show page for newly created workspace
-		    final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
-		    setResponsePage(resultPage);
+//		    final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
+		    setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
 		}
 	    }
 	};

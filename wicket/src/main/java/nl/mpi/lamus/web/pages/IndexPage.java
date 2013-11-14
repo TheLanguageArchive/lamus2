@@ -16,7 +16,10 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  * Main page or index page Displays options for further navigation
@@ -25,11 +28,38 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
  */
 public final class IndexPage extends LamusPage {
 
+    @SpringBean
+    private LamusWicketPagesProvider pagesProvider;
+    
     /**
      * Constructor.
      */
     public IndexPage() {
         super();
+        
+        add(new Link("createWorkspaceLink") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(pagesProvider.getCreateWorkspacePage());
+            }
+        });
+        
+        add(new Link("selectWorkspaceLink") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(pagesProvider.getSelectWorkspacePage());
+            }
+        });
+        
+        add(new Link("requestStorageSpaceLink") {
+
+            @Override
+            public void onClick() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
     }
 
     /**
@@ -37,7 +67,7 @@ public final class IndexPage extends LamusPage {
      *
      * @param parameters Page parameters
      */
-    public IndexPage(PageParameters params) {
-        //TODO:  process page parameters
-    }
+//    public IndexPage(PageParameters params) {
+//        //TODO:  process page parameters
+//    }
 }

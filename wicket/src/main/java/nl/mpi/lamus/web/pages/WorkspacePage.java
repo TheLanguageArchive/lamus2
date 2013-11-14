@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.web.components.ButtonPanel;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
@@ -64,7 +65,7 @@ public class WorkspacePage extends LamusPage {
 
 	wsTreePanel = createWorkspaceTreePanel("workspaceTree");
 	add(wsTreePanel);
-	add(new ButtonPage("buttonpage", model));
+	add(new ButtonPanel("buttonpage", model));
 
 	wsNodeActionsPanel = new WsTreeNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
 	    @Override

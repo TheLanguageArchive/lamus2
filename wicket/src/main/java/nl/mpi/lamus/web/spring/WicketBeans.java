@@ -22,12 +22,14 @@ import org.apache.wicket.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  *
  * @author guisil
  */
 @Configuration
+@Profile(value = {"production", "mock"})
 public class WicketBeans {
     
     @Autowired

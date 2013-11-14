@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
@@ -34,11 +35,15 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public final class SelectWorkspacePage extends LamusPage {
+public class SelectWorkspacePage extends LamusPage {
 
     // service to be injected
     @SpringBean
     private WorkspaceService workspaceService;
+    
+    @SpringBean
+    private LamusWicketPagesProvider pagesProvider;
+    
     final String currentUserId = LamusSession.get().getUserId();
 
     public SelectWorkspacePage() {
@@ -69,8 +74,8 @@ public final class SelectWorkspacePage extends LamusPage {
                 // Request a workspace with workspace service
                 final Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
                 // Show page for newly created workspace
-                final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(openSelectedWorkspace));
-                setResponsePage(resultPage);
+//                final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(openSelectedWorkspace));
+                setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
             }
         };
         form.add(submitButton);

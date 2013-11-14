@@ -14,9 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.pages;
+package nl.mpi.lamus.web.components;
 
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.pages.FreeNodesPage;
+import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.LinkNodesPage;
+import nl.mpi.lamus.web.pages.UploadPage;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.form.Button;
@@ -31,15 +36,19 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 
-public final class ButtonPage extends Panel {
+public final class ButtonPanel extends Panel {
 // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
     
     
-    public ButtonPage(String id, IModel<Workspace> model) {
+    public ButtonPanel(String id, IModel<Workspace> model) {
         super(id, model);
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
+    }
+    
+    public ButtonPanel(String id, Workspace workspace) {
+        this(id, new WorkspaceModel(workspace));
     }
 
     
