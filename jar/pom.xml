@@ -22,13 +22,14 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <version>1.3</version>
+            <scope>test</scope>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
-<!--            <scope>test</scope>-->
-        </dependency>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>-->
         <dependency>
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-core</artifactId>
@@ -63,16 +64,24 @@
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit4</artifactId>
             <version>2.6.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-legacy</artifactId>
             <version>2.6.0</version>
+            <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-easymock</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
             <version>1.5.1</version>
             <scope>test</scope>
         </dependency>
@@ -88,6 +97,18 @@
             <version>1.5.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4-rule</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-classloading-xstream</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
+        </dependency>
         
 <!--        <dependency>
             <groupId>cglib</groupId>
@@ -98,6 +119,7 @@
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
             <version>1.3</version>
+            <scope>test</scope>
         </dependency>
         
         <!-- ANOTHER VERSION OF THE DRIVER????? -->
@@ -111,24 +133,24 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>3.2.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>3.2.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>3.2.4.RELEASE</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>3.2.4.RELEASE</version>
         </dependency>
 <!--        <dependency>
             <groupId>org.hibernate</groupId>
@@ -167,12 +189,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.4</version>
+            <version>1.7.5</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
+            <version>1.2.17</version>
         </dependency>
         
         <dependency>
@@ -236,7 +258,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>typechecker</artifactId>
-            <version>1.7.1</version>
+            <version>1.7.2</version>
         </dependency>
         
         <dependency>
