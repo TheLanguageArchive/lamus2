@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
@@ -29,18 +30,16 @@ import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
-import org.apache.wicket.extensions.markup.html.tree.Tree;
+import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.util.tester.FormTester;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -53,12 +52,16 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     private CreateWorkspacePage createWsPage;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
-    @Mock private LamusWicketPagesProvider mockLamusWicketPagesProviderBean;
+    @Mock private LamusWicketPagesProvider mockPagesProviderBean;
+    @Mock private Workspace mockWorkspace;
+    @Mock private WorkspacePage mockWorkspacePage;
     
     private GenericTreeModelProvider mockTreeModelProviderBean;
     private MockCorpusNode mockArchiveRootNode;
     private String mockArchiveRootNodeName;
     private URI mockArchiveRootNodeURI;
+    
+    private MockCorpusNode expectedSelectedNode;
 
     public CreateWorkspacePageTest() throws URISyntaxException {
         mockArchiveRootNodeName = "RootNode";
@@ -73,10 +76,12 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         mockTreeModelProviderBean = new LinkedTreeModelProvider(mockArchiveRootNode());
         
         //TODO expected calls to the mocks ...
+        when(mockWorkspaceServiceBean.createWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, expectedSelectedNode.getNodeURI())).thenReturn(mockWorkspace);
+        when(mockPagesProviderBean.getWorkspacePage(mockWorkspace)).thenReturn(mockWorkspacePage);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockTreeModelProviderBean);
-        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockLamusWicketPagesProviderBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         
         createWsPage = new CreateWorkspacePage();
         getTester().startPage(createWsPage);
@@ -144,15 +149,17 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void formSubmitted() {
         
-//        FormTester formTester = getTester().newFormTester("formContainer:workspaceForm", false);
-//        
-//        formTester.select("workspace", 0);
-//        formTester.submit("OpenWorkspace");
-//        
-//        verify(mockWorkspaceServiceBean).openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWs1.getWorkspaceID());
-//        verify(mockLamusWicketPagesProviderBean).getWorkspacePage(mockWs1);
-//        
-//        getTester().assertRenderedPage(WorkspacePage.class);
+        Form<CorpusNode> form = (Form<CorpusNode>) getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm");
+        form.setModel(new CompoundPropertyModel<CorpusNode>(expectedSelectedNode));
+        
+        FormTester formTester = getTester().newFormTester("formContainer:nodeIdForm", false);
+        
+        formTester.submit("createWorkspace");
+
+        verify(mockWorkspaceServiceBean).createWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, expectedSelectedNode.getNodeURI());
+        verify(mockPagesProviderBean).getWorkspacePage(mockWorkspace);
+
+        getTester().assertRenderedPage(WorkspacePage.class);
         
         
         //TODO Trigger the form submission on the SELECTED node and create a workspace based on that node
@@ -180,6 +187,8 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         children.add(child2);
 
         mockArchiveRootNode.setChildren(children);
+        
+        expectedSelectedNode = child1;
 
         return mockArchiveRootNode;
     }
