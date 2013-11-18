@@ -17,22 +17,25 @@
 package nl.mpi.lamus.web.providers;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
-import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
+import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.LinkNodesPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
+import nl.mpi.lamus.web.pages.UnlinkedNodesPage;
 import nl.mpi.lamus.web.pages.UploadPage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
 import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.junit.Test;
@@ -64,6 +67,19 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     private final Collection<Workspace> mockWsList = new ArrayList<Workspace>() {{
         add(mockWs1);
         add(mockWs2);
+    }};
+    
+    private final WorkspaceNode mockUnlinkedWsN1 = new MockWorkspaceTreeNode() {{
+        setWorkspaceID(mockWorkspaceID);
+        setWorkspaceNodeID(2);
+    }};
+    private final WorkspaceNode mockUnlinkedWsN2 = new MockWorkspaceTreeNode() {{
+        setWorkspaceID(mockWorkspaceID);
+        setWorkspaceNodeID(3);
+    }};
+    private final List<WorkspaceNode> mockUnlinkedNodesList = new ArrayList<WorkspaceNode>() {{
+        add(mockUnlinkedWsN1);
+        add(mockUnlinkedWsN2);
     }};
 
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
@@ -107,6 +123,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         when(mockWorkspaceServiceBean.getTreeNode(mockWorkspaceTopNodeID, null)).thenReturn(mockWorkspaceTopNode);
         when(mockWorkspaceServiceBean.listUserWorkspaces(AbstractLamusWicketTest.MOCK_USER_ID)).thenReturn(mockWsList);
         when(mockWorkspaceServiceBean.getWorkspaceUploadDirectory(mockWorkspaceID)).thenReturn(mockUploadDirectory);
+        when(mockWorkspaceServiceBean.listUnlinkedNodes(AbstractLamusWicketTest.MOCK_USER_ID, mockWorkspaceID)).thenReturn(mockUnlinkedNodesList);
         when(mockWorkspaceTreeModelProviderFactoryBean.createTreeModelProvider(mockWorkspaceTopNode)).thenReturn(mockTreeModelProvider);
         when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
         
@@ -181,10 +198,49 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         
         UploadPage resultPage = pagesProvider.getUploadPage(mockWorkspace);
         
+        //WorkspacePage (tree)
         verify(mockWorkspace).getTopNodeID();
         verify(mockWorkspaceServiceBean).getTreeNode(mockWorkspaceTopNodeID, null);
         verify(mockWorkspaceTreeModelProviderFactoryBean).createTreeModelProvider(mockWorkspaceTopNode);
         verify(mockTreeModelProvider).getRoot();
+        //UploadPage (UnlinkedNodesPanel)
+        verify(mockWorkspaceServiceBean).getWorkspaceUploadDirectory(mockWorkspaceID);
+        
+        assertNotNull("Page should not be null", resultPage);
+    }
+    
+    @Test
+    @DirtiesContext
+    public void getUnlinkedNodesPage() {
+        
+        UnlinkedNodesPage resultPage = pagesProvider.getUnlinkedNodesPage(mockWorkspace);
+        
+        //WorkspacePage (tree)
+        verify(mockWorkspace).getTopNodeID();
+        verify(mockWorkspaceServiceBean).getTreeNode(mockWorkspaceTopNodeID, null);
+        verify(mockWorkspaceTreeModelProviderFactoryBean).createTreeModelProvider(mockWorkspaceTopNode);
+        verify(mockTreeModelProvider).getRoot();
+        
+        //UnlinkedNodesPanel
+        verify(mockWorkspaceServiceBean).getWorkspaceUploadDirectory(mockWorkspaceID);
+        
+        assertNotNull("Page should not be null", resultPage);
+    }
+    
+    @Test
+    @DirtiesContext
+    public void getLinkNodesPage() {
+        
+        LinkNodesPage resultPage = pagesProvider.getLinkNodesPage(mockWorkspace);
+        
+        //WorkspacePage (tree)
+        verify(mockWorkspace).getTopNodeID();
+        verify(mockWorkspaceServiceBean).getTreeNode(mockWorkspaceTopNodeID, null);
+        verify(mockWorkspaceTreeModelProviderFactoryBean).createTreeModelProvider(mockWorkspaceTopNode);
+        verify(mockTreeModelProvider).getRoot();
+        
+        //UnlinkedNodesPanel
+        verify(mockWorkspaceServiceBean).getWorkspaceUploadDirectory(mockWorkspaceID);
         
         assertNotNull("Page should not be null", resultPage);
     }

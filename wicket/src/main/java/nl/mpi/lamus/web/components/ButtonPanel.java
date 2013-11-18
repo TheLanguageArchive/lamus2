@@ -18,10 +18,8 @@ package nl.mpi.lamus.web.components;
 
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.pages.FreeNodesPage;
 import nl.mpi.lamus.web.pages.IndexPage;
-import nl.mpi.lamus.web.pages.LinkNodesPage;
-import nl.mpi.lamus.web.pages.UploadPage;
+import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.form.Button;
@@ -40,6 +38,9 @@ public final class ButtonPanel extends Panel {
 // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
+    
+    @SpringBean
+    private LamusWicketPagesProvider pagesProvider;
     
     
     public ButtonPanel(String id, IModel<Workspace> model) {
@@ -64,8 +65,7 @@ public final class ButtonPanel extends Panel {
 
                 @Override
                 public void onSubmit() {
-                    final UploadPage resultPage = new UploadPage(model);
-                    setResponsePage(resultPage);
+                    setResponsePage(pagesProvider.getUploadPage(model.getObject()));
                 }
             };
             add(uploadFilesButton);
@@ -83,8 +83,7 @@ public final class ButtonPanel extends Panel {
 
                 @Override
                 public void onSubmit() {
-                    final FreeNodesPage resultPage = new FreeNodesPage(model);
-                    setResponsePage(resultPage);
+                    setResponsePage(pagesProvider.getUnlinkedNodesPage(model.getObject()));
                 }
             };
             add(unlinkedFilesButton);
@@ -93,8 +92,7 @@ public final class ButtonPanel extends Panel {
 
                 @Override
                 public void onSubmit() {
-                    final LinkNodesPage resultPage = new LinkNodesPage(model);
-                    setResponsePage(resultPage);
+                    setResponsePage(pagesProvider.getLinkNodesPage(model.getObject()));
                 }
             };
             add(linkNodesButton);
@@ -104,8 +102,7 @@ public final class ButtonPanel extends Panel {
                 @Override
                 public void onSubmit() {
                     workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());                   
-                    final IndexPage resultPage = new IndexPage();
-                    setResponsePage(resultPage);
+                    setResponsePage(pagesProvider.getIndexPage());
                 }
             };
             deleteWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));

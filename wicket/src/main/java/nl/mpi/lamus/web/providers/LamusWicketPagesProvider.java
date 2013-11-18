@@ -19,11 +19,12 @@ package nl.mpi.lamus.web.providers;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.LinkNodesPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
+import nl.mpi.lamus.web.pages.UnlinkedNodesPage;
 import nl.mpi.lamus.web.pages.UploadPage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
 import nl.mpi.lamus.workspace.model.Workspace;
-import org.apache.wicket.model.IModel;
 import org.springframework.stereotype.Component;
 
 /**
@@ -52,5 +53,13 @@ public class LamusWicketPagesProvider {
     
     public UploadPage getUploadPage(Workspace workspace) {
         return new UploadPage(new WorkspaceModel(workspace));
+    }
+    
+    public UnlinkedNodesPage getUnlinkedNodesPage(Workspace workspace) {
+        return new UnlinkedNodesPage(new WorkspaceModel(workspace));
+    }
+    
+    public LinkNodesPage getLinkNodesPage(Workspace workspace) {
+        return new LinkNodesPage(new WorkspaceModel(workspace));
     }
 }

@@ -26,14 +26,14 @@ import org.apache.wicket.model.IModel;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public class FreeNodesPage extends WorkspacePage {
+public class UnlinkedNodesPage extends WorkspacePage {
  
     /**
      * Constructor.
      *
      * @param parameters Page parameters
      */
-    public FreeNodesPage(final IModel<Workspace> model) {
+    public UnlinkedNodesPage(final IModel<Workspace> model) {
         
         super(model);
         

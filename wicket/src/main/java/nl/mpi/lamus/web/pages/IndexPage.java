@@ -26,7 +26,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-public final class IndexPage extends LamusPage {
+public class IndexPage extends LamusPage {
 
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
