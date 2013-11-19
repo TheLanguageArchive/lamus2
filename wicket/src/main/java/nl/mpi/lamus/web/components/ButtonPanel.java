@@ -53,7 +53,7 @@ public final class ButtonPanel extends Panel {
     }
 
     
-       /**
+    /**
      * Form that allows user to select actions on the current workspace
      */
     private class WorkspaceActionsForm extends Form<Workspace> {

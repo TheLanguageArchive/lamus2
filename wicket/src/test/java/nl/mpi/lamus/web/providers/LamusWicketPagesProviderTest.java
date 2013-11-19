@@ -101,7 +101,6 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     @Mock private WorkspacePage mockWorkspacePage;
 
     TemporaryFolder testFolder = new TemporaryFolder();
-    
     private File mockUploadDirectory;
     
     @Override

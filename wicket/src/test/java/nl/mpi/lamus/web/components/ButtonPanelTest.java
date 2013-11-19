@@ -96,7 +96,7 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         
-        buttonPanel = new ButtonPanel("buttonpage", mockWorkspace);
+        buttonPanel = new ButtonPanel("buttonpanel", mockWorkspace);
         getTester().startComponentInPage(buttonPanel);
     }
 
@@ -110,30 +110,30 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void componentsRendered() {
     
-        getTester().assertComponent("buttonpage:workspaceActionsForm", Form.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm", Form.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm");
         
-        getTester().assertComponent("buttonpage:workspaceActionsForm:uploadFilesButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:uploadFilesButton");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:uploadFilesButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:uploadFilesButton");
         
-        getTester().assertComponent("buttonpage:workspaceActionsForm:requestStorageButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:requestStorageButton");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:requestStorageButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:requestStorageButton");
         
-        getTester().assertComponent("buttonpage:workspaceActionsForm:unlinkedFilesButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:unlinkedFilesButton");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:unlinkedFilesButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:unlinkedFilesButton");
         
-        getTester().assertComponent("buttonpage:workspaceActionsForm:linkNodesButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:linkNodesButton");
-        
-        //TODO other buttons
-        
-        getTester().assertComponent("buttonpage:workspaceActionsForm:deleteWorkspaceButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:deleteWorkspaceButton");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:linkNodesButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:linkNodesButton");
         
         //TODO other buttons
         
-        getTester().assertComponent("buttonpage:workspaceActionsForm:indexPageButton", Button.class);
-        getTester().assertEnabled("buttonpage:workspaceActionsForm:indexPageButton");
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:deleteWorkspaceButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:deleteWorkspaceButton");
+        
+        //TODO other buttons
+        
+        getTester().assertComponent("buttonpanel:workspaceActionsForm:indexPageButton", Button.class);
+        getTester().assertEnabled("buttonpanel:workspaceActionsForm:indexPageButton");
     }
     
     @Test
@@ -177,6 +177,6 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     
     private FormTester getFormTester() {
-        return getTester().newFormTester("buttonpage:workspaceActionsForm", false);
+        return getTester().newFormTester("buttonpanel:workspaceActionsForm", false);
     }
 }

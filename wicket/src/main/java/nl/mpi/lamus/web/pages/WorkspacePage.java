@@ -49,7 +49,7 @@ public class WorkspacePage extends LamusPage {
     private WorkspaceTreeModelProviderFactory workspaceTreeProviderFactory;
     // Page model
     private final IModel<Workspace> model;
-    private final Form nodeIdForm;
+    private final Form<WorkspaceTreeNode> nodeIdForm;
     private ArchiveTreePanel wsTreePanel;
     private final WsTreeNodeActionsPanel wsNodeActionsPanel;
     
@@ -59,7 +59,7 @@ public class WorkspacePage extends LamusPage {
     public WorkspacePage(final IModel<Workspace> model) {
 	super();
 	this.model = model;
-	nodeIdForm = (Form) createNodeInfoForm("nodeInfoForm");
+	nodeIdForm = createNodeInfoForm("nodeInfoForm");
 
 	add(createWorkspaceInfo("workspaceInfo"));
 
@@ -133,7 +133,7 @@ public class WorkspacePage extends LamusPage {
      * @param id
      * @return Form
      */
-    private Form createNodeInfoForm(final String id) {
+    private Form<WorkspaceTreeNode> createNodeInfoForm(final String id) {
 	final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("archiveURI"));

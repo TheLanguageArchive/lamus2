@@ -16,6 +16,13 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.mpi.lamus.web.components.ButtonPanel;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
@@ -25,13 +32,16 @@ import nl.mpi.lamus.web.components.WsTreeNodeActionsPanel;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
+import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.CompoundPropertyModel;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.mockito.Mock;
@@ -54,6 +64,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     
     @Mock private LinkedTreeModelProvider mockTreeModelProvider;
     
+    @Mock private LamusWicketPagesProvider mockPagesProvider;
+    
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
     private MockWorkspace mockWorkspace = new MockWorkspace() {{
@@ -65,11 +77,17 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
+        setName("topNode");
+        setType(WorkspaceNodeType.METADATA);
     }};
-    
-    
+
+
     @Override
     protected void setUpTest() throws Exception {
+        
+        mockWorkspaceTopNode.setArchiveURI(new URI("node:10"));
+        mockWorkspaceTopNode.setArchiveURL(new URL("file:/archive/topNode.cmdi"));
+        
         
         MockitoAnnotations.initMocks(this);
         
@@ -82,6 +100,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
+        
+        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
         
         wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspace));
         getTester().startPage(wsPage);
@@ -172,5 +192,32 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     public void testRefreshStuff() {
         
         //TODO ...
+    }
+    
+    @Test
+    @DirtiesContext
+    public void updateModelNodeIdForm() {
+        
+        Form<WorkspaceTreeNode> nodeIdForm = (Form<WorkspaceTreeNode>) getTester().getComponentFromLastRenderedPage("nodeInfoContainer:nodeInfoForm");
+        nodeIdForm.setModel(new CompoundPropertyModel<WorkspaceTreeNode>(mockWorkspaceTopNode));
+        
+        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:name", mockWorkspaceTopNode.getName());
+        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:archiveURI", mockWorkspaceTopNode.getArchiveURI().toString());
+        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:archiveURL", mockWorkspaceTopNode.getArchiveURL().toString());
+        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:workspaceID", "" + mockWorkspaceTopNode.getWorkspaceID());
+        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:type", mockWorkspaceTopNode.getType().toString());
+    }
+    
+    @Test
+    @DirtiesContext
+    public void updateModelNodeActionsPanel() {
+        
+        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedNodes.add(mockWorkspaceTopNode);
+        
+        WsTreeNodeActionsPanel nodeActionsPanel = (WsTreeNodeActionsPanel) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel");
+        nodeActionsPanel.setModelObject(selectedNodes);
+        
+        //TODO THIS SHOULD BE TESTED IN THE PANEL TESTS...
     }
 }

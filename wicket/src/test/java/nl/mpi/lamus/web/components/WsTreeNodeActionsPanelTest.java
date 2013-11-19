@@ -1,0 +1,155 @@
+/*
+ * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package nl.mpi.lamus.web.components;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.AbstractLamusWicketTest;
+import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
+import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.util.CollectionModel;
+import org.apache.wicket.util.tester.FormTester;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.annotation.DirtiesContext;
+
+/**
+ *
+ * @author guisil
+ */
+public class WsTreeNodeActionsPanelTest extends AbstractLamusWicketTest {
+
+    private WsTreeNodeActionsPanel treeNodeActionsPanel;
+    
+    @Mock WorkspaceService mockWorkspaceServiceBean;
+    @Mock TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
+    
+    @Mock private DeleteNodesAction mockDeleteAction;
+    @Mock private UnlinkNodesAction mockUnlinkAction;
+    
+    private int mockWorkspaceID = 1;
+    private MockWorkspaceTreeNode mockWorkspaceNode = new MockWorkspaceTreeNode() {{
+        setWorkspaceID(mockWorkspaceID);
+        setWorkspaceNodeID(10);
+        setName("topNode");
+        setType(WorkspaceNodeType.METADATA);
+    }};
+    private Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>() {{
+        add(mockWorkspaceNode);
+    }};
+    
+    
+    private List<WsTreeNodesAction> expectedActionsList = new ArrayList<WsTreeNodesAction>();
+
+    private boolean refreshStuffCalled = false;
+    
+    @Override
+    protected void setUpTest() throws Exception {
+        
+        MockitoAnnotations.initMocks(this);
+        
+        expectedActionsList.add(mockDeleteAction);
+        expectedActionsList.add(mockUnlinkAction);
+        
+        when(mockTreeNodeActionsProviderBean.getActions(selectedNodes)).thenReturn(expectedActionsList);
+        
+        when(mockDeleteAction.getName()).thenReturn("Delete");
+        when(mockUnlinkAction.getName()).thenReturn("Unlink");
+        
+
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
+        
+        treeNodeActionsPanel = new WsTreeNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(selectedNodes)) {
+
+            @Override
+            public void refreshStuff() {
+                refreshStuffCalled = true;
+            }
+        };
+        getTester().startComponentInPage(treeNodeActionsPanel);
+    }
+
+    @Override
+    protected void tearDownTest() throws Exception {
+        
+    }
+    
+    
+    @Test
+    @DirtiesContext
+    public void componentsRendered() {
+        
+        getTester().assertComponent("wsNodeActionsPanel:wsNodeActionsForm", Form.class);
+        getTester().assertEnabled("wsNodeActionsPanel:wsNodeActionsForm");
+        getTester().assertModelValue("wsNodeActionsPanel:wsNodeActionsForm", selectedNodes);
+        
+        getTester().assertComponent("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions", ListView.class);
+        getTester().assertEnabled("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
+        getTester().assertListView("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions", expectedActionsList);
+        
+        ListView<WsTreeNodesAction> nodesActionList = (ListView<WsTreeNodesAction>) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
+        Iterator<Component> listItems = nodesActionList.iterator();
+        while(listItems.hasNext()) {
+            ListItem<WsTreeNodesAction> item = (ListItem<WsTreeNodesAction>) listItems.next();
+            Iterator<Component> itemButtons =  item.iterator();
+            int i = 0;
+            while(itemButtons.hasNext()) {
+                Component button = itemButtons.next();
+                assertTrue("Component " + button.getPath() + " is not instance of expected class", button instanceof WsTreeNodeActionButton);
+                i++;
+            }
+            assertTrue("Number of buttons different from expected", i != 2);
+        }
+    }
+    
+    @Test
+    @DirtiesContext
+    public void clickButton() {
+        
+        ListView<WsTreeNodesAction> nodesActionList = (ListView<WsTreeNodesAction>) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
+        Iterator<Component> listItems = nodesActionList.iterator();
+
+        ListItem<WsTreeNodesAction> item = (ListItem<WsTreeNodesAction>) listItems.next();
+        Iterator<Component> itemButtons =  item.iterator();
+            
+        Component button = itemButtons.next();
+        assertEquals("Not the expected button", "Delete", (String) button.getDefaultModelObject());
+        FormTester formTester = getTester().newFormTester("wsNodeActionsPanel:wsNodeActionsForm", false);
+        formTester.submit(button);
+        
+        //for some reason the actual WorkspaceService object that is used in the call is not the same as expected
+            // - something to do with the object proxy created by Mockito and passed on?
+        verify(mockDeleteAction).execute(eq(AbstractLamusWicketTest.MOCK_USER_ID), eq(selectedNodes), any(WorkspaceService.class));
+        assertTrue("refreshStuff not called", refreshStuffCalled);
+    }
+}

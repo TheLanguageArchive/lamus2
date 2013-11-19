@@ -19,11 +19,9 @@ package nl.mpi.lamus.web.components;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -46,32 +44,13 @@ public class WsTreeNodeActionsPanel extends GenericPanel<Collection<WorkspaceTre
     public WsTreeNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
 	super(id, model);
 	form = new Form<Collection<WorkspaceTreeNode>>("wsNodeActionsForm", model);
-
-//	final Button deleteNodeButton = new Button("deleteNodeButton") {
-//	    @Override
-//	    public void onSubmit() {
-//		if (WsTreeNodeActionsPanel.this.getModelObject().iterator().hasNext()) {
-//		    final String currentUserId = LamusSession.get().getUserId();
-//		    final WorkspaceTreeNode node = WsTreeNodeActionsPanel.this.getModelObject().iterator().next();
-//		    workspaceService.deleteNode(currentUserId, node);
-//		    afterWorkspaceChanged();
-//		}
-//	    }
-//	};
-        
         
         //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
         
-//        final Button deleteNodeButton = new WsTreeNodeActionButton("deleteNodeButton", model.getObject(), action);
-
-//	form.add(deleteNodeButton);
-        
         
         //TODO Add unlink node button
         //TODO Add other buttons
-        
-        //TODO The model for the panel should be, like in the metadata browser, node actions... maybe this could be somehow reused from there
         
         
 	add(form);
