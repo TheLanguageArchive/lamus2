@@ -259,6 +259,12 @@
             <groupId>nl.mpi</groupId>
             <artifactId>typechecker</artifactId>
             <version>1.7.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
