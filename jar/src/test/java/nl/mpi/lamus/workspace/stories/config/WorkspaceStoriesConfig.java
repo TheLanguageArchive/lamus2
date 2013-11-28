@@ -24,8 +24,6 @@ import java.util.concurrent.Executors;
 import javax.sql.DataSource;
 import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
-import nl.mpi.archiving.corpusstructure.adapter.model.AdapterAccessInfo;
-import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
@@ -133,7 +131,7 @@ public class WorkspaceStoriesConfig {
         corpusStructureProviderFactory();
         if(csProvider == null) {
             corpusstructureDataSource();
-            csProvider = csProviderFactory.createCorpusStructureDB();
+            csProvider = csProviderFactory.createCorpusStructureProvider();
         }
         return csProvider;
     }
@@ -536,19 +534,6 @@ public class WorkspaceStoriesConfig {
     @Bean
     public FileType typeChecker() {
         return new FileType();
-    }
-    
-    private AccessInfo defaultAccessInfo;
-    
-    @Bean
-    public AccessInfo defaultAccessInfo() {
-        
-        if(defaultAccessInfo == null) {
-            nl.mpi.corpusstructure.AccessInfo oldAccessInfo = nl.mpi.corpusstructure.AccessInfo.create(
-                    nl.mpi.corpusstructure.AccessInfo.EVERYBODY, nl.mpi.corpusstructure.AccessInfo.EVERYBODY, nl.mpi.corpusstructure.AccessInfo.ACCESS_LEVEL_NONE);
-            defaultAccessInfo = new AdapterAccessInfo(oldAccessInfo);
-        }
-        return defaultAccessInfo;
     }
     
     
