@@ -38,7 +38,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CorpusStructureProvider csdb() {
-        return csdbFactory().createCorpusStructureDB();
+        return csdbFactory().createCorpusStructureProvider();
     }
     
     @Bean
