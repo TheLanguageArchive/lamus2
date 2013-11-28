@@ -539,22 +539,22 @@ public class WorkspaceStepsHelper {
         //TODO CorpusNodeType doesn't allow to select in this method "ALL TYPES" (previously '-1'); using a workaround at the moment
         List<String> allFormats = new ArrayList<String>();
         allFormats.add("*");
-        List<URI> descendantsURIs = csProvider.getDescendants(selectedNodeURI, CorpusNodeType.RESOURCE_OTHER, allFormats);
-//        for(String descendantID : descendantsIDs) {
-        for(URI descendantURI : descendantsURIs) {
-//            Timestamp descendantTimestamp = aoDB.getObjectTimestamp(descendantID);
-            CorpusNode descendantNode = csProvider.getNode(descendantURI);
-            Date descendantTimestamp = descendantNode.getFileInfo().getFileTime();
-//            String descendantChecksum = aoDB.getObjectChecksum(descendantID);
-            String descendantChecksum = descendantNode.getFileInfo().getChecksum();
-//            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantID, topNodeTimestamp, topNodeChecksum);
-            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantURI, selectedNodeDate, descendantChecksum);
-            otherNodeSnapshots.add(descendantSnapshot);
-        }
+
         
-//        TreeSnapshot treeSnapshot = new TreeSnapshot(topNodeSnapshot, otherNodeSnapshots);
-        TreeSnapshot treeSnapshot = new TreeSnapshot(selectedNodeSnapshot, otherNodeSnapshots);
-        return treeSnapshot;
+        
+        throw new UnsupportedOperationException("CHANGE CALL TO CS PROVIDER TO GET DESCENDANTS");
+    //TODO REPLACE THIS CALL    
+//        List<URI> descendantsURIs = csProvider.getDescendants(selectedNodeURI, CorpusNodeType.RESOURCE_OTHER, allFormats);
+//        for(URI descendantURI : descendantsURIs) {
+//            CorpusNode descendantNode = csProvider.getNode(descendantURI);
+//            Date descendantTimestamp = descendantNode.getFileInfo().getFileTime();
+//            String descendantChecksum = descendantNode.getFileInfo().getChecksum();
+//            NodeSnapshot descendantSnapshot = new NodeSnapshot(descendantURI, selectedNodeDate, descendantChecksum);
+//            otherNodeSnapshots.add(descendantSnapshot);
+//        }
+//        
+//        TreeSnapshot treeSnapshot = new TreeSnapshot(selectedNodeSnapshot, otherNodeSnapshots);
+//        return treeSnapshot;
     }
     
     static Collection<WorkspaceNode> findWorkspaceNodeForFile(WorkspaceDao workspaceDao, int workspaceID, File file) {
