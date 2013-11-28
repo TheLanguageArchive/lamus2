@@ -19,7 +19,7 @@
     <url>https://trac.mpi.nl/wiki/Lamus2</url>
     <ciManagement>
         <system>hudson</system>
-        <url>http://lux16.mpi.nl/jenkins/job/Lamus%202/</url>
+        <url>https://lux16.mpi.nl/jenkins/job/Lamus%202/</url>
     </ciManagement>
     <organization>
         <name>Max Planck Institute for Psycholinguistics</name>
