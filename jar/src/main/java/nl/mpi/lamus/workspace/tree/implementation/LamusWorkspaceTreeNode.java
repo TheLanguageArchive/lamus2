@@ -38,7 +38,11 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements WorkspaceTreeNode {
 
     private WorkspaceTreeNode parentTreeNode;
-    private WorkspaceDao workspaceDao;
+    protected WorkspaceDao workspaceDao;
+    
+    public LamusWorkspaceTreeNode() {
+        super();
+    }
 
     public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID,
 	    URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
@@ -66,7 +70,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 		node.getStatus(), node.getFormat());
 
 	if (dao == null) {
-	    throw new IllegalArgumentException("The WorkspaceService object should not be null.");
+	    throw new IllegalArgumentException("The WorkspaceDao object should not be null.");
 	}
 
 	this.parentTreeNode = parent;
@@ -105,7 +109,8 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 	return this.parentTreeNode;
     }
 
-    private List<WorkspaceTreeNode> getChildren() {
+    @Override
+    public List<WorkspaceTreeNode> getChildren() {
 	Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
 	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<WorkspaceTreeNode>(children.size());
 	for (WorkspaceNode child : children) {

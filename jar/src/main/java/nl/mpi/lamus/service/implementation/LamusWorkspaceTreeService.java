@@ -15,6 +15,8 @@
  */
 package nl.mpi.lamus.service.implementation;
 
+import java.util.ArrayList;
+import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
@@ -56,5 +58,23 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
                         child.getFormat(), parentTreeNode, this.workspaceDao);
         
         return treeNode;
+    }
+    
+    /**
+     * @see WorkspaceTreeService#listUnlinkedTreeNodes(java.lang.String, int)
+     */
+    @Override
+    public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID) {
+        
+        List<WorkspaceNode> nodes = super.listUnlinkedNodes(userID, workspaceID);
+        List<WorkspaceTreeNode> treeNodes = new ArrayList<WorkspaceTreeNode>();
+        
+        for(WorkspaceNode node : nodes) {
+            
+            //TODO assume null parent... should it be changed in this case?
+            treeNodes.add(new LamusWorkspaceTreeNode(node, null, workspaceDao));
+        }
+        
+        return treeNodes;
     }
 }

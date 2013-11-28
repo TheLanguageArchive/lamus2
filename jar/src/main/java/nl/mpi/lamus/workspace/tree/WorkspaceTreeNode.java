@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.tree;
 
+import java.util.List;
 import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -30,26 +31,32 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 public interface WorkspaceTreeNode extends LinkedTreeNode, WorkspaceNode {
     
     /**
-     * @see GenericTreeNode#getChild(int)
+     * @see LinkedTreeNode#getChild(int)
      */
     @Override
     public WorkspaceTreeNode getChild(int index);
     
     /**
-     * @see GenericTreeNode#getChildCount()
+     * @see LinkedTreeNode#getChildCount()
      */
     @Override
     public int getChildCount();
     
     /**
-     * @see GenericTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
+     * @see LinkedTreeNode#getIndexOfChild(nl.mpi.archiving.tree.GenericTreeNode)
      */
     @Override
     public int getIndexOfChild(LinkedTreeNode child); 
     
     /**
-     * @see GenericTreeNode#getParent()
+     * @see LinkedTreeNode#getParent()
      */
     @Override
     public WorkspaceTreeNode getParent();
+    
+    /**
+     * 
+     * @return children of the node
+     */
+    public List<WorkspaceTreeNode> getChildren();
 }

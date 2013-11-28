@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.service;
 
+import java.util.List;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -34,4 +35,13 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * @return corresponding workspace tree node
      */
     public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode);
+    
+    /**
+     * Retrieves the nodes in the workspace which are not linked to the tree.
+     * 
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @return list of unlinked nodes
+     */
+    public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID);
 }

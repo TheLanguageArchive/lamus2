@@ -19,7 +19,9 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -42,8 +44,8 @@ public class UnlinkNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeOne;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeTwo;
+    @Mock WorkspaceTreeNode mockChildNodeOne;
+    @Mock WorkspaceTreeNode mockChildNodeTwo;
     @Mock WorkspaceTreeNode mockParentNode;
     
     private WsTreeNodesAction unlinkNodesAction;
@@ -85,32 +87,32 @@ public class UnlinkNodesActionTest {
     public void executeOneAction() {
 
         final String userID = "testUser";
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeOne);
+        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
+        childNodes.add(mockChildNodeOne);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeOne).getParent(); will(returnValue(mockParentNode));
-            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockWorkspaceNodeOne);
+            oneOf(mockChildNodeOne).getParent(); will(returnValue(mockParentNode));
+            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockChildNodeOne);
         }});
 
-        unlinkNodesAction.execute(userID, nodes, mockWorkspaceService);
+        unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
     }
     
     @Test
     public void executeTwoActions() {
 
         final String userID = "testUser";
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeOne);
-        nodes.add(mockWorkspaceNodeTwo);
+        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
+        childNodes.add(mockChildNodeOne);
+        childNodes.add(mockChildNodeTwo);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeOne).getParent(); will(returnValue(mockParentNode));
-            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockWorkspaceNodeOne);
-            oneOf(mockWorkspaceNodeTwo).getParent(); will(returnValue(mockParentNode));
-            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockWorkspaceNodeTwo);
+            oneOf(mockChildNodeOne).getParent(); will(returnValue(mockParentNode));
+            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockChildNodeOne);
+            oneOf(mockChildNodeTwo).getParent(); will(returnValue(mockParentNode));
+            oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockChildNodeTwo);
         }});
 
-        unlinkNodesAction.execute(userID, nodes, mockWorkspaceService);
+        unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
     }
 }

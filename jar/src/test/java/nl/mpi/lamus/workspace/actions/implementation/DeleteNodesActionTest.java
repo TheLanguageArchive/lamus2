@@ -42,8 +42,8 @@ public class DeleteNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeOne;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeTwo;
+    @Mock WorkspaceTreeNode mockTreeNodeOne;
+    @Mock WorkspaceTreeNode mockTreeNodeTwo;
     
     private WsTreeNodesAction deleteNodesAction;
     
@@ -84,29 +84,31 @@ public class DeleteNodesActionTest {
     public void executeOneAction() {
 
         final String userID = "testUser";
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeOne);
+        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedNodes.add(mockTreeNodeOne);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceService).deleteNode(userID, mockWorkspaceNodeOne);
+            oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeOne);
         }});
 
-        deleteNodesAction.execute(userID, nodes, mockWorkspaceService);
+        //TODO is there an advantage on passing the parent node in this particular type of action?
+        deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
     }
     
     @Test
     public void executeTwoActions() {
 
         final String userID = "testUser";
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeOne);
-        nodes.add(mockWorkspaceNodeTwo);
+        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedNodes.add(mockTreeNodeOne);
+        selectedNodes.add(mockTreeNodeTwo);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceService).deleteNode(userID, mockWorkspaceNodeOne);
-            oneOf(mockWorkspaceService).deleteNode(userID, mockWorkspaceNodeTwo);
+            oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeOne);
+            oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeTwo);
         }});
 
-        deleteNodesAction.execute(userID, nodes, mockWorkspaceService);
+        //TODO is there an advantage on passing the parent node in this particular type of action?
+        deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
     }
 }

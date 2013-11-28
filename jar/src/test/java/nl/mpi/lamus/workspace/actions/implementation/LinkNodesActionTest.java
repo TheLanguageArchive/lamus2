@@ -19,8 +19,9 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.WsTwoNodesAction;
+import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -42,11 +43,11 @@ public class LinkNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
-    @Mock WorkspaceNode mockSelectedNode;
-    @Mock WorkspaceNode mockWorkspaceNodeOne;
-    @Mock WorkspaceNode mockWorkspaceNodeTwo;
+    @Mock WorkspaceTreeNode mockParentNode;
+    @Mock WorkspaceTreeNode mockChildNodeOne;
+    @Mock WorkspaceTreeNode mockChildNodeTwo;
     
-    private WsTwoNodesAction linkNodesAction;
+    private WsParentChildNodesAction linkNodesAction;
     
     private String expectedActionName = "Link";
     
@@ -63,7 +64,7 @@ public class LinkNodesActionTest {
     
     @Before
     public void setUp() {
-        linkNodesAction = new LinkNodesAction(mockWorkspaceService);
+        linkNodesAction = new LinkNodesAction();
         ReflectionTestUtils.setField(linkNodesAction, "name", expectedActionName);
     }
     
@@ -83,29 +84,29 @@ public class LinkNodesActionTest {
     public void executeOneAction() {
 
         final String userID = "testUser";
-        Collection<WorkspaceNode> nodes = new ArrayList<WorkspaceNode>();
-        nodes.add(mockWorkspaceNodeOne);
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
+        nodes.add(mockChildNodeOne);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceService).linkNodes(userID, mockSelectedNode, mockWorkspaceNodeOne);
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeOne);
         }});
 
-        linkNodesAction.execute(userID, mockSelectedNode, nodes);
+        linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
     }
     
     @Test
     public void executeTwoActions() {
 
         final String userID = "testUser";
-        Collection<WorkspaceNode> nodes = new ArrayList<WorkspaceNode>();
-        nodes.add(mockWorkspaceNodeOne);
-        nodes.add(mockWorkspaceNodeTwo);
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
+        nodes.add(mockChildNodeOne);
+        nodes.add(mockChildNodeTwo);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceService).linkNodes(userID, mockSelectedNode, mockWorkspaceNodeOne);
-            oneOf(mockWorkspaceService).linkNodes(userID, mockSelectedNode, mockWorkspaceNodeTwo);
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeOne);
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeTwo);
         }});
 
-        linkNodesAction.execute(userID, mockSelectedNode, nodes);
+        linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
     }
 }

@@ -18,21 +18,18 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.WsTwoNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
  *
  * @author guisil
  */
-public class LinkNodesAction implements WsTwoNodesAction {
+public class LinkNodesAction implements WsParentChildNodesAction {
 
     private final String name = "Link";
     
-    private final WorkspaceService workspaceService;
-    
-    public LinkNodesAction(WorkspaceService wsService) {
-        this.workspaceService = wsService;
+    public LinkNodesAction() {
     }
     
     @Override
@@ -41,9 +38,9 @@ public class LinkNodesAction implements WsTwoNodesAction {
     }
 
     @Override
-    public void execute(String userID, WorkspaceNode selectedNode, Collection<WorkspaceNode> otherNodes) {
-        for(WorkspaceNode currentNode : otherNodes) {
-            workspaceService.linkNodes(userID, selectedNode, currentNode);
+    public void execute(String userID, WorkspaceTreeNode parentNode, Collection<WorkspaceTreeNode> childNodes, WorkspaceService wsService) {
+        for(WorkspaceTreeNode currentNode : childNodes) {
+            wsService.linkNodes(userID, parentNode, currentNode);
         }
     }
 }

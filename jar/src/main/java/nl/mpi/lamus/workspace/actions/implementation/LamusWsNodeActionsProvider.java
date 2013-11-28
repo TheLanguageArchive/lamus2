@@ -19,13 +19,10 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,7 +30,7 @@ import org.springframework.stereotype.Component;
  * @author guisil
  */
 @Component
-public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
+public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
 
     private final List<WsTreeNodesAction> writtenResourcesActions;
     private final List<WsTreeNodesAction> mediaResourcesActions;
@@ -41,13 +38,14 @@ public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
     
     private final List<WsTreeNodesAction> metadataActions;
     
-    //TODO ??
+    //TODO would this have different actions??
     private final List<WsTreeNodesAction> metadataCollectionActions;
     
+    //TODO actions with a different format?
     private final List<WsTreeNodesAction> multipleNodesActions;
     
     
-    public WsTreeNodeActionsProvider() {
+    public LamusWsNodeActionsProvider() {
         writtenResourcesActions = new ArrayList<WsTreeNodesAction>();
         writtenResourcesActions.add(new DeleteNodesAction());
         writtenResourcesActions.add(new UnlinkNodesAction());
@@ -64,6 +62,8 @@ public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
         metadataActions.add(new DeleteNodesAction());
         metadataActions.add(new UnlinkNodesAction());
         
+        
+        
         metadataCollectionActions = new ArrayList<WsTreeNodesAction>();
         
         multipleNodesActions = new ArrayList<WsTreeNodesAction>();
@@ -75,7 +75,7 @@ public class WsTreeNodeActionsProvider implements TreeNodeActionsProvider {
         if(nodes.isEmpty()) {
             return new ArrayList<WsTreeNodesAction>();
         } else if(nodes.size() == 1) {
-            for(WorkspaceNode currentNode : nodes) {
+            for(WorkspaceTreeNode currentNode : nodes) {
                 
                 WorkspaceNodeType currentNodeType = currentNode.getType();
                 

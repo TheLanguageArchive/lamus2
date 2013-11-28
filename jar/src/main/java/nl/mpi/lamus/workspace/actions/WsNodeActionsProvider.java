@@ -17,13 +17,15 @@
 package nl.mpi.lamus.workspace.actions;
 
 import java.util.Collection;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import java.util.List;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- *
+ * Based on the WsNodeActionsProvider interface in the Metadata Browser
+ * 
  * @author guisil
  */
-public interface WsTwoNodesAction extends WsNodesAction {
-    
-    public void execute(String userID, WorkspaceNode selectedNode, Collection<WorkspaceNode> otherNodes);
+public interface WsNodeActionsProvider {
+
+    public List<WsTreeNodesAction> getActions(Collection<WorkspaceTreeNode> nodes);
 }

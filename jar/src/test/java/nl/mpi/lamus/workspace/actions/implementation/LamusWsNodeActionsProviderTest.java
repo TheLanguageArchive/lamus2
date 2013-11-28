@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -40,7 +40,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
-public class WsTreeNodeActionsProviderTest {
+public class LamusWsNodeActionsProviderTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
@@ -53,7 +53,7 @@ public class WsTreeNodeActionsProviderTest {
     
     
     
-    private TreeNodeActionsProvider wsNodeActionsProvider;
+    private WsNodeActionsProvider wsNodeActionsProvider;
     
     private List<WsTreeNodesAction> expectedWrittenResourceNodeActions;
     private List<WsTreeNodesAction> expectedMediaResourceNodeActions;
@@ -66,7 +66,7 @@ public class WsTreeNodeActionsProviderTest {
     private List<WsTreeNodesAction> expectedMultipleNodesActions;
     
     
-    public WsTreeNodeActionsProviderTest() {
+    public LamusWsNodeActionsProviderTest() {
     }
     
     @BeforeClass
@@ -79,7 +79,7 @@ public class WsTreeNodeActionsProviderTest {
     
     @Before
     public void setUp() {
-        wsNodeActionsProvider = new WsTreeNodeActionsProvider();
+        wsNodeActionsProvider = new LamusWsNodeActionsProvider();
         
         expectedWrittenResourceNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedWrittenResourceNodeActions.add(new DeleteNodesAction());
