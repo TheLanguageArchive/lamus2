@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;

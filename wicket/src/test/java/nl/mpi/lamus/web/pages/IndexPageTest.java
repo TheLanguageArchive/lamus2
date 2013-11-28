@@ -18,7 +18,7 @@ package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.LamusWicketApplication;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.spring.LamusWicketApplicationTestBeans;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.util.tester.WicketTester;

@@ -196,4 +196,9 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

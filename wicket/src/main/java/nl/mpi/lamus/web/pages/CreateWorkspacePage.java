@@ -24,7 +24,7 @@ import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;

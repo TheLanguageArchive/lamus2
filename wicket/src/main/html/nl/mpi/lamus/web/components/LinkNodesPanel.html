@@ -23,13 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:panel>
-            <h4>Current unlinked or uploaded files (in <span wicket:id="dir">(dir)</span>):</h4>
-            <table wicket:id="checkgroup">
-                <tr wicket:id="linkNodesList">
-                    <td><input type="checkbox" wicket:id="checkbox" /></td>
-                    <td width="200"><span wicket:id="node">(file)</span></td>
-                </tr>
-            </table>
+            <form wicket:id="linkNodesForm">
+                <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
+                <input type="submit" value="Link"/>
+            </form>
         </wicket:panel>
     </body>
 </html>

@@ -229,5 +229,10 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     public String toString() {
 	return getName();
     }
+
+    @Override
+    public List<WorkspaceTreeNode> getChildren() {
+        return children;
+    }
     
 }

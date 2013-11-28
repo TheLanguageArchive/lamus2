@@ -19,7 +19,7 @@ package nl.mpi.lamus.web.components;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.IndexPage;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.form.Button;
@@ -61,15 +61,6 @@ public final class ButtonPanel extends Panel {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
 
-            final Button uploadFilesButton = new Button("uploadFilesButton") {
-
-                @Override
-                public void onSubmit() {
-                    setResponsePage(pagesProvider.getUploadPage(model.getObject()));
-                }
-            };
-            add(uploadFilesButton);
-
             final Button requestStorageButton = new Button("requestStorageButton") {
 
                 @Override
@@ -78,24 +69,6 @@ public final class ButtonPanel extends Panel {
                 }
             };
             add(requestStorageButton);
-
-            final Button unlinkedFilesButton = new Button("unlinkedFilesButton") {
-
-                @Override
-                public void onSubmit() {
-                    setResponsePage(pagesProvider.getUnlinkedNodesPage(model.getObject()));
-                }
-            };
-            add(unlinkedFilesButton);
-            
-            final Button linkNodesButton = new Button("linkNodesButton") {
-
-                @Override
-                public void onSubmit() {
-                    setResponsePage(pagesProvider.getLinkNodesPage(model.getObject()));
-                }
-            };
-            add(linkNodesButton);
             
             final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {
                 

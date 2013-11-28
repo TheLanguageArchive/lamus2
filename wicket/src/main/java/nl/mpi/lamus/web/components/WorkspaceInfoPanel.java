@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,32 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.pages;
+package nl.mpi.lamus.web.components;
 
-import nl.mpi.lamus.web.components.UnlinkedNodesPanel;
-import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 
 /**
- * Display nodes that are not linked in the workspace
  *
- * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author guisil
  */
-public class UnlinkedNodesPage extends WorkspacePage {
- 
-    /**
-     * Constructor.
-     *
-     * @param parameters Page parameters
-     */
-    public UnlinkedNodesPage(final IModel<Workspace> model) {
+public class WorkspaceInfoPanel extends Panel {
+    
+    public WorkspaceInfoPanel(String id, IModel<Workspace> model) {
+        super(id, model);
         
-        super(model);
+        WebMarkupContainer container = new WebMarkupContainer("workspaceInfoContainer", new CompoundPropertyModel<Workspace>(model));
+	container.add(new Label("userID"));
+	container.add(new Label("workspaceID"));
+	container.add(new Label("status"));
         
-        final String currentUserID = LamusSession.get().getUserId();
-
-        add(new UnlinkedNodesPanel("unlinkedNodesPanel", model));
-
+        add(container);
     }
 }

@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.tree.LinkedTreeNode;
@@ -36,13 +35,11 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     private CorpusStructureArchiveNode parent;
     private List<CorpusStructureArchiveNode> children = Collections.emptyList();
     private String name = "";
-//    private int nodeId;
     private URI nodeUri;
     
     private URI profile;
     private FileInfo fileInfo;
     private CorpusNodeType nodeType;
-    private AccessInfo authorization;
     private Date lastUpdate;
     private boolean isOnSite;
     private String format;
@@ -83,15 +80,6 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     public void setParent(CorpusStructureArchiveNode parent) {
 	this.parent = parent;
     }
-
-//    @Override
-//    public int getNodeId() {
-//	return nodeId;
-//    }
-
-//    public void setNodeId(int nodeId) {
-//	this.nodeId = nodeId;
-//    }
 
     @Override
     public String toString() {
@@ -135,15 +123,6 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     }
 
     @Override
-    public AccessInfo getAuthorization() {
-        return authorization;
-    }
-    
-    public void setAuthorization(AccessInfo authorization) {
-        this.authorization = authorization;
-    }
-
-    @Override
     public Date getLastUpdate() {
         return lastUpdate;
     }
@@ -168,5 +147,10 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    @Override
+    public URI getPID() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

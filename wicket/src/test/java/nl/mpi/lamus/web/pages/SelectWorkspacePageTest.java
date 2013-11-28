@@ -21,7 +21,7 @@ import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.markup.html.WebMarkupContainer;

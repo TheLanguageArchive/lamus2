@@ -17,34 +17,38 @@
 package nl.mpi.lamus.web.components;
 
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.Check;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 /**
  *
  * @author guisil
  */
-public class NodeInfoPanel extends Panel {
+public class CheckBoxPanel extends Panel {
     
-    public NodeInfoPanel(String id) {
+    private Check checkbox;
+    
+    public CheckBoxPanel(String id, IModel<WorkspaceTreeNode> model) { //IModel<Boolean> model) {
         super(id);
-        
-        
-        final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>("nodeInfoForm");
-        form.add(new Label("name"));
-	form.add(new Label("archiveURI"));
-	form.add(new Label("archiveURL"));
-	form.add(new Label("workspaceID"));
-	form.add(new Label("type"));
-        
-        
-        // Put details/submit form in container for refresh through AJAX 
-	final MarkupContainer formContainer = new WebMarkupContainer("nodeInfoContainer");
-	formContainer.add(form);
-	// Add container to page
-	add(formContainer);
+        checkbox = new Check("checkbox", model) {
+
+            @Override
+            protected void onModelChanged() {
+                super.onModelChanged(); //To change body of generated methods, choose Tools | Templates.
+            }
+            
+        };
+        add(checkbox);
+    }
+    
+//    public CheckBoxPanel(String id) {
+//        this(id, new Model<Boolean>());
+//    }
+    
+    public Check getCheckbox() {
+        return checkbox;
     }
 }

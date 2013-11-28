@@ -19,11 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <html>
     <body>
         <wicket:panel>
-            <p>Selected node: <span wicket:id="name">Node name</span></p>
-            <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
-            <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
-            <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
-            <p>Type: <span wicket:id="type">Type</span></p>
+            <div wicket:id="nodeInfoContainer">
+                <form wicket:id="nodeInfoForm">
+                    <p>Selected node: <span wicket:id="name">Node name</span></p>
+                    <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
+                    <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
+                    <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
+                    <p>Type: <span wicket:id="type">Type</span></p>
+                </form>
+            </div>
         </wicket:panel>
     </body>
 </html>

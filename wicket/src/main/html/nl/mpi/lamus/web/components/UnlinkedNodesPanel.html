@@ -15,21 +15,36 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <wicket:head>
+            <style>
+            table {
+                width: 50%;
+                border: 1px solid #DDDDDD;
+            }
+            tr.even {
+                background-color: #FFFFFF;
+            }
+            tr.odd {
+                background-color: #EEEEEE;
+            }
+            td.number {
+                text-align: right;
+                padding-right: 1em;
+            }
+            </style>
+        </wicket:head>
     </head>
     <body>
         <wicket:panel>
             <h4>Current unlinked or uploaded files (in <span wicket:id="dir">(dir)</span>):</h4>
-            <table>
-                <tr wicket:id="unlinkedNodesList">
-                    <td width="200"><span wicket:id="node">(file)</span></td>
-                    <td><a href="#" wicket:id="delete"><img wicket:id="image2" src="delete.gif" border="0"/></a></td>
-                </tr>
-            </table>
+            <div wicket:id="checkgroup">
+                <table wicket:id="unlinkedNodesTableTree"></table>
+            </div>
         </wicket:panel>
     </body>
 </html>

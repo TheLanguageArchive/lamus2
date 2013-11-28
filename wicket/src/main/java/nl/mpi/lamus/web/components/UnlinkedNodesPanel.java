@@ -17,20 +17,31 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
-import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
+import nl.mpi.lamus.web.unlinkednodes.tree.CheckedFolderContent;
+import nl.mpi.lamus.web.unlinkednodes.tree.Content;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.Component;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColumn;
+import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultTableTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.TableTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.table.TreeColumn;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.form.CheckGroup;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -45,82 +56,96 @@ public class UnlinkedNodesPanel extends GenericPanel<Workspace> {
     @SpringBean
     private WorkspaceService workspaceService;
     
-        /**
-     * List view for files in upload folder.
-     */
-    private class WorkspaceNodeListView extends ListView<WorkspaceNode> {
-
-        /**
-         * Construct.
-         *
-         * @param name Component name
-         * @param files The file list model
-         */
-        public WorkspaceNodeListView(String name, final IModel<List<WorkspaceNode>> nodes) {
-            super(name, nodes);
-        }
-
-        /**
-         * @see ListView#populateItem(ListItem) Add clickable icon to remove
-         * unwanted uploaded files
-         */
-        @Override
-        protected void populateItem(ListItem<WorkspaceNode> listItem) {
-//            final File file = listItem.getModelObject();
-//            listItem.add(new Label("file", file.getName()));
-            
-            final WorkspaceNode node = listItem.getModelObject();
-            listItem.add(new Label("node", node.getName()));
-            
-            Link link = new Link("delete") {
-
-                @Override
-                public void onClick() {
-//                    Files.remove(file);
-//                    info("Deleted " + file);
-                    workspaceService.deleteNode(LamusSession.get().getUserId(), node);
-                    info("Deleted " + node.getName());
-                }
-            };
-            link.add(new Image("image2", DELETE_IMAGE_RESOURCE_REFERENCE));
-            listItem.add(link);
-        }
-    }
+    private AbstractTree<WorkspaceTreeNode> unlinkedNodesTree;
     
-    public UnlinkedNodesPanel(String id, IModel<Workspace> model) {
+    private CheckGroup<WorkspaceTreeNode> checkgroup;
+    
+    private Content content;
+    
+    
+    public UnlinkedNodesPanel(String id, IModel<Workspace> model, UnlinkedNodesModelProvider provider) {
         super(id, model);
         
         File uploadFolder = workspaceService.getWorkspaceUploadDirectory(getModelObject().getWorkspaceID());
         
-        
         add(new Label("dir", uploadFolder.getAbsolutePath()));
         
-        WorkspaceNodeListView nodeListView = new WorkspaceNodeListView("unlinkedNodesList", new LoadableDetachableModel<List<WorkspaceNode>>() {
+        content = new CheckedFolderContent(provider);
+        
+        checkgroup = new CheckGroup<WorkspaceTreeNode>("checkgroup", new ArrayList<WorkspaceTreeNode>()) {
+
+            @Override
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+
+            @Override
+            protected void onSelectionChanged(Collection<? extends WorkspaceTreeNode> newSelection) {
+                super.onSelectionChanged(newSelection); //To change body of generated methods, choose Tools | Templates.
+            }
             
             @Override
-            protected List<WorkspaceNode> load() {
-//                return Arrays.asList(getUploadFolder().listFiles());
+            protected void onModelChanged() {
+                super.onModelChanged(); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        
+        unlinkedNodesTree = createTree("unlinkedNodesTableTree", provider);
+        unlinkedNodesTree.setOutputMarkupPlaceholderTag(true);
+        
+        checkgroup.setOutputMarkupId(true);
+        
+        checkgroup.add(unlinkedNodesTree);
+        
+        add(checkgroup);
+    }
+    
+    
+    protected AbstractTree<WorkspaceTreeNode> createTree(String id, UnlinkedNodesModelProvider provider/*, IModel<Set<WorkspaceTreeNode>> state*/)
+    {
+        List<IColumn<WorkspaceTreeNode, String>> columns = createColumns();
+
+        final TableTree<WorkspaceTreeNode, String> tree = new DefaultTableTree<WorkspaceTreeNode, String>(id, columns, provider, Integer.MAX_VALUE/*, state*/) {
+
+            @Override
+            protected Component newContentComponent(String id, IModel<WorkspaceTreeNode> model) {
+                return content.newContentComponent(id, unlinkedNodesTree, model);
+            }
+
+            @Override
+            protected Item<WorkspaceTreeNode> newRowItem(String id, int index, IModel<WorkspaceTreeNode> model) {
+                return new OddEvenItem<WorkspaceTreeNode>(id, index, model);
+            }
+        };
+
+        return tree;
+    }
+    
+    
+    private List<IColumn<WorkspaceTreeNode, String>> createColumns()
+    {
+        List<IColumn<WorkspaceTreeNode, String>> columns = new ArrayList<IColumn<WorkspaceTreeNode, String>>();
+
+        columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("ID"), "workspaceNodeID"));
+        
+        columns.add(new TreeColumn<WorkspaceTreeNode, String>(Model.of("")) {
+
+            @Override
+            public void populateItem(Item<ICellPopulator<WorkspaceTreeNode>> cellItem, String componentId, IModel<WorkspaceTreeNode> rowModel) {
                 
-                List<WorkspaceNode> unlinkedNodes =
-                        workspaceService.listUnlinkedNodes(LamusSession.get().getUserId(), UnlinkedNodesPanel.this.getModelObject().getWorkspaceID());
-                
-                
-                //TODO change FileListView so that receives WorkspaceNodes and presents them as such
-                
-//                List<File> filesList = new ArrayList<File>();
-//                
-//                for(WorkspaceNode node : unlinkedNodes) {
-//                    File file = (node.getWorkspaceURL() != null ?
-//                            new File(node.getWorkspaceURL().getPath()) :
-//                            new File(node.getArchiveURL().getPath()));
-//                    filesList.add(file);
-//                }
-//                
-//                return filesList;
-                
-                return unlinkedNodes;
+                cellItem.add(new CheckBoxPanel(componentId, rowModel));
             }
         });
-        add(nodeListView);
+        
+        columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("Name"), "name"));
+        columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("Type"), "type"));
+
+        return columns;
+    }
+
+    
+    public Collection<WorkspaceTreeNode> getSelectedUnlinkedNodes() {
+        
+        return this.checkgroup.getModelObject();
     }
 }

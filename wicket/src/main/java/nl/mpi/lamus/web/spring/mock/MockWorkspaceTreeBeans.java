@@ -16,13 +16,9 @@
  */
 package nl.mpi.lamus.web.spring.mock;
 
-import java.util.ArrayList;
-import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
-//import nl.mpi.archiving.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.model.mock.MockGenericTreeModelProviderFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -38,6 +34,11 @@ public class MockWorkspaceTreeBeans {
     @Bean
     public GenericTreeModelProviderFactory workspaceTreeProviderFactory() {
         return new MockGenericTreeModelProviderFactory();
+    }
+    
+    @Bean
+    public UnlinkedNodesModelProviderFactory unlinkedNodesProviderFactory() {
+        return new UnlinkedNodesModelProviderFactory();
     }
     
 //    @Bean

@@ -19,7 +19,8 @@ package nl.mpi.lamus.web.components;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.markup.html.form.Form;
@@ -33,23 +34,21 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author guisil
  */
-public class WsTreeNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNode>> {
+public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNode>> {
 
     @SpringBean
-    private TreeNodeActionsProvider nodeActionsProvider;
+    private WsNodeActionsProvider nodeActionsProvider;
     @SpringBean
     private WorkspaceService workspaceService;
     private final Form<Collection<WorkspaceTreeNode>> form;
 
-    public WsTreeNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
+    public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
 	super(id, model);
 	form = new Form<Collection<WorkspaceTreeNode>>("wsNodeActionsForm", model);
         
         //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
         
-        
-        //TODO Add unlink node button
         //TODO Add other buttons
         
         
@@ -74,13 +73,13 @@ public class WsTreeNodeActionsPanel extends GenericPanel<Collection<WorkspaceTre
             @Override
             protected void populateItem(ListItem<WsTreeNodesAction> li) {
                 
-                li.add(new WsTreeNodeActionButton(
-                        "nodeActionButton", WsTreeNodeActionsPanel.this.getModelObject(), li.getModelObject(),
-                        WsTreeNodeActionsPanel.this.workspaceService) {
+                li.add(new WsNodeActionButton(
+                        "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), li.getModelObject(),
+                        WsNodeActionsPanel.this.workspaceService) {
 
                     @Override
                     public void refreshStuff() {
-                        WsTreeNodeActionsPanel.this.refreshStuff();
+                        WsNodeActionsPanel.this.refreshStuff();
                     }
                     
                     

@@ -29,7 +29,7 @@ import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockCorpusNode;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;

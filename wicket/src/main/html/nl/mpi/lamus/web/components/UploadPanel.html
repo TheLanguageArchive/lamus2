@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+Copyright (C) 2013 Max Planck Institute for Psycholinguistics
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,17 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:wicket="http://wicket.apache.org">
-    <head>
-        <title>Upload Files</title>
-        <link rel="stylesheet" type="text/css" href="style.css"/>
-        <style>
-            legend { border: 1px solid #e9601a; background-color: #bbb; color: #fff; padding: 4px;}
-            fieldset { border: 1px solid #e9601a; padding: 10px; margin-top: 10px;}
-        </style>
-    </head>
+<html>
     <body>
-        <wicket:extend>
+                <wicket:panel>
             <!--    <form wicket:id="simpleUpload">
                  <fieldset>
                   <legend>Upload form</legend>
@@ -51,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <div>
                 <span wicket:id="uploadFeedback"/>
             </div>
-            <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
-        </wicket:extend>
+            <!--<div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>-->
+        </wicket:panel>
     </body>
 </html>

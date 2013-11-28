@@ -23,10 +23,13 @@ import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
+import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Component;
@@ -46,12 +49,12 @@ import org.springframework.test.annotation.DirtiesContext;
  *
  * @author guisil
  */
-public class WsTreeNodeActionsPanelTest extends AbstractLamusWicketTest {
+public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
 
-    private WsTreeNodeActionsPanel treeNodeActionsPanel;
+    private WsNodeActionsPanel treeNodeActionsPanel;
     
     @Mock WorkspaceService mockWorkspaceServiceBean;
-    @Mock TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
+    @Mock WsNodeActionsProvider mockTreeNodeActionsProviderBean;
     
     @Mock private DeleteNodesAction mockDeleteAction;
     @Mock private UnlinkNodesAction mockUnlinkAction;
@@ -89,7 +92,7 @@ public class WsTreeNodeActionsPanelTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         
-        treeNodeActionsPanel = new WsTreeNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(selectedNodes)) {
+        treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(selectedNodes)) {
 
             @Override
             public void refreshStuff() {
@@ -125,7 +128,7 @@ public class WsTreeNodeActionsPanelTest extends AbstractLamusWicketTest {
             int i = 0;
             while(itemButtons.hasNext()) {
                 Component button = itemButtons.next();
-                assertTrue("Component " + button.getPath() + " is not instance of expected class", button instanceof WsTreeNodeActionButton);
+                assertTrue("Component " + button.getPath() + " is not instance of expected class", button instanceof WsNodeActionButton);
                 i++;
             }
             assertTrue("Number of buttons different from expected", i != 2);

@@ -22,12 +22,9 @@ import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
-import nl.mpi.lamus.web.pages.UnlinkedNodesPage;
 import nl.mpi.lamus.web.pages.IndexPage;
-import nl.mpi.lamus.web.pages.LinkNodesPage;
-import nl.mpi.lamus.web.pages.UploadPage;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
+import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.markup.html.form.Button;
@@ -49,7 +46,7 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     private ButtonPanel buttonPanel;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
-    @Mock private TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
+    @Mock private WsNodeActionsProvider mockTreeNodeActionsProviderBean;
     
     @Mock private LamusWicketPagesProvider mockPagesProviderBean;
     
@@ -57,10 +54,7 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     
-    @Mock private UploadPage mockUploadPage;
     //TODO request storage
-    @Mock private UnlinkedNodesPage mockUnlinkedNodesPage;
-    @Mock private LinkNodesPage mockLinkNodesPage;
     @Mock private IndexPage mockIndexPage;
     
     
@@ -87,9 +81,6 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         MockitoAnnotations.initMocks(this);
         
         when(mockWorkspaceServiceBean.getWorkspace(mockWorkspaceID)).thenReturn(mockWorkspace);
-        when(mockPagesProviderBean.getUploadPage(mockWorkspace)).thenReturn(mockUploadPage);
-        when(mockPagesProviderBean.getUnlinkedNodesPage(mockWorkspace)).thenReturn(mockUnlinkedNodesPage);
-        when(mockPagesProviderBean.getLinkNodesPage(mockWorkspace)).thenReturn(mockLinkNodesPage);
         when(mockPagesProviderBean.getIndexPage()).thenReturn(mockIndexPage);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
@@ -113,17 +104,8 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         getTester().assertComponent("buttonpanel:workspaceActionsForm", Form.class);
         getTester().assertEnabled("buttonpanel:workspaceActionsForm");
         
-        getTester().assertComponent("buttonpanel:workspaceActionsForm:uploadFilesButton", Button.class);
-        getTester().assertEnabled("buttonpanel:workspaceActionsForm:uploadFilesButton");
-        
         getTester().assertComponent("buttonpanel:workspaceActionsForm:requestStorageButton", Button.class);
         getTester().assertEnabled("buttonpanel:workspaceActionsForm:requestStorageButton");
-        
-        getTester().assertComponent("buttonpanel:workspaceActionsForm:unlinkedFilesButton", Button.class);
-        getTester().assertEnabled("buttonpanel:workspaceActionsForm:unlinkedFilesButton");
-        
-        getTester().assertComponent("buttonpanel:workspaceActionsForm:linkNodesButton", Button.class);
-        getTester().assertEnabled("buttonpanel:workspaceActionsForm:linkNodesButton");
         
         //TODO other buttons
         
@@ -136,34 +118,8 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("buttonpanel:workspaceActionsForm:indexPageButton");
     }
     
-    @Test
-    @DirtiesContext
-    public void uploadButtonClicked() {
-                
-        getFormTester().submit("uploadFilesButton");
-        verify(mockPagesProviderBean).getUploadPage(mockWorkspace);
-        getTester().assertRenderedPage(UploadPage.class);
-    }
-    
     //TODO handle request storage
     
-    @Test
-    @DirtiesContext
-    public void unlinkedNodesButtonClicked() {
-        
-        getFormTester().submit("unlinkedFilesButton");
-        verify(mockPagesProviderBean).getUnlinkedNodesPage(mockWorkspace);
-        getTester().assertRenderedPage(UnlinkedNodesPage.class);
-    }
-    
-    @Test
-    @DirtiesContext
-    public void linkNodesButtonClicked() {
-        
-        getFormTester().submit("linkNodesButton");
-        verify(mockPagesProviderBean).getLinkNodesPage(mockWorkspace);
-        getTester().assertRenderedPage(LinkNodesPage.class);
-    }
     
     @Test
     @DirtiesContext

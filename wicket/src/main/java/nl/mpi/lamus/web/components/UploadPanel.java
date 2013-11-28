@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.pages;
+package nl.mpi.lamus.web.components;
 
 import java.io.File;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.components.UnlinkedNodesPanel;
+import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -34,15 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * UploadPage displays page that offers possibility to upload multiple files
  *
- * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl> Adapted from
- * org.apache.wicket.examples.upload example
- * @author Eelco Hillenius
+ * @author guisil
  */
-@SuppressWarnings("serial")
-public class UploadPage extends WorkspacePage {
-
+public class UploadPanel extends Panel {
+    
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
 
     @SpringBean
@@ -98,7 +95,7 @@ public class UploadPage extends WorkspacePage {
                         workspaceService.uploadFileIntoWorkspace(
                                 LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
 
-                        UploadPage.this.info("saved file: " + upload.getClientFileName());
+                        UploadPanel.this.info("saved file: " + upload.getClientFileName());
                     } catch (Exception e) {
                         throw new IllegalStateException("Unable to write file", e);
                     }
@@ -109,7 +106,7 @@ public class UploadPage extends WorkspacePage {
     /**
      * Log.
      */
-    private static final Logger log = LoggerFactory.getLogger(UploadPage.class);
+    private static final Logger log = LoggerFactory.getLogger(UploadPanel.class);
     /**
      * Reference to listview for easy access.
      */
@@ -120,9 +117,9 @@ public class UploadPage extends WorkspacePage {
      *
      * @param parameters Page parameters
      */
-    public UploadPage(IModel<Workspace> model) {
+    public UploadPanel(String id, IModel<Workspace> model) {
         
-        super(model);
+        super(id, model);
         
         this.model = model;
         
@@ -137,7 +134,7 @@ public class UploadPage extends WorkspacePage {
 
         // Add folder view
      
-        add(new UnlinkedNodesPanel("unlinkedNodesPanel", model));
+//        add(new UnlinkedNodesPanel("unlinkedNodesPanel", model));
         
         
         
@@ -150,5 +147,4 @@ public class UploadPage extends WorkspacePage {
                 progressUploadForm.fileUploadField));
         add(progressUploadForm);
     }
-
 }

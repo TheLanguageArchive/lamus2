@@ -29,15 +29,15 @@ import org.apache.wicket.model.Model;
  * 
  * @author guisil
  */
-public class WsTreeNodeActionButton extends Button {
+public class WsNodeActionButton extends Button {
     
-    private final Collection<WorkspaceTreeNode> nodes;
+    private final Collection<WorkspaceTreeNode> selectedTreeNodes;
     private final WsTreeNodesAction action;
     private WorkspaceService workspaceService;
     
-    public WsTreeNodeActionButton(String id, Collection<WorkspaceTreeNode> nodes, WsTreeNodesAction action, WorkspaceService wsService) {
+    public WsNodeActionButton(String id, Collection<WorkspaceTreeNode> selectedTreeNodes, WsTreeNodesAction action, WorkspaceService wsService) {
         super(id, new Model<String>(action.getName()));
-        this.nodes = nodes;
+        this.selectedTreeNodes = selectedTreeNodes;
         this.action = action;
         this.workspaceService = wsService;
     }
@@ -45,7 +45,8 @@ public class WsTreeNodeActionButton extends Button {
     @Override
     public void onSubmit() {
         final String currentUserId = LamusSession.get().getUserId();
-        this.action.execute(currentUserId, this.nodes, this.workspaceService);
+        
+        this.action.execute(currentUserId, this.selectedTreeNodes, this.workspaceService);
         
         refreshStuff();
     }

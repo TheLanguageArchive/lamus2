@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.spring.production;
 
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
+import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,5 +34,10 @@ public class WorkspaceTreeBeans {
     @Bean
     public GenericTreeModelProviderFactory workspaceTreeProviderFactory() {
         return new WorkspaceTreeModelProviderFactory();
+    }
+    
+    @Bean
+    public UnlinkedNodesModelProviderFactory unlinkedNodesProviderFactory() {
+        return new UnlinkedNodesModelProviderFactory();
     }
 }

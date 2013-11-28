@@ -14,27 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.pages;
+package nl.mpi.lamus.web.components;
 
 import java.io.File;
 import java.io.InputStream;
-import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
-import nl.mpi.lamus.web.components.UnlinkedNodesPanel;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
-import nl.mpi.lamus.web.providers.LamusWicketPagesProvider;
-import nl.mpi.lamus.workspace.actions.TreeNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
@@ -45,18 +45,18 @@ import org.springframework.test.annotation.DirtiesContext;
  *
  * @author guisil
  */
-public class UploadPageTest extends AbstractLamusWicketTest {
+public class UploadPanelTest extends AbstractLamusWicketTest {
     
-    private UploadPage uploadPage;
+    private UploadPanel uploadPanel;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
-    @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
+//    @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     
-    @Mock private TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
+//    @Mock private TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
     
-    @Mock private LinkedTreeModelProvider mockTreeModelProvider;
+//    @Mock private LinkedTreeModelProvider mockTreeModelProvider;
     
-    @Mock private LamusWicketPagesProvider mockPagesProvider;
+//    @Mock private LamusWicketPagesProvider mockPagesProvider;
     
 //    @Mock private FileUploadField mockFileUploadField;
 //    @Mock private FileUpload mockFileUpload;
@@ -99,10 +99,10 @@ public class UploadPageTest extends AbstractLamusWicketTest {
         MockitoAnnotations.initMocks(this);
         
         when(mockWorkspaceServiceBean.getWorkspace(mockWorkspaceID)).thenReturn(mockWorkspace);
-        when(mockWorkspaceServiceBean.getTreeNode(mockWorkspaceTopNodeID, null)).thenReturn(mockWorkspaceTopNode);
+//        when(mockWorkspaceServiceBean.getTreeNode(mockWorkspaceTopNodeID, null)).thenReturn(mockWorkspaceTopNode);
         when(mockWorkspaceServiceBean.getWorkspaceUploadDirectory(mockWorkspaceID)).thenReturn(mockUploadDirectory);
-        when(mockWorkspaceTreeModelProviderFactoryBean.createTreeModelProvider(mockWorkspaceTopNode)).thenReturn(mockTreeModelProvider);
-        when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
+//        when(mockWorkspaceTreeModelProviderFactoryBean.createTreeModelProvider(mockWorkspaceTopNode)).thenReturn(mockTreeModelProvider);
+//        when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
         
 //        when(mockFileUpload.getClientFileName()).thenReturn(mockFilename);
 //        when(mockFileUpload.getInputStream()).thenReturn(mockFileInputStream);
@@ -116,18 +116,18 @@ public class UploadPageTest extends AbstractLamusWicketTest {
         
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
-        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
+//        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         
-        addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
+//        addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         
-        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
+//        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
         
         
 //        mockFileUploads.add(mockFileUpload);
         
         
-        uploadPage = new UploadPage(new WorkspaceModel(mockWorkspace));
-        getTester().startPage(uploadPage);
+        uploadPanel = new UploadPanel("uploadPanel", new WorkspaceModel(mockWorkspace));
+        getTester().startComponentInPage(uploadPanel);
     }
 
     @Override
@@ -140,21 +140,21 @@ public class UploadPageTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void componentsRendered() {
         
-        getTester().assertComponent("progressUpload", Form.class);
-        getTester().assertEnabled("progressUpload");
+        getTester().assertComponent("uploadPanel:progressUpload", Form.class);
+        getTester().assertEnabled("uploadPanel:progressUpload");
         
-        getTester().assertComponent("progressUpload:fileInput", FileUploadField.class);
-        getTester().assertEnabled("progressUpload:fileInput");
+        getTester().assertComponent("uploadPanel:progressUpload:fileInput", FileUploadField.class);
+        getTester().assertEnabled("uploadPanel:progressUpload:fileInput");
         
         
-        getTester().assertComponent("progressUpload:progress", UploadProgressBar.class);
-        getTester().assertEnabled("progressUpload:progress");
+        getTester().assertComponent("uploadPanel:progressUpload:progress", UploadProgressBar.class);
+        getTester().assertEnabled("uploadPanel:progressUpload:progress");
         
-        getTester().assertComponent("uploadFeedback", FeedbackPanel.class);
-        getTester().assertEnabled("uploadFeedback");
+        getTester().assertComponent("uploadPanel:uploadFeedback", FeedbackPanel.class);
+        getTester().assertEnabled("uploadPanel:uploadFeedback");
         
-        getTester().assertComponent("unlinkedNodesPanel", UnlinkedNodesPanel.class);
-        getTester().assertEnabled("unlinkedNodesPanel");
+//        getTester().assertComponent("unlinkedNodesPanel", UnlinkedNodesPanel.class);
+//        getTester().assertEnabled("unlinkedNodesPanel");
     }
     
     
