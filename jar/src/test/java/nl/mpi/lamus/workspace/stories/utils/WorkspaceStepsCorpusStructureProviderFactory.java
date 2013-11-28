@@ -54,7 +54,7 @@ public class WorkspaceStepsCorpusStructureProviderFactory implements CorpusStruc
     }
 
     @Override
-    public CorpusStructureProvider createCorpusStructureDB() {
+    public CorpusStructureProvider createCorpusStructureProvider() {
 	return new CorpusStructureAPIAdapter(corpusStructureDBProxy, archiveObjectsDBProxy);
     }
 
