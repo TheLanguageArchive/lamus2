@@ -17,25 +17,13 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-//import nl.mpi.corpusstructure.AccessInfo;
-//import nl.mpi.corpusstructure.ArchiveAccessContext;
-//import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
-//import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.util.Checksum;
-import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -66,10 +54,7 @@ public class LamusCorpusStructureBridgeTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
-//    @Mock ArchiveObjectsDBWrite mockArchiveObjectsDBW;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
-//    @Mock ArchiveAccessContext mockArchiveAccessContext;
-    @Mock AccessInfo mockAccessInfo;
     @Mock DateTimeHelper mockDateTimeHelper;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock WorkspaceAccessChecker mockWorkspaceAccessChecker;

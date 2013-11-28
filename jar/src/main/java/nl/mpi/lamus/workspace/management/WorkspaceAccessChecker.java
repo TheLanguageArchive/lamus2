@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.management;
 
 import java.io.Serializable;
 import java.net.URI;
-import nl.mpi.archiving.corpusstructure.core.AccessInfo;
 
 /**
  * Interface for the archive node access checking.
@@ -42,12 +41,5 @@ public interface WorkspaceAccessChecker extends Serializable {
      * @return true if the given user has access to the given workspace
      */
     public boolean hasAccessToWorkspace(String userID, int workspaceID);
-    
-    /**
-     * Creates a template AccessInfo object containing access rights only
-     * for the given user
-     * @param userID ID of the user
-     * @return created AccessInfo object
-     */
-    public AccessInfo getDefaultAccessInfoForUser(String userID);
+
 }

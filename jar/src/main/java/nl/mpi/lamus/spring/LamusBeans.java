@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
-import nl.mpi.lamus.mock.MockAccessInfo;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.context.annotation.Bean;
@@ -51,17 +50,6 @@ public class LamusBeans {
     @Bean
     public FileType typeChecker() {
         return new FileType();
-    }
-    
-    private MockAccessInfo defaultAccessInfo;
-    
-    @Bean
-    public MockAccessInfo defaultAccessInfo() {
-        
-        if(this.defaultAccessInfo == null) {
-            this.defaultAccessInfo = new MockAccessInfo();
-        }
-        return this.defaultAccessInfo;
     }
     
     

@@ -28,8 +28,6 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.corpusstructure.AccessInfo;
-import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -90,7 +88,6 @@ public class AddedNodeExporterTest {
     @Mock CMDIDocument mockParentCmdiDocument;
     @Mock StreamResult mockStreamResult;
     @Mock ResourceProxy mockResourceProxy;
-    @Mock AccessInfo mockAccessInfo;
     
     @Mock CorpusNode mockParentCorpusNode;
     

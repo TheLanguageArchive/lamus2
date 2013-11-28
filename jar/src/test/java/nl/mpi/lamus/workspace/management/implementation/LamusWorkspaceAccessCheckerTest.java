@@ -22,14 +22,11 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.AccessInfo;
-import nl.mpi.archiving.corpusstructure.core.AccessLevel;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.mock.MockAccessInfo;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -39,7 +36,6 @@ import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -49,7 +45,6 @@ public class LamusWorkspaceAccessCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceAccessChecker nodeAccessChecker;
-//    @Mock private ArchiveObjectsDB mockArchiveObjectsDB;
     @Mock private CorpusStructureProvider mockCorpusStructureProvider;
     @Mock private AmsBridge mockAmsBridge;
     @Mock private WorkspaceDao mockWorkspaceDao;
@@ -70,7 +65,6 @@ public class LamusWorkspaceAccessCheckerTest {
     @Before
     public void setUp() {
         nodeAccessChecker = new LamusWorkspaceAccessChecker(mockCorpusStructureProvider, mockAmsBridge, mockWorkspaceDao);
-        ReflectionTestUtils.setField(nodeAccessChecker, "defaultAccessInfo", new MockAccessInfo());
     }
     
     @After
@@ -246,15 +240,4 @@ public class LamusWorkspaceAccessCheckerTest {
         assertFalse("Result should be false when the workspace does not exist.", result);
     }
     
-    @Test
-    public void getDefaultAccessInfoForUser() {
-        
-        final String username = "someuser@mpi.nl";
-        
-        AccessInfo result = nodeAccessChecker.getDefaultAccessInfoForUser(username);
-        
-        assertEquals("Default access level value different from expected", AccessLevel.ACCESS_LEVEL_UNKNOWN, result.getAccessLevel());
-        assertTrue("Default read rights different from expected", result.hasReadAccess(username));
-        assertTrue("Default write rights different from expected", result.hasWriteAccess(username));
-    }
 }
