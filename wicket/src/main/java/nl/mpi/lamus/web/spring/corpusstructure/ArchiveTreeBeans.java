@@ -18,8 +18,15 @@ package nl.mpi.lamus.web.spring.corpusstructure;
 
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectsDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.CorpusStructureDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchiveDaoImpl;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchiveObjectsDaoImpl;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.CorpusStructureDaoImpl;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
 import nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,15 +41,43 @@ import org.springframework.context.annotation.Scope;
 @Profile("corpusstructure")
 public class ArchiveTreeBeans {
     
+    @Autowired
+    private CorpusStructureProviderFactory corpusStructureProviderFactory;
+    
     @Bean
     @Scope("prototype")
     @Qualifier("createWorkspaceTreeProvider")
     public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() throws UnknownNodeException {
-        return new CorpusStructureTreeModelProvider(corpusStructureDbFactory());
+//        return new CorpusStructureTreeModelProvider(corpusStructureDbFactory());
+        return new CorpusStructureTreeModelProvider(corpusStructureProviderFactory.createCorpusStructureProvider());
+    }
+    
+//    @Bean
+//    public CorpusStructureProviderFactory corpusStructureDbFactory() {
+//        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
+//    }
+    
+
+    
+    //PROFILE NECESSARY???
+    
+    
+    
+    
+    @Bean
+    public ArchiveDao archiveDao() {
+        return new ArchiveDaoImpl();
     }
     
     @Bean
-    public CorpusStructureProviderFactory corpusStructureDbFactory() {
-        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
+    public ArchiveObjectsDao archiveObjectsDao() {
+        return new ArchiveObjectsDaoImpl();
     }
+    
+    @Bean
+    public CorpusStructureDao corpusStructureDao() {
+        return new CorpusStructureDaoImpl();
+    }
+    
+    
 }
