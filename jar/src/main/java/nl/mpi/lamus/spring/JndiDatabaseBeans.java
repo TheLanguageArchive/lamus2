@@ -15,20 +15,22 @@
  */
 package nl.mpi.lamus.spring;
 
+import freemarker.core.Environment;
+import java.util.Properties;
+import javax.annotation.Resource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
-import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
 import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 /**
  * Configuration class containing some beans related with databases. To be used
@@ -39,41 +41,57 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 @Profile("production")
 public class JndiDatabaseBeans {
+    
+    
+//    @Resource
+//    private Environment env;
+    
 
     //TODO add these properties to some configuration file and load them here
     //TODO for testing load a dummy one? take care of closing the connection
-    private CorpusStructureDBWriteImpl csDBWrite;
-    private DataSource lamusDataSource;
+
     private VersioningAPI versioningAPI;
     private SearchClient searchClient;
 
-    /**
-     * @return ArchiveObjectsDB bean, which connects to the 'corpusstructure'
-     * database
-     */
+    
     @Bean
-    @Qualifier("ArchiveObjectsDB")
-    public CorpusStructureDBWriteImpl archiveObjectsDB() {
-        return corpusStructureDBWrite();
+    @Qualifier("corpusStructureDataSource")
+    public DataSource corpusStructureDataSource() throws NamingException {
+        Context ctx = new InitialContext();
+        return (DataSource) ctx.lookup("java:comp/env/jdbc/CSDB2");
     }
-
-    /**
-     * Creates the connection to the 'corpusstructure' database, in case it
-     * hasn't been done before.
-     *
-     * @return CorpusStructureDBWriteImpl object, which will be used for the
-     * ArchiveObjectsDB bean
-     */
-    private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
-        if (csDBWrite == null) {
-
-            //TODO How are the username and password injected here?
-
-            csDBWrite = new CorpusStructureDBWriteImpl("java:comp/env/jdbc/CSDB", false, "", "");
-        }
-        return csDBWrite;
+    
+    @Bean  
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws NamingException {
+            return new LocalContainerEntityManagerFactoryBean() {{
+                
+                setPackagesToScan("nl.mpi.archiving.corpusstructure.core.database.pojo");
+                setDataSource(corpusStructureDataSource());
+                setJpaVendorAdapter(
+                        new HibernateJpaVendorAdapter() {{
+                            setGenerateDdl(true);
+                        }});
+                setPersistenceUnitName(null);
+                setJpaProperties(hibProperties());
+            }};
     }
-
+    
+    private Properties hibProperties() {
+        return new Properties() {{
+            put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+            put("hibernate.show_sql", "false");
+            put("hibernate.hbm2ddl.auto", "update");
+        }};
+    }
+    
+    @Bean  
+    public JpaTransactionManager transactionManager() throws NamingException {
+        return new JpaTransactionManager() {{
+            setEntityManagerFactory(entityManagerFactory().getObject());
+        }};
+    }
+    
+    
     /**
      * @return DataSource bean corresponding to the Lamus2 database
      * @throws NamingException
@@ -81,11 +99,8 @@ public class JndiDatabaseBeans {
     @Bean
     @Qualifier("lamusDataSource")
     public DataSource lamusDataSource() throws NamingException {
-        if (lamusDataSource == null) {
-            Context ctx = new InitialContext();
-            lamusDataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
-        }
-        return lamusDataSource;
+        Context ctx = new InitialContext();
+        return (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
     }
 
     @Bean

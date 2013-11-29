@@ -248,6 +248,10 @@
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -284,6 +288,16 @@
             <artifactId>annot-search-lib</artifactId>
             <version>1.2.2</version>
         </dependency>
+        
+        
+        
+        <!-- CS Providers beans -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>4.2.4.Final</version>
+        </dependency>
+        
         
     </dependencies>
 
