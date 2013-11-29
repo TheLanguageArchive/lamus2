@@ -108,7 +108,6 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             childCorpusNode = corpusStructureProvider.getNode(childURI);
             childURL = nodeResolver.getUrl(childCorpusNode);
             
-//            childURL = nodeDataRetriever.getResourceURL(childLink);
             if(childURL == null) {
                 String errorMessage = "Error getting URL for link " + childLink.getURI();
                 logger.error(errorMessage);
@@ -126,10 +125,6 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
 
-        
-        //TODO change this call - reuse/refactor the new method in ArchiveFileHelper instead
-//        OurURL childURLWithContext = this.archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-        
 
         WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();

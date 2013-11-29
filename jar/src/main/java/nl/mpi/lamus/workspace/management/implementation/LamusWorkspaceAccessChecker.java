@@ -40,7 +40,6 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
-//    private final ArchiveObjectsDB archiveObjectsDB;
     private final CorpusStructureProvider corpusStructureProvider;
     private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;

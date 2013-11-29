@@ -108,15 +108,9 @@ public class LamusWorkspaceNodeExplorerTest {
             
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
-                
-//                oneOf(mockArchiveObjectsDB).getObjectForPID(((HandleCarrier)currentLink).getHandle()); will(returnValue(testLinksArchiveIDs[current]));
-                
-//                oneOf(mockArchiveObjectsDB).getObjectURLForPid(((HandleCarrier)currentLink).getHandle()); will(returnValue(urls[current]));
-//                oneOf(mockArchiveObjectsDB).getObjectId(urls[current]); will(returnValue(testLinksArchiveIDs[current]));
-                
+
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
-//                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
                 oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
                 oneOf(mockNodeImporter).importNode(workspaceID, mockNodeToExplore, mockNodeDocument, currentLink, currentLink.getURI());
                 
@@ -157,7 +151,6 @@ public class LamusWorkspaceNodeExplorerTest {
 //            
 //            int current = 0;
 //            for(Reference currentLink : testLinks) {
-//                oneOf (mockArchiveObjectsDB).getObjectId(new OurURL(currentLink.getURI().toURL())); will(returnValue(testLinksArchiveIDs[current]));
 //                
 //                oneOf (mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
 //                oneOf (mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));

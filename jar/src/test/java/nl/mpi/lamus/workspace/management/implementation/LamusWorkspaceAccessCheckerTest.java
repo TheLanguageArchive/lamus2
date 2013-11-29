@@ -81,7 +81,6 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(false));
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(throwException(new UnknownNodeException("node not known")));
         }});
         
@@ -102,7 +101,6 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(false));
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.FALSE));
         }});
@@ -121,7 +119,6 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
@@ -141,7 +138,6 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
@@ -162,7 +158,6 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(archiveNodeID)); will(returnValue(true));
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));

@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
-import java.util.logging.Level;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -32,7 +31,6 @@ import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.util.OurURL;
@@ -67,50 +65,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         this.archiveFileHelper = archiveFileHelper;
     }
 
-    /**
-     * @see NodeDataRetriever#getArchiveNodeMetadataDocument(int)
-     */
-//    @Override
-//    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
-//            throws IOException, MetadataException, UnknownNodeException {
-//        
-//        OurURL tempUrl = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(nodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-//	if (tempUrl == null) {
-//	    throw new UnknownNodeException("No known URL for node with ID " + nodeArchiveID);
-//	}
-//	URL nodeArchiveURL = tempUrl.toURL();
-//
-//	MetadataDocument document = metadataAPI.getMetadataDocument(nodeArchiveURL);
-//
-//        return document;
-//    }
-//    
-    /**
-     * @see NodeDataRetriever#getResourceURL(nl.mpi.metadata.api.model.Reference)
-     */
-//    @Override
-//    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException {
-//        
-//        OurURL resourceURL = null;
-//        
-//        if(resourceReference instanceof HandleCarrier) {
-//            String resourceHandle = ((HandleCarrier) resourceReference).getHandle();
-//            resourceURL = this.archiveObjectsDB.getObjectURLForPid(resourceHandle);
-//            
-//            //TODO can't assume that the link always has a handle
-//        }
-//        
-//        if(resourceURL == null) {
-//            
-//            //TODO Something else
-//                //TODO get URL from nodeID instead?
-//            
-//            resourceURL = new OurURL(resourceReference.getURI().toURL());
-//        }
-//        
-//        return resourceURL;
-//    }
-    
+  
     //TODO review this method
     
     @Override

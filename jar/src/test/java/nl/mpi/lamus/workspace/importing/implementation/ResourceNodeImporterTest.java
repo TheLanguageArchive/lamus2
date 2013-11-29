@@ -169,17 +169,11 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLink).getURI(); will(returnValue(childURI));
-//            oneOf(mockNodeDataRetriever).getResourceURL(mockChildLink); will(returnValue(childNodeUrl));
-
-//            oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-//                will(returnValue(childNodeUrlWithContext));
-            
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
             
             //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
             
             
             oneOf(mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
@@ -240,99 +234,4 @@ public class ResourceNodeImporterTest {
     }
     
     //TODO TEST OTHER POSSIBILITIES/EXCEPTIONS
-    
-//    @Test
-//    public void childLinkIsNotURL() throws URISyntaxException, MalformedURLException, NodeExplorerException {
-//        
-//        final int parentWorkspaceNodeID = 1;
-//        final URI childNodeSchemaLocation = new URI("file:/some.location");
-//        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
-//        final int childNodeArchiveID = 100;
-//        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-//                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
-//        final URI validUriButInvalidUrl = new URI("urn:isbn:1234567890");
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf (mockChildLink).getURI(); will(returnValue(validUriButInvalidUrl));
-//        }});
-//        
-//        try {
-//            nodeImporter.importNode(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
-//        } catch (NodeImporterException ex) {
-//            assertNotNull(ex);
-//            String expectedErrorMessage = "Error getting URL for link " + validUriButInvalidUrl;
-//            assertEquals(expectedErrorMessage, ex.getMessage());
-//            assertEquals(testWorkspace, ex.getWorkspace());
-//            assertEquals(ResourceNodeImporter.class, ex.getNodeImporterType());
-//            assertTrue(ex.getCause() instanceof MalformedURLException);
-//        }
-//    }
-//    
-//    @Test
-//    public void childIsNotOnsite() throws URISyntaxException, MalformedURLException, NodeImporterException, NodeExplorerException {
-//        
-//        final int parentWorkspaceNodeID = 1;
-//        final URI childNodeSchemaLocation = new URI("file:/some.location");
-//        final URL parentURL = new URL("file:/some.uri/filename.cmdi");
-//        final int childNodeArchiveID = 100;
-//        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), 1, childNodeSchemaLocation,
-//                "parent label", "", WorkspaceNodeType.METADATA, parentURL, parentURL, parentURL, WorkspaceNodeStatus.NODE_ISCOPY, "aPid", "cmdi");
-//        
-//        final URI childLinkURI = new URI("http:/some.external.uri/filename.txt");
-//        final OurURL childNodeUrl = new OurURL(childLinkURI.toURL());
-//        final String childNodeName = "filename.txt";
-//        final String childNodeLabel = "file name label";
-//        final String childNodeMimetype = "txt";
-//        final OurURL archiveFileUrlWithContext = new OurURL("http:/some.external.uri/filename.txt");
-//        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
-//        final int childWorkspaceNodeID = 10;
-//        final String childNodePid = "somePid";
-//        
-//        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeArchiveID, childNodeSchemaLocation,
-//                childNodeLabel, "", childNodeType, childLinkURI.toURL(), childLinkURI.toURL(), childLinkURI.toURL(), WorkspaceNodeStatus.NODE_CREATED, childNodePid, childNodeMimetype);
-//        
-//        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLink);
-//        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childLinkURI);
-//
-//        context.checking(new Expectations() {{
-//            
-//            oneOf (mockChildLink).getURI(); will(returnValue(childLinkURI));
-//            
-//            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
-//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(childNodePid); will(returnValue(childNodeUrl));
-//            
-//            oneOf (mockArchiveFileHelper).getFileBasename(childNodeUrl.toString()); will(returnValue(childNodeName));
-//            oneOf (mockArchiveFileHelper).getFileTitle(childNodeUrl.toString()); will(returnValue(childNodeLabel));
-//            
-//            oneOf (mockChildLink).getMimetype(); will(returnValue(childNodeMimetype));
-//            
-////            oneOf (mockFileTypeHandlerFactory).getNewFileTypeHandlerForWorkspace(testWorkspace); will(returnValue(mockFileTypeHandler));
-//            
-//            oneOf (mockArchiveObjectsDB).isOnSite(NodeIdUtils.TONODEID(childNodeArchiveID)); will(returnValue(false));
-//            
-//            oneOf (mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
-//                will(returnValue(archiveFileUrlWithContext));
-//            
-//            oneOf (mockFileTypeHandler).setValues(childNodeMimetype);
-//            oneOf (mockFileTypeHandler).getMimetype(); will(returnValue(childNodeMimetype));
-//            oneOf (mockFileTypeHandler).getNodeType(); will(returnValue(childNodeType));
-//            
-//            oneOf (mockWorkspaceNodeFactory).getNewWorkspaceNode(testWorkspace.getWorkspaceID(), childNodeArchiveID, childLinkURI.toURL());
-//                will(returnValue(testChildNode));
-//            
-//            oneOf(mockChildLink).getHandle(); will(returnValue(childNodePid));
-//            
-//            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-//
-//            oneOf (mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(testParentNode, mockChildLink);
-//                will(returnValue(testParentNodeReference));
-//            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childLinkURI);
-//                will(returnValue(testNodeLink));
-//            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);            
-//        }});
-//
-//        
-//        nodeImporter.importNode(testParentNode, mockReferencingMetadataDocument, mockChildLink, childNodeArchiveID);
-//    }
 }

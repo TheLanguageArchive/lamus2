@@ -24,14 +24,11 @@ import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
-import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,31 +68,6 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
         
             //TODO check if the file does exist
 
-//            String currentNodeArchiveIdStr;
-//            
-//            if(currentLink instanceof HandleCarrier) {
-//                String linkHandle = ((HandleCarrier) currentLink).getHandle();
-////                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectForPID(linkHandle);
-//                
-//                OurURL linkArchiveURL = this.archiveObjectsDB.getObjectURLForPid(linkHandle);
-//                currentNodeArchiveIdStr = this.archiveObjectsDB.getObjectId(linkArchiveURL);
-//                
-//            } else {
-//                //TODO Get the URL/nodeID some other way...
-//                currentNodeArchiveIdStr = null;
-//            }
-//            
-//            if(currentNodeArchiveIdStr == null) {
-//                
-//                //TODO node doesn't exist?
-//                String errorMessage = "PROBLEMS GETTING NODE ID";
-//                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), null);
-//            }
-            
-            
-
-//            int currentNodeArchiveID = NodeIdUtils.TOINT(currentNodeArchiveIdStr);
-            
             //TODO check here if it's already locked or not?
             
             //TODO check if it is Metadata or Resource node
@@ -109,7 +81,6 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
                 throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), ex);
             }
             
-//            linkImporterToUse.setWorkspace(workspace);
             linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentLink.getURI());
         }
     }

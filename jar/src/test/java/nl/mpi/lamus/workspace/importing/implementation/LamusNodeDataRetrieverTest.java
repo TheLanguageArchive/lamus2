@@ -34,7 +34,6 @@ import nl.mpi.lamus.workspace.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -123,77 +122,7 @@ public class LamusNodeDataRetrieverTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of getArchiveNodeMetadataDocument method, of class LamusNodeDataRetriever.
-     */
-//    @Test
-//    public void testGetArchiveNodeMetadataDocument() throws MalformedURLException, IOException, MetadataException {
-//        
-//        final URI testChildURI = new URI(UUID.randomUUID().toString());
-//        final URL testChildURL = new OurURL("http://some.url/node.something");
-//
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockArchiveObjectsDB).getObjectURL(NodeIdUtils.TONODEID(testChildArchiveID), ArchiveAccessContext.getFileUrlContext()); will(returnValue(testChildURL));
-//            oneOf(mockMetadataAPI).getMetadataDocument(testChildURL.toURL()); will(returnValue(mockMetadataDocument));
-//        }});
-//        
-//        MetadataDocument retrievedDocument = testNodeDataRetriever.getArchiveNodeMetadataDocument(testChildArchiveID);
-//        assertEquals("Retrieved metadata document different from expected", mockMetadataDocument, retrievedDocument);
-//    }
-    
-    //TODO test Exceptions
-    
-    
-//    @Test
-//    public void testGetResourceURLWithHandle() throws MalformedURLException {
-//        
-//        final String testHandle = "some:fakehandle";
-//        final OurURL expectedURL = new OurURL("http://some.fakeurl");
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockReferenceWithHandle).getHandle(); will(returnValue(testHandle));
-//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testHandle); will(returnValue(expectedURL));
-//        }});
-//        
-//        OurURL retrievedURL = testNodeDataRetriever.getResourceURL(mockReferenceWithHandle);
-//        assertEquals("Retrieved URL different from expected", expectedURL, retrievedURL);
-//    }
-//    
-//    @Test
-//    public void testGetResourceNullURLWithHandle() throws MalformedURLException, URISyntaxException {
-//        
-//        final String testHandle = "some:fakehandle";
-//        final URI testURI = new URI("http://some.fakeurl");
-//        final OurURL expectedURL = new OurURL(testURI.toURL());
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockReferenceWithHandle).getHandle(); will(returnValue(testHandle));
-//            oneOf(mockArchiveObjectsDB).getObjectURLForPid(testHandle); will(returnValue(null));
-//            oneOf(mockReferenceWithHandle).getURI(); will(returnValue(testURI));
-//        }});
-//        
-//        OurURL retrievedURL = testNodeDataRetriever.getResourceURL(mockReferenceWithHandle);
-//        assertEquals("Retrieved URL different from expected", expectedURL, retrievedURL);
-//    }
-//    
-//    @Test
-//    public void testGetResourceURLWithoutHandle() throws MalformedURLException, URISyntaxException {
-//        
-//        final URI testURI = new URI("http://some.fakeurl");
-//        final OurURL expectedURL = new OurURL(testURI.toURL());
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockReferenceWithoutHandle).getURI(); will(returnValue(testURI));
-//        }});
-//        
-//        OurURL retrievedURL = testNodeDataRetriever.getResourceURL(mockReferenceWithoutHandle);
-//        assertEquals("Retrieved URL different from expected", expectedURL, retrievedURL);
-//    }
-    
+
     @Test
     public void getArchiveURL() throws URISyntaxException, MalformedURLException, UnknownNodeException {
         
@@ -343,28 +272,7 @@ public class LamusNodeDataRetrieverTest {
     }
     
     
-//    @Test
-//    public void testVerifyTypecheckedResults() throws MalformedURLException {
-//        
-//        final String mimetype = "text/plain";
-//        final OurURL resourceURL = new OurURL("file:/some.file.txt");
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockReferenceWithHandle).getMimetype(); will(returnValue(mimetype));
-//            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(mimetype));
-//            oneOf(mockTypecheckedResults).isTypeUnspecified(); will(returnValue(false));
-//        }});
-//        
-//        testNodeDataRetriever.verifyTypecheckedResults(resourceURL, mockReferenceWithHandle, mockTypecheckedResults);
-//    }
-    
-    
     public void getNewArchiveURI() {
-        
-//        context.checking(new Expectations() {{
-//            oneOf(mockWorkspaceNode).setArchiveURI(with(aNonNull(URI.class)));
-//        }});
         
         URI retrievedURI = testNodeDataRetriever.getNewArchiveURI();
         

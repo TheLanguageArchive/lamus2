@@ -40,7 +40,6 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.*;
-import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,17 +129,13 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         MetadataDocument childDocument;
         try {
-//            childNodeArchivePID = archiveObjectsDB.getObjectPID(NodeIdUtils.TONODEID(childNodeArchiveID));
-//            childNodeArchiveURL = archiveObjectsDB.getObjectURLForPid(childNodeArchivePID);
-//            childNodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(childNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
             
             CorpusNode childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
             childArchiveURL = nodeResolver.getUrl(childCorpusNode);
             childName = childCorpusNode.getName();
             
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
-//            childDocument = nodeDataRetriever.getArchiveNodeMetadataDocument(childNodeArchiveID);
-            
+
         } catch (IOException ioex) {
 	    String errorMessage = "Error importing Metadata Document for node " + childArchiveURI;
 	    logger.error(errorMessage, ioex);
@@ -155,14 +150,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
         }
         
-        WorkspaceNode childNode;
-//        try {
-            childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName);
-//        } catch (MalformedURLException muex) {
-//            String errorMessage = "Error creating workspace node for file with location: " + childDocument.getFileLocation();
-//            logger.error(errorMessage, muex);
-//            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
-//        }
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName);
         
         workspaceDao.addWorkspaceNode(childNode);
         
