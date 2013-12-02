@@ -85,7 +85,7 @@
 		<!-- MPI dependencies -->
 	<dependency>
 	    <groupId>nl.mpi</groupId>
-	    <artifactId>lamus2</artifactId>
+	    <artifactId>lamus2-jar</artifactId>
 	    <version>0.1-SNAPSHOT</version>
 	</dependency>
 	<dependency>
