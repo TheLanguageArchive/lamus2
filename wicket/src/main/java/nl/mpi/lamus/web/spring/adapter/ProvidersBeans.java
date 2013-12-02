@@ -14,29 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.spring;
+package nl.mpi.lamus.web.spring.adapter;
 
-import nl.mpi.lamus.web.LamusWicketApplication;
-import nl.mpi.lamus.web.session.LamusSessionFactory;
-import org.apache.wicket.Application;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
+import nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
 
 /**
  *
  * @author guisil
  */
 @Configuration
-@Profile(value = {"production", "cmdi-adapter-csdb"})
-public class WicketBeans {
+@Profile(value = {"cmdi-adapter-csdb"})
+public class ProvidersBeans {
     
     @Autowired
-    private LamusSessionFactory sessionFactory;
-
+    private CorpusStructureProviderFactory csdbFactory;
+    
     @Bean
-    public Application wicketApplication() {
-        return new LamusWicketApplication(sessionFactory);
+    @Scope("prototype")
+    @Qualifier("createWorkspaceTreeProvider")
+    public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() throws UnknownNodeException {
+        return new CorpusStructureTreeModelProvider(csdbFactory);
     }
 }

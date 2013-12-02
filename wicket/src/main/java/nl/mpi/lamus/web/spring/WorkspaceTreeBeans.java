@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.spring.production;
+package nl.mpi.lamus.web.spring;
 
 import nl.mpi.archiving.tree.GenericTreeModelProviderFactory;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Profile;
  * @author guisil
  */
 @Configuration
-@Profile("production")
+@Profile(value = {"production", "cmdi-adapter-csdb"})
 public class WorkspaceTreeBeans {
     
     @Bean

@@ -14,19 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.spring.production;
+package nl.mpi.lamus.web.spring;
 
-import org.springframework.context.annotation.ComponentScan;
+import nl.mpi.lamus.web.session.LamusSessionFactory;
+import nl.mpi.lamus.web.session.mock.MockLamusSessionFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 /**
  *
  * @author guisil
  */
-//@Configuration
-//@Profile("production")
-//@ComponentScan("nl.mpi.lamus")
-public class WorkspaceBeans {
+@Configuration
+public class MockSessionBeans {
     
+    private MockLamusSessionFactory sessionFactory;
+    
+    @Bean
+    public LamusSessionFactory sessionFactory() {
+        if(sessionFactory == null) {
+            sessionFactory = new MockLamusSessionFactory();
+            sessionFactory.setUserId("corpman@mpi.test");
+            sessionFactory.setAuthenticated(Boolean.TRUE);
+        }
+        return sessionFactory;
+    }
 }
