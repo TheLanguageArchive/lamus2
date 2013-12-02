@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 @ComponentScan("nl.mpi.lamus")
-@Profile("production")
+@Profile(value = {"production", "cmdi-adapter-csdb"})
 public class LamusBeans {
     
     @Bean

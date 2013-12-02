@@ -16,8 +16,6 @@
 package nl.mpi.lamus.spring;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +32,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  */
 @Configuration
 @PropertySource(value="classpath:application.properties")
-@Profile("production")
+@Profile(value = {"production", "cmdi-adapter-csdb"})
 public class LamusProperties {
     
     // otherwise the properties don't get automatically injected with the Value annotations

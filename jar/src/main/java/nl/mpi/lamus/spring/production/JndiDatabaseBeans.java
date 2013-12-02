@@ -13,11 +13,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.spring;
+package nl.mpi.lamus.spring.production;
 
-import freemarker.core.Environment;
-import java.util.Properties;
-import javax.annotation.Resource;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -27,10 +24,8 @@ import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 /**
  * Configuration class containing some beans related with databases. To be used
@@ -39,7 +34,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-@Profile("production")
+//@EnableTransactionManagement
+@Profile(value = { "production"})
+@ImportResource("classpath:/config/production/csdb.xml")
 public class JndiDatabaseBeans {
     
     
@@ -54,42 +51,42 @@ public class JndiDatabaseBeans {
     private SearchClient searchClient;
 
     
-    @Bean
-    @Qualifier("corpusStructureDataSource")
-    public DataSource corpusStructureDataSource() throws NamingException {
-        Context ctx = new InitialContext();
-        return (DataSource) ctx.lookup("java:comp/env/jdbc/CSDB2");
-    }
+//    @Bean
+//    @Qualifier("corpusStructureDataSource")
+//    public DataSource corpusStructureDataSource() throws NamingException {
+//        Context ctx = new InitialContext();
+//        return (DataSource) ctx.lookup("java:comp/env/jdbc/CSDB2");
+//    }
     
-    @Bean  
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws NamingException {
-            return new LocalContainerEntityManagerFactoryBean() {{
-                
-                setPackagesToScan("nl.mpi.archiving.corpusstructure.core.database.pojo");
-                setDataSource(corpusStructureDataSource());
-                setJpaVendorAdapter(
-                        new HibernateJpaVendorAdapter() {{
-                            setGenerateDdl(true);
-                        }});
-                setPersistenceUnitName(null);
-                setJpaProperties(hibProperties());
-            }};
-    }
-    
-    private Properties hibProperties() {
-        return new Properties() {{
-            put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-            put("hibernate.show_sql", "false");
-            put("hibernate.hbm2ddl.auto", "update");
-        }};
-    }
-    
-    @Bean  
-    public JpaTransactionManager transactionManager() throws NamingException {
-        return new JpaTransactionManager() {{
-            setEntityManagerFactory(entityManagerFactory().getObject());
-        }};
-    }
+//    @Bean  
+//    public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws NamingException {
+//            return new LocalContainerEntityManagerFactoryBean() {{
+//                
+//                setPackagesToScan("nl.mpi.archiving.corpusstructure.core.database.pojo");
+//                setDataSource(corpusStructureDataSource());
+//                setJpaVendorAdapter(
+//                        new HibernateJpaVendorAdapter() {{
+//                            setGenerateDdl(true);
+//                        }});
+//                setPersistenceUnitName("corpusstructure2-persistency");
+//                setJpaProperties(hibProperties());
+//            }};
+//    }
+//    
+//    private Properties hibProperties() {
+//        return new Properties() {{
+//            put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+//            put("hibernate.show_sql", "false");
+//            put("hibernate.hbm2ddl.auto", "update");
+//        }};
+//    }
+//    
+//    @Bean  
+//    public JpaTransactionManager transactionManager() throws NamingException {
+//        return new JpaTransactionManager() {{
+//            setEntityManagerFactory(entityManagerFactory().getObject());
+//        }};
+//    }
     
     
     /**
