@@ -699,8 +699,8 @@ public class WorkspaceSteps {
         for(Reference child : childReferences) {
             
             if(child instanceof HandleCarrier) {
-                String handle = ((HandleCarrier) child).getHandle();
-                if(handle != null && !handle.isEmpty()) {
+                URI handle = ((HandleCarrier) child).getHandle();
+                if(handle != null) {
                     continue;
                 }
             }
@@ -753,7 +753,7 @@ public class WorkspaceSteps {
         
         for(Reference ref : references) {
             assertTrue("Reference should contain a handle", ref instanceof HandleCarrier);
-            String handle = ((HandleCarrier) ref).getHandle();
+            URI handle = ((HandleCarrier) ref).getHandle();
             assertNotNull("Handle should not be null", handle);
             
             URL refResolvedURL = this.identifierResolver.resolveIdentifier(document, ref.getURI());

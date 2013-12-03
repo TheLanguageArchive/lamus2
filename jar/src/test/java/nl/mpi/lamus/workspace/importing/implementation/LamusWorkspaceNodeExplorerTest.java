@@ -89,9 +89,9 @@ public class LamusWorkspaceNodeExplorerTest {
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
         final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
         
-        final String metadataLinkHandle = "hdl:SOMETHING/00-0000-0000-0000-0000-1";
+        final URI metadataLinkHandle = URI.create("hdl:SOMETHING/00-0000-0000-0000-0000-1");
         metadataLink.setHandle(metadataLinkHandle);
-        final String resourceLinkHandle = "hdl:SOMETHING/00-0000-0000-0000-0000-2";
+        final URI resourceLinkHandle = URI.create("hdl:SOMETHING/00-0000-0000-0000-0000-2");
         resourceLink.setHandle(resourceLinkHandle);
         
         final Collection<Reference> testLinks = new ArrayList<Reference>();
