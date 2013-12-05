@@ -142,7 +142,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      */
     @Override
     public Collection<WorkspaceNode> getWorkspaceNodeByArchiveURI(URI archiveNodeURI) {
-        return this.getWorkspaceNodeByArchiveURI(archiveNodeURI);
+        return this.getWorkspaceDao().getWorkspaceNodeByArchiveURI(archiveNodeURI);
     }
 
     /**

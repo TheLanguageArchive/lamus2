@@ -38,7 +38,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private DeletedNodesExportHandler deletedNodesExportHandler;
     
     private Workspace workspace;
-    private boolean keepUnlinkedFiles;
+//    private boolean keepUnlinkedFiles;
 
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory, DeletedNodesExportHandler dnExportHandler) {
@@ -59,9 +59,9 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * Setter for the boolean that indicates if the unlinked files are to be kept
      * @param keepUnlinkedFiles true if unlinked files are to be kept
      */
-    public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
-        this.keepUnlinkedFiles = keepUnlinkedFiles;
-    }
+//    public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
+//        this.keepUnlinkedFiles = keepUnlinkedFiles;
+//    }
 
     /**
      * The export process is started in a separate thread.

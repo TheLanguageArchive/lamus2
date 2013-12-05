@@ -110,9 +110,7 @@ public class JndiDatabaseBeans {
 
     @Bean
     public SearchClient searchClient() {
-        if (searchClient == null) {
-            //TODO INITIALIZE SearchClient bean
-        }
+        //TODO INITIALIZE SearchClient bean
         return searchClient;
     }
 }
