@@ -18,19 +18,18 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -88,7 +87,14 @@ public class GeneralNodeExporter implements NodeExporter {
      * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode)
+            throws WorkspaceExportException {
+        
+        if (workspace == null) {
+	    String errorMessage = "Workspace not set";
+	    logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+	}
         
         if(currentNode.isMetadata()) {
             
@@ -103,37 +109,53 @@ public class GeneralNodeExporter implements NodeExporter {
             try {
                 corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
             } catch (UnknownNodeException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
+                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
             String archiveChecksum = corpusNode.getFileInfo().getChecksum();
             String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
             
+            //TODO should the checksum be created at some other point (when the node is actually changed, for instance)
+                // so it takes less time at this point?
+            // node hasn't changed
             if(workspaceChecksum.equals(archiveChecksum)) {
                 return;
             }
             
-            
-            //TODO IF NODE WAS NOT CHANGED, RETURN
-            
-
             MetadataDocument nodeDocument = null;
             try {
                 nodeDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
             } catch (IOException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
+                String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
             } catch (MetadataException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
+                String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
 
             File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
             File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
             StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
-        
-            try {
+            
+            
+            try {        
                 workspaceFileHandler.copyMetadataFile(currentNode, metadataAPI, nodeDocument, nodeWsFile, nodeArchiveStreamResult);
-            } catch (WorkspaceNodeFilesystemException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
-            }
+            } catch (IOException ex) {
+                String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            } catch (TransformerException ex) {
+                String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            } catch (MetadataException ex) {
+                String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            }            
             
             
             

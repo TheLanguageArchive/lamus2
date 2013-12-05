@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -94,7 +96,7 @@ public class WorkspaceExportRunnerTest {
      * Test of call method, of class WorkspaceExportRunner.
      */
     @Test
-    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException {
+    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException {
         
         final int workspaceID = 1;
         

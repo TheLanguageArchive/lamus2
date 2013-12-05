@@ -26,8 +26,8 @@ import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
@@ -89,14 +89,14 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
      */
     @Override
     public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, URI childNodeArchiveURI) throws NodeImporterException {
+            Reference childLink, URI childNodeArchiveURI) throws WorkspaceImportException {
         
         workspaceID = wsID;
         
         if(workspaceID < 0) {
             String errorMessage = "ResourceNodeImporter.importNode: workspace not set";
             logger.error(errorMessage);
-            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
+            throw new IllegalArgumentException(errorMessage);
         }
    
         URI childURI = childLink.getURI();
@@ -109,20 +109,20 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             childURL = nodeResolver.getUrl(childCorpusNode);
             
             if(childURL == null) {
-                String errorMessage = "Error getting URL for link " + childLink.getURI();
+                String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
                 logger.error(errorMessage);
-                throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
+                throw new IllegalArgumentException(errorMessage);
             }
-            childOurURL = new OurURL(childURL.toString());
+            childOurURL = new OurURL(childURL);
             
         } catch (MalformedURLException muex) {
-            String errorMessage = "Error getting URL for link " + childLink.getURI();
+            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
             logger.error(errorMessage, muex);
-            throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), muex);
+            throw new WorkspaceImportException(errorMessage, workspaceID, muex);
         } catch (UnknownNodeException unex) {
-	    String errorMessage = "Error getting object URL for node " + childURI;
+	    String errorMessage = "ResourceNodeImporter.importNode: error getting object URL for node " + childURI;
 	    logger.error(errorMessage, unex);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
+	    throw new WorkspaceImportException(errorMessage, workspaceID, unex);
         }
 
 
@@ -140,7 +140,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
-                throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), tcex);
+                throw new WorkspaceImportException(errorMessage, workspaceID, tcex);
             }
             
             nodeDataRetriever.verifyTypecheckedResults(childOurURL, childLink, typecheckedResults);

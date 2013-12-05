@@ -18,9 +18,11 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -81,7 +83,7 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeOneAction() {
+    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final String userID = "testUser";
         Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
@@ -95,7 +97,7 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeTwoActions() {
+    public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final String userID = "testUser";
         Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
@@ -108,5 +110,74 @@ public class LinkNodesActionTest {
         }});
 
         linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
+    }
+    
+    @Test
+    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        final int workspaceID = 10;
+        final String userID = "testUser";
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
+        nodes.add(mockChildNodeOne);
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeOne);
+                will(throwException(expectedException));
+        }});
+
+        try {
+            linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        final int workspaceID = 10;
+        final String userID = "testUser";
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
+        nodes.add(mockChildNodeOne);
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeOne);
+                will(throwException(expectedException));
+        }});
+
+        try {
+            linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        final int workspaceID = 10;
+        final String userID = "testUser";
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
+        nodes.add(mockChildNodeOne);
+        
+        final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceService).linkNodes(userID, mockParentNode, mockChildNodeOne);
+                will(throwException(expectedException));
+        }});
+
+        try {
+            linkNodesAction.execute(userID, mockParentNode, nodes, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
 }

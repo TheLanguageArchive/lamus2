@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
@@ -333,7 +335,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
      * Test of getWorkspace method, of class JdbcWorkspaceDao.
      */
     @Test
-    public void getWorkspaceWithNullEndDates() {
+    public void getWorkspaceWithNullEndDates() throws WorkspaceNotFoundException {
 
         
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
@@ -345,7 +347,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getWorkspaceWithNonNullEndDates() {
+    public void getWorkspaceWithNonNullEndDates() throws WorkspaceNotFoundException {
 
         
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
@@ -356,7 +358,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getWorkspaceWithTopNodeID() throws URISyntaxException, MalformedURLException {
+    public void getWorkspaceWithTopNodeID() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         WorkspaceNode testWorkspaceNode = insertTestWorkspaceNodeIntoDB(expectedWorkspace);
@@ -371,9 +373,17 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     @Test
     public void getWorkspaceThatDoesntExist() {
         
-        Workspace workspaceThatDoesntExist = workspaceDao.getWorkspace(1564);
+        int nonExistingWorkspaceID = 1564;
+        String errorMessage = "Workspace with ID " + nonExistingWorkspaceID + " does not exist in the database";
         
-        assertNull("Retrieved workspace should not exist", workspaceThatDoesntExist);
+        try {
+            workspaceDao.getWorkspace(nonExistingWorkspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", nonExistingWorkspaceID, ex.getWorkspaceID());
+            assertTrue("Exception cause has different type from expected", ex.getCause() instanceof EmptyResultDataAccessException);
+        }
     }
     
     @Test
@@ -462,11 +472,51 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Node should be locked (should exist in the database).", result);
     }
     
-    
-    
     //TODO TESTS NODE LOCKED WITH ONLY URL, NOT PID...
     
     
+    
+    @Test
+    public void getLockedNode() throws URISyntaxException, MalformedURLException {
+        
+        URI archiveNodeUriToCheck = new URI(UUID.randomUUID().toString());
+        URI archiveNodeUriToBeInsertedInTheDb = archiveNodeUriToCheck;
+        URL nodeURL = new URL("file:/archive/folder/node.cmdi");
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, Boolean.TRUE);
+        
+        Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeUriToCheck);
+        
+        assertNotNull("Node should not be null", retrievedNodes);
+        assertFalse("List should not be empty", retrievedNodes.isEmpty());
+        assertTrue("List should contain one node", retrievedNodes.size() == 1);
+        assertEquals("Node is different from expected", testNode, retrievedNodes.iterator().next());
+    }
+    
+    @Test
+    public void getLockedNodeMoreThanOnce() throws URISyntaxException, MalformedURLException {
+        
+        URI archiveNodeUriToCheck = new URI(UUID.randomUUID().toString());
+        URL firstURL = new URL("file:/archive/folder/first.cmdi");
+        URI archiveNodeUriToBeInsertedInTheDb = archiveNodeUriToCheck;
+        URL secondURL = new URL("file:/archive/folder/second.cmdi");
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        WorkspaceNode firstTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, Boolean.TRUE);
+        WorkspaceNode secondTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, Boolean.TRUE);
+        Collection<WorkspaceNode> testNodes = new ArrayList<WorkspaceNode>();
+        testNodes.add(firstTestNode);
+        testNodes.add(secondTestNode);
+        
+        Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeUriToCheck);
+        
+        assertNotNull("Node should not be null", retrievedNodes);
+        assertFalse("List should not be empty", retrievedNodes.isEmpty());
+        assertTrue("List should contain two nodes", retrievedNodes.size() == 2);
+        assertTrue("Collection doesn't contain all expected nodes", retrievedNodes.containsAll(testNodes));
+    }
     
     
     @Test
@@ -699,7 +749,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getExistingNode() throws MalformedURLException, URISyntaxException {
+    public void getExistingNode()
+            throws MalformedURLException, URISyntaxException, WorkspaceNodeNotFoundException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
@@ -712,15 +763,25 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getNonExistingNode() {
+    public void getNonExistingNode()
+            throws WorkspaceNodeNotFoundException {
         
-        WorkspaceNode result = this.workspaceDao.getWorkspaceNode(100);
+        int workspaceNodeID = 100;
+        String expectedErrorMessage = "Workspace Node with ID " + workspaceNodeID + " does not exist in the database";
         
-        assertNull("Retrieved node should be null", result);
+        try {
+            this.workspaceDao.getWorkspaceNode(workspaceNodeID);
+        } catch (WorkspaceNodeNotFoundException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID should not be known", -1, ex.getWorkspaceID());
+            assertEquals("Node ID different from expected", workspaceNodeID, ex.getWorkspaceNodeID());
+            assertTrue("Cause has a different type from expected", ex.getCause() instanceof EmptyResultDataAccessException);
+        }
     }
     
     @Test
-    public void getNodeWithNullProfileSchema() throws MalformedURLException, URISyntaxException {
+    public void getNodeWithNullProfileSchema()
+            throws MalformedURLException, URISyntaxException, WorkspaceNodeNotFoundException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
@@ -733,7 +794,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getNodeWithNullURLs() throws MalformedURLException, URISyntaxException {
+    public void getNodeWithNullURLs()
+            throws MalformedURLException, URISyntaxException, WorkspaceNodeNotFoundException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
@@ -745,79 +807,9 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertNotNull("Returned node should not be null", result);
     }
     
-//    @Test
-//    public void getExistingTreeNodeWithoutParent() throws MalformedURLException, URISyntaxException {
-//        
-//        int archiveNodeIdToBeInsertedInTheDb = 10;
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, Boolean.TRUE, Boolean.TRUE);
-//        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
-//        
-//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), null);
-//        
-//        assertNotNull("Returned tree node should not be null", result);
-//        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
-//        assertNull("Returned tree node should have a null parent tree node", result.getParent());
-//    }
-    
-//    @Test
-//    public void getExistingTreeNodeWithParent() throws MalformedURLException, URISyntaxException {
-//        
-//        int archiveNodeIdToBeInsertedInTheDb = 10;
-//        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, Boolean.TRUE, Boolean.TRUE);
-//        WorkspaceNode testParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, Boolean.TRUE, Boolean.TRUE);
-//        setNodeAsParentAndInsertLinkIntoDatabase(testParentNode, testNode);
-//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(testParentNode, null, workspaceDao);
-//        WorkspaceTreeNode expectedTreeNode = new LamusWorkspaceTreeNode(testNode, parentTreeNode, workspaceDao);
-//        
-//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), parentTreeNode);
-//        
-//        assertNotNull("Returned tree node should not be null", result);
-//        assertEquals("Returned tree node is different from expected", expectedTreeNode, result);
-//        assertNotNull("Returned tree node should have a null parent tree node", result.getParent());
-//        assertEquals("Returned tree node has a parent tree node that is different from expected", parentTreeNode, result.getParent());
-//    }
-    
-//    @Test
-//    public void getExistingTreeNodeWithIllegalParent() throws MalformedURLException, URISyntaxException {
-//        
-//        int archiveNodeIdToBeInsertedInTheDb = 10;
-//        int parentArchiveNodeIdToBeInsertedInTheDb = 5;
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode testNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, archiveNodeIdToBeInsertedInTheDb, Boolean.TRUE, Boolean.TRUE);
-//        WorkspaceNode testNotParentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, parentArchiveNodeIdToBeInsertedInTheDb, Boolean.TRUE, Boolean.TRUE);
-//        
-//        WorkspaceTreeNode notParentTreeNode = new LamusWorkspaceTreeNode(testNotParentNode, null, workspaceDao);
-//        WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(testNode, null, workspaceDao);
-//        
-//        String expectedErrorMessage = "Node with ID " + notParentTreeNode.getWorkspaceNodeID() +
-//                " is passed as parent of node with ID " + treeNode.getWorkspaceNodeID() +
-//                " but these nodes are not linked in the database.";
-//        
-//        WorkspaceTreeNode result;
-//        try {
-//            result = this.workspaceDao.getWorkspaceTreeNode(testNode.getWorkspaceNodeID(), notParentTreeNode);
-//            fail("An IllegalArgumentException should have been thrown.");
-//        } catch(IllegalArgumentException ex) {
-//            assertEquals("Exception message different from expected", expectedErrorMessage, ex.getMessage());
-//        }
-//    }
-    
-//    @Test
-//    public void getNonExistingTreeNode() {
-//        
-//        WorkspaceTreeNode result = this.workspaceDao.getWorkspaceTreeNode(100, null);
-//        
-//        assertNull("Retrieved tree node should be null", result);
-//    }
-    
     @Test
-    public void getWorkspaceTopNode() throws MalformedURLException, URISyntaxException {
+    public void getWorkspaceTopNode()
+            throws MalformedURLException, URISyntaxException, WorkspaceNodeNotFoundException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
@@ -832,6 +824,31 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertNotNull("Returned node should not be null", result);
         assertEquals("Returned node is different from expected", testNode, result);
+    }
+    
+    @Test
+    public void getNotFoundWorkspaceTopNode()
+            throws MalformedURLException, URISyntaxException, WorkspaceNodeNotFoundException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = new URI(UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+//        testWorkspace.setTopNodeID(testNode.getWorkspaceNodeID());
+//        testWorkspace.setTopNodeArchiveID(testNode.getArchiveNodeID());
+        testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
+        
+        String expectedErrorMessage = "Top node for workspace with ID " + testWorkspace.getWorkspaceID() + " does not exist in the database";
+        
+        try {
+            this.workspaceDao.getWorkspaceTopNode(testWorkspace.getWorkspaceID());
+        } catch (WorkspaceNodeNotFoundException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID should not be known", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Node ID should not be known", -1, ex.getWorkspaceNodeID());
+            assertTrue("Cause has a different type from expected", ex.getCause() instanceof EmptyResultDataAccessException);
+        }
     }
     
     @Test

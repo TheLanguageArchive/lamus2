@@ -28,9 +28,17 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -92,28 +100,75 @@ public class LamusWorkspaceServiceTest {
     public void tearDown() {
     }
 
-    /**
-     * 
-     */
+
     @Test
-    public void createWorkspaceNoAccess() throws MalformedURLException, URISyntaxException {
+    public void createWorkspaceThrowsUnknownNodeException()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
+        final UnknownNodeException expectedException = new UnknownNodeException("node not found");
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+                will(throwException(expectedException));
         }});
         
-        Workspace result = service.createWorkspace(userID, archiveNodeURI);
-        assertNull("Returned workspace should be null when it cannot be created.", result);
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(UnknownNodeException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
-    /**
-     * 
-     */
     @Test
-    public void createWorkspaceSuccess() throws MalformedURLException, URISyntaxException {
+    public void createWorkspaceThrowsNodeAccessException()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
+        
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final String userID = "someUser";
+        final NodeAccessException expectedException = new NodeAccessException("access problem", archiveNodeURI, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(NodeAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void createWorkspaceThrowsWorkspaceImportException()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
+        
+        final int workspaceID = 10;
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final String userID = "someUser";
+        final WorkspaceImportException expectedException = new WorkspaceImportException("some problem", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            //allow other calls
+            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void createWorkspaceSuccess()
+            throws MalformedURLException, URISyntaxException, UnknownNodeException, NodeAccessException, WorkspaceImportException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
@@ -122,9 +177,9 @@ public class LamusWorkspaceServiceTest {
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
-            oneOf (mockNodeAccessChecker).canCreateWorkspace(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
-            oneOf (mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeURI);
@@ -133,14 +188,14 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void deleteExistingWorkspace() {
+    public void deleteExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID);
         }});
         
@@ -148,7 +203,71 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void getExistingWorkspace() throws URISyntaxException, MalformedURLException {
+    public void deleteNonExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.deleteWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteInaccessibleWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.deleteWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.deleteWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void getExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
@@ -175,6 +294,38 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void getNonExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.getWorkspace(workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
     public void listUserWorkspaces() throws URISyntaxException, MalformedURLException {
         
         final String userID = "someUser";
@@ -194,11 +345,12 @@ public class LamusWorkspaceServiceTest {
         
         Collection<Workspace> result = service.listUserWorkspaces(userID);
         
-        assertEquals("Retrieved list differenc from expected", expectedList, result);
+        assertEquals("Retrieved list different from expected", expectedList, result);
     }
     
     @Test
-    public void openExistingWorkspace() throws URISyntaxException, MalformedURLException {
+    public void openExistingWorkspace()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
@@ -216,7 +368,8 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceManager).openWorkspace(userID, workspaceID); will(returnValue(workspaceToRetrieve));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).openWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
         }});
         
         Workspace result = service.openWorkspace(userID, workspaceID);
@@ -225,55 +378,187 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void submitWorkspaceNoAccess() {
+    public void openNonExistingWorkspace()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.openWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void openInaccessibleWorkspace()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.openWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void openWorkspaceThrowsIOException()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String archiveInfo = "still not sure what this would be";
+        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).openWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.openWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.submitWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.submitWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.submitWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+        
+    @Test
+    public void submitWorkspaceSuccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
         final int workspaceID = 1;
         final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
         }});
         
-        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
-        assertFalse("Result should be false", result);
-    }
-    
-    @Test
-    public void submitWorkspaceFail() {
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final boolean keepUnlinkedFiles = Boolean.TRUE;
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(returnValue(Boolean.FALSE));
-        }});
-        
-        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
-        assertFalse("Result should be false", result);
-    }
-        
-    @Test
-    public void submitWorkspaceSuccess() {
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final boolean keepUnlinkedFiles = Boolean.TRUE;
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(returnValue(Boolean.TRUE));
-        }});
-        
-        boolean result = service.submitWorkspace(userID, workspaceID/*, keepUnlinkedFiles*/);
-        assertTrue("Result should be true", result);
+        service.submitWorkspace(userID, workspaceID);
     }
     
     
     @Test
-    public void getExistingNode() throws URISyntaxException {
+    public void getExistingNode() throws URISyntaxException, WorkspaceNodeNotFoundException {
         
         final int nodeID = 1;
         final int workspaceID = 1;
@@ -297,6 +582,38 @@ public class LamusWorkspaceServiceTest {
         WorkspaceNode result = service.getNode(nodeID);
         assertNotNull("Returned node should not be null", result);
         assertEquals("Returned node is different from expected", result, nodeToRetrieve);
+    }
+    
+    @Test
+    public void getNonExistingNode() throws URISyntaxException, WorkspaceNodeNotFoundException {
+        
+        final int nodeID = 1;
+        final int workspaceID = 1;
+        URI profileSchemaURI = null;
+        String name = "node_name";
+        String title = "node_title";
+        WorkspaceNodeType type = WorkspaceNodeType.METADATA;
+        URL wsURL = null;
+        URI archiveURI = null;
+        URL archiveURL = null;
+        URL originURL = null;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        String format = "cmdi";
+        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL, archiveURI, archiveURL, originURL, status, format);
+        
+        final WorkspaceNodeNotFoundException expectedException = new WorkspaceNodeNotFoundException("some exception message", -1, nodeID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNode(nodeID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.getNode(nodeID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNodeNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test
@@ -327,7 +644,7 @@ public class LamusWorkspaceServiceTest {
 //        
 //        context.checking(new Expectations() {{
 //            
-//            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+//            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
 //            oneOf(mockWorkspaceUploader).uploadFiles(workspaceID, fileItems);
 //        }});
 //        
@@ -353,7 +670,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException {
+    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException, WorkspaceException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -368,7 +685,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException {
+    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException, WorkspaceException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -390,7 +707,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException {
+    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException, WorkspaceException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -412,7 +729,29 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void linkNodesWithAccess() {
+    public void uploadFileIntoWorkspaceThrowsWorkspaceException() throws IOException, TypeCheckerException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        final WorkspaceException workspaceException = new WorkspaceException("some error message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(throwException(workspaceException));
+        }});
+        
+        try {
+            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+            fail("An exception should have been thrown");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception thrown different from expected", workspaceException, ex);
+        }
+    }
+    
+    @Test
+    public void linkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -420,17 +759,82 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
         }});
         
         service.linkNodes(userID, mockParentNode, mockChildNode);
     }
     
-    //TODO linkNodesWithoutAccess
+    @Test
+    public void linkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.linkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
-    public void unlinkNodesWithAccess() {
+    public void linkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.linkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void linkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.linkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void unlinkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -438,17 +842,82 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodes(mockParentNode, mockChildNode);
         }});
         
         service.unlinkNodes(userID, mockParentNode, mockChildNode);
     }
     
-    //TODO unlinkNodesWithoutAccess
+    @Test
+    public void unlinkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.unlinkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
-    public void deleteNodeWithAccess() {
+    public void unlinkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.unlinkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void unlinkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.unlinkNodes(userID, mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteNodeWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
         final int nodeID = 4;
@@ -457,7 +926,7 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockChildNode);
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
@@ -467,7 +936,73 @@ public class LamusWorkspaceServiceTest {
         service.deleteNode(userID, mockChildNode);
     }
     
-    //TODO deleteNodeWithoutAccess
+    @Test
+    public void deleteNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+
+        try {
+            service.deleteNode(userID, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+
+        try {
+            service.deleteNode(userID, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteNodeWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int nodeID = 4;
+        final String userID = "testUser";
+        
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockChildNode); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.deleteNode(userID, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
     public void listUnlinkedNodes() {
@@ -477,8 +1012,6 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            //TODO should this be done everywhere?
-//            oneOf(mockNodeAccessChecker).hasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).listUnlinkedNodes(workspaceID); will(returnValue(mockUnlinkedNodesList));
         }});
         

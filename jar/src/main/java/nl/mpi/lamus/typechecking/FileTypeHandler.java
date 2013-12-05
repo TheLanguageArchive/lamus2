@@ -17,7 +17,7 @@ package nl.mpi.lamus.typechecking;
 
 import java.io.IOException;
 import java.io.InputStream;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 

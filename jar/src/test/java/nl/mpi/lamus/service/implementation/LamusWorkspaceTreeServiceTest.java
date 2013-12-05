@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -76,7 +77,7 @@ public class LamusWorkspaceTreeServiceTest {
      * Test of getTreeNode method, of class LamusWorkspaceTreeService.
      */
     @Test
-    public void testGetTreeNodeWithoutParent() {
+    public void testGetTreeNodeWithoutParent() throws WorkspaceNodeNotFoundException {
 
         final int nodeID = 1;
         final int workspaceID = 1;
@@ -114,7 +115,7 @@ public class LamusWorkspaceTreeServiceTest {
      * Test of getTreeNode method, of class LamusWorkspaceTreeService.
      */
     @Test
-    public void testGetTreeNodeWithParent() {
+    public void testGetTreeNodeWithParent() throws WorkspaceNodeNotFoundException {
 
         final int parentNodeID = 0;
         final int workspaceID = 1;
@@ -157,4 +158,6 @@ public class LamusWorkspaceTreeServiceTest {
         assertNotNull("Returned tree node should have a null parent tree node.", result.getParent());
         assertEquals("The parent tree node of the returned tree node is different from expected", parentTreeNode, result.getParent());
     }
+    
+    //TODO test exception possibilities and other methods
 }

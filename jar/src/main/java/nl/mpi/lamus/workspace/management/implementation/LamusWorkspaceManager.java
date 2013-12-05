@@ -22,9 +22,13 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.util.DateTimeHelper;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -76,7 +80,8 @@ public class LamusWorkspaceManager implements WorkspaceManager {
      * @see WorkspaceManager#createWorkspace(java.lang.String, java.net.URI)
      */
     @Override
-    public Workspace createWorkspace(String userID, URI topArchiveNodeURI) {
+    public Workspace createWorkspace(String userID, URI topArchiveNodeURI)
+            throws WorkspaceImportException {
         
         Workspace newWorkspace = workspaceFactory.getNewWorkspace(userID, topArchiveNodeURI);
         newWorkspace.setStatusMessageInitialising();
@@ -84,8 +89,9 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         try {
             workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace.getWorkspaceID());
         } catch(IOException ex) {
-            logger.error(ex.getMessage(), ex);
-            return null;
+            String errorMessage = "Error creating workspace in node " + topArchiveNodeURI;
+            logger.error(errorMessage, ex);
+            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), ex);
         }
         
         workspaceImportRunner.setWorkspace(newWorkspace);
@@ -105,26 +111,38 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         try {            
             isSuccessful = importResult.get();
         } catch (InterruptedException iex) {
-            logger.error("The thread was interrupted", iex);
-            
-            //TODO return some error instead??
-            return null;
+            String errorMessage = "Interruption in thread while creating workspace in node " + topArchiveNodeURI;
+            logger.error(errorMessage, iex);
+            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), iex);
         } catch (ExecutionException eex) {
-            logger.error("There was a problem with the thread execution", eex);
             
-            //TODO return some error instead??
-            return null;
+            //TODO Find a better way of handling these exceptions
+                // In most cases this WorkspaceImportException is wrapping an ExecutionException
+                    // that already contains a nested WorkspaceImportException
+                // One possibility would be to just throw here the cause of the ExecutionException
+                    // but perhaps some stacktrace information would be lost that way
+            
+            String errorMessage = "Problem with thread execution while creating workspace in node " + topArchiveNodeURI;
+            logger.error(errorMessage, eex);
+            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), eex);
         }
         
         if(!isSuccessful) {
             //TODO remove whatever was already created for the workspace
                 // (filesystem, database) and return some error instead??
             
-            return null;
+            String errorMessage = "Workspace creation failed in node " + topArchiveNodeURI;
+            logger.error(errorMessage);
+            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), null);
         }
         
         // updated workspace
-        Workspace toReturn = workspaceDao.getWorkspace(newWorkspace.getWorkspaceID());
+        Workspace toReturn;
+        try {
+            toReturn = workspaceDao.getWorkspace(newWorkspace.getWorkspaceID());
+        } catch (WorkspaceNotFoundException ex) {
+            throw new WorkspaceImportException(ex.getMessage(), ex.getWorkspaceID(), ex);
+        }
         
         return toReturn;
     }
@@ -133,25 +151,19 @@ public class LamusWorkspaceManager implements WorkspaceManager {
      * @see WorkspaceManager#deleteWorkspace(java.lang.String, int)
      */
     @Override
-    public boolean deleteWorkspace(int workspaceID) {
+    public void deleteWorkspace(int workspaceID) throws IOException {
         
         workspaceDao.deleteWorkspace(workspaceID);
-        try {
-            workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
-        } catch (IOException ex) {
-            String errorMessage = "Problems deleting workspace directory for workspace with ID " + workspaceID;
-            logger.error(errorMessage, ex);
-            return false;
-        }
         
-        return true;
+        workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
     }
 
     /**
      * @see WorkspaceManager#submitWorkspace(int)
      */
     @Override
-    public boolean submitWorkspace(int workspaceID/*, boolean keepUnlinkedFiles*/) {
+    public void submitWorkspace(int workspaceID/*, boolean keepUnlinkedFiles*/)
+            throws WorkspaceNotFoundException, WorkspaceExportException {
                 
         //TODO workspaceDao - get workspace from DB
         //TODO workspaceFactory (or something else) - set workspace as submitted
@@ -163,80 +175,87 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?
         
-        //TODO workspaceExportRunner - start export thread
-        
         Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
         
-        Boolean isSuccessful;
+        Boolean isSuccessful = false;
         
         try {
             isSuccessful = exportResult.get();
         } catch (InterruptedException iex) {
-            logger.error("The thread was interrupted", iex);
-            
-            //TODO return some error instead??
-            isSuccessful = false;
+            String errorMessage = "Interruption in thread while submitting workspace " + workspaceID;
+            logger.error(errorMessage, iex);
+            finaliseWorkspace(workspace, Boolean.FALSE);
+            throw new WorkspaceExportException(errorMessage, workspaceID, iex);
         } catch (ExecutionException eex) {
-            logger.error("There was a problem with the thread execution", eex);
             
-            //TODO return some error instead??
-            isSuccessful = false;
+            //TODO Find a better way of handling these exceptions
+                // In most cases this WorkspaceImportException is wrapping an ExecutionException
+                    // that already contains a nested WorkspaceImportException
+                // One possibility would be to just throw here the cause of the ExecutionException
+                    // but perhaps some stacktrace information would be lost that way
+            
+            String errorMessage = "Problem with thread execution while submitting workspace " + workspaceID;
+            logger.error(errorMessage, eex);
+            finaliseWorkspace(workspace, Boolean.FALSE);
+            throw new WorkspaceExportException(errorMessage, workspaceID, eex);
         }
         
-        Date endDate = dateTimeHelper.getCurrentDateTime();
-        workspace.setSessionEndDate(endDate);
-        workspace.setEndDate(endDate);
-        if(isSuccessful) {
-            workspace.setStatus(WorkspaceStatus.SUBMITTED);
-            workspace.setMessage("workspace was successfully submitted");
-            //TODO Set message from properties file
-        } else {
-            workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
-            workspace.setMessage("there were errors when submitting the workspace");
-            //TODO Set message from properties file
-            
-            //TODO Maybe an exception would be a better option than a false boolean for an unsuccessful submission
+        if(!isSuccessful) {
+            String errorMessage = "Workspace submission failed for workspace " + workspaceID;
+            logger.error(errorMessage);
+            finaliseWorkspace(workspace, Boolean.FALSE);
+            throw new WorkspaceExportException(errorMessage, workspaceID, null);
         }
-        workspaceDao.updateWorkspaceEndDates(workspace);        
-        workspaceDao.updateWorkspaceStatusMessage(workspace);
         
-        return isSuccessful;
+        finaliseWorkspace(workspace, Boolean.TRUE);
     }
 
     /**
-     * @see WorkspaceManager#openWorkspace(java.lang.String, int)
+     * @see WorkspaceManager#openWorkspace(int)
      */
     @Override
-    public Workspace openWorkspace(String userID, int workspaceID) {
+    public Workspace openWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException, IOException {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
-        if(workspace != null) {
-            if(userID.equals(workspace.getUserID())) {
-                if(workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
-                    Calendar calendarNow = Calendar.getInstance();
-                    Date now = calendarNow.getTime();
-                    workspace.setSessionStartDate(now);
-                    calendarNow.add(Calendar.DATE, numberOfDaysOfInactivityAllowedSinceLastSession);
-                    Date nowPlusExpiry = calendarNow.getTime();
-                    workspace.setSessionEndDate(nowPlusExpiry);
-                    workspaceDao.updateWorkspaceSessionDates(workspace);
-                    workspace = workspaceDao.getWorkspace(workspaceID);
-                } else {
-                    //TODO Or throw exception?
-                    logger.error("LamusWorkspaceManager.openWorkspace: Directory for workpace " + workspaceID +
-                        " does not exist");
-                    return null;
-                }
-            } else {
-                //TODO Or throw exception?
-                logger.error("LamusWorkspaceManager.openWorkspace: Given userID (" + userID +
-                        ") different from expected (" + workspace.getUserID() + ")");
-                return null;
-            }
+        if(workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
+            Calendar calendarNow = Calendar.getInstance();
+            Date now = calendarNow.getTime();
+            workspace.setSessionStartDate(now);
+            calendarNow.add(Calendar.DATE, numberOfDaysOfInactivityAllowedSinceLastSession);
+            Date nowPlusExpiry = calendarNow.getTime();
+            workspace.setSessionEndDate(nowPlusExpiry);
+            workspaceDao.updateWorkspaceSessionDates(workspace);
+
+            //TODO necessary?
+//                workspace = workspaceDao.getWorkspace(workspaceID);
+
+        } else {
+            String errorMessage = "Directory for workpace " + workspaceID + " does not exist";
+            logger.error(errorMessage);
+            throw new IOException(errorMessage);
         }
         
         return workspace;
     }
     
+    
+    private void finaliseWorkspace(Workspace workspace, boolean submitSuccessful) {
+        
+        Date endDate = dateTimeHelper.getCurrentDateTime();
+        workspace.setSessionEndDate(endDate);
+        workspace.setEndDate(endDate);
+        
+        if(submitSuccessful) {
+            workspace.setStatus(WorkspaceStatus.SUBMITTED);
+            workspace.setMessage("workspace was successfully submitted");
+        } else {
+            workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+            workspace.setMessage("there were errors when submitting the workspace");
+        }
+        
+        workspaceDao.updateWorkspaceEndDates(workspace);
+        workspaceDao.updateWorkspaceStatusMessage(workspace);
+    }
 }

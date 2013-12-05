@@ -16,6 +16,7 @@
 package nl.mpi.lamus.service;
 
 import java.util.List;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -34,7 +35,8 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * @param parentNode WorkspaceTreeNode object of the parent node
      * @return corresponding workspace tree node
      */
-    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode);
+    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode)
+            throws WorkspaceNodeNotFoundException;
     
     /**
      * Retrieves the nodes in the workspace which are not linked to the tree.

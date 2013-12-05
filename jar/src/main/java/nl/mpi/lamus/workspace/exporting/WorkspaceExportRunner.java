@@ -17,6 +17,8 @@ package nl.mpi.lamus.workspace.exporting;
 
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * @return true if export is successful
      */
     @Override
-    public Boolean call() {
+    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException {
         
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)

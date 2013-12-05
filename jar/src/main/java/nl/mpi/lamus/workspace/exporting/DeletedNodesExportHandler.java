@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -27,5 +28,6 @@ public interface DeletedNodesExportHandler {
     /**
      * Triggers the export of all the deleted nodes in the workspace
      */
-    public void exploreDeletedNodes(Workspace workpace);
+    public void exploreDeletedNodes(Workspace workpace)
+            throws WorkspaceExportException;
 }

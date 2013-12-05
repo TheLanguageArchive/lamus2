@@ -17,15 +17,27 @@
 package nl.mpi.lamus.workspace.actions;
 
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Based on the NodeAction interface of the Metadata Browser
+ * Interface for node actions in the workspace tree.
+ * (Based on the NodeAction interface of the Metadata Browser)
  * 
  * @author guisil
  */
 public interface WsTreeNodesAction extends WsNodesAction {
     
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService);
+    /**
+     * Executes the action.
+     * 
+     * @param userID ID of the user
+     * @param nodes nodes involved in the action
+     * @param wsService service which will be called to perform the action
+     */
+    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
 }

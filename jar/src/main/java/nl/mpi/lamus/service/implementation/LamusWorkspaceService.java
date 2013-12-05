@@ -21,9 +21,17 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -62,75 +70,50 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#createWorkspace(java.lang.String, java.net.URI)
      */
     @Override
-    public Workspace createWorkspace(String userID, URI archiveNodeURI) {
+    public Workspace createWorkspace(String userID, URI archiveNodeURI)
+            throws UnknownNodeException, NodeAccessException, WorkspaceImportException {
 
-        if(!this.nodeAccessChecker.canCreateWorkspace(userID, archiveNodeURI)) {
-            
-            //TODO Inform the user of the reason why the workspace can't be created (either there is already a workspace from the same user or from a different one)
-            //TODO Throw an exception instead?
-            
-            logger.error("Cannot create workspace in node " + archiveNodeURI);
-            return null;
-        }
+        this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
         
         //TODO what about the browser session? does it make sense to check for a workspace in the session? disconnect it?
-        
         //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
         
-
-        Workspace newWorkspace = this.workspaceManager.createWorkspace(userID, archiveNodeURI);
-        
-        
-
-        return newWorkspace;
+        return this.workspaceManager.createWorkspace(userID, archiveNodeURI);
     }
     
     /**
      * @see WorkspaceService#deleteWorkspace(java.lang.String, int)
      */
     @Override
-    public void deleteWorkspace(String userID, int workspaceID) {
+    public void deleteWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
-            
-            //TODO Inform the user of the reason why the workspace can't be deleted
-            //TODO Throw an exception instead?
-            
-            logger.error("Cannot delete workspace with ID " + workspaceID);
-        } else {
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         
-            this.workspaceManager.deleteWorkspace(workspaceID);
-        }
+        this.workspaceManager.deleteWorkspace(workspaceID);
     }
 
     /**
      * @see WorkspaceService#submitWorkspace(String, int)
      */
     @Override
-    public boolean submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/) {
+    public void submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
 
         //TODO requests in this session?
         //TODO workspace should be initialised / connected
         
-        //TODO nodeAccessChecker - check access?
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
-            
-            //TODO Inform the user of the reason why the workspace can't be submitted
-            //TODO Throw an exception instead?
-            logger.error("Cannot submit workspace with ID " + workspaceID);
-            return false;
-        } else {
-        
-            return this.workspaceManager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
-        }
+        this.workspaceManager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
     }
 
     /**
      * @see WorkspaceService#getWorkspace(int)
      */
     @Override
-    public Workspace getWorkspace(int workspaceID) {
+    public Workspace getWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException {
         
         return this.workspaceDao.getWorkspace(workspaceID);
     }
@@ -148,16 +131,20 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#openWorkspace(java.lang.String, int)
      */
     @Override
-    public Workspace openWorkspace(String userID, int workspaceID) {
+    public Workspace openWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        return this.workspaceManager.openWorkspace(userID, workspaceID);
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
+        
+        return this.workspaceManager.openWorkspace(workspaceID);
     }
 
     /**
      * @see WorkspaceService#getNode(int)
      */
     @Override
-    public WorkspaceNode getNode(int nodeID) {
+    public WorkspaceNode getNode(int nodeID)
+            throws WorkspaceNodeNotFoundException {
         
         return this.workspaceDao.getWorkspaceNode(nodeID);
     }
@@ -175,52 +162,37 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#linkNodes(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
+    public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, parentNode.getWorkspaceID())) {
-            
-            //TODO Inform the user of the reason why the nodes can't be linked
-            //TODO Throw an exception instead?
-            logger.error("Cannot link nodes in workspace with ID " + parentNode.getWorkspaceID());
-        } else {
-            
-            this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
-        }
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
+        
+        this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
     }
     
     /**
      * @see WorkspaceService#unlinkNodes(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode) {
+    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, parentNode.getWorkspaceID())) {
-            
-            //TODO Inform the user of the reason why the nodes can't be unlinked
-            //TODO Throw an exception instead?
-            logger.error("Cannot unlink nodes in workspace with ID " + parentNode.getWorkspaceID());
-        } else {
-            
-            this.workspaceNodeLinkManager.unlinkNodes(parentNode, childNode);
-        }
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
+        
+        this.workspaceNodeLinkManager.unlinkNodes(parentNode, childNode);
     }
     
     /**
      * @see WorkspaceService#deleteNode(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void deleteNode(String userID, WorkspaceNode node) {
+    public void deleteNode(String userID, WorkspaceNode node)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
-        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, node.getWorkspaceID())) {
-            
-            //TODO Inform the user of the reason why the node can't be deleted
-            //TODO Throw an exception instead?
-            logger.error("Cannot delete node in workspace with ID " + node.getWorkspaceID());
-        } else {
-            
-            this.workspaceNodeLinkManager.unlinkNodeFromAllParents(node);
-            this.workspaceDao.setWorkspaceNodeAsDeleted(node.getWorkspaceID(), node.getWorkspaceNodeID());
-        }
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
+        
+        this.workspaceNodeLinkManager.unlinkNodeFromAllParents(node);
+        this.workspaceDao.setWorkspaceNodeAsDeleted(node.getWorkspaceID(), node.getWorkspaceNodeID());
     }
 
     /**
@@ -229,7 +201,7 @@ public class LamusWorkspaceService implements WorkspaceService {
 //    @Override
 //    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
 //        
-//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
+//        if(!this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID)) {
 //            
 //            //TODO Inform the user of the reason why the files can't be uploaded
 //            //TODO Throw an exception instead?
@@ -252,14 +224,10 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#uploadFileIntoWorkspace(java.lang.String, int, java.io.InputStream, java.lang.String)
      */
     @Override
-    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException {
-//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
-//            
-//            throw new UnsupportedOperationException("not implemented yet");
-//        } else {
+    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
+            throws IOException, TypeCheckerException, WorkspaceException {
             
-            this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
-//        }
+        this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
     }
     
     /**
@@ -268,13 +236,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
         
-//        if(!this.nodeAccessChecker.hasAccessToWorkspace(userID, workspaceID)) {
-//            
-//            throw new UnsupportedOperationException("not implemented yet");
-//        } else {
-            
-            return this.workspaceDao.listUnlinkedNodes(workspaceID);
-//        }
+        return this.workspaceDao.listUnlinkedNodes(workspaceID);
     }
     
 }

@@ -16,12 +16,13 @@
 package nl.mpi.lamus.filesystem;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 
 /**
@@ -39,12 +40,11 @@ public interface WorkspaceFileHandler {
      * @param metadataDocument MetadataDocument corresponding to the file
      * @param originNodeFile File object corresponding to the file origin
      * @param targetNodeFileStreamResult StreamResult object corresponding to the target file
-     * @throws FailedToCreateWorkspaceNodeFileException if there is some problem with the file copy
      */
     public void copyMetadataFile(WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile,
             StreamResult targetNodeFileStreamResult)
-            throws WorkspaceNodeFilesystemException;
+                throws IOException, TransformerException, MetadataException;
 
     /**
      * Copies the given resource file into the given location
@@ -52,11 +52,10 @@ public interface WorkspaceFileHandler {
      * @param workspaceNode node corresponding to the file
      * @param originNodeFile File object corresponding to the file origin
      * @param targetNodeFile File object corresponding to the target file
-     * @throws WorkspaceNodeFilesystemException if there is some problem with the file copy
      */
     public void copyResourceFile(WorkspaceNode workspaceNode,
             File originNodeFile, File targetNodeFile)
-            throws WorkspaceNodeFilesystemException;
+                throws IOException;
     
     /**
      * Copies the given file to the given location
@@ -66,7 +65,7 @@ public interface WorkspaceFileHandler {
      * @param targetNodeFile File object corresponding to the target file
      */
     public void copyFile(int workspaceID, File originFile, File targetNodeFile)
-            throws WorkspaceFilesystemException;
+            throws IOException;
     
     /**
      * Gets a StreamResult object based on the given file.

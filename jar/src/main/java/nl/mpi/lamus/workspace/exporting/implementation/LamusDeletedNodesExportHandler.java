@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.DeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
@@ -48,7 +49,8 @@ public class LamusDeletedNodesExportHandler implements DeletedNodesExportHandler
      * @see DeletedNodesExportHandler#exploreDeletedNodes(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
-    public void exploreDeletedNodes(Workspace workspace) {
+    public void exploreDeletedNodes(Workspace workspace)
+            throws WorkspaceExportException {
         
         Collection<WorkspaceNode> deletedTopNodes = this.workspaceDao.getDeletedTopNodes(workspace.getWorkspaceID());
         

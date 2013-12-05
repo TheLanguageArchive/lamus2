@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -46,7 +47,8 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
      * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void explore(Workspace workspace, WorkspaceNode node) {
+    public void explore(Workspace workspace, WorkspaceNode node)
+            throws WorkspaceExportException {
         
         Collection<WorkspaceNode> children = workspaceDao.getChildWorkspaceNodes(node.getWorkspaceNodeID());
         

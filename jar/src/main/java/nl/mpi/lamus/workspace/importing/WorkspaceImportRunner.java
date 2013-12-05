@@ -18,8 +18,7 @@ package nl.mpi.lamus.workspace.importing;
 import java.net.URI;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.exception.NodeExplorerException;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.implementation.NodeImporterFactoryBean;
 import nl.mpi.lamus.workspace.importing.implementation.TopNodeImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -79,18 +78,14 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
      * @return true if import is successful
      */
     @Override
-    public Boolean call() throws NodeImporterException, NodeExplorerException {
+    public Boolean call() throws WorkspaceImportException {
         
         //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
-        
-//        topNodeImporter.setWorkspace(workspace);
         
         try {
             //TODO create some other method that takes something else than a Reference
             // or have a separate method for importing the top node
-//            topNodeImporter.importNode(null, null, null, topNodeArchiveID);
             topNodeImporter.importNode(workspace.getWorkspaceID(), topNodeArchiveURI);
-
             
             //TODO import successful? notify main thread, change workspace status, etc...
             // no exceptions, so it was successful ?
@@ -98,36 +93,17 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             workspace.setStatusMessageInitialised();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
-        } catch (NodeImporterException fiex) {
-            String errorMessage = "Error during file import.";
-                //TODO LOG PROPERLY
-                //TODO THROW EXCEPTION OR RETURN?
-            logger.error(errorMessage, fiex);
-            
+        } catch (WorkspaceImportException fiex) {
             workspace.setStatusMessageErrorDuringInitialisation();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
             throw fiex;
             
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
-        } catch (NodeExplorerException feex) {
-            String errorMessage = "Error during file explore.";
-                //TODO LOG PROPERLY
-                //TODO THROW EXCEPTION OR RETURN?
-            logger.error(errorMessage, feex);
-            
-            workspace.setStatusMessageErrorDuringInitialisation();
-            workspaceDao.updateWorkspaceStatusMessage(workspace);
-            
-            throw feex;
-            
-            //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
             
-            
-            //TODO When to return false?
-            
-            return true;
+        //TODO When to return false?
+        return true;
     }
     
 }

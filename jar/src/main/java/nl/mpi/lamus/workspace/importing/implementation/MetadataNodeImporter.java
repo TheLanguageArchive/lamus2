@@ -16,18 +16,18 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
-import nl.mpi.lamus.workspace.exception.NodeExplorerException;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
@@ -95,18 +95,20 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     }
 
     /**
-     * @see NodeImporter#importNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
+     * @see NodeImporter#importNode(
+     *          nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument,
+     *          nl.mpi.metadata.api.model.Reference, int)
      */
     @Override
     public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-	    Reference childLink, URI childArchiveURI) throws NodeImporterException, NodeExplorerException {
+	    Reference childLink, URI childArchiveURI) throws WorkspaceImportException {
 
         workspaceID = wsID;
         
 	if (workspaceID < 0) {
-	    String errorMessage = "MetadataNodeImporter.importNode: workspace not set";
+	    String errorMessage = "Workspace not set";
 	    logger.error(errorMessage);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), null);
+            throw new IllegalArgumentException(errorMessage);
 	}
 
 
@@ -137,17 +139,17 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
         } catch (IOException ioex) {
-	    String errorMessage = "Error importing Metadata Document for node " + childArchiveURI;
+	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
 	    logger.error(errorMessage, ioex);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), ioex);
+	    throw new WorkspaceImportException(errorMessage, workspaceID, ioex);
         } catch (MetadataException mdex) {
-	    String errorMessage = "Error importing Metadata Document for node " + childArchiveURI;
+	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
 	    logger.error(errorMessage, mdex);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), mdex);
+	    throw new WorkspaceImportException(errorMessage, workspaceID, mdex);
         } catch (UnknownNodeException unex) {
 	    String errorMessage = "Error getting information for node " + childArchiveURI;
 	    logger.error(errorMessage, unex);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), unex);
+	    throw new WorkspaceImportException(errorMessage, workspaceID, unex);
         }
         
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName);
@@ -160,12 +162,27 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         try {
             this.workspaceFileImporter.importMetadataFileToWorkspace(childArchiveURL, childNode, childDocument);
-        } catch (WorkspaceNodeFilesystemException fwsnex) {
-	    String errorMessage = "Failed to create file for workspace node " + childNode.getWorkspaceNodeID()
+	} catch (MalformedURLException muex) {
+            String errorMessage = "Failed to set URL for node " + childNode.getArchiveURI()
 		    + " in workspace " + workspaceID;
-	    logger.error(errorMessage, fwsnex);
-	    throw new NodeImporterException(errorMessage, workspaceID, this.getClass(), fwsnex);
-	}
+	    logger.error(errorMessage, muex);
+            throw new WorkspaceImportException(errorMessage, workspaceID, muex);
+        } catch (IOException ioex) {
+            String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
+		    + " in workspace " + workspaceID;
+	    logger.error(errorMessage, ioex);
+            throw new WorkspaceImportException(errorMessage, workspaceID, ioex);
+        } catch (TransformerException trex) {
+            String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
+		    + " in workspace " + workspaceID;
+	    logger.error(errorMessage, trex);
+            throw new WorkspaceImportException(errorMessage, workspaceID, trex);
+        } catch (MetadataException mdex) {
+            String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
+		    + " in workspace " + workspaceID;
+	    logger.error(errorMessage, mdex);
+            throw new WorkspaceImportException(errorMessage, workspaceID, mdex);
+        }
 
 	//TODO change the referenced URL in the parent document
 	//TODO not of the original one, but the one IN THE WORKSPACE FOLDER

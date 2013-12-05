@@ -19,11 +19,14 @@ import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class responsible for exporting nodes that were deleted
@@ -35,6 +38,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  */
 public class DeletedNodeExporter implements NodeExporter {
 
+    private final static Logger logger = LoggerFactory.getLogger(DeletedNodeExporter.class);
+    
     private final TrashCanHandler trashCanHandler;
     private final CorpusStructureProvider corpusStructureProvider;
     private final SearchClientBridge searchClientBridge;
@@ -69,8 +74,14 @@ public class DeletedNodeExporter implements NodeExporter {
      * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
 
+        if (workspace == null) {
+	    String errorMessage = "Workspace not set";
+	    logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+	}
+        
         //TODO What to do with this URL? Update it and use to inform the crawler of the change?
         
         URL trashedNodeArchiveURL = this.trashCanHandler.moveFileToTrashCan(currentNode);
@@ -80,7 +91,9 @@ public class DeletedNodeExporter implements NodeExporter {
         try {
             node = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
         } catch (UnknownNodeException ex) {
-            throw new UnsupportedOperationException("Exception not handled yet", ex);
+            String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
         }
         
         //TODO Is this needed? Isn't LAMUS only supposed to change things in the filesystem, leaving the database changes for the crawler?

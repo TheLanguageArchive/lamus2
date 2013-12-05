@@ -16,15 +16,17 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,26 +59,14 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
      */
     @Override
     public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
-        throws WorkspaceNodeFilesystemException {
+            throws MalformedURLException, IOException, TransformerException, MetadataException {
         
 	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, workspaceNode);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 
         workspaceFileHandler.copyMetadataFile(workspaceNode, metadataAPI, metadataDocument, nodeFile, streamResult);
         
-        try {
-            workspaceNode.setWorkspaceURL(nodeFile.toURI().toURL());
-        } catch(MalformedURLException mfex) {
-            throwWorkspaceNodeFilesystemUrlException(mfex, nodeFile, workspaceNode);
-        } catch(IllegalArgumentException iaex) {
-            throwWorkspaceNodeFilesystemUrlException(iaex, nodeFile, workspaceNode);
-        }
+        workspaceNode.setWorkspaceURL(nodeFile.toURI().toURL());
         this.workspaceDao.updateNodeWorkspaceURL(workspaceNode);
-    }
-    
-    private void throwWorkspaceNodeFilesystemUrlException(Exception ex, File file, WorkspaceNode node) throws WorkspaceNodeFilesystemException {
-        String errorMessage = "Failed to create URL from the Workspace file location: " + file.toURI();
-        logger.error(errorMessage, ex);
-        throw new WorkspaceNodeFilesystemException(errorMessage, node, ex);
     }
 }

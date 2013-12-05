@@ -19,10 +19,14 @@ package nl.mpi.lamus.workspace.actions;
 import java.io.Serializable;
 
 /**
- *
+ * Base interface for node actions in a workspace.
+ * 
  * @author guisil
  */
 public interface WsNodesAction extends Serializable {
     
+    /**
+     * @return name of the action
+     */
     public String getName();
 }

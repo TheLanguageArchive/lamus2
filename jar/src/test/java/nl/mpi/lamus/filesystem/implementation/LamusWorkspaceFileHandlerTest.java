@@ -28,8 +28,6 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -118,7 +116,7 @@ public class LamusWorkspaceFileHandlerTest {
      */
     @Test
     public void copyMetadataFileToWorkspaceSuccessfully() throws IOException,
-        TransformerException, MetadataException, WorkspaceNodeFilesystemException,
+        TransformerException, MetadataException,
         CMDITypeException, ParserConfigurationException, SAXException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
@@ -150,23 +148,20 @@ public class LamusWorkspaceFileHandlerTest {
         WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
         File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
-        final IOException expectedExceptionCause = new IOException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
+        final IOException expectedException = new IOException(expectedErrorMessage);
         
         context.checking(new Expectations() {{
             oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedExceptionCause));
+                will(throwException(expectedException));
         }});
         
         try {
             workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(WorkspaceNodeFilesystemException wsnfex) {
-            assertEquals("Exception cause is different from expected", wsnfex.getCause(), expectedExceptionCause);
-            assertEquals("Exception error message is different from expected", wsnfex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", wsnfex.getWorkspaceID(), testWorkspace.getWorkspaceID());
-            assertEquals("Workspace Node associated with exception is different from expected", wsnfex.getWorkspaceNode(), testWorkspaceNode);
+        } catch(IOException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
         }
     }
     
@@ -183,23 +178,20 @@ public class LamusWorkspaceFileHandlerTest {
         WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
         File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
-        final TransformerException expectedExceptionCause = new TransformerException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
+        final TransformerException expectedException = new TransformerException(expectedErrorMessage);
         
         context.checking(new Expectations() {{
             oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedExceptionCause));
+                will(throwException(expectedException));
         }});
         
         try {
             workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(WorkspaceNodeFilesystemException wsnfex) {
-            assertEquals("Exception cause is different from expected", wsnfex.getCause(), expectedExceptionCause);
-            assertEquals("Exception error message is different from expected", wsnfex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", wsnfex.getWorkspaceID(), testWorkspace.getWorkspaceID());
-            assertEquals("Workspace Node associated with exception is different from expected", wsnfex.getWorkspaceNode(), testWorkspaceNode);
+        } catch(TransformerException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
         }
     }
     
@@ -216,28 +208,25 @@ public class LamusWorkspaceFileHandlerTest {
         WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
         File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
-        final MetadataException expectedExceptionCause = new MetadataException("something bla bla");
         String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
+        final MetadataException expectedException = new MetadataException(expectedErrorMessage);
         
         context.checking(new Expectations() {{
             oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedExceptionCause));
+                will(throwException(expectedException));
         }});
         
         try {
             workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
                     mockMetadataDocument, testNodeFile, mockStreamResult);
             fail("An exception should have been thrown");
-        } catch(WorkspaceNodeFilesystemException wsnfex) {
-            assertEquals("Exception cause is different from expected", wsnfex.getCause(), expectedExceptionCause);
-            assertEquals("Exception error message is different from expected", wsnfex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", wsnfex.getWorkspaceID(), testWorkspace.getWorkspaceID());
-            assertEquals("Workspace Node associated with exception is different from expected", wsnfex.getWorkspaceNode(), testWorkspaceNode);
+        } catch(MetadataException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
         }
     }
     
     @Test
-    public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, WorkspaceNodeFilesystemException, URISyntaxException {
+    public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
         URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
@@ -258,7 +247,6 @@ public class LamusWorkspaceFileHandlerTest {
     public void copyResourceFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
@@ -267,22 +255,23 @@ public class LamusWorkspaceFileHandlerTest {
         File originFile = new File(testNode.getWorkspaceURL().getPath());
         File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
         
-        String expectedErrorMessage = "Problem writing file " + destinationFile.getAbsolutePath();
+        destinationFile.createNewFile();
+        destinationFile.setReadOnly();
         
         try {
             workspaceFileHandler.copyResourceFile(testNode, originFile, destinationFile);
-        } catch(WorkspaceNodeFilesystemException wsnfex) {
-            assertTrue("Exception cause has different type than expected", wsnfex.getCause() instanceof IOException);
-            assertEquals("Exception error message is different from expected", wsnfex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", wsnfex.getWorkspaceID(), testWorkspace.getWorkspaceID());
-            assertEquals("Workspace Node associated with exception is different from expected", wsnfex.getWorkspaceNode(), testNode);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            assertTrue("Exception has different type than expected", ex instanceof IOException);
+            
+            //TODO Should mock the call to FileUtils.copyFile in order to properly compare the exception with an expected one
         }
         
         assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
     }
     
     @Test
-    public void copyFileSuccessfully() throws IOException, WorkspaceFilesystemException {
+    public void copyFileSuccessfully() throws IOException {
         
         final int workspaceID = 1;
         final File baseDirectory = createTestBaseDirectory();
@@ -310,16 +299,19 @@ public class LamusWorkspaceFileHandlerTest {
         
         final File destinationFile = new File(uploadDirectory, FilenameUtils.getName(fileToCopy.getPath()));
         
-        String expectedErrorMessage = "Problem writing file " + destinationFile.getAbsolutePath();
+        destinationFile.createNewFile();
+        destinationFile.setReadOnly();
         
         try {
             workspaceFileHandler.copyFile(workspaceID, fileToCopy, destinationFile);
             fail("An exception should have been thrown");
-        } catch (WorkspaceFilesystemException wsfex) {
-            assertTrue("Exception cause has different type than expected", wsfex.getCause() instanceof IOException);
-            assertEquals("Exception error message is different from expected", wsfex.getMessage(), expectedErrorMessage);
-            assertEquals("Workspace associated with exception is different from expected", wsfex.getWorkspaceID(), workspaceID);
+        } catch (IOException ex) {
+            assertTrue("Exception has different type than expected", ex instanceof IOException);
+            
+            //TODO Should mock the call to FileUtils.copyFile in order to properly compare the exception with an expected one
         }
+        
+        assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
     }
     
     @Test

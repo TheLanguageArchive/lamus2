@@ -30,9 +30,8 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -121,7 +120,7 @@ public class GeneralNodeExporterTest {
 
 
     @Test
-    public void exportChangedTopNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceNodeFilesystemException, UnknownNodeException {
+    public void exportChangedTopNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
     
         /*
          * File already exists in the archive.
@@ -180,7 +179,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportChangedMetadataNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceNodeFilesystemException, UnknownNodeException {
+    public void exportChangedMetadataNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
         
         /*
          * File already exists in the archive.
@@ -248,7 +247,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportUnchangedMetadataNode() throws MalformedURLException, URISyntaxException, UnknownNodeException {
+    public void exportUnchangedMetadataNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -299,9 +298,303 @@ public class GeneralNodeExporterTest {
         generalNodeExporter.exportNode(parentNode, node);
     }
     
+    @Test
+    public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String metadataFormat = "text/x-cmdi+xml";
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        final String expectedErrorMessage = "Node not found in archive database for URI " + node.getArchiveURI();
+        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(throwException(expectedException));
+        }});
+        
+        try {
+            generalNodeExporter.exportNode(parentNode, node);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
     
     @Test
-    public void exportResourceNode() throws MalformedURLException, URISyntaxException {
+    public void exportNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+        
+        generalNodeExporter.setWorkspace(null);
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String metadataFormat = "text/x-cmdi+xml";
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        try {
+            generalNodeExporter.exportNode(parentNode, node);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "Workspace not set";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportChangedMetadataNodeIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String metadataFormat = "text/cmdi";
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        final String someFakeChecksum = "SOMEFAKECHECKSUM";
+        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
+        
+        final String expectedErrorMessage = "Error getting Metadata Document for node " + node.getArchiveURI();
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
+            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
+            
+            // Checksum is different, so export will proceed
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
+        }});
+        
+        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
+        
+        try {
+            generalNodeExporter.exportNode(parentNode, node);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportChangedMetadataNodeMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String metadataFormat = "text/cmdi";
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        final String someFakeChecksum = "SOMEFAKECHECKSUM";
+        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
+        
+        final String expectedErrorMessage = "Error getting Metadata Document for node " + node.getArchiveURI();
+        final MetadataException expectedException = new MetadataException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
+            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
+            
+            // Checksum is different, so export will proceed
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
+        }});
+        
+        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
+        
+        try {
+            generalNodeExporter.exportNode(parentNode, node);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportChangedMetadataNodeTransformerException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
+        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
+        final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final String metadataFormat = "text/cmdi";
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
+        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeArchiveURL, parentNodeStatus, metadataFormat);
+        
+        final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, parentNodeStatus, metadataFormat);
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        final String someFakeChecksum = "SOMEFAKECHECKSUM";
+        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
+        
+        final String expectedErrorMessage = "Error writing file for node " + node.getArchiveURI();
+        final TransformerException expectedException = new TransformerException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
+            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
+            
+            // Checksum is different, so export will proceed
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
+            
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
+                will(throwException(expectedException));
+        }});
+        
+        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
+        
+        try {
+            generalNodeExporter.exportNode(parentNode, node);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportResourceNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         /*
          * File already exists in the archive.

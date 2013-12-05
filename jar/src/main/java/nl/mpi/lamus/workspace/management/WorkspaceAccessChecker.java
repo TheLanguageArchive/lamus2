@@ -17,6 +17,10 @@ package nl.mpi.lamus.workspace.management;
 
 import java.io.Serializable;
 import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 
 /**
  * Interface for the archive node access checking.
@@ -26,20 +30,22 @@ import java.net.URI;
 public interface WorkspaceAccessChecker extends Serializable {
 
     /**
-     * Checks if a given user has write access to the given archive node.
+     * Checks if a workspace can be created in the given node.
+     * This is true only when the node exists, is on site, is not locked
+     * and the user has write access on it.
      * @param userID ID of the user who needs to create a workspace
      * @param archiveNodeURI URI of the node in which the workspace is supposed to be created
-     * @return true if the given user has write access to the given node
      */
-    public boolean canCreateWorkspace(String userID, URI archiveNodeURI);
+    public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
+            throws UnknownNodeException, NodeAccessException;
     
     /**
      * Checks if the given user has access to the given workspace
      * (the user has access if he/she was the creator of the workspace).
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
-     * @return true if the given user has access to the given workspace
      */
-    public boolean hasAccessToWorkspace(String userID, int workspaceID);
+    public void ensureUserHasAccessToWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException;
 
 }

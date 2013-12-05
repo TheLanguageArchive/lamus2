@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.DeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
@@ -82,11 +83,10 @@ public class LamusDeletedNodesExportHandlerTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of exploreDeletedNodes method, of class LamusDeletedNodesExportHandler.
-     */
+    
+    
     @Test
-    public void exploreDeletedTopNodes() throws MalformedURLException, URISyntaxException {
+    public void exploreDeletedTopNodes() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
 
         final int workspaceID = 1;
         
@@ -136,4 +136,64 @@ public class LamusDeletedNodesExportHandlerTest {
         deletedNodesExportHandler.exploreDeletedNodes(mockWorkspace);
     }
 
+    @Test
+    public void exploreDeletedTopNodesThrowsException() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+
+        final int workspaceID = 1;
+        
+        final Collection<WorkspaceNode> deletedTopNodes = new ArrayList<WorkspaceNode>();
+        
+        final int firstNodeID = 10;
+        final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL firstNodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL firstNodeArchiveURL = firstNodeOriginURL;
+        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
+        final String firstNodeDisplayValue = "someName";
+        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String firstNodeFormat = "";
+        final URI firstNodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
+                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, firstNodeFormat);
+        
+        final int secondNodeID = 10;
+        final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
+        final URL secondNodeOriginURL = new URL("file:/some.url/node.cmdi");
+        final URL secondNodeArchiveURL = secondNodeOriginURL;
+        final URI secondNodeURI = new URI(UUID.randomUUID().toString());
+        final String secondNodeDisplayValue = "someName";
+        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String secondNodeFormat = "";
+        final URI secondNodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
+                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
+        
+        deletedTopNodes.add(firstNode);
+        deletedTopNodes.add(secondNode);
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
+        
+    
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockWorkspaceDao).getDeletedTopNodes(workspaceID); will(returnValue(deletedTopNodes));
+        }});
+        
+        for(final WorkspaceNode deletedNode : deletedTopNodes) {
+            
+            context.checking(new Expectations() {{
+                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
+                oneOf(mockNodeExporter).exportNode(null, deletedNode);
+                    will(throwException(expectedException));
+            }});
+            
+            break; // throws exception, so the loop doesn't continue
+        }
+    
+        try {
+            deletedNodesExportHandler.exploreDeletedNodes(mockWorkspace);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
 }

@@ -22,7 +22,15 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -38,8 +46,10 @@ public interface WorkspaceService extends Serializable {
      * @param userID ID of the user
      * @param archiveNodeURI URI of the node in the archive
      * @return Workspace object
+     * @throws UnknownNodeException if the node is not found
      */
-    public Workspace createWorkspace(String userID, URI archiveNodeURI);
+    public Workspace createWorkspace(String userID, URI archiveNodeURI)
+            throws UnknownNodeException, NodeAccessException, WorkspaceImportException;
     
     /**
      * Deletes the workspace with the given ID.
@@ -47,7 +57,8 @@ public interface WorkspaceService extends Serializable {
      * @param userID ID of the user who is trying to delete the workspace
      * @param workspaceID ID of the workspace to be deleted
      */
-    public void deleteWorkspace(String userID, int workspaceID);
+    public void deleteWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException;
     
     /**
      * Retrieves a workspace with the given ID.
@@ -55,7 +66,8 @@ public interface WorkspaceService extends Serializable {
      * @param workspaceID ID of the workspace to retrieve
      * @return Retrieved workspace object
      */
-    public Workspace getWorkspace(int workspaceID);
+    public Workspace getWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException;
     
     /**
      * Retrieves a collection containing the active workspaces belonging to the
@@ -72,16 +84,17 @@ public interface WorkspaceService extends Serializable {
      * @param workspaceID ID of the workspace to open
      * @return Retrieved workspace object
      */
-    public Workspace openWorkspace(String userID, int workspaceID);
+    public Workspace openWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException;
     
     /**
      * Submits a workspace back into the archive.
      * 
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
-     * @return true if successfully submitted
      */
-    public boolean submitWorkspace(String userID, int workspaceID);
+    public void submitWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException;
     
     /**
      * Retrieves a workspace node with the given ID.
@@ -89,7 +102,8 @@ public interface WorkspaceService extends Serializable {
      * @param nodeID ID of the node to retrieve
      * @return corresponding workspace node
      */
-    public WorkspaceNode getNode(int nodeID);
+    public WorkspaceNode getNode(int nodeID)
+            throws WorkspaceNodeNotFoundException;
     
     /**
      * Retrieves a collection containing the child nodes of the node with 
@@ -107,7 +121,8 @@ public interface WorkspaceService extends Serializable {
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      */
-    public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode);
+    public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
     
     /**
      * Unlinks two nodes in a workspace.
@@ -115,14 +130,16 @@ public interface WorkspaceService extends Serializable {
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      */
-    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode);
+    public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
     
     /**
      * Deletes a node in the workspace.
      * @param userID ID of the user
      * @param node WorkspaceNode object corresponding to the node that should be deleted
      */
-    public void deleteNode(String userID, WorkspaceNode node);
+    public void deleteNode(String userID, WorkspaceNode node)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
     
     /**
      * Uploads the given files into the workspace.
@@ -147,10 +164,9 @@ public interface WorkspaceService extends Serializable {
      * @param workspaceID ID of the workspace
      * @param inputStream InputStream to be uploaded
      * @param filename name of the file to upload
-     * @throws IOException 
-     * @throws TypeCheckerException
      */
-    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException;
+    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
+            throws IOException, TypeCheckerException, WorkspaceException;
     
     /**
      * Lists the unlinked nodes of the given workspace.

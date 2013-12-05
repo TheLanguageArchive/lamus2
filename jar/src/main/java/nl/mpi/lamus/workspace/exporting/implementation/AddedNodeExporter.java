@@ -20,13 +20,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
@@ -102,7 +103,14 @@ public class AddedNodeExporter implements NodeExporter {
      * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) {
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode)
+            throws WorkspaceExportException {
+        
+        if (workspace == null) {
+	    String errorMessage = "Workspace not set";
+	    logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+	}
         
         String parentArchivePath = parentNode.getArchiveURL().getPath();
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
@@ -114,9 +122,13 @@ public class AddedNodeExporter implements NodeExporter {
             nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename, currentNode.getType());
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
+            String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
         } catch (IOException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
+            String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
         }
         currentNode.setArchiveURL(newNodeArchiveURL);
         URI newNodeArchiveURI = nodeDataRetriever.getNewArchiveURI();
@@ -141,9 +153,13 @@ public class AddedNodeExporter implements NodeExporter {
                 currentDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
                 
             } catch (IOException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
+                String errorMessage = "Error getting Metadata Document for node " + currentNode.getWorkspaceURL();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
             } catch (MetadataException ex) {
-                throw new UnsupportedOperationException("exception not handled yet", ex);
+                String errorMessage = "Error getting Metadata Document for node " + currentNode.getWorkspaceURL();
+                logger.error(errorMessage, ex);
+                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
         }
         
@@ -156,8 +172,18 @@ public class AddedNodeExporter implements NodeExporter {
             } else {
                 workspaceFileHandler.copyResourceFile(currentNode, currentNodeWorkspaceFile, nextAvailableFile);
             }
-        } catch (WorkspaceNodeFilesystemException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
+        } catch (IOException ex) {
+            String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+        } catch (TransformerException ex) {
+            String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+        } catch (MetadataException ex) {
+            String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
         }
         
 //        try {

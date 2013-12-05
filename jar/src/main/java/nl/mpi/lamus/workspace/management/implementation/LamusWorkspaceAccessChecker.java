@@ -16,13 +16,21 @@
 package nl.mpi.lamus.workspace.management.implementation;
 
 import java.net.URI;
+import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ExternalNodeException;
+import nl.mpi.lamus.exception.LockedNodeException;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.UnauthorizedNodeException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,35 +61,41 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     }
 
     /**
-     * @see WorkspaceAccessChecker#canCreateWorkspace(java.lang.String, java.net.URI)
+     * @see WorkspaceAccessChecker#ensureWorkspaceCanBeCreated(java.lang.String, java.net.URI)
      */
     @Override
-    public boolean canCreateWorkspace(String userID, URI archiveNodeURI) {
+    public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
+            throws UnknownNodeException, NodeAccessException {
         
-        CorpusNode node = null;
+        CorpusNode node;
         try {
             node = this.corpusStructureProvider.getNode(archiveNodeURI);
         } catch (UnknownNodeException ex) {
-            logger.warn("Node " + archiveNodeURI.toString() + " is not known in the archive", ex);
-            return false;
+            logger.error(ex.getMessage(), ex);
+            throw ex;
         }
         if(!node.isOnSite()) {
-            logger.warn("Node " + archiveNodeURI.toString() + " is not on site (it is an external node)");
-            return false;
-            //TODO ExternalNodeException
+            NodeAccessException ex = new ExternalNodeException(archiveNodeURI);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
         }
         if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
-            logger.warn("User " + userID + " has no write access on the node " + archiveNodeURI.toString());
-            return false;
-            //TODO NoWriteAccessException
+            NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
         }
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
         
         if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
-            logger.warn("Node " + archiveNodeURI + " is locked");
-            return false;
-            //TODO LockedNodeException
+            Collection<WorkspaceNode> lockedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
+            int workspaceID = -1;
+            if(lockedNodes.size() == 1) {
+                workspaceID = lockedNodes.iterator().next().getWorkspaceID();
+            }
+            NodeAccessException ex = new LockedNodeException(archiveNodeURI, workspaceID);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
         }
         
         //TODO Should it check now if any of the child nodes is locked??
@@ -91,29 +105,21 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
 
         logger.info("A workspace can be created in node " + archiveNodeURI);
         
-        return true;
     }
     
     /**
-     * @see WorkspaceAccessChecker#hasAccessToWorkspace(java.lang.String, int)
+     * @see WorkspaceAccessChecker#ensureUserHasAccessToWorkspace(java.lang.String, int)
      */
     @Override
-    public boolean hasAccessToWorkspace(String userID, int workspaceID) {
-        
+    public void ensureUserHasAccessToWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException {
         
         Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
         
-        if(workspace == null) {
-            logger.error("Can't access a workspace (with ID " + workspaceID + ") that does not exist");
-            return false;
-        }
-        
-        if(userID.equals(workspace.getUserID())) {
-            logger.info("User with ID " + userID + " has access to workspace with ID " + workspaceID);
-            return true;
-        } else {
-            logger.warn("User with ID " + userID + " does not have access to workspace with ID " + workspaceID);
-            return false;
+        if(!userID.equals(workspace.getUserID())) {
+            String errorMessage = "User with ID " + userID + " does not have access to workspace with ID " + workspaceID;
+            logger.error(errorMessage);
+            throw new WorkspaceAccessException(errorMessage, workspaceID, null);
         }
     }
     

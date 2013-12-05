@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 
@@ -41,7 +42,8 @@ public interface WorkspaceNodeLinkManager {
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      */
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceException;
     
     /**
      * Unlinks, in the workspace, two nodes.
@@ -49,11 +51,13 @@ public interface WorkspaceNodeLinkManager {
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      */
-    public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode);
+    public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceException;
     
     /**
      * Unlinks, in the workspace, a node from all its parent nodes.
      * @param childNode WorkspaceNode object corresponding to the node to be unlinked
      */
-    public void unlinkNodeFromAllParents(WorkspaceNode childNode);
+    public void unlinkNodeFromAllParents(WorkspaceNode childNode)
+            throws WorkspaceException;
 }

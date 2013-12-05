@@ -18,13 +18,14 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
@@ -36,6 +37,7 @@ import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -78,9 +80,6 @@ public class LamusWorkspaceNodeExplorerTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of explore method, of class LamusWorkspaceNodeExplorer.
-     */
     @Test
     public void exploreSuccessfullyLinkWithHandle() throws Exception {
 
@@ -89,9 +88,9 @@ public class LamusWorkspaceNodeExplorerTest {
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
         final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
         
-        final URI metadataLinkHandle = URI.create("hdl:SOMETHING/00-0000-0000-0000-0000-1");
+        final URI metadataLinkHandle = new URI("hdl:3492/2932");
         metadataLink.setHandle(metadataLinkHandle);
-        final URI resourceLinkHandle = URI.create("hdl:SOMETHING/00-0000-0000-0000-0000-2");
+        final URI resourceLinkHandle = new URI("hdl:3492/2933");
         resourceLink.setHandle(resourceLinkHandle);
         
         final Collection<Reference> testLinks = new ArrayList<Reference>();
@@ -166,4 +165,58 @@ public class LamusWorkspaceNodeExplorerTest {
 //        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
 //        
 //    }
+    
+    
+    @Test
+    public void exploreThrowsException() throws Exception {
+        
+        final int workspaceID = 10;
+
+        final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
+        final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
+        final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
+        final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
+        
+        final URI metadataLinkHandle = new URI("hdl:3492/2932");
+        metadataLink.setHandle(metadataLinkHandle);
+        final URI resourceLinkHandle = new URI("hdl:3492/2933");
+        resourceLink.setHandle(resourceLinkHandle);
+        
+        final Collection<Reference> testLinks = new ArrayList<Reference>();
+        testLinks.add(metadataLink);
+        testLinks.add(resourceLink);
+        
+        final OurURL metadataURL = new OurURL("https://testURL.mpi.nl/test.cmdi");
+        final OurURL resourceURL = new OurURL("http://testURL.mpi.nl/test.jpg");
+        final OurURL[] urls = new OurURL[testLinks.size()];
+        urls[0] = metadataURL;
+        urls[1] = resourceURL;
+        
+        final Exception expectedException = new Exception("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            for(Reference currentLink : testLinks) { //instances of HandleCarrier
+
+                oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
+                oneOf(mockNodeImporterFactoryBean).getObject(); will(throwException(expectedException));
+                
+                oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
+                
+                break; // due to the exception, the loop doesn't continue
+            }
+            
+        }});
+
+        try {
+            nodeExplorer.explore(mockNodeToExplore, mockNodeDocument, testLinks);
+            fail("should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Error getting file importer";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+        
+    }
 }

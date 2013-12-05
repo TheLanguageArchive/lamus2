@@ -28,7 +28,14 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
@@ -264,7 +271,7 @@ public class WorkspaceSteps {
     @Given("a workspace with ID $workspaceID created by $userID in node $topNodeArchiveUriStr")
     public void aWorkspaceWithIDCreatedByUserInNode(
             int workspaceID, String userID, String topNodeArchiveUriStr)
-            throws MalformedURLException, FileNotFoundException, IOException, MetadataException, UnknownNodeException, URISyntaxException {
+            throws MalformedURLException, FileNotFoundException, IOException, MetadataException, UnknownNodeException, URISyntaxException, WorkspaceNotFoundException, WorkspaceNodeNotFoundException {
         
         URI topNodeArchiveURI = new URI(topNodeArchiveUriStr);
         
@@ -346,7 +353,7 @@ public class WorkspaceSteps {
     }
     
     @Given("the top node has had some metadata added")
-    public void theTopNodeHasHadSomeMetadataAdded() throws IOException, MetadataException, UnknownNodeException {
+    public void theTopNodeHasHadSomeMetadataAdded() throws IOException, MetadataException, UnknownNodeException, WorkspaceNodeNotFoundException {
         
 //        Node archiveNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID));
         CorpusNode archiveNode = this.corpusStructureProvider.getNode(this.createdWorkspaceTopNodeArchiveURI);
@@ -437,7 +444,7 @@ public class WorkspaceSteps {
     
     
     @When("that user chooses to create a workspace in the node with URI $nodeUriStr")
-    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException {
+    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException, UnknownNodeException, NodeAccessException, WorkspaceImportException {
 
         URI nodeURI = new URI(nodeUriStr);
         
@@ -458,7 +465,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to delete the workspace")
-    public void thatUserChoosesToDeleteTheWorkspace() {
+    public void thatUserChoosesToDeleteTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
@@ -469,7 +476,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to submit the workspace")
-    public void thatUserChoosesToSubmitTheWorkspace() {
+    public void thatUserChoosesToSubmitTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
         
         boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -479,9 +486,9 @@ public class WorkspaceSteps {
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
         
         //TODO more assertions missing?
-        boolean result = this.workspaceService.submitWorkspace(this.currentUserID, this.createdWorkspaceID/*, keepUnlinkedFiles*/);
+        this.workspaceService.submitWorkspace(this.currentUserID, this.createdWorkspaceID/*, keepUnlinkedFiles*/);
         
-        assertTrue("Result of the workspace submission should be true", result);
+//        assertTrue("Result of the workspace submission should be true", result);
     }
     
     @When("that user chooses to upload a $type file into the workspace")
@@ -533,7 +540,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to link the uploaded node to the top node of the workspace")
-    public void thatUserChoosesToLinkTheUploadedNodeIntoTheWorkspaceTree() {
+    public void thatUserChoosesToLinkTheUploadedNodeIntoTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.uploadedFileParentNode = wsTopNode;
@@ -542,7 +549,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to unlink a $type node from the workspace tree")
-    public void thatUserChoosesToUnlinkANodeFromTheWorkspaceTree() {
+    public void thatUserChoosesToUnlinkANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.unlinkedParentNode = wsTopNode;
@@ -556,7 +563,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to delete a $type node from the workspace tree")
-    public void thatUserChoosesToDeleteANodeFromTheWorkspaceTree() {
+    public void thatUserChoosesToDeleteANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.deletedWsNodeParent = wsTopNode;
@@ -573,7 +580,7 @@ public class WorkspaceSteps {
     
     
     @Then("the workspace is created in the database")
-    public void theWorkspaceIsCreatedInTheDatabase() throws InterruptedException {
+    public void theWorkspaceIsCreatedInTheDatabase() throws InterruptedException, WorkspaceNotFoundException, WorkspaceNodeNotFoundException {
         
         // database
         Workspace retrievedWorkspace = this.workspaceDao.getWorkspace(this.createdWorkspace.getWorkspaceID());
@@ -615,7 +622,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the workspace is removed both from database and filesystem")
-    public void theWorkspaceIsDeleted() {
+    public void theWorkspaceIsDeleted() throws WorkspaceNotFoundException {
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspaceID);
@@ -629,7 +636,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the status of the workspace is marked as successfully submitted")
-    public void theWorkspaceStatusIsMarkedAsSuccessfullySubmitted() {
+    public void theWorkspaceStatusIsMarkedAsSuccessfullySubmitted() throws WorkspaceNotFoundException {
         
         //TODO assert that the workspace is now marked as successfully submitted
             //TODO (maybe some other assertions)
@@ -643,7 +650,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the end date of the workspace is set")
-    public void theEndDateOfTheWorkspaceWithIDIsSet() {
+    public void theEndDateOfTheWorkspaceWithIDIsSet() throws WorkspaceNotFoundException {
         
         Workspace workspace = this.workspaceDao.getWorkspace(this.createdWorkspaceID);
         
@@ -955,7 +962,7 @@ public class WorkspaceSteps {
     }
     
     @Then("that node is marked as deleted in the database")
-    public void thatNodeIsMarkedAsDeletedInTheDatabase() {
+    public void thatNodeIsMarkedAsDeletedInTheDatabase() throws WorkspaceNodeNotFoundException {
         
         WorkspaceNode retrievedNode =
                 this.workspaceDao.getWorkspaceNode(this.deletedWsNode.getWorkspaceNodeID());

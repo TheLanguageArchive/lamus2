@@ -27,8 +27,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.util.DateTimeHelper;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -85,11 +89,10 @@ public class LamusWorkspaceManagerTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of createWorkspace method, of class LamusWorkspaceManager.
-     */
+    
     @Test
-    public void createWorkspaceSuccessfully() throws InterruptedException, ExecutionException, URISyntaxException, IOException {
+    public void createWorkspaceSuccessfully()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException, WorkspaceImportException, WorkspaceNotFoundException {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final int workspaceID = 10;
         final String userID = "someUser";
@@ -131,23 +134,207 @@ public class LamusWorkspaceManagerTest {
      * Test of createWorkspace method, of class LamusWorkspaceManager.
      */
     @Test
-    public void creationOfWorkspaceDirectoryFails() throws URISyntaxException, IOException {
+    public void creationOfWorkspaceDirectoryFails()
+            throws URISyntaxException, IOException {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         final String errorMessage = "Directory for workspace " + newWorkspace.getWorkspaceID() + " could not be created";
+        final IOException expectedException = new IOException(errorMessage);
         
         context.checking(new Expectations() {{
             oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
-                will(throwException(new IOException(errorMessage)));
+                will(throwException(expectedException));
         }});
         
-        Workspace result = manager.createWorkspace(userID, archiveNodeURI);
-        assertNull("Returned workspace should be null when the directory creation fails.", result);
+        try {
+            manager.createWorkspace(userID, archiveNodeURI);
+        } catch(WorkspaceImportException ex) {
+            String expectedMainErrorMessage = "Error creating workspace in node " + archiveNodeURI;
+            assertEquals("Message different from expected", expectedMainErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", newWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+        
+    }
+    
+    @Test
+    public void createWorkspaceThreadInterrupted()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException, WorkspaceImportException {
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        newWorkspace.setWorkspaceID(workspaceID);
+        
+        final WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        final String expectedMessage = "Workspace initialising";
+        
+        final int topNodeID = 100;
+        final Workspace expectedWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        expectedWorkspace.setWorkspaceID(workspaceID);
+        expectedWorkspace.setTopNodeID(topNodeID);
+        expectedWorkspace.setStatus(expectedStatus);
+        expectedWorkspace.setMessage(expectedMessage);
+        
+        final InterruptedException expectedException = new InterruptedException("some exception message");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
+            oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
+            oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
+            
+        }});
+        
+        try {
+            manager.createWorkspace(userID, archiveNodeURI);
+        } catch(WorkspaceImportException ex) {
+            String expectedMainErrorMessage = "Interruption in thread while creating workspace in node " + archiveNodeURI;
+            assertEquals("Message different from expected", expectedMainErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", newWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void createWorkspaceExecutionException()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException, WorkspaceImportException {
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        newWorkspace.setWorkspaceID(workspaceID);
+        
+        final WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        final String expectedMessage = "Workspace initialising";
+        
+        final int topNodeID = 100;
+        final Workspace expectedWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        expectedWorkspace.setWorkspaceID(workspaceID);
+        expectedWorkspace.setTopNodeID(topNodeID);
+        expectedWorkspace.setStatus(expectedStatus);
+        expectedWorkspace.setMessage(expectedMessage);
+        
+        final ExecutionException expectedException = new ExecutionException("some exception message", null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
+            oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
+            oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
+            
+        }});
+        
+        try {
+            manager.createWorkspace(userID, archiveNodeURI);
+        } catch(WorkspaceImportException ex) {
+            String expectedMainErrorMessage = "Problem with thread execution while creating workspace in node " + archiveNodeURI;
+            assertEquals("Message different from expected", expectedMainErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", newWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void createWorkspaceFails()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException, WorkspaceImportException {
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        newWorkspace.setWorkspaceID(workspaceID);
+        
+        final WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        final String expectedMessage = "Workspace initialising";
+        
+        final int topNodeID = 100;
+        final Workspace expectedWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        expectedWorkspace.setWorkspaceID(workspaceID);
+        expectedWorkspace.setTopNodeID(topNodeID);
+        expectedWorkspace.setStatus(expectedStatus);
+        expectedWorkspace.setMessage(expectedMessage);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
+            oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
+            oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
+            
+        }});
+        
+        try {
+            manager.createWorkspace(userID, archiveNodeURI);
+        } catch(WorkspaceImportException ex) {
+            String expectedMainErrorMessage = "Workspace creation failed in node " + archiveNodeURI;
+            assertEquals("Message different from expected", expectedMainErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", newWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void createWorkspaceThrowsWorkspaceNotFoundException()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException, WorkspaceImportException, WorkspaceNotFoundException {
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        newWorkspace.setWorkspaceID(workspaceID);
+        
+        final WorkspaceStatus expectedStatus = WorkspaceStatus.INITIALISING;
+        final String expectedMessage = "Workspace initialising";
+        
+        final int topNodeID = 100;
+        final Workspace expectedWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
+        expectedWorkspace.setWorkspaceID(workspaceID);
+        expectedWorkspace.setTopNodeID(topNodeID);
+        expectedWorkspace.setStatus(expectedStatus);
+        expectedWorkspace.setMessage(expectedMessage);
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
+            oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
+            oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            manager.createWorkspace(userID, archiveNodeURI);
+        } catch(WorkspaceImportException ex) {
+            assertEquals("Message different from expected", expectedException.getMessage(), ex.getMessage());
+            assertEquals("Workspace ID different from expected", newWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+        
     }
     
     @Test
@@ -161,9 +348,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
         }});
         
-        boolean result = manager.deleteWorkspace(workspaceID);
-        
-        assertTrue("Result should be true.", result);
+        manager.deleteWorkspace(workspaceID);
     }
     
     @Test
@@ -179,13 +364,16 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID); will(throwException(expectedException));
         }});
         
-        boolean result = manager.deleteWorkspace(workspaceID);
-        
-        assertFalse("Result should be false.", result);
+        try {
+            manager.deleteWorkspace(workspaceID);
+            fail("should have thrown an exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test
-    public void openExistingWorkspaceWithRightUser() throws URISyntaxException, MalformedURLException {
+    public void openExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, IOException {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
@@ -209,10 +397,10 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(workspaceToRetrieve);
             //update as well status?
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+//            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
         }});
         
-        Workspace result = manager.openWorkspace(userID, workspaceID);
+        Workspace result = manager.openWorkspace(workspaceID);
         assertNotNull("Returned workspace should not be null", result);
         assertEquals("Returned workspace is different from expected", result, workspaceToRetrieve);
         
@@ -221,9 +409,8 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void openExistingWorkspaceWithWrongUser() throws URISyntaxException, MalformedURLException {
+    public void openNonExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, IOException {
         final int workspaceID = 1;
-        final String givenUserID = "someUser";
         final String expectedUserID = "someOtherUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
@@ -237,20 +424,23 @@ public class LamusWorkspaceManagerTest {
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, expectedUserID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
         }});
         
-        Workspace result = manager.openWorkspace(givenUserID, workspaceID);
-        
-        //TODO Or throw an exception?
-        
-        assertNull("Returned workspace should be null", result);
+        try {
+            manager.openWorkspace(workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test
-    public void openExistingWorkspaceWithoutDirectory() throws URISyntaxException, MalformedURLException {
+    public void openExistingWorkspaceWithoutDirectory() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
@@ -265,35 +455,25 @@ public class LamusWorkspaceManagerTest {
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
         
+        final String expectedErrorMessage = "Directory for workpace " + workspaceID + " does not exist";
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
             oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(Boolean.FALSE));
         }});
         
-        Workspace result = manager.openWorkspace(userID, workspaceID);
-        
-        //TODO Or throw an exception?
-        
-        assertNull("Returned workspace should be null", result);
+        try {
+            manager.openWorkspace(workspaceID);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
     }
     
     @Test
-    public void openNonExistingWorkspace() throws MalformedURLException {
-        final int workspaceID = 1;
-        final String userID = "someUser";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(null));
-        }});
-        
-        Workspace result = manager.openWorkspace(userID, workspaceID);
-        assertNull("Returned workspace should be null", result);
-    }
-    
-    @Test
-    public void submitWorkspaceSuccessful() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException {
+    public void submitWorkspaceSuccessful() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
@@ -325,8 +505,6 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
             
-            //TODO something else?
-            
             oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
@@ -338,13 +516,33 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
         }});
         
-        boolean result = manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
-        assertTrue("Result should be true", result);
+        manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
     }
     
     @Test
-    public void submitWorkspaceUnsuccessful() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException {
+    public void submitWorkspaceThrowsWorkspaceNotFoundException()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
         
+        final int workspaceID = 1;
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            fail("should have thrown exception");
+        } catch (WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceThreadInterrupted() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
         final int workspaceID = 1;
         final String userID = "someUser";
         final int topNodeID = 1;
@@ -357,9 +555,9 @@ public class LamusWorkspaceManagerTest {
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
-        final WorkspaceStatus unsuccessfullySubmittedStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
         final String initialMessage = "workspace is in good shape";
-        final String unsuccessfullySubmittedMessage = "there were errors when submitting the workspace";
+        final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
@@ -370,13 +568,127 @@ public class LamusWorkspaceManagerTest {
         
         final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
-                unsuccessfullySubmittedStatus, unsuccessfullySubmittedMessage, archiveInfo);
+                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
+        
+        final String expectedErrorMessage = "Interruption in thread while submitting workspace " + workspaceID;
+        final InterruptedException expectedException = new InterruptedException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
             
-            //TODO something else?
+            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
+            
+            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+        }});
+        
+        try {
+            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceExecutionException() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.add(Calendar.DAY_OF_MONTH, -2);
+        final Date startDate = startCalendar.getTime();
+        final Date endDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final String initialMessage = "workspace is in good shape";
+        final String errorSubmittingMessage = "there were errors when submitting the workspace";
+        final String archiveInfo = "still not sure what this would be";
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
+                initialStatus, initialMessage, archiveInfo);
+        
+        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
+                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
+        
+        final String expectedErrorMessage = "Problem with thread execution while submitting workspace " + workspaceID;
+        final ExecutionException expectedException = new ExecutionException("some exception message", null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
+            
+            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+        }});
+        
+        try {
+            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void submitWorkspaceFails() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.add(Calendar.DAY_OF_MONTH, -2);
+        final Date startDate = startCalendar.getTime();
+        final Date endDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final String initialMessage = "workspace is in good shape";
+        final String errorSubmittingMessage = "there were errors when submitting the workspace";
+        final String archiveInfo = "still not sure what this would be";
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
+                initialStatus, initialMessage, archiveInfo);
+        
+        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
+                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
+        
+        final String expectedErrorMessage = "Workspace submission failed for workspace " + workspaceID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
@@ -389,8 +701,13 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
         }});
         
-        boolean result = manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
-        assertFalse("Result should be false", result);
-
+        try {
+            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertNull("Cause should be null", ex.getCause());
+        }
     }
 }

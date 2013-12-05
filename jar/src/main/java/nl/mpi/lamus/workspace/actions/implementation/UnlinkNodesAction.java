@@ -17,26 +17,37 @@
 package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- *
+ * Implementation of the action to unlink nodes.
+ * 
  * @author guisil
  */
 public class UnlinkNodesAction implements WsTreeNodesAction {
 
     private final String name = "Unlink";
     
-    
+   
+    /**
+     * @see WsTreeNodesAction#getName()
+     */
     @Override
     public String getName() {
         return this.name;
     }
 
+    /**
+     * @see WsTreeNodesAction#execute(java.lang.String, java.util.Collection, nl.mpi.lamus.service.WorkspaceService)
+     */
     @Override
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService) {
+    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         for(WorkspaceTreeNode currentNode : nodes) {
             wsService.unlinkNodes(userID, currentNode.getParent(), currentNode);
         }

@@ -21,8 +21,6 @@ import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -56,23 +54,13 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     @Override
     public void copyMetadataFile(WorkspaceNode workspaceNode,
             MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile, StreamResult targetNodeFileStreamResult)
-            throws WorkspaceNodeFilesystemException {
+                throws IOException, TransformerException, MetadataException {
         
-        try {
-            metadataAPI.writeMetadataDocument(metadataDocument, targetNodeFileStreamResult);
-        } catch(IOException ioex) {
-            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
-            logger.error(errorMessage, ioex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, ioex);
-        } catch(TransformerException tex) {
-            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
-            logger.error(errorMessage, tex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, tex);
-        } catch(MetadataException mdex) {
-            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
-            logger.error(errorMessage, mdex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, mdex);
-        }
+        
+        //TODO NO NEED TO BE A SEPARATE METHOD...
+        
+        
+        metadataAPI.writeMetadataDocument(metadataDocument, targetNodeFileStreamResult);
     }
     
     /**
@@ -80,14 +68,14 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
      */
     @Override
     public void copyResourceFile(WorkspaceNode workspaceNode,
-            File originNodeFile, File targetNodeFile) throws WorkspaceNodeFilesystemException {
-        try {
-            FileUtils.copyFile(originNodeFile, targetNodeFile);
-        } catch (IOException ioex) {
-            String errorMessage = "Problem writing file " + originNodeFile.getAbsolutePath();
-            logger.error(errorMessage, ioex);
-            throw new WorkspaceNodeFilesystemException(errorMessage, workspaceNode, ioex);
-        }
+            File originNodeFile, File targetNodeFile)
+                throws IOException {
+        
+        
+        //TODO NO NEED TO BE A SEPARATE METHOD...
+        
+        
+        FileUtils.copyFile(originNodeFile, targetNodeFile);
     }
     
     //TODO standardise the copy methods
@@ -96,13 +84,14 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
      * @see WorkspaceFileHandler#copyFile(int, java.io.File, java.io.File)
      */
     @Override
-    public void copyFile(int workspaceID, File originFile, File targetNodeFile) throws WorkspaceFilesystemException {
+    public void copyFile(int workspaceID, File originFile, File targetNodeFile)
+            throws IOException {
         try {
             FileUtils.copyFile(originFile, targetNodeFile);
         } catch (IOException ioex) {
             String errorMessage = "Problem writing file " + targetNodeFile.getAbsolutePath();
             logger.error(errorMessage, ioex);
-            throw new WorkspaceFilesystemException(errorMessage, workspaceID, ioex);
+            throw ioex;
         }
     }
     
@@ -123,11 +112,8 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
         String nodeFilename = FilenameUtils.getName(archiveNodeURL.toString());
         
-        
         //TODO Should it be based on the name in the node's metadata??
         File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
-        
-        
         
         return workspaceNodeFile;
     }

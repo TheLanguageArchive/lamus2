@@ -17,28 +17,37 @@
 package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- *
+ * Implementation of the action to link nodes.
+ * 
  * @author guisil
  */
 public class LinkNodesAction implements WsParentChildNodesAction {
 
     private final String name = "Link";
     
-    public LinkNodesAction() {
-    }
     
+    /**
+     * @see WsParentChildNodesAction#getName()
+     */
     @Override
     public String getName() {
         return this.name;
     }
 
+    /**
+     * @see WsParentChildNodesAction#execute(java.lang.String, nl.mpi.lamus.workspace.tree.WorkspaceTreeNode, java.util.Collection, nl.mpi.lamus.service.WorkspaceService)
+     */
     @Override
-    public void execute(String userID, WorkspaceTreeNode parentNode, Collection<WorkspaceTreeNode> childNodes, WorkspaceService wsService) {
+    public void execute(String userID, WorkspaceTreeNode parentNode, Collection<WorkspaceTreeNode> childNodes, WorkspaceService wsService)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         for(WorkspaceTreeNode currentNode : childNodes) {
             wsService.linkNodes(userID, parentNode, currentNode);
         }

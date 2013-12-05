@@ -20,8 +20,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.NodeExplorerException;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
@@ -62,10 +61,8 @@ public class TopNodeImporter {
      * 
      * @param workspaceID ID of the workspace
      * @param childNodeArchiveURI archive URI of the current node
-     * @throws NodeImporterException if there is a problem during the import
-     * @throws NodeExplorerException if there is a problem in the recursive exploration of the tree
      */
-    public void importNode(int workspaceID, URI childNodeArchiveURI) throws NodeImporterException, NodeExplorerException {
+    public void importNode(int workspaceID, URI childNodeArchiveURI) throws WorkspaceImportException {
         metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveURI);
     }
     

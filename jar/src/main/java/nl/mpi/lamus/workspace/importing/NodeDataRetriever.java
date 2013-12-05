@@ -22,7 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import nl.mpi.corpusstructure.UnknownNodeException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;

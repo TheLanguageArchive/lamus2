@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
@@ -30,9 +31,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
-import nl.mpi.lamus.workspace.exception.NodeExplorerException;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
@@ -50,6 +49,8 @@ import nl.mpi.metadata.api.model.*;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import org.jmock.Expectations;
+import static org.jmock.Expectations.returnValue;
+import static org.jmock.Expectations.throwException;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -117,15 +118,15 @@ public class MetadataNodeImporterTest {
                 mockNodeDataRetriever, mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
                 mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
                 mockWorkspaceFileHandler, mockWorkspaceNodeExplorer);
-//        nodeImporter.setWorkspace(testWorkspace);
     }
     
     @After
     public void tearDown() {
     }
+    
 
     @Test
-    public void importNodeWithNullWorkspace() throws NodeExplorerException, URISyntaxException {
+    public void importNodeWithNullWorkspace() throws URISyntaxException, WorkspaceImportException {
         NodeImporter testNodeImporter = new MetadataNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockMetadataAPI,
                 mockNodeDataRetriever, mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
                 mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
@@ -134,22 +135,17 @@ public class MetadataNodeImporterTest {
         final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
         try {
             testNodeImporter.importNode(-1, null, null, null, testChildArchiveURI);
-        } catch (NodeImporterException ex) {
-            assertNotNull(ex);
-            String errorMessage = "MetadataNodeImporter.importNode: workspace not set";
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(-1, ex.getWorkspaceID());
-            assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
-            assertNull(ex.getCause());
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "Workspace not set";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
         }
     }
     
-    /**
-     * Test of importNode method, of class MetadataNodeImporter.
-     */
     @Test
     public void importTopNodeWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceNodeFilesystemException, NodeImporterException, NodeExplorerException, UnknownNodeException {
+        WorkspaceImportException, UnknownNodeException, TransformerException {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
@@ -188,7 +184,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importTopNodeWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceNodeFilesystemException, NodeImporterException, NodeExplorerException, UnknownNodeException {
+        WorkspaceImportException, UnknownNodeException, TransformerException {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
@@ -224,7 +220,7 @@ public class MetadataNodeImporterTest {
    
     @Test
     public void importNodeMetadataDocumentThrowsIOException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, NodeExplorerException, UnknownNodeException {
+        IOException, MetadataException, UnknownNodeException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI(UUID.randomUUID().toString());
@@ -245,19 +241,17 @@ public class MetadataNodeImporterTest {
         try {
             nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
             fail("Should have thrown exception");
-        } catch(NodeImporterException ex) {
-            assertNotNull(ex);
-            String errorMessage = "Error importing Metadata Document for node " + testURI;
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
-            assertEquals(expectedException, ex.getCause());
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Error getting Metadata Document for node " + testURI;
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
     }
     
     @Test
     public void importNodeMetadataDocumentThrowsMetadataException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, NodeExplorerException, UnknownNodeException {
+        IOException, MetadataException, UnknownNodeException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI(UUID.randomUUID().toString());
@@ -278,19 +272,17 @@ public class MetadataNodeImporterTest {
         try {
             nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
             fail("Should have thrown exception");
-        } catch(NodeImporterException ex) {
-            assertNotNull(ex);
-            String errorMessage = "Error importing Metadata Document for node " + testURI;
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Error getting Metadata Document for node " + testURI;
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
             assertEquals(expectedException, ex.getCause());
         }
     }
     
     @Test
     public void importNodeMetadataDocumentThrowsUnknownNodeException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, NodeExplorerException, UnknownNodeException {
+        IOException, MetadataException, UnknownNodeException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI(UUID.randomUUID().toString());
@@ -306,21 +298,17 @@ public class MetadataNodeImporterTest {
         try {
             nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
             fail("Should have thrown exception");
-        } catch(NodeImporterException ex) {
-            assertNotNull(ex);
+        } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting information for node " + testURI;
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
-            assertEquals(expectedException, ex.getCause());
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
     }
     
-    //TODO Test throw NodeExplorerException
-    
     @Test
     public void importNormalNodeWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceNodeFilesystemException, NodeImporterException, NodeExplorerException, UnknownNodeException {
+        WorkspaceImportException, UnknownNodeException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -368,7 +356,7 @@ public class MetadataNodeImporterTest {
 
     @Test
     public void importNormalNodeWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceNodeFilesystemException, NodeImporterException, NodeExplorerException, UnknownNodeException {
+        WorkspaceImportException, UnknownNodeException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -412,8 +400,8 @@ public class MetadataNodeImporterTest {
     }
 
     @Test
-    public void getNewWorkspaceNodeThrowsWorkspaceNodeFilesystemException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceNodeFilesystemException, NodeImporterException, NodeExplorerException, UnknownNodeException {
+    public void getNewWorkspaceNodeThrowsMalformedURLException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
+        WorkspaceImportException, UnknownNodeException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -436,9 +424,8 @@ public class MetadataNodeImporterTest {
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
-        final WorkspaceNodeFilesystemException expectedException =
-                new WorkspaceNodeFilesystemException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'",
-                    testChildNode, null);
+        final MalformedURLException expectedException =
+                new MalformedURLException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
             
@@ -460,14 +447,183 @@ public class MetadataNodeImporterTest {
         try {
             nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
             fail("Should have thrown exception");
-        } catch(NodeImporterException ex) {
-            assertNotNull(ex);
-            String errorMessage = "Failed to create file for workspace node " + testChildNode.getWorkspaceNodeID()
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to set URL for node " + testChildNode.getArchiveURI()
 		    + " in workspace " + testWorkspace.getWorkspaceID();
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals(MetadataNodeImporter.class, ex.getNodeImporterType());
-            assertEquals(expectedException, ex.getCause());
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+        
+    @Test
+    public void getNewWorkspaceNodeThrowsIOException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
+        WorkspaceImportException, UnknownNodeException, TransformerException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int testChildWorkspaceNodeID = 10;
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URL testChildOriginURL = new URL("file:/some.url/node.something");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final String testChildName = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
+        
+        final IOException expectedException =
+                new IOException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
+                will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
+                will(returnValue(testChildNode));
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
+		    + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void getNewWorkspaceNodeThrowsTransformerException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
+        WorkspaceImportException, UnknownNodeException, TransformerException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int testChildWorkspaceNodeID = 10;
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URL testChildOriginURL = new URL("file:/some.url/node.something");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final String testChildName = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
+        
+        final TransformerException expectedException =
+                new TransformerException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
+                will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
+                will(returnValue(testChildNode));
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
+		    + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void getNewWorkspaceNodeThrowsMetadataException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
+        WorkspaceImportException, UnknownNodeException, TransformerException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int testChildWorkspaceNodeID = 10;
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URL testChildOriginURL = new URL("file:/some.url/node.something");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final String testChildName = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
+        
+        final MetadataException expectedException =
+                new MetadataException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
+                will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
+                will(returnValue(testChildNode));
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
+		    + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
     }
     

@@ -15,8 +15,12 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -34,7 +38,8 @@ public interface WorkspaceManager extends Serializable {
      * @param topArchiveNodeURI URI of the archive node where the workspace is being created
      * @return the object corresponding to the created workspace
      */
-    public Workspace createWorkspace(String userID, URI topArchiveNodeURI);
+    public Workspace createWorkspace(String userID, URI topArchiveNodeURI)
+            throws WorkspaceImportException;
     
     /**
      * Triggers the deletion of a workspace
@@ -42,26 +47,26 @@ public interface WorkspaceManager extends Serializable {
      * 
      * @param userID ID of the user who is deleting the workspace
      * @param workspaceID  ID of the workspace to be deleted
-     * @return true if deletion was successful
      */
-    public boolean deleteWorkspace(int workspaceID);
+    public void deleteWorkspace(int workspaceID)
+            throws IOException;
     
     /**
      * Triggers the submission of a workspace 
      * (copying the corresponding data back to the archive).
      * 
      * @param workspaceID ID of the workspace to submit
-     * @return true if submission was successful
      */
-    public boolean submitWorkspace(int workspaceID);
+    public void submitWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceExportException;
     
     /**
      * Opens a workspace, getting the corresponding object from the
      * database, as well as changing its status.
      * 
-     * @param userID ID of the user who is opening the workspace
      * @param workspaceID ID of the workspace to be opened
      * @return the object corresponding to the opened workspace
      */
-    public Workspace openWorkspace(String userID, int workspaceID);
+    public Workspace openWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException, IOException;
 }

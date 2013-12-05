@@ -24,6 +24,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
@@ -43,6 +44,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -89,11 +91,8 @@ public class DeletedNodeExporterTest {
     }
 
 
-    /**
-     * Test of exportNode method, of class DeletedNodeExporter.
-     */
     @Test
-    public void exportNode() throws MalformedURLException, URISyntaxException, UnknownNodeException {
+    public void exportNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
@@ -144,5 +143,63 @@ public class DeletedNodeExporterTest {
         
     }
     
-    //TODO tests for failure situations
+    @Test
+    public void exportUnknownNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+        
+        final int testWorkspaceNodeID = 10;
+        final String testBaseName = "node.txt";
+        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
+        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+        final URL testNodeArchiveURL = testNodeOriginURL;
+        
+        final String testNodeDisplayValue = "node";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "text/plain";
+        final URI testNodeSchemaLocation = new URI("http://some.location");
+
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
+                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
+        
+        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
+        
+        final String expectedErrorMessage = "Node not found in archive database for URI " + testNode.getArchiveURI();
+        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
+
+            //exception caught
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+        }});
+        
+        try {
+            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+        
+        deletedNodeExporter.setWorkspace(null);
+        
+        try {
+            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "Workspace not set";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
 }

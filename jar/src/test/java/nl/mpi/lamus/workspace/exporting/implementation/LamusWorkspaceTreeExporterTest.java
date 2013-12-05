@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -80,11 +81,10 @@ public class LamusWorkspaceTreeExporterTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of explore method, of class LamusWorkspaceTreeExporter.
-     */
+
+    
     @Test
-    public void testExplore() throws MalformedURLException, URISyntaxException {
+    public void explore() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int workspaceID = 1;
         final int workspaceNodeID = 10;
@@ -122,5 +122,54 @@ public class LamusWorkspaceTreeExporterTest {
         }});
         
         workspaceTreeExporter.explore(mockWorkspace, node);
+    }
+    
+    @Test
+    public void exploreThrowsException() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+        
+        final int workspaceID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI schemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
+        
+        final int childWorkspaceNodeID = 20;
+        final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
+        final URL childOriginURL = new URL("file://some/different/local/folder/someOtherName.pdf");
+        final String childNodeName = "someOtherName";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
+        final String childNodeFormat = "";
+        final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
+                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodeFormat);
+        
+        final Collection<WorkspaceNode> children = new ArrayList<WorkspaceNode>();
+        children.add(childNode);
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
+            
+            //TODO FOR EACH CHILD NODE, GET THE PROPER EXPORTER AND CALL IT
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporter).exportNode(node, childNode);
+                will(throwException(expectedException));
+            
+        }});
+        
+        try {
+            workspaceTreeExporter.explore(mockWorkspace, node);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
 }

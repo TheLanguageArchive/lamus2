@@ -28,7 +28,8 @@ import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -155,7 +156,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 //    }
 
     @Override
-    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStreamToCheck, String filename) throws IOException, TypeCheckerException {
+    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStreamToCheck, String filename)
+            throws IOException, TypeCheckerException, WorkspaceException {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
@@ -163,15 +165,13 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
         File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, filename);
         URL uploadedFileURL;
-        OurURL uploadedFileOurURL;
         try {
             uploadedFileURL = uploadedFile.toURI().toURL();
-//            uploadedFileOurURL = new OurURL(uploadedFileURL);
         } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
+            String errorMessage = "Error retrieving URL from file " + uploadedFile.getPath();
+            logger.error(errorMessage, ex);
+            throw new WorkspaceException(errorMessage, workspaceID, ex);
         }
-
-            
         
         TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(inputStreamToCheck, filename);
         
@@ -186,7 +186,6 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
         if(!isArchivable) {
             logger.error("File [" + filename + "] not archivable: " + message);
-
             throw new TypeCheckerException(message.toString(), null);
         }
 
@@ -197,12 +196,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
         WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
                 workspaceID, null, uploadedFileURL, nodeType, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
-
         
         this.workspaceDao.addWorkspaceNode(uploadedNode);
-        
-        
-        //TODO return something
     }
 
 }

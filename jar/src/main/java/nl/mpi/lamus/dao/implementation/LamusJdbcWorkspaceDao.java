@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
@@ -301,7 +303,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      * @see WorkspaceDao#getWorkspace(int)
      */
     @Override
-    public Workspace getWorkspace(int workspaceID) {
+    public Workspace getWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException {
         
         logger.debug("Retrieving workspace with ID: " + workspaceID);
         
@@ -312,8 +315,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             workspaceToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceSql, namedParameters, new WorkspaceMapper());
         } catch(EmptyResultDataAccessException ex) {
-            logger.warn("Workspace with ID " + workspaceID + " does not exist in the database");
-            return null;
+            String errorMessage = "Workspace with ID " + workspaceID + " does not exist in the database";
+            logger.error(errorMessage, ex);
+            throw new WorkspaceNotFoundException(errorMessage, workspaceID, ex);
         }
         
         logger.info("Workspace with ID " + workspaceID + " retrieved from the database");
@@ -388,6 +392,23 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
         logger.info("Node " + archiveNodeURI + " is locked (there is already a workspace that contains this node).");
         return true;
+    }
+
+    /**
+     * @see WorkspaceDao#getWorkspaceNodeByArchiveURI(java.net.URI)
+     */
+    @Override
+    public Collection<WorkspaceNode> getWorkspaceNodeByArchiveURI(URI archiveNodeURI) {
+        
+        logger.debug("Retrieving locked node " + archiveNodeURI);
+        
+        
+        String queryWorkspaceNodeListSql = "SELECT * FROM node WHERE archive_uri = :uri";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("uri", archiveNodeURI.toString());
+        
+        Collection<WorkspaceNode> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceNodeListSql, namedParameters, new WorkspaceNodeMapper());
+        
+        return listToReturn;
     }
 
     /**
@@ -467,7 +488,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      * @see WorkspaceDao#getWorkspaceNode(int)
      */
     @Override
-    public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
+    public WorkspaceNode getWorkspaceNode(int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException {
 
         logger.debug("Retrieving workspace node with ID: " + workspaceNodeID);
         
@@ -478,8 +500,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             workspaceNodeToReturn = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
         } catch(EmptyResultDataAccessException ex) {
-            logger.warn("Workspace Node with ID " + workspaceNodeID + " does not exist in the database");
-            return null;
+            String errorMessage = "Workspace Node with ID " + workspaceNodeID + " does not exist in the database";
+            logger.error(errorMessage, ex);
+            throw new WorkspaceNodeNotFoundException(errorMessage, -1, workspaceNodeID, ex);
         }
         
         logger.info("Workspace Node with ID " + workspaceNodeID + " retrieved from the database");
@@ -491,7 +514,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      * @see WorkspaceDao#getWorkspaceTopNode(int)
      */
     @Override
-    public WorkspaceNode getWorkspaceTopNode(int workspaceID) {
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID) throws WorkspaceNodeNotFoundException {
 
         logger.debug("Retrieving top node of workspace with ID: " + workspaceID);
         
@@ -502,8 +525,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         try {
             topWorkspaceNode = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
         } catch(EmptyResultDataAccessException ex) {
-            logger.warn("Top node for workspace with ID " + workspaceID + " does not exist in the database");
-            return null;
+            String errorMessage = "Top node for workspace with ID " + workspaceID + " does not exist in the database";
+            logger.error(errorMessage, ex);
+            throw new WorkspaceNodeNotFoundException(errorMessage, workspaceID, -1, ex);
         }
         
         logger.info("Top node for workspace with ID " + workspaceID + " retrieved from the database");

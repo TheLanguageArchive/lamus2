@@ -18,8 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.workspace.exception.NodeExplorerException;
-import nl.mpi.lamus.workspace.exception.NodeImporterException;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -54,11 +53,13 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     }
 
     /**
-     * @see WorkspaceNodeExplorer#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
+     * @see WorkspaceNodeExplorer#explore(
+     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *          nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
      */
     @Override
     public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
-        throws NodeImporterException, NodeExplorerException {
+        throws WorkspaceImportException {
         
         
         //TODO for each link call recursive method to explore it
@@ -77,8 +78,8 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             try {
                 linkImporterToUse = nodeImporterFactoryBean.getObject();
             } catch (Exception ex) {
-                String errorMessage = "Error getting file importer.";
-                throw new NodeExplorerException(errorMessage, nodeToExplore.getWorkspaceID(), ex);
+                String errorMessage = "Error getting file importer";
+                throw new WorkspaceImportException(errorMessage, nodeToExplore.getWorkspaceID(), ex);
             }
             
             linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentLink.getURI());

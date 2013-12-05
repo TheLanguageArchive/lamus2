@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -42,6 +43,7 @@ public interface NodeExporter {
      * @param parentNode Parent of the node to export
      * @param currentNode Node to export
      */
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode);
+    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode)
+            throws WorkspaceExportException;
     
 }

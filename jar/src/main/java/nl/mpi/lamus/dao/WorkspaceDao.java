@@ -18,6 +18,8 @@ package nl.mpi.lamus.dao;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -84,7 +86,8 @@ public interface WorkspaceDao {
      * @param workspaceID ID of the workspace to retrieve
      * @return Workspace object with the given ID
      */
-    public Workspace getWorkspace(int workspaceID);
+    public Workspace getWorkspace(int workspaceID)
+            throws WorkspaceNotFoundException;
 
     /**
      * Retrieves a collection of workspaces created by the given user.
@@ -101,6 +104,15 @@ public interface WorkspaceDao {
      * @return true if the given archive node is locked
      */
     public boolean isNodeLocked(URI archiveNodeURI);
+    
+    /**
+     * Gets a list of workspace nodes with the given URI.
+     * There should be only one, but in case of failed workspaces
+     * that weren't deleted it could be possible to have more.
+     * @param archiveNodeURI URI of the archive node
+     * @return List of WorkspaceNode objects with the given archive URI
+     */
+    public Collection<WorkspaceNode> getWorkspaceNodeByArchiveURI(URI archiveNodeURI);
     
     /**
      * Inserts a node into the database.
@@ -122,7 +134,8 @@ public interface WorkspaceDao {
      * @param workspaceNodeID ID of the node to retrieve
      * @return WorkspaceNode object with the given ID
      */
-    public WorkspaceNode getWorkspaceNode(int workspaceNodeID);
+    public WorkspaceNode getWorkspaceNode(int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException;
     
     /**
      * Retrieves the top node of the given workspace.
@@ -130,7 +143,8 @@ public interface WorkspaceDao {
      * @param workspaceID ID of the workspace
      * @return WorkspaceNode object corresponding to the top node of the workspace
      */
-    public WorkspaceNode getWorkspaceTopNode(int workspaceID);
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID)
+            throws WorkspaceNodeNotFoundException;
     
     /**
      * Retrieves a collection containing all the nodes

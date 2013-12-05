@@ -16,19 +16,20 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.UUID;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceNodeFilesystemException;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -89,7 +90,8 @@ public class LamusWorkspaceFileImporterTest {
 
 
     @Test
-    public void importMetadataFileToWorkspace() throws WorkspaceNodeFilesystemException, MalformedURLException, URISyntaxException {
+    public void importMetadataFileToWorkspace()
+            throws MalformedURLException, URISyntaxException, IOException, TransformerException, MetadataException {
         
         final URI testURI = new URI("http://some.uri");
         final URL testURL = testURI.toURL();
@@ -109,9 +111,77 @@ public class LamusWorkspaceFileImporterTest {
     }
     
     @Test
-    public void importMetadataFileToWorkspaceThrowsException() throws URISyntaxException, WorkspaceNodeFilesystemException, MalformedURLException {
+    public void importMetadataFileToWorkspaceThrowsIOException()
+            throws URISyntaxException, MalformedURLException, IOException, TransformerException, MetadataException {
         
-        final int workspaceID = 1;
+        final URL archiveURL = new URL("file:/archive/some.url/file.cmdi");
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
+                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+                    will(throwException(expectedException));
+        }});
+        
+        try {
+            fileImporter.importMetadataFileToWorkspace(archiveURL, mockWorkspaceNode, mockMetadataDocument);
+            fail("Should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void importMetadataFileToWorkspaceThrowsTransformerException()
+            throws URISyntaxException, MalformedURLException, IOException, TransformerException, MetadataException {
+        
+        final URL archiveURL = new URL("file:/archive/some.url/file.cmdi");
+        final TransformerException expectedException = new TransformerException("some exception message");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
+                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+                    will(throwException(expectedException));
+        }});
+        
+        try {
+            fileImporter.importMetadataFileToWorkspace(archiveURL, mockWorkspaceNode, mockMetadataDocument);
+            fail("Should have thrown exception");
+        } catch(TransformerException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void importMetadataFileToWorkspaceThrowsMetadataException()
+            throws URISyntaxException, MalformedURLException, IOException, TransformerException, MetadataException {
+        
+        final URL archiveURL = new URL("file:/archive/some.url/file.cmdi");
+        final MetadataException expectedException = new MetadataException("some exception message");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
+            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
+                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+                    will(throwException(expectedException));
+        }});
+        
+        try {
+            fileImporter.importMetadataFileToWorkspace(archiveURL, mockWorkspaceNode, mockMetadataDocument);
+            fail("Should have thrown exception");
+        } catch(MetadataException ex) {
+            assertEquals("Exception is different from expected", expectedException, ex);
+        }
+    }
+
+    @Test
+    public void importMetadataFileToWorkspaceThrowsIllegalArgumentException()
+            throws URISyntaxException, MalformedURLException, IOException, TransformerException, MetadataException {
         
         final URI wsFileURI = new URI("file.cmdi"); // a URI which is not a URL
         final URL archiveURL = new URL("file:/archive/some.url/file.cmdi");
@@ -122,25 +192,17 @@ public class LamusWorkspaceFileImporterTest {
             oneOf(mockWorkspaceFileHandler).copyMetadataFile(
                     mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
             oneOf(mockNodeFile).toURI(); will(returnValue(wsFileURI));
-            
-                
-            oneOf(mockNodeFile).toURI(); will(returnValue(wsFileURI));
-            oneOf(mockWorkspaceNode).getWorkspaceID(); will(returnValue(workspaceID));
         }});
         
         try {
             fileImporter.importMetadataFileToWorkspace(archiveURL, mockWorkspaceNode, mockMetadataDocument);
             fail("Should have thrown exception");
-        } catch(WorkspaceNodeFilesystemException ex) {
-            assertNotNull(ex);
-            String errorMessage = "Failed to create URL from the Workspace file location: " + wsFileURI;
-            assertEquals(errorMessage, ex.getMessage());
-            assertEquals(workspaceID, ex.getWorkspaceID());
-            assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
-        } catch(Exception ex) {
+        } catch(IllegalArgumentException ex) {
+            assertEquals(IllegalArgumentException.class, ex.getClass());
             assertNotNull(ex);
         }
     }
     
+        
     //TODO MalformedURLException
 }

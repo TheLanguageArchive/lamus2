@@ -20,7 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import nl.mpi.lamus.workspace.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import org.apache.commons.fileupload.FileItem;
 
 /**
@@ -49,9 +50,8 @@ public interface WorkspaceUploader {
      * @param workspaceID ID of the workspace
      * @param inputStream InputStream to upload
      * @param filename name of the file to upload
-     * @throws IOException 
-     * @throws TypeCheckerException 
      */
-    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename) throws IOException, TypeCheckerException;
+    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
+            throws IOException, TypeCheckerException, WorkspaceException;
     
 }

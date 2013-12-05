@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -115,7 +117,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      * @see WorkspaceDao#getWorkspace(int)
      */
     @Override
-    public Workspace getWorkspace(int workspaceID) {
+    public Workspace getWorkspace(int workspaceID) throws WorkspaceNotFoundException {
         return this.getWorkspaceDao().getWorkspace(workspaceID);
     }
 
@@ -133,6 +135,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     @Override
     public boolean isNodeLocked(URI archiveNodeURI) {
         return this.getWorkspaceDao().isNodeLocked(archiveNodeURI);
+    }
+
+    /**
+     * @see WorkspaceDao#getWorkspaceNodeByArchiveURI(java.net.URI)
+     */
+    @Override
+    public Collection<WorkspaceNode> getWorkspaceNodeByArchiveURI(URI archiveNodeURI) {
+        return this.getWorkspaceNodeByArchiveURI(archiveNodeURI);
     }
 
     /**
@@ -155,7 +165,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      * @see WorkspaceDao#getWorkspaceNode(int)
      */
     @Override
-    public WorkspaceNode getWorkspaceNode(int workspaceNodeID) {
+    public WorkspaceNode getWorkspaceNode(int workspaceNodeID) throws WorkspaceNodeNotFoundException {
         return this.getWorkspaceDao().getWorkspaceNode(workspaceNodeID);
     }
     
@@ -163,7 +173,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      * @see WorkspaceDao#getWorkspaceTopNode(int)
      */
     @Override
-    public WorkspaceNode getWorkspaceTopNode(int workspaceID) {
+    public WorkspaceNode getWorkspaceTopNode(int workspaceID) throws WorkspaceNodeNotFoundException {
         return this.getWorkspaceDao().getWorkspaceTopNode(workspaceID);
     }
     

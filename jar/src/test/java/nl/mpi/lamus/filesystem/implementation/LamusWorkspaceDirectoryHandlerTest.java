@@ -20,7 +20,7 @@ import java.io.IOException;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.workspace.exception.WorkspaceFilesystemException;
+import nl.mpi.lamus.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.codehaus.plexus.util.FileUtils;
