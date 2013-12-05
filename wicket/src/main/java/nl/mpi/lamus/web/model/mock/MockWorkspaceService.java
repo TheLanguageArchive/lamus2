@@ -69,12 +69,10 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      *
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
-     * @return true if successfully submitted
      */
     @Override
-    public boolean submitWorkspace(String userID, int workspaceID) {
+    public void submitWorkspace(String userID, int workspaceID) {
 	logger.info("call to submitWorkspace({}, {})", userID, workspaceID);
-	return true;
     }
 
     /**

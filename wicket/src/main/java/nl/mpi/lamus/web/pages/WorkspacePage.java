@@ -22,6 +22,7 @@ import nl.mpi.lamus.web.components.ButtonPanel;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.components.LinkNodesPanel;
 import nl.mpi.lamus.web.components.NodeInfoPanel;
@@ -32,6 +33,7 @@ import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactor
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.tabs.AbstractTab;
 import org.apache.wicket.extensions.markup.html.tabs.TabbedPanel;
@@ -153,9 +155,13 @@ public class WorkspacePage extends LamusPage {
      * @return ArchiveTreePanel
      */
     private ArchiveTreePanel createWorkspaceTreePanel(String id) {
-	LinkedTreeModelProvider workspaceTreeProvider;
-	workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(
-		this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null));
+	WorkspaceTreeNode rootNode = null;
+        try {
+            rootNode = this.workspaceTreeService.getTreeNode(this.model.getObject().getTopNodeID(), null);
+        } catch (WorkspaceNodeNotFoundException ex) {
+            Session.get().error(ex.getMessage());
+        }
+        LinkedTreeModelProvider workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(rootNode);
 
 	ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider);
 	treePanel.addArchiveTreePanelListener(new ArchiveTreePanelListener() {

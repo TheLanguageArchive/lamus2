@@ -15,14 +15,18 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -70,12 +74,16 @@ public class SelectWorkspacePage extends LamusPage {
 
             @Override
             public void onSubmit() {
-
-                // Request a workspace with workspace service
-                final Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
-                // Show page for newly created workspace
-//                final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(openSelectedWorkspace));
-                setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
+                try {
+                    Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
+                    setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
+                } catch (WorkspaceNotFoundException ex) {
+                    Session.get().error(ex.getMessage());
+                } catch (WorkspaceAccessException ex) {
+                    Session.get().error(ex.getMessage());
+                } catch (IOException ex) {
+                    Session.get().error(ex.getMessage());
+                }
             }
         };
         form.add(submitButton);

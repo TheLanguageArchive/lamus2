@@ -17,10 +17,14 @@
 package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.model.Model;
 
@@ -45,8 +49,15 @@ public class WsNodeActionButton extends Button {
     @Override
     public void onSubmit() {
         final String currentUserId = LamusSession.get().getUserId();
-        
-        this.action.execute(currentUserId, this.selectedTreeNodes, this.workspaceService);
+        try {
+            this.action.execute(currentUserId, this.selectedTreeNodes, this.workspaceService);
+        } catch (WorkspaceNotFoundException ex) {
+            Session.get().error(ex.getMessage());
+        } catch (WorkspaceAccessException ex) {
+            Session.get().error(ex.getMessage());
+        } catch (WorkspaceException ex) {
+            Session.get().error(ex.getMessage());
+        }
         
         refreshStuff();
     }

@@ -16,8 +16,10 @@
  */
 package nl.mpi.lamus.web.model;
 
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.Session;
 import org.apache.wicket.injection.Injector;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -64,7 +66,12 @@ public class WorkspaceTreeNodeModel extends LoadableDetachableModel<WorkspaceTre
         if (this.workspaceNodeId == null) {
             return null;
         } else {
-            return this.workspaceTreeService.getTreeNode(this.workspaceNodeId, parentNode);
+            try {
+                return this.workspaceTreeService.getTreeNode(this.workspaceNodeId, parentNode);
+            } catch (WorkspaceNodeNotFoundException ex) {
+                Session.get().error(ex.getMessage());
+                return null;
+            }
         }
     }
     

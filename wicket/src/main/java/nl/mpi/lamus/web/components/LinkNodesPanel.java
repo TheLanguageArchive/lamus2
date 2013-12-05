@@ -16,12 +16,16 @@
  */
 package nl.mpi.lamus.web.components;
 
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -86,8 +90,15 @@ public class LinkNodesPanel extends GenericPanel<WorkspaceTreeNode> {
 
         @Override
         protected void onSubmit() {
-
-            getModelObject().execute(LamusSession.get().getUserId(), model.getObject(), unlinkedNodesPanel.getSelectedUnlinkedNodes(), workspaceService);
+            try {
+                getModelObject().execute(LamusSession.get().getUserId(), model.getObject(), unlinkedNodesPanel.getSelectedUnlinkedNodes(), workspaceService);
+            } catch (WorkspaceNotFoundException ex) {
+                Session.get().error(ex.getMessage());
+            } catch (WorkspaceAccessException ex) {
+                Session.get().error(ex.getMessage());
+            } catch (WorkspaceException ex) {
+                Session.get().error(ex.getMessage());
+            }
             LinkNodesPanel.this.refreshStuff();            
             
             unlinkedNodesPanel = new UnlinkedNodesPanel(

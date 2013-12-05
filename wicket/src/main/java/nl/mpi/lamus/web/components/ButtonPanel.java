@@ -16,12 +16,16 @@
  */
 package nl.mpi.lamus.web.components;
 
+import java.io.IOException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -74,7 +78,15 @@ public final class ButtonPanel extends Panel {
                 
                 @Override
                 public void onSubmit() {
-                    workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());                   
+                    try {
+                        workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
+                    } catch (WorkspaceNotFoundException ex) {
+                        Session.get().error(ex.getMessage());
+                    } catch (WorkspaceAccessException ex) {
+                        Session.get().error(ex.getMessage());
+                    } catch (IOException ex) {
+                        Session.get().error(ex.getMessage());
+                    }
                     setResponsePage(pagesProvider.getIndexPage());
                 }
             };

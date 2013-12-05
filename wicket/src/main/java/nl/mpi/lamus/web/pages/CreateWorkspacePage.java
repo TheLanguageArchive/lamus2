@@ -18,14 +18,16 @@ package nl.mpi.lamus.web.pages;
 
 import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
+import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
@@ -35,7 +37,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -108,15 +109,16 @@ public class CreateWorkspacePage extends LamusPage {
 		final String currentUserId = LamusSession.get().getUserId();
 		final URI selectedNodeURI = form.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
-		final Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
-		if (createdWorkspace == null) {
-		    //TODO: This will probably be replaced with exception handling once they get thrown from the createWorkspace method
-		    Session.get().error("Workspace was not created");
-		} else {
-		    // Show page for newly created workspace
-//		    final WorkspacePage resultPage = new WorkspacePage(new WorkspaceModel(createdWorkspace));
-		    setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-		}
+                try {
+                    Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
+                    setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
+                } catch (UnknownNodeException ex) {
+                    Session.get().error(ex.getMessage());
+                } catch (NodeAccessException ex) {
+                    Session.get().error(ex.getMessage());
+                } catch (WorkspaceImportException ex) {
+                    Session.get().error(ex.getMessage());
+                }
 	    }
 	};
 	form.add(submitButton);

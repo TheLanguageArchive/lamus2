@@ -16,8 +16,11 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
@@ -63,7 +66,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
 
     
     @Override
-    protected void setUpTest() {
+    protected void setUpTest() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         MockitoAnnotations.initMocks(this);
         
@@ -124,7 +127,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void formSubmitted() {
+    public void formSubmitted() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         FormTester formTester = getTester().newFormTester("formContainer:workspaceForm", false);
         

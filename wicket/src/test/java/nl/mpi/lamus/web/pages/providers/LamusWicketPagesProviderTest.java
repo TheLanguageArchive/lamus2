@@ -16,13 +16,13 @@
  */
 package nl.mpi.lamus.web.pages.providers;
 
-import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
@@ -31,7 +31,6 @@ import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
-import nl.mpi.lamus.web.unlinkednodes.model.UnlinkedRootWorkspaceNode;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
@@ -187,7 +186,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
 
     @Test
     @DirtiesContext
-    public void getWorkspacePage() {
+    public void getWorkspacePage() throws WorkspaceNodeNotFoundException {
         
         WorkspacePage resultPage = pagesProvider.getWorkspacePage(mockWorkspace);
         

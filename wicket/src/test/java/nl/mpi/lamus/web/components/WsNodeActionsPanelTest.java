@@ -20,16 +20,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
-import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
-import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Component;
@@ -137,7 +137,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void clickButton() {
+    public void clickButton() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         ListView<WsTreeNodesAction> nodesActionList = (ListView<WsTreeNodesAction>) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
         Iterator<Component> listItems = nodesActionList.iterator();

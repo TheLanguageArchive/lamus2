@@ -21,15 +21,18 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.corpusstructure.CorpusStructureArchiveNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
+import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -147,7 +150,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void formSubmitted() {
+    public void formSubmitted() throws UnknownNodeException, NodeAccessException, WorkspaceImportException {
         
         Form<CorpusNode> form = (Form<CorpusNode>) getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm");
         form.setModel(new CompoundPropertyModel<CorpusNode>(expectedSelectedNode));
@@ -164,6 +167,8 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         
         //TODO Trigger the form submission on the SELECTED node and create a workspace based on that node
     }
+    
+    //TODO test exceptions thrown
     
     
     private LinkedTreeNode mockArchiveRootNode() throws URISyntaxException {

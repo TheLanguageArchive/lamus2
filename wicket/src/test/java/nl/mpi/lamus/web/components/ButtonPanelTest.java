@@ -17,7 +17,10 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
+import java.io.IOException;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
@@ -123,13 +126,15 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void deleteWorkspaceButtonClicked() {
+    public void deleteWorkspaceButtonClicked() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
         getFormTester().submit("deleteWorkspaceButton");
         verify(mockWorkspaceServiceBean).deleteWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWorkspaceID);
         verify(mockPagesProviderBean).getIndexPage();
         getTester().assertRenderedPage(IndexPage.class);
     }
+    
+    //TODO test exceptions thrown
     
     
     private FormTester getFormTester() {
