@@ -21,11 +21,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
@@ -56,8 +54,6 @@ public class LamusNodeExporterFactoryTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock SearchClientBridge mockSearchClientBridge;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;

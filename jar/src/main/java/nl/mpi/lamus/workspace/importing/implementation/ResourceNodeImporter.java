@@ -64,7 +64,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     
-    private int workspaceID = -1;
+    private Workspace workspace = null;
     
     @Autowired
     public ResourceNodeImporter(CorpusStructureProvider csProvider,
@@ -85,15 +85,17 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     
     
     /**
-     * @see NodeImporter#importNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, int)
+     * @see NodeImporter#importNode(
+     *      nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, java.net.URI)
      */
     @Override
-    public void importNode(int wsID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, URI childNodeArchiveURI) throws WorkspaceImportException {
         
-        workspaceID = wsID;
+        workspace = ws;
         
-        if(workspaceID < 0) {
+        if(workspace == null) {
             String errorMessage = "ResourceNodeImporter.importNode: workspace not set";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
@@ -118,11 +120,11 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         } catch (MalformedURLException muex) {
             String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
             logger.error(errorMessage, muex);
-            throw new WorkspaceImportException(errorMessage, workspaceID, muex);
+            throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), muex);
         } catch (UnknownNodeException unex) {
 	    String errorMessage = "ResourceNodeImporter.importNode: error getting object URL for node " + childURI;
 	    logger.error(errorMessage, unex);
-	    throw new WorkspaceImportException(errorMessage, workspaceID, unex);
+	    throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), unex);
         }
 
 
@@ -140,7 +142,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
-                throw new WorkspaceImportException(errorMessage, workspaceID, tcex);
+                throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), tcex);
             }
             
             nodeDataRetriever.verifyTypecheckedResults(childOurURL, childLink, typecheckedResults);
@@ -152,7 +154,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspaceID, childURI, childURL, childLink, childType, childMimetype, childCorpusNode.getName());
+                workspace.getWorkspaceID(), childURI, childURL, childLink, childType, childMimetype, childCorpusNode.getName());
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

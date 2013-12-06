@@ -65,21 +65,12 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         this.archiveFileHelper = archiveFileHelper;
     }
 
-  
-    //TODO review this method
-    
     @Override
-    public URL getNodeArchiveURL(URI nodeArchiveURI) {
+    public URL getNodeArchiveURL(URI nodeArchiveURI) throws UnknownNodeException {
         
-        try {
-            CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
-            URL nodeArchiveURL = nodeResolver.getUrl(archiveNode);
-            return nodeArchiveURL;
-            
-        } catch (UnknownNodeException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
-        
+        CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
+        URL nodeArchiveURL = nodeResolver.getUrl(archiveNode);
+        return nodeArchiveURL;
     }
     
     /**

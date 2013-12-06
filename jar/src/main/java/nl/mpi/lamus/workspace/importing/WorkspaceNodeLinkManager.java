@@ -16,6 +16,8 @@
 package nl.mpi.lamus.workspace.importing;
 
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 
@@ -30,11 +32,12 @@ public interface WorkspaceNodeLinkManager {
      * Links, in the workspace, two nodes that were already linked in the archive
      * (for instance, when importing set of nodes from the archive in order to create a workspace).
      * 
+     * @param workspace Workspace where the linking is happening
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
      * @param childLink Reference to the child node from the parent metadata file
      */
-    public void linkNodesWithReference(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
+    public void linkNodesWithReference(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink);
     
     /**
      * Links, in the workspace, two nodes.

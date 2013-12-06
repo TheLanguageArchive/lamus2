@@ -18,16 +18,10 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collection;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -79,7 +73,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      * @see WorkspaceNodeLinkManager#linkNodesWithReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
      */
     @Override
-    public void linkNodesWithReference(WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
+    public void linkNodesWithReference(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
         
         WorkspaceParentNodeReference parentNodeReference =
 		this.workspaceParentNodeReferenceFactory.getNewWorkspaceParentNodeReference(parentNode, childLink);
@@ -87,12 +81,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
 	//TODO set top node ID in workspace (if reference is null), set workspace status / Save workspace
 	if (parentNodeReference == null) { //TODO find a better way of indicating this
             
-            Workspace workspace;
-            try {
-                workspace = this.workspaceDao.getWorkspace(childNode.getWorkspaceID());
-            } catch (WorkspaceNotFoundException ex) {
-                throw new UnsupportedOperationException("exception not handled yet");
-            }
+//            Workspace workspace;
+//
+//            workspace = this.workspaceDao.getWorkspace(childNode.getWorkspaceID());
+
             workspace.setTopNodeID(childNode.getWorkspaceNodeID());
 	    workspace.setTopNodeArchiveURI(childNode.getArchiveURI());
             workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
@@ -116,26 +108,23 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        MetadataDocument tempParentDocument;
+        MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
         } catch (IOException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        ReferencingMetadataDocument parentDocument;
+        ReferencingMetadataDocument parentDocument = null;
         if(tempParentDocument instanceof ReferencingMetadataDocument) {
             parentDocument = (ReferencingMetadataDocument) tempParentDocument;
         } else {
             String errorMessage = "Error retrieving referencing document for node " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage);
-            throw new WorkspaceException(errorMessage, workspaceID, null);
+            throwWorkspaceException(errorMessage, workspaceID, null);
         }
         
         try {
@@ -154,31 +143,26 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
         } catch (URISyntaxException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (IOException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (TransformerException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        WorkspaceNodeLink nodeLink;
+        WorkspaceNodeLink nodeLink = null;
         try {
             nodeLink =
                     this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
                         parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childNode.getWorkspaceURL().toURI());
         } catch (URISyntaxException ex) {
             String errorMessage = "Error creating link between nodes " + parentNode.getWorkspaceNodeID() + " and " + childNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
         this.workspaceDao.addWorkspaceNodeLink(nodeLink);
@@ -190,17 +174,15 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        MetadataDocument tempParentDocument;
+        MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
         } catch (IOException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
         ReferencingMetadataDocument parentDocument;
@@ -239,20 +221,16 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
         } catch (URISyntaxException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (IOException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (TransformerException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
+            throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
         this.workspaceDao.deleteWorkspaceNodeLink(parentNode.getWorkspaceID(), parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
@@ -270,4 +248,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
     }
     
+    private void throwWorkspaceException(String errorMessage, int workspaceID, Exception cause) throws WorkspaceException {
+        logger.error(errorMessage, cause);
+        throw new WorkspaceException(errorMessage, workspaceID, cause);
+    }
 }

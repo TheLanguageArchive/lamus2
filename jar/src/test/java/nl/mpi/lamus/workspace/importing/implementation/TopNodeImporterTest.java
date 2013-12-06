@@ -103,14 +103,13 @@ public class TopNodeImporterTest {
     @Test
     public void testImportNode() throws Exception {
         
-        final int workspaceID = 1;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataNodeImporter).importNode(workspaceID, null, null, null, nodeArchiveURI);
+            oneOf(mockMetadataNodeImporter).importNode(mockWorkspace, null, null, null, nodeArchiveURI);
         }});
         
-        topNodeImporter.importNode(workspaceID, nodeArchiveURI);
+        topNodeImporter.importNode(mockWorkspace, nodeArchiveURI);
     }
 
     /**

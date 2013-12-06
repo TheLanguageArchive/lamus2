@@ -28,6 +28,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,11 +60,11 @@ public class TopNodeImporter {
      * Imports the top node into the workspace, by invoking the correct importer
      * with only the parameters that matter in this case.
      * 
-     * @param workspaceID ID of the workspace
+     * @param workspace workspace where to import the node
      * @param childNodeArchiveURI archive URI of the current node
      */
-    public void importNode(int workspaceID, URI childNodeArchiveURI) throws WorkspaceImportException {
-        metadataNodeImporter.importNode(workspaceID, null, null, null, childNodeArchiveURI);
+    public void importNode(Workspace workspace, URI childNodeArchiveURI) throws WorkspaceImportException {
+        metadataNodeImporter.importNode(workspace, null, null, null, childNodeArchiveURI);
     }
     
 }

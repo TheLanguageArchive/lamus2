@@ -25,7 +25,6 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -53,17 +52,15 @@ public class GeneralNodeExporter implements NodeExporter {
     private MetadataAPI metadataAPI;
     private WorkspaceFileHandler workspaceFileHandler;
     private WorkspaceTreeExporter workspaceTreeExporter;
-    private CorpusStructureBridge corpusStructureBridge;
     private CorpusStructureProvider corpusStructureProvider;
     
     public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler,
-            WorkspaceTreeExporter wsTreeExporter, CorpusStructureBridge csBridge,
+            WorkspaceTreeExporter wsTreeExporter,
             CorpusStructureProvider csProvider) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
-        this.corpusStructureBridge = csBridge;
         this.corpusStructureProvider = csProvider;
     }
     
@@ -100,10 +97,7 @@ public class GeneralNodeExporter implements NodeExporter {
             
             workspaceTreeExporter.explore(workspace, currentNode);
             
-//            if(!corpusStructureBridge.ensureChecksum(currentNode.getArchiveNodeID(), currentNode.getWorkspaceURL())) {
-//                return;
-//                //TODO IS THIS ENOUGH IN THIS CASE?
-//            }
+            //TODO ensureChecksum - will this be done by the crawler??
             
             CorpusNode corpusNode = null;
             try {

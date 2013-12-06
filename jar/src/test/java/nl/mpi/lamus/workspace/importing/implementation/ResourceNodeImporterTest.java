@@ -203,7 +203,7 @@ public class ResourceNodeImporterTest {
         }});
         
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
         
     }
     
@@ -221,7 +221,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         
         try {
-            nodeImporterWithoutWorkspace.importNode(-1, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
+            nodeImporterWithoutWorkspace.importNode(null, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
             fail("Should have thrown exception");
         } catch(IllegalArgumentException ex) {
             String expectedErrorMessage = "ResourceNodeImporter.importNode: workspace not set";
@@ -269,7 +269,7 @@ public class ResourceNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
             fail("Should have thrown exception");
         } catch(IllegalArgumentException ex) {
             String expectedErrorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
@@ -317,7 +317,7 @@ public class ResourceNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String expectedErrorMessage = "ResourceNodeImporter.importNode: error getting object URL for node " + childURI;
@@ -376,7 +376,7 @@ public class ResourceNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLink, childURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String expectedErrorMessage = "ResourceNodeImporter.importNode: error during type checking";

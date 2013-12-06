@@ -26,12 +26,8 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -42,7 +38,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -50,7 +45,6 @@ import nl.mpi.metadata.api.model.MetadataReference;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
-import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
@@ -155,11 +149,11 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodesWithReference(mockParentNode, mockChildNode, mockChildReference);
+        nodeLinkManager.linkNodesWithReference(mockWorkspace, mockParentNode, mockChildNode, mockChildReference);
     }
 
     @Test
-    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException, UnknownNodeException, WorkspaceNotFoundException {
+    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException, UnknownNodeException {
         
         final int childNodeID = 2;
         final URI childNodeURI = new URI(UUID.randomUUID().toString());
@@ -178,12 +172,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildNode).getArchiveURL(); will(returnValue(childNodeURL));
             oneOf(mockWorkspace).setTopNodeArchiveURL(childNodeURL);
             
-            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+//            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+//            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).updateWorkspaceTopNode(mockWorkspace);
         }});
         
-        nodeLinkManager.linkNodesWithReference(null, mockChildNode, mockChildReference);
+        nodeLinkManager.linkNodesWithReference(mockWorkspace, null, mockChildNode, mockChildReference);
     }
   
     //TODO top node -> UnknownNodeException

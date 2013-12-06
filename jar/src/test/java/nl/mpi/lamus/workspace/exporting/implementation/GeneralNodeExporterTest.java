@@ -32,7 +32,6 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -79,7 +78,6 @@ public class GeneralNodeExporterTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
-    @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     
     @Mock MetadataDocument mockMetadataDocument;
@@ -109,7 +107,7 @@ public class GeneralNodeExporterTest {
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         
         generalNodeExporter = new GeneralNodeExporter(mockMetadataAPI, mockWorkspaceFileHandler,
-                mockWorkspaceTreeExporter, mockCorpusStructureBridge, mockCorpusStructureProvider);
+                mockWorkspaceTreeExporter, mockCorpusStructureProvider);
         generalNodeExporter.setWorkspace(workspace);
     }
     

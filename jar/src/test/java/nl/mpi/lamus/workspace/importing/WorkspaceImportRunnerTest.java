@@ -95,7 +95,7 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
-            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveURI);
+            oneOf(mockTopNodeImporter).importNode(mockWorkspace, topNodeArchiveURI);
                 when(importing.isNot("finished"));
             oneOf(mockWorkspace).setStatusMessageInitialised();
                 when(importing.isNot("finished"));
@@ -128,7 +128,7 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
-            oneOf(mockTopNodeImporter).importNode(workspaceID, topNodeArchiveURI);
+            oneOf(mockTopNodeImporter).importNode(mockWorkspace, topNodeArchiveURI);
                 will(throwException(expectedExceptionCause));
             
             oneOf (mockWorkspace).setStatusMessageErrorDuringInitialisation();

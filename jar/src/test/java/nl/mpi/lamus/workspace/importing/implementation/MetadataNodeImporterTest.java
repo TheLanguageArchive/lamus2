@@ -134,7 +134,7 @@ public class MetadataNodeImporterTest {
         
         final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
         try {
-            testNodeImporter.importNode(-1, null, null, null, testChildArchiveURI);
+            testNodeImporter.importNode(null, null, null, null, testChildArchiveURI);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -171,15 +171,15 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(null, testChildNode, null);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, null, testChildNode, null);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
         
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceList));
-            oneOf (mockWorkspaceNodeExplorer).explore(testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
+            oneOf (mockWorkspaceNodeExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
         }});
         
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testChildURI);
+        nodeImporter.importNode(testWorkspace, null, null, null, testChildURI);
     }
     
     @Test
@@ -210,12 +210,12 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(null, testChildNode, null);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, null, testChildNode, null);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
         
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testChildURI);
+        nodeImporter.importNode(testWorkspace, null, null, null, testChildURI);
     }
    
     @Test
@@ -239,7 +239,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting Metadata Document for node " + testURI;
@@ -270,7 +270,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting Metadata Document for node " + testURI;
@@ -296,7 +296,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting information for node " + testURI;
@@ -343,15 +343,15 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceList));
-            oneOf (mockWorkspaceNodeExplorer).explore(testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
+            oneOf (mockWorkspaceNodeExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
         }});
         
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
     }
 
     @Test
@@ -391,12 +391,12 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
         
-        nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
     }
 
     @Test
@@ -439,13 +439,13 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to set URL for node " + testChildNode.getArchiveURI()
@@ -496,13 +496,13 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
@@ -553,13 +553,13 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
@@ -610,13 +610,13 @@ public class MetadataNodeImporterTest {
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestReferencingMetadataDocumentWithHandle, testChildName);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testParentNode, testChildNode, testChildReference);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, testChildReference);
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
                 will(throwException(expectedException));
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace.getWorkspaceID(), testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()

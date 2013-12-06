@@ -33,7 +33,6 @@ import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -75,7 +74,6 @@ public class AddedNodeExporterTest {
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock MetadataAPI mockMetadataAPI;
-    @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock SearchClientBridge mockSearchClientBridge;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
@@ -114,7 +112,7 @@ public class AddedNodeExporterTest {
     @Before
     public void setUp() {
         addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
-                mockMetadataAPI, mockCorpusStructureBridge, mockWorkspaceDao, mockSearchClientBridge,
+                mockMetadataAPI, mockWorkspaceDao, mockSearchClientBridge,
                 mockWorkspaceTreeExporter, mockNodeDataRetriever, mockCorpusStructureProvider, mockNodeResolver);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
@@ -161,7 +159,8 @@ public class AddedNodeExporterTest {
                 
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
             
-//            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, nextAvailableFile.toURI().toURL());
+            //TODO ensureChecksum
+            
             //add node to searchdb
             //calculate urid
             //set urid in db(?) and metadata
@@ -224,7 +223,8 @@ public class AddedNodeExporterTest {
             
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
             
-//            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, nextAvailableFile.toURI().toURL());
+            //TODO ensureChecksum
+            
             //add node to searchdb
             //calculate urid
             //set urid in db(?) and metadata

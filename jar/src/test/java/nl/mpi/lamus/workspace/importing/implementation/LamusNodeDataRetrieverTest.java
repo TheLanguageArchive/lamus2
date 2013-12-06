@@ -140,7 +140,25 @@ public class LamusNodeDataRetrieverTest {
         assertEquals("Retrieved URL different from expected", expectedURL, retrievedURL);
     }
     
-    //TODO getArchiveURL throws exception (UnknownNodeException)
+    @Test
+    public void getArchiveURLThrowsUnknownNodeException() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+        
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        
+        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(throwException(expectedException));
+        }});
+        
+        try {
+            testNodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
+            fail("should have thrown exception");
+        } catch(UnknownNodeException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
     public void resourceToBeTypechecked() throws MalformedURLException {

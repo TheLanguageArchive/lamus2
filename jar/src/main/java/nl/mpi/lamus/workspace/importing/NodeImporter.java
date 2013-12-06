@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing;
 
 import java.net.URI;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -35,12 +36,12 @@ public interface NodeImporter<R extends Reference> {
      * information in the archive database as well as in the file itself and
      * the parent node.
      * 
-     * @param workspaceID ID of the workspace
+     * @param workspace workspace where to import the node
      * @param parentNode parent of the node to be imported
      * @param parentDocument metadata document corresponding to the parent node
      * @param childLink reference corresponding to the current node
      * @param childArchiveURI URI of the current node in the archive
      */
-    public void importNode(int workspaceID, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference childLink, URI childArchiveURI) throws WorkspaceImportException;
 }

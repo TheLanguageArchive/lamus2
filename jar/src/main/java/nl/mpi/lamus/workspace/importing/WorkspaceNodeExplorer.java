@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing;
 
 import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -33,10 +34,12 @@ public interface WorkspaceNodeExplorer {
      * Explores, recursively, the tree/branch where the import process is
      * currently working on, triggering the import of its nodes.
      * 
+     * @param workspace workspace where to import the nodes
      * @param nodeToExplore node where the import proccess is working on currently
      * @param nodeDocument metadata document corresponding to the current node
      * @param linksInNode references contained in the metadata document corresponding to the current node
      */
-    public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
-            throws WorkspaceImportException;
+    public void explore(Workspace workspace, WorkspaceNode nodeToExplore,
+            ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
+                throws WorkspaceImportException;
 }

@@ -17,15 +17,11 @@ package nl.mpi.lamus.workspace.importing;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import nl.mpi.corpusstructure.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.util.OurURL;
 
@@ -62,7 +58,7 @@ public interface NodeDataRetriever {
      * @param nodeArchiveURI URI of the node in the archive
      * @return URL of the node in the archive
      */
-    public URL getNodeArchiveURL(URI nodeArchiveURI);
+    public URL getNodeArchiveURL(URI nodeArchiveURI) throws UnknownNodeException;
     
     /**
      * Decides if a resource should be typechecked (depending on its location and size).

@@ -23,9 +23,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -35,7 +34,6 @@ import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -239,7 +237,8 @@ public class LamusWorkspaceUploaderTest {
     @Test
     public void uploadFileIsArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException {
+                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
+                UnknownNodeException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -303,7 +302,8 @@ public class LamusWorkspaceUploaderTest {
     @Test
     public void uploadFileIsNotArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException {
+                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
+                UnknownNodeException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -374,7 +374,8 @@ public class LamusWorkspaceUploaderTest {
     @Test
     public void uploadFileCopyFails()
             throws URISyntaxException, MalformedURLException, IOException,
-                TypeCheckerException, WorkspaceNodeNotFoundException, WorkspaceException {
+                TypeCheckerException, WorkspaceNodeNotFoundException, WorkspaceException,
+                UnknownNodeException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -469,6 +470,65 @@ public class LamusWorkspaceUploaderTest {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
             assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
             assertTrue("Cause has different type from expected", ex.getCause() instanceof MalformedURLException);
+        }
+    }
+    
+    @Test
+    public void uploadFileUnknownNodeException()
+            throws TypeCheckerException, URISyntaxException, MalformedURLException,
+                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
+                UnknownNodeException {
+        
+        final int workspaceID = 1;
+        final String filename = "someFile.cmdi";
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
+        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        final File uploadedFile = new File(workspaceUploadDirectory, filename);
+        final URI uploadedFileURI = uploadedFile.toURI();
+        final URL uploadedFileURL = uploadedFileURI.toURL();
+        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
+        final String fileMimetype = "text/plain";
+        
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode.setName(filename);
+        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
+        uploadedNode.setType(fileType);
+        uploadedNode.setFormat(fileMimetype);
+        uploadedNode.setWorkspaceURL(uploadedFileURL);
+        
+        final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
+        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+                
+            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
+            
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
+                will(returnValue(mockTypecheckedResults));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+                will(throwException(expectedException));
+
+        }});
+        
+        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
+        
+        try {
+            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
     }
     

@@ -28,7 +28,6 @@ import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -56,7 +55,6 @@ public class AddedNodeExporter implements NodeExporter {
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final WorkspaceFileHandler workspaceFileHandler;
     private final MetadataAPI metadataAPI;
-    private final CorpusStructureBridge corpusStructureBridge;
     private final WorkspaceDao workspaceDao;
     private final SearchClientBridge searchClientBridge;
     private final WorkspaceTreeExporter workspaceTreeExporter;
@@ -67,14 +65,13 @@ public class AddedNodeExporter implements NodeExporter {
     private Workspace workspace;
     
     public AddedNodeExporter(ArchiveFileLocationProvider aflProvider, WorkspaceFileHandler wsFileHandler,
-            MetadataAPI mdAPI, CorpusStructureBridge csBridge, WorkspaceDao wsDao,
+            MetadataAPI mdAPI, WorkspaceDao wsDao,
             SearchClientBridge scBridge, WorkspaceTreeExporter wsTreeExporter,
             NodeDataRetriever nodeDataRetriever,
             CorpusStructureProvider csProvider, NodeResolver nodeResolver) {
         this.archiveFileLocationProvider = aflProvider;
         this.workspaceFileHandler = wsFileHandler;
         this.metadataAPI = mdAPI;
-        this.corpusStructureBridge = csBridge;
         this.workspaceDao = wsDao;
         this.searchClientBridge = scBridge;
         this.workspaceTreeExporter = wsTreeExporter;
@@ -171,20 +168,12 @@ public class AddedNodeExporter implements NodeExporter {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
             throwWorkspaceExportException(errorMessage, ex);
         }
-        
-//        try {
-//            //TODO will this be done by the crawler??
-//            corpusStructureBridge.ensureChecksum(currentNodeNewArchiveID, nextAvailableFile.toURI().toURL());
-//        } catch (MalformedURLException ex) {
-//            throw new UnsupportedOperationException("exception not handled yet", ex);
-//        }
+
+        //TODO ensureChecksum - will this be done by the crawler??
         
         if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
             searchClientBridge.addNode(currentNode.getArchiveURI());
-        }// else {
-           // throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
-        //}
-        
+        }
     }
     
     private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {

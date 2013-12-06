@@ -85,7 +85,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
         try {
             //TODO create some other method that takes something else than a Reference
             // or have a separate method for importing the top node
-            topNodeImporter.importNode(workspace.getWorkspaceID(), topNodeArchiveURI);
+            topNodeImporter.importNode(workspace, topNodeArchiveURI);
             
             //TODO import successful? notify main thread, change workspace status, etc...
             // no exceptions, so it was successful ?

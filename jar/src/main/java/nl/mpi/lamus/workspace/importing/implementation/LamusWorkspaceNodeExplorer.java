@@ -58,7 +58,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
      *          nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection)
      */
     @Override
-    public void explore(WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
+    public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
         throws WorkspaceImportException {
         
         
@@ -79,10 +79,10 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
                 linkImporterToUse = nodeImporterFactoryBean.getObject();
             } catch (Exception ex) {
                 String errorMessage = "Error getting file importer";
-                throw new WorkspaceImportException(errorMessage, nodeToExplore.getWorkspaceID(), ex);
+                throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
             
-            linkImporterToUse.importNode(nodeToExplore.getWorkspaceID(), nodeToExplore, nodeDocument, currentLink, currentLink.getURI());
+            linkImporterToUse.importNode(workspace, nodeToExplore, nodeDocument, currentLink, currentLink.getURI());
         }
     }
     

@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
@@ -110,8 +109,7 @@ public class LamusWorkspaceNodeExplorerTest {
 
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
-                oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
-                oneOf(mockNodeImporter).importNode(workspaceID, mockNodeToExplore, mockNodeDocument, currentLink, currentLink.getURI());
+                oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink, currentLink.getURI());
                 
                 current++;
             }
@@ -119,7 +117,7 @@ public class LamusWorkspaceNodeExplorerTest {
         }});
 
         
-        nodeExplorer.explore(mockNodeToExplore, mockNodeDocument, testLinks);
+        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
         
     }
     
@@ -201,7 +199,7 @@ public class LamusWorkspaceNodeExplorerTest {
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(throwException(expectedException));
                 
-                oneOf(mockNodeToExplore).getWorkspaceID(); will(returnValue(workspaceID));
+                oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 
                 break; // due to the exception, the loop doesn't continue
             }
@@ -209,7 +207,7 @@ public class LamusWorkspaceNodeExplorerTest {
         }});
 
         try {
-            nodeExplorer.explore(mockNodeToExplore, mockNodeDocument, testLinks);
+            nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
             fail("should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting file importer";

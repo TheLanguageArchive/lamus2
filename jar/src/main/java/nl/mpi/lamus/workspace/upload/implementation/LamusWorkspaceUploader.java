@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
@@ -36,7 +37,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +176,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(inputStreamToCheck, filename);
         
         WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
-        URL topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+        URL topNodeArchiveURL;
+        try {
+            topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+        } catch (UnknownNodeException ex) {
+            String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
+            logger.error(errorMessage, ex);
+            throw new WorkspaceException(errorMessage, workspaceID, ex);
+        }
             
         File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
         TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
