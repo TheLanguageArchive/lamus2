@@ -128,7 +128,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         }
 
 
-        WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
+//        WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();
 
         if(nodeDataRetriever.shouldResourceBeTypechecked(childLink, childOurURL)) {
@@ -147,14 +147,14 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             
             nodeDataRetriever.verifyTypecheckedResults(childOurURL, childLink, typecheckedResults);
             
-            childType = typecheckedResults.getCheckedNodeType();
+//            childType = typecheckedResults.getCheckedNodeType();
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
         //TODO needsProtection?
 
         //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace.getWorkspaceID(), childURI, childURL, childLink, childType, childMimetype, childCorpusNode.getName());
+                workspace.getWorkspaceID(), childURI, childURL, childLink, childMimetype, childCorpusNode.getName());
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

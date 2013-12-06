@@ -139,7 +139,7 @@ public class GeneralNodeExporterTest {
         final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
         final String nodeName = "someNode";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
-        final String nodeFormat = "text/cmdi";
+        final String nodeFormat = "text/x-cmdi+xml";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(nodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
@@ -197,7 +197,7 @@ public class GeneralNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String metadataFormat = "text/cmdi";
+        final String metadataFormat = "text/x-cmdi+xml";
         
         final int nodeWsID = 10;
         final String nodeName = "someNode";
@@ -403,7 +403,7 @@ public class GeneralNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String metadataFormat = "text/cmdi";
+        final String metadataFormat = "text/x-cmdi+xml";
         
         final int nodeWsID = 10;
         final String nodeName = "someNode";
@@ -468,7 +468,7 @@ public class GeneralNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String metadataFormat = "text/cmdi";
+        final String metadataFormat = "text/x-cmdi+xml";
         
         final int nodeWsID = 10;
         final String nodeName = "someNode";
@@ -533,7 +533,7 @@ public class GeneralNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String metadataFormat = "text/cmdi";
+        final String metadataFormat = "text/x-cmdi+xml";
         
         final int nodeWsID = 10;
         final String nodeName = "someNode";
@@ -612,7 +612,7 @@ public class GeneralNodeExporterTest {
         final URL parentNodeArchiveURL = new URL("file:/archive/root/somenode/" + parentFilename);
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String metadataFormat = "text/cmdi";
+        final String metadataFormat = "text/x-cmdi+xml";
         
         final int nodeWsID = 10;
         final String nodeName = "someNode";
@@ -623,7 +623,7 @@ public class GeneralNodeExporterTest {
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
         final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         
         final WorkspaceNode parentNode = new LamusWorkspaceNode(parentNodeWsID, workspace.getWorkspaceID(), nodeSchemaLocation,

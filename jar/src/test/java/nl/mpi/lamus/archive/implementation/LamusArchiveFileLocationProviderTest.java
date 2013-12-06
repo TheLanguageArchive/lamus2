@@ -190,7 +190,7 @@ public class LamusArchiveFileLocationProviderTest {
         final String parentPath = "/archive/some/url/parent.cmdi";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         
@@ -221,7 +221,7 @@ public class LamusArchiveFileLocationProviderTest {
         final String parentPath = "/archive/some/url/parent.cmdi";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         

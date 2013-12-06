@@ -145,7 +145,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI(UUID.randomUUID().toString());
@@ -185,12 +185,11 @@ public class ResourceNodeImporterTest {
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLink, mockTypecheckedResults);
             
-            oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(childNodeType));
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLink, childNodeType, childNodeMimetype, childNodeName);
+                    childURI, childArchiveURL, mockChildLink, childNodeMimetype, childNodeName);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -237,7 +236,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI(UUID.randomUUID().toString());
@@ -286,7 +285,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI(UUID.randomUUID().toString());
@@ -334,7 +333,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI(UUID.randomUUID().toString());

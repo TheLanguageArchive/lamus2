@@ -442,10 +442,10 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getDirectoryForFileTypeWritten() {
+    public void getDirectoryForResource() {
         
         final String parentpath = "/some/path/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
@@ -454,31 +454,7 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getDirectoryForFileTypeLexical() {
-        
-        final String parentPath = "/some/path/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_LEX;
-        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
-        
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
-        
-        assertEquals("Returned directory different from expected", expectedDirectory, result);
-    }
-    
-    @Test
-    public void getDirectoryForFileTypeMedia() {
-        
-        final String parentPath = "/some/path/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_MR;
-        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
-        
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
-        
-        assertEquals("Returned directory different from expected", expectedDirectory, result);
-    }
-    
-    @Test
-    public void getDirectoryForFileTypeMetadata() {
+    public void getDirectoryForMetadata() {
         
         final String parentPath = "/some/path/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;

@@ -251,8 +251,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 3;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         final URI childURI = childURL.toURI();
-        final String childMimetype = "text/x-cmdi+xml";
-        final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WR;
+        final String childMimetype = "text/plain";
+        final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
         context.checking(new Expectations() {{

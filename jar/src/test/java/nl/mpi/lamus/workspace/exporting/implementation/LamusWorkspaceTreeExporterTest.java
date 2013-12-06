@@ -103,7 +103,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URL childOriginURL = new URL("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeFormat = "";
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
                 childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodeFormat);
@@ -144,7 +144,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URL childOriginURL = new URL("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeFormat = "";
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
                 childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, childNodeFormat);

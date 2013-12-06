@@ -23,7 +23,6 @@ import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
-import nl.mpi.lamus.workspace.model.NodeTypeMapper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.IOUtils;
@@ -43,16 +42,14 @@ public class LamusFileTypeHandler implements FileTypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(LamusFileTypeHandler.class);
     
     private TypecheckHandler typecheckHandler;
-    private NodeTypeMapper typeMapper;
     
     private String mimetype = "Unknown";
     private WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
     private String analysis = "okay";
 
     @Autowired
-    public LamusFileTypeHandler(TypecheckHandler typecheckHandler, NodeTypeMapper typeMapper) {
+    public LamusFileTypeHandler(TypecheckHandler typecheckHandler) {
         this.typecheckHandler = typecheckHandler;
-        this.typeMapper = typeMapper;
     }
 
     /**
@@ -83,14 +80,6 @@ public class LamusFileTypeHandler implements FileTypeHandler {
             return analysis.substring(6);
         }
         return analysis;
-    }
-
-    /**
-     * @see FileTypeHandler#getNodeType()
-     */
-    @Override
-    public WorkspaceNodeType getNodeType() {
-        return this.nodeType;
     }
 
     /**
@@ -301,7 +290,6 @@ public class LamusFileTypeHandler implements FileTypeHandler {
     @Override
     public void setValues(String mimetype) {
         this.mimetype = mimetype;
-        this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
     }
     
     
@@ -339,7 +327,6 @@ public class LamusFileTypeHandler implements FileTypeHandler {
             this.mimetype = "Unknown"; // but do NOT use filename as fallback
             this.analysis = checkResult;
         }
-        this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
     }
     
     //TODO Should this replace the other method???
@@ -360,7 +347,6 @@ public class LamusFileTypeHandler implements FileTypeHandler {
             this.mimetype = "Unknown"; // but do NOT use filename as fallback
             this.analysis = checkResult;
         }
-        this.nodeType = typeMapper.getNodeTypeForMimetype(mimetype);
     }
     
     /**
@@ -393,6 +379,6 @@ public class LamusFileTypeHandler implements FileTypeHandler {
     @Override
     public TypecheckedResults getTypecheckedResults() {
         
-        return new LamusTypecheckedResults(nodeType, mimetype, analysis, typecheckHandler.getTypecheckJudgement());
+        return new LamusTypecheckedResults(mimetype, analysis, typecheckHandler.getTypecheckJudgement());
     }
 }

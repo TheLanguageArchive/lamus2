@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.springframework.stereotype.Component;
 
@@ -32,39 +31,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
 
-    private final List<WsTreeNodesAction> writtenResourcesActions;
-    private final List<WsTreeNodesAction> mediaResourcesActions;
-    private final List<WsTreeNodesAction> lexicalResourcesActions;
+    private final List<WsTreeNodesAction> resourcesActions;;
     
     private final List<WsTreeNodesAction> metadataActions;
-    
-    //TODO would this have different actions??
-    private final List<WsTreeNodesAction> metadataCollectionActions;
     
     //TODO actions with a different format?
     private final List<WsTreeNodesAction> multipleNodesActions;
     
     
     public LamusWsNodeActionsProvider() {
-        writtenResourcesActions = new ArrayList<WsTreeNodesAction>();
-        writtenResourcesActions.add(new DeleteNodesAction());
-        writtenResourcesActions.add(new UnlinkNodesAction());
-        
-        mediaResourcesActions = new ArrayList<WsTreeNodesAction>();
-        mediaResourcesActions.add(new DeleteNodesAction());
-        mediaResourcesActions.add(new UnlinkNodesAction());
-        
-        lexicalResourcesActions = new ArrayList<WsTreeNodesAction>();
-        lexicalResourcesActions.add(new DeleteNodesAction());
-        lexicalResourcesActions.add(new UnlinkNodesAction());
-        
+        resourcesActions = new ArrayList<WsTreeNodesAction>();
+        resourcesActions.add(new DeleteNodesAction());
+        resourcesActions.add(new UnlinkNodesAction());
+                
         metadataActions = new ArrayList<WsTreeNodesAction>();
         metadataActions.add(new DeleteNodesAction());
         metadataActions.add(new UnlinkNodesAction());
         
-        
-        
-        metadataCollectionActions = new ArrayList<WsTreeNodesAction>();
         
         multipleNodesActions = new ArrayList<WsTreeNodesAction>();
     }
@@ -75,34 +58,16 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         if(nodes.isEmpty()) {
             return new ArrayList<WsTreeNodesAction>();
         } else if(nodes.size() == 1) {
-            for(WorkspaceTreeNode currentNode : nodes) {
-                
-                WorkspaceNodeType currentNodeType = currentNode.getType();
-                
-                if(WorkspaceNodeType.RESOURCE_WR.equals(currentNodeType)) {
-                    return this.writtenResourcesActions;
-                }
-                if(WorkspaceNodeType.RESOURCE_MR.equals(currentNodeType)) {
-                    return this.mediaResourcesActions;
-                }
-                if(WorkspaceNodeType.RESOURCE_LEX.equals(currentNodeType)) {
-                    return this.lexicalResourcesActions;
-                }
-        
-                
-                if(WorkspaceNodeType.METADATA.equals(currentNodeType)) {
+                if(!nodes.iterator().next().isMetadata()) {
+                    return this.resourcesActions;
+                } else {
                     return this.metadataActions;
                 }
-                
-                
-                //TODO OTHER TYPES...
-                
-                throw new UnsupportedOperationException("not implemented yet");
-            }
-        }
+        } else {
         
-        //TODO multiple node actions
-        throw new UnsupportedOperationException("not implemented yet");
+            //TODO multiple node actions
+            return this.multipleNodesActions;
+        }
     }
     
 }

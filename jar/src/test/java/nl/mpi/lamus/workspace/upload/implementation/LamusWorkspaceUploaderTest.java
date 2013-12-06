@@ -251,8 +251,8 @@ public class LamusWorkspaceUploaderTest {
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
-        final String fileMimetype = "text/plain";
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
+        final String fileMimetype = "text/x-cmdi+xml";
         
         final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
         uploadedNode.setName(filename);
@@ -281,11 +281,10 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
                 
-            oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(fileType));
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, uploadedFileURL, fileType, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
                 will(returnValue(uploadedNode));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
@@ -439,7 +438,7 @@ public class LamusWorkspaceUploaderTest {
         
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
         final String fileMimetype = "text/plain";
         
         final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
@@ -490,7 +489,7 @@ public class LamusWorkspaceUploaderTest {
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
         final String fileMimetype = "text/plain";
         
         final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
@@ -532,74 +531,4 @@ public class LamusWorkspaceUploaderTest {
         }
     }
     
-//    @Test
-//    public void processUploadedFiles() throws TypeCheckerException, MalformedURLException {
-//        
-//        final int workspaceID = 1;
-//        final String filename1 = "file1.txt";
-//        final String filename2 = "file2.txt";
-//        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WR;
-//        final String fileMimetype = "text/plain";
-//        
-//        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-//        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-//        
-//        final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
-//        final URI uploadedFileURI1 = uploadedFile1.toURI();
-//        final URL uploadedFileURL1 = uploadedFileURI1.toURL();
-//        final File uploadedFile2 = new File(workspaceUploadDirectory, filename1);
-//        final URI uploadedFileURI2 = uploadedFile2.toURI();
-//        final URL uploadedFileURL2 = uploadedFileURI2.toURL();
-//        
-//        Collection<File> uploadedFiles = new ArrayList<File>();
-//        uploadedFiles.add(uploadedFile1);
-//        uploadedFiles.add(uploadedFile2);
-//        
-//        //TODO Is the originURL really necessary??
-//        final WorkspaceNode uploadedNode1 = new LamusWorkspaceNode(workspaceID, null, null);
-//        uploadedNode1.setName(filename1);
-//        uploadedNode1.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-//        uploadedNode1.setType(fileType);
-//        uploadedNode1.setFormat(fileMimetype);
-//        uploadedNode1.setWorkspaceURL(uploadedFileURL1);
-//        
-//        final WorkspaceNode uploadedNode2 = new LamusWorkspaceNode(workspaceID, null, null);
-//        uploadedNode2.setName(filename2);
-//        uploadedNode2.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-//        uploadedNode2.setType(fileType);
-//        uploadedNode2.setFormat(fileMimetype);
-//        uploadedNode2.setWorkspaceURL(uploadedFileURL2);
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename1);
-//                will(returnValue(mockTypecheckedResults));
-//                
-//            oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(fileType));
-//            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
-//            
-//            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-//                    workspaceID, null, uploadedFileURL1, fileType, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
-//                will(returnValue(uploadedNode1));
-//
-//            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode1);
-//
-//            //SECOND LOOP CYCLE
-//            
-//            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename2);
-//                will(returnValue(mockTypecheckedResults));
-//                
-//            oneOf(mockTypecheckedResults).getCheckedNodeType(); will(returnValue(fileType));
-//            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
-//            
-//            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-//                    workspaceID, null, uploadedFileURL2, fileType, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
-//                will(returnValue(uploadedNode2));
-//
-//            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode2);
-//            
-//        }});
-//        
-//        uploader.processUploadedFilesIntoWorkspace(workspaceID, uploadedFiles);
-//    }
 }

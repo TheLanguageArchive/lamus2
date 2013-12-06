@@ -22,7 +22,6 @@ import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -45,24 +44,14 @@ public class LamusWsNodeActionsProviderTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeWrittenResourceOne;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeMediaResourceOne;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeLexicalResourceOne;
+    @Mock WorkspaceTreeNode mockWorkspaceNodeResourceOne;
     @Mock WorkspaceTreeNode mockWorkspaceNodeMetadataOne;
-    @Mock WorkspaceTreeNode mockWorkspaceNodeMetadataCollectionOne;
-    
-    
     
     private WsNodeActionsProvider wsNodeActionsProvider;
     
-    private List<WsTreeNodesAction> expectedWrittenResourceNodeActions;
-    private List<WsTreeNodesAction> expectedMediaResourceNodeActions;
-    private List<WsTreeNodesAction> expectedLexicalResourceNodeActions;
-    
+    private List<WsTreeNodesAction> expectedResourceNodeActions;
     private List<WsTreeNodesAction> expectedMetadataNodeActions;
-    
-    private List<WsTreeNodesAction> expectedMetadataCollectionNodeActions;
-    
+
     private List<WsTreeNodesAction> expectedMultipleNodesActions;
     
     
@@ -81,28 +70,15 @@ public class LamusWsNodeActionsProviderTest {
     public void setUp() {
         wsNodeActionsProvider = new LamusWsNodeActionsProvider();
         
-        expectedWrittenResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedWrittenResourceNodeActions.add(new DeleteNodesAction());
-        expectedWrittenResourceNodeActions.add(new UnlinkNodesAction());
-        ReflectionTestUtils.setField(wsNodeActionsProvider, "writtenResourcesActions", expectedWrittenResourceNodeActions);
-        
-        expectedMediaResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedMediaResourceNodeActions.add(new DeleteNodesAction());
-        expectedMediaResourceNodeActions.add(new UnlinkNodesAction());
-        ReflectionTestUtils.setField(wsNodeActionsProvider, "mediaResourcesActions", expectedMediaResourceNodeActions);
-        
-        expectedLexicalResourceNodeActions = new ArrayList<WsTreeNodesAction>();
-        expectedLexicalResourceNodeActions.add(new DeleteNodesAction());
-        expectedLexicalResourceNodeActions.add(new UnlinkNodesAction());
-        ReflectionTestUtils.setField(wsNodeActionsProvider, "lexicalResourcesActions", expectedLexicalResourceNodeActions);
+        expectedResourceNodeActions = new ArrayList<WsTreeNodesAction>();
+        expectedResourceNodeActions.add(new DeleteNodesAction());
+        expectedResourceNodeActions.add(new UnlinkNodesAction());
+        ReflectionTestUtils.setField(wsNodeActionsProvider, "resourcesActions", expectedResourceNodeActions);
         
         expectedMetadataNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedMetadataNodeActions.add(new DeleteNodesAction());
         expectedMetadataNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataActions", expectedMetadataNodeActions);
-        
-        expectedMetadataCollectionNodeActions = new ArrayList<WsTreeNodesAction>();
-        ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataCollectionActions", expectedMetadataCollectionNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<WsTreeNodesAction>();
         ReflectionTestUtils.setField(wsNodeActionsProvider, "multipleNodesActions", expectedMultipleNodesActions);
@@ -124,48 +100,18 @@ public class LamusWsNodeActionsProviderTest {
     }
     
     @Test
-    public void getActionsOneWrittenResource() {
+    public void getActionsOneResource() {
         
         Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeWrittenResourceOne);
+        nodes.add(mockWorkspaceNodeResourceOne);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeWrittenResourceOne).getType(); will(returnValue(WorkspaceNodeType.RESOURCE_WR));
+            oneOf(mockWorkspaceNodeResourceOne).isMetadata(); will(returnValue(Boolean.FALSE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
         
-        assertEquals("Retrieved node actions different from expected", retrievedNodeActions, expectedWrittenResourceNodeActions);
-    }
-    
-    @Test
-    public void getActionsOneMediaResource() {
-        
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeMediaResourceOne);
-        
-        context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeMediaResourceOne).getType(); will(returnValue(WorkspaceNodeType.RESOURCE_MR));
-        }});
-        
-        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
-        
-        assertEquals("Retrieved node actions different from expected", retrievedNodeActions, expectedMediaResourceNodeActions);
-    }
-    
-    @Test
-    public void getActionsOneLexicalResource() {
-        
-        Collection<WorkspaceTreeNode> nodes = new ArrayList<WorkspaceTreeNode>();
-        nodes.add(mockWorkspaceNodeLexicalResourceOne);
-        
-        context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeLexicalResourceOne).getType(); will(returnValue(WorkspaceNodeType.RESOURCE_LEX));
-        }});
-        
-        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
-        
-        assertEquals("Retrieved node actions different from expected", retrievedNodeActions, expectedLexicalResourceNodeActions);
+        assertEquals("Retrieved node actions different from expected", retrievedNodeActions, expectedResourceNodeActions);
     }
     
     @Test
@@ -175,7 +121,7 @@ public class LamusWsNodeActionsProviderTest {
         nodes.add(mockWorkspaceNodeMetadataOne);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceNodeMetadataOne).getType(); will(returnValue(WorkspaceNodeType.METADATA));
+            oneOf(mockWorkspaceNodeMetadataOne).isMetadata(); will(returnValue(Boolean.TRUE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);

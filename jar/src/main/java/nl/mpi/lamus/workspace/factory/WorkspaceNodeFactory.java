@@ -51,7 +51,8 @@ public interface WorkspaceNodeFactory {
      * @param name Name of the node
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name);
+    public WorkspaceNode getNewWorkspaceMetadataNode(
+            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name);
 
     /**
      * Creates a resource WorkspaceNode with the given values.
@@ -60,13 +61,12 @@ public interface WorkspaceNodeFactory {
      * @param archiveNodeURI archive URI of the node
      * @param archiveNodeURL archive URL of the node
      * @param resourceReference Reference to the node, in the parent metadata file
-     * @param type Type of the node
      * @param mimetype Mimetype of the file
      * @param name name of the node
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, WorkspaceNodeType type, String mimetype, String name);
+            Reference resourceReference, String mimetype, String name);
 
     /**
      * Creates a WorkspaceNode with the given values.
@@ -74,11 +74,10 @@ public interface WorkspaceNodeFactory {
      * @param workspaceID ID of the workspace to which the node should be connected
      * @param originURL URL of the original file location (mostly for uploaded files)
      * @param workspaceURL URL of the file location in the workspace
-     * @param type Type of the node
      * @param mimetype Mimetype of the file
      * @param status Status of the node
      * @return 
      */
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
-            WorkspaceNodeType type, String mimetype, WorkspaceNodeStatus status);
+            String mimetype, WorkspaceNodeStatus status);
 }

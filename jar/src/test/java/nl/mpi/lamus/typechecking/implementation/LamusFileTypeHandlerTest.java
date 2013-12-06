@@ -23,7 +23,6 @@ import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
-import nl.mpi.lamus.workspace.model.NodeTypeMapper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
@@ -45,7 +44,6 @@ public class LamusFileTypeHandlerTest {
     
     private FileTypeHandler fileTypeHandler;
     @Mock TypecheckHandler mockTypecheckHandler;
-    @Mock NodeTypeMapper mockTypeMapper;
     
     @Mock OurURL mockOurURL;
     @Mock InputStream mockInputStream;
@@ -63,7 +61,7 @@ public class LamusFileTypeHandlerTest {
     
     @Before
     public void setUp() {
-        fileTypeHandler = new LamusFileTypeHandler(mockTypecheckHandler, mockTypeMapper);
+        fileTypeHandler = new LamusFileTypeHandler(mockTypecheckHandler);
     }
     
     @After
@@ -76,17 +74,11 @@ public class LamusFileTypeHandlerTest {
         
         String testFileName = "someFileName.txt";
         final String expectedMimetype = "text/plain";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
         String expectedAnalysis = "okay";
-        
-        context.checking(new Expectations() {{
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
-        }});
         
         fileTypeHandler.checkType(mockOurURL, testFileName, expectedMimetype);
         
         assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
         assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
     }
     
@@ -95,7 +87,6 @@ public class LamusFileTypeHandlerTest {
         
         final String testFileName = "someFilename.txt";
         final String expectedMimetype = "text/plain";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
         String expectedAnalysis = "okay (content, name)";
         final String testCheckResult = "true ARCHIVABLE text/plain";
         
@@ -105,13 +96,11 @@ public class LamusFileTypeHandlerTest {
             oneOf (mockTypecheckHandler).getTypecheckMimetype(); will(returnValue(expectedMimetype));
             oneOf (mockInputStream).close();
             oneOf (mockTypecheckHandler).getTypecheckResult(); will(returnValue(testCheckResult));
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
         }});
         
         fileTypeHandler.checkType(mockOurURL, testFileName, null);
         
         assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
         assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
     }
     
@@ -120,7 +109,6 @@ public class LamusFileTypeHandlerTest {
         
         final String testFileName = "someFilename.txt";
         final String expectedMimetype = "text/plain";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
         String expectedAnalysis = "okay (content, name)";
         final String testCheckResult = "true ARCHIVABLE text/plain";
         
@@ -130,13 +118,11 @@ public class LamusFileTypeHandlerTest {
             oneOf (mockTypecheckHandler).getTypecheckMimetype(); will(returnValue(expectedMimetype));
             oneOf (mockInputStream).close();
             oneOf (mockTypecheckHandler).getTypecheckResult(); will(returnValue(testCheckResult));
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
         }});
         
         fileTypeHandler.checkType(mockOurURL, testFileName, "Unknown");
         
         assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
         assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
     }
     
@@ -145,7 +131,6 @@ public class LamusFileTypeHandlerTest {
         
         final String testFileName = "someFilename.txt";
         final String expectedMimetype = "text/plain";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_WR;
         String expectedAnalysis = "okay (content, name)";
         final String testCheckResult = "true ARCHIVABLE text/plain";
         
@@ -155,13 +140,11 @@ public class LamusFileTypeHandlerTest {
             oneOf (mockTypecheckHandler).getTypecheckMimetype(); will(returnValue(expectedMimetype));
             oneOf (mockInputStream).close();
             oneOf (mockTypecheckHandler).getTypecheckResult(); will(returnValue(testCheckResult));
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
         }});
         
         fileTypeHandler.checkType(mockOurURL, testFileName, "Unspecified");
         
         assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
         assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
     }
     
@@ -170,7 +153,6 @@ public class LamusFileTypeHandlerTest {
         
         final String testFileName = "somefilename.jjj";
         final String expectedMimetype = "Unknown";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.UNKNOWN;
         String expectedAnalysis = "outrageous file";
         final String testCheckResult = "false " + expectedAnalysis;
         
@@ -180,13 +162,11 @@ public class LamusFileTypeHandlerTest {
             oneOf (mockTypecheckHandler).getTypecheckMimetype(); will(returnValue(expectedMimetype));
             oneOf (mockInputStream).close();
             oneOf (mockTypecheckHandler).getTypecheckResult(); will(returnValue(testCheckResult));
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
         }});
         
         fileTypeHandler.checkType(mockOurURL, testFileName, null);
         
         assertEquals(expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals(expectedNodeType, fileTypeHandler.getNodeType());
         assertEquals(expectedAnalysis, fileTypeHandler.getAnalysis());
     }
     
@@ -274,16 +254,10 @@ public class LamusFileTypeHandlerTest {
     public void testSetValues() {
 
         final String expectedMimetype = "image/jpeg";
-        final WorkspaceNodeType expectedNodeType = WorkspaceNodeType.RESOURCE_MR;
         
-        context.checking(new Expectations() {{
-            oneOf (mockTypeMapper).getNodeTypeForMimetype(expectedMimetype); will(returnValue(expectedNodeType));
-        }});
-
         fileTypeHandler.setValues(expectedMimetype);
         
         assertEquals("Mimetype is different from expected", expectedMimetype, fileTypeHandler.getMimetype());
-        assertEquals("Node type is different from expected", expectedNodeType, fileTypeHandler.getNodeType());
     }
     
     @Test

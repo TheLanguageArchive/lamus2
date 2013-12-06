@@ -15,18 +15,11 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-
 /**
  * Container for the results of the typechecker regarding a resource.
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface TypecheckedResults {
-    
-    /**
-     * @return type of the checked resource
-     */
-    public WorkspaceNodeType getCheckedNodeType();
     
     /**
      * @return mimetype of the checked resource

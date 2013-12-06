@@ -21,16 +21,12 @@ package nl.mpi.lamus.workspace.model;
  */
 public enum WorkspaceNodeType {
 
-    //TODO METADATA_COLLECTION?
-    
     METADATA,
     
-    RESOURCE_WR,
-    
-    RESOURCE_MR,
-    
-    RESOURCE_LEX,
+    RESOURCE,
     
     UNKNOWN
     
+    
+    //TODO enough types?
 }

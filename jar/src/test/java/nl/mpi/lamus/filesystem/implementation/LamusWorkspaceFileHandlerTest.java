@@ -246,7 +246,7 @@ public class LamusWorkspaceFileHandlerTest {
         workspaceNodeFile.createNewFile();
         node.setWorkspaceURL(workspaceNodeFile.toURI().toURL());
         node.setName(filename);
-        node.setType(WorkspaceNodeType.RESOURCE_WR);
+        node.setType(WorkspaceNodeType.RESOURCE);
         node.setFormat("someFormat");
         node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
 

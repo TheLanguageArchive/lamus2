@@ -5,7 +5,7 @@ INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, ori
     VALUES (5, 3, 'file:/tmp/lamusStoriesTestDirectory/archiveFolder/parent_collection/collection3.cmdi', 'node:003',
                      'file:/tmp/lamusStoriesTestDirectory/archiveFolder/parent_collection/collection3.cmdi',
         'collection3_CHANGED', 'METADATA', 'file:/tmp/lamusStoriesTestDirectory/workspaceFolders/3/collection3.cmdi', 'NODE_ISCOPY',
-        'text/cmdi');
+        'text/x-cmdi+xml');
 INSERT INTO node (workspace_node_id, workspace_id, archive_url, archive_uri, origin_url, name, type, workspace_url, status, format) 
     VALUES (6, 3, 'file:/tmp/lamusStoriesTestDirectory/archiveFolder/parent_collection/collection3/phist_crookedmagic.jpg', 'node:004',
                      'file:/tmp/lamusStoriesTestDirectory/archiveFolder/parent_collection/collection3/phist_crookedmagic.jpg',

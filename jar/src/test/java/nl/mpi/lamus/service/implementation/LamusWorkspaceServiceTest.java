@@ -621,7 +621,7 @@ public class LamusWorkspaceServiceTest {
         
         final int nodeID = 1;
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<WorkspaceNode>();
-        final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE_MR, null, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "jpeg");
+        final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "jpeg");
         expectedChildNodes.add(childNode);
         
         context.checking(new Expectations() {{

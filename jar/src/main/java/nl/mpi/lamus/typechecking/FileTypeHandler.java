@@ -47,12 +47,6 @@ public interface FileTypeHandler {
     public String getAnalysis();
     
     /**
-     * Node type getter
-     * @return nodetype, one of the WSNodeType constants
-     */
-    public WorkspaceNodeType getNodeType();
-    
-    /**
      * Sets the Format (mimetype) and Type (class / category) fields for a given file.
      * Use getFormat and getType to fetch the results.
      * @param resourceURL the url of the resource which should be tested, if null,
@@ -61,16 +55,12 @@ public interface FileTypeHandler {
      *   If given, filename (-extension) is checked for match with mimetype as
      *   detected based on file contents. If no resourceURL is given and only
      *   a filename is given, rough mimetype detection will be done based on name.
-     * @param nodetype one of the WSNodeType constants for format hinting: if
-     *   nodetype is WSNodeType.RESOURCE_WR, more exact document classes are used
-     *   If nodetype is WSNodeType.UNKNOWN, type is autodetected (less accurate)
-     *   Nodetype hinting does not influence mimetype checks.
      * @param mimetype suggested format, if already known: mimetype or MPI type
      *   NOTE: only if NO mimetype is given, calculateCV will check the file
      *   content or (as fallback) the file name, to determine the file format.
      *   NOTE: if mimetype IS given, filename and resourceURL will be ignored!
      */
-    public void checkType(OurURL resourceURL, String filename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException;
+    public void checkType(OurURL resourceURL, String filename, String mimetype) throws TypeCheckerException;
     
     //TODO Should this replace the other method???
     public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws IOException;

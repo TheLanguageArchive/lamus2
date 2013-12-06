@@ -119,7 +119,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URL nodeArchiveURL = topNodeArchiveURL;
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
-        final String nodeFormat = "";
+        final String nodeFormat = "text/x-cmdi+xml";
         final URI schemaLocation = new URI("http://some.location");
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY; //TODO change this
         
@@ -154,7 +154,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
         final String nodeName = "someName.txt";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
         final String nodeMimetype = "text/plain";
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_VIRTUAL; //TODO change this
         
@@ -170,7 +170,7 @@ public class LamusWorkspaceNodeFactoryTest {
 //            oneOf(mockTestReferenceHandleCarrier).getHandle(); will(returnValue(nodePid));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceResourceNode(workspaceID, nodeArchiveURI, nodeArchiveURL, mockTestReferenceHandleCarrier, nodeType, nodeMimetype, nodeName);
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceResourceNode(workspaceID, nodeArchiveURI, nodeArchiveURL, mockTestReferenceHandleCarrier, nodeMimetype, nodeName);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }
@@ -182,8 +182,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final URL originURL = new URL("file:/local/folder/file.txt");
         final URL workspaceURL = new URL("file:/workspace/folder/file.txt");
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WR; //TODO change this
-        final String nodeMimetype = "";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
+        final String nodeMimetype = "text/plain";
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED; //TODO change this
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();
@@ -197,7 +197,8 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setStatus(nodeStatus);
         
         
-        WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(workspaceID, originURL, workspaceURL, nodeType, nodeMimetype, nodeStatus);
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
+                workspaceID, originURL, workspaceURL, nodeMimetype, nodeStatus);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }

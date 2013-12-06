@@ -21,13 +21,13 @@ INSERT INTO archiveobjects (nodeid, url, crawltime, onsite, checksum, readrights
 
 -- change types (these values are still based on the old type definition for the corpusstructure - corpus, session, ...)
 INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) 
-    VALUES (0, 2, 'text/cmdi', 'parent_collection', 'parent collection');
+    VALUES (0, 2, 'text/x-cmdi+xml', 'parent_collection', 'parent collection');
 INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) 
-    VALUES (1, 2, 'text/cmdi', 'collection1', 'collection 1');
+    VALUES (1, 2, 'text/x-cmdi+xml', 'collection1', 'collection 1');
 INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) 
-    VALUES (2, 2, 'text/cmdi', 'collection2', 'collection 2');
+    VALUES (2, 2, 'text/x-cmdi+xml', 'collection2', 'collection 2');
 INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) 
-    VALUES (3, 2, 'text/cmdi', 'collection3', 'collection 3');
+    VALUES (3, 2, 'text/x-cmdi+xml', 'collection3', 'collection 3');
 
 INSERT INTO corpusnodes (nodeid, nodetype, format, name, title) 
     VALUES (4, 16, 'image/jpeg', 'phist_crookedmagic', 'phist - crooked magic');

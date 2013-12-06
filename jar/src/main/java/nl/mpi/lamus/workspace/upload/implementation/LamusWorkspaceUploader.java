@@ -198,11 +198,10 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 
         FileUtils.copyInputStreamToFile(inputStreamToCheck, uploadedFile);
             
-        WorkspaceNodeType nodeType = typecheckedResults.getCheckedNodeType();
         String nodeMimetype = typecheckedResults.getCheckedMimetype();
             
         WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                workspaceID, null, uploadedFileURL, nodeType, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                workspaceID, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
         
         this.workspaceDao.addWorkspaceNode(uploadedNode);
     }

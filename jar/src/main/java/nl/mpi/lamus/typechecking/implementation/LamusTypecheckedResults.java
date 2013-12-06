@@ -17,7 +17,6 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
  * @see TypecheckedResults
@@ -26,26 +25,16 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
  */
 public class LamusTypecheckedResults implements TypecheckedResults {
 
-    private WorkspaceNodeType checkedNodeType;
     private String checkedMimetype;
     private String analysis;
     private TypecheckerJudgement typecheckerJudgement;
     
-    public LamusTypecheckedResults(WorkspaceNodeType nodeType, String mimetype, String analysis, TypecheckerJudgement judgement) {
-        this.checkedNodeType = nodeType;
+    public LamusTypecheckedResults(String mimetype, String analysis, TypecheckerJudgement judgement) {
         this.checkedMimetype = mimetype;
         this.analysis = analysis;
         this.typecheckerJudgement = judgement;
     }
     
-    /**
-     * @see TypecheckedResults#getCheckedNodeType()
-     */
-    @Override
-    public WorkspaceNodeType getCheckedNodeType() {
-        return checkedNodeType;
-    }
-
     /**
      * @see TypecheckedResults#getCheckedMimetype()
      */

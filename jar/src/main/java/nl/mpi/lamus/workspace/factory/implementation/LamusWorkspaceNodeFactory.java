@@ -70,13 +70,14 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name) {
+    public WorkspaceNode getNewWorkspaceMetadataNode(
+            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(name);
         node.setTitle(name);
-        node.setType(WorkspaceNodeType.METADATA); //TODO it's metadata, so it should be CMDI? otherwise, should I get it based on what? What are the possible node types?
-        node.setFormat(""); //TODO get this based on what? typechecker?
+        node.setType(WorkspaceNodeType.METADATA);
+        node.setFormat("text/x-cmdi+xml"); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
         node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
@@ -90,12 +91,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      */
     @Override
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, WorkspaceNodeType type, String mimetype, String name) {
+            Reference resourceReference, String mimetype, String name) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(name);
         node.setTitle("(type=" + mimetype + ")"); //TODO CHANGE THIS
-        node.setType(type);
+        node.setType(WorkspaceNodeType.RESOURCE);
         node.setFormat(mimetype);
         
         //ALWAYS?
@@ -111,7 +112,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      */
     @Override
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
-        WorkspaceNodeType type, String mimetype, WorkspaceNodeStatus status) {
+        String mimetype, WorkspaceNodeStatus status) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
@@ -120,8 +121,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setTitle(displayValue);
         node.setOriginURL(originURL);
         node.setWorkspaceURL(workspaceURL);
-        node.setType(type);
         node.setFormat(mimetype);
+        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
+            node.setType(WorkspaceNodeType.METADATA);
+        } else {
+            node.setType(WorkspaceNodeType.RESOURCE);
+        }
         node.setStatus(status);
         
         return node;

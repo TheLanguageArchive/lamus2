@@ -395,7 +395,7 @@ public class AddedNodeExporterTest {
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
-        final String parentNodeFormat = "text/cmdi";
+        final String parentNodeFormat = "text/x-cmdi+xml";
         final URI nodeSchemaLocation = new URI("http://some.location");
         
         return new LamusWorkspaceNode(parentNodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
@@ -404,11 +404,11 @@ public class AddedNodeExporterTest {
     
     
     private WorkspaceNode getCurrentMetadataNode() throws MalformedURLException, URISyntaxException {
-        return getCurrentNode(metadataExtension, WorkspaceNodeType.METADATA, "text/cmdi");
+        return getCurrentNode(metadataExtension, WorkspaceNodeType.METADATA, "text/x-cmdi+xml");
     }
     
     private WorkspaceNode getCurrentResourceNode() throws MalformedURLException, URISyntaxException {
-        return getCurrentNode(resourceExtension, WorkspaceNodeType.RESOURCE_WR, "application/pdf");
+        return getCurrentNode(resourceExtension, WorkspaceNodeType.RESOURCE, "application/pdf");
     }
     
     private WorkspaceNode getCurrentNode(String fileExtension, WorkspaceNodeType type, String format) throws MalformedURLException, URISyntaxException {
