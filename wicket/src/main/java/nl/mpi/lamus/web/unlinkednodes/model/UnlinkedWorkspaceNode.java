@@ -18,14 +18,10 @@ package nl.mpi.lamus.web.unlinkednodes.model;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 
