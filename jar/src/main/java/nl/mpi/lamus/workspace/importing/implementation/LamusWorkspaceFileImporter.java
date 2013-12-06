@@ -64,7 +64,7 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
 	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, workspaceNode);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 
-        workspaceFileHandler.copyMetadataFile(workspaceNode, metadataAPI, metadataDocument, nodeFile, streamResult);
+        metadataAPI.writeMetadataDocument(metadataDocument, streamResult);
         
         workspaceNode.setWorkspaceURL(nodeFile.toURI().toURL());
         this.workspaceDao.updateNodeWorkspaceURL(workspaceNode);

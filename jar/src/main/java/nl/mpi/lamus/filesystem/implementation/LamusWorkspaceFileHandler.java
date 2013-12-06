@@ -49,50 +49,13 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     private File workspaceBaseDirectory;
 
     /**
-     * @see WorkspaceFileHandler#copyMetadataFileToWorkspace(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.MetadataAPI, nl.mpi.metadata.api.model.MetadataDocument, java.io.File, javax.xml.transform.stream.StreamResult)
+     * @see WorkspaceFileHandler#copyFile(java.io.File, java.io.File)
      */
     @Override
-    public void copyMetadataFile(WorkspaceNode workspaceNode,
-            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile, StreamResult targetNodeFileStreamResult)
-                throws IOException, TransformerException, MetadataException {
-        
-        
-        //TODO NO NEED TO BE A SEPARATE METHOD...
-        
-        
-        metadataAPI.writeMetadataDocument(metadataDocument, targetNodeFileStreamResult);
-    }
-    
-    /**
-     * @see WorkspaceFileHandler#copyResourceFile(nl.mpi.lamus.workspace.model.WorkspaceNode, java.io.File, java.io.File)
-     */
-    @Override
-    public void copyResourceFile(WorkspaceNode workspaceNode,
-            File originNodeFile, File targetNodeFile)
+    public void copyFile(File originNodeFile, File targetNodeFile)
                 throws IOException {
         
-        
-        //TODO NO NEED TO BE A SEPARATE METHOD...
-        
-        
         FileUtils.copyFile(originNodeFile, targetNodeFile);
-    }
-    
-    //TODO standardise the copy methods
-    
-    /**
-     * @see WorkspaceFileHandler#copyFile(int, java.io.File, java.io.File)
-     */
-    @Override
-    public void copyFile(int workspaceID, File originFile, File targetNodeFile)
-            throws IOException {
-        try {
-            FileUtils.copyFile(originFile, targetNodeFile);
-        } catch (IOException ioex) {
-            String errorMessage = "Problem writing file " + targetNodeFile.getAbsolutePath();
-            logger.error(errorMessage, ioex);
-            throw ioex;
-        }
     }
     
     /**

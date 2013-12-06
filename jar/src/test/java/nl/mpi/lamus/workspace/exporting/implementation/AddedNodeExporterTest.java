@@ -157,13 +157,8 @@ public class AddedNodeExporterTest {
                 
             oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
             
-//            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), nodePid, testWorkspace.getUserID());
-//                will(returnValue(newNodeArchiveID));
-            
-            oneOf(mockWorkspaceFileHandler).copyResourceFile(updatedCurrentNode, nodeWsFile, nextAvailableFile);
+            oneOf(mockWorkspaceFileHandler).copyFile(nodeWsFile, nextAvailableFile);
                 
-            //TODO new node is added and linked in database
-
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
             
 //            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, nextAvailableFile.toURI().toURL());
@@ -182,9 +177,7 @@ public class AddedNodeExporterTest {
             
         }});
         
-        
         addedNodeExporter.exportNode(parentNode, currentNode);
-        
     }
     
     
@@ -223,17 +216,12 @@ public class AddedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
             
             oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, updatedCurrentNode);
-                    
-//            oneOf(mockCorpusStructureBridge).addNewNodeToCorpusStructure(nextAvailableFile.toURI().toURL(), nodePid, testWorkspace.getUserID());
-//                will(returnValue(newNodeArchiveID));
             
             oneOf(mockMetadataAPI).getMetadataDocument(currentNode.getWorkspaceURL()); will(returnValue(mockChildCmdiDocument));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(updatedCurrentNode, mockMetadataAPI, mockChildCmdiDocument, nodeWsFile, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
             
-            //TODO new node is added and linked in database
-
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
             
 //            oneOf(mockCorpusStructureBridge).ensureChecksum(newNodeArchiveID, nextAvailableFile.toURI().toURL());
@@ -251,7 +239,6 @@ public class AddedNodeExporterTest {
             //TODO Keep workspace information in DB?
             
         }});
-        
         
         addedNodeExporter.exportNode(parentNode, currentNode);
     }
@@ -382,7 +369,7 @@ public class AddedNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(currentNode.getWorkspaceURL()); will(returnValue(mockChildCmdiDocument));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(updatedCurrentNode, mockMetadataAPI, mockChildCmdiDocument, nodeWsFile, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
                 will(throwException(expectedException));
         }});
         

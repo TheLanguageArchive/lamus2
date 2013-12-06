@@ -169,8 +169,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
-            
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
         
         stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
@@ -238,7 +237,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
         
         stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
@@ -577,7 +576,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(node, mockMetadataAPI, mockMetadataDocument, nodeWsFile, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
                 will(throwException(expectedException));
         }});
         

@@ -105,13 +105,12 @@ public class GeneralNodeExporter implements NodeExporter {
 //                //TODO IS THIS ENOUGH IN THIS CASE?
 //            }
             
-            CorpusNode corpusNode;
+            CorpusNode corpusNode = null;
             try {
                 corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
             } catch (UnknownNodeException ex) {
                 String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             }
             String archiveChecksum = corpusNode.getFileInfo().getChecksum();
             String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
@@ -128,43 +127,33 @@ public class GeneralNodeExporter implements NodeExporter {
                 nodeDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
             } catch (IOException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             } catch (MetadataException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             }
 
             File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
             File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
             StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
             
-            
-            try {        
-                workspaceFileHandler.copyMetadataFile(currentNode, metadataAPI, nodeDocument, nodeWsFile, nodeArchiveStreamResult);
+            try {
+                metadataAPI.writeMetadataDocument(nodeDocument, nodeArchiveStreamResult);
             } catch (IOException ex) {
                 String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             } catch (TransformerException ex) {
                 String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             } catch (MetadataException ex) {
                 String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             }            
-            
-            
             
             //TODO CHECK FOR CHANGES IN DB... OR IS IT TO BE DONE BY THE CRAWLER???
                 // check if checksum is different
                     // if not, do nothing
                     // if so
-        
-            
         } else {
             
             //TODO resources
@@ -174,6 +163,11 @@ public class GeneralNodeExporter implements NodeExporter {
         }
         
         //TODO Update node in corpusstructure?
+    }
+    
+    private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {
+        logger.error(errorMessage, cause);
+        throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), cause);
     }
     
 }

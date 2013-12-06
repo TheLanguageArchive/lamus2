@@ -100,8 +100,7 @@ public class LamusWorkspaceFileImporterTest {
         
             oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(testURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
-                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockNodeFileStreamResult);
             oneOf(mockNodeFile).toURI(); will(returnValue(testURI));
             oneOf(mockWorkspaceNode).setWorkspaceURL(testURI.toURL());
             oneOf(mockWorkspaceDao).updateNodeWorkspaceURL(mockWorkspaceNode);
@@ -120,8 +119,7 @@ public class LamusWorkspaceFileImporterTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
-                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockNodeFileStreamResult);
                     will(throwException(expectedException));
         }});
         
@@ -143,8 +141,7 @@ public class LamusWorkspaceFileImporterTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
-                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockNodeFileStreamResult);
                     will(throwException(expectedException));
         }});
         
@@ -166,8 +163,7 @@ public class LamusWorkspaceFileImporterTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
-                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockNodeFileStreamResult);
                     will(throwException(expectedException));
         }});
         
@@ -189,8 +185,7 @@ public class LamusWorkspaceFileImporterTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceFileHandler).getFileForImportedWorkspaceNode(archiveURL, mockWorkspaceNode); will(returnValue(mockNodeFile));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockNodeFile); will(returnValue(mockNodeFileStreamResult));
-            oneOf(mockWorkspaceFileHandler).copyMetadataFile(
-                    mockWorkspaceNode, mockMetadataAPI, mockMetadataDocument, mockNodeFile, mockNodeFileStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockNodeFileStreamResult);
             oneOf(mockNodeFile).toURI(); will(returnValue(wsFileURI));
         }});
         

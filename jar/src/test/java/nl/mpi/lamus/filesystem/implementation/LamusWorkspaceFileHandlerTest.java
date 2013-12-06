@@ -111,119 +111,6 @@ public class LamusWorkspaceFileHandlerTest {
         }
     }
 
-    /**
-     * Test of copyMetadataFileToWorkspace method, of class LamusWorkspaceFileHandler.
-     */
-    @Test
-    public void copyMetadataFileToWorkspaceSuccessfully() throws IOException,
-        TransformerException, MetadataException,
-        CMDITypeException, ParserConfigurationException, SAXException, URISyntaxException {
-        
-        String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
-        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
-        
-        context.checking(new Expectations() {{
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-        }});
-        
-        workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
-                mockMetadataDocument, testNodeFile, mockStreamResult);
-    }
-    
-    @Test
-    public void copyMetadataFileToWorkspaceThrowsIOException() throws IOException,
-        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
-        SAXException, URISyntaxException {
-        
-        String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
-        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
-        
-        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
-        final IOException expectedException = new IOException(expectedErrorMessage);
-        
-        context.checking(new Expectations() {{
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedException));
-        }});
-        
-        try {
-            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
-                    mockMetadataDocument, testNodeFile, mockStreamResult);
-            fail("An exception should have been thrown");
-        } catch(IOException ex) {
-            assertEquals("Exception is different from expected", expectedException, ex);
-        }
-    }
-    
-    @Test
-    public void copyMetadataFileToWorkspaceThrowsTransformerException() throws IOException,
-        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
-        SAXException, URISyntaxException {
-        
-        String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
-        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
-        
-        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
-        final TransformerException expectedException = new TransformerException(expectedErrorMessage);
-        
-        context.checking(new Expectations() {{
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedException));
-        }});
-        
-        try {
-            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
-                    mockMetadataDocument, testNodeFile, mockStreamResult);
-            fail("An exception should have been thrown");
-        } catch(TransformerException ex) {
-            assertEquals("Exception is different from expected", expectedException, ex);
-        }
-    }
-    
-    @Test
-    public void copyMetadataFileToWorkspaceThrowsMetadataException() throws IOException,
-        TransformerException, MetadataException, CMDITypeException, ParserConfigurationException,
-        SAXException, URISyntaxException {
-        
-        String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
-        File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
-        
-        String expectedErrorMessage = "Problem writing file " + testNodeFile.getAbsolutePath();
-        final MetadataException expectedException = new MetadataException(expectedErrorMessage);
-        
-        context.checking(new Expectations() {{
-            oneOf (mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
-                will(throwException(expectedException));
-        }});
-        
-        try {
-            workspaceFileHandler.copyMetadataFile(testWorkspaceNode, mockMetadataAPI,
-                    mockMetadataDocument, testNodeFile, mockStreamResult);
-            fail("An exception should have been thrown");
-        } catch(MetadataException ex) {
-            assertEquals("Exception is different from expected", expectedException, ex);
-        }
-    }
     
     @Test
     public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
@@ -238,7 +125,7 @@ public class LamusWorkspaceFileHandlerTest {
         File originFile = new File(testNode.getWorkspaceURL().getPath());
         File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
         
-        workspaceFileHandler.copyResourceFile(testNode, originFile, destinationFile);
+        workspaceFileHandler.copyFile(originFile, destinationFile);
         
         assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
     }
@@ -259,53 +146,9 @@ public class LamusWorkspaceFileHandlerTest {
         destinationFile.setReadOnly();
         
         try {
-            workspaceFileHandler.copyResourceFile(testNode, originFile, destinationFile);
+            workspaceFileHandler.copyFile(originFile, destinationFile);
             fail("An exception should have been thrown");
         } catch(IOException ex) {
-            assertTrue("Exception has different type than expected", ex instanceof IOException);
-            
-            //TODO Should mock the call to FileUtils.copyFile in order to properly compare the exception with an expected one
-        }
-        
-        assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
-    }
-    
-    @Test
-    public void copyFileSuccessfully() throws IOException {
-        
-        final int workspaceID = 1;
-        final File baseDirectory = createTestBaseDirectory();
-        final File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, workspaceID);
-        final File uploadDirectory = createTestUploadDirectory(workspaceDirectory);
-        
-        final File fileToCopy = createFileToCopy();
-        
-        final File destinationFile = new File(uploadDirectory, FilenameUtils.getName(fileToCopy.getPath()));
-        
-        workspaceFileHandler.copyFile(workspaceID, fileToCopy, destinationFile);
-        
-        assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
-    }
-    
-    @Test
-    public void copyFileThrowsException() throws IOException {
-        
-        final int workspaceID = 1;
-        final File baseDirectory = createTestBaseDirectory();
-        final File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, workspaceID);
-        final File uploadDirectory = createTestUploadDirectory(workspaceDirectory);
-        
-        final File fileToCopy = doNotCreateFileToCopy();
-        
-        final File destinationFile = new File(uploadDirectory, FilenameUtils.getName(fileToCopy.getPath()));
-        
-        destinationFile.createNewFile();
-        destinationFile.setReadOnly();
-        
-        try {
-            workspaceFileHandler.copyFile(workspaceID, fileToCopy, destinationFile);
-            fail("An exception should have been thrown");
-        } catch (IOException ex) {
             assertTrue("Exception has different type than expected", ex instanceof IOException);
             
             //TODO Should mock the call to FileUtils.copyFile in order to properly compare the exception with an expected one

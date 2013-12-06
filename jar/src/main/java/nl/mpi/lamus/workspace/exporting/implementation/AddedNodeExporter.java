@@ -117,35 +117,26 @@ public class AddedNodeExporter implements NodeExporter {
         
         File nextAvailableFile = null;
         URL newNodeArchiveURL = null;
-        
         try {
             nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename, currentNode.getType());
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {
             String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            throwWorkspaceExportException(errorMessage, ex);
         } catch (IOException ex) {
             String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            throwWorkspaceExportException(errorMessage, ex);
         }
         currentNode.setArchiveURL(newNodeArchiveURL);
+        
+        //TODO how to generate handles exactly?
         URI newNodeArchiveURI = nodeDataRetriever.getNewArchiveURI();
         currentNode.setArchiveURI(newNodeArchiveURI);
         workspaceDao.updateNodeArchiveUriUrl(currentNode);
         
-        //TODO WHEN METADATA, CALL (RECURSIVELY) exploreTree FOR CHILDREN IN THE BEGINNING
-            // this way child files would have the pids calculated in advance,
-                // so the references in the parent can be set before the files are copied to their archive location
         if(currentNode.isMetadata()) {
             workspaceTreeExporter.explore(workspace, currentNode);
         }
-        
-//        int currentNodeNewArchiveID = corpusStructureBridge.addNewNodeToCorpusStructure(
-//                    newNodeArchiveURL, currentNode.getPid(), workspace.getUserID());
-            
-            //TODO PID should have already been assigned when the node was uploaded/linked...
         
         MetadataDocument currentDocument = null;
         if(currentNode.isMetadata()) {
@@ -154,12 +145,10 @@ public class AddedNodeExporter implements NodeExporter {
                 
             } catch (IOException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getWorkspaceURL();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             } catch (MetadataException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getWorkspaceURL();
-                logger.error(errorMessage, ex);
-                throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+                throwWorkspaceExportException(errorMessage, ex);
             }
         }
         
@@ -168,22 +157,19 @@ public class AddedNodeExporter implements NodeExporter {
         try {
             if(currentNode.isMetadata()) {
                 StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
-                workspaceFileHandler.copyMetadataFile(currentNode, metadataAPI, currentDocument, currentNodeWorkspaceFile, targetStreamResult);
+                metadataAPI.writeMetadataDocument(currentDocument, targetStreamResult);
             } else {
-                workspaceFileHandler.copyResourceFile(currentNode, currentNodeWorkspaceFile, nextAvailableFile);
+                workspaceFileHandler.copyFile(currentNodeWorkspaceFile, nextAvailableFile);
             }
         } catch (IOException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            throwWorkspaceExportException(errorMessage, ex);
         } catch (TransformerException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            throwWorkspaceExportException(errorMessage, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+            throwWorkspaceExportException(errorMessage, ex);
         }
         
 //        try {
@@ -199,5 +185,10 @@ public class AddedNodeExporter implements NodeExporter {
            // throw new UnsupportedOperationException("AddedNodeExporter.exportNode (when currentNode is not searchable by SearchClient) not implemented yet");
         //}
         
+    }
+    
+    private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {
+        logger.error(errorMessage, cause);
+        throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), cause);
     }
 }

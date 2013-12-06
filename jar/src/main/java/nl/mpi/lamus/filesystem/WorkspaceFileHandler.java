@@ -31,41 +31,15 @@ import nl.mpi.metadata.api.model.MetadataDocument;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public interface WorkspaceFileHandler {
-    
-    /**
-     * Copies the given metadata file into the given location.
-     * 
-     * @param workspaceNode node corresponding to the file
-     * @param metadataAPI instance of the MetadataAPI
-     * @param metadataDocument MetadataDocument corresponding to the file
-     * @param originNodeFile File object corresponding to the file origin
-     * @param targetNodeFileStreamResult StreamResult object corresponding to the target file
-     */
-    public void copyMetadataFile(WorkspaceNode workspaceNode,
-            MetadataAPI metadataAPI, MetadataDocument metadataDocument, File originNodeFile,
-            StreamResult targetNodeFileStreamResult)
-                throws IOException, TransformerException, MetadataException;
 
     /**
      * Copies the given resource file into the given location
      * 
-     * @param workspaceNode node corresponding to the file
      * @param originNodeFile File object corresponding to the file origin
      * @param targetNodeFile File object corresponding to the target file
      */
-    public void copyResourceFile(WorkspaceNode workspaceNode,
-            File originNodeFile, File targetNodeFile)
+    public void copyFile(File originNodeFile, File targetNodeFile)
                 throws IOException;
-    
-    /**
-     * Copies the given file to the given location
-     * 
-     * @param workspaceID ID of the workspace
-     * @param originFile File object corresponding to the file origin
-     * @param targetNodeFile File object corresponding to the target file
-     */
-    public void copyFile(int workspaceID, File originFile, File targetNodeFile)
-            throws IOException;
     
     /**
      * Gets a StreamResult object based on the given file.
