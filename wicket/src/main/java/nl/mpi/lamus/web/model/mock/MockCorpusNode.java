@@ -24,16 +24,16 @@ import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.tree.LinkedTreeNode;
-import nl.mpi.archiving.tree.corpusstructure.CorpusStructureArchiveNode;
+import nl.mpi.archiving.tree.corpusstructure.LinkedCorpusNode;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable {
+public class MockCorpusNode implements LinkedCorpusNode, Serializable {
 
-    private CorpusStructureArchiveNode parent;
-    private List<CorpusStructureArchiveNode> children = Collections.emptyList();
+    private LinkedCorpusNode parent;
+    private List<LinkedCorpusNode> children = Collections.emptyList();
     private String name = "";
     private URI nodeUri;
     
@@ -44,12 +44,12 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     private boolean isOnSite;
     private String format;
 
-    public void setChildren(List<CorpusStructureArchiveNode> children) {
+    public void setChildren(List<LinkedCorpusNode> children) {
 	this.children = children;
     }
 
     @Override
-    public CorpusStructureArchiveNode getChild(int index) {
+    public LinkedCorpusNode getChild(int index) {
 	return children.get(index);
     }
 
@@ -73,11 +73,11 @@ public class MockCorpusNode implements CorpusStructureArchiveNode, Serializable 
     }
 
     @Override
-    public CorpusStructureArchiveNode getParent() {
+    public LinkedCorpusNode getParent() {
 	return parent;
     }
 
-    public void setParent(CorpusStructureArchiveNode parent) {
+    public void setParent(LinkedCorpusNode parent) {
 	this.parent = parent;
     }
 

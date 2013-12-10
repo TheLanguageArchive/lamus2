@@ -25,7 +25,7 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
-import nl.mpi.archiving.tree.corpusstructure.CorpusStructureArchiveNode;
+import nl.mpi.archiving.tree.corpusstructure.LinkedCorpusNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -177,7 +177,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         mockArchiveRootNode.setName(mockArchiveRootNodeName);
         mockArchiveRootNode.setNodeURI(mockArchiveRootNodeURI);
 
-        List<CorpusStructureArchiveNode> children = new ArrayList<CorpusStructureArchiveNode>();
+        List<LinkedCorpusNode> children = new ArrayList<LinkedCorpusNode>();
 
         MockCorpusNode child1 = new MockCorpusNode();
         child1.setParent(mockArchiveRootNode);
