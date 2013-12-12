@@ -70,6 +70,8 @@ public interface WorkspaceNode extends Serializable {
     
     public WorkspaceNodeStatus getStatus();
     
+    public boolean isExternal();
+    
     public void setStatus(WorkspaceNodeStatus status);
     
     public String getFormat();

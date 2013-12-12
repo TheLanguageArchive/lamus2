@@ -67,11 +67,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     
     
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.MetadataDocument)
+     * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL,
+     *      nl.mpi.metadata.api.model.MetadataDocument, java.lang.String, boolean)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceMetadataNode(
-            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name) {
+    public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            MetadataDocument document, String name, boolean onSite) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(name);
@@ -80,18 +81,22 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setFormat("text/x-cmdi+xml"); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
-        node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+        if(onSite) {
+            node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+        } else {
+            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        }
         
         return node;
     }
     
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL, nl.mpi.metadata.api.model.Reference,
-     *      nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, java.lang.String)
+     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL,
+     *      nl.mpi.metadata.api.model.Reference, java.lang.String, java.lang.String, boolean)
      */
     @Override
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name) {
+            Reference resourceReference, String mimetype, String name, boolean onSite) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         node.setName(name);
@@ -99,8 +104,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setType(WorkspaceNodeType.RESOURCE);
         node.setFormat(mimetype);
         
-        //ALWAYS?
-        node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
+        if(onSite) {
+            node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
+        } else {
+            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        }
         
         
         return node;

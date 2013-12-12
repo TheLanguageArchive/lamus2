@@ -187,6 +187,11 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
 
     @Override
+    public boolean isExternal() {
+        return WorkspaceNodeStatus.NODE_EXTERNAL.equals(this.status);
+    }
+    
+    @Override
     public void setStatus(WorkspaceNodeStatus status) {
         this.status = status;
     }

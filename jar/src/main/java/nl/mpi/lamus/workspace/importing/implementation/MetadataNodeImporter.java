@@ -136,6 +136,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         URL childArchiveURL = null;
         String childName = null;
+        boolean childOnSite = true;
         
         MetadataDocument childDocument = null;
         try {
@@ -143,6 +144,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             CorpusNode childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
             childArchiveURL = nodeResolver.getUrl(childCorpusNode);
             childName = childCorpusNode.getName();
+            childOnSite = childCorpusNode.isOnSite();
             
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
@@ -157,10 +159,15 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    throwWorkspaceImportException(errorMessage, unex);
         }
         
-        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName);
+        WorkspaceNode childNode =
+                workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite);
         workspaceDao.addWorkspaceNode(childNode);
         
         workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, childLink);
+        
+        if(childNode.isExternal()) {
+            return;
+        }
         
         try {
             this.workspaceFileImporter.importMetadataFileToWorkspace(childArchiveURL, childNode, childDocument);

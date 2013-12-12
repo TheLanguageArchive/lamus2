@@ -19,7 +19,6 @@ import java.net.URI;
 import java.net.URL;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 
@@ -49,10 +48,11 @@ public interface WorkspaceNodeFactory {
      * @param archiveNodeURL archive URL of the node
      * @param document MetadataDocument object corresponding to the file
      * @param name Name of the node
+     * @param onSite true if node is on site (in the local archive)
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceMetadataNode(
-            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name);
+            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name, boolean onSite);
 
     /**
      * Creates a resource WorkspaceNode with the given values.
@@ -63,10 +63,11 @@ public interface WorkspaceNodeFactory {
      * @param resourceReference Reference to the node, in the parent metadata file
      * @param mimetype Mimetype of the file
      * @param name name of the node
+     * @param onSite true if node is on site (in the local archive)
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name);
+            Reference resourceReference, String mimetype, String name, boolean onSite);
 
     /**
      * Creates a WorkspaceNode with the given values.

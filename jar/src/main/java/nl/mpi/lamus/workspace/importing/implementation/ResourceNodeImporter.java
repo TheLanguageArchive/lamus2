@@ -102,10 +102,12 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             throw new IllegalArgumentException(errorMessage);
         }
    
-        URI childURI;
+        URI childURI = null;
         if(childLink instanceof HandleCarrier) {
             childURI = ((HandleCarrier) childLink).getHandle();
-        } else {
+        }
+        
+        if(childURI == null) {
             childURI = childLink.getURI();
         }
         
@@ -161,7 +163,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace.getWorkspaceID(), childURI, childURL, childLink, childMimetype, childCorpusNode.getName());
+                workspace.getWorkspaceID(), childURI, childURL, childLink, childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite());
         workspaceDao.addWorkspaceNode(childNode);
         
         //TODO add parent link in the database

@@ -154,16 +154,19 @@ public class ResourceNodeImporterTest {
         final URL childOriginURL = new URL("file:/some.uri/childname.txt");
         final URL childArchiveURL = childOriginURL;
         final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
         
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
         final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
@@ -189,8 +192,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName);
+                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -221,16 +225,19 @@ public class ResourceNodeImporterTest {
         final URL childArchiveURL = childOriginURL;
         final URI childURI = childArchiveURL.toURI();
         final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
         
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
         final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithoutHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
@@ -256,8 +263,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName);
+                    childURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName, childOnSite);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
