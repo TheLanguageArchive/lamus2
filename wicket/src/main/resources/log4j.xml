@@ -9,7 +9,7 @@
 	</layout> 
     </appender> 
     <appender name="logfile" class="org.apache.log4j.DailyRollingFileAppender"> 
-	<param name="File" value="${catalina.home}/logs/lamus2.log"/> 
+	<param name="File" value="${log.home}/lamus2.log"/> 
 	<layout class="org.apache.log4j.PatternLayout"> 
 	    <param name="ConversionPattern" value="%d %-5p %c{1} - %m%n"/> 
 	</layout> 

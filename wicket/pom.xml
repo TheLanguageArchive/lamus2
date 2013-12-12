@@ -180,9 +180,14 @@
         
     </dependencies>
     <build>
+        
+        <filters>
+            <filter>src/main/filters/application.${deployTo}.properties</filter>
+        </filters>
+        
 	<resources>
 	    <resource>
-		<filtering>false</filtering>
+		<filtering>true</filtering>
 		<directory>src/main/resources</directory>
 	    </resource>
 	    <resource>
