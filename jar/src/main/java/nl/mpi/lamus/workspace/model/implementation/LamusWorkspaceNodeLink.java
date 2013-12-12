@@ -36,14 +36,17 @@ public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
         this.childURI = childResourceProxyURI;
     }
     
+    @Override
     public int getParentWorkspaceNodeID() {
         return this.parentWorkspaceNodeID;
     }
 
+    @Override
     public int getChildWorkspaceNodeID() {
         return this.childWorkspaceNodeID;
     }
 
+    @Override
     public URI getChildURI() {
         return this.childURI;
     }

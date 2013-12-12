@@ -106,7 +106,8 @@ public class TopNodeImporterTest {
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataNodeImporter).importNode(mockWorkspace, null, null, null, nodeArchiveURI);
+            oneOf(mockWorkspace).setTopNodeArchiveURI(nodeArchiveURI);
+            oneOf(mockMetadataNodeImporter).importNode(mockWorkspace, null, null, null);
         }});
         
         topNodeImporter.importNode(mockWorkspace, nodeArchiveURI);

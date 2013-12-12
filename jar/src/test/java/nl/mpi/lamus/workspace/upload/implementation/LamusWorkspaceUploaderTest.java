@@ -28,9 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
-import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
@@ -82,8 +80,6 @@ public class LamusWorkspaceUploaderTest {
     @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock TypecheckerConfiguration mockTypecheckerConfiguration;
-    @Mock FileTypeHandler mockFileTypeHandler;
     
     @Mock FileItem mockFileItem;
     @Mock InputStream mockInputStream;
@@ -117,8 +113,7 @@ public class LamusWorkspaceUploaderTest {
     public void setUp() {
         uploader = new LamusWorkspaceUploader(mockNodeDataRetriever,
                 mockWorkspaceDirectoryHandler, mockWorkspaceNodeFactory,
-                mockWorkspaceDao, mockTypecheckerConfiguration,
-                mockFileTypeHandler);
+                mockWorkspaceDao);
     }
     
     @After
@@ -276,9 +271,12 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
                 will(returnValue(workspaceTopNodeArchiveURL));
                 
-            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-                will(returnValue(acceptableJudgement));
-            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
+//                will(returnValue(acceptableJudgement));
+//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//                will(returnValue(Boolean.TRUE));
+              
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
                 
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
@@ -329,9 +327,12 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
                 will(returnValue(workspaceTopNodeArchiveURL));
                 
-            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-                will(returnValue(acceptableJudgement));
-            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
+//                will(returnValue(acceptableJudgement));
+//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//                will(returnValue(Boolean.FALSE));
+                
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
         }});
         
@@ -402,9 +403,12 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
                 will(returnValue(workspaceTopNodeArchiveURL));
                 
-            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-                will(returnValue(acceptableJudgement));
-            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
+//                will(returnValue(acceptableJudgement));
+//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
+//                will(returnValue(Boolean.TRUE));
+                
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
         }});
         

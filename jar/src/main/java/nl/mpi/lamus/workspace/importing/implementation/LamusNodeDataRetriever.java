@@ -30,6 +30,8 @@ import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
+import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.Reference;
@@ -52,16 +54,19 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     private final NodeResolver nodeResolver;
     private final MetadataAPI metadataAPI;
     private final FileTypeHandler fileTypeHandler;
+    private TypecheckerConfiguration typecheckerConfiguration;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
     public LamusNodeDataRetriever(CorpusStructureProvider csProvider,
         NodeResolver nodeResolver, MetadataAPI mAPI,
-        FileTypeHandler fileTypeHandler, ArchiveFileHelper archiveFileHelper) {
+        FileTypeHandler fileTypeHandler, TypecheckerConfiguration typecheckerConfiguration,
+        ArchiveFileHelper archiveFileHelper) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.metadataAPI = mAPI;
         this.fileTypeHandler = fileTypeHandler;
+        this.typecheckerConfiguration = typecheckerConfiguration;
         this.archiveFileHelper = archiveFileHelper;
     }
 
@@ -186,6 +191,16 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
                 }
             }
         }
+    }
+    
+    /**
+     * @see NodeDataRetriever#isCheckedResourceArchivable(java.net.URL, java.lang.StringBuilder)
+     */
+    @Override
+    public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message) {
+        
+        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(urlToCheckInConfiguration);
+        return this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
     }
 
     /**

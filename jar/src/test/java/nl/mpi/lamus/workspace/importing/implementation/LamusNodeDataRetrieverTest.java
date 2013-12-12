@@ -31,6 +31,8 @@ import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
+import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -88,6 +90,7 @@ public class LamusNodeDataRetrieverTest {
     @Mock NodeResolver mockNodeResolver;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock FileTypeHandler mockFileTypeHandler;
+    @Mock TypecheckerConfiguration mockTypecheckerConfiguration;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     
     @Mock MetadataDocument mockMetadataDocument;
@@ -99,6 +102,7 @@ public class LamusNodeDataRetrieverTest {
     @Mock WorkspaceNode mockWorkspaceNode;
     
     @Mock InputStream mockInputStream;
+    @Mock File mockTopWsFile;
     
     public LamusNodeDataRetrieverTest() {
     }
@@ -115,7 +119,8 @@ public class LamusNodeDataRetrieverTest {
     public void setUp() {
         testNodeDataRetriever = new LamusNodeDataRetriever(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockMetadataAPI, mockFileTypeHandler, mockArchiveFileHelper);
+                mockMetadataAPI, mockFileTypeHandler,
+                mockTypecheckerConfiguration, mockArchiveFileHelper);
     }
     
     @After
@@ -287,6 +292,46 @@ public class LamusNodeDataRetrieverTest {
             assertEquals("Exception thrown different from expected", ioException, ex);
         }
         
+    }
+    
+    @Test
+    public void checkedResourceIsArchivable() throws MalformedURLException {
+        
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
+        final StringBuilder message = new StringBuilder();
+        final URL topWsArchiveURL = new URL("http://someServer/location");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
+                will(returnValue(acceptableJudgement));
+            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(acceptableJudgement, message);
+                will(returnValue(Boolean.TRUE));
+        }});
+        
+        boolean result = testNodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void checkedResourceIsNotArchivable() throws MalformedURLException {
+        
+        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
+        final StringBuilder message = new StringBuilder();
+        final URL topWsArchiveURL = new URL("http://someServer/location");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
+                will(returnValue(acceptableJudgement));
+            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(acceptableJudgement, message);
+                will(returnValue(Boolean.FALSE));
+        }});
+        
+        boolean result = testNodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        
+        assertFalse("Result should be false", result);
     }
     
     

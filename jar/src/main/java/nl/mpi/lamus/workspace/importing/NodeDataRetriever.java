@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -86,7 +87,14 @@ public interface NodeDataRetriever {
      * @param typecheckedResults Object containing the result of the typechecker
      */
     public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults);
-        
+    
+    /**
+     * @param urlToCheckInConfiguration URL of the archive branch for which the configuration has to be checked (top node of the workspace)
+     * @param message Message from the typechecker
+     * @return true if the previously checked resource is archivable, according to the configuration
+     */
+    public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message);
+    
     /**
      * Generates a new archive URI
      * 

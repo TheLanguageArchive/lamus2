@@ -224,11 +224,6 @@
             <artifactId>corpus-structure-2-adapter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>nl.mpi.corpusstructure</groupId>
-            <artifactId>corpus-structure-2-writer</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         
         
         <dependency>

@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
@@ -47,6 +46,7 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.*;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
+import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
@@ -84,7 +84,7 @@ public class MetadataNodeImporterTest {
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
     @Mock WorkspaceNode mockParentNode;
-    @Mock Reference mockChildLink;
+    @Mock Reference mockReferenceWithoutHandle;
     private Workspace testWorkspace;
     
     @Mock MetadataDocument mockNonReferencingMetadataDocument;
@@ -132,9 +132,8 @@ public class MetadataNodeImporterTest {
                 mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
                 mockWorkspaceFileHandler, mockWorkspaceNodeExplorer);
         
-        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
         try {
-            testNodeImporter.importNode(null, null, null, null, testChildArchiveURI);
+            testNodeImporter.importNode(null, null, null, null);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -155,9 +154,12 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
                 testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        testWorkspace.setTopNodeArchiveURI(testChildURI);
+        
         
         context.checking(new Expectations() {{
             
@@ -179,7 +181,7 @@ public class MetadataNodeImporterTest {
             oneOf (mockWorkspaceNodeExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
         }});
         
-        nodeImporter.importNode(testWorkspace, null, null, null, testChildURI);
+        nodeImporter.importNode(testWorkspace, null, null, null);
     }
     
     @Test
@@ -194,9 +196,11 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
                 testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        testWorkspace.setTopNodeArchiveURI(testChildURI);
         
         context.checking(new Expectations() {{
             
@@ -215,7 +219,7 @@ public class MetadataNodeImporterTest {
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
         
-        nodeImporter.importNode(testWorkspace, null, null, null, testChildURI);
+        nodeImporter.importNode(testWorkspace, null, null, null);
     }
    
     @Test
@@ -223,8 +227,10 @@ public class MetadataNodeImporterTest {
         IOException, MetadataException, UnknownNodeException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
-        final URI testURI = new URI(UUID.randomUUID().toString());
+        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
+        
+        testWorkspace.setTopNodeArchiveURI(testURI);
         
         final IOException expectedException = new IOException("this is an exception thrown by the method 'getMetadataDocument'");
         
@@ -239,7 +245,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting Metadata Document for node " + testURI;
@@ -254,8 +260,10 @@ public class MetadataNodeImporterTest {
         IOException, MetadataException, UnknownNodeException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
-        final URI testURI = new URI(UUID.randomUUID().toString());
+        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
+        
+        testWorkspace.setTopNodeArchiveURI(testURI);
         
         final MetadataException expectedException = new MetadataException("this is an exception thrown by the method 'getMetadataDocument'");
         
@@ -270,7 +278,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting Metadata Document for node " + testURI;
@@ -284,8 +292,9 @@ public class MetadataNodeImporterTest {
     public void importNodeMetadataDocumentThrowsUnknownNodeException() throws MalformedURLException, URISyntaxException,
         IOException, MetadataException, UnknownNodeException {
 
-        final URL testChildURL = new URL("http://some.url/node.something");
-        final URI testURI = new URI(UUID.randomUUID().toString());
+        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        
+        testWorkspace.setTopNodeArchiveURI(testURI);
         
         final UnknownNodeException expectedException = new UnknownNodeException("this is an exception thrown by the method 'getMetadataDocument'");
         
@@ -296,7 +305,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, null, null, null, testURI);
+            nodeImporter.importNode(testWorkspace, null, null, null);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting information for node " + testURI;
@@ -315,11 +324,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -351,7 +360,7 @@ public class MetadataNodeImporterTest {
             oneOf (mockWorkspaceNodeExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
         }});
         
-        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
     }
 
     @Test
@@ -363,11 +372,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -396,7 +405,54 @@ public class MetadataNodeImporterTest {
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
         }});
         
-        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
+    }
+    
+    @Test
+    public void importNormalNodeWithNoHandle() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
+        WorkspaceImportException, UnknownNodeException, TransformerException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int testChildWorkspaceNodeID = 10;
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URL testChildOriginURL = new URL("file:/some.url/node.something");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final URI testChildURI = testChildArchiveURL.toURI();
+        final String testChildName = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+//        final Reference testChildReference = new DataResourceProxy("childID", testChildURI, "cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockReferenceWithoutHandle).getURI(); will(returnValue(testChildURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(testChildArchiveURL));
+            oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
+                will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
+                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL, mockTestNonReferencingMetadataDocumentWithHandle, testChildName);
+                will(returnValue(testChildNode));
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodesWithReference(testWorkspace, testParentNode, testChildNode, mockReferenceWithoutHandle);
+            
+            oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(testChildArchiveURL, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
+        }});
+        
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockReferenceWithoutHandle);
     }
 
     @Test
@@ -408,11 +464,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -445,7 +501,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to set URL for node " + testChildNode.getArchiveURI()
@@ -465,11 +521,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -502,7 +558,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
@@ -522,11 +578,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -559,7 +615,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()
@@ -579,11 +635,11 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI(UUID.randomUUID().toString());
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URL testChildOriginURL = new URL("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildOriginURL;
-        final URI testChildURI = new URI(UUID.randomUUID().toString());
+        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
@@ -616,7 +672,7 @@ public class MetadataNodeImporterTest {
         }});
         
         try {
-            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference, testChildURI);
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, testChildReference);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Failed to create file for node " + testChildNode.getArchiveURI()

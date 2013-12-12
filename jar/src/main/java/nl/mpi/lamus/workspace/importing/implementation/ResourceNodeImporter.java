@@ -34,6 +34,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
@@ -87,11 +88,11 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     /**
      * @see NodeImporter#importNode(
      *      nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, java.net.URI)
+     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference)
      */
     @Override
     public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink, URI childNodeArchiveURI) throws WorkspaceImportException {
+            Reference childLink) throws WorkspaceImportException {
         
         workspace = ws;
         
@@ -101,7 +102,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             throw new IllegalArgumentException(errorMessage);
         }
    
-        URI childURI = childLink.getURI();
+        URI childURI;
+        if(childLink instanceof HandleCarrier) {
+            childURI = ((HandleCarrier) childLink).getHandle();
+        } else {
+            childURI = childLink.getURI();
+        }
+        
         CorpusNode childCorpusNode = null;
         URL childURL = null;
         OurURL childOurURL = null;

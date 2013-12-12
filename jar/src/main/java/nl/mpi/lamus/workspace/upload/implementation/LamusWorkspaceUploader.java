@@ -56,21 +56,16 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private WorkspaceNodeFactory workspaceNodeFactory;
     private WorkspaceDao workspaceDao;
-    private TypecheckerConfiguration typecheckerConfiguration;
-    private FileTypeHandler fileTypeHandler;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceNodeFactory wsNodeFactory,
-        WorkspaceDao wsDao, TypecheckerConfiguration typecheckerConfig,
-        FileTypeHandler fileTypeHandler) {
+        WorkspaceDao wsDao) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
-        this.typecheckerConfiguration = typecheckerConfig;
-        this.fileTypeHandler = fileTypeHandler;
     }
 
     /**
@@ -185,11 +180,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             throw new WorkspaceException(errorMessage, workspaceID, ex);
         }
             
-        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
-        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
-        
+        //TODO get this in some other way
+            // the server in the URL should be replaced by the actual folder
+                // or there should be a different way of specifying the folders with special typechecker configurations
+//        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
+//        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
+
         StringBuilder message = new StringBuilder();
-        boolean isArchivable = this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
+        boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(topNodeArchiveURL, message);
         
         if(!isArchivable) {
             logger.error("File [" + filename + "] not archivable: " + message);

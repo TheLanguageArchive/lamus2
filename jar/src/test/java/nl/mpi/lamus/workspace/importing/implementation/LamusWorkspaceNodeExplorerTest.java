@@ -109,7 +109,7 @@ public class LamusWorkspaceNodeExplorerTest {
 
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
-                oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink, currentLink.getURI());
+                oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
                 
                 current++;
             }

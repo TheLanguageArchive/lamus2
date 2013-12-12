@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import java.io.File;
+import java.net.URL;
 
 /**
  * Class used to retrieve some configuration properties
@@ -29,9 +29,9 @@ public interface TypecheckerConfiguration {
     /**
      * Given an archive location, retrieves the
      * minimum acceptable judgement value for typechecked resources.
-     * @param item Location for the query
+     * @param urlToCheck Location for the query
      * @return Minimum acceptable value of TypecheckerJudgement for that location
      */
-    public TypecheckerJudgement getAcceptableJudgementForLocation(File item);
+    public TypecheckerJudgement getAcceptableJudgementForLocation(URL urlToCheck);
     
 }

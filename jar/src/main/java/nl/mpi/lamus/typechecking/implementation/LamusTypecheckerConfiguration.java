@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
-import java.io.File;
+import java.net.URL;
 import java.util.Map;
 import javax.annotation.Resource;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
@@ -37,12 +37,12 @@ public class LamusTypecheckerConfiguration implements TypecheckerConfiguration {
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
 
     /**
-     * @see TypecheckerConfiguration#getAcceptableJudgementForLocation(java.io.File)
+     * @see TypecheckerConfiguration#getAcceptableJudgementForLocation(java.net.URL)
      */
     @Override
-    public TypecheckerJudgement getAcceptableJudgementForLocation(File item) {
+    public TypecheckerJudgement getAcceptableJudgementForLocation(URL urlToCheck) {
         
-        if(customTypecheckerFolderToConfigFileMap.containsKey(item.getPath())) {
+        if(customTypecheckerFolderToConfigFileMap.containsKey(urlToCheck.getPath())) {
             
             //TODO this must be changed/improved
                 // use something similar to the old LAMUS

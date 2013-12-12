@@ -82,7 +82,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
             
-            linkImporterToUse.importNode(workspace, nodeToExplore, nodeDocument, currentLink, currentLink.getURI());
+            linkImporterToUse.importNode(workspace, nodeToExplore, nodeDocument, currentLink);
         }
     }
     

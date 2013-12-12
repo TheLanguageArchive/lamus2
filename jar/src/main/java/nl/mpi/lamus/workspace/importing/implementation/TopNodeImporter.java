@@ -64,7 +64,8 @@ public class TopNodeImporter {
      * @param childNodeArchiveURI archive URI of the current node
      */
     public void importNode(Workspace workspace, URI childNodeArchiveURI) throws WorkspaceImportException {
-        metadataNodeImporter.importNode(workspace, null, null, null, childNodeArchiveURI);
+        workspace.setTopNodeArchiveURI(childNodeArchiveURI);
+        metadataNodeImporter.importNode(workspace, null, null, null);
     }
     
 }

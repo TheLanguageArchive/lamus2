@@ -97,11 +97,11 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     /**
      * @see NodeImporter#importNode(
      *      nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference, java.net.URI)
+     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference)
      */
     @Override
     public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-	    Reference childLink, URI childArchiveURI) throws WorkspaceImportException {
+	    Reference childLink) throws WorkspaceImportException {
 
         workspace = ws;
         
@@ -121,6 +121,19 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	//TODO if so, it should be for the same workspace
 	//TODO also, the node file should already exist in the workspace directory
 
+        URI childArchiveURI;
+        
+        //TODO another way of doing this?
+        if(childLink == null) { // top node
+            childArchiveURI = ws.getTopNodeArchiveURI();
+        } else {
+            if(childLink instanceof HandleCarrier) {
+                childArchiveURI = ((HandleCarrier) childLink).getHandle();
+            } else {
+                childArchiveURI = childLink.getURI();
+            }
+        }
+        
         URL childArchiveURL = null;
         String childName = null;
         
