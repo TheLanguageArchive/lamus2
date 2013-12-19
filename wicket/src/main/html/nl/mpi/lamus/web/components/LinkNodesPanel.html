@@ -23,10 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:panel>
+            <h4>Link uploaded files</h4>
             <form wicket:id="linkNodesForm">
                 <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
-                <input type="submit" value="Link"/>
+                <input wicket:id="linkNodesButton" type="submit"/>
             </form>
+            <div>
+            <h4>Link and external file</h4>
+            <form wicket:id="linkExternalNodesForm">
+                <p>File location: </p>
+                <input wicket:id="externalNodeLocation" type="text" maxlength="200"/>
+                <input wicket:id="linkExternalNodeButton" type="submit"/>
+            </form>
+            </div>
         </wicket:panel>
     </body>
 </html>

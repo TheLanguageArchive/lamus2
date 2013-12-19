@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
-import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
+import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.markup.html.form.Form;

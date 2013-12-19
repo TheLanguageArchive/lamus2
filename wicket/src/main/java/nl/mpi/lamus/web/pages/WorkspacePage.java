@@ -185,9 +185,16 @@ public class WorkspacePage extends LamusPage {
                 
                 
                 
-                if(linkNodesPanel != null && selectedNode != null) {
+                if(linkNodesPanel != null) {
+                    
+                    if(selectedNode != null) {
 //                    WorkspaceTreeNode selectedNode = (WorkspaceTreeNode) wsTreePanel.getSelectedNodes().iterator().next();
-                    linkNodesPanel.setModelObject(selectedNode);
+                        linkNodesPanel.setModelObject(selectedNode);
+                        
+                    } else {
+                        linkNodesPanel.setModelObject(null);
+                        
+                    }
                 }
 
                 
