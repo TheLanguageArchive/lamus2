@@ -5,15 +5,16 @@
     <appender name="console" class="org.apache.log4j.ConsoleAppender"> 
 	<param name="Target" value="System.out"/> 
 	<layout class="org.apache.log4j.PatternLayout"> 
-	    <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/> 
+	    <param name="ConversionPattern" value="%d %p [%c{1}#%M:%L] - %m%n"/> 
 	</layout> 
     </appender> 
     <appender name="logfile" class="org.apache.log4j.DailyRollingFileAppender"> 
 	<param name="File" value="${log.home}/lamus2.log"/> 
 	<layout class="org.apache.log4j.PatternLayout"> 
-	    <param name="ConversionPattern" value="%d %-5p %c{1} - %m%n"/> 
+	    <param name="ConversionPattern" value="%d %p [%c#%M:%L] - %m%n"/> 
 	</layout> 
     </appender>
+    
     
     <!-- GENERIC TREE -->
     
@@ -31,6 +32,11 @@
     
     <logger name="nl.mpi.util">
 	<level value="info" />
+    </logger>
+    
+    <!-- LAMUS -->
+    <logger name="nl.mpi.lamus">
+        <level value="info" />
     </logger>
     
     <!-- WICKET -->
