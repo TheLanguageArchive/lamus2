@@ -139,4 +139,23 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         return node;
     }
+
+    @Override
+    public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL) {
+        
+        WorkspaceNode node = new LamusWorkspaceNode();
+        node.setWorkspaceID(workpaceID);
+        String displayValue = FilenameUtils.getName(FilenameUtils.getName(originURL.getPath()));
+        node.setName(displayValue);
+        node.setTitle(displayValue);
+        node.setOriginURL(originURL);
+        if(displayValue.endsWith("cmdi")) { // Try to guess type or leave as unknown?
+            node.setType(WorkspaceNodeType.METADATA);
+        } else {
+            node.setType(WorkspaceNodeType.RESOURCE);
+        }
+        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        
+        return node;
+    }
 }

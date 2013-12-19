@@ -101,7 +101,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
         final URI schemaLocation = new URI("http://some.location");
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
@@ -138,7 +138,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
         final URI schemaLocation = new URI("http://some.location");
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
@@ -235,9 +235,9 @@ public class LamusWorkspaceNodeFactoryTest {
         final URL originURL = new URL("file:/local/folder/file.txt");
         final URL workspaceURL = new URL("file:/workspace/folder/file.txt");
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String nodeMimetype = "text/plain";
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED; //TODO change this
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();
         expectedNode.setWorkspaceID(workspaceID);
@@ -252,6 +252,28 @@ public class LamusWorkspaceNodeFactoryTest {
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
                 workspaceID, originURL, workspaceURL, nodeMimetype, nodeStatus);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void newExternalNode() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        final URL originURL = new URL("http:/remote/folder/file.txt");
+        final String displayValue = FilenameUtils.getName(originURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        
+        WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setOriginURL(originURL);
+        expectedNode.setType(nodeType);
+        expectedNode.setStatus(nodeStatus);
+        
+        WorkspaceNode retrievedNode = factory.getNewExternalNode(workspaceID, originURL);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }

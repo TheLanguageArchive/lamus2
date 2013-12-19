@@ -21,7 +21,7 @@ import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.WsParentChildNodesAction;
+import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
@@ -49,7 +49,7 @@ public class LinkNodesActionTest {
     @Mock WorkspaceTreeNode mockChildNodeOne;
     @Mock WorkspaceTreeNode mockChildNodeTwo;
     
-    private WsParentChildNodesAction linkNodesAction;
+    private WsParentMultipleChildNodesAction linkNodesAction;
     
     private String expectedActionName = "Link";
     

@@ -751,6 +751,66 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void addNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.addNode(userID, mockChildNode);
+            fail("should have thrown an exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different frome expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void addNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.addNode(userID, mockChildNode);
+            fail("should have thrown an exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different frome expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void addNodeSuccessfully() throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(mockChildNode);
+        }});
+        
+        service.addNode(userID, mockChildNode);
+    }
+    
+    @Test
     public void linkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;

@@ -28,7 +28,7 @@ CREATE TABLE node (
         origin_url varchar(255),
         status varchar(255) NOT NULL,
         pid varchar(255),
-        format varchar(255) NOT NULL,
+        format varchar(255),
         PRIMARY KEY (workspace_node_id));
 
 CREATE TABLE node_link (

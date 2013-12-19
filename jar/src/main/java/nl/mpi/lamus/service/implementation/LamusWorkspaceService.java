@@ -157,6 +157,17 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         return this.workspaceDao.getChildWorkspaceNodes(nodeID);
     }
+
+    /**
+     * @see WorkspaceService#addNode(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void addNode(String userID, WorkspaceNode node) throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
+        
+        this.workspaceDao.addWorkspaceNode(node);
+    }
     
     /**
      * @see WorkspaceService#linkNodes(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)

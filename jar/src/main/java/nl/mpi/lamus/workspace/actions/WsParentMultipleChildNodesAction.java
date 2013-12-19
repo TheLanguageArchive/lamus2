@@ -28,7 +28,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * 
  * @author guisil
  */
-public interface WsParentChildNodesAction extends WsNodesAction {
+public interface WsParentMultipleChildNodesAction extends WsNodesAction {
     
     /**
      * Executes the action.

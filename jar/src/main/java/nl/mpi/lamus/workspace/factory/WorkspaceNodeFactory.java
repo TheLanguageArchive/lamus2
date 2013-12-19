@@ -81,4 +81,12 @@ public interface WorkspaceNodeFactory {
      */
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
             String mimetype, WorkspaceNodeStatus status);
+    
+    /**
+     * Creates an external WorkspaceNode with the given values
+     * 
+     * @param workpaceID ID of the workspace to which the node should be connected
+     * @return created WorkspaceNode object
+     */
+    public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL);
 }

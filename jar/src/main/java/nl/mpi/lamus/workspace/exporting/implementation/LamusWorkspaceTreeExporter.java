@@ -54,8 +54,10 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
         
         for(WorkspaceNode child : children) {
             
-            NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child);
-            childNodeExporter.exportNode(node, child);
+            if(!child.isExternal()) {
+                NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child);
+                childNodeExporter.exportNode(node, child);
+            }
         }
     }
     

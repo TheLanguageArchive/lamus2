@@ -108,6 +108,18 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
+        URI childNodeURI = null;
+        try {
+            if(childNode.getWorkspaceURL() != null) {
+                childNodeURI = childNode.getWorkspaceURL().toURI();
+            } else {
+                childNodeURI = childNode.getOriginURL().toURI();
+            }
+        } catch(URISyntaxException ex) {
+            String errorMessage = "Error getting URI of the child node " + childNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, workspaceID, ex);
+        }
+        
         MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
@@ -130,10 +142,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         try {
             if(childNode.isMetadata()) {
                 parentDocument.createDocumentMetadataReference(
-                        childNode.getWorkspaceURL().toURI(), childNode.getFormat());
+                        childNodeURI, childNode.getFormat());
             } else {
                 parentDocument.createDocumentResourceReference(
-                        childNode.getWorkspaceURL().toURI(), childNode.getType().toString(), childNode.getFormat());
+                        childNodeURI, childNode.getType().toString(), childNode.getFormat());
             }
             
             StreamResult parentStreamResult =
@@ -141,9 +153,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
             this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
                 
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
@@ -155,15 +164,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        WorkspaceNodeLink nodeLink = null;
-        try {
-            nodeLink =
-                    this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-                        parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childNode.getWorkspaceURL().toURI());
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error creating link between nodes " + parentNode.getWorkspaceNodeID() + " and " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        }
+        WorkspaceNodeLink nodeLink =
+                this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
+                    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childNodeURI);
         
         this.workspaceDao.addWorkspaceNodeLink(nodeLink);
     }
@@ -173,6 +176,18 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throws WorkspaceException {
         
         int workspaceID = parentNode.getWorkspaceID();
+        
+        URI childNodeURI = null;
+        try {
+            if(childNode.getWorkspaceURL() != null) {
+                childNodeURI = childNode.getWorkspaceURL().toURI();
+            } else {
+                childNodeURI = childNode.getOriginURL().toURI();
+            }
+        } catch(URISyntaxException ex) {
+            String errorMessage = "Error getting URI of the child node " + childNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, workspaceID, ex);
+        }
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -206,7 +221,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             URI uriToQuery = childNode.getArchiveURI();
             
             if(uriToQuery == null) {
-                uriToQuery = childNode.getWorkspaceURL().toURI();
+                uriToQuery = childNodeURI;
             }
             
             //TODO CHECK IF URI IS NULL OR NOT... HOW TO USE URL TO RETRIEVE REFERENCE?
@@ -219,9 +234,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
             this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
                 
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
         } catch (MetadataException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);

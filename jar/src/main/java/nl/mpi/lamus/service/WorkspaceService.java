@@ -115,6 +115,15 @@ public interface WorkspaceService extends Serializable {
     public Collection<WorkspaceNode> getChildNodes(int nodeID);
     
     /**
+     * Adds a node to the workspace.
+     * 
+     * @param userID ID of the user
+     * @param node node to be added to the workspace
+     */
+    public void addNode(String userID, WorkspaceNode node)
+            throws WorkspaceNotFoundException, WorkspaceAccessException;
+    
+    /**
      * Links two nodes in a workspace.
      * 
      * @param userID ID of the user

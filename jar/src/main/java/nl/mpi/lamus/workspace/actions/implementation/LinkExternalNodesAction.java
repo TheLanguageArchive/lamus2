@@ -16,40 +16,37 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
-import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
-import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.actions.WsParentSingleChildNodeAction;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Implementation of the action to link nodes.
+ * Implementation of the action to link an external node to the tree.
  * 
  * @author guisil
  */
-public class LinkNodesAction implements WsParentMultipleChildNodesAction {
+public class LinkExternalNodesAction implements WsParentSingleChildNodeAction {
 
-    private final String name = "Link";
+    private final String name = "Link External Node";
     
     
     /**
-     * @see WsParentMultipleChildNodesAction#getName()
+     * @see WsParentSingleChildNodeAction#getName()
      */
     @Override
     public String getName() {
         return this.name;
     }
-
-    /**
-     * @see WsParentMultipleChildNodesAction#execute(java.lang.String, nl.mpi.lamus.workspace.tree.WorkspaceTreeNode, java.util.Collection, nl.mpi.lamus.service.WorkspaceService)
-     */
+    
     @Override
-    public void execute(String userID, WorkspaceTreeNode parentNode, Collection<WorkspaceTreeNode> childNodes, WorkspaceService wsService)
+    public void execute(String userID, WorkspaceTreeNode parentNode, WorkspaceNode childNode, WorkspaceService wsService)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
-        for(WorkspaceTreeNode currentNode : childNodes) {
-            wsService.linkNodes(userID, parentNode, currentNode);
-        }
+        
+        wsService.addNode(userID, childNode);
+        wsService.linkNodes(userID, parentNode, childNode);
     }
 }
