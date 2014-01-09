@@ -41,14 +41,14 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
     @SpringBean
     private LamusSessionFactory sessionFactory;
 
-    @Autowired
-    @Qualifier("workspaceBaseDirectory")
-    private File workspaceBaseDirectory;
-    @Autowired
-    @Qualifier("workspaceUploadDirectoryName")
-    private String uploadFolderName;
+//    @Autowired
+//    @Qualifier("workspaceBaseDirectory")
+//    private File workspaceBaseDirectory;
+//    @Autowired
+//    @Qualifier("workspaceUploadDirectoryName")
+//    private String uploadFolderName;
     
-    private Folder uploadFolder = null;
+//    private Folder uploadFolder = null;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
 	this.sessionFactory = sessionFactory;
@@ -69,17 +69,17 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         //uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
         
         //TODO retrieve/construct this folder in some other way
-        if(uploadFolderName != null && !uploadFolderName.isEmpty()) {
-            uploadFolder = new Folder(new File(workspaceBaseDirectory, uploadFolderName));
-        }
+//        if(uploadFolderName != null && !uploadFolderName.isEmpty()) {
+//            uploadFolder = new Folder(new File(workspaceBaseDirectory, uploadFolderName));
+//        }
         
-        if(uploadFolder == null) {
-            //TODO have some other fallback value?
-            uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
-        }
+//        if(uploadFolder == null) {
+//            //TODO have some other fallback value?
+//            uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
+//        }
         
         // Ensure folder exists
-        uploadFolder.mkdirs();
+//        uploadFolder.mkdirs();
 
         getApplicationSettings().setUploadProgressUpdatesEnabled(true);
     }
@@ -99,9 +99,9 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
     /**
      * @return the folder for uploads
      */
-    public File getUploadFolder()
-    {
-        return uploadFolder;
-    }
+//    public File getUploadFolder()
+//    {
+//        return uploadFolder;
+//    }
 
 }

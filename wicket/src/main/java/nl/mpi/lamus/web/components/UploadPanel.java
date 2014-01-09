@@ -17,7 +17,14 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
@@ -80,26 +87,60 @@ public class UploadPanel extends Panel {
         protected void onSubmit() {
             final List<FileUpload> uploads = fileUploadField.getFileUploads();
             if (uploads != null) {
+                
+                Collection<File> copiedFiles = new ArrayList<File>();
+                
                 for (FileUpload upload : uploads) {
                     // Create a new file
-//                    File newFile = new File(getUploadFolder(UploadPage.this.model.getObject().getWorkspaceID()), upload.getClientFileName());
+                    File newFile = new File(workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID()), upload.getClientFileName());
 
-                    File newFile = new File(upload.getClientFileName());
+//                    File newFile = new File(upload.getClientFileName());
                     
                     if(newFile.isDirectory()) {
                         continue;
                     }
 
+                    
+                    //TODO Check if file exists already
+
                     try {
                         
-                        workspaceService.uploadFileIntoWorkspace(
-                                LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
-
+//                        workspaceService.uploadFileIntoWorkspace(
+//                                LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
+                        
+                        //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
+                        
+                        // Save to new file
+                        newFile.createNewFile();
+                        upload.writeTo(newFile);
+                        
+                        //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
+                        copiedFiles.add(newFile);
+                        
+                    
                         UploadPanel.this.info("saved file: " + upload.getClientFileName());
                     } catch (Exception e) {
                         throw new IllegalStateException("Unable to write file", e);
                     }
                 }
+                try {
+                    //TODO CALL SERVICE TO PROCESS UPLOADED FILES
+                    Map<File, String> failedUploads = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
+                    
+                    //TODO HAVE SOMETHING RETURNED? IF SOME FILES WERE NOT ACCEPTED, FOR INSTANCE?
+                    for(File failedFile : failedUploads.keySet()) {
+                        
+                        UploadPanel.this.error(failedUploads.get(failedFile));
+                    }
+                    
+                } catch (IOException ex) {
+//                    java.util.logging.Logger.getLogger(UploadPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    UploadPanel.this.error(ex.getMessage());
+                } catch (WorkspaceException ex) {
+//                    java.util.logging.Logger.getLogger(UploadPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    UploadPanel.this.error(ex.getMessage());
+                }
+                
             }
         }
     }

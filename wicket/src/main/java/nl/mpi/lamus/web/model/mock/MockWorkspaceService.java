@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -204,6 +205,11 @@ public class MockWorkspaceService implements WorkspaceTreeService {
 
     @Override
     public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
