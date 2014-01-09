@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -158,7 +159,7 @@ public interface WorkspaceService extends Serializable {
      * @param fileItems Files to be uploaded
      */
 //    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
-
+    
     /**
      * Returns the upload directory for the given workspace.
      * @param workspaceID ID of the workspace
@@ -176,6 +177,17 @@ public interface WorkspaceService extends Serializable {
      */
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
             throws IOException, TypeCheckerException, WorkspaceException;
+    
+    /**
+     * After the files are uploaded, process the files by performing
+     * typechecks and checking for links between them and the existing tree.
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @param uploadedFiles Files previously uploaded
+     * @return Map containing the files which could not be successfully uploaded and the reason for each
+     */
+    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
+            throws IOException, WorkspaceException;
     
     /**
      * Lists the unlinked nodes of the given workspace.

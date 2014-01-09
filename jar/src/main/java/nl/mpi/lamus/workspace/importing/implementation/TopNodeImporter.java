@@ -27,7 +27,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import org.springframework.beans.factory.annotation.Autowired;

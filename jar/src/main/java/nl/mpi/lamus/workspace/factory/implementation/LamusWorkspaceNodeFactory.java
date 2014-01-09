@@ -130,11 +130,15 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setOriginURL(originURL);
         node.setWorkspaceURL(workspaceURL);
         node.setFormat(mimetype);
-        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
+        
+//        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
+        if(workspaceURL.toString().endsWith("cmdi")) { //TODO THIS IS HERE TEMPORARILY WHILE THE TYPECHECKER DOESN'T RECOGNISE CMDI...
             node.setType(WorkspaceNodeType.METADATA);
         } else {
             node.setType(WorkspaceNodeType.RESOURCE);
         }
+        
+        
         node.setStatus(status);
         
         return node;

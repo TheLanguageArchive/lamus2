@@ -21,21 +21,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
-import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
-import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -56,16 +56,18 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private WorkspaceNodeFactory workspaceNodeFactory;
     private WorkspaceDao workspaceDao;
+    private WorkspaceUploadHelper workspaceUploadHelper;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceNodeFactory wsNodeFactory,
-        WorkspaceDao wsDao) {
+        WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
+        this.workspaceUploadHelper = wsUploadHelper;
     }
 
     /**
@@ -156,8 +158,6 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
-        this.workspaceDirectoryHandler.createUploadDirectoryForWorkspace(workspaceID);
-        
         File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, filename);
         URL uploadedFileURL;
         try {
@@ -202,6 +202,92 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 workspaceID, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
         
         this.workspaceDao.addWorkspaceNode(uploadedNode);
+    }
+
+    /**
+     * @see WorkspaceUploader#processUploadedFiles(int, java.util.Collection)
+     */
+    @Override
+    public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+            throws IOException, WorkspaceException {
+        
+        // map containing the files that for some reason are not sucessfully processed, along with the reason for it
+        Map<File, String> failedFiles = new HashMap<File, String>();
+        
+        // collection containing the nodes that were eventually uploaded, to be used later for checking eventual links between them
+        Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        
+        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
+        URL topNodeArchiveURL;
+        try {
+            topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+        } catch (UnknownNodeException ex) {
+            String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
+            logger.error(errorMessage, ex);
+            throw new WorkspaceException(errorMessage, workspaceID, ex);
+        }
+        
+        
+        for(File currentFile : uploadedFiles) {
+            
+            URL uploadedFileURL;
+            try {
+                uploadedFileURL = currentFile.toURI().toURL();
+            } catch (MalformedURLException ex) {
+                String errorMessage = "Error retrieving URL from file " + currentFile.getPath();
+                logger.error(errorMessage, ex);
+//                throw new WorkspaceException(errorMessage, workspaceID, ex);
+                failedFiles.put(currentFile, errorMessage);
+                continue;
+            }
+        
+            InputStream currentInputStream = FileUtils.openInputStream(currentFile);
+        
+            TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(currentInputStream, currentFile.getName());
+            currentInputStream.close();
+        
+            
+            
+            //TODO get this in some other way
+                // the server in the URL should be replaced by the actual folder
+                    // or there should be a different way of specifying the folders with special typechecker configurations
+//        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
+//        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
+
+            
+            
+            StringBuilder message = new StringBuilder();
+            boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(topNodeArchiveURL, message);
+            
+            if(!isArchivable) {
+                String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;
+                logger.error(errorMessage);
+//                throw new TypeCheckerException(message.toString(), null);
+                failedFiles.put(currentFile, errorMessage);
+                
+                //remove unarchivable file after adding it to the collection of failed uploads
+                FileUtils.forceDelete(currentFile);
+                
+                continue;
+            }
+            
+            String nodeMimetype = typecheckedResults.getCheckedMimetype();
+            
+            WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
+                    workspaceID, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+        
+            this.workspaceDao.addWorkspaceNode(uploadedNode);
+            
+            uploadedNodes.add(uploadedNode);
+        }
+        
+        
+        //TODO ADD LOGIC FOR SEARCHING LINKS
+        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
+        
+        
+        
+        return failedFiles;
     }
 
 }

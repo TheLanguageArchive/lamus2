@@ -28,7 +28,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ResourceReference;

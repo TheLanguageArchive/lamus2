@@ -13,8 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing.implementation;
+package nl.mpi.lamus.workspace.management.implementation;
 
+import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceNodeLinkManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -32,7 +34,7 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -47,6 +49,7 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -103,6 +106,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Mock File mockParentFile;
     @Mock StreamResult mockParentStreamResult;
+    @Mock File mockChildFile;
     
     
     public LamusWorkspaceNodeLinkManagerTest() {

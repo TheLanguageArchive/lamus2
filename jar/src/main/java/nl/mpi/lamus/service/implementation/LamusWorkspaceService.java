@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -32,7 +33,7 @@ import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -239,6 +240,15 @@ public class LamusWorkspaceService implements WorkspaceService {
             throws IOException, TypeCheckerException, WorkspaceException {
             
         this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
+    }
+    
+    /**
+     * @see WorkspaceService#processUploadedFiles(java.lang.String, int, java.util.Collection)
+     */
+    @Override
+    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
+            throws IOException, WorkspaceException {
+        return this.workspaceUploader.processUploadedFiles(workspaceID, uploadedFiles);
     }
     
     /**

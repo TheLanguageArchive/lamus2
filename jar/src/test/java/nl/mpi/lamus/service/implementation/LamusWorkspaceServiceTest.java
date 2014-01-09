@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -39,7 +40,7 @@ import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.*;
@@ -76,6 +77,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
     @Mock private InputStream mockInputStream;
     @Mock private Collection<File> mockUploadedFiles;
+    @Mock private Map<File, String> mockFailedUploads;
 
     
     public LamusWorkspaceServiceTest() {
@@ -747,6 +749,65 @@ public class LamusWorkspaceServiceTest {
             fail("An exception should have been thrown");
         } catch(WorkspaceException ex) {
             assertEquals("Exception thrown different from expected", workspaceException, ex);
+        }
+    }
+    
+    @Test
+    public void processUploadedFiles() throws IOException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
+                will(returnValue(mockFailedUploads));
+        }});
+        
+        Map<File, String> result = service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+        
+        assertEquals("Resulting map different from expected", mockFailedUploads, result);
+    }
+    
+    @Test
+    public void processUploadedFilesThrowsIOException() throws IOException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final IOException ioException = new IOException("some error message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
+                will(throwException(ioException));
+        }});
+        
+        try {
+            service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", ioException, ex);
+        }
+    }
+    
+    @Test
+    public void processUploadedFilesThrowsWorkspaceException() throws IOException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final WorkspaceException workspaceException = new WorkspaceException("some error message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
+                will(throwException(workspaceException));
+        }});
+        
+        try {
+            service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", workspaceException, ex);
         }
     }
     

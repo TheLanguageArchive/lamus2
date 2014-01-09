@@ -13,10 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing;
+package nl.mpi.lamus.workspace.management;
 
+import java.io.File;
+import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;

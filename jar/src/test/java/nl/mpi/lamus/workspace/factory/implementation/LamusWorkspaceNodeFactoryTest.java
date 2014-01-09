@@ -229,7 +229,7 @@ public class LamusWorkspaceNodeFactoryTest {
     }
     
     @Test
-    public void workspaceNodeFromFile() throws MalformedURLException, URISyntaxException {
+    public void resourceNodeFromFile() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
         final URL originURL = new URL("file:/local/folder/file.txt");
@@ -237,6 +237,34 @@ public class LamusWorkspaceNodeFactoryTest {
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String nodeMimetype = "text/plain";
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        
+        final WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setOriginURL(originURL);
+        expectedNode.setWorkspaceURL(workspaceURL);
+        expectedNode.setType(nodeType);
+        expectedNode.setFormat(nodeMimetype);
+        expectedNode.setStatus(nodeStatus);
+        
+        
+        WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
+                workspaceID, originURL, workspaceURL, nodeMimetype, nodeStatus);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void metadataNodeFromFile() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final URL originURL = new URL("file:/local/folder/file.cmdi");
+        final URL workspaceURL = new URL("file:/workspace/folder/file.cmdi");
+        final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String nodeMimetype = "text/x-cmdi+xml";
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();

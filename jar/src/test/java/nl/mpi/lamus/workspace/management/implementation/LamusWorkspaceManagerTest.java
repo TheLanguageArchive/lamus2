@@ -115,6 +115,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -189,6 +190,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -233,6 +235,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -275,6 +278,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -319,6 +323,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
+            oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));

@@ -88,6 +88,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceDao.addWorkspace(newWorkspace);
         try {
             workspaceDirectoryHandler.createWorkspaceDirectory(newWorkspace.getWorkspaceID());
+            workspaceDirectoryHandler.createUploadDirectoryForWorkspace(newWorkspace.getWorkspaceID());
         } catch(IOException ex) {
             String errorMessage = "Error creating workspace in node " + topArchiveNodeURI;
             logger.error(errorMessage, ex);

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Map;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import org.apache.commons.fileupload.FileItem;
@@ -53,5 +54,15 @@ public interface WorkspaceUploader {
      */
     public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
             throws IOException, TypeCheckerException, WorkspaceException;
+
     
+    /**
+     * After the files are uploaded, process the files by performing
+     * typechecks and checking for links between them and the existing tree.
+     * @param workspaceID ID of the workspace
+     * @param uploadedFiles Collection of previously uploaded files
+     * @return Map containing the files which could not be successfully uploaded and the reason for each
+     */
+    public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+            throws IOException, WorkspaceException;
 }
