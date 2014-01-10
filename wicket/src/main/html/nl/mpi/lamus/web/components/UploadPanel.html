@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <legend>Upload form with progress bar and HTML5 &lt;input type="file" <strong>multiple</strong> /&gt;, so it can upload more than one file in browsers which support <em>multiple</em> attribute</legend>
                     <p>
                         <label for="upload">File</label>
-                        <input wicket:id="fileInput" type="file" multiple="multiple" webkitdirectory=""/>
+                        <input wicket:id="fileInput" type="file" multiple="multiple" webkitdirectory="" directory=""/>
                     </p>
                     <input type="submit" value="Upload!"/>
                     <span wicket:id="progress">[[upload progressbar]]</span>
