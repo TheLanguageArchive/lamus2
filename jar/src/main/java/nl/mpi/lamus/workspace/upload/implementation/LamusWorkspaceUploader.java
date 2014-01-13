@@ -245,7 +245,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
             TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(currentInputStream, currentFile.getName());
             currentInputStream.close();
-        
+            
             
             
             //TODO get this in some other way
@@ -254,7 +254,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 //        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
 //        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
 
-            
+        
             
             StringBuilder message = new StringBuilder();
             boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(topNodeArchiveURL, message);

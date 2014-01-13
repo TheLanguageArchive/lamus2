@@ -83,7 +83,8 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
                 
                 for(WorkspaceNode innerNode : nodesToCheck) {
                     
-                    if(refURI.toString().contains(FilenameUtils.getName(innerNode.getWorkspaceURL().toString()))) {
+//                    if(refURI.toString().contains(FilenameUtils.getName(innerNode.getWorkspaceURL().toString()))) {
+                    if(innerNode.getWorkspaceURL().toString().contains(refURI.toString())) { //check if the node URL contains the relative path that comes in the link reference
                         
                         try {
                             ref.setURI(innerNode.getWorkspaceURL().toURI());

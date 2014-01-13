@@ -98,16 +98,16 @@ public class LamusWorkspaceUploadHelperTest {
         
         final int workspaceID = 1;
         
-        final String childFilename = "child.txt";
-        final File childFile = new File("/workspaces/" + workspaceID + "/upload/" + childFilename);
-        final URI childFileURI = childFile.toURI();
-        final URL childFileURL = childFileURI.toURL();
-
         final String parentFilename = "parent.txt";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
         
-        final URI childReferenceURI = new URI(FilenameUtils.getBaseName(parentFilename) + File.pathSeparator + childFilename);
+        final String childFilename = "child.txt";
+        final File childFile = new File("/workspaces/" + workspaceID + "/upload/" + FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
+        final URI childFileURI = childFile.toURI();
+        final URL childFileURL = childFileURI.toURL();
+
+        final URI childReferenceURI = new URI(FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
         
         Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
         nodesToCheck.add(mockChildNode);
