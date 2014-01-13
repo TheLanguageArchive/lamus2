@@ -17,13 +17,16 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import nl.mpi.lamus.exception.TypeCheckerException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
@@ -88,11 +91,13 @@ public class UploadPanel extends Panel {
             final List<FileUpload> uploads = fileUploadField.getFileUploads();
             if (uploads != null) {
                 
+                File uploadDirectory = workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID());
+                
                 Collection<File> copiedFiles = new ArrayList<File>();
                 
                 for (FileUpload upload : uploads) {
                     // Create a new file
-                    File newFile = new File(workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID()), upload.getClientFileName());
+                    File newFile = new File(uploadDirectory, upload.getClientFileName());
 
 //                    File newFile = new File(upload.getClientFileName());
                     
@@ -101,26 +106,63 @@ public class UploadPanel extends Panel {
                     }
 
                     
+                    //TODO a better way of deciding this? typechecker?
+                    if(newFile.getName().endsWith(".zip")) {
+                    
+                        try {
+                        
+                            byte[] buffer = new byte[1024];
+
+                            InputStream newInputStream = upload.getInputStream();
+                            ZipInputStream zipInputStream = new ZipInputStream(newInputStream);
+                            ZipEntry nextEntry = zipInputStream.getNextEntry();
+                            while(nextEntry != null) {
+                                File entryFile = new File(uploadDirectory, nextEntry.getName());
+                                if(nextEntry.isDirectory()) {
+                                    entryFile.mkdirs();
+                                    nextEntry = zipInputStream.getNextEntry();
+                                    continue;
+                                }
+                                OutputStream outputStream = new FileOutputStream(entryFile);
+                                int len;
+                                while((len = zipInputStream.read(buffer)) > 0) {
+                                    outputStream.write(buffer, 0, len);
+                                }
+                                outputStream.close();
+                                nextEntry = zipInputStream.getNextEntry();
+                                copiedFiles.add(entryFile);
+                            }
+
+                            zipInputStream.close();
+
+                            UploadPanel.this.info("saved contents of file: " + upload.getClientFileName());
+                        } catch(IOException ex) {
+                            UploadPanel.this.error(ex.getMessage());
+                        }
+                    } else {
+                    
+                    
                     //TODO Check if file exists already
 
-                    try {
-                        
+                        try {
+
 //                        workspaceService.uploadFileIntoWorkspace(
 //                                LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
-                        
-                        //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
-                        
-                        // Save to new file
-                        newFile.createNewFile();
-                        upload.writeTo(newFile);
-                        
-                        //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
-                        copiedFiles.add(newFile);
-                        
-                    
-                        UploadPanel.this.info("saved file: " + upload.getClientFileName());
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Unable to write file", e);
+
+                            //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
+
+                            // Save to new file
+                            newFile.createNewFile();
+                            upload.writeTo(newFile);
+
+                            //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
+                            copiedFiles.add(newFile);
+
+
+                            UploadPanel.this.info("saved file: " + upload.getClientFileName());
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Unable to write file", e);
+                        }
                     }
                 }
                 try {
@@ -134,10 +176,8 @@ public class UploadPanel extends Panel {
                     }
                     
                 } catch (IOException ex) {
-//                    java.util.logging.Logger.getLogger(UploadPanel.class.getName()).log(Level.SEVERE, null, ex);
                     UploadPanel.this.error(ex.getMessage());
                 } catch (WorkspaceException ex) {
-//                    java.util.logging.Logger.getLogger(UploadPanel.class.getName()).log(Level.SEVERE, null, ex);
                     UploadPanel.this.error(ex.getMessage());
                 }
                 
