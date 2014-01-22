@@ -15,12 +15,16 @@
  */
 package nl.mpi.lamus.spring;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import nl.mpi.bcarchive.typecheck.FileType;
+import nl.mpi.handle.util.HandleMatcher;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.util.HandleUtil;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -59,4 +63,14 @@ public class LamusBeans {
         return new Ams2Bridge();
     }
     
+    
+    @Bean
+    public HandleMatcher handleMatcher() throws FileNotFoundException, IOException {
+        return new HandleMatcher();
+    }
+    
+    @Bean
+    public HandleUtil metadataApiHandleUtil() {
+        return new HandleUtil();
+    }
 }

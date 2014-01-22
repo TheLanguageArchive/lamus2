@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.factory;
 
 import java.net.URI;
 import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -73,13 +74,14 @@ public interface WorkspaceNodeFactory {
      * Creates a WorkspaceNode with the given values.
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
+     * @param archiveURI URI (handle) from the archive, if the node comes from there
      * @param originURL URL of the original file location (mostly for uploaded files)
      * @param workspaceURL URL of the file location in the workspace
      * @param mimetype Mimetype of the file
      * @param status Status of the node
-     * @return 
+     * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
             String mimetype, WorkspaceNodeStatus status);
     
     /**
@@ -89,4 +91,14 @@ public interface WorkspaceNodeFactory {
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL);
+    
+    /**
+     * Creates an external WorkspaceNode which is a pointer to an archive node.
+     * 
+     * @param workspaceID ID of the workspace to which the node should be connected
+     * @param archiveNode CorpusNode object corresponding to the archive node
+     * @param archiveURL URL of the node in the archive
+     * @return created WorkspaceNode object
+     */
+    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URL archiveURL);
 }

@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -109,17 +108,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        URI childNodeURI = null;
-        try {
-            if(childNode.getWorkspaceURL() != null) {
-                childNodeURI = childNode.getWorkspaceURL().toURI();
-            } else {
-                childNodeURI = childNode.getOriginURL().toURI();
-            }
-        } catch(URISyntaxException ex) {
-            String errorMessage = "Error getting URI of the child node " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        }
+        URI childNodeURI = getNodeWorkspaceURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -165,6 +154,17 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
+        linkNodesOnlyInDb(parentNode, childNode);
+    }
+    
+    /**
+     * @see WorkspaceNodeLinkManager#linkNodesOnlyInDb(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void linkNodesOnlyInDb(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
+        
+        URI childNodeURI = getNodeWorkspaceURI(childNode);
+        
         WorkspaceNodeLink nodeLink =
                 this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
                     parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childNodeURI);
@@ -172,23 +172,16 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         this.workspaceDao.addWorkspaceNodeLink(nodeLink);
     }
 
+    /**
+     * @see WorkspaceNodeLinkManager#unlinkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
             throws WorkspaceException {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        URI childNodeURI = null;
-        try {
-            if(childNode.getWorkspaceURL() != null) {
-                childNodeURI = childNode.getWorkspaceURL().toURI();
-            } else {
-                childNodeURI = childNode.getOriginURL().toURI();
-            }
-        } catch(URISyntaxException ex) {
-            String errorMessage = "Error getting URI of the child node " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        }
+        URI childNodeURI = getNodeWorkspaceURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -249,6 +242,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         this.workspaceDao.deleteWorkspaceNodeLink(parentNode.getWorkspaceID(), parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
     }
 
+    /**
+     * @see WorkspaceNodeLinkManager#unlinkNodeFromAllParents(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void unlinkNodeFromAllParents(WorkspaceNode childNode)
             throws WorkspaceException {
@@ -261,8 +257,26 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
     }
     
+    
     private void throwWorkspaceException(String errorMessage, int workspaceID, Exception cause) throws WorkspaceException {
         logger.error(errorMessage, cause);
         throw new WorkspaceException(errorMessage, workspaceID, cause);
+    }
+    
+    private URI getNodeWorkspaceURI(WorkspaceNode node) throws WorkspaceException {
+        
+        URI nodeURI = null;
+        try {
+            if(node.getWorkspaceURL() != null) {
+                nodeURI = node.getWorkspaceURL().toURI();
+            } else {
+                nodeURI = node.getOriginURL().toURI();
+            }
+        } catch(URISyntaxException ex) {
+            String errorMessage = "Error getting URI of the node " + node.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, node.getWorkspaceID(), ex);
+        }
+        
+        return nodeURI;
     }
 }

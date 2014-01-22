@@ -17,14 +17,13 @@ package nl.mpi.lamus.workspace.factory.implementation;
 
 import java.net.URI;
 import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspacePidValue;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import org.apache.commons.io.FilenameUtils;
@@ -61,10 +60,6 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 
         return node;
     }
-
-    
-    //TODO CREATING NEW NODES WITH ALREADY THE ARCHIVE NODE URI???
-    
     
     /**
      * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL,
@@ -115,11 +110,10 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URL, java.net.URL,
-     *      nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URL originURL, URL workspaceURL,
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
         String mimetype, WorkspaceNodeStatus status) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
@@ -138,12 +132,16 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             node.setType(WorkspaceNodeType.RESOURCE);
         }
         
+        node.setArchiveURI(archiveURI);
         
         node.setStatus(status);
         
         return node;
     }
 
+    /**
+     * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URL)
+     */
     @Override
     public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL) {
         
@@ -153,7 +151,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setName(displayValue);
         node.setTitle(displayValue);
         node.setOriginURL(originURL);
-        if(displayValue.endsWith("cmdi")) { // Try to guess type or leave as unknown?
+        if(originURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
             node.setType(WorkspaceNodeType.METADATA);
         } else {
             node.setType(WorkspaceNodeType.RESOURCE);
@@ -162,4 +160,27 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         return node;
     }
+
+    /**
+     * @see WorkspaceNodeFactory#getNewExternalNodeFromArchive(int, nl.mpi.archiving.corpusstructure.core.CorpusNode, java.net.URL)
+     */
+    @Override
+    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URL archiveURL) {
+        
+        WorkspaceNode node = new LamusWorkspaceNode();
+        node.setWorkspaceID(workspaceID);
+        node.setName(archiveNode.getName());
+        node.setTitle(archiveNode.getName());
+        node.setArchiveURI(archiveNode.getNodeURI());
+        node.setArchiveURL(archiveURL);
+        node.setOriginURL(archiveURL);
+        if(archiveURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
+            node.setType(WorkspaceNodeType.METADATA);
+        } else {
+            node.setType(WorkspaceNodeType.RESOURCE);
+        }
+        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        
+        return node;
+   }
 }

@@ -17,41 +17,44 @@
 package nl.mpi.lamus.workspace.upload.implementation;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
+import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
-import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WorkspaceUploadHelper
+ * 
  * @author guisil
  */
 @Component
 public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
 
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadHelper.class);
+    
     private MetadataAPI metadataAPI;
-    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private WorkspaceUploadReferenceHandler workspaceUploadReferenceHandler;
     
     @Autowired
-    public LamusWorkspaceUploadHelper(MetadataAPI mdAPI, WorkspaceNodeLinkManager wsNodeLinkManager) {
+    public LamusWorkspaceUploadHelper(MetadataAPI mdAPI,
+            WorkspaceUploadReferenceHandler wsUploadReferenceHandler) {
         this.metadataAPI = mdAPI;
-        this.workspaceNodeLinkManager = wsNodeLinkManager;
+        this.workspaceUploadReferenceHandler = wsUploadReferenceHandler;
     }
 
+    /**
+     * @see WorkspaceUploadHelper#assureLinksInWorkspace(int, java.util.Collection)
+     */
     @Override
     public void assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
@@ -62,48 +65,41 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
                 continue;
             }
             
-            MetadataDocument document;
+            MetadataDocument document = null;
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
             } catch (IOException ex) {
-                throw new UnsupportedOperationException("exception not handled yet");
+                logger.error("Document could not be loaded for " + node.getWorkspaceURL(), ex);
+                continue;
             } catch (MetadataException ex) {
-                throw new UnsupportedOperationException("exception not handled yet");
+                logger.error("Document could not be loaded for " + node.getWorkspaceURL(), ex);
+                continue;
             }
             
             if(!(document instanceof ReferencingMetadataDocument)) {
                 continue;
             }
             
-            List<Reference> references = ((ReferencingMetadataDocument)document).getDocumentReferences();
+            ReferencingMetadataDocument referencingDocument = (ReferencingMetadataDocument) document;
+            Collection<Reference> failedLinks = new ArrayList<Reference>();
             
-            for(Reference ref : references) {
+            workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, node, referencingDocument, failedLinks);
             
-                URI refURI = ref.getURI();
+            if(!failedLinks.isEmpty()) {
                 
-                for(WorkspaceNode innerNode : nodesToCheck) {
-                    
-//                    if(refURI.toString().contains(FilenameUtils.getName(innerNode.getWorkspaceURL().toString()))) {
-                    if(innerNode.getWorkspaceURL().toString().contains(refURI.toString())) { //check if the node URL contains the relative path that comes in the link reference
-                        
-                        try {
-                            ref.setURI(innerNode.getWorkspaceURL().toURI());
-                        } catch (URISyntaxException ex) {
-                            throw new UnsupportedOperationException("exception not handled yet");
-                        }
-                        
-                        try {
-                            workspaceNodeLinkManager.linkNodes(node, innerNode);
-                        } catch (WorkspaceException ex) {
-                            throw new UnsupportedOperationException("exception not handled yet");
-                        }
-                        
-                        break;
-                    }
-                }
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                logger.error("Some of the uploaded nodes could not be properly linked");
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
+                //TODO SHOW ERROR
             }
         }
-        
     }
     
 }

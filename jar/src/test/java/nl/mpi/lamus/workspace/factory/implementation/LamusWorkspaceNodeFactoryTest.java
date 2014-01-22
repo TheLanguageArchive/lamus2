@@ -19,17 +19,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
@@ -57,6 +53,8 @@ public class LamusWorkspaceNodeFactoryTest {
     @Mock TestReferencingMetadataDocumentHandleCarrier mockTestReferencingMetadataDocumentHandleCarrier;
     @Mock MetadataDocumentType mockMetadataDocumentType;
     @Mock TestReferenceHandleCarrier mockTestReferenceHandleCarrier;
+    
+    @Mock CorpusNode mockCorpusNode;
     
     public LamusWorkspaceNodeFactoryTest() {
     }
@@ -241,6 +239,7 @@ public class LamusWorkspaceNodeFactoryTest {
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();
         expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setArchiveURI(null);
         expectedNode.setName(displayValue);
         expectedNode.setTitle(displayValue);
         expectedNode.setOriginURL(originURL);
@@ -251,7 +250,8 @@ public class LamusWorkspaceNodeFactoryTest {
         
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
-                workspaceID, originURL, workspaceURL, nodeMimetype, nodeStatus);
+                workspaceID, null, originURL,
+                workspaceURL, nodeMimetype, nodeStatus);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }
@@ -260,6 +260,7 @@ public class LamusWorkspaceNodeFactoryTest {
     public void metadataNodeFromFile() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
+        final URI archiveURI = new URI(UUID.randomUUID().toString());
         final URL originURL = new URL("file:/local/folder/file.cmdi");
         final URL workspaceURL = new URL("file:/workspace/folder/file.cmdi");
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
@@ -271,6 +272,7 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setWorkspaceID(workspaceID);
         expectedNode.setName(displayValue);
         expectedNode.setTitle(displayValue);
+        expectedNode.setArchiveURI(archiveURI);
         expectedNode.setOriginURL(originURL);
         expectedNode.setWorkspaceURL(workspaceURL);
         expectedNode.setType(nodeType);
@@ -279,7 +281,8 @@ public class LamusWorkspaceNodeFactoryTest {
         
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
-                workspaceID, originURL, workspaceURL, nodeMimetype, nodeStatus);
+                workspaceID, archiveURI, originURL,
+                workspaceURL, nodeMimetype, nodeStatus);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }
@@ -302,6 +305,37 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setStatus(nodeStatus);
         
         WorkspaceNode retrievedNode = factory.getNewExternalNode(workspaceID, originURL);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void newExternalNodeFromArchive() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final URI archiveURI = new URI(UUID.randomUUID().toString());
+        final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(archiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        
+        WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setArchiveURI(archiveURI);
+        expectedNode.setArchiveURL(archiveURL);
+        expectedNode.setOriginURL(archiveURL);
+        expectedNode.setType(nodeType);
+        expectedNode.setStatus(nodeStatus);
+        
+        context.checking(new Expectations() {{
+            
+            exactly(2).of(mockCorpusNode).getName(); will(returnValue(displayValue));
+            oneOf(mockCorpusNode).getNodeURI(); will(returnValue(archiveURI));
+        }});
+        
+        WorkspaceNode retrievedNode = factory.getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, archiveURL);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }

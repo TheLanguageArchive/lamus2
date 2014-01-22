@@ -16,21 +16,21 @@
  */
 package nl.mpi.lamus.workspace.upload;
 
-import java.util.Collection;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import java.net.URI;
+import java.net.URL;
 
 /**
- * Provides some helping functionality to the file upload procedure.
+ * Provides some functionality that interacts with the Metadata API.
  * 
  * @author guisil
  */
-public interface WorkspaceUploadHelper {
-    
+public interface MetadataApiBridge {
+   
     /**
-     * Checks if there are links among the nodes in the given collection
-     * and adds them in the database.
-     * @param workspaceID ID of the workspace
-     * @param nodesToCheck Collection of nodes to be checked
+     * Retrieves the self link (handle) from the given file, if it has one.
+     * 
+     * @param fileURL URL of the file to check
+     * @return URI corresponding to the self link, null if none is found
      */
-    public void assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck);
+    public URI getSelfHandleFromFile(URL fileURL);
 }

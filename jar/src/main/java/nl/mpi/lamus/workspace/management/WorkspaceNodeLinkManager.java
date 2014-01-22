@@ -15,8 +15,6 @@
  */
 package nl.mpi.lamus.workspace.management;
 
-import java.io.File;
-import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -47,6 +45,15 @@ public interface WorkspaceNodeLinkManager {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceException;
+    
+    /**
+     * Links, only in the workspace DB, two nodes.
+     * 
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     */
+    public void linkNodesOnlyInDb(WorkspaceNode parentNode, WorkspaceNode childNode)
             throws WorkspaceException;
     
     /**

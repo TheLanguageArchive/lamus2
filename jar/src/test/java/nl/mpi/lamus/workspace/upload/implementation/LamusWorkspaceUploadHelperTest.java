@@ -24,13 +24,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
+import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.apache.commons.io.FilenameUtils;
@@ -43,7 +45,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 
 /**
@@ -59,15 +60,20 @@ public class LamusWorkspaceUploadHelperTest {
     private WorkspaceUploadHelper workspaceUploadHelper;
     
     @Mock MetadataAPI mockMetadataAPI;
-    @Mock WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
+    @Mock WorkspaceUploadReferenceHandler mockWorkspaceUploadReferenceHandler;
     
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
+    @Mock WorkspaceNode mockArchiveExternalNode;
+    @Mock WorkspaceNode mockExternalNode;
     @Mock Reference mockChildReference;
 
     @Mock ReferencingMetadataDocument mockParentDocument;
+    @Mock MetadataDocument mockChildDocument;
     @Mock File mockParentFile;
     @Mock File mockChildFile;
+    
+    @Mock CorpusNode mockCorpusNode;
     
     public LamusWorkspaceUploadHelperTest() {
     }
@@ -83,43 +89,30 @@ public class LamusWorkspaceUploadHelperTest {
     @Before
     public void setUp() {
         
-        workspaceUploadHelper = new LamusWorkspaceUploadHelper(mockMetadataAPI, mockWorkspaceNodeLinkManager);
+        workspaceUploadHelper = new LamusWorkspaceUploadHelper(mockMetadataAPI, mockWorkspaceUploadReferenceHandler);
     }
     
     @After
     public void tearDown() {
     }
 
-    /**
-     * Test of assureLinksInWorkspace method, of class LamusWorkspaceUploadHelper.
-     */
+    
     @Test
-    public void assureLinksInWorkspace() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
+    public void assureLinksRelativePathReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
         final int workspaceID = 1;
         
-        final String parentFilename = "parent.txt";
+        final String parentFilename = "parent.cmdi";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
         
-        final String childFilename = "child.txt";
-        final File childFile = new File("/workspaces/" + workspaceID + "/upload/" + FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
-        final URI childFileURI = childFile.toURI();
-        final URL childFileURL = childFileURI.toURL();
-
-        final URI childReferenceURI = new URI(FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
-        
-        Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
-        
-        final List<Reference> parentDocumentReferences = new ArrayList<Reference>();
-        parentDocumentReferences.add(mockChildReference);
         
         context.checking(new Expectations() {{
             
             // loop
-            
             
             // first iteration - not metadata, so jumps to next iteration
             oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
@@ -128,29 +121,153 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
-            oneOf(mockParentDocument).getDocumentReferences(); will(returnValue(parentDocumentReferences));
             
-            // loop through the references trying to find a match
-            //TODO what if the reference URI is a handle?
-            oneOf(mockChildReference).getURI(); will(returnValue(childReferenceURI));
-            
-            // match
-            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
-            //change reference to point to the current location
-            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
-            oneOf(mockChildReference).setURI(childFileURI);
-            //add link in database
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
-            
-            // out of the loop
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
+                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
         }});
-        
-        
-        //TODO check links in the metadata files
-        //TODO if any of those links is part of the collection, add the link in the database
-        
-        //TODO check links also from the workspace tree to the collection of files? maybe later?
         
         workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
     }
+    
+    @Test
+    public void assureLinksPidMetadataReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+        
+        final int workspaceID = 1;
+        
+        final String parentFilename = "parent.cmdi";
+        final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
+        final URL parentFileURL = parentFileURI.toURL();
+        
+        final String childFilename = "child.cmdi";
+        final File childFile = new File("/workspaces/" + workspaceID + "/upload/" + FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
+        final URI childFileURI = childFile.toURI();
+        final URL childFileURL = childFileURI.toURL();
+
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockChildNode);
+        nodesToCheck.add(mockParentNode);
+        
+        context.checking(new Expectations() {{
+            
+            // loop
+            
+            // first iteration - metadata, so continues in this iteration
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(childFileURL); will(returnValue(mockChildDocument));
+            
+            // second iteration - metadata, so continues in this iteration
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
+                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+        }});
+        
+        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+    }
+    
+    @Test
+    public void assureLinksPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+        
+        final int workspaceID = 1;
+        
+        final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
+        
+        final String parentFilename = "parent.cmdi";
+        final URI parentFileURI = new URI(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
+        final URL parentFileURL = parentFileURI.toURL();
+
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockChildNode);
+        nodesToCheck.add(mockParentNode);
+        
+        context.checking(new Expectations() {{
+            
+            // loop
+            
+            // first iteration - not metadata, so jumps to next iteration
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            // second iteration - metadata, so continues in this iteration
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
+                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+        }});
+        
+        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+    }
+    
+    @Test
+    public void assureLinksArchiveExternalPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+        
+        final int workspaceID = 1;
+        
+        final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
+        
+        final String parentFilename = "parent.cmdi";
+        final URL parentFileURL = new URL(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
+
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockChildNode);
+        nodesToCheck.add(mockParentNode);
+        
+        context.checking(new Expectations() {{
+            
+            // loop
+            
+            // first iteration - not metadata, so jumps to next iteration
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            // second iteration - metadata, so continues in this iteration
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
+                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+        }});
+        
+        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+    }
+    
+    @Test
+    public void assureLinksExternalReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        
+        final String parentFilename = "parent.txt";
+        final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
+        final URL parentFileURL = parentFileURI.toURL();
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockChildNode);
+        nodesToCheck.add(mockParentNode);
+        
+        context.checking(new Expectations() {{
+            
+            // loop
+            
+            // first iteration - not metadata, so jumps to next iteration
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            // second iteration - metadata, so continues in this iteration
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));            
+            
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
+                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+        }});
+        
+        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+    }
+    
+    
+    //TODO Exception situations
+    //TODO Exception situations
 }

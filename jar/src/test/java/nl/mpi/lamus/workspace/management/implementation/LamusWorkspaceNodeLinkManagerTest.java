@@ -232,6 +232,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
             
+            exactly(2).of(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
 //            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -281,6 +282,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
             
+            exactly(2).of(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
 //            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -330,6 +332,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
             
+            exactly(2).of(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
 //            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -588,6 +591,37 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     //TODO URISyntaxException
+    
+    @Test
+    public void linkNodesOnlyInDb() throws MalformedURLException, URISyntaxException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final int childNodeID = 3;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
+        final URI childURI = childURL.toURI();
+                
+        context.checking(new Expectations() {{
+            
+            exactly(2).of(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID, childURI);
+                will(returnValue(mockWorkspaceNodeLink));
+            
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
+        }});
+        
+        nodeLinkManager.linkNodesOnlyInDb(mockParentNode, mockChildNode);
+    }
+    
+    
+    
+    //TODO URISyntaxException
+    
+    
+    
     
     @Test
     public void unlinkNodesWithURI() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {

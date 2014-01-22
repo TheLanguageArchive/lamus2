@@ -23,10 +23,11 @@ import java.util.Collection;
 import java.util.Map;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import org.apache.commons.fileupload.FileItem;
 
 /**
- *
+ * Provides functionality to upload files into the workspace,
+ * including the processing of those files after the upload.
+ * 
  * @author guisil
  */
 public interface WorkspaceUploader {
@@ -37,13 +38,6 @@ public interface WorkspaceUploader {
      * @return Upload directory
      */
     public File getWorkspaceUploadDirectory(int workspaceID);
-    
-    /**
-     * Uploads the given collection of files into the given workspace
-     * @param workspaceID ID of the workspace
-     * @param fileItems Collection of file items to be uploaded
-     */
-//    public void uploadFiles(int workspaceID, Collection<FileItem> fileItems);
     
     /**
      * Given an InputStream and the filename, this method triggers a
