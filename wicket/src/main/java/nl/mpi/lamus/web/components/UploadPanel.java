@@ -166,12 +166,9 @@ public class UploadPanel extends Panel {
                     }
                 }
                 try {
-                    //TODO CALL SERVICE TO PROCESS UPLOADED FILES
                     Map<File, String> failedUploads = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
                     
-                    //TODO HAVE SOMETHING RETURNED? IF SOME FILES WERE NOT ACCEPTED, FOR INSTANCE?
                     for(File failedFile : failedUploads.keySet()) {
-                        
                         UploadPanel.this.error(failedUploads.get(failedFile));
                     }
                     
