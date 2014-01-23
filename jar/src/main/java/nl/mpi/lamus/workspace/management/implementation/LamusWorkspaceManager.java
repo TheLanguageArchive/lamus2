@@ -22,13 +22,12 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -57,7 +56,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private final WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceExportRunner workspaceExportRunner;
-    private final DateTimeHelper dateTimeHelper;
+    private final CalendarHelper calendarHelper;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
@@ -66,14 +65,14 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     @Autowired
     public LamusWorkspaceManager(ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
         WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
-        DateTimeHelper dtHelper) {
+        CalendarHelper calendarHelper) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
         this.workspaceImportRunner = wsImportRunner;
         this.workspaceExportRunner = wsExportRunner;
-        this.dateTimeHelper = dtHelper;
+        this.calendarHelper = calendarHelper;
     }
     
     /**
@@ -221,7 +220,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
         if(workspaceDirectoryHandler.workspaceDirectoryExists(workspace)) {
-            Calendar calendarNow = Calendar.getInstance();
+            Calendar calendarNow = calendarHelper.getCalendarInstance();
             Date now = calendarNow.getTime();
             workspace.setSessionStartDate(now);
             calendarNow.add(Calendar.DATE, numberOfDaysOfInactivityAllowedSinceLastSession);
@@ -244,7 +243,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     
     private void finaliseWorkspace(Workspace workspace, boolean submitSuccessful) {
         
-        Date endDate = dateTimeHelper.getCurrentDateTime();
+        Date endDate = calendarHelper.getCalendarInstance().getTime();
         workspace.setSessionEndDate(endDate);
         workspace.setEndDate(endDate);
         

@@ -27,12 +27,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
-import nl.mpi.lamus.util.DateTimeHelper;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
@@ -46,6 +45,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -63,8 +63,14 @@ public class LamusWorkspaceManagerTest {
     @Mock private WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock private WorkspaceImportRunner mockWorkspaceImportRunner;
     @Mock private WorkspaceExportRunner mockWorkspaceExportRunner;
+    @Mock private CalendarHelper mockCalendarHelper;
+    
     @Mock private Future<Boolean> mockFuture;
-    @Mock private DateTimeHelper mockDateTimeHelper;
+    @Mock private Workspace mockWorkspace;
+    @Mock private Calendar mockCalendar;
+
+    
+    private final int numberOfDaysOfInactivityAllowedSinceLastSession = 60;
     
     public LamusWorkspaceManagerTest() {
     }
@@ -81,8 +87,9 @@ public class LamusWorkspaceManagerTest {
     public void setUp() {
         this.manager = new LamusWorkspaceManager(
                 mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao,
-                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner, mockWorkspaceExportRunner,
-                mockDateTimeHelper);
+                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner, mockWorkspaceExportRunner, mockCalendarHelper);
+        
+        ReflectionTestUtils.setField(manager, "numberOfDaysOfInactivityAllowedSinceLastSession", numberOfDaysOfInactivityAllowedSinceLastSession);
     }
     
     @After
@@ -379,38 +386,32 @@ public class LamusWorkspaceManagerTest {
     
     @Test
     public void openExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, IOException {
+        
         final int workspaceID = 1;
-        final String userID = "someUser";
-        final int topNodeID = 1;
-        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
-        final Date startDate = Calendar.getInstance().getTime();
-        final long usedStorageSpace = 0L;
-        final long maxStorageSpace = 10000000L;
-        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
-        final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
-        final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+        
+        final Calendar now = Calendar.getInstance();
+        final Date firstDate = new Date(now.getTime().getTime());
+        final Calendar nowClone = (Calendar) now.clone();
+        nowClone.add(Calendar.DATE, numberOfDaysOfInactivityAllowedSinceLastSession);
+        final Date secondDate = new Date(nowClone.getTime().getTime());
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
-            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             //check if the workspace directory exists
-            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(workspaceToRetrieve); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDirectoryHandler).workspaceDirectoryExists(mockWorkspace); will(returnValue(Boolean.TRUE));
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(now));
+            oneOf(mockWorkspace).setSessionStartDate(firstDate);
+            oneOf(mockWorkspace).setSessionEndDate(secondDate);
             
-            oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(workspaceToRetrieve);
+            oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(mockWorkspace);
             //update as well status?
-//            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(workspaceToRetrieve));
+
         }});
         
         Workspace result = manager.openWorkspace(workspaceID);
         assertNotNull("Returned workspace should not be null", result);
-        assertEquals("Returned workspace is different from expected", result, workspaceToRetrieve);
-        
-        assertFalse("", startDate.equals(workspaceToRetrieve.getSessionStartDate()));
-        assertNotNull(workspaceToRetrieve.getSessionEndDate());
+        assertEquals("Returned workspace is different from expected", result, mockWorkspace);
     }
     
     @Test
@@ -479,47 +480,38 @@ public class LamusWorkspaceManagerTest {
     
     @Test
     public void submitWorkspaceSuccessful() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+
         final int workspaceID = 1;
-        final String userID = "someUser";
-        final int topNodeID = 1;
-        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
-        final Date startDate = startCalendar.getTime();
-        final Date endDate = Calendar.getInstance().getTime();
-        final long usedStorageSpace = 0L;
-        final long maxStorageSpace = 10000000L;
-        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
         final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.SUBMITTED;
-        final String initialMessage = "workspace is in good shape";
         final String successfullySubmittedMessage = "workspace was successfully submitted";
-        final String archiveInfo = "still not sure what this would be";
+        
+        final Calendar endCalendar = Calendar.getInstance();
+        final Date endDate = endCalendar.getTime();
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                initialStatus, initialMessage, archiveInfo);
-        
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
-                successfullySubmittedStatus, successfullySubmittedMessage, archiveInfo);
-        
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
-            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
+            
+            oneOf(mockWorkspace).setSessionEndDate(endDate);
+            oneOf(mockWorkspace).setEndDate(endDate);
+            oneOf(mockWorkspace).setStatus(successfullySubmittedStatus);
+            oneOf(mockWorkspace).setMessage(successfullySubmittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
         }});
+        
         
         manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
     }
@@ -556,7 +548,6 @@ public class LamusWorkspaceManagerTest {
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
         final Date startDate = startCalendar.getTime();
-        final Date endDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
@@ -564,6 +555,9 @@ public class LamusWorkspaceManagerTest {
         final String initialMessage = "workspace is in good shape";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
+        
+        final Calendar endCalendar = Calendar.getInstance();
+        final Date endDate = new Date(endCalendar.getTime().getTime());
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -588,7 +582,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             
-            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
         }});
@@ -613,7 +607,6 @@ public class LamusWorkspaceManagerTest {
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
         final Date startDate = startCalendar.getTime();
-        final Date endDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
@@ -621,6 +614,9 @@ public class LamusWorkspaceManagerTest {
         final String initialMessage = "workspace is in good shape";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
+        
+        final Calendar endCalendar = Calendar.getInstance();
+        final Date endDate = new Date(endCalendar.getTime().getTime());
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -645,7 +641,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             
-            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
         }});
@@ -670,7 +666,6 @@ public class LamusWorkspaceManagerTest {
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
         final Date startDate = startCalendar.getTime();
-        final Date endDate = Calendar.getInstance().getTime();
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
@@ -678,6 +673,9 @@ public class LamusWorkspaceManagerTest {
         final String initialMessage = "workspace is in good shape";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
+        
+        final Calendar endCalendar = Calendar.getInstance();
+        final Date endDate = endCalendar.getTime();
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -701,7 +699,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockDateTimeHelper).getCurrentDateTime(); will(returnValue(endDate));
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
         }});

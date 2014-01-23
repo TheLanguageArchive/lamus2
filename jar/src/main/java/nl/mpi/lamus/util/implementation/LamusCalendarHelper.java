@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,23 +17,19 @@
 package nl.mpi.lamus.util.implementation;
 
 import java.util.Calendar;
-import java.util.Date;
-import nl.mpi.lamus.util.DateTimeHelper;
+import nl.mpi.lamus.util.CalendarHelper;
 import org.springframework.stereotype.Component;
 
 /**
- * @see DateTimeHelper
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Utility class used to improve testability of operations involving Calendar and Date.
+ * 
+ * @author guisil
  */
 @Component
-public class LamusDateTimeHelper implements DateTimeHelper {
+public class LamusCalendarHelper implements CalendarHelper {
 
-    /**
-     * @see DateTimeHelper#getCurrentDateTime()
-     */
     @Override
-    public Date getCurrentDateTime() {
-        return Calendar.getInstance().getTime();
+    public Calendar getCalendarInstance() {
+        return Calendar.getInstance();
     }
-    
 }
