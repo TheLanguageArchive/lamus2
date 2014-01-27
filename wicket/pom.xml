@@ -57,11 +57,11 @@
 	</dependency>
 		
 		<!-- LOGGING DEPENDENCIES - SLF4J -->
-<!--	<dependency>
+	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-api</artifactId>
-	    <version>${slf4j.version}</version>
-	</dependency>-->
+	    <version>1.7.5</version>
+	</dependency>
 
 	<dependency>
 	    <groupId>org.slf4j</groupId>

@@ -286,7 +286,8 @@ public class WorkspacePage extends LamusPage {
         
         
         
-        
-        linkNodesPanel.render();
+        if(linkNodesPanel != null) {
+            linkNodesPanel.render();
+        }
     }
 }

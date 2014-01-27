@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.components;
 
 import java.io.IOException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
@@ -73,6 +74,30 @@ public final class ButtonPanel extends Panel {
                 }
             };
             add(requestStorageButton);
+            
+            final Button submitWorkspaceButton = new Button("submitWorkspacebutton") {
+
+                @Override
+                public void onSubmit() {
+                    try {
+                        workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
+                    } catch (WorkspaceNotFoundException ex) {
+                        Session.get().error(ex.getMessage());
+                    } catch (WorkspaceAccessException ex) {
+                        Session.get().error(ex.getMessage());
+                    } catch (WorkspaceExportException ex) {
+                        Session.get().error(ex.getMessage());
+                    }
+                    
+                    
+                    //TODO SHOW SUCCESS MESSAGE
+                    
+                    
+                    setResponsePage(pagesProvider.getIndexPage());
+                }
+            };
+            submitWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));
+            add(submitWorkspaceButton);
             
             final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {
                 
