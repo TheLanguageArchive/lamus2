@@ -112,6 +112,11 @@ public class GeneralNodeExporter implements NodeExporter {
             //TODO should the checksum be created at some other point (when the node is actually changed, for instance)
                 // so it takes less time at this point?
             // node hasn't changed
+            
+            // It's possible that a metadata document was changed just to adjust the reference to the workspace URL, for instance
+                // and not necessarily because of a real change
+            //TODO Maybe there should be a better way of comparing the files
+            
             if(workspaceChecksum.equals(archiveChecksum)) {
                 return;
             }
@@ -156,7 +161,7 @@ public class GeneralNodeExporter implements NodeExporter {
                     // the file itself shouldn't have changed, otherwise it's a replaced node
         }
         
-        //TODO Update node in corpusstructure?
+        //TODO Update node in corpusstructure? - CRAWLER
     }
     
     private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {

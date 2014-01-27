@@ -484,8 +484,12 @@ public class LamusWorkspaceManagerTest {
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
-        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.SUBMITTED;
-        final String successfullySubmittedMessage = "workspace was successfully submitted";
+        
+        final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
+        final String submittedMessage = "workspace was submitted";
+        
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final String successfullySubmittedMessage = "data was successfully move to the archive";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
@@ -495,6 +499,10 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspace).setStatus(submittedStatus);
+            oneOf(mockWorkspace).setMessage(submittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
@@ -508,6 +516,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setEndDate(endDate);
             oneOf(mockWorkspace).setStatus(successfullySubmittedStatus);
             oneOf(mockWorkspace).setMessage(successfullySubmittedMessage);
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
         }});
@@ -551,8 +560,10 @@ public class LamusWorkspaceManagerTest {
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
+        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
         final String initialMessage = "workspace is in good shape";
+        final String intermediateMessage = "workspace was submitted";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
         
@@ -565,6 +576,10 @@ public class LamusWorkspaceManagerTest {
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
                 initialStatus, initialMessage, archiveInfo);
         
+        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
+                intermediateStatus, intermediateMessage, archiveInfo);
+        
         final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
                 errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
@@ -575,6 +590,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
@@ -610,8 +627,10 @@ public class LamusWorkspaceManagerTest {
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
+        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
         final String initialMessage = "workspace is in good shape";
+        final String intermediateMessage = "workspace was submitted";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
         
@@ -624,6 +643,10 @@ public class LamusWorkspaceManagerTest {
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
                 initialStatus, initialMessage, archiveInfo);
         
+        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
+                intermediateStatus, intermediateMessage, archiveInfo);
+        
         final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
                 errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
@@ -634,6 +657,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
@@ -669,8 +694,10 @@ public class LamusWorkspaceManagerTest {
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
+        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
         final String initialMessage = "workspace is in good shape";
+        final String intermediateMessage = "workspace was submitted";
         final String errorSubmittingMessage = "there were errors when submitting the workspace";
         final String archiveInfo = "still not sure what this would be";
         
@@ -683,6 +710,10 @@ public class LamusWorkspaceManagerTest {
                 startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
                 initialStatus, initialMessage, archiveInfo);
         
+        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
+                intermediateStatus, intermediateMessage, archiveInfo);
+        
         final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
                 startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
                 errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
@@ -692,6 +723,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);

@@ -108,7 +108,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        URI childNodeURI = getNodeWorkspaceURI(childNode);
+        URI childNodeURI = getNodeURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -163,7 +163,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     @Override
     public void linkNodesOnlyInDb(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
         
-        URI childNodeURI = getNodeWorkspaceURI(childNode);
+        URI childNodeURI = getNodeURI(childNode);
         
         WorkspaceNodeLink nodeLink =
                 this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
@@ -181,7 +181,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        URI childNodeURI = getNodeWorkspaceURI(childNode);
+        URI childNodeURI = getNodeURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -263,14 +263,14 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         throw new WorkspaceException(errorMessage, workspaceID, cause);
     }
     
-    private URI getNodeWorkspaceURI(WorkspaceNode node) throws WorkspaceException {
+    private URI getNodeURI(WorkspaceNode node) throws WorkspaceException {
         
         URI nodeURI = null;
         try {
             if(node.getWorkspaceURL() != null) {
                 nodeURI = node.getWorkspaceURL().toURI();
             } else {
-                nodeURI = node.getOriginURL().toURI();
+                nodeURI = node.getArchiveURI();
             }
         } catch(URISyntaxException ex) {
             String errorMessage = "Error getting URI of the node " + node.getWorkspaceNodeID();

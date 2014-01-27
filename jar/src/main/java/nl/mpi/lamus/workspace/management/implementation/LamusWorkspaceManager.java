@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -169,6 +170,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         //TODO workspaceFactory (or something else) - set workspace as submitted
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
+        workspace.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace.setMessage("workspace was submitted");
+        workspaceDao.updateWorkspaceStatusMessage(workspace);
+        
         workspaceExportRunner.setWorkspace(workspace);
 //        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         
@@ -181,12 +186,12 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         try {
             isSuccessful = exportResult.get();
-        } catch (InterruptedException iex) {
+        } catch(InterruptedException iex) {
             String errorMessage = "Interruption in thread while submitting workspace " + workspaceID;
             logger.error(errorMessage, iex);
             finaliseWorkspace(workspace, Boolean.FALSE);
             throw new WorkspaceExportException(errorMessage, workspaceID, iex);
-        } catch (ExecutionException eex) {
+        } catch(ExecutionException eex) {
             
             //TODO Find a better way of handling these exceptions
                 // In most cases this WorkspaceImportException is wrapping an ExecutionException
@@ -199,6 +204,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             finaliseWorkspace(workspace, Boolean.FALSE);
             throw new WorkspaceExportException(errorMessage, workspaceID, eex);
         }
+        
+        //TODO CATCH CrawlerException?
+        
+        
         
         if(!isSuccessful) {
             String errorMessage = "Workspace submission failed for workspace " + workspaceID;
@@ -248,8 +257,11 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspace.setEndDate(endDate);
         
         if(submitSuccessful) {
-            workspace.setStatus(WorkspaceStatus.SUBMITTED);
-            workspace.setMessage("workspace was successfully submitted");
+            workspace.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
+            workspace.setMessage("data was successfully move to the archive");
+            
+            //TODO remove data from DB (nodes and links?)
+            workspaceDao.cleanWorkspaceNodesAndLinks(workspace);
         } else {
             workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
             workspace.setMessage("there were errors when submitting the workspace");

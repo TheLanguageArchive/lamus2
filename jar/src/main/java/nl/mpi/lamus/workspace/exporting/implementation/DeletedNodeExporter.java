@@ -82,19 +82,28 @@ public class DeletedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
+        if(currentNode.getArchiveURL() == null) { //Assuming that if archiveURL is null, so is archiveURI
+            
+            // if there is no archiveURL, the node was never in the archive, so it can actually be deleted;
+            // to make it easier, that node can simply be skipped and eventually will be deleted together with the whole workspace folder
+            return;
+            
+        }
+        
+        
         //TODO What to do with this URL? Update it and use to inform the crawler of the change?
         
         URL trashedNodeArchiveURL = this.trashCanHandler.moveFileToTrashCan(currentNode);
         currentNode.setArchiveURL(trashedNodeArchiveURL);
         
-        CorpusNode node;
-        try {
-            node = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
-        } catch (UnknownNodeException ex) {
-            String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
-        }
+//        CorpusNode node;
+//        try {
+//            node = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+//        } catch (UnknownNodeException ex) {
+//            String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+//            logger.error(errorMessage, ex);
+//            throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), ex);
+//        }
         
         //TODO Is this needed? Isn't LAMUS only supposed to change things in the filesystem, leaving the database changes for the crawler?
 //        this.corpusstructureWriter.deleteNode(node);

@@ -16,6 +16,10 @@
 package nl.mpi.lamus.workspace.exporting;
 
 import java.util.concurrent.Callable;
+import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
+import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
+import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
+import nl.mpi.lamus.archive.CrawlerBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -36,15 +40,18 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
     private DeletedNodesExportHandler deletedNodesExportHandler;
+    private CrawlerBridge crawlerBridge;
     
     private Workspace workspace;
 //    private boolean keepUnlinkedFiles;
 
     @Autowired
-    public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory, DeletedNodesExportHandler dnExportHandler) {
+    public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
+            DeletedNodesExportHandler dnExportHandler, CrawlerBridge crawlerBridge) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
         this.deletedNodesExportHandler = dnExportHandler;
+        this.crawlerBridge = crawlerBridge;
     }
     
     /**
@@ -69,7 +76,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * @return true if export is successful
      */
     @Override
-    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException {
+    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException {
         
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)
@@ -121,6 +128,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         //TODO cleanup WS DB / filesystem
         
         //TODO call crawler
+        Crawler crawler = crawlerBridge.setUpCrawler();
+        HandlerUtilities handlerUtilities = crawlerBridge.setUpHandlerUtilities();
+        crawler.startCrawler(topNode.getArchiveURI(), handlerUtilities);
+        
         
         //TODO fix permissions
         

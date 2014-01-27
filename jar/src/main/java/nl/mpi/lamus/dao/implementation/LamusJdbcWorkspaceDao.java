@@ -333,8 +333,13 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
         
-        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE user_id = :user_id";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("user_id", userID);
+        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE user_id = :user_id"
+                + " AND status NOT IN (:submitted_status, :error_status, :success_status)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("user_id", userID)
+                .addValue("submitted_status", WorkspaceStatus.SUBMITTED.toString())
+                .addValue("error_status", WorkspaceStatus.DATA_MOVED_ERROR.toString())
+                .addValue("success_status", WorkspaceStatus.DATA_MOVED_SUCCESS.toString());
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
         
@@ -719,6 +724,25 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
         
         logger.info("Node link between nodes " + parentNodeID + " and " + childNodeID + ", in workspace " + workspaceID + " was deleted");
+    }
+
+    /**
+     * @see WorkspaceDao#cleanWorkspaceNodesAndLinks(nl.mpi.lamus.workspace.model.Workspace)
+     */
+    @Override
+    public void cleanWorkspaceNodesAndLinks(Workspace workspace) {
+        
+        logger.debug("Cleaning nodes and links belonging to workspace " + workspace.getWorkspaceID());
+        
+        String deleteLinksSql =
+                "DELETE FROM node_link WHERE parent_workspace_node_id in (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
+        String deleteNodesSql =
+                "DELETE FROM node WHERE workspace_id = :workspace_id;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(deleteLinksSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteNodesSql, namedParameters);
+        
+        logger.info("Nodes and links belonging to workspace " + workspace.getWorkspaceID() + " were deleted");
     }
 
     

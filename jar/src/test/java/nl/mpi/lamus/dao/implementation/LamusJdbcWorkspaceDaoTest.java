@@ -403,6 +403,60 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void listExistingWorkspacesForUserOneSubmitted() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.SUBMITTED);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void listExistingWorkspacesForUserOneError() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void listExistingWorkspacesForUserOneSuccess() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
     public void listNonExistinWorkspacesForUser() {
         
         String userID = "user1";
@@ -1169,6 +1223,37 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertEquals("Not should be set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode.getStatus());
     }
     
+    @Test
+    public void cleanWorkspaceNodesAndLinks() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfWorkspaces = countRowsInTable("workspace");
+        int initialNumberOfNodes = countRowsInTable("node");
+        int initialNumberOfLinks = countRowsInTable("node_link");
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
+        setNodeAsParentAndInsertLinkIntoDatabase(node1, node2);
+        
+        int intermediateNumberOfWorkspaces = countRowsInTable("workspace");
+        int intermediateNumberOfNodes = countRowsInTable("node");
+        int intermediateNumberOfLinks = countRowsInTable("node_link");
+        
+        assertEquals("Intermediate number of workspaces different from expected", initialNumberOfWorkspaces + 1, intermediateNumberOfWorkspaces);
+        assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 2, intermediateNumberOfNodes);
+        assertEquals("Intermediate number of links different from expected", initialNumberOfLinks + 1, intermediateNumberOfLinks);
+        
+        this.workspaceDao.cleanWorkspaceNodesAndLinks(ws);
+        
+        int finalNumberOfWorkspaces = countRowsInTable("workspace");
+        int finalNumberOfNodes = countRowsInTable("node");
+        int finalNumberOfLinks = countRowsInTable("node_link");
+        
+        assertEquals("Final number of workspaces different from expected", intermediateNumberOfWorkspaces, finalNumberOfWorkspaces);
+        assertEquals("Final number of nodes different from expected", initialNumberOfNodes, finalNumberOfNodes);
+        assertEquals("Final number of links different from expected", initialNumberOfLinks, finalNumberOfLinks);
+    }
+    
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);
@@ -1353,6 +1438,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         node.setStatus(WorkspaceNodeStatus.NODE_DELETED);
     }
     
+    private void updateWorkspaceStatusInDb(Workspace workspace) {
+        String updateWorkspaceSql = "UPDATE workspace SET status = ? WHERE workspace_id = ?";
+        jdbcTemplate.update(updateWorkspaceSql, workspace.getStatus().toString(), workspace.getWorkspaceID());
+    }
 }
 
 class WorkspaceRowMapper implements RowMapper<Workspace> {

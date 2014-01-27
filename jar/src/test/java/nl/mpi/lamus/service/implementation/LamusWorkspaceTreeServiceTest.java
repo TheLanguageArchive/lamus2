@@ -26,6 +26,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -50,6 +51,7 @@ public class LamusWorkspaceTreeServiceTest {
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
+    @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
     
     public LamusWorkspaceTreeServiceTest() {
     }
@@ -66,7 +68,7 @@ public class LamusWorkspaceTreeServiceTest {
     public void setUp() {
         service = new LamusWorkspaceTreeService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinkManager);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager, mockWorkspaceNodeManager);
     }
     
     @After

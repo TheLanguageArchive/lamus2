@@ -216,4 +216,10 @@ public interface WorkspaceDao {
      * @param childNodeID ID of the child node
      */
     public void deleteWorkspaceNodeLink(int workspaceID, int parentNodeID, int childNodeID);
+    
+    /**
+     * Cleans the information regarding nodes and links of a workspace.
+     * @param workspace 
+     */
+    public void cleanWorkspaceNodesAndLinks(Workspace workspace);
 }

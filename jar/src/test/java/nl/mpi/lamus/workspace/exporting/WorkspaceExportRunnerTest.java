@@ -26,6 +26,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
+import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
+import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
+import nl.mpi.lamus.archive.CrawlerBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -65,8 +69,12 @@ public class WorkspaceExportRunnerTest {
 //    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock NodeExporterFactory mockNodeExporterFactory;
     @Mock DeletedNodesExportHandler mockDeletedNodesExportHandler;
+    @Mock CrawlerBridge mockCrawlerBridge;
     
     @Mock NodeExporter mockNodeExporter;
+    
+    @Mock Crawler mockCrawler;
+    @Mock HandlerUtilities mockHandlerUtilities;
     
     private WorkspaceExportRunner workspaceExportRunner;
     
@@ -83,7 +91,7 @@ public class WorkspaceExportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockDeletedNodesExportHandler);
+        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockDeletedNodesExportHandler, mockCrawlerBridge);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -96,7 +104,7 @@ public class WorkspaceExportRunnerTest {
      * Test of call method, of class WorkspaceExportRunner.
      */
     @Test
-    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException {
+    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException {
         
         final int workspaceID = 1;
         
@@ -147,6 +155,14 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
                 
             oneOf(mockDeletedNodesExportHandler).exploreDeletedNodes(mockWorkspace);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockCrawlerBridge).setUpCrawler(); will(returnValue(mockCrawler));
+                when(exporting.isNot("finished"));
+            oneOf(mockCrawlerBridge).setUpHandlerUtilities(); will(returnValue(mockHandlerUtilities));
+                when(exporting.isNot("finished"));
+                        
+            oneOf(mockCrawler).startCrawler(testChildArchiveURI, mockHandlerUtilities);
                 then(exporting.is("finished"));
         }});
         
@@ -194,6 +210,12 @@ public class WorkspaceExportRunnerTest {
         
         assertTrue("Execution result should have been successful (true)", result);
     }
+    
+    
+    //TODO EXCEPTIONS
+    
+    
+    
     
     private boolean executeRunner() throws InterruptedException, ExecutionException {
         

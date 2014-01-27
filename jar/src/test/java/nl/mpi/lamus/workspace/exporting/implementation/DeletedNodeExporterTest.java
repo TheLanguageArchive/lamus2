@@ -92,7 +92,7 @@ public class DeletedNodeExporterTest {
 
 
     @Test
-    public void exportNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
@@ -115,11 +115,13 @@ public class DeletedNodeExporterTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
             oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
             
 //            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
             
@@ -144,49 +146,68 @@ public class DeletedNodeExporterTest {
     }
     
     @Test
-    public void exportUnknownNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
-        final int testWorkspaceNodeID = 10;
-        final String testBaseName = "node.txt";
-        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        final URL testNodeArchiveURL = testNodeOriginURL;
-        
-        final String testNodeDisplayValue = "node";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-        final String testNodeFormat = "text/plain";
-        final URI testNodeSchemaLocation = new URI("http://some.location");
 
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
-        
-        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
-        
-        final String expectedErrorMessage = "Node not found in archive database for URI " + testNode.getArchiveURI();
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
-        
         context.checking(new Expectations() {{
-            
-            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
-            
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
 
-            //exception caught
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(null));
         }});
         
-        try {
-            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
-            fail("should have thrown exception");
-        } catch(WorkspaceExportException ex) {
-            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals("Cause different from expected", expectedException, ex.getCause());
-        }
+        
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        
     }
+    
+//    @Test
+//    public void exportUnknownNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+//        
+//        final int testWorkspaceNodeID = 10;
+//        final String testBaseName = "node.txt";
+//        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
+//        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+//        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+//        final URL testNodeArchiveURL = testNodeOriginURL;
+//        
+//        final String testNodeDisplayValue = "node";
+//        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+//        final String testNodeFormat = "text/plain";
+//        final URI testNodeSchemaLocation = new URI("http://some.location");
+//
+//        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
+//                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
+//        
+//        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
+//        
+//        final String expectedErrorMessage = "Node not found in archive database for URI " + testNode.getArchiveURI();
+//        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+//            
+//            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+//            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+//            
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
+//
+//            //exception caught
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//        }});
+//        
+//        try {
+//            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+//            fail("should have thrown exception");
+//        } catch(WorkspaceExportException ex) {
+//            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+//            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+//            assertEquals("Cause different from expected", expectedException, ex.getCause());
+//        }
+//    }
     
     @Test
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {

@@ -36,6 +36,7 @@ import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
@@ -56,14 +57,17 @@ public class LamusWorkspaceService implements WorkspaceService {
     protected final WorkspaceDao workspaceDao;
     private final WorkspaceUploader workspaceUploader;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private final WorkspaceNodeManager workspaceNodeManager;
 
     public LamusWorkspaceService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
-            WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager) {
+            WorkspaceDao wsDao, WorkspaceUploader wsUploader,
+            WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager) {
         this.nodeAccessChecker = aChecker;
         this.workspaceManager = wsManager;
         this.workspaceDao = wsDao;
         this.workspaceUploader = wsUploader;
         this.workspaceNodeLinkManager = wsnLinkManager;
+        this.workspaceNodeManager = wsNodeManager;
     }
     
     
@@ -203,8 +207,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
         
-        this.workspaceNodeLinkManager.unlinkNodeFromAllParents(node);
-        this.workspaceDao.setWorkspaceNodeAsDeleted(node.getWorkspaceID(), node.getWorkspaceNodeID());
+        this.workspaceNodeManager.deleteNodesRecursively(node);
     }
 
     /**

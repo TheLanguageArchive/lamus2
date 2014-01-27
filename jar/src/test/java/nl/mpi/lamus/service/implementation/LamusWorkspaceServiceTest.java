@@ -43,11 +43,11 @@ import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
+import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import org.apache.commons.fileupload.FileItem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -70,6 +70,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
+    @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
     
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
@@ -95,7 +96,7 @@ public class LamusWorkspaceServiceTest {
     public void setUp() {
         service = new LamusWorkspaceService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinkManager);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager, mockWorkspaceNodeManager);
     }
     
     @After
@@ -1048,10 +1049,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockChildNode);
-            oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+            oneOf(mockWorkspaceNodeManager).deleteNodesRecursively(mockChildNode);
         }});
         
         service.deleteNode(userID, mockChildNode);
@@ -1114,7 +1112,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockChildNode); will(throwException(expectedException));
+            oneOf(mockWorkspaceNodeManager).deleteNodesRecursively(mockChildNode); will(throwException(expectedException));
         }});
         
         try {

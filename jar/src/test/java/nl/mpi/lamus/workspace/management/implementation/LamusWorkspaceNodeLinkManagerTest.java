@@ -316,7 +316,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
-            oneOf(mockChildNode).getOriginURL(); will(returnValue(childURL));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
@@ -719,7 +719,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
-            oneOf(mockChildNode).getOriginURL(); will(returnValue(childURL));
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
