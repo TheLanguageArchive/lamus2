@@ -18,14 +18,11 @@ package nl.mpi.lamus.web.model.mock;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -49,7 +46,6 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     private URL originURL;
     private WorkspaceNodeStatus status;
     private String format;
-    private Collection<WorkspaceParentNodeReference> parentNodesReferences;
 
     private List<WorkspaceTreeNode> children= Collections.emptyList();
     
@@ -210,24 +206,6 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     @Override
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    @Override
-    public Collection<WorkspaceParentNodeReference> getParentNodesReferences() {
-        return Collections.unmodifiableCollection(parentNodesReferences);
-    }
-
-    @Override
-    public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodesReferences) {
-        this.parentNodesReferences = parentNodesReferences;
-    }
-    
-    @Override
-    public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
-        if(parentNodesReferences == null) {
-            parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();
-        }
-        parentNodesReferences.add(parentNodeReference);
     }
 
     @Override

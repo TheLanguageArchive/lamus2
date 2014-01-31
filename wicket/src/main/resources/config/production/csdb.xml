@@ -62,7 +62,7 @@
     <!-- CSDB created from factory -->
     <bean id="corpusStructureProvider" factory-bean="providerFactory" factory-method="createCorpusStructureProvider" />
     
-    <bean id="nodeResolver" class="nl.mpi.archiving.corpusstructure.provider.db.service.impl.CorpusStructureProviderNodeResolver" />
+    <!--<bean id="nodeResolver" class="nl.mpi.archiving.corpusstructure.provider.db.service.impl.CorpusStructureProviderNodeResolver" />-->
     
     <bean id="createWorkspaceTreeProvider" class="nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider">
 	<constructor-arg ref="corpusStructureProvider" />

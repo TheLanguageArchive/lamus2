@@ -41,7 +41,7 @@ public class UnlinkedRootWorkspaceNode extends UnlinkedWorkspaceNode {
     
     @Override
     public List<WorkspaceTreeNode> getChildren() {
-        Collection<WorkspaceNode> children = this.workspaceDao.listUnlinkedNodes(this.getWorkspaceID());
+        Collection<WorkspaceNode> children = this.workspaceDao.getUnlinkedNodes(this.getWorkspaceID());
 	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<WorkspaceTreeNode>(children.size());
 	for (WorkspaceNode child : children) {
 	    UnlinkedWorkspaceNode treeNode = new UnlinkedWorkspaceNode(

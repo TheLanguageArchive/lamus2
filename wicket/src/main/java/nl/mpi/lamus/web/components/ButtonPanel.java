@@ -96,7 +96,9 @@ public final class ButtonPanel extends Panel {
                     setResponsePage(pagesProvider.getIndexPage());
                 }
             };
-            submitWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));
+            submitWorkspaceButton.add(new AttributeModifier("onclick",
+                    "if(!confirm('If there are unlinked nodes in the workspace,"
+                    + " they will be deleted. Are you sure you want to proceed?'))return false;"));
             add(submitWorkspaceButton);
             
             final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {

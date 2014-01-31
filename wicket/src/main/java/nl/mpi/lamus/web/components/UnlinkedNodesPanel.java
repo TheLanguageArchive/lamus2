@@ -190,7 +190,7 @@ public class UnlinkedNodesPanel extends GenericPanel<Workspace> {
 
         columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("ID"), "workspaceNodeID"));
         
-        columns.add(new TreeColumn<WorkspaceTreeNode, String>(Model.of("Tree")));// {
+        columns.add(new TreeColumn<WorkspaceTreeNode, String>(Model.of("File")));// {
 
 //            @Override
 //            public void populateItem(Item<ICellPopulator<WorkspaceTreeNode>> cellItem, String componentId, IModel<WorkspaceTreeNode> rowModel) {
@@ -201,7 +201,7 @@ public class UnlinkedNodesPanel extends GenericPanel<Workspace> {
 //            }
 //        });
         
-        columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("Name"), "name"));
+//        columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("Name"), "name"));
         columns.add(new PropertyColumn<WorkspaceTreeNode, String>(Model.of("Type"), "type"));
 
         return columns;
