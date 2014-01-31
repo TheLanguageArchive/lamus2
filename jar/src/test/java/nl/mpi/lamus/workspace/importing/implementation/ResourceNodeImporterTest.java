@@ -24,22 +24,18 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -92,9 +88,7 @@ public class ResourceNodeImporterTest {
     @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock NodeDataRetriever mockNodeDataRetriever;
-    @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
-    @Mock WorkspaceParentNodeReferenceFactory mockWorkspaceParentNodeReferenceFactory;
     @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
     
     private Workspace testWorkspace;
@@ -102,7 +96,6 @@ public class ResourceNodeImporterTest {
     @Mock ReferencingMetadataDocument mockReferencingMetadataDocument;
     @Mock Reference mockChildLinkWithoutHandle;
     @Mock ResourceProxy mockChildLinkWithHandle;
-    @Mock FileTypeHandler mockFileTypeHandler;
     
     @Mock TypecheckedResults mockTypecheckedResults;
     @Mock CorpusNode mockCorpusNode;
@@ -125,13 +118,11 @@ public class ResourceNodeImporterTest {
         testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
-        nodeImporter = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockNodeDataRetriever,
-                mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
-                mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
+        nodeImporter = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
+                mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
 //        nodeImporter.setWorkspace(testWorkspace);
-        nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockNodeDataRetriever,
-                mockArchiveFileHelper, mockFileTypeHandler, mockWorkspaceNodeFactory,
-                mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory);
+        nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
+                mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
     }
     
     @After
@@ -167,7 +158,6 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
-        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         context.checking(new Expectations() {{
@@ -199,8 +189,6 @@ public class ResourceNodeImporterTest {
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
-            oneOf (mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(testParentNode, mockChildLinkWithHandle);
-                will(returnValue(testParentNodeReference));
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
@@ -238,7 +226,6 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
-        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithoutHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         context.checking(new Expectations() {{
@@ -270,8 +257,6 @@ public class ResourceNodeImporterTest {
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
-            oneOf (mockWorkspaceParentNodeReferenceFactory).getNewWorkspaceParentNodeReference(testParentNode, mockChildLinkWithoutHandle);
-                will(returnValue(testParentNodeReference));
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
@@ -329,7 +314,6 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         context.checking(new Expectations() {{
@@ -378,7 +362,6 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
@@ -426,7 +409,6 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceParentNodeReference testParentNodeReference = new LamusWorkspaceParentNodeReference(parentWorkspaceNodeID, mockChildLinkWithHandle);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
         final TypeCheckerException expectedException = new TypeCheckerException("some exception message", null);

@@ -80,6 +80,14 @@ public class LamusPropertiesTest {
     @Qualifier("customTypecheckerFolderToConfigFileMap")
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
     
+    @Autowired
+    @Qualifier("db_httproot")
+    private String httpRoot;
+    @Autowired
+    @Qualifier("db_localroot")
+    private String localRoot;
+    
+    
     public LamusPropertiesTest() {
     }
 
@@ -164,5 +172,8 @@ public class LamusPropertiesTest {
         expectedCustomTypecheckerConfigMap.put("folder3", "config_file2");
         expectedCustomTypecheckerConfigMap.put("folder4", "config_file2");
 //        assertEquals("CustomTypecheckerConfigMap different from expected", expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
+        
+        
+        //TODO httpRoot / localRoot
     }
 }

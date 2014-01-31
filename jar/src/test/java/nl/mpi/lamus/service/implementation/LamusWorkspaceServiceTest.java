@@ -343,7 +343,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).listWorkspacesForUser(userID); will(returnValue(expectedList));
+            oneOf(mockWorkspaceDao).getWorkspacesForUser(userID); will(returnValue(expectedList));
         }});
         
         Collection<Workspace> result = service.listUserWorkspaces(userID);
@@ -1131,7 +1131,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).listUnlinkedNodes(workspaceID); will(returnValue(mockUnlinkedNodesList));
+            oneOf(mockWorkspaceDao).getUnlinkedNodes(workspaceID); will(returnValue(mockUnlinkedNodesList));
         }});
         
         service.listUnlinkedNodes(userID, workspaceID);

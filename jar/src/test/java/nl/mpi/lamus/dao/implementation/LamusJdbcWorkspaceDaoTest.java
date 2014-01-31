@@ -23,8 +23,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -32,8 +30,6 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceParentNodeReference;
-import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -387,7 +383,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void listExistingWorkspacesForUser() {
+    public void getExistingWorkspacesForUser() {
         
         String userID = "user1";
         
@@ -397,13 +393,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         expectedList.add(workspace1);
         expectedList.add(workspace2);
         
-        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
     }
     
     @Test
-    public void listExistingWorkspacesForUserOneSubmitted() {
+    public void getExistingWorkspacesForUserOneSubmitted() {
         
         String userID = "user1";
         
@@ -415,13 +411,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
-        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
     }
     
     @Test
-    public void listExistingWorkspacesForUserOneError() {
+    public void getExistingWorkspacesForUserOneError() {
         
         String userID = "user1";
         
@@ -433,13 +429,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
-        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
     }
     
     @Test
-    public void listExistingWorkspacesForUserOneSuccess() {
+    public void getExistingWorkspacesForUserOneSuccess() {
         
         String userID = "user1";
         
@@ -451,17 +447,17 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
-        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
     }
     
     @Test
-    public void listNonExistinWorkspacesForUser() {
+    public void getNonExistinWorkspacesForUser() {
         
         String userID = "user1";
         
-        Collection<Workspace> retrievedList = workspaceDao.listWorkspacesForUser(userID);
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertEquals("Retrieved list should be empty", 0, retrievedList.size());
     }
@@ -1071,7 +1067,22 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
         setNodeAsDeleted(testNode);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(testNode));
+    }
+    
+    @Test
+    public void getTheOnlyUnlinkedNode() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = new URI(UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("The returned list of nodes should not be null", result);
         assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
@@ -1092,7 +1103,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         setNodeAsDeleted(parentNode);
         setNodeAsDeleted(childNode);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("The returned list of nodes should not be null", result);
         assertEquals("Size of the returned list of nodes is different from expected", 1, result.size());
@@ -1112,7 +1123,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         setNodeAsDeleted(firstNode);
         setNodeAsDeleted(secondNode);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("The returned list of nodes should not be null", result);
         assertEquals("Size of the returned list of nodes is different from expected", 2, result.size());
@@ -1121,18 +1132,44 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getNonExistingDeletedTopNodes() {
+    public void getSeveralUnlinkedAndDeletedNodes() throws MalformedURLException, URISyntaxException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI firstURI = new URI(UUID.randomUUID().toString());
+        URL firstURL = new URL("file:/archive/folder/first.cmdi");
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, Boolean.TRUE);
+        URI secondURI = new URI(UUID.randomUUID().toString());
+        URL secondURL = new URL("file:/archive/folder/second.cmdi");
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, secondURI, secondURL, Boolean.TRUE);
+        setNodeAsDeleted(firstNode);
         
-        Collection<WorkspaceNode> result = this.workspaceDao.getDeletedTopNodes(testWorkspace.getWorkspaceID());
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 2, result.size());
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(firstNode));
+        assertTrue("The returned list of nodes does not contain the expected node", result.contains(secondNode));
+    }
+    
+    @Test
+    public void getNonExistingUnlinkedAndDeletedTopNodes() throws URISyntaxException, MalformedURLException {
+        
+        //top node of the workspace shouldn't be retrieved
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI firstURI = new URI(UUID.randomUUID().toString());
+        URL firstURL = new URL("file:/archive/folder/first.cmdi");
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, firstNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("The returned list of nodes should not be null", result);
         assertTrue("Returned list of nodes should be empty", result.isEmpty());
     }
     
     @Test
-    public void listUnlinkedNodesOneNode() throws URISyntaxException, MalformedURLException {
+    public void getUnlinkedNodesOneNode() throws URISyntaxException, MalformedURLException {
         
         //TODO get all nodes that have no parent link in the node_link table
             // THIS HAS TO EXCLUDE THE TOP NODE
@@ -1150,7 +1187,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL unlinkedURL = new URL("file:/archive/folder/unlinkednode.cmdi");
         WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, Boolean.TRUE);
         
-        List<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("List of unlinked nodes should not be null", result);
         assertTrue("List of unlinked nodes has a different size than what was expected", result.size() == 1);
@@ -1158,7 +1195,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
 
     @Test
-    public void listUnlinkedNodesZeroNodes() throws URISyntaxException, MalformedURLException {
+    public void getUnlinkedNodesZeroNodes() throws URISyntaxException, MalformedURLException {
         
         //TODO get all nodes that have no parent link in the node_link table
             // THIS HAS TO EXCLUDE THE TOP NODE
@@ -1173,7 +1210,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         
-        List<WorkspaceNode> result = this.workspaceDao.listUnlinkedNodes(testWorkspace.getWorkspaceID());
+        List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
         
         assertNotNull("List of unlinked nodes should not be null", result);
         assertTrue("List of unlinked nodes has a different size than what was expected", result.isEmpty());
@@ -1421,8 +1458,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         URI childResourceProxy = new URI("http://some_uri.jpg");
         
-        WorkspaceParentNodeReference parentReference = new LamusWorkspaceParentNodeReference(parent.getWorkspaceNodeID(), new DataResourceProxy("id", childResourceProxy, "jpg"));
-        child.addParentNodeReference(parentReference);
         WorkspaceNodeLink link = new LamusWorkspaceNodeLink(parent.getWorkspaceNodeID(), child.getWorkspaceNodeID(), childResourceProxy);
         
         String insertNodeSql = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "

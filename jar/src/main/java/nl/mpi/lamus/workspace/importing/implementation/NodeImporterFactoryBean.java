@@ -17,13 +17,9 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
@@ -62,17 +58,9 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     @Autowired
     private WorkspaceNodeFactory workspaceNodeFactory;
     @Autowired
-    private WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
-    @Autowired
     private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     @Autowired
-    private WorkspaceFileHandler workspaceFileHandler;
-    @Autowired
     private WorkspaceNodeExplorer workspaceNodeExplorer;
-    @Autowired
-    private ArchiveFileHelper archiveFileHelper;
-    @Autowired
-    private FileTypeHandler fileTypeHandler;
     
     private Class<? extends NodeImporter> nodeImporterType; 
     
@@ -84,14 +72,14 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     @Override
     public NodeImporter getObject() throws Exception {
         if(ResourceNodeImporter.class.equals(nodeImporterType)) {
-            return new ResourceNodeImporter(corpusStructureProvider, nodeResolver, workspaceDao, nodeDataRetriever,
-                    archiveFileHelper, fileTypeHandler, workspaceNodeFactory,
-                    workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory);
+            return new ResourceNodeImporter(
+                    corpusStructureProvider, nodeResolver, workspaceDao,
+                    nodeDataRetriever, workspaceNodeFactory, workspaceNodeLinkFactory);
         } else {
             return new MetadataNodeImporter(
-                    corpusStructureProvider, nodeResolver, workspaceDao, metadataApi, nodeDataRetriever, workspaceNodeLinkManager, workspaceFileImporter,
-                    workspaceNodeFactory, workspaceParentNodeReferenceFactory, workspaceNodeLinkFactory,
-                    workspaceFileHandler, workspaceNodeExplorer);
+                    corpusStructureProvider, nodeResolver, workspaceDao,
+                    metadataApi, workspaceNodeLinkManager, workspaceFileImporter,
+                    workspaceNodeFactory, workspaceNodeExplorer);
         }
     }
 

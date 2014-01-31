@@ -19,13 +19,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -251,7 +248,6 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     private URL originURL;
     private WorkspaceNodeStatus status;
     private String format;
-    private Collection<WorkspaceParentNodeReference> parentNodesReferences;
     
     public SomeOtherWorkspaceNode() {
         
@@ -405,20 +401,4 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     public void setFormat(String format) {
         this.format = format;
     }
-
-    @Override
-    public Collection<WorkspaceParentNodeReference> getParentNodesReferences() {
-        return Collections.unmodifiableCollection(this.parentNodesReferences);
-    }
-
-    @Override
-    public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodesReferences) {
-        this.parentNodesReferences = parentNodesReferences;
-    }
-    
-    @Override
-    public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
-        this.parentNodesReferences.add(parentNodeReference);
-    }
-    
 }

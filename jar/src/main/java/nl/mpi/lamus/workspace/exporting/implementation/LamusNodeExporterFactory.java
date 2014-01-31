@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -70,24 +71,35 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     @Autowired
     private TrashCanHandler trashCanHandler;
     
+    @Autowired
+    private ArchiveFileHelper archiveFileHelper;
+    
     private AddedNodeExporter addedNodeExporter;
     private DeletedNodeExporter deletedNodeExporter;
     private GeneralNodeExporter generalNodeExporter;
+    private UnlinkedNodeExporter unlinkedNodeExporter;
     
     /**
      * @see NodeExporterFactory#getNodeExporterForNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
     public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node) {
-        
-        if(WorkspaceNodeStatus.NODE_UPLOADED.equals(node.getStatus())) {
-            return getAddedNodeExporter(workspace);
-        }
-        if(WorkspaceNodeStatus.NODE_CREATED.equals(node.getStatus())) {
-            return getAddedNodeExporter(workspace);
-        }
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus())) {
-            return getDeletedNodeExporter(workspace);
+
+        if(workspace.getTopNodeID() != node.getWorkspaceNodeID()) {
+            if(workspaceDao.getParentWorkspaceNodes(node.getWorkspaceNodeID()).isEmpty() &&
+                    !WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus())) { // unlinked node, but not deleted
+                return getUnlinkedNodeExporter(workspace);
+            }
+
+            if(WorkspaceNodeStatus.NODE_UPLOADED.equals(node.getStatus())) {
+                return getAddedNodeExporter(workspace);
+            }
+            if(WorkspaceNodeStatus.NODE_CREATED.equals(node.getStatus())) {
+                return getAddedNodeExporter(workspace);
+            }
+            if(WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus())) {
+                return getDeletedNodeExporter(workspace);
+            }
         }
         
         return getGeneralNodeExporter(workspace); //TODO create other possible exporter types
@@ -105,8 +117,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     private NodeExporter getDeletedNodeExporter(Workspace workspace) {
         if(deletedNodeExporter == null) {
-            deletedNodeExporter = new DeletedNodeExporter(trashCanHandler,
-                    corpusStructureProvider, searchClientBridge);
+            deletedNodeExporter = new DeletedNodeExporter(trashCanHandler, searchClientBridge);
         }
         deletedNodeExporter.setWorkspace(workspace);
         return deletedNodeExporter;
@@ -115,9 +126,17 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private NodeExporter getGeneralNodeExporter(Workspace workspace) {
         if(generalNodeExporter == null) {
             generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler,
-                    workspaceTreeExporter, corpusStructureProvider);
+                    workspaceTreeExporter, corpusStructureProvider, archiveFileHelper);
         }
         generalNodeExporter.setWorkspace(workspace);
         return generalNodeExporter;
+    }
+    
+    private NodeExporter getUnlinkedNodeExporter(Workspace workspace) {
+        if(unlinkedNodeExporter == null) {
+            unlinkedNodeExporter = new UnlinkedNodeExporter(trashCanHandler, searchClientBridge);
+        }
+        unlinkedNodeExporter.setWorkspace(workspace);
+        return unlinkedNodeExporter;
     }
 }

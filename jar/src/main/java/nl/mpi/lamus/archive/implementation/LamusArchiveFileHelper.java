@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -266,12 +268,37 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Override
     public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
         
-        String parentDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
+        String metadataFolderPlusFilename = this.metadataDirectoryName + File.separator + FilenameUtils.getName(parentPath);
+        String parentBaseDirectory;
+        if(parentPath.endsWith(metadataFolderPlusFilename)) {
+            parentBaseDirectory = parentPath.replace(metadataFolderPlusFilename, "");
+        } else {
+            parentBaseDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
+        }
         
         if(WorkspaceNodeType.METADATA.equals(nodeType)) {
-            return FilenameUtils.concat(parentDirectory, this.metadataDirectoryName);
+            return FilenameUtils.concat(parentBaseDirectory, this.metadataDirectoryName);
         } else {
-            return FilenameUtils.concat(parentDirectory, this.resourcesDirectoryName);
+            return FilenameUtils.concat(parentBaseDirectory, this.resourcesDirectoryName);
         }
+    }
+
+    /**
+     * @see ArchiveFileHelper#hasArchiveFileChanged(nl.mpi.archiving.corpusstructure.core.FileInfo, java.io.File)
+     */
+    @Override
+    public boolean hasArchiveFileChanged(FileInfo archiveFileInfo, File workspaceFile) {
+        
+        if(archiveFileInfo.getSize() != workspaceFile.length()) {
+            return true;
+        }
+        
+        String archiveChecksum = archiveFileInfo.getChecksum();
+        String workspaceChecksum = Checksum.create(workspaceFile.getPath());
+        if(!workspaceChecksum.equals(archiveChecksum)) {
+            return true;
+        }
+        
+        return false;
     }
 }

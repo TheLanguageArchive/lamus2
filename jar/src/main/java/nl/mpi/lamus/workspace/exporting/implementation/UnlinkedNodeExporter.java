@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,23 +27,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class responsible for exporting nodes that were deleted
- * and should be moved to the trash can in the filesystem and have
- * their record in the database updated accordingly.
- * @see NodeExporter
- * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ *
+ * @author guisil
  */
-public class DeletedNodeExporter implements NodeExporter {
-
-    private final static Logger logger = LoggerFactory.getLogger(DeletedNodeExporter.class);
+public class UnlinkedNodeExporter implements NodeExporter{
     
+    private static final Logger logger = LoggerFactory.getLogger(UnlinkedNodeExporter.class);
+
     private final TrashCanHandler trashCanHandler;
     private final SearchClientBridge searchClientBridge;
     
     private Workspace workspace;
     
-    public DeletedNodeExporter(TrashCanHandler trashCanHandler,
+    public UnlinkedNodeExporter(TrashCanHandler trashCanHandler,
             SearchClientBridge sClientBridge) {
 
         this.trashCanHandler = trashCanHandler;
@@ -56,7 +53,7 @@ public class DeletedNodeExporter implements NodeExporter {
     public Workspace getWorkspace() {
         return this.workspace;
     }
-    
+
     /**
      * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
      */
@@ -71,6 +68,10 @@ public class DeletedNodeExporter implements NodeExporter {
     @Override
     public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
 
+        //TODO FOR NOW SIMILAR TO DeletedNodeExporter, but will have to be changed
+            // when new functionality is added regarding unlinked nodes
+        
+        
         if (workspace == null) {
 	    String errorMessage = "Workspace not set";
 	    logger.error(errorMessage);

@@ -19,12 +19,8 @@ import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
@@ -46,14 +42,11 @@ public class TopNodeImporter {
     @Autowired
     public TopNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             WorkspaceDao wsDao, MetadataAPI mAPI,
-	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
-            WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
-	    WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
-	    WorkspaceNodeExplorer workspaceNodeExplorer) {
+	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
+            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer) {
 
 	metadataNodeImporter = new MetadataNodeImporter(csProvider, nodeResolver, wsDao, mAPI,
-                nodeDataRetriever, nodeLinkManager, fileImporter, nodeFactory,
-                parentNodeReferenceFactory, wsNodelinkFactory, fileHandler, workspaceNodeExplorer);
+                nodeLinkManager, fileImporter, nodeFactory, workspaceNodeExplorer);
     }
     
     /**

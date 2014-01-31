@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -36,6 +37,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
+import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -45,6 +47,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -62,6 +65,7 @@ public class LamusNodeExporterFactoryTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     
     @Mock Workspace mockWorkspace;
+    @Mock Collection<WorkspaceNode> mockParentNodes;
     
     private NodeExporterFactory exporterFactory;
     
@@ -86,6 +90,7 @@ public class LamusNodeExporterFactoryTest {
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         
         exporterFactory = new LamusNodeExporterFactory();
+        ReflectionTestUtils.setField(exporterFactory, "workspaceDao", mockWorkspaceDao);
     }
     
     @After
@@ -93,9 +98,38 @@ public class LamusNodeExporterFactoryTest {
     }
 
     @Test
-    public void getNodeExporterForUploadedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForTopNode() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 1;
+        final int topNodeID = 1;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof GeneralNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+    
+    @Test
+    public void getNodeExporterForUnlinkedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
         final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
@@ -108,10 +142,141 @@ public class LamusNodeExporterFactoryTest {
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
         
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof UnlinkedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+
+    @Test
+    public void getNodeExporterForUploadedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.FALSE));
+        }});
+        
         NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof AddedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+    
+    @Test
+    public void getNodeExporterForCreatedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_CREATED, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.FALSE));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof AddedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+
+    @Test
+    public void getNodeExporterForDeletedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof DeletedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+    
+    @Test
+    public void getNodeExporterForChangedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.FALSE));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof GeneralNodeExporter);
         assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
     }
 }

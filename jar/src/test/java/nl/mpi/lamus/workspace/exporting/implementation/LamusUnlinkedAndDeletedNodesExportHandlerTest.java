@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.DeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -48,12 +48,12 @@ import org.junit.Rule;
  *
  * @author guisil
  */
-public class LamusDeletedNodesExportHandlerTest {
+public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
     
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    private DeletedNodesExportHandler deletedNodesExportHandler;
+    private UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock NodeExporterFactory mockNodeExporterFactory;
@@ -62,7 +62,7 @@ public class LamusDeletedNodesExportHandlerTest {
     @Mock Workspace mockWorkspace;
     
     
-    public LamusDeletedNodesExportHandlerTest() {
+    public LamusUnlinkedAndDeletedNodesExportHandlerTest() {
     }
     
     @BeforeClass
@@ -76,7 +76,7 @@ public class LamusDeletedNodesExportHandlerTest {
     @Before
     public void setUp() {
         
-        deletedNodesExportHandler = new LamusDeletedNodesExportHandler(mockWorkspaceDao, mockNodeExporterFactory);
+        unlinkedAndDeletedNodesExportHandler = new LamusUnlinkedAndDeletedNodesExportHandler(mockWorkspaceDao, mockNodeExporterFactory);
     }
     
     @After
@@ -90,7 +90,7 @@ public class LamusDeletedNodesExportHandlerTest {
 
         final int workspaceID = 1;
         
-        final Collection<WorkspaceNode> deletedTopNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<WorkspaceNode>();
         
         final int firstNodeID = 10;
         final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -116,16 +116,16 @@ public class LamusDeletedNodesExportHandlerTest {
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
                 secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
         
-        deletedTopNodes.add(firstNode);
-        deletedTopNodes.add(secondNode);
+        unlinkedAndDeletedTopNodes.add(firstNode);
+        unlinkedAndDeletedTopNodes.add(secondNode);
         
     
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockWorkspaceDao).getDeletedTopNodes(workspaceID); will(returnValue(deletedTopNodes));
+            oneOf(mockWorkspaceDao).getUnlinkedAndDeletedTopNodes(workspaceID); will(returnValue(unlinkedAndDeletedTopNodes));
         }});
         
-        for(final WorkspaceNode deletedNode : deletedTopNodes) {
+        for(final WorkspaceNode deletedNode : unlinkedAndDeletedTopNodes) {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
@@ -133,7 +133,7 @@ public class LamusDeletedNodesExportHandlerTest {
             }});
         }
     
-        deletedNodesExportHandler.exploreDeletedNodes(mockWorkspace);
+        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class LamusDeletedNodesExportHandlerTest {
 
         final int workspaceID = 1;
         
-        final Collection<WorkspaceNode> deletedTopNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<WorkspaceNode>();
         
         final int firstNodeID = 10;
         final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -167,18 +167,18 @@ public class LamusDeletedNodesExportHandlerTest {
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
                 secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
         
-        deletedTopNodes.add(firstNode);
-        deletedTopNodes.add(secondNode);
+        unlinkedAndDeletedTopNodes.add(firstNode);
+        unlinkedAndDeletedTopNodes.add(secondNode);
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
         
     
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockWorkspaceDao).getDeletedTopNodes(workspaceID); will(returnValue(deletedTopNodes));
+            oneOf(mockWorkspaceDao).getUnlinkedAndDeletedTopNodes(workspaceID); will(returnValue(unlinkedAndDeletedTopNodes));
         }});
         
-        for(final WorkspaceNode deletedNode : deletedTopNodes) {
+        for(final WorkspaceNode deletedNode : unlinkedAndDeletedTopNodes) {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
@@ -190,7 +190,7 @@ public class LamusDeletedNodesExportHandlerTest {
         }
     
         try {
-            deletedNodesExportHandler.exploreDeletedNodes(mockWorkspace);
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

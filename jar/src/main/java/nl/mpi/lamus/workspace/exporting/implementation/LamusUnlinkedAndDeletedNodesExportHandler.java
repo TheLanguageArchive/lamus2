@@ -19,7 +19,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.workspace.exporting.DeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -28,35 +28,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Class that handles the process of exporting all the deleted
+ * Class that handles the process of exporting all the unlinked and deleted
  * nodes in a workspace.
- * @see DeletedNodesExportHandler
+ * @see UnlinkedAndDeletedNodesExportHandler
  * @author guisil
  */
 @Component
-public class LamusDeletedNodesExportHandler implements DeletedNodesExportHandler {
+public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDeletedNodesExportHandler {
 
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
     
     @Autowired
-    public LamusDeletedNodesExportHandler(WorkspaceDao wsDao, NodeExporterFactory neFactory) {
+    public LamusUnlinkedAndDeletedNodesExportHandler(WorkspaceDao wsDao, NodeExporterFactory neFactory) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = neFactory;
     }
     
     /**
-     * @see DeletedNodesExportHandler#exploreDeletedNodes(nl.mpi.lamus.workspace.model.Workspace)
+     * @see UnlinkedAndDeletedNodesExportHandler#exploreUnlinkedAndDeletedNodes(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
-    public void exploreDeletedNodes(Workspace workspace)
+    public void exploreUnlinkedAndDeletedNodes(Workspace workspace)
             throws WorkspaceExportException {
         
-        Collection<WorkspaceNode> deletedTopNodes = this.workspaceDao.getDeletedTopNodes(workspace.getWorkspaceID());
+        Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = this.workspaceDao.getUnlinkedAndDeletedTopNodes(workspace.getWorkspaceID());
         
-        for(WorkspaceNode deletedNode : deletedTopNodes) {
-            NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, deletedNode);
-            nodeExporter.exportNode(null, deletedNode);
+        for(WorkspaceNode unlinkedOrDeletedNode : unlinkedAndDeletedTopNodes) {
+            NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode);
+            nodeExporter.exportNode(null, unlinkedOrDeletedNode);
         }
     }
     

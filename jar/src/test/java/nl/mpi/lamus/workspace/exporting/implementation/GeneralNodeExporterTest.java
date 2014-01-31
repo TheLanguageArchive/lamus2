@@ -30,6 +30,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -57,18 +58,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
-import org.junit.runner.RunWith;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import static org.powermock.api.support.membermodification.MemberModifier.stub;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author guisil
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Checksum.class})
 public class GeneralNodeExporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -79,6 +73,7 @@ public class GeneralNodeExporterTest {
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock ArchiveFileHelper mockArchiveFileHelper;
     
     @Mock MetadataDocument mockMetadataDocument;
     @Mock StreamResult mockStreamResult;
@@ -107,7 +102,7 @@ public class GeneralNodeExporterTest {
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         
         generalNodeExporter = new GeneralNodeExporter(mockMetadataAPI, mockWorkspaceFileHandler,
-                mockWorkspaceTreeExporter, mockCorpusStructureProvider);
+                mockWorkspaceTreeExporter, mockCorpusStructureProvider, mockArchiveFileHelper);
         generalNodeExporter.setWorkspace(workspace);
     }
     
@@ -147,9 +142,6 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
-        
         //TODO copy file from workspace folder to archive folder
         //TODO check if there are differences in the data present in the database? (or is this supposed to be done in the crawler?)
         //TODO call the tree exporter for this node in case it's metadata (can have children)
@@ -160,17 +152,14 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
-            
-            // Checksum is different, so export will proceed
+            // Files are different, so export will proceed
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         generalNodeExporter.exportNode(null, node);
     }
@@ -219,26 +208,20 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
-        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
-            
-            // Checksum is different, so export will proceed
+            // Files are different, so export will proceed
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         generalNodeExporter.exportNode(parentNode, node);
     }
@@ -261,6 +244,7 @@ public class GeneralNodeExporterTest {
         final String nodeName = "someNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
+        final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
@@ -275,8 +259,6 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        
         
         context.checking(new Expectations() {{
             
@@ -284,13 +266,10 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someFakeChecksum));
-            
-            // Checksum is similar, so file hasn't changed
+            // Files are similar, so export will return
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.FALSE));
             
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         generalNodeExporter.exportNode(parentNode, node);
     }
@@ -425,9 +404,6 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
-        
         final String expectedErrorMessage = "Error getting Metadata Document for node " + node.getArchiveURI();
         final IOException expectedException = new IOException("some exception message");
         
@@ -437,14 +413,11 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
-            
-            // Checksum is different, so export will proceed
+            // Files are different, so export will proceed
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         try {
             generalNodeExporter.exportNode(parentNode, node);
@@ -490,9 +463,6 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
-        
         final String expectedErrorMessage = "Error getting Metadata Document for node " + node.getArchiveURI();
         final MetadataException expectedException = new MetadataException("some exception message");
         
@@ -502,14 +472,11 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
-            
-            // Checksum is different, so export will proceed
+            // Files are different, so export will proceed
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         try {
             generalNodeExporter.exportNode(parentNode, node);
@@ -555,9 +522,6 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
-        final String someFakeChecksum = "SOMEFAKECHECKSUM";
-        final String someOtherFakeChecksum = "SOMEOTHERFAKECHECKSUM";
-        
         final String expectedErrorMessage = "Error writing file for node " + node.getArchiveURI();
         final TransformerException expectedException = new TransformerException("some exception message");
         
@@ -567,9 +531,8 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-            oneOf(mockFileInfo).getChecksum(); will(returnValue(someOtherFakeChecksum));
-            
-            // Checksum is different, so export will proceed
+            // Files are different, so export will proceed
+            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
@@ -577,8 +540,6 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
                 will(throwException(expectedException));
         }});
-        
-        stub(method(Checksum.class, "create", String.class)).toReturn(someFakeChecksum);
         
         try {
             generalNodeExporter.exportNode(parentNode, node);

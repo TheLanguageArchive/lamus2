@@ -39,7 +39,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
-    private DeletedNodesExportHandler deletedNodesExportHandler;
+    private UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     private CrawlerBridge crawlerBridge;
     
     private Workspace workspace;
@@ -47,10 +47,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
-            DeletedNodesExportHandler dnExportHandler, CrawlerBridge crawlerBridge) {
+            UnlinkedAndDeletedNodesExportHandler dnExportHandler, CrawlerBridge crawlerBridge) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
-        this.deletedNodesExportHandler = dnExportHandler;
+        this.unlinkedAndDeletedNodesExportHandler = dnExportHandler;
         this.crawlerBridge = crawlerBridge;
     }
     
@@ -121,8 +121,8 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         NodeExporter topNodeExporter = this.nodeExporterFactory.getNodeExporterForNode(this.workspace, topNode);
         topNodeExporter.exportNode(null, topNode);
         
-        //TODO Export deleted nodes...
-        this.deletedNodesExportHandler.exploreDeletedNodes(this.workspace);
+        //TODO Export unlinked and deleted nodes...
+        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(this.workspace);
         
         //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem

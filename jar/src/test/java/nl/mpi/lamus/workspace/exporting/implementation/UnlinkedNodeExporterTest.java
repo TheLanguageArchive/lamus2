@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,18 +44,18 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Rule;
 import static org.junit.Assert.*;
+import org.junit.Rule;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
-public class DeletedNodeExporterTest {
+public class UnlinkedNodeExporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    private NodeExporter deletedNodeExporter;
+    private NodeExporter unlinkedNodeExporter;
     private Workspace testWorkspace;
     
     @Mock TrashCanHandler mockTrashCanHandler;
@@ -64,7 +65,7 @@ public class DeletedNodeExporterTest {
     @Mock WorkspaceNode mockWorkspaceNode;
     @Mock CorpusNode mockCorpusNode;
     
-    public DeletedNodeExporterTest() {
+    public UnlinkedNodeExporterTest() {
     }
     
     @BeforeClass
@@ -77,19 +78,22 @@ public class DeletedNodeExporterTest {
     
     @Before
     public void setUp() {
-        deletedNodeExporter = new DeletedNodeExporter(mockTrashCanHandler, mockSearchClientBridge);
+        
+        unlinkedNodeExporter = new DeletedNodeExporter(mockTrashCanHandler, mockSearchClientBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
-        deletedNodeExporter.setWorkspace(testWorkspace);
+        unlinkedNodeExporter.setWorkspace(testWorkspace);
     }
     
     @After
     public void tearDown() {
     }
 
-
+    
+    //TODO SIMILAR TO DeleteNodeExporterTest FOR NOW
+    
     @Test
     public void exportNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
@@ -140,7 +144,7 @@ public class DeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
         
     }
     
@@ -157,7 +161,7 @@ public class DeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
         
     }
     
@@ -211,10 +215,10 @@ public class DeletedNodeExporterTest {
     @Test
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
         
-        deletedNodeExporter.setWorkspace(null);
+        unlinkedNodeExporter.setWorkspace(null);
         
         try {
-            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";

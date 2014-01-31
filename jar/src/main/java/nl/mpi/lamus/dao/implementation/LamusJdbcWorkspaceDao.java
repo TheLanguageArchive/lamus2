@@ -326,10 +326,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#listWorkspacesForUser(java.lang.String)
+     * @see WorkspaceDao#getWorkspacesForUser(java.lang.String)
      */
     @Override
-    public Collection<Workspace> listWorkspacesForUser(String userID) {
+    public Collection<Workspace> getWorkspacesForUser(String userID) {
 
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
         
@@ -591,30 +591,29 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#getDeletedTopNodes(int)
+     * @see WorkspaceDao#getUnlinkedAndDeletedTopNodes(int)
      */
     @Override
-    public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceID) {
+    public Collection<WorkspaceNode> getUnlinkedAndDeletedTopNodes(int workspaceID) {
         
-        logger.debug("Retrieving list containing deleted top nodes of the workspace with ID: " + workspaceID);
+        logger.debug("Retrieving list containing unlinked and deleted top nodes of the workspace with ID: " + workspaceID);
         
-        String queryDeletedTopNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
-                + " AND workspace_id = :workspace_id AND status LIKE :status;";
-        SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("workspace_id", workspaceID)
-                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
+        String queryUnlinkedAndDeletedTopNodeListSql = "SELECT * FROM node"
+                + " WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
+                + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         
         Collection<WorkspaceNode> listToReturn =
-                this.namedParameterJdbcTemplate.query(queryDeletedTopNodeListSql, namedParameters, new WorkspaceNodeMapper());
+                this.namedParameterJdbcTemplate.query(queryUnlinkedAndDeletedTopNodeListSql, namedParameters, new WorkspaceNodeMapper());
         
         return listToReturn;
     }
 
     /**
-     * @see WorkspaceDao#listUnlinkedNodes(int)
+     * @see WorkspaceDao#getUnlinkedNodes(int)
      */
     @Override
-    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
+    public List<WorkspaceNode> getUnlinkedNodes(int workspaceID) {
         
         logger.debug("Retrieving list containing unlinked nodes of the workspace with ID: " + workspaceID);
         

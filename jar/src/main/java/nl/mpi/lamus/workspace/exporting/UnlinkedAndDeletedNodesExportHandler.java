@@ -20,14 +20,14 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
- * Interface for the handler of deleted nodes export.
+ * Interface for the handler of unlinked and deleted nodes export.
  * @author guisil
  */
-public interface DeletedNodesExportHandler {
+public interface UnlinkedAndDeletedNodesExportHandler {
     
     /**
-     * Triggers the export of all the deleted nodes in the workspace
+     * Triggers the export of all the unlinked and deleted nodes in the workspace
      */
-    public void exploreDeletedNodes(Workspace workpace)
+    public void exploreUnlinkedAndDeletedNodes(Workspace workpace)
             throws WorkspaceExportException;
 }

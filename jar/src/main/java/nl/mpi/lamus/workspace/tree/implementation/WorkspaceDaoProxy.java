@@ -122,11 +122,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
-     * @see WorkspaceDao#listWorkspacesForUser(java.lang.String)
+     * @see WorkspaceDao#getWorkspacesForUser(java.lang.String)
      */
     @Override
-    public Collection<Workspace> listWorkspacesForUser(String userID) {
-        return this.getWorkspaceDao().listWorkspacesForUser(userID);
+    public Collection<Workspace> getWorkspacesForUser(String userID) {
+        return this.getWorkspaceDao().getWorkspacesForUser(userID);
     }
 
     /**
@@ -202,19 +202,19 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
-     * @see WorkspaceDao#getDeletedTopNodes(int)
+     * @see WorkspaceDao#getUnlinkedAndDeletedTopNodes(int)
      */
     @Override
-    public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceID) {
-        return this.getWorkspaceDao().getDeletedTopNodes(workspaceID);
+    public Collection<WorkspaceNode> getUnlinkedAndDeletedTopNodes(int workspaceID) {
+        return this.getWorkspaceDao().getUnlinkedAndDeletedTopNodes(workspaceID);
     }
 
     /**
-     * @see WorkspaceDao#listUnlinkedNodes(int)
+     * @see WorkspaceDao#getUnlinkedNodes(int)
      */
     @Override
-    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID) {
-        return this.getWorkspaceDao().listUnlinkedNodes(workspaceID);
+    public List<WorkspaceNode> getUnlinkedNodes(int workspaceID) {
+        return this.getWorkspaceDao().getUnlinkedNodes(workspaceID);
     }
 
     /**

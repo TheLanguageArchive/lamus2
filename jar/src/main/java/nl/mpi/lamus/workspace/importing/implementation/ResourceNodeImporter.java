@@ -22,15 +22,12 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.model.*;
@@ -59,10 +56,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     
     private final NodeDataRetriever nodeDataRetriever;
     
-    private final ArchiveFileHelper archiveFileHelper;
-    private final FileTypeHandler fileTypeHandler;
     private final WorkspaceNodeFactory workspaceNodeFactory;
-    private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     
     private Workspace workspace = null;
@@ -70,16 +64,12 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     @Autowired
     public ResourceNodeImporter(CorpusStructureProvider csProvider,
             NodeResolver nodeResolver, WorkspaceDao wsDao,
-            NodeDataRetriever nodeDataRetriever ,ArchiveFileHelper archiveFileHelper, FileTypeHandler fileTypeHandler,
-            WorkspaceNodeFactory wsNodeFactory, WorkspaceParentNodeReferenceFactory wsParentNodeReferenceFactory,
+            NodeDataRetriever nodeDataRetriever , WorkspaceNodeFactory wsNodeFactory,
             WorkspaceNodeLinkFactory wsNodeLinkFactory) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.workspaceDao = wsDao;
-        this.archiveFileHelper = archiveFileHelper;
-        this.fileTypeHandler = fileTypeHandler;
         this.workspaceNodeFactory = wsNodeFactory;
-        this.workspaceParentNodeReferenceFactory = wsParentNodeReferenceFactory;
         this.workspaceNodeLinkFactory = wsNodeLinkFactory;
         this.nodeDataRetriever = nodeDataRetriever;
     }
@@ -136,8 +126,6 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 	    throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), unex);
         }
 
-
-//        WorkspaceNodeType childType = WorkspaceNodeType.UNKNOWN; //TODO What to use here? Is this field supposed to exist?
         String childMimetype = childLink.getMimetype();
 
         if(nodeDataRetriever.shouldResourceBeTypechecked(childLink, childOurURL)) {
@@ -145,7 +133,6 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             TypecheckedResults typecheckedResults = null;    
             try {
 
-                // REALLY NECESSARY TO CALL A SEPARATE CLASS FOR THIS?
                 typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childOurURL);
 
             } catch(TypeCheckerException tcex) {
@@ -161,22 +148,16 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         }
         //TODO needsProtection?
 
-        //TODO create node accordingly and add it to the database
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
                 workspace.getWorkspaceID(), childURI, childURL, childLink, childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite());
         workspaceDao.addWorkspaceNode(childNode);
         
-        //TODO add parent link in the database
-        WorkspaceParentNodeReference parentNodeReference = 
-                workspaceParentNodeReferenceFactory.getNewWorkspaceParentNodeReference(parentNode, childLink);
-        
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-                parentNodeReference.getParentWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childURI);
+                parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childURI);
         workspaceDao.addWorkspaceNodeLink(nodeLink);
         
         //TODO DO NOT copy file to workspace folder... it will only exist as a link in the DB
             // and any changes made to it will be done during workspace submission
         
-        //TODO something
     }
 }

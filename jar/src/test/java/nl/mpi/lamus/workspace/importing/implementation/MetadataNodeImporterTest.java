@@ -29,12 +29,8 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
@@ -46,7 +42,6 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.*;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
-import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
@@ -70,7 +65,6 @@ public class MetadataNodeImporterTest {
     }};
     private NodeImporter nodeImporter;
     
-    @Mock NodeDataRetriever mockNodeDataRetriever;
     @Mock WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     @Mock WorkspaceFileImporter mockWorkspaceFileImporter;
     
@@ -79,9 +73,6 @@ public class MetadataNodeImporterTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
-    @Mock WorkspaceParentNodeReferenceFactory mockWorkspaceParentNodeReferenceFactory;
-    @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
-    @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
     @Mock WorkspaceNode mockParentNode;
     @Mock Reference mockReferenceWithoutHandle;
@@ -114,10 +105,11 @@ public class MetadataNodeImporterTest {
         testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
-        nodeImporter = new MetadataNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockMetadataAPI,
-                mockNodeDataRetriever, mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
-                mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
-                mockWorkspaceFileHandler, mockWorkspaceNodeExplorer);
+        nodeImporter = new MetadataNodeImporter(
+                mockCorpusStructureProvider, mockNodeResolver,
+                mockWorkspaceDao, mockMetadataAPI,
+                mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
+                mockWorkspaceNodeFactory, mockWorkspaceNodeExplorer);
     }
     
     @After
@@ -127,10 +119,11 @@ public class MetadataNodeImporterTest {
 
     @Test
     public void importNodeWithNullWorkspace() throws URISyntaxException, WorkspaceImportException {
-        NodeImporter testNodeImporter = new MetadataNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao, mockMetadataAPI,
-                mockNodeDataRetriever, mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
-                mockWorkspaceNodeFactory, mockWorkspaceParentNodeReferenceFactory, mockWorkspaceNodeLinkFactory,
-                mockWorkspaceFileHandler, mockWorkspaceNodeExplorer);
+        NodeImporter testNodeImporter = new MetadataNodeImporter(
+                mockCorpusStructureProvider, mockNodeResolver,
+                mockWorkspaceDao, mockMetadataAPI,
+                mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
+                mockWorkspaceNodeFactory, mockWorkspaceNodeExplorer);
         
         try {
             testNodeImporter.importNode(null, null, null, null);

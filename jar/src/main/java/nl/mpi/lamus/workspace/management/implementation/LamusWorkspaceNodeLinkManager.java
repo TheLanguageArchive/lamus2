@@ -25,12 +25,10 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
-import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -51,18 +49,15 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeLinkManager.class);
     
-    private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
     private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     private final WorkspaceDao workspaceDao;
     private final MetadataAPI metadataAPI;
     private final WorkspaceFileHandler workspaceFileHandler;
     
     @Autowired
-    public LamusWorkspaceNodeLinkManager(WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
-            WorkspaceNodeLinkFactory nodeLinkFactory, WorkspaceDao wsDao, MetadataAPI mdAPI,
-            WorkspaceFileHandler wsFileHandler) {
+    public LamusWorkspaceNodeLinkManager(WorkspaceNodeLinkFactory nodeLinkFactory,
+            WorkspaceDao wsDao, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler) {
         
-        this.workspaceParentNodeReferenceFactory = parentNodeReferenceFactory;
         this.workspaceNodeLinkFactory = nodeLinkFactory;
         this.workspaceDao = wsDao;
         this.metadataAPI = mdAPI;
@@ -75,11 +70,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     @Override
     public void linkNodesWithReference(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
         
-        WorkspaceParentNodeReference parentNodeReference =
-		this.workspaceParentNodeReferenceFactory.getNewWorkspaceParentNodeReference(parentNode, childLink);
-
-	//TODO set top node ID in workspace (if reference is null), set workspace status / Save workspace
-	if (parentNodeReference == null) { //TODO find a better way of indicating this
+	if(parentNode == null && childLink == null) { //TODO find a better way of checking for the top node
             
 //            Workspace workspace;
 //
@@ -90,14 +81,16 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
             
 	    this.workspaceDao.updateWorkspaceTopNode(workspace);
-	} else {
+	} else if(parentNode != null && childLink != null) { //TODO Is there a situation when this would be different?
 	    //TODO add information about parent link
 	    // add the link in the database
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-		    parentNodeReference.getParentWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childLink.getURI());
+		    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childLink.getURI());
 	    this.workspaceDao.addWorkspaceNodeLink(nodeLink);
 	    //TODO possible problems with adding the link? if the link already exists?
-	}
+	} else {
+            throw new IllegalArgumentException("Unable to create link (parent node: " + parentNode + "; child link: " + childLink);
+        }
     }
 
     /**

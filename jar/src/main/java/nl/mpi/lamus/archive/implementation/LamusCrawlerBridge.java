@@ -57,11 +57,11 @@ public class LamusCrawlerBridge implements CrawlerBridge {
     private String mdsUrl;
     
     @Autowired
-    @Qualifier("crawler_httproot")
+    @Qualifier("db_httproot")
     private String httpRoot;
     
     @Autowired
-    @Qualifier("crawler_localroot")
+    @Qualifier("db_localroot")
     private String localRoot;
     
     @Autowired

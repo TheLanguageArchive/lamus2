@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -31,6 +33,11 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -38,6 +45,8 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Checksum.class})
 public class LamusArchiveFileHelperTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -52,6 +61,9 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockChildFile;
     @Mock File mockChildAbsoluteFile;
     @Mock File mockParentFile;
+    
+    @Mock FileInfo mockArchiveFileInfo;
+    @Mock File mockWorkspaceFile;
     
     private final int maxDirectoryNameLength = 50;
     private final String corpusDirectoryBaseName = "Corpusstructure";
@@ -442,11 +454,35 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
+    public void getDirectoryForResourceWithTopParent() {
+        
+        final String parentpath = "/archive/root/root.cmdi";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
+        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForMetadataWithTopParent() {
+        
+        final String parentPath = "/archive/root/root.cmdi";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
+        
+        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
     public void getDirectoryForResource() {
         
-        final String parentpath = "/some/path/parent.cmdi";
+        final String parentpath = "/archive/root/Metadata/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
-        final String expectedDirectory = "/some/path/" + resourcesDirectoryName;
+        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
         
@@ -456,12 +492,82 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getDirectoryForMetadata() {
         
-        final String parentPath = "/some/path/parent.cmdi";
+        final String parentPath = "/archive/root/Metadata/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/some/path/" + metadataDirectoryName;
+        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+
+    
+    @Test
+    public void fileChangedDifferentSize() {
+        
+        final long archiveFileSize = 10;
+        final long workspaceFileSize = 20;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockArchiveFileInfo).getSize(); will(returnValue(archiveFileSize));
+            oneOf(mockWorkspaceFile).length(); will(returnValue(workspaceFileSize));
+        }});
+        
+        boolean result = testArchiveFileHelper.hasArchiveFileChanged(mockArchiveFileInfo, mockWorkspaceFile);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void fileChangedDifferentChecksum() {
+        
+        final long archiveFilesize = 10;
+        final long workspaceFilesize = 10;
+        
+        final String archiveChecksum = "123456789";
+        final String workspaceChecksum = "987654321";
+        
+        final String workspaceFilePath = "/workspace/path/file.cmdi";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockArchiveFileInfo).getSize(); will(returnValue(archiveFilesize));
+            oneOf(mockWorkspaceFile).length(); will(returnValue(workspaceFilesize));
+            oneOf(mockWorkspaceFile).getPath(); will(returnValue(workspaceFilePath));
+            oneOf(mockArchiveFileInfo).getChecksum(); will(returnValue(archiveChecksum));
+        }});
+        
+        stub(method(Checksum.class, "create", String.class)).toReturn(workspaceChecksum);
+        
+        boolean result = testArchiveFileHelper.hasArchiveFileChanged(mockArchiveFileInfo, mockWorkspaceFile);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void fileDidNotChange() {
+        
+        final long archiveFilesize = 10;
+        final long workspaceFilesize = 10;
+        
+        final String archiveChecksum = "123456789";
+        final String workspaceChecksum = "123456789";
+        
+        final String workspaceFilePath = "/workspace/path/file.cmdi";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockArchiveFileInfo).getSize(); will(returnValue(archiveFilesize));
+            oneOf(mockWorkspaceFile).length(); will(returnValue(workspaceFilesize));
+            oneOf(mockWorkspaceFile).getPath(); will(returnValue(workspaceFilePath));
+            oneOf(mockArchiveFileInfo).getChecksum(); will(returnValue(archiveChecksum));
+        }});
+        
+        stub(method(Checksum.class, "create", String.class)).toReturn(workspaceChecksum);
+        
+        boolean result = testArchiveFileHelper.hasArchiveFileChanged(mockArchiveFileInfo, mockWorkspaceFile);
+        
+        assertFalse("Result should be false", result);
     }
 }

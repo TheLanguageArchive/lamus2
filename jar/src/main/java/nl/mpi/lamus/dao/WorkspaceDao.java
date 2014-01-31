@@ -95,7 +95,7 @@ public interface WorkspaceDao {
      * @param userID ID of the user to use in the query
      * @return Collectio of workspaces created by the given user
      */
-    public Collection<Workspace> listWorkspacesForUser(String userID);
+    public Collection<Workspace> getWorkspacesForUser(String userID);
     
     /**
      * Checks if the archive node with the given ID is locked
@@ -174,12 +174,12 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getParentWorkspaceNodes(int workspaceNodeID);
     
     /**
-     * Retrieves a collection containing the nodes that were deleted
-     * and have no parent.
+     * Retrieves a collection containing the nodes that were unlinked or deleted
+     * and have no parent (except the top node of the workspace).
      * @param workspaceNodeID ID of the workspace
-     * @return Collection of deleted nodes that have no parent
+     * @return Collection of unlinked or deleted nodes that have no parent
      */
-    public Collection<WorkspaceNode> getDeletedTopNodes(int workspaceNodeID);
+    public Collection<WorkspaceNode> getUnlinkedAndDeletedTopNodes(int workspaceNodeID);
     
     /**
      * Retrieves a collection containing the nodes that have no parent
@@ -187,7 +187,7 @@ public interface WorkspaceDao {
      * @param workspaceID ID of the workspace
      * @return List of unlinked nodes in the workspace
      */
-    public List<WorkspaceNode> listUnlinkedNodes(int workspaceID);
+    public List<WorkspaceNode> getUnlinkedNodes(int workspaceID);
     
     /**
      * Updates the Workspace URL of the given node.

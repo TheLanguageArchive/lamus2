@@ -182,4 +182,20 @@ public class LamusProperties {
         return mapToReturn;
     }
 
+    
+    @Value("${httproot}")
+    private String httproot;
+    @Bean
+    @Qualifier("db_httproot")
+    public String httpRoot() {
+        return httproot;
+    }
+    
+    @Value("${localroot}")
+    private String localroot;
+    @Bean
+    @Qualifier("db_localroot")
+    public String localRoot() {
+        return localroot;
+    }
 }

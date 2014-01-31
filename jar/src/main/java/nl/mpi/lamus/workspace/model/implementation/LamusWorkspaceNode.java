@@ -17,13 +17,9 @@ package nl.mpi.lamus.workspace.model.implementation;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.lamus.workspace.model.WorkspaceParentNodeReference;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -45,7 +41,6 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     private URL originURL;
     private WorkspaceNodeStatus status;
     private String format;
-    private Collection<WorkspaceParentNodeReference> parentNodesReferences;
     
     public LamusWorkspaceNode() {
         
@@ -204,24 +199,6 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     @Override
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    @Override
-    public Collection<WorkspaceParentNodeReference> getParentNodesReferences() {
-        return Collections.unmodifiableCollection(this.parentNodesReferences);
-    }
-
-    @Override
-    public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodesReferences) {
-        this.parentNodesReferences = parentNodesReferences;
-    }
-    
-    @Override
-    public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference) {
-        if(this.parentNodesReferences == null) {
-            this.parentNodesReferences = new ArrayList<WorkspaceParentNodeReference>();
-        }
-        this.parentNodesReferences.add(parentNodeReference);
     }
     
 

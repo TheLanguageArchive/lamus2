@@ -68,7 +68,7 @@ public class WorkspaceExportRunnerTest {
     @Mock WorkspaceDao mockWorkspaceDao;
 //    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock NodeExporterFactory mockNodeExporterFactory;
-    @Mock DeletedNodesExportHandler mockDeletedNodesExportHandler;
+    @Mock UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock CrawlerBridge mockCrawlerBridge;
     
     @Mock NodeExporter mockNodeExporter;
@@ -91,7 +91,7 @@ public class WorkspaceExportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockDeletedNodesExportHandler, mockCrawlerBridge);
+        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockUnlinkedAndDeletedNodesExportHandler, mockCrawlerBridge);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -154,7 +154,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporter).exportNode(null, testNode);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockDeletedNodesExportHandler).exploreDeletedNodes(mockWorkspace);
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCrawlerBridge).setUpCrawler(); will(returnValue(mockCrawler));
@@ -212,6 +212,8 @@ public class WorkspaceExportRunnerTest {
     }
     
     
+    //TODO EXCEPTIONS
+    //TODO EXCEPTIONS
     //TODO EXCEPTIONS
     
     

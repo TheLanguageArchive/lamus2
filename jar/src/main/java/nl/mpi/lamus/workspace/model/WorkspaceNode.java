@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.model;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 
 /**
  *
@@ -77,11 +76,5 @@ public interface WorkspaceNode extends Serializable {
     public String getFormat();
     
     public void setFormat(String format);
-    
-    public Collection<WorkspaceParentNodeReference> getParentNodesReferences();
-    
-    public void setParentNodesReferences(Collection<WorkspaceParentNodeReference> parentNodeReferences);
-    
-    public void addParentNodeReference(WorkspaceParentNodeReference parentNodeReference);
     
 }

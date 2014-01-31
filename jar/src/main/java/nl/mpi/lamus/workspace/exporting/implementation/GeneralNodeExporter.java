@@ -23,6 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -32,7 +33,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.util.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,15 +53,17 @@ public class GeneralNodeExporter implements NodeExporter {
     private WorkspaceFileHandler workspaceFileHandler;
     private WorkspaceTreeExporter workspaceTreeExporter;
     private CorpusStructureProvider corpusStructureProvider;
+    private ArchiveFileHelper archiveFileHelper;
     
     public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler,
             WorkspaceTreeExporter wsTreeExporter,
-            CorpusStructureProvider csProvider) {
+            CorpusStructureProvider csProvider, ArchiveFileHelper archiveFileHelper) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
         this.corpusStructureProvider = csProvider;
+        this.archiveFileHelper = archiveFileHelper;
     }
     
     /**
@@ -106,8 +108,8 @@ public class GeneralNodeExporter implements NodeExporter {
                 String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
                 throwWorkspaceExportException(errorMessage, ex);
             }
-            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
-            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
+//            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
+//            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
             
             //TODO should the checksum be created at some other point (when the node is actually changed, for instance)
                 // so it takes less time at this point?
@@ -117,7 +119,8 @@ public class GeneralNodeExporter implements NodeExporter {
                 // and not necessarily because of a real change
             //TODO Maybe there should be a better way of comparing the files
             
-            if(workspaceChecksum.equals(archiveChecksum)) {
+//            if(workspaceChecksum.equals(archiveChecksum)) {
+            if(!archiveFileHelper.hasArchiveFileChanged(corpusNode.getFileInfo(), new File(currentNode.getWorkspaceURL().getPath()))) {
                 return;
             }
             

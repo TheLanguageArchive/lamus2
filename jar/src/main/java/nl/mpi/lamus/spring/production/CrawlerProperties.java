@@ -80,23 +80,6 @@ public class CrawlerProperties {
         return mdsurl;
     }
     
-    @Value("${httproot}")
-    private String httproot;
-    @Bean
-    @Qualifier("crawler_httproot")
-    public String httproot() {
-        return httproot;
-    }
-    
-    @Value("${localroot}")
-    private String localroot;
-    @Bean
-    @Qualifier("crawler_localroot")
-    public String localroot() {
-        return localroot;
-    }
-
-    
     @Value("${dbdriverclassname}")
     private String dbdriverclassname;
     @Bean

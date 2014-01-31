@@ -91,6 +91,10 @@ public class AddedNodeExporterTest {
     
     @Mock CorpusNode mockParentCorpusNode;
     
+    @Mock Workspace mockWorkspace;
+    @Mock WorkspaceNode mockParentWsNode;
+    @Mock WorkspaceNode mockChildWsNode;
+    
     private NodeExporter addedNodeExporter;
     private Workspace testWorkspace;
     
@@ -131,7 +135,7 @@ public class AddedNodeExporterTest {
      */
     @Test
     public void exportUploadedResourceNode()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, WorkspaceExportException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, WorkspaceExportException, TransformerException {
         
         final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
 
@@ -140,24 +144,68 @@ public class AddedNodeExporterTest {
         final WorkspaceNode updatedCurrentNode = getUpdatedCurrentResourceNode(intermediateCurrentNode, nodeNewArchiveURI);
         final WorkspaceNode parentNode = getParentNode();
         
-        final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + resourceExtension;
-        final File nextAvailableFile = new File("/archive/root/somenode/" + currentNodeFilename);
-        final File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final URI nodeWsURI = nodeWsURL.toURI();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final String nodeFormat = currentNode.getFormat();
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
         context.checking(new Expectations() {{
             
+            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
             oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNode.getArchiveURL().getPath(), currentNodeFilename, currentNode.getType());
+                    parentNodeArchivePath, nodeWsFilename, nodeType);
                 will(returnValue(nextAvailableFile));
+            oneOf(mockChildWsNode).setArchiveURL(nodeNewArchiveURL);
             
                 //TODO GENERATE URID
             oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
-                
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
+            oneOf(mockChildWsNode).setArchiveURI(nodeNewArchiveURI);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(mockChildWsNode);
+            
+            exactly(2).of(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceFileHandler).copyFile(nodeWsFile, nextAvailableFile);
                 
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
+            
+            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL);
+                will(returnValue(mockParentCmdiDocument));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            
+            
+            
+            //TODO FOR SOME REASON THE FOLLOWING CALL NEVER PASSES
+                // IT COMPLAINS THAT THERE IS AN UNEXPECTED INVOCATION AND AT THE SAME TIME SAYS THAT THIS CALL IS NEVER DONE
+                    // (EVEN THOUGH IT SEEMS EXACTLY THE SAME)
+            ignoring(mockParentCmdiDocument);
+//            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsURI);
+//                will(returnValue(mockResourceProxy));
+//            oneOf(mockResourceProxy).setURI(nodeNewArchiveUrlToUri);
+            
+            
+            
+            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
+                will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+            
+            
             
             //TODO ensureChecksum
             
@@ -166,7 +214,9 @@ public class AddedNodeExporterTest {
             //set urid in db(?) and metadata
             //close searchdb
             
-            oneOf(mockSearchClientBridge).isFormatSearchable(currentNode.getFormat()); will(returnValue(Boolean.TRUE));
+            oneOf(mockChildWsNode).getFormat(); will(returnValue(nodeFormat));
+            oneOf(mockSearchClientBridge).isFormatSearchable(nodeFormat); will(returnValue(Boolean.TRUE));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveURI));
             oneOf(mockSearchClientBridge).addNode(nodeNewArchiveURI);
             
             //TODO something missing?...
@@ -176,7 +226,7 @@ public class AddedNodeExporterTest {
             
         }});
         
-        addedNodeExporter.exportNode(parentNode, currentNode);
+        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
     }
     
     
@@ -201,7 +251,9 @@ public class AddedNodeExporterTest {
         
         final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
         final File nextAvailableFile = new File("/archive/root/somenode/" + currentNodeFilename);
+        final URI nodeWsURI = currentNode.getWorkspaceURL().toURI();
         final File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
+        final File parentNodeWsFile = new File(parentNode.getWorkspaceURL().getPath());
         
         context.checking(new Expectations() {{
             
@@ -222,6 +274,22 @@ public class AddedNodeExporterTest {
             oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
             
             //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
+            
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(parentNode.getWorkspaceURL());
+                will(returnValue(mockParentCmdiDocument));
+              
+            //TODO FOR SOME REASON THE FOLLOWING CALL NEVER PASSES
+                // IT COMPLAINS THAT THERE IS AN UNEXPECTED INVOCATION AND AT THE SAME TIME SAYS THAT THIS CALL IS NEVER DONE
+                    // (EVEN THOUGH IT SEEMS EXACTLY THE SAME)
+            ignoring(mockParentCmdiDocument);
+//            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsURI);
+//                will(returnValue(mockResourceProxy));
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
+                will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+            
             
             //TODO ensureChecksum
             
@@ -389,7 +457,7 @@ public class AddedNodeExporterTest {
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
-        final URL parentNodeWsURL = new URL("file:/workspace" + testWorkspace.getWorkspaceID() + File.separator + parentFilename);
+        final URL parentNodeWsURL = new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + File.separator + parentFilename);
         final URL parentNodeOriginURL = new URL("file:/archive/somewhere/" + parentFilename);
         final URL parentNodeArchiveURL = parentNodeOriginURL;
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());

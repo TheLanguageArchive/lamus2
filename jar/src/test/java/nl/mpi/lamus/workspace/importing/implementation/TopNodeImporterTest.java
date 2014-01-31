@@ -20,11 +20,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
@@ -60,13 +56,9 @@ public class TopNodeImporterTest {
     @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWsDao;
     @Mock MetadataAPI metadataAPI;
-    @Mock NodeDataRetriever mockNodeDataRetriever;
     @Mock WorkspaceNodeLinkManager mockNodeLinkManager;
     @Mock WorkspaceFileImporter mockFileImporter;
     @Mock WorkspaceNodeFactory mockNodeFactory;
-    @Mock WorkspaceParentNodeReferenceFactory mockParentNodeReferenceFactory;
-    @Mock WorkspaceNodeLinkFactory mockWsNodeLinkFactory;
-    @Mock WorkspaceFileHandler mockFileHandler;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
     
     @Mock Workspace mockWorkspace;
@@ -86,9 +78,8 @@ public class TopNodeImporterTest {
     @Before
     public void setUp() {
         
-        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, metadataAPI, mockNodeDataRetriever,
-                mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockParentNodeReferenceFactory,
-                mockWsNodeLinkFactory, mockFileHandler, mockWorkspaceNodeExplorer);
+        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, metadataAPI,
+                mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer);
         
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);
     }

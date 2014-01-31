@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -37,6 +39,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +172,40 @@ public class AddedNodeExporter implements NodeExporter {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
             throwWorkspaceExportException(errorMessage, ex);
         }
-
+        
+        try {
+            //TODO CHANGE REFERENCE IN PARENT
+            MetadataDocument parentDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
+            ReferencingMetadataDocument referencingParentDocument = null;
+            if(parentDocument instanceof ReferencingMetadataDocument) {
+                referencingParentDocument = (ReferencingMetadataDocument) parentDocument;
+            } else {
+                String errorMessage = "Error retrieving child reference in file " + parentNode.getWorkspaceURL();
+                throwWorkspaceExportException(errorMessage, null);
+            }
+            
+            Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getWorkspaceURL().toURI());
+            currentReference.setURI(newNodeArchiveURL.toURI());
+            StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
+            metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
+            
+        } catch (IOException ex) {
+            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
+            throwWorkspaceExportException(errorMessage, ex);
+        } catch (MetadataException ex) {
+            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
+            throwWorkspaceExportException(errorMessage, ex);
+        } catch (URISyntaxException ex) {
+            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
+            throwWorkspaceExportException(errorMessage, ex);
+        } catch (TransformerException ex) {
+            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
+            throwWorkspaceExportException(errorMessage, ex);
+        }
+        
+        
+        
+        
         //TODO ensureChecksum - will this be done by the crawler??
         
         if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {

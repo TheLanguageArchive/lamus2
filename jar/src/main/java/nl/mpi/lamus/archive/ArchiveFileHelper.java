@@ -18,6 +18,7 @@ package nl.mpi.lamus.archive;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 
@@ -131,4 +132,13 @@ public interface ArchiveFileHelper {
      * @return Directory where the node should be located
      */
     public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType);
+    
+    /**
+     * Given the FileInfo of an archive node and the location of the corresponding
+     * file in the workspace, checks if there were any changes in the file.
+     * @param archiveFileInfo FileInfo of the archive node to be checked
+     * @param workspaceFile Path of the file in the workspace
+     * @return true if the file has changed
+     */
+    public boolean hasArchiveFileChanged(FileInfo archiveFileInfo, File workspaceFile);
 }

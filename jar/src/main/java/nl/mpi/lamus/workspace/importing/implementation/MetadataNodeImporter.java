@@ -26,12 +26,8 @@ import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
-import nl.mpi.lamus.workspace.factory.WorkspaceParentNodeReferenceFactory;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
@@ -58,39 +54,25 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
     private final MetadataAPI metadataAPI;
-    
-    private final NodeDataRetriever nodeDataRetriever;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
     private final WorkspaceFileImporter workspaceFileImporter;
-    
     private final WorkspaceNodeFactory workspaceNodeFactory;
-    private final WorkspaceParentNodeReferenceFactory workspaceParentNodeReferenceFactory;
-    private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
-    private final WorkspaceFileHandler workspaceFileHandler;
     private final WorkspaceNodeExplorer workspaceNodeExplorer;
 
     private Workspace workspace = null;
     
     @Autowired
     public MetadataNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver, WorkspaceDao wsDao, MetadataAPI mAPI,
-	    NodeDataRetriever nodeDataRetriever, WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
-            WorkspaceNodeFactory nodeFactory, WorkspaceParentNodeReferenceFactory parentNodeReferenceFactory,
-	    WorkspaceNodeLinkFactory wsNodelinkFactory, WorkspaceFileHandler fileHandler,
-	    WorkspaceNodeExplorer workspaceNodeExplorer) {
+	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
+            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer) {
 
 	this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
 	this.workspaceDao = wsDao;
 	this.metadataAPI = mAPI;
-        
-        this.nodeDataRetriever = nodeDataRetriever;
         this.workspaceNodeLinkManager = nodeLinkManager;
         this.workspaceFileImporter = fileImporter;
-        
 	this.workspaceNodeFactory = nodeFactory;
-	this.workspaceParentNodeReferenceFactory = parentNodeReferenceFactory;
-	this.workspaceNodeLinkFactory = wsNodelinkFactory;
-	this.workspaceFileHandler = fileHandler;
 	this.workspaceNodeExplorer = workspaceNodeExplorer;
     }
 
@@ -196,14 +178,11 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    //TODO change link of the copied document to have a different handle when it is null, for instance
 	}
 
-	//TODO get metadata file links (references)
 	if (childDocument instanceof ReferencingMetadataDocument) {
 	    ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
             List<Reference> links = childReferencingDocument.getDocumentReferences();
 	    workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
 	}
-
-	//TODO What else?
     }
     
     private void throwWorkspaceImportException(String errorMessage, Exception cause) throws WorkspaceImportException {

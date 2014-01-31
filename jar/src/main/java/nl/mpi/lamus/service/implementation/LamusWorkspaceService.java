@@ -129,7 +129,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
         
-        return this.workspaceDao.listWorkspacesForUser(userID);
+        return this.workspaceDao.getWorkspacesForUser(userID);
     }
 
     /**
@@ -255,12 +255,12 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
     
     /**
-     * @see WorkspaceService#listUnlinkedNodes(java.lang.String, int)
+     * @see WorkspaceService#getUnlinkedNodes(java.lang.String, int)
      */
     @Override
     public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
         
-        return this.workspaceDao.listUnlinkedNodes(workspaceID);
+        return this.workspaceDao.getUnlinkedNodes(workspaceID);
     }
     
 }
