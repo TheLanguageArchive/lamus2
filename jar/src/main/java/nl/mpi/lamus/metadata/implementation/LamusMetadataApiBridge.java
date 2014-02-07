@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload.implementation;
+package nl.mpi.lamus.metadata.implementation;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import nl.mpi.lamus.workspace.upload.MetadataApiBridge;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -75,6 +75,14 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
                 return null;
             }
         }
+    }
+
+    /**
+     * @see MetadataApiBridge#getNewSelfHandleHeaderInfo(java.net.URI)
+     */
+    @Override
+    public HeaderInfo getNewSelfHandleHeaderInfo(URI handle) {
+        return new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, handle.toString());
     }
     
 }

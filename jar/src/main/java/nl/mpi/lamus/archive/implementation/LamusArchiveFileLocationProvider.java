@@ -17,12 +17,15 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,6 +38,13 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveFileLocationProvider.class);
     
     private final ArchiveFileHelper archiveFileHelper;
+    
+    @Autowired
+    @Qualifier("dbHttpRoot")
+    private String dbHttpRoot;
+    @Autowired
+    @Qualifier("dbLocalRoot")
+    private String dbLocalRoot;
     
     @Autowired
     public LamusArchiveFileLocationProvider(ArchiveFileHelper archiveFileHelper) {
@@ -54,6 +64,20 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
         archiveFileHelper.createFileAndDirectories(finalFile);
         
         return finalFile;
+    }
+
+    /**
+     * @see ArchiveFileLocationProvider#getUriWithHttpRoot(java.net.URI)
+     */
+    @Override
+    public URI getUriWithHttpRoot(URI location) throws URISyntaxException{
+        
+        if(location.toString().startsWith(dbLocalRoot)) {
+            return new URI(location.toString().replace(dbLocalRoot, dbHttpRoot));
+        }
+        
+        // in other cases (including when the httpRoot is already present, returns the same file
+        return location;
     }
     
 }

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.HandleMatcher;
+import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -70,7 +70,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Mock WorkspaceUploadNodeMatcher mockWorkspaceUploadNodeMatcher;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
-    @Mock HandleMatcher mockHandleMatcher;
+    @Mock HandleManagerImpl mockHandleMatcher;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     
@@ -190,7 +190,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockHandleMatcher).areHandlesEquivalent(firstRefURI, null); will(returnValue(Boolean.FALSE));
             
             oneOf(mockSecondNode).setArchiveURI(firstRefURI);
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(mockSecondNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockSecondNode);
                 
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);

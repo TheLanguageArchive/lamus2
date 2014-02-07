@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.HandleMatcher;
+import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -58,7 +58,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     private WorkspaceUploadNodeMatcher workspaceUploadNodeMatcher;
     private WorkspaceDao workspaceDao;
     private WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private HandleMatcher handleMatcher;
+    private HandleManagerImpl handleMatcher;
     private MetadataAPI metadataAPI;
     private WorkspaceFileHandler workspaceFileHandler;
     
@@ -66,7 +66,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     public LamusWorkspaceUploadReferenceHandler(
             HandleUtil mdApiHandleUtil, WorkspaceUploadNodeMatcher wsUploadNodeMatcher,
             WorkspaceDao wsDao, WorkspaceNodeLinkManager wsNodeLinkManager,
-            HandleMatcher handleMatcher, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler) {
+            HandleManagerImpl handleMatcher, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler) {
         this.metadataApiHandleUtil = mdApiHandleUtil;
         this.workspaceUploadNodeMatcher = wsUploadNodeMatcher;
         this.workspaceDao = wsDao;
@@ -100,7 +100,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 //set handle in DB
                 if(matchedNode != null && !handleMatcher.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
                     matchedNode.setArchiveURI(refURI);
-                    workspaceDao.updateNodeArchiveUriUrl(matchedNode);
+                    workspaceDao.updateNodeArchiveUri(matchedNode);
                 }
                 
             } else {

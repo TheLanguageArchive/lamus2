@@ -81,11 +81,71 @@ public class LamusPropertiesTest {
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
     
     @Autowired
-    @Qualifier("db_httproot")
-    private String httpRoot;
+    @Qualifier("dbHttpRoot")
+    private String dbHttpRoot;
     @Autowired
-    @Qualifier("db_localroot")
-    private String localRoot;
+    @Qualifier("dbLocalRoot")
+    private String dbLocalRoot;
+    @Autowired
+    @Qualifier("crawlerHostName")
+    private String crawlerHostName;
+    @Autowired
+    @Qualifier("crawlerDomainName")
+    private String crawlerDomainName;
+//    @Autowired
+//    @Qualifier("crawlerPrefixes")
+//    private String crawlerPrefixes;
+    @Autowired
+    @Qualifier("crawlerAmsUrl")
+    private String crawlerAmsUrl;
+    @Autowired
+    @Qualifier("crawlerMdsUrl")
+    private String crawlerMdsUrl;
+    @Autowired
+    @Qualifier("crawlerDbDriverClassName")
+    private String crawlerDbDriverClassName;
+    @Autowired
+    @Qualifier("crawlerDbUrl")
+    private String crawlerDbUrl;
+    @Autowired
+    @Qualifier("crawlerDbMaxActive")
+    private String crawlerDbMaxActive;
+    @Autowired
+    @Qualifier("crawlerDbMaxWait")
+    private String crawlerDbMaxWait;
+    @Autowired
+    @Qualifier("crawlerDbTestOnBorrow")
+    private String crawlerDbTestOnBorrow;
+    @Autowired
+    @Qualifier("crawlerDbUsername")
+    private String crawlerDbUsername;
+    @Autowired
+    @Qualifier("crawlerDbPassword")
+    private String crawlerDbPassword;
+    @Autowired
+    @Qualifier("crawlerConnectionDriverName")
+    private String crawlerConnectionDriverName;
+    @Autowired
+    @Qualifier("crawlerHdlProxyDomain")
+    private String crawlerHdlProxyDomain;
+    @Autowired
+    @Qualifier("handlePrefix")
+    private String handlePrefix;
+    @Autowired
+    @Qualifier("handleProxy")
+    private String handleProxy;
+    @Autowired
+    @Qualifier("handleAdminKeyFile")
+    private String handleAdminKeyFile;
+    @Autowired
+    @Qualifier("handleAdminUserHandle")
+    private String handleAdminUserHandle;
+    @Autowired
+    @Qualifier("handleAdminUserHandleIndex")
+    private String handleAdminUserHandleIndex;
+    @Autowired
+    @Qualifier("handleAdminHandlePassword")
+    private String handleAdminHandlePassword;
     
     
     public LamusPropertiesTest() {
@@ -174,6 +234,9 @@ public class LamusPropertiesTest {
 //        assertEquals("CustomTypecheckerConfigMap different from expected", expectedCustomTypecheckerConfigMap, customTypecheckerFolderToConfigFileMap);
         
         
-        //TODO httpRoot / localRoot
+        
+        
+        
+        //TODO other properties
     }
 }

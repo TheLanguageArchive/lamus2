@@ -201,7 +201,14 @@ public interface WorkspaceDao {
      * 
      * @param node WorkspaceNode object to be updated
      */
-    public void updateNodeArchiveUriUrl(WorkspaceNode node);
+    public void updateNodeArchiveUri(WorkspaceNode node);
+    
+    /**
+     * Updates the Archive URL of the given node.
+     * 
+     * @param node WorkspaceNode object to be updated
+     */
+    public void updateNodeArchiveUrl(WorkspaceNode node);
     
     /**
      * Inserts a link between two nodes (parent and child) into the database.

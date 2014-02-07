@@ -25,14 +25,17 @@ import java.util.Calendar;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -46,7 +49,9 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.api.model.HeaderInfo;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -59,6 +64,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.jmock.Expectations.returnValue;
 import static org.junit.Assert.*;
 
 /**
@@ -83,9 +89,13 @@ public class AddedNodeExporterTest {
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     
+    @Mock HandleManager mockHandleManager;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     
-    @Mock CMDIDocument mockChildCmdiDocument;
-    @Mock CMDIDocument mockParentCmdiDocument;
+    // initially had these mock objects as CMDIDocument,
+    // but the expectations were not being properly matched after the cast (to ReferencingMetadataObject) was made in the code to be tested
+    @Mock ReferencingMetadataDocument mockChildCmdiDocument;
+    @Mock ReferencingMetadataDocument mockParentCmdiDocument;
     @Mock StreamResult mockStreamResult;
     @Mock ResourceProxy mockResourceProxy;
     
@@ -100,6 +110,8 @@ public class AddedNodeExporterTest {
     
     private final String metadataExtension = "cmdi";
     private final String resourceExtension = "pdf";
+    
+    private final String handleHdlPrefix = "hdl:" + "11142" + "/";
     
     
     public AddedNodeExporterTest() {
@@ -116,8 +128,8 @@ public class AddedNodeExporterTest {
     @Before
     public void setUp() {
         addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
-                mockMetadataAPI, mockWorkspaceDao, mockSearchClientBridge,
-                mockWorkspaceTreeExporter, mockNodeDataRetriever, mockCorpusStructureProvider, mockNodeResolver);
+                mockMetadataAPI, mockWorkspaceDao, mockSearchClientBridge, mockWorkspaceTreeExporter,
+                mockNodeDataRetriever, mockCorpusStructureProvider, mockNodeResolver, mockHandleManager, mockMetadataApiBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -135,24 +147,24 @@ public class AddedNodeExporterTest {
      */
     @Test
     public void exportUploadedResourceNode()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, WorkspaceExportException, TransformerException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, WorkspaceExportException, TransformerException, HandleException {
         
-        final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
 
         final WorkspaceNode currentNode = getCurrentResourceNode();
-        final WorkspaceNode intermediateCurrentNode = getIntermediateCurrentResourceNode(currentNode);
-        final WorkspaceNode updatedCurrentNode = getUpdatedCurrentResourceNode(intermediateCurrentNode, nodeNewArchiveURI);
         final WorkspaceNode parentNode = getParentNode();
         
+        final boolean isFileMetadata = Boolean.FALSE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
         final String nodeWsPath = nodeWsURL.getPath();
-        final URI nodeWsURI = nodeWsURL.toURI();
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
         final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
         final String nodeFormat = currentNode.getFormat();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
@@ -160,71 +172,27 @@ public class AddedNodeExporterTest {
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
+        
         context.checking(new Expectations() {{
-            
-            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-            oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
-            oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNodeArchivePath, nodeWsFilename, nodeType);
-                will(returnValue(nextAvailableFile));
-            oneOf(mockChildWsNode).setArchiveURL(nodeNewArchiveURL);
-            
-                //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
-            oneOf(mockChildWsNode).setArchiveURI(nodeNewArchiveURI);
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(mockChildWsNode);
-            
-            exactly(2).of(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
-            
-            oneOf(mockWorkspaceFileHandler).copyFile(nodeWsFile, nextAvailableFile);
-                
-            //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
-            
-            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
-            oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL);
-                will(returnValue(mockParentCmdiDocument));
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-            
-            
-            
-            //TODO FOR SOME REASON THE FOLLOWING CALL NEVER PASSES
-                // IT COMPLAINS THAT THERE IS AN UNEXPECTED INVOCATION AND AT THE SAME TIME SAYS THAT THIS CALL IS NEVER DONE
-                    // (EVEN THOUGH IT SEEMS EXACTLY THE SAME)
-            ignoring(mockParentCmdiDocument);
-//            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsURI);
-//                will(returnValue(mockResourceProxy));
-//            oneOf(mockResourceProxy).setURI(nodeNewArchiveUrlToUri);
-            
-            
-            
-            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
-                will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
-            
-            
-            
-            //TODO ensureChecksum
-            
-            //add node to searchdb
-            //calculate urid
-            //set urid in db(?) and metadata
-            //close searchdb
-            
-            oneOf(mockChildWsNode).getFormat(); will(returnValue(nodeFormat));
-            oneOf(mockSearchClientBridge).isFormatSearchable(nodeFormat); will(returnValue(Boolean.TRUE));
-            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveURI));
-            oneOf(mockSearchClientBridge).addNode(nodeNewArchiveURI);
-            
-            //TODO something missing?...
-            
-            //TODO Remove workspace from filesystem
-            //TODO Keep workspace information in DB?
-            
         }});
+        
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        
+        checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
+        
+        checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle, parentNodeWsURL, parentNodeWsFile, null);
+        
+        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
+                
         
         addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
     }
@@ -233,82 +201,56 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportUploadedMetadataNode()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
-        //TODO WHEN METADATA, CALL (RECURSIVELY) exploreTree FOR CHILDREN IN THE BEGINNING
-            // this way child files would have the pids calculated in advance,
-                // so the references in the parent can be set before the files are copied to their archive location
-
-        //TODO but if now the PIDs are eventually assigned beforehand (when file is uploaded or added?)
-            //maybe this doesn't make such a big difference...
-        
-        final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString().toUpperCase());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode intermediateCurrentNode = getIntermediateCurrentMetadataNode(currentNode);
-        final WorkspaceNode updatedCurrentNode = getUpdatedCurrentMetadataNode(intermediateCurrentNode, nodeNewArchiveURI);
         final WorkspaceNode parentNode = getParentNode();
         
-        final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
-        final File nextAvailableFile = new File("/archive/root/somenode/" + currentNodeFilename);
-        final URI nodeWsURI = currentNode.getWorkspaceURL().toURI();
-        final File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
-        final File parentNodeWsFile = new File(parentNode.getWorkspaceURL().getPath());
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
+        final String nodeFormat = currentNode.getFormat();
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        
+        final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
+        
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
         
         context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNode.getArchiveURL().getPath(), currentNodeFilename, currentNode.getType());
-                will(returnValue(nextAvailableFile));
-            
-                //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
-                
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
-            
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, updatedCurrentNode);
-            
-            oneOf(mockMetadataAPI).getMetadataDocument(currentNode.getWorkspaceURL()); will(returnValue(mockChildCmdiDocument));
-            
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
-            
-            //ONLY THIS IS NEEDED...? BECAUSE THE CRAWLER CREATES THE OTHER CONNECTIONS? WHAT ABOUT LINKING IN THE DB?
-            
-            
-            oneOf(mockMetadataAPI).getMetadataDocument(parentNode.getWorkspaceURL());
-                will(returnValue(mockParentCmdiDocument));
-              
-            //TODO FOR SOME REASON THE FOLLOWING CALL NEVER PASSES
-                // IT COMPLAINS THAT THERE IS AN UNEXPECTED INVOCATION AND AT THE SAME TIME SAYS THAT THIS CALL IS NEVER DONE
-                    // (EVEN THOUGH IT SEEMS EXACTLY THE SAME)
-            ignoring(mockParentCmdiDocument);
-//            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsURI);
-//                will(returnValue(mockResourceProxy));
-            
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
-                will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
-            
-            
-            //TODO ensureChecksum
-            
-            //add node to searchdb
-            //calculate urid
-            //set urid in db(?) and metadata
-            //close searchdb
-            
-            oneOf(mockSearchClientBridge).isFormatSearchable(currentNode.getFormat()); will(returnValue(Boolean.TRUE));
-            oneOf(mockSearchClientBridge).addNode(nodeNewArchiveURI);
-            
-            //TODO something missing?...
-            
-            //TODO Remove workspace from filesystem
-            //TODO Keep workspace information in DB?
-            
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
         }});
         
-        addedNodeExporter.exportNode(parentNode, currentNode);
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
+        
+        checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
+        
+        checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle, parentNodeWsURL, parentNodeWsFile, null);
+        
+        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
+        
+        
+        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
     }
     
     @Test
@@ -317,11 +259,8 @@ public class AddedNodeExporterTest {
         
         addedNodeExporter.setWorkspace(null);
         
-        final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
-        
         try {
-            addedNodeExporter.exportNode(parentNode, currentNode);
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -335,23 +274,26 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode intermediateCurrentNode = getIntermediateCurrentMetadataNode(currentNode);
         final WorkspaceNode parentNode = getParentNode();
         
-        final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
-        final String expectedErrorMessage = "Error getting new file for node " + intermediateCurrentNode.getWorkspaceURL();
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+                
+        final String expectedErrorMessage = "Error getting new file for node " + nodeWsURL;
         final IOException expectedException = new IOException("some exception message");
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNode.getArchiveURL().getPath(), currentNodeFilename, currentNode.getType());
-                will(throwException(expectedException));
-        }});
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
-            addedNodeExporter.exportNode(parentNode, currentNode);
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -364,37 +306,121 @@ public class AddedNodeExporterTest {
     public void exportNodeThrowsMetadataException()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
-        final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
-        
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode intermediateCurrentNode = getIntermediateCurrentMetadataNode(currentNode);
-        final WorkspaceNode updatedCurrentNode = getUpdatedCurrentMetadataNode(intermediateCurrentNode, nodeNewArchiveURI);
         final WorkspaceNode parentNode = getParentNode();
         
-        final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
-        final File nextAvailableFile = new File("/archive/root/somenode/" + currentNodeFilename);
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
-        final String expectedErrorMessage = "Error getting Metadata Document for node " + currentNode.getWorkspaceURL();
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        
+        final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeWsURL;
         final MetadataException expectedException = new MetadataException("some exception message");
         
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
+        
         context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNode.getArchiveURL().getPath(), currentNodeFilename, currentNode.getType());
-                will(returnValue(nextAvailableFile));
-            
-                //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
-                
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
-            
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, updatedCurrentNode);
-                    
-            oneOf(mockMetadataAPI).getMetadataDocument(currentNode.getWorkspaceURL()); will(throwException(expectedException));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
         }});
         
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, expectedException);
+        
         try {
-            addedNodeExporter.exportNode(parentNode, currentNode);
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportNodeExploreThrowsException()
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+        
+        final WorkspaceNode currentNode = getCurrentMetadataNode();
+        final WorkspaceNode parentNode = getParentNode();
+        
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", testWorkspace.getWorkspaceID(), null);
+        
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, expectedException);
+
+        try {
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void exportNodeThrowsHandleException()
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+        
+        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        
+        final WorkspaceNode currentNode = getCurrentMetadataNode();
+        final WorkspaceNode parentNode = getParentNode();
+        
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        
+        final String expectedErrorMessage = "Error assigning new handle for node " + nodeWsURL;
+        final HandleException expectedException = new HandleException(HandleException.INVALID_VALUE, "some exception message");
+        
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
+        
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, expectedException);
+        
+        try {
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -405,44 +431,56 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportNodeThrowsTransformerException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
-        final URI nodeNewArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString().toUpperCase());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode intermediateCurrentNode = getIntermediateCurrentMetadataNode(currentNode);
-        final WorkspaceNode updatedCurrentNode = getUpdatedCurrentMetadataNode(intermediateCurrentNode, nodeNewArchiveURI);
         final WorkspaceNode parentNode = getParentNode();
         
-        final String currentNodeFilename = currentNode.getName() + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
-        final File nextAvailableFile = new File("/archive/root/somenode/" + currentNodeFilename);
-        final File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final File nextAvailableFile = new File("/archive/root/somenode/" + nodeWsFilename);
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
         
-        final String expectedErrorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        
+        final String expectedErrorMessage = "Error writing file (updating child reference) for node " + parentNodeWsURL;
         final TransformerException expectedException = new TransformerException("some exception message");
         
+        final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
+        
+        
+        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
+        
         context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                    parentNode.getArchiveURL().getPath(), currentNodeFilename, currentNode.getType());
-                will(returnValue(nextAvailableFile));
-            
-                //TODO GENERATE URID
-            oneOf(mockNodeDataRetriever).getNewArchiveURI(); will(returnValue(nodeNewArchiveURI));
-                
-            oneOf(mockWorkspaceDao).updateNodeArchiveUriUrl(updatedCurrentNode);
-            
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, updatedCurrentNode);
-            
-            oneOf(mockMetadataAPI).getMetadataDocument(currentNode.getWorkspaceURL()); will(returnValue(mockChildCmdiDocument));
-            
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
-                will(throwException(expectedException));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
         }});
         
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
+        
+        checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
+        
+        checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle, parentNodeWsURL, parentNodeWsFile, expectedException);
+        
         try {
-            addedNodeExporter.exportNode(parentNode, currentNode);
+            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -450,6 +488,196 @@ public class AddedNodeExporterTest {
             assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
     }
+    
+    
+    private void checkFirstInvocations(
+            final URL parentNodeArchiveURL, final URL nodeWsURL, final WorkspaceNodeType nodeType,
+            final String nodeWsFilename, final File nextAvailableFile,
+            final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        if(expectedException != null) {
+            context.checking(new Expectations() {{
+                oneOf(mockArchiveFileLocationProvider).getAvailableFile(
+                        parentNodeArchivePath, nodeWsFilename, nodeType);
+                    will(throwException(expectedException));
+                //during logging of the exception
+                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            }});
+        } else {
+        
+            context.checking(new Expectations() {{
+                oneOf(mockArchiveFileLocationProvider).getAvailableFile(
+                        parentNodeArchivePath, nodeWsFilename, nodeType);
+                    will(returnValue(nextAvailableFile));
+                oneOf(mockChildWsNode).setArchiveURL(nodeNewArchiveURL);
+                oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
+            }});
+        }
+    }
+    
+    
+    private void checkExploreInvocations(final boolean isMetadata, final Exception expectedException) throws WorkspaceExportException {
+        
+        if(isMetadata) {
+            if(expectedException != null) {
+                context.checking(new Expectations() {{
+                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode);
+                        will(throwException(expectedException));
+                }});
+            } else {
+                context.checking(new Expectations() {{
+                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode);
+                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+
+                }});
+            }
+        } else {
+            context.checking(new Expectations() {{
+                exactly(2).of(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            }});
+        }
+    }
+    
+    private void checkRetrieveMetadataDocumentInvocations(final boolean isMetadata, final URL nodeWsURL, final Exception expectedException) throws IOException, MetadataException {
+        
+        if(isMetadata) {
+            if(expectedException != null) {
+                context.checking(new Expectations() {{
+                    oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
+                    //during logging of the exception
+                    oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+                }});
+            } else {
+                context.checking(new Expectations() {{
+                    oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+                    oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
+                }});
+            }
+        }
+    }
+    
+    private void checkUpdateSelfHandleInvocations(
+            final boolean isMetadata, final URI nodeNewArchiveHandle, final URI preparedNodeNewArchiveHandle,
+            final HeaderInfo childSelfLinkHeaderInfo) throws MetadataException, URISyntaxException {
+        
+        if(isMetadata) {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
+                oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNodeNewArchiveHandle));
+                oneOf(mockMetadataApiBridge).getNewSelfHandleHeaderInfo(preparedNodeNewArchiveHandle); will(returnValue(childSelfLinkHeaderInfo));
+                oneOf(mockChildCmdiDocument).putHeaderInformation(childSelfLinkHeaderInfo);
+            }});
+        } else {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            }});
+        }
+    }
+    
+    private void checkFileMoveInvocations(
+            boolean isMetadata, final File nodeWsFile,
+            final File nextAvailableFile) throws IOException, WorkspaceExportException, MetadataException, TransformerException {
+        
+        if(isMetadata) {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
+                oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
+            }});
+        } else {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+                oneOf(mockWorkspaceFileHandler).copyFile(nodeWsFile, nextAvailableFile);
+            }});
+        }
+    }
+    
+    private void checkHandleAssignmentInvocations(
+            final URL nodeWsURL, final URL nodeNewArchiveURL, final File nodeWsFile,
+            final URI nodeNewArchiveUrlToUri, final URI nodeNewArchiveUriToUriHttpRoot,
+            final URI nodeNewArchiveHandle, final Exception expectedException) throws HandleException, IOException, URISyntaxException {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeNewArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpRoot(nodeNewArchiveUrlToUri); will(returnValue(nodeNewArchiveUriToUriHttpRoot));
+        }});
+        
+        if(expectedException != null) {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+                oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpRoot); will(throwException(expectedException));
+                //logging for the exception
+                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            }});
+        } else {
+            context.checking(new Expectations() {{
+                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+                oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpRoot); will(returnValue(nodeNewArchiveHandle));
+                oneOf(mockChildWsNode).setArchiveURI(nodeNewArchiveHandle);
+                oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildWsNode);
+            }});
+        }
+    }
+    
+    private void checkParentReferenceUpdateInvocations(
+            final URL nodeWsURL, final URI nodeNewArchiveHandle, final URI preparedNewArchiveHandle,
+            final URL parentNodeWsURL, final File parentNodeWsFile, final Exception expectedException) throws IOException, MetadataException, TransformerException, URISyntaxException {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL);
+                will(returnValue(mockParentCmdiDocument));
+                
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(nodeWsURL.toURI());
+                will(returnValue(mockResourceProxy));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
+            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+            oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
+            
+            
+            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
+                will(returnValue(mockStreamResult));
+        }});
+        
+        if(expectedException != null) {
+            context.checking(new Expectations() {{
+                oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+                    will(throwException(expectedException));
+                //logging for the exception
+                oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            }});
+        } else {
+            context.checking(new Expectations() {{
+                oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+            }});
+        }
+    }
+    
+    private void checkSearchClientInvocations(final String nodeFormat, final URI nodeNewArchiveHandle) {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).getFormat(); will(returnValue(nodeFormat));
+            oneOf(mockSearchClientBridge).isFormatSearchable(nodeFormat); will(returnValue(Boolean.TRUE));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
+            oneOf(mockSearchClientBridge).addNode(nodeNewArchiveHandle);
+        }});
+    }
+    
+    
     
     
     private WorkspaceNode getParentNode() throws MalformedURLException, URISyntaxException {

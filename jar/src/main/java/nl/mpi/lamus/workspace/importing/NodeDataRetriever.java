@@ -94,11 +94,4 @@ public interface NodeDataRetriever {
      * @return true if the previously checked resource is archivable, according to the configuration
      */
     public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message);
-    
-    /**
-     * Generates a new archive URI
-     * 
-     * @return generated archive URI
-     */
-    public URI getNewArchiveURI();
 }

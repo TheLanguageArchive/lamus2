@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload;
+package nl.mpi.lamus.metadata;
 
 import java.net.URI;
 import java.net.URL;
+import nl.mpi.metadata.api.model.HeaderInfo;
 
 /**
  * Provides some functionality that interacts with the Metadata API.
@@ -33,4 +34,11 @@ public interface MetadataApiBridge {
      * @return URI corresponding to the self link, null if none is found
      */
     public URI getSelfHandleFromFile(URL fileURL);
+    
+    /**
+     * Creates a new HeaderInfo object containing the given handle
+     * @param handle
+     * @return HeaderInfo object containing the handle
+     */
+    public HeaderInfo getNewSelfHandleHeaderInfo(URI handle);
 }

@@ -17,10 +17,12 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
@@ -74,6 +76,12 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     @Autowired
     private ArchiveFileHelper archiveFileHelper;
     
+    @Autowired
+    private HandleManager handleManager;
+    
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    
     private AddedNodeExporter addedNodeExporter;
     private DeletedNodeExporter deletedNodeExporter;
     private GeneralNodeExporter generalNodeExporter;
@@ -108,8 +116,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private AddedNodeExporter getAddedNodeExporter(Workspace workspace) {
         if(addedNodeExporter == null) {
             addedNodeExporter = new AddedNodeExporter(archiveFileLocationProvider, workspaceFileHandler,
-                    metadataAPI, workspaceDao, searchClientBridge, workspaceTreeExporter,
-                    nodeDataRetriever, corpusStructureProvider, nodeResolver);
+                    metadataAPI, workspaceDao, searchClientBridge, workspaceTreeExporter, nodeDataRetriever,
+                    corpusStructureProvider, nodeResolver, handleManager, metadataApiBridge);
         }
         addedNodeExporter.setWorkspace(workspace);
         return addedNodeExporter;

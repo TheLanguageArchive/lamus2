@@ -656,31 +656,48 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#updateNodeArchiveUriUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceDao#updateNodeArchiveUri(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void updateNodeArchiveUriUrl(WorkspaceNode node) {
+    public void updateNodeArchiveUri(WorkspaceNode node) {
         
-        logger.debug("Updating archive URL for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URI to: " + node.getArchiveURI());
+        logger.debug("Updating archive URI for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URI to: " + node.getArchiveURI());
         
         String nodeArchiveUriStr = null;
         if(node.getArchiveURI() != null) {
             nodeArchiveUriStr = node.getArchiveURI().toString();
         }
+        
+        String updateSql = "UPDATE node SET archive_uri = :archive_uri"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("archive_uri", nodeArchiveUriStr)
+                .addValue("workspace_node_id", node.getWorkspaceNodeID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Archive URI of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURI());
+    }
+    
+    /**
+     * @see WorkspaceDao#updateNodeArchiveUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void updateNodeArchiveUrl(WorkspaceNode node) {
+        logger.debug("Updating archive URL for node with ID: " + node.getWorkspaceNodeID() + "; setting archive URL to: " + node.getArchiveURL());
+        
         String nodeArchiveUrlStr = null;
         if(node.getArchiveURL() != null) {
             nodeArchiveUrlStr = node.getArchiveURL().toString();
         }
         
-        String updateSql = "UPDATE node SET archive_uri = :archive_uri, archive_url = :archive_url"
+        String updateSql = "UPDATE node SET archive_url = :archive_url"
                 + " WHERE workspace_node_id = :workspace_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("archive_uri", nodeArchiveUriStr)
                 .addValue("archive_url", nodeArchiveUrlStr)
                 .addValue("workspace_node_id", node.getWorkspaceNodeID());
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
-        logger.info("Archive URI of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURI());
+        logger.info("Archive URL of node " + node.getWorkspaceNodeID() + " updated to " + node.getArchiveURL());
     }
 
     /**

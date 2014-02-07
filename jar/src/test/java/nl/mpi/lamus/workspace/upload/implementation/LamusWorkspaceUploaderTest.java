@@ -42,7 +42,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.lamus.workspace.upload.MetadataApiBridge;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.util.OurURL;

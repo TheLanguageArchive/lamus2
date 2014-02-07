@@ -202,24 +202,4 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(urlToCheckInConfiguration);
         return this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
     }
-
-    /**
-     * @see NodeDataRetriever#getNewArchiveURI()
-     */
-    @Override
-    public URI getNewArchiveURI() {
-        
-        //TODO Maybe it should be generated in a different way?
-        
-        URI newArchiveURI;
-        try {
-            newArchiveURI = new URI(UUID.randomUUID().toString());
-        } catch (URISyntaxException ex) {
-            throw new UnsupportedOperationException("exception not handled yet", ex);
-        }
-        
-//        node.setArchiveURI(newArchiveURI);
-        return newArchiveURI;
-    }
-    
 }

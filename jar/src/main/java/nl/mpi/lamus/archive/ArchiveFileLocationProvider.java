@@ -17,6 +17,8 @@ package nl.mpi.lamus.archive;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
@@ -38,4 +40,14 @@ public interface ArchiveFileLocationProvider {
      * @throws IOException when there are problems in the creation of file or folders
      */
     public File getAvailableFile(String parentNodePath, String filenameAttempt, WorkspaceNodeType nodeType) throws IOException;
+    
+    /**
+     * Retrieves the given URI with the archive HTTP Root prefix (if the URI
+     * starts with the local Root prefix, it is replaced, otherwise the URI
+     * is not changed).
+     * 
+     * @param location
+     * @return URI with the archive HTTP Root prefix
+     */
+    public URI getUriWithHttpRoot(URI location) throws URISyntaxException;
 }

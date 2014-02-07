@@ -36,7 +36,7 @@ import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.upload.MetadataApiBridge;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.apache.commons.io.FileUtils;

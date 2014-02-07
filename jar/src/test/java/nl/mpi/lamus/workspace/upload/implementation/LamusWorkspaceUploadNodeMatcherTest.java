@@ -28,7 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleMatcher;
+import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -60,7 +60,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
-    @Mock HandleMatcher mockHandleMatcher;
+    @Mock HandleManagerImpl mockHandleMatcher;
     @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;

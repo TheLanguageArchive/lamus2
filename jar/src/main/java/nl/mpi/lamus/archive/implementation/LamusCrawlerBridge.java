@@ -30,76 +30,76 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see CrawlerBridge
  * @author guisil
  */
 @Component
 public class LamusCrawlerBridge implements CrawlerBridge {
     
     @Autowired
-    @Qualifier("crawler_hostname")
-    private String hostName;
+    @Qualifier("crawlerHostName")
+    private String crawlerHostName;
     
     @Autowired
-    @Qualifier("crawler_domainname")
-    private String domainName;
+    @Qualifier("crawlerDomainName")
+    private String crawlerDomainName;
     
     @Autowired
-    @Qualifier("crawler_prefixes")
-    private String prefixes;
+    @Qualifier("handlePrefix")
+    private String handlePrefix;
     
     @Autowired
-    @Qualifier("crawler_amsurl")
-    private String amsUrl;
+    @Qualifier("crawlerAmsUrl")
+    private String crawlerAmsUrl;
     
     @Autowired
-    @Qualifier("crawler_mdsurl")
-    private String mdsUrl;
+    @Qualifier("crawlerMdsUrl")
+    private String crawlerMdsUrl;
     
     @Autowired
-    @Qualifier("db_httproot")
-    private String httpRoot;
+    @Qualifier("dbHttpRoot")
+    private String dbHttpRoot;
     
     @Autowired
-    @Qualifier("db_localroot")
-    private String localRoot;
+    @Qualifier("dbLocalRoot")
+    private String dbLocalRoot;
     
     @Autowired
-    @Qualifier("crawler_dbdriverclassname")
-    private String dbDriverClassName;
+    @Qualifier("crawlerDbDriverClassName")
+    private String crawlerDbDriverClassName;
     
     @Autowired
-    @Qualifier("crawler_dburl")
-    private String dbUrl;
+    @Qualifier("crawlerDbUrl")
+    private String crawlerDbUrl;
     
     @Autowired
-    @Qualifier("crawler_dbmaxactive")
-    private String dbMaxActive;
+    @Qualifier("crawlerDbMaxActive")
+    private String crawlerDbMaxActive;
     
     @Autowired
-    @Qualifier("crawler_dbmaxwait")
-    private String dbMaxWait;
+    @Qualifier("crawlerDbMaxWait")
+    private String crawlerDbMaxWait;
     
     @Autowired
-    @Qualifier("crawler_dbtestonborrow")
-    private String dbTestOnBorrow;
+    @Qualifier("crawlerDbTestOnBorrow")
+    private String crawlerDbTestOnBorrow;
     
     @Autowired
-    @Qualifier("crawler_dbusername")
-    private String dbUserName;
+    @Qualifier("crawlerDbUsername")
+    private String crawlerDbUsername;
     
     @Autowired
-    @Qualifier("crawler_dbpassword")
-    private String dbPassword;
+    @Qualifier("crawlerDbPassword")
+    private String crawlerDbPassword;
     
     @Autowired
-    @Qualifier("crawler_connectiondrivername")
-    private String connectionDriverName;
+    @Qualifier("crawlerConnectionDriverName")
+    private String crawlerConnectionDriverName;
     
-    /* specify the handle proxy to use for resolving of handles */
+    // specify the handle proxy to use for resolving of handles
     @Autowired
-    @Qualifier("crawler_hdlproxydomain")
-    private String hdlProxyDomain;
+    @Qualifier("crawlerHdlProxyDomain")
+    private String crawlerHdlProxyDomain;
     
     
     @Override
@@ -107,41 +107,37 @@ public class LamusCrawlerBridge implements CrawlerBridge {
         
         Crawler crawler = null;
         
-        
-        //TODO CHANGE THIS - MAYBE PROVIDE THIS AS A BEAN, USING THE CONTEXT TO FILL IN THE PROPERTIES
-        
-        
-        
+        //TODO Provide this as a bean instead, using the context to fill in the properties?
         
         try {    
             /* crawler options */
             Properties archiveProperties = new Properties();
-            archiveProperties.put("hostname", hostName);
-            archiveProperties.put("domainname", domainName);
-            archiveProperties.put("prefixes", prefixes);
-            archiveProperties.put("amsurl", amsUrl);
-            archiveProperties.put("mdsurl", mdsUrl);
+            archiveProperties.put("hostname", crawlerHostName);
+            archiveProperties.put("domainname", crawlerDomainName);
+            archiveProperties.put("prefixes", handlePrefix);
+            archiveProperties.put("amsurl", crawlerAmsUrl);
+            archiveProperties.put("mdsurl", crawlerMdsUrl);
             
             /* crawler jpa/database options */
             Map jpaProperties = new HashMap();
             
-            String driverClassNameString = "DriverClassName=" + dbDriverClassName;
-            String urlString = "Url=" + dbUrl;
-            String maxActiveString = "MaxActive=" + dbMaxActive;
-            String maxWaitString = "MaxWait=" + dbMaxWait;
-            String testOnBorrowString = "TestOnBorrow=" + dbTestOnBorrow;
-            String userNameString = "Username=" + dbUserName;
-            String passwordString = "Password=" + dbPassword;
+            String driverClassNameString = "DriverClassName=" + crawlerDbDriverClassName;
+            String urlString = "Url=" + crawlerDbUrl;
+            String maxActiveString = "MaxActive=" + crawlerDbMaxActive;
+            String maxWaitString = "MaxWait=" + crawlerDbMaxWait;
+            String testOnBorrowString = "TestOnBorrow=" + crawlerDbTestOnBorrow;
+            String userNameString = "Username=" + crawlerDbUsername;
+            String passwordString = "Password=" + crawlerDbPassword;
             
             jpaProperties.put(
                     "openjpa.ConnectionProperties",
                     driverClassNameString + "," + urlString + "," + maxActiveString + "," + maxWaitString + "," + testOnBorrowString + "," + userNameString + "," + passwordString);
             jpaProperties.put(
                         "openjpa.ConnectionDriverName",
-                        connectionDriverName);
+                        crawlerConnectionDriverName);
             
-            /* create the crawler */
-            crawler = new CmdiCrawler(jpaProperties, archiveProperties, hdlProxyDomain);
+            // create the crawler
+            crawler = new CmdiCrawler(jpaProperties, archiveProperties, crawlerHdlProxyDomain);
         } catch (URISyntaxException ex) {
             throw new UnsupportedOperationException("exception not handled yet");
         }
@@ -152,7 +148,7 @@ public class LamusCrawlerBridge implements CrawlerBridge {
     @Override
     public HandlerUtilities setUpHandlerUtilities() {
         
-        return new LocalFsUtilities(httpRoot, localRoot);
+        return new LocalFsUtilities(dbHttpRoot, dbLocalRoot);
     }
     
 }

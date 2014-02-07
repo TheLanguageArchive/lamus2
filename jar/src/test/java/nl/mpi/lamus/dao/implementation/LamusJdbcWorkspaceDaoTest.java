@@ -677,18 +677,15 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL testURL = new URL("file:/archive/folder/test.cmdi");
         WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
         URI expectedURI = new URI(UUID.randomUUID().toString());
-        URL expectedURL = new URL("file:/archive/folder/different_test.cmdi");
 
         testNode.setArchiveURI(expectedURI);
-        testNode.setArchiveURL(expectedURL);
         
-        workspaceDao.updateNodeArchiveUriUrl(testNode);
+        workspaceDao.updateNodeArchiveUri(testNode);
         
         WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
         
         assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
         assertEquals("Archive URI of the node was not updated in the database.", expectedURI, retrievedNode.getArchiveURI());
-        assertEquals("Archive URL of the node was not updated in the database.", expectedURL, retrievedNode.getArchiveURL());
     }
     
     @Test
@@ -701,12 +698,49 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
         testNode.setArchiveURI(null);
         
-        workspaceDao.updateNodeArchiveUriUrl(testNode);
+        workspaceDao.updateNodeArchiveUri(testNode);
         
         WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
         
         assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
         assertEquals("Archive URI of the node was not updated in the database.", null, retrievedNode.getArchiveURI());
+    }
+    
+    @Test
+    public void updateNodeArchiveURL() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = new URI(UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        URL expectedURL = new URL("file:/archive/folder/different_test.cmdi");
+
+        testNode.setArchiveURL(expectedURL);
+        
+        workspaceDao.updateNodeArchiveUrl(testNode);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        
+        assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
+        assertEquals("Archive URL of the node was not updated in the database.", expectedURL, retrievedNode.getArchiveURL());
+    }
+    
+    @Test
+    public void updateNodeWithNullArchiveURL() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = new URI(UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+
+        testNode.setArchiveURL(null);
+        
+        workspaceDao.updateNodeArchiveUrl(testNode);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        
+        assertEquals("WorkspaceNode object retrieved from the database is different from expected.", testNode, retrievedNode);
+        assertEquals("Archive URL of the node was not updated in the database.", null, retrievedNode.getArchiveURL());
     }
     
     @Test

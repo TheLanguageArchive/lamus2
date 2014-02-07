@@ -333,14 +333,4 @@ public class LamusNodeDataRetrieverTest {
         
         assertFalse("Result should be false", result);
     }
-    
-    
-    public void getNewArchiveURI() {
-        
-        URI retrievedURI = testNodeDataRetriever.getNewArchiveURI();
-        
-        assertNotNull("URI should not be null", retrievedURI);
-        
-        //TODO assert that URI complies with expected format, etc (archive policies regarding handles)
-    }
 }

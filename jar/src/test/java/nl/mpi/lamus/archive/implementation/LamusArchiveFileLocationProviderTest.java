@@ -17,13 +17,11 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.util.OurURL;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -37,6 +35,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -49,6 +48,9 @@ public class LamusArchiveFileLocationProviderTest {
     }};
     
     private ArchiveFileLocationProvider archiveFileLocationProvider;
+    
+    private final String dbHttpRoot = "http://some.server/archive/";
+    private final String dbLocalRoot = "file:/some/loca/folder/archive/";
     
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
@@ -69,119 +71,13 @@ public class LamusArchiveFileLocationProviderTest {
     @Before
     public void setUp() {
         archiveFileLocationProvider = new LamusArchiveFileLocationProvider(mockArchiveFileHelper);
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpRoot", dbHttpRoot);
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "dbLocalRoot", dbLocalRoot);
     }
     
     @After
     public void tearDown() {
     }
-
-
-//    @Test
-//    public void getNextAvailableMetadataFileForNodeCreatedFromScratch_ParentFollowingMpiRules() throws MalformedURLException, IOException {
-//        
-//        final String parentFileNameWithoutExtension = "1-2";
-//        final String parentBasename = parentFileNameWithoutExtension + ".cmdi";
-//        final String parentDirname = "/archive/some/url";
-//        final URL parentArchiveURL = new URL("file:/archive/some/url/" + parentBasename);
-//        final String childNodeName = "childnode";
-////        final String childBasename = parentFileNameWithoutExtension + "-01.cmdi";
-//        
-//        context.checking(new Expectations() {{
-//            
-//            // when originURL of the child node is null, use archiveURL of parent as the base for the name
-//            oneOf(mockArchiveFileHelper).fileNameMatchesMpiRules(parentArchiveURL.getPath()); will(returnValue(Boolean.TRUE));
-//            
-////            oneOf(mockArchiveFileHelper).correctPathElement(childNodeName, "getNextAvailableMetadataFile"); will(returnValue(childNodeName));
-//            oneOf(mockArchiveFileHelper).getFinalFile(parentDirname, parentBasename); will(returnValue(mockChildFile));
-//            oneOf(mockArchiveFileHelper).createFileAndDirectories(mockChildFile);
-//        }});
-//        
-//        File retrievedFile = archiveFileLocationProvider.getNextAvailableMetadataFile(parentArchiveURL, childNodeName, null);
-//        
-//        assertEquals("Retrieved file different from expected", mockChildFile, retrievedFile);
-//    }
-    
-//    @Test
-//    public void getNextAvailableMetadataFileForNodeCreatedFromScratch_ParentNotFollowingMpiRules() throws MalformedURLException, IOException {
-//        
-//        final String parentFileNameWithoutExtension = "parentnode";
-//        final String parentBasename = parentFileNameWithoutExtension + ".cmdi";
-//        final String parentDirname = "/archive/some/url";
-//        final URL parentArchiveURL = new URL("file:/archive/some/url/" + parentBasename);
-//        final String childNodeName = "childnode";
-//        final String childBasename = childNodeName + ".cmdi";
-//        
-//        context.checking(new Expectations() {{
-//            
-//            // when originURL of the child node is null, use archiveURL of parent as the base for the name
-//            oneOf(mockArchiveFileHelper).fileNameMatchesMpiRules(parentArchiveURL.getPath()); will(returnValue(Boolean.FALSE));
-//            
-//            oneOf(mockArchiveFileHelper).correctPathElement(childNodeName, "getNextAvailableMetadataFile"); will(returnValue(childNodeName));
-//            oneOf(mockArchiveFileHelper).getFinalFile(parentDirname, childBasename); will(returnValue(mockChildFile));
-//            oneOf(mockArchiveFileHelper).createFileAndDirectories(mockChildFile);
-//        }});
-//        
-//        File retrievedFile = archiveFileLocationProvider.getNextAvailableMetadataFile(parentArchiveURL, childNodeName, null);
-//        
-//        assertEquals("Retrieved file different from expected", mockChildFile, retrievedFile);
-//    }
-    
-//    @Test
-//    public void getNextAvailableMetadataFileForNodeUploaded_FollowingMpiRules() throws MalformedURLException, IOException {
-//        
-//        final String parentBasename = "parentnode";
-//        final String parentFilenameWithExtension = parentBasename + ".cmdi";
-//        final String parentDirname = "/archive/some/url";
-//        final URL parentArchiveURL = new URL("file:/archive/some/url/" + parentFilenameWithExtension);
-//        final String childNodeName = "1-3";
-//        final String childFilename = "1-3.cmdi";
-////        final String expectedChildFilename = "1-3-01.cmdi";
-//        
-////        final String childFilename = "childnode";
-////        final String childFilenameWithExtension = childFilename + ".cmdi";
-//        final URL childOriginURL = new URL("file:/local/folder/" + childFilename);
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockArchiveFileHelper).fileNameMatchesMpiRules(childOriginURL.getPath()); will(returnValue(Boolean.TRUE));
-//            
-////            oneOf(mockArchiveFileHelper).correctPathElement(childNodeName, "getNextAvailableMetadataFile"); will(returnValue(childNodeName));
-//            oneOf(mockArchiveFileHelper).getFinalFile(parentDirname, childFilename); will(returnValue(mockChildFile));
-//            oneOf(mockArchiveFileHelper).createFileAndDirectories(mockChildFile);
-//        }});
-//        
-//        File retrievedFile = archiveFileLocationProvider.getNextAvailableMetadataFile(parentArchiveURL, childNodeName, childOriginURL);
-//        
-//        assertEquals("Retrieved file different from expected", mockChildFile, retrievedFile);
-//    }
-    
-//    @Test
-//    public void getNextAvailableMetadataFileForNodeUploaded_NotFollowingMpiRules() throws MalformedURLException, IOException {
-//        
-//        final String parentBasename = "parentnode";
-//        final String parentFilenameWithExtension = parentBasename + ".cmdi";
-//        final String parentDirname = "/archive/some/url";
-//        final URL parentArchiveURL = new URL("file:/archive/some/url/" + parentFilenameWithExtension);
-//        final String childNodeName = "CHILDNODE";
-//        final String expectedChildFilename = "CHILDNODE.cmdi";
-//        
-//        final String childFilename = "childnode";
-//        final String childFilenameWithExtension = childFilename + ".cmdi";
-//        final URL childOriginURL = new URL("file:/local/folder/" + childFilenameWithExtension);
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockArchiveFileHelper).fileNameMatchesMpiRules(childOriginURL.getPath()); will(returnValue(Boolean.FALSE));
-//            
-//            oneOf(mockArchiveFileHelper).correctPathElement(childNodeName, "getNextAvailableMetadataFile"); will(returnValue(childNodeName));
-//            oneOf(mockArchiveFileHelper).getFinalFile(parentDirname, expectedChildFilename); will(returnValue(mockChildFile));
-//            oneOf(mockArchiveFileHelper).createFileAndDirectories(mockChildFile);
-//        }});
-//        
-//        File retrievedFile = archiveFileLocationProvider.getNextAvailableMetadataFile(parentArchiveURL, childNodeName, childOriginURL);
-//        
-//        assertEquals("Retrieved file different from expected", mockChildFile, retrievedFile);
-//    }
     
     
     @Test
@@ -250,5 +146,41 @@ public class LamusArchiveFileLocationProviderTest {
             assertNotNull(ex);
             assertEquals("Exception different from expected", ioException, ex);
         }
+    }
+    
+    @Test
+    public void getFileContainingAlreadyHttpRoot() throws URISyntaxException {
+        
+        String fileRelativePath = "anotherFolder/file.cmdi";
+        URI initialLocation = new URI(dbHttpRoot + fileRelativePath);
+        URI expectedLocation = initialLocation;
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getFileContainingLocalRoot() throws URISyntaxException {
+        
+        String fileRelativePath = "anotherFolder/file.cmdi";
+        URI initialLocation = new URI(dbLocalRoot + fileRelativePath);
+        URI expectedLocation = new URI(dbHttpRoot + fileRelativePath);
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getFileContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
+        
+        String fileAbsolutePath = "http://alternative/root/anotherFolder/file.cmdi";
+        URI initialLocation = new URI(fileAbsolutePath);
+        URI expectedLocation = initialLocation;
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
 }

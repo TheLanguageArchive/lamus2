@@ -45,8 +45,8 @@ public class LamusArchiveNodeResolverTest {
     
     private LamusArchiveNodeResolver nodeResolver;
     
-    private final String httpRoot = "http://some/archive/folder/cmdi_test/";
-    private final String localRoot = "file:/some/local/folder/cmdi_test/";
+    private final String dbHttpRoot = "http://some/archive/folder/cmdi_test/";
+    private final String dbLocalRoot = "file:/some/local/folder/cmdi_test/";
     
     @Mock CorpusNodeImpl mockCorpusNode;
     @Mock Archiveobject mockArchiveObject;
@@ -66,8 +66,8 @@ public class LamusArchiveNodeResolverTest {
     public void setUp() {
         
         nodeResolver = new LamusArchiveNodeResolver();
-        ReflectionTestUtils.setField(nodeResolver, "httpRoot", httpRoot);
-        ReflectionTestUtils.setField(nodeResolver, "localRoot", localRoot);
+        ReflectionTestUtils.setField(nodeResolver, "dbHttpRoot", dbHttpRoot);
+        ReflectionTestUtils.setField(nodeResolver, "dbLocalRoot", dbLocalRoot);
     }
     
     @After
@@ -79,9 +79,9 @@ public class LamusArchiveNodeResolverTest {
     public void getUrlHttpRoot() throws MalformedURLException {
 
         final String filePath = "subfolder/file.cmdi";
-        final String dbUriStr = httpRoot + filePath;
+        final String dbUriStr = dbHttpRoot + filePath;
         final URL dbUrl = new URL(dbUriStr);
-        final URL expectedUrl = new URL(localRoot + filePath);
+        final URL expectedUrl = new URL(dbLocalRoot + filePath);
         
         context.checking(new Expectations() {{
             
@@ -98,9 +98,9 @@ public class LamusArchiveNodeResolverTest {
     public void getUrlLocalRoot() throws MalformedURLException {
 
         final String filePath = "subfolder/file.cmdi";
-        final String dbUriStr = localRoot + filePath;
+        final String dbUriStr = dbLocalRoot + filePath;
         final URL dbUrl = new URL(dbUriStr);
-        final URL expectedUrl = new URL(localRoot + filePath);
+        final URL expectedUrl = new URL(dbLocalRoot + filePath);
         
         context.checking(new Expectations() {{
             

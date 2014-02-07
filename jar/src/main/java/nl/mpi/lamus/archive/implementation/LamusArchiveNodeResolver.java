@@ -16,8 +16,6 @@
  */
 package nl.mpi.lamus.archive.implementation;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
@@ -29,7 +27,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Extension of CorpusStructureProviderNodeResolver, which
+ * resolves a node from its external URI to the local one, if necessary.
  * @author guisil
  */
 @Component
@@ -38,19 +37,19 @@ public class LamusArchiveNodeResolver extends CorpusStructureProviderNodeResolve
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveNodeResolver.class);
     
     @Autowired
-    @Qualifier("db_httproot")
-    private String httpRoot;
+    @Qualifier("dbHttpRoot")
+    private String dbHttpRoot;
     @Autowired
-    @Qualifier("db_localroot")
-    private String localRoot;
+    @Qualifier("dbLocalRoot")
+    private String dbLocalRoot;
     
     @Override
     public URL getUrl(CorpusNode node) {
         URL dbUrl = super.getUrl(node);
         
-        if(dbUrl.toString().startsWith(httpRoot)) {
+        if(dbUrl.toString().startsWith(dbHttpRoot)) {
             try {
-                return new URL(dbUrl.toString().replace(httpRoot, localRoot));
+                return new URL(dbUrl.toString().replace(dbHttpRoot, dbLocalRoot));
             } catch (MalformedURLException ex) {
                 logger.warn("Couldn't replace node http URI by a local one (" + dbUrl + ")", ex);
             }

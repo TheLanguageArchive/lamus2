@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload.implementation;
+package nl.mpi.lamus.metadata.implementation;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -171,5 +171,17 @@ public class LamusMetadataApiBridgeTest {
         URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromFile(fileURL);
         
         assertNull("Retrieved handle should be null", retrievedHandle);
+    }
+    
+    @Test
+    public void getNewSelfHandleHeaderInfo() throws URISyntaxException {
+        
+        final URI handle = new URI(UUID.randomUUID().toString().toUpperCase());
+        
+        HeaderInfo retrievedHeaderInfo = lamusMetadataApiBridge.getNewSelfHandleHeaderInfo(handle);
+        
+        assertNotNull("Retrieved header info should not be null", retrievedHeaderInfo);
+        assertEquals("Header info name different from expected", CMDIConstants.CMD_HEADER_MD_SELF_LINK, retrievedHeaderInfo.getName());
+        assertEquals("Header info value different from expected", handle.toString(), retrievedHeaderInfo.getValue());
     }
 }

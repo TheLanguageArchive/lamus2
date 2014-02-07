@@ -37,22 +37,22 @@ public class LamusCrawlerBridgeTest {
     
     private CrawlerBridge crawlerBridge;
     
-    private String hostName = "host.mpi.nl";
-    private String domainName = "mpi.nl";
-    private String prefixes = "01234";
-    private String amsUrl = "";
-    private String mdsUrl = "";
-    private String httpRoot = "http://host.mpi.nl/archive/";
-    private String localRoot = "file:/somewhere/archive/";
-    private String dbDriverClassName = "org.hsqldb.jdbcDriver";
-    private String dbUrl = "jdbc:hsqldb:mem:corpusstructure2";
-    private String dbMaxActive = "100";
-    private String dbMaxWait = "10000";
-    private String dbTestOnBorrow = "true";
-    private String dbUserName = "sa";
-    private String dbPassword = "";
-    private String connectionDriverName = "org.apache.commons.dbcp.BasicDataSource";
-    private String hdlProxyDomain = "http://hdl.handle.net";
+    private String crawlerHostName = "host.mpi.nl";
+    private String crawlerDomainName = "mpi.nl";
+    private String handlePrefix = "01234";
+    private String crawlerAmsUrl = "";
+    private String crawlerMdsUrl = "";
+    private String dbHttpRoot = "http://host.mpi.nl/archive/";
+    private String dbLocalRoot = "file:/somewhere/archive/";
+    private String crawlerDbDriverClassName = "org.hsqldb.jdbcDriver";
+    private String crawlerDbUrl = "jdbc:hsqldb:mem:corpusstructure2";
+    private String crawlerDbMaxActive = "100";
+    private String crawlerDbMaxWait = "10000";
+    private String crawlerDbTestOnBorrow = "true";
+    private String crawlerDbUsername = "sa";
+    private String crawlerDbPassword = "";
+    private String crawlerConnectionDriverName = "org.apache.commons.dbcp.BasicDataSource";
+    private String crawlerHdlProxyDomain = "http://hdl.handle.net";
     
     public LamusCrawlerBridgeTest() {
     }
@@ -75,22 +75,22 @@ public class LamusCrawlerBridgeTest {
         
         crawlerBridge = new LamusCrawlerBridge();
         
-        ReflectionTestUtils.setField(crawlerBridge, "hostName", hostName);
-        ReflectionTestUtils.setField(crawlerBridge, "domainName", domainName);
-        ReflectionTestUtils.setField(crawlerBridge, "prefixes", prefixes);
-        ReflectionTestUtils.setField(crawlerBridge, "amsUrl", amsUrl);
-        ReflectionTestUtils.setField(crawlerBridge, "mdsUrl", mdsUrl);
-        ReflectionTestUtils.setField(crawlerBridge, "httpRoot", httpRoot);
-        ReflectionTestUtils.setField(crawlerBridge, "localRoot", localRoot);
-        ReflectionTestUtils.setField(crawlerBridge, "dbDriverClassName", dbDriverClassName);
-        ReflectionTestUtils.setField(crawlerBridge, "dbUrl", dbUrl);
-        ReflectionTestUtils.setField(crawlerBridge, "dbMaxActive", dbMaxActive);
-        ReflectionTestUtils.setField(crawlerBridge, "dbMaxWait", dbMaxWait);
-        ReflectionTestUtils.setField(crawlerBridge, "dbTestOnBorrow", dbTestOnBorrow);
-        ReflectionTestUtils.setField(crawlerBridge, "dbUserName", dbUserName);
-        ReflectionTestUtils.setField(crawlerBridge, "dbPassword", dbPassword);
-        ReflectionTestUtils.setField(crawlerBridge, "connectionDriverName", connectionDriverName);
-        ReflectionTestUtils.setField(crawlerBridge, "hdlProxyDomain", hdlProxyDomain);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerHostName", crawlerHostName);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDomainName", crawlerDomainName);
+        ReflectionTestUtils.setField(crawlerBridge, "handlePrefix", handlePrefix);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerAmsUrl", crawlerAmsUrl);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerMdsUrl", crawlerMdsUrl);
+        ReflectionTestUtils.setField(crawlerBridge, "dbHttpRoot", dbHttpRoot);
+        ReflectionTestUtils.setField(crawlerBridge, "dbLocalRoot", dbLocalRoot);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbDriverClassName", crawlerDbDriverClassName);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbUrl", crawlerDbUrl);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbMaxActive", crawlerDbMaxActive);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbMaxWait", crawlerDbMaxWait);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbTestOnBorrow", crawlerDbTestOnBorrow);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbUsername", crawlerDbUsername);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerDbPassword", crawlerDbPassword);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerConnectionDriverName", crawlerConnectionDriverName);
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerHdlProxyDomain", crawlerHdlProxyDomain);
     }
     
     @After

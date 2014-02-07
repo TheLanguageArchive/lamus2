@@ -226,11 +226,19 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
-     * @see WorkspaceDao#updateNodeArchiveUriUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceDao#updateNodeArchiveUri(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void updateNodeArchiveUriUrl(WorkspaceNode node) {
-        this.getWorkspaceDao().updateNodeArchiveUriUrl(node);
+    public void updateNodeArchiveUri(WorkspaceNode node) {
+        this.getWorkspaceDao().updateNodeArchiveUri(node);
+    }
+    
+    /**
+     * @see WorkspaceDao#updateNodeArchiveUrl(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void updateNodeArchiveUrl(WorkspaceNode node) {
+        this.getWorkspaceDao().updateNodeArchiveUrl(node);
     }
 
     /**

@@ -25,7 +25,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleMatcher;
+import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
@@ -49,7 +49,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     
     private CorpusStructureProvider corpusStructureProvider;
     private NodeResolver nodeResolver;
-    private HandleMatcher handleMatcher;
+    private HandleManagerImpl handleMatcher;
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private WorkspaceNodeFactory workspaceNodeFactory;
     private WorkspaceDao workspaceDao;
@@ -58,7 +58,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Autowired
     public LamusWorkspaceUploadNodeMatcher(
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            HandleMatcher handleMatcher, WorkspaceDirectoryHandler wsDirectoryHandler,
+            HandleManagerImpl handleMatcher, WorkspaceDirectoryHandler wsDirectoryHandler,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;

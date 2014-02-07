@@ -182,20 +182,178 @@ public class LamusProperties {
         return mapToReturn;
     }
 
+        
+    // crawler properties
     
-    @Value("${httproot}")
-    private String httproot;
+    @Value("${db_httproot}")
+    private String dbHttpRoot;
     @Bean
-    @Qualifier("db_httproot")
-    public String httpRoot() {
-        return httproot;
+    @Qualifier("dbHttpRoot")
+    public String dbHttpRoot() {
+        return dbHttpRoot;
     }
     
-    @Value("${localroot}")
-    private String localroot;
+    @Value("${db_localroot}")
+    private String dbLocalRoot;
     @Bean
-    @Qualifier("db_localroot")
-    public String localRoot() {
-        return localroot;
+    @Qualifier("dbLocalRoot")
+    public String dbLocalRoot() {
+        return dbLocalRoot;
     }
+    
+    @Value("${crawler_hostname}")
+    private String crawlerHostName;
+    @Bean
+    @Qualifier("crawlerHostName")
+    public String crawlerHostName() {
+        return crawlerHostName;
+    }
+    
+    @Value("${crawler_domainname}")
+    private String crawlerDomainName;
+    @Bean
+    @Qualifier("crawlerDomainName")
+    public String crawlerDomainName() {
+        return crawlerDomainName;
+    }
+    
+    @Value("${crawler_amsurl}")
+    private String crawlerAmsUrl;
+    @Bean
+    @Qualifier("crawlerAmsUrl")
+    public String crawlerAmsUrl() {
+        return crawlerAmsUrl;
+    }
+    
+    @Value("${crawler_mdsurl}")
+    private String crawlerMdsUrl;
+    @Bean
+    @Qualifier("crawlerMdsUrl")
+    public String crawlerMdsUrl() {
+        return crawlerMdsUrl;
+    }
+    
+    @Value("${crawler_dbdriverclassname}")
+    private String crawlerDbDriverClassName;
+    @Bean
+    @Qualifier("crawlerDbDriverClassName")
+    public String crawlerDbDriverClassName() {
+        return crawlerDbDriverClassName;
+    }
+    
+    @Value("${crawler_dburl}")
+    private String crawlerDbUrl;
+    @Bean
+    @Qualifier("crawlerDbUrl")
+    public String crawlerDbUrl() {
+        return crawlerDbUrl;
+    }
+    
+    @Value("${crawler_dbmaxactive}")
+    private String crawlerDbMaxActive;
+    @Bean
+    @Qualifier("crawlerDbMaxActive")
+    public String crawlerDbMaxActive() {
+        return crawlerDbMaxActive;
+    }
+    
+    @Value("${crawler_dbmaxwait}")
+    private String crawlerDbMaxWait;
+    @Bean
+    @Qualifier("crawlerDbMaxWait")
+    public String crawlerDbMaxWait() {
+        return crawlerDbMaxWait;
+    }
+    
+    @Value("${crawler_dbtestonborrow}")
+    private String crawlerDbTestOnBorrow;
+    @Bean
+    @Qualifier("crawlerDbTestOnBorrow")
+    public String crawlerDbTestOnBorrow() {
+        return crawlerDbTestOnBorrow;
+    }
+    
+    @Value("${crawler_dbusername}")
+    private String crawlerDbUsername;
+    @Bean
+    @Qualifier("crawlerDbUsername")
+    public String crawlerDbUsername() {
+        return crawlerDbUsername;
+    }
+    
+    @Value("${crawler_dbpassword}")
+    private String crawlerDbPassword;
+    @Bean
+    @Qualifier("crawlerDbPassword")
+    public String crawlerDbPassword() {
+        return crawlerDbPassword;
+    }
+    
+    @Value("${crawler_connectiondrivername}")
+    private String crawlerConnectionDriverName;
+    @Bean
+    @Qualifier("crawlerConnectionDriverName")
+    public String crawlerConnectionDriverName() {
+        return crawlerConnectionDriverName;
+    }
+    
+    @Value("${crawler_hdlproxydomain}")
+    private String crawlerHdlProxyDomain;
+    @Bean
+    @Qualifier("crawlerHdlProxyDomain")
+    public String crawlerHdlProxyDomain() {
+        return crawlerHdlProxyDomain;
+    }
+    
+    
+    //handle properties
+    
+    @Value("${handle_prefix}")
+    private String handlePrefix;
+    @Bean
+    @Qualifier("handlePrefix")
+    public String handlePrefix() {
+        return handlePrefix;
+    }
+    
+    @Value("${handle_proxy}")
+    private String handleProxy;
+    @Bean
+    @Qualifier("handleProxy")
+    public String handleProxy() {
+        return handleProxy;
+    }
+    
+    @Value("${handle_admin_key_file}")
+    private String handleAdminKeyFile;
+    @Bean
+    @Qualifier("handleAdminKeyFile")
+    public String handleAdminKeyFile() {
+        return handleAdminKeyFile;
+    }
+    
+    @Value("${handle_admin_user_handle}")
+    private String handleAdminUserHandle;
+    @Bean
+    @Qualifier("handleAdminUserHandle")
+    public String handleAdminUserHandle() {
+        return handleAdminUserHandle;
+    }
+    
+    @Value("${handle_admin_user_handle_index}")
+    private String handleAdminUserHandleIndex;
+    @Bean
+    @Qualifier("handleAdminUserHandleIndex")
+    public String handleAdminUserHandleIndex() {
+        return handleAdminUserHandleIndex;
+    }
+    
+    @Value("${handle_admin_handle_password}")
+    private String handleAdminHandlePassword;
+    @Bean
+    @Qualifier("handleAdminHandlePassword")
+    public String handleAdminHandlePassword() {
+        return handleAdminHandlePassword;
+    }
+    
 }
