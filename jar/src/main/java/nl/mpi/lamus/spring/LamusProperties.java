@@ -32,7 +32,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
  */
 @Configuration
 @PropertySource(value="classpath:application.properties")
-@Profile(value = {"production", "cmdi-adapter-csdb"})
+@Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
 public class LamusProperties {
     
     // otherwise the properties don't get automatically injected with the Value annotations

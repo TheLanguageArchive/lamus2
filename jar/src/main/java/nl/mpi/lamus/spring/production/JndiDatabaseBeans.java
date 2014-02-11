@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 //@EnableTransactionManagement
-@Profile(value = { "production"})
+@Profile(value = {"production", "demoserver"})
 @ImportResource("classpath:/config/production/csdb.xml")
 public class JndiDatabaseBeans {
     

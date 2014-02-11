@@ -274,7 +274,6 @@ public class AddedNodeExporter implements NodeExporter {
         
         try {
             
-            //TODO FIX TARGET URI
             URI targetUri = archiveFileLocationProvider.getUriWithHttpRoot(currentNode.getArchiveURL().toURI());
             
             URI newNodeArchiveHandle = handleManager.assignNewHandle(new File(currentNode.getWorkspaceURL().getPath()), targetUri);
