@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 package nl.mpi.lamus.web.spring;
 
 import nl.mpi.lamus.web.session.LamusSessionFactory;
-import nl.mpi.lamus.web.session.mock.MockLamusSessionFactory;
+import nl.mpi.lamus.web.session.production.ProductionLamusSessionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -27,18 +27,11 @@ import org.springframework.context.annotation.Profile;
  * @author guisil
  */
 @Configuration
-@Profile(value = {"mock", "demoserver"})
-public class MockSessionBeans {
-    
-    private MockLamusSessionFactory sessionFactory;
+@Profile(value = {"production", "cmdi-adapter-csdb"})
+public class ProductionSessionBeans {
     
     @Bean
     public LamusSessionFactory lamusSessionFactory() {
-        if(sessionFactory == null) {
-            sessionFactory = new MockLamusSessionFactory();
-            sessionFactory.setUserId("corpman@mpi.test");
-            sessionFactory.setAuthenticated(Boolean.TRUE);
-        }
-        return sessionFactory;
+        return new ProductionLamusSessionFactory();
     }
 }

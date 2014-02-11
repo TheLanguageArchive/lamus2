@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.web;
 
-import java.io.File;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
@@ -24,12 +23,8 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-//import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
-import org.apache.wicket.util.file.Folder;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -37,21 +32,11 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
 
     private ApplicationContext applicationContext;
     
-    // service to be injected
     @SpringBean
-    private LamusSessionFactory sessionFactory;
-
-//    @Autowired
-//    @Qualifier("workspaceBaseDirectory")
-//    private File workspaceBaseDirectory;
-//    @Autowired
-//    @Qualifier("workspaceUploadDirectoryName")
-//    private String uploadFolderName;
-    
-//    private Folder uploadFolder = null;
+    private LamusSessionFactory lamusSessionFactory;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
-	this.sessionFactory = sessionFactory;
+	this.lamusSessionFactory = sessionFactory;
     }
 
     @Override
@@ -66,42 +51,18 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
                 new SpringComponentInjector(this, applicationContext, true));
         getResourceSettings().setThrowExceptionOnMissingResource(false);
 
-        //uploadFolder = new Folder(System.getProperty("java.io.tmpdir"), "wicket-uploads");
-        
-        //TODO retrieve/construct this folder in some other way
-//        if(uploadFolderName != null && !uploadFolderName.isEmpty()) {
-//            uploadFolder = new Folder(new File(workspaceBaseDirectory, uploadFolderName));
-//        }
-        
-//        if(uploadFolder == null) {
-//            //TODO have some other fallback value?
-//            uploadFolder = new Folder(System.getProperty("Downloads"), "wicket-uploads");
-//        }
-        
-        // Ensure folder exists
-//        uploadFolder.mkdirs();
-
         getApplicationSettings().setUploadProgressUpdatesEnabled(true);
+        
+        mountPage("/IndexPage", IndexPage.class);
     }
 
     @Override
     public LamusSession newSession(Request request, Response response) {
-	return sessionFactory.createSession(this, request, response);
+	return lamusSessionFactory.createSession(this, request, response);
     }
-    
     
     @Override
     public void setApplicationContext(ApplicationContext ac) throws BeansException {
         this.applicationContext = ac;
     }
-    
-    
-    /**
-     * @return the folder for uploads
-     */
-//    public File getUploadFolder()
-//    {
-//        return uploadFolder;
-//    }
-
 }

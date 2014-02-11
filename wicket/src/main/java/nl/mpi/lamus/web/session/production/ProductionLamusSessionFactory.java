@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,29 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.spring;
+package nl.mpi.lamus.web.session.production;
 
-import nl.mpi.lamus.web.LamusWicketApplication;
+import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.Application;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Response;
 
 /**
  *
  * @author guisil
  */
-@Configuration
-@Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
-public class WicketBeans {
-    
-    @Autowired
-    private LamusSessionFactory lamusSessionFactory;
+public class ProductionLamusSessionFactory implements LamusSessionFactory {
 
-    @Bean
-    public Application wicketApplication() {
-        return new LamusWicketApplication(lamusSessionFactory);
+    @Override
+    public LamusSession createSession(Application application, Request request, Response response) {
+        return new ProductionLamusSession(request);
     }
+    
 }

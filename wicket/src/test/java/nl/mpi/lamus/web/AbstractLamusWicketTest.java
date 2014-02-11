@@ -51,7 +51,7 @@ public abstract class AbstractLamusWicketTest {
     
     private WicketTester tester = null;
     
-    private MockLamusSessionFactory sessionFactory;
+    private MockLamusSessionFactory lamusSessionFactory;
     
     
     @Before
@@ -95,11 +95,11 @@ public abstract class AbstractLamusWicketTest {
     }
     
     private LamusSessionFactory getSessionFactory() {
-        if(sessionFactory == null) {
-            sessionFactory = new MockLamusSessionFactory();
-            sessionFactory.setAuthenticated(true);
-            sessionFactory.setUserId(MOCK_USER_ID);
+        if(lamusSessionFactory == null) {
+            lamusSessionFactory = new MockLamusSessionFactory();
+            lamusSessionFactory.setAuthenticated(true);
+            lamusSessionFactory.setUserId(MOCK_USER_ID);
         }
-        return sessionFactory;
+        return lamusSessionFactory;
     }
 }

@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Profile;
  * @author guisil
  */
 @Configuration
-@Profile(value = {"production", "cmdi-adapter-csdb"})
+@Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
 public class WorkspaceTreeBeans {
     
     @Bean

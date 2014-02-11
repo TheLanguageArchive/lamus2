@@ -46,7 +46,7 @@ import org.springframework.context.annotation.Profile;
 public class LamusWicketApplicationTestBeans {
     
 //    @Autowired
-    private MockLamusSessionFactory sessionFactory;
+    private MockLamusSessionFactory lamusSessionFactory;
     
     private LamusWicketApplication wicketApplication;
     
@@ -57,7 +57,7 @@ public class LamusWicketApplicationTestBeans {
     @Bean
     public Application wicketApplication() {
         if(wicketApplication == null) {
-            wicketApplication = new LamusWicketApplication(sessionFactory);
+            wicketApplication = new LamusWicketApplication(lamusSessionFactory);
         }
         return wicketApplication;
     }
@@ -107,11 +107,11 @@ public class LamusWicketApplicationTestBeans {
     
     @Bean
     public LamusSessionFactory sessionFactory() {
-        if(sessionFactory == null) {
-            sessionFactory = new MockLamusSessionFactory();
-            sessionFactory.setUserId("testUser@mpi.test");
-            sessionFactory.setAuthenticated(Boolean.TRUE);
+        if(lamusSessionFactory == null) {
+            lamusSessionFactory = new MockLamusSessionFactory();
+            lamusSessionFactory.setUserId("testUser@mpi.test");
+            lamusSessionFactory.setAuthenticated(Boolean.TRUE);
         }
-        return sessionFactory;
+        return lamusSessionFactory;
     }
 }

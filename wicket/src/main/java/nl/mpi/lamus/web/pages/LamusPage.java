@@ -35,7 +35,7 @@ public class LamusPage extends WebPage {
 
     public static final PackageResourceReference CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lams.css");
     public static final PackageResourceReference LANA_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lana.gif");
-
+    
     public LamusPage() {
         this("Lamus2 Language Archive Management and Upload System");
     }
