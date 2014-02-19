@@ -721,4 +721,9 @@ class SomeOtherWorkspace implements Workspace {
     public void updateDatesForOpening() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String getWorkspaceSelectionDisplayString() {
+        return toString();
+    }
 }

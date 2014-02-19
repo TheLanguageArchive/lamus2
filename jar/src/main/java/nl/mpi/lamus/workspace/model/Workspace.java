@@ -94,4 +94,6 @@ public interface Workspace extends Serializable {
     public String getArchiveInfo();
     
     public void setArchiveInfo(String archiveInfo);
+    
+    public String getWorkspaceSelectionDisplayString();
 }

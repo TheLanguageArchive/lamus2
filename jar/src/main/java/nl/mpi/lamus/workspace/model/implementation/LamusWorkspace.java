@@ -301,6 +301,16 @@ public class LamusWorkspace implements Workspace {
         this.archiveInfo = archiveInfo;
     }
     
+    @Override
+    public String getWorkspaceSelectionDisplayString() {
+        
+        String stringResult = "ID: " + this.workspaceID + 
+//                ", Top Node Archive URI: " + this.topNodeArchiveURI +
+                ", Start Date: " + this.startDate +
+                ", Session End Date: " + this.sessionEndDate;
+        
+        return stringResult;
+    }
     
     
     
