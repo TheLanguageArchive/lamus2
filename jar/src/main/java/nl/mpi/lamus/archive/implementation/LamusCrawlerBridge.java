@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
+import nl.mpi.archiving.corpusstructure.tools.crawler.ResolverImpl;
 import nl.mpi.archiving.corpusstructure.tools.crawler.cmdi.CmdiCrawler;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.LocalFsUtilities;
@@ -148,7 +149,8 @@ public class LamusCrawlerBridge implements CrawlerBridge {
     @Override
     public HandlerUtilities setUpHandlerUtilities() {
         
-        return new LocalFsUtilities(dbHttpRoot, dbLocalRoot);
+        //TODO Keep this implementation of the resolver, or use something else?
+        return new LocalFsUtilities(new ResolverImpl(), dbHttpRoot, dbLocalRoot);
     }
     
 }
