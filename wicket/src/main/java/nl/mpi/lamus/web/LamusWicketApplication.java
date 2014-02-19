@@ -16,7 +16,9 @@
  */
 package nl.mpi.lamus.web;
 
+import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -41,7 +43,16 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
 
     @Override
     public Class getHomePage() {
-	return IndexPage.class;
+        
+        if(!LamusSession.get().isAuthenticated()) {
+            return IndexPage.class;
+        } else {
+            return CreateWorkspacePage.class;
+        }
+        // if user logged in
+            // if has open workspaces, set "select workspace page" as homepage
+            // else set "create workspace" as homepage
+        // else set "about" as homepage
     }
 
     @Override
@@ -54,6 +65,8 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         getApplicationSettings().setUploadProgressUpdatesEnabled(true);
         
         mountPage("/IndexPage", IndexPage.class);
+        mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
+        mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
     }
 
     @Override

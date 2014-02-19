@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 
 /**
  *
@@ -29,11 +30,12 @@ import org.apache.wicket.markup.html.panel.Panel;
  */
 public class NodeInfoPanel extends Panel {
     
+    private final Form<WorkspaceTreeNode> form;
+    
     public NodeInfoPanel(String id) {
         super(id);
         
-        
-        final Form<WorkspaceTreeNode> form = new Form<WorkspaceTreeNode>("nodeInfoForm");
+        form = new Form<WorkspaceTreeNode>("nodeInfoForm");
         form.add(new Label("name"));
 	form.add(new Label("archiveURI"));
 	form.add(new Label("archiveURL"));
@@ -46,5 +48,9 @@ public class NodeInfoPanel extends Panel {
 	formContainer.add(form);
 	// Add container to page
 	add(formContainer);
+    }
+    
+    public void setNodeInfoModel(IModel<WorkspaceTreeNode> model) {
+        form.setModel(model);
     }
 }

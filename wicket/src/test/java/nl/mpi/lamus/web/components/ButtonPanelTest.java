@@ -107,8 +107,8 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         getTester().assertComponent("buttonpanel:workspaceActionsForm", Form.class);
         getTester().assertEnabled("buttonpanel:workspaceActionsForm");
         
-        getTester().assertComponent("buttonpanel:workspaceActionsForm:requestStorageButton", Button.class);
-        getTester().assertEnabled("buttonpanel:workspaceActionsForm:requestStorageButton");
+//        getTester().assertComponent("buttonpanel:workspaceActionsForm:requestStorageButton", Button.class);
+//        getTester().assertEnabled("buttonpanel:workspaceActionsForm:requestStorageButton");
         
         //TODO other buttons
         
@@ -116,9 +116,6 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("buttonpanel:workspaceActionsForm:deleteWorkspaceButton");
         
         //TODO other buttons
-        
-        getTester().assertComponent("buttonpanel:workspaceActionsForm:indexPageButton", Button.class);
-        getTester().assertEnabled("buttonpanel:workspaceActionsForm:indexPageButton");
     }
     
     //TODO handle request storage

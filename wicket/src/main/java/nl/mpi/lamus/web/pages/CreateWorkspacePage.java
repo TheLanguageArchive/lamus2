@@ -16,7 +16,10 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
@@ -24,10 +27,14 @@ import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.web.components.NavigationPanel;
+import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
@@ -37,7 +44,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
+import org.apache.wicket.markup.html.form.ListChoice;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -62,10 +71,21 @@ public class CreateWorkspacePage extends LamusPage {
 
     public CreateWorkspacePage() {
 	super();
+        
+        createNavigationPanel("navigationPanel");
+        
 	nodeIdForm = createNodeIdForm("nodeIdForm");
 	createArchiveTreePanel("archiveTree");
     }
 
+    
+    private NavigationPanel createNavigationPanel(final String id) {
+        NavigationPanel navPanel = new NavigationPanel(id);
+        add(navPanel);
+        return navPanel;
+    }
+    
+    
     /**
      * Creates and adds an archive tree panel
      *

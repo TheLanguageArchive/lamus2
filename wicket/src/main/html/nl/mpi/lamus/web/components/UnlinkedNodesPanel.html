@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+Copyright (C) 2012 Max Planck Institute for Psycholinguistics
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,12 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <wicket:head>
             <style>
             table {
@@ -41,11 +41,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:panel>
-            <h4>Current unlinked or uploaded files (in <span wicket:id="dir">(dir)</span>):</h4>
+            <h4>Current unlinked or uploaded files</h4>
 <!--            <div wicket:id="checkgroup">
                 <table wicket:id="unlinkedNodesTableTree"></table>
             </div>-->
-            <div wicket:id="unlinkedNodesTableTree"></div>
+            <div wicket:id="unlinkedNodesTableTree" class="tableTree"></div>
         </wicket:panel>
     </body>
 </html>

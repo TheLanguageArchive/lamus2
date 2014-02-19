@@ -79,7 +79,7 @@ public class UnlinkedNodesPanel extends GenericPanel<Workspace> {
         
         File uploadFolder = workspaceService.getWorkspaceUploadDirectory(getModelObject().getWorkspaceID());
         
-        add(new Label("dir", uploadFolder.getAbsolutePath()));
+//        add(new Label("dir", uploadFolder.getAbsolutePath()));
         
 //        checked = new ProviderSubset<WorkspaceTreeNode>(provider, true);
         checked = new ArrayList<WorkspaceTreeNode>();

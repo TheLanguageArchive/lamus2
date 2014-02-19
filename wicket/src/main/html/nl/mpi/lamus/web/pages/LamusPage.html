@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright (C) 2012 Max Planck Institute for Psycholinguistics
 
@@ -14,13 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:wicket="http://wicket.apache.org">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <title>Lamus</title>
     </head>
-    <body topmargin="0" leftmargin="5" marginwidth="5" marginheight="0">
+<!--    <body topmargin="0" leftmargin="5" marginwidth="5" marginheight="0">
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
 	    <tr>
 		<td width="62"><img wicket:id="image" src="lana.gif"/></td>
@@ -36,5 +37,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	</table>
 	<div wicket:id="feedbackPanel" />
     <wicket:child/>
+</body>-->
+
+
+<body>
+    <header>
+        <img id="header_tla_logo" class="header_components header_components_logos" wicket:id="header_tla_logo" src="tla_logo.png" alt=""/>
+        <span id="header_appname" class="header_components header_components_general" wicket:id="header_appname">[APPNAME]</span>
+        <img id="header_clarin_logo" class="header_components header_components_logos" wicket:id="header_clarin_logo" src="CLARIN-inverted.png" alt=""/>
+        <ul id="header_info_container">
+            <li>
+                <a wicket:id="home_page_link" href="[HOME_PAGE]">
+                    <img id="header_home" class="header_components header_components_general" wicket:id="home_image" src="home.png" alt="Home"/>
+                </a>
+            </li>
+            <li>
+                <a href="aboutPage" target="_blank">about</a>
+            </li>
+            <li>
+                <a href="manual" target="_blank">manual</a>
+            </li>
+            <li>
+                <a href="https://lux17.mpi.nl/ds/RRS_V1/RrsRegistration">register</a>
+            </li>
+            <li>
+                <span id="header_userinfo">
+                    <span class="header_components header_components_labels">user:</span>
+                    <em>
+                        <span class="header_components header_components_general" wicket:id="header_username">[USERNAME]</span>
+                    </em>
+                </span>
+            </li>
+            <li>
+                <a id="loginOrLogoutLink" wicket:id="loginOrLogoutLink" href="[LOGIN_OR_LOGOUT]">LOGIN_OR_LOGOUT</a>
+            </li>
+        </ul>
+    </header>
+    <div wicket:id="feedbackPanel" class="feedbackPanel" />
+    <wicket:child/>
 </body>
+
+
+
+
 </html>

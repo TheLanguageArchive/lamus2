@@ -66,15 +66,6 @@ public final class ButtonPanel extends Panel {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
 
-            final Button requestStorageButton = new Button("requestStorageButton") {
-
-                @Override
-                public void onSubmit() {
-                    handleRequestStorage();
-                }
-            };
-            add(requestStorageButton);
-            
             final Button submitWorkspaceButton = new Button("submitWorkspacebutton") {
 
                 @Override
@@ -90,6 +81,8 @@ public final class ButtonPanel extends Panel {
                     }
                     
                     
+                    //TODO SHOW SUCCESS MESSAGE
+                    //TODO SHOW SUCCESS MESSAGE
                     //TODO SHOW SUCCESS MESSAGE
                     
                     
@@ -119,20 +112,6 @@ public final class ButtonPanel extends Panel {
             };
             deleteWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));
             add(deleteWorkspaceButton);
-            
-            final Button indexPageButton = new Button("indexPageButton") {
-
-                @Override
-                public void onSubmit() {
-                    final IndexPage resultPage = new IndexPage();
-                    setResponsePage(resultPage);
-                }
-            };
-            add(indexPageButton);
         }
     }
-
-    private void handleRequestStorage() {
-    }
-
 }

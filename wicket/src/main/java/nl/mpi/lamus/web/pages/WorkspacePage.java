@@ -63,10 +63,12 @@ public class WorkspacePage extends LamusPage {
     // Page model
     private final IModel<Workspace> model;
 //    private final Form<WorkspaceTreeNode> nodeIdForm;
-    private final NodeInfoPanel nodeInfoPanel;
+//    private final NodeInfoPanel nodeInfoPanel;
     private ArchiveTreePanel wsTreePanel;
     private final WsNodeActionsPanel wsNodeActionsPanel;
     private LinkNodesPanel linkNodesPanel;
+    
+    private WorkspaceInfoPanel wsInfoPanel;
     
     //TODO Make it possible to have multiple selection
 //    private WorkspaceTreeNode selectedNode;
@@ -75,16 +77,16 @@ public class WorkspacePage extends LamusPage {
 	super();
 	this.model = model;
 //	nodeIdForm = createNodeInfoForm("nodeInfoForm");
-        nodeInfoPanel = new NodeInfoPanel("nodeInfoPanel");
-        nodeInfoPanel.setOutputMarkupId(true);
-        add(nodeInfoPanel);
+//        nodeInfoPanel = new NodeInfoPanel("nodeInfoPanel");
+//        nodeInfoPanel.setOutputMarkupId(true);
+//        add(nodeInfoPanel);
 
 //	add(createWorkspaceInfo("workspaceInfo"));
 //        add(new WorkspaceInfoPanel("workspaceInfoPanel", model));
 
 	wsTreePanel = createWorkspaceTreePanel("workspaceTree");
 	add(wsTreePanel);
-	add(new ButtonPanel("buttonpage", model));
+	add(new ButtonPanel("buttonPanel", model));
 
 	wsNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
 	    @Override
@@ -103,7 +105,11 @@ public class WorkspacePage extends LamusPage {
         tabs.add(new AbstractTab(new Model<String>("Workspace Info")) {
             @Override
             public WebMarkupContainer getPanel(String panelId) {
-                return new WorkspaceInfoPanel(panelId, model);
+                if(wsInfoPanel == null) {
+                    wsInfoPanel = new WorkspaceInfoPanel(panelId, model);
+                    wsInfoPanel.setOutputMarkupId(true);
+                }
+                return wsInfoPanel;
             }
         });
         tabs.add(new AbstractTab(new Model<String>("Unlinked Nodes")) {
@@ -145,7 +151,7 @@ public class WorkspacePage extends LamusPage {
                 return new UploadPanel(panelId, model);
             }
         });
-        add(new TabbedPanel("tabs", tabs));
+        add(new TabbedPanel("workspaceTabs", tabs));
     }
 
     /**
@@ -170,16 +176,15 @@ public class WorkspacePage extends LamusPage {
 		
 //                final WorkspaceTreeNode node = (WorkspaceTreeNode) treePanel.getSelectedNodes().iterator().next();
                 
-                WorkspaceTreeNode selectedNode = null;
-                IModel<WorkspaceTreeNode> nodeInfoModel;
-                if(!treePanel.getSelectedNodes().isEmpty()) {
-                    selectedNode = (WorkspaceTreeNode) treePanel.getSelectedNodes().iterator().next();
-                    nodeInfoModel = new CompoundPropertyModel<WorkspaceTreeNode>(selectedNode);
-                } else {
-                    nodeInfoModel = new Model<WorkspaceTreeNode>();
-                }
+                WorkspaceTreeNode selectedNode = getSelectedNode(treePanel);
+                IModel<WorkspaceTreeNode> nodeInfoModel = getSelectedNodesModel(selectedNode);
+                
 //                nodeIdForm.setModel(new CompoundPropertyModel<WorkspaceTreeNode>(node));
-                nodeInfoPanel.setDefaultModel(nodeInfoModel);
+//                nodeInfoPanel.setDefaultModel(nodeInfoModel);
+                
+                
+                wsInfoPanel.setNodeInfoPanelModel(nodeInfoModel);
+                
                 
 		wsNodeActionsPanel.setModelObject(wsTreePanel.getSelectedNodes());
                 
@@ -201,7 +206,13 @@ public class WorkspacePage extends LamusPage {
                 
 		if (target != null) {
 //		    target.add(nodeIdForm);
-                    target.add(nodeInfoPanel);
+//                    target.add(nodeInfoPanel);
+                    
+                    if(wsInfoPanel != null) {
+//                        target.add(wsInfoPanel);
+                        target.add(wsInfoPanel.getNodeInfoPanel());
+                    }
+                    
                     
 		    target.add(wsNodeActionsPanel);
                     
@@ -279,11 +290,31 @@ public class WorkspacePage extends LamusPage {
         return linkNodesPanel;
     }
     
+    private WorkspaceTreeNode getSelectedNode(ArchiveTreePanel treePanel) {
+        WorkspaceTreeNode selectedNode = null;
+        if(!treePanel.getSelectedNodes().isEmpty()) {
+            selectedNode = (WorkspaceTreeNode) treePanel.getSelectedNodes().iterator().next();
+        }
+        return selectedNode;
+    }
+    
+    private IModel<WorkspaceTreeNode> getSelectedNodesModel(WorkspaceTreeNode selectedNode) {
+        
+        IModel<WorkspaceTreeNode> nodeInfoModel = null;
+        if(selectedNode != null) {
+            nodeInfoModel = new CompoundPropertyModel<WorkspaceTreeNode>(selectedNode);
+        } else {
+            nodeInfoModel = new Model<WorkspaceTreeNode>();
+        }
+        return nodeInfoModel;
+    }
+    
     
     protected void refreshStuff() {
-        wsTreePanel = createWorkspaceTreePanel("workspaceTree");
-        addOrReplace(wsTreePanel);
-        
+//        wsTreePanel = createWorkspaceTreePanel("workspaceTree");
+//        addOrReplace(wsTreePanel);
+        //TODO some other way of updating the tree?
+        wsTreePanel.getTree().invalidateAll();
         
         
         if(linkNodesPanel != null) {

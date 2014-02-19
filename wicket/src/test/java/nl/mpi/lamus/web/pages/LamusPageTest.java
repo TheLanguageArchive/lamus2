@@ -54,16 +54,19 @@ public class LamusPageTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void componentsRenderSuccessfully() {
         
-        getTester().assertComponent("image", Image.class);
-        getTester().assertEnabled("image");
+        getTester().assertComponent("header_tla_logo", Image.class);
+        getTester().assertEnabled("header_tla_logo");
         
-        getTester().assertComponent("pageTitle", Label.class);
-        getTester().assertEnabled("pageTitle");
-        getTester().assertLabel("pageTitle", AbstractLamusWicketTest.MOCK_LAMUS_PAGE_TITLE);
+        getTester().assertComponent("header_appname", Label.class);
+        getTester().assertEnabled("header_appname");
+        getTester().assertLabel("header_appname", AbstractLamusWicketTest.MOCK_LAMUS_PAGE_TITLE);
         
-        getTester().assertComponent("username", Label.class);
-        getTester().assertEnabled("username");
-        getTester().assertLabel("username", AbstractLamusWicketTest.MOCK_USER_ID);
+        getTester().assertComponent("header_clarin_logo", Image.class);
+        getTester().assertEnabled("header_clarin_logo");
+        
+        getTester().assertComponent("header_username", Label.class);
+        getTester().assertEnabled("header_username");
+        getTester().assertLabel("header_username", AbstractLamusWicketTest.MOCK_USER_ID);
         
         getTester().assertComponent("feedbackPanel", FeedbackPanel.class);
         getTester().assertEnabled("feedbackPanel");

@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+Copyright (C) 2012 Max Planck Institute for Psycholinguistics
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,27 +15,28 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
     <body>
         <wicket:panel>
-            <h4>Link uploaded files</h4>
-            <form wicket:id="linkNodesForm">
-                <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
-                <input wicket:id="linkNodesButton" type="submit"/>
-            </form>
-            <div>
-            <h4>Link and external file</h4>
-            <form wicket:id="linkExternalNodesForm">
-                <p>File location: </p>
-                <input wicket:id="externalNodeLocation" type="text" maxlength="200"/>
-                <input wicket:id="linkExternalNodeButton" type="submit"/>
-            </form>
+            <div class="infoContainer">
+                <h2>Link files</h2>
+                <form wicket:id="linkNodesForm">
+                    <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
+                    <input wicket:id="linkNodesButton" type="submit"/>
+                </form>
+                <div>
+                <h4>Link and external file</h4>
+                <form wicket:id="linkExternalNodesForm">
+                    <p>File location: </p>
+                    <input wicket:id="externalNodeLocation" type="text" maxlength="200"/>
+                    <input wicket:id="linkExternalNodeButton" type="submit"/>
+                </form>
+                </div>
             </div>
         </wicket:panel>
     </body>

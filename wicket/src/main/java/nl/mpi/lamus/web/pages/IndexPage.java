@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -28,8 +29,8 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  */
 public class IndexPage extends LamusPage {
 
-    @SpringBean
-    private LamusWicketPagesProvider pagesProvider;
+//    @SpringBean
+//    private LamusWicketPagesProvider pagesProvider;
     
     /**
      * Constructor.
@@ -37,29 +38,31 @@ public class IndexPage extends LamusPage {
     public IndexPage() {
         super();
         
-        add(new Link("createWorkspaceLink") {
-
-            @Override
-            public void onClick() {
-                setResponsePage(pagesProvider.getCreateWorkspacePage());
-            }
-        });
+//        add(new Link("createWorkspaceLink") {
+//
+//            @Override
+//            public void onClick() {
+//                setResponsePage(pagesProvider.getCreateWorkspacePage());
+//            }
+//        });
+//        
+//        add(new Link("selectWorkspaceLink") {
+//
+//            @Override
+//            public void onClick() {
+//                setResponsePage(pagesProvider.getSelectWorkspacePage());
+//            }
+//        });
+//        
+//        add(new Link("requestStorageSpaceLink") {
+//
+//            @Override
+//            public void onClick() {
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//            }
+//        });
         
-        add(new Link("selectWorkspaceLink") {
-
-            @Override
-            public void onClick() {
-                setResponsePage(pagesProvider.getSelectWorkspacePage());
-            }
-        });
-        
-        add(new Link("requestStorageSpaceLink") {
-
-            @Override
-            public void onClick() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        });
+        createNavigationPanel("navigationPanel");
     }
 
     /**
@@ -70,4 +73,11 @@ public class IndexPage extends LamusPage {
 //    public IndexPage(PageParameters params) {
 //        //TODO:  process page parameters
 //    }
+    
+    
+    private NavigationPanel createNavigationPanel(final String id) {
+        NavigationPanel navPanel = new NavigationPanel(id);
+        add(navPanel);
+        return navPanel;
+    }
 }

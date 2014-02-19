@@ -15,19 +15,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:wicket="http://wicket.apache.org">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Welcome to  LAMUS2</title>
         <wicket:link>
-            <link type="text/css" rel="stylesheet" href="lams.css"></link>
+            <!--<link type="text/css" rel="stylesheet" href="lams.css"></link>-->
         </wicket:link>
     </head>
     <body>
 	<wicket:extend>
 
-	    <table align="center" width='450px'>
+            <div id="navigationPanel" wicket:id="navigationPanel" />
+            
+            <div class="mainPageContent">
+                <center><h1>Welcome to  LAMUS2</h1></center>
+            </div>
+            
+<!--	    <table align="center" width='450px'>
 		<tr>
 		    <td>
 			<center><h1>Welcome to  LAMUS2</h1></center>
@@ -58,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<tr>
 		    <td>&nbsp;</td>
 		</tr>
-	    </table>
+	    </table>-->
 	</wicket:extend>
     </body>
 </html>

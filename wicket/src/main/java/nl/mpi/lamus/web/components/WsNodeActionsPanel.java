@@ -23,11 +23,14 @@ import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -73,7 +76,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
             @Override
             protected void populateItem(ListItem<WsTreeNodesAction> li) {
                 
-                li.add(new WsNodeActionButton(
+                Button nodeActionButton = new WsNodeActionButton(
                         "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), li.getModelObject(),
                         WsNodeActionsPanel.this.workspaceService) {
 
@@ -83,7 +86,11 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
                     }
                     
                     
-                });
+                };
+                
+                nodeActionButton.add(AttributeModifier.append("class", new Model<String>("icon-submit_ws")));
+                
+                li.add(nodeActionButton);
             }
         };
     }

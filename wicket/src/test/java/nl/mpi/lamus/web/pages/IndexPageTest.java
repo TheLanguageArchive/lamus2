@@ -90,41 +90,41 @@ public class IndexPageTest extends AbstractLamusWicketTest {
         getTester().assertRenderedPage(IndexPage.class);
     }
     
-    @Test
-    @DirtiesContext
-    public void linksRenderSuccessfully() {
-        
-        getTester().assertComponent("createWorkspaceLink", Link.class);
-        getTester().assertEnabled("createWorkspaceLink");
-        
-        getTester().assertComponent("selectWorkspaceLink", Link.class);
-        getTester().assertEnabled("selectWorkspaceLink");
-        
-        getTester().assertComponent("requestStorageSpaceLink", Link.class);
-        getTester().assertEnabled("requestStorageSpaceLink");
-    }
-    
-    @Test
-    @DirtiesContext
-    public void createWorkspaceLinkClick() {
-        
-        getTester().clickLink("createWorkspaceLink");
-        
-        verify(mockPagesProviderBean).getCreateWorkspacePage();
-        
-        getTester().assertRenderedPage(CreateWorkspacePage.class);
-    }
-    
-    @Test
-    @DirtiesContext
-    public void selectWorkspaceLinkClick() {
-        
-        getTester().clickLink("selectWorkspaceLink");
-        
-        verify(mockPagesProviderBean).getSelectWorkspacePage();
-        
-        getTester().assertRenderedPage(SelectWorkspacePage.class);
-    }
+//    @Test
+//    @DirtiesContext
+//    public void linksRenderSuccessfully() {
+//        
+//        getTester().assertComponent("createWorkspaceLink", Link.class);
+//        getTester().assertEnabled("createWorkspaceLink");
+//        
+//        getTester().assertComponent("selectWorkspaceLink", Link.class);
+//        getTester().assertEnabled("selectWorkspaceLink");
+//        
+//        getTester().assertComponent("requestStorageSpaceLink", Link.class);
+//        getTester().assertEnabled("requestStorageSpaceLink");
+//    }
+//    
+//    @Test
+//    @DirtiesContext
+//    public void createWorkspaceLinkClick() {
+//        
+//        getTester().clickLink("createWorkspaceLink");
+//        
+//        verify(mockPagesProviderBean).getCreateWorkspacePage();
+//        
+//        getTester().assertRenderedPage(CreateWorkspacePage.class);
+//    }
+//    
+//    @Test
+//    @DirtiesContext
+//    public void selectWorkspaceLinkClick() {
+//        
+//        getTester().clickLink("selectWorkspaceLink");
+//        
+//        verify(mockPagesProviderBean).getSelectWorkspacePage();
+//        
+//        getTester().assertRenderedPage(SelectWorkspacePage.class);
+//    }
     
     //TODO test other links
 

@@ -106,11 +106,11 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertComponent("formContainer:workspaceForm", Form.class);
         getTester().assertEnabled("formContainer:workspaceForm");
         
-        getTester().assertComponent("formContainer:workspaceForm:workspace", ListChoice.class);
-        getTester().assertEnabled("formContainer:workspaceForm:workspace");
+        getTester().assertComponent("formContainer:workspaceForm:workspaceSelection", ListChoice.class);
+        getTester().assertEnabled("formContainer:workspaceForm:workspaceSelection");
         
-        getTester().assertComponent("formContainer:workspaceForm:OpenWorkspace", Button.class);
-        getTester().assertEnabled("formContainer:workspaceForm:OpenWorkspace");
+        getTester().assertComponent("formContainer:workspaceForm:openWorkspace", Button.class);
+        getTester().assertEnabled("formContainer:workspaceForm:openWorkspace");
     }
     
     @Test
@@ -120,7 +120,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         verify(mockWorkspaceServiceBean).listUserWorkspaces(AbstractLamusWicketTest.MOCK_USER_ID);
         
         ListChoice<Workspace> listComponent =
-                (ListChoice<Workspace>) getTester().getComponentFromLastRenderedPage("formContainer:workspaceForm:workspace");
+                (ListChoice<Workspace>) getTester().getComponentFromLastRenderedPage("formContainer:workspaceForm:workspaceSelection");
         
         assertEquals("List of workspaces different from expected", mockWsList, listComponent.getChoices());
     }
@@ -131,8 +131,8 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         
         FormTester formTester = getTester().newFormTester("formContainer:workspaceForm", false);
         
-        formTester.select("workspace", 0);
-        formTester.submit("OpenWorkspace");
+        formTester.select("workspaceSelection", 0);
+        formTester.submit("openWorkspace");
         
         verify(mockWorkspaceServiceBean).openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWs1.getWorkspaceID());
         verify(mockLamusWicketPagesProviderBean).getWorkspacePage(mockWs1);

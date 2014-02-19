@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright (C) 2012 Max Planck Institute for Psycholinguistics
 
@@ -14,56 +15,51 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:wicket="http://wicket.apache.org">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Workspace</title>
-        <link rel="stylesheet" type="text/css" href="style.css"/>
+        <!--<link rel="stylesheet" type="text/css" href="style.css"/>-->
     </head>
     <body>
         <wicket:extend>
-            <div wicket:id="buttonpage" />
-            <div id="workspaceSelect" style="position: relative; float: left; width: 40%;">
+            <div wicket:id="buttonPanel" class="buttonPanel" />
+            
+            <!--<div id="nodeActionsPanelContainer">-->
+
                 
-                <table>
+                    <div id="wsNodeActionsPanel" wicket:id="wsNodeActionsPanel">[node actions panel]</div>
+                    
+                <!--<wicket:child />-->
+                
+            <!--</div>-->  
+            
+            <div class="treePanelContainer">
+                
+<!--                <table>
                     <tr>
-<!--                        <td wicket:id="workspaceInfoPanel">
-                        </td>-->
+                        <td wicket:id="workspaceInfoPanel">
+                        </td>
                         <td wicket:id="nodeInfoPanel">
-<!--                            <form wicket:id="nodeInfoForm">
+                            <form wicket:id="nodeInfoForm">
                                 <p>Selected node: <span wicket:id="name">Node name</span></p>
                                 <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
                                 <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
                                 <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
                                 <p>Type: <span wicket:id="type">Type</span></p>
-                            </form>-->
+                            </form>
                         </td>
                     </tr>
-                </table>
+                </table>-->
                     
-                    <div wicket:id="workspaceTree">[WORKSPACE TREE]</div>
-                </div>
-            <span wicket:id="tabs" class="tabpanel">[tabbed panel]</span>
-            <div id="changeableContainer" style="position: relative; float: right; width: 40%;">
-<!--                <div wicket:id="nodeInfoContainer">
-                    <form wicket:id="nodeInfoForm">
-                        <p>Selected node: <span wicket:id="name">Node name</span></p>
-                        <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
-                        <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
-                        <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
-                        <p>Type: <span wicket:id="type">Type</span></p>
-                    </form>
-                </div>-->
+                <div id="workspaceTree" wicket:id="workspaceTree" class="treePanel">[WORKSPACE TREE]</div>
                 
-                    <!--<div wicket:id="nodeInfoPanel">NodeInfoPanel</div>-->
+<!--                <div id="nodeInfoPanel" wicket:id="nodeInfoPanel">[NODE INFO PANEL]</div>-->
                 
-                    <div id="wsNodeActionsPanel" wicket:id="wsNodeActionsPanel">[node actions panel]</div>
-                    
-                <wicket:child />
-                
-            </div>  
+            </div>
+            <div wicket:id="workspaceTabs" class="tabpanel">[tabbed panel]</div>
+            
             
         </wicket:extend>
     </body>

@@ -15,8 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:wicket="http://wicket.apache.org">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>LamusSelectWorkspace</title>
@@ -24,16 +24,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <body>
         <wicket:extend>
 
-            <div align="center" wicket:id="formContainer">
-                <form wicket:id="workspaceForm">
-		<p>
-			<label>[ListChoice] Select a workspace :</label> 
-			<br />
-			<select wicket:id="workspace"></select>
-		</p>
-                    <input  wicket:id="OpenWorkspace" type="submit" value="Open selected Workspace"/>
-                </form>
-            </div>
+            <div id="navigationPanel" wicket:id="navigationPanel" />
+                
+                <div class="mainPageContent">
+            
+                    <div wicket:id="formContainer">
+                        <form wicket:id="workspaceForm">
+                            <p>
+                                <label>Select a workspace :</label>
+                                <br />
+                                <select id="workspaceSelection" wicket:id="workspaceSelection"></select>
+                            </p>
+                            <input class="ws_button ws_button-3 ws_button-3b" wicket:id="openWorkspace" type="submit" value="Open selected Workspace"/>
+                        </form>
+                    </div>
+                    
+                </div>
         </wicket:extend>
     </body>
 </html>

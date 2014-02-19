@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.components;
 
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -29,6 +30,8 @@ import org.apache.wicket.model.IModel;
  */
 public class WorkspaceInfoPanel extends Panel {
     
+    private final NodeInfoPanel nodeInfoPanel;
+    
     public WorkspaceInfoPanel(String id, IModel<Workspace> model) {
         super(id, model);
         
@@ -38,5 +41,17 @@ public class WorkspaceInfoPanel extends Panel {
 	container.add(new Label("status"));
         
         add(container);
+        
+        nodeInfoPanel = new NodeInfoPanel("nodeInfoPanel");
+        nodeInfoPanel.setOutputMarkupId(true);
+        add(nodeInfoPanel);
+    }
+    
+    public NodeInfoPanel getNodeInfoPanel() {
+        return nodeInfoPanel;
+    }
+    
+    public void setNodeInfoPanelModel(IModel<WorkspaceTreeNode> model) {
+        nodeInfoPanel.setNodeInfoModel(model);
     }
 }

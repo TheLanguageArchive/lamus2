@@ -198,6 +198,11 @@ public class MockWorkspace implements Workspace {
     public void setStatusMessageErrorDuringInitialisation() {
 	setMessage("Error during initialisation");
     }
+    
+    @Override
+    public String getWorkspaceSelectionDisplayString() {
+        return toString();
+    }
 
     @Override
     public String toString() {

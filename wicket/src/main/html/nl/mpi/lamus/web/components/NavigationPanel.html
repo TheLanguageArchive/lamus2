@@ -18,16 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     </head>
     <body>
         <wicket:panel>
-            <form id="wsNodeActionsForm" wicket:id="wsNodeActionsForm">
-                <span wicket:id="wsNodeActions">
-                    <input class="ws_button ws_button-3 ws_button-3b" wicket:id="nodeActionButton" type="submit" value="node action button" />
-                </span>
-            </form>
-        </wicket:panel>
+
+            <!--<div id="navigation">-->
+            <ul class="navigationMenu">
+                    <li><a href="#" wicket:id="createWorkspaceLink" >Create Workspace</a></li>
+                    <li><a href="#" wicket:id="selectWorkspaceLink" >Open Workspace</a></li>
+                    <li><a href="#" wicket:id="requestStorageSpaceLink" >Request storage space</a></li>
+                </ul>
+            <!--</div>-->
+            
+	</wicket:panel>
     </body>
 </html>

@@ -21,6 +21,7 @@ import java.util.List;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
@@ -29,6 +30,7 @@ import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListChoice;
 import org.apache.wicket.model.IModel;
@@ -53,8 +55,16 @@ public class SelectWorkspacePage extends LamusPage {
     public SelectWorkspacePage() {
         super();
         createNodeIdForm("workspaceForm");
+        
+        createNavigationPanel("navigationPanel");
     }
 
+    private NavigationPanel createNavigationPanel(final String id) {
+        NavigationPanel navPanel = new NavigationPanel(id);
+        add(navPanel);
+        return navPanel;
+    }
+    
     /**
      * Create Form that will show a list of Workspaces to be opened by a
      * specific user
@@ -64,13 +74,19 @@ public class SelectWorkspacePage extends LamusPage {
      */
     private Form createNodeIdForm(String id) {
 
-        IModel<Workspace> workspaceModel = new WorkspaceModel(null);
+        Workspace defaultSelectedWs = null;
         List<Workspace> myWSList = new ArrayList<Workspace>(workspaceService.listUserWorkspaces(currentUserId));
-        ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspace", workspaceModel, myWSList);
+        if(!myWSList.isEmpty()) {
+            defaultSelectedWs = myWSList.iterator().next();
+        }
+        IModel<Workspace> workspaceModel = new WorkspaceModel(defaultSelectedWs);
+        
+        ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
         listWorkspaces.setMaxRows(5);
+        listWorkspaces.setNullValid(false);
         final Form<Workspace> form = new Form<Workspace>(id, workspaceModel);
 
-        Button submitButton = new Button("OpenWorkspace") {
+        Button submitButton = new Button("openWorkspace") {
 
             @Override
             public void onSubmit() {

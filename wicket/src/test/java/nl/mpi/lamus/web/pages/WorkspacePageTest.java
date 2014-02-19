@@ -17,12 +17,7 @@
 package nl.mpi.lamus.web.pages;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.mpi.lamus.web.components.ButtonPanel;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
@@ -36,16 +31,10 @@ import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.extensions.markup.html.tabs.TabbedPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.CompoundPropertyModel;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
@@ -126,8 +115,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void componentsRendered() {
         
-        getTester().assertComponent("buttonpage", ButtonPanel.class);
-        getTester().assertEnabled("buttonpage");
+        getTester().assertComponent("buttonPanel", ButtonPanel.class);
+        getTester().assertEnabled("buttonPanel");
         
         
 //        getTester().assertComponent("workspaceInfo", WebMarkupContainer.class);
@@ -175,8 +164,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
 //        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:type");
 //        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:type", ""); //TODO test when node selection changes
         
-        getTester().assertComponent("nodeInfoPanel", Panel.class);
-        getTester().assertEnabled("nodeInfoPanel");
+//        getTester().assertComponent("nodeInfoPanel", Panel.class);
+//        getTester().assertEnabled("nodeInfoPanel");
         
         
         
@@ -188,8 +177,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("wsNodeActionsPanel");
         
         
-        getTester().assertComponent("tabs", TabbedPanel.class);
-        getTester().assertEnabled("tabs");
+        getTester().assertComponent("workspaceTabs", TabbedPanel.class);
+        getTester().assertEnabled("workspaceTabs");
         
         //TODO assert individual tabs?
     }
