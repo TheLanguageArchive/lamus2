@@ -24,10 +24,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -129,7 +129,7 @@ public class LamusNodeDataRetrieverTest {
 
 
     @Test
-    public void getArchiveURL() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+    public void getArchiveURL() throws URISyntaxException, MalformedURLException, ArchiveNodeNotFoundException {
         
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL expectedURL = new URL("file:/somewhere/in/the/archive/node.cmdi");
@@ -146,22 +146,22 @@ public class LamusNodeDataRetrieverTest {
     }
     
     @Test
-    public void getArchiveURLThrowsUnknownNodeException() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+    public void getArchiveURLThrowsArchiveNodeNotFoundException() throws URISyntaxException, MalformedURLException, ArchiveNodeNotFoundException {
         
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        final String expectedMessage = "Archive node not found: " + nodeArchiveURI;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(throwException(expectedException));
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(null));
         }});
         
         try {
             testNodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
             fail("should have thrown exception");
-        } catch(UnknownNodeException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+        } catch(ArchiveNodeNotFoundException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", nodeArchiveURI, ex.getNodeURI());
         }
     }
     

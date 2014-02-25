@@ -23,15 +23,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
-import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.util.OurURL;
-import nl.mpi.versioning.manager.VersioningAPI;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -60,7 +57,6 @@ public class LamusTrashVersioningHandlerTest {
     
     private TrashVersioningHandler versioningHandler;
     
-    @Mock VersioningAPI mockVersioningAPI;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     
     private File trashCanBaseDirectory = new File("/lat/corpora/version_archive/");

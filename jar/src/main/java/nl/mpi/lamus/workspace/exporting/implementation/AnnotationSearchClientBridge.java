@@ -15,11 +15,11 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
-import nl.mpi.annot.search.lib.SearchClient;
+//import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +35,12 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
     
     private static final Logger logger = LoggerFactory.getLogger(AnnotationSearchClientBridge.class);
 
-    private final SearchClient searchClient;
+//    private final SearchClient searchClient;
     
-    @Autowired
-    public AnnotationSearchClientBridge(SearchClient sClient) {
-        this.searchClient = sClient;
-    }
+//    @Autowired
+//    public AnnotationSearchClientBridge(SearchClient sClient) {
+//        this.searchClient = sClient;
+//    }
     
     /**
      * @see SearchClientBridge#addNode(java.net.URI)
@@ -82,12 +82,14 @@ public class AnnotationSearchClientBridge implements SearchClientBridge {
     @Override
     public boolean isFormatSearchable(String format) {
         
-        List<String> searchableFormats = Arrays.asList(SearchClient.getSearchableFormats());
-        if(searchableFormats.contains(format)) {
-            return Boolean.TRUE;
-        } else {
-            return Boolean.FALSE;
-        }
+//        List<String> searchableFormats = Arrays.asList(SearchClient.getSearchableFormats());
+//        if(searchableFormats.contains(format)) {
+//            return Boolean.TRUE;
+//        } else {
+//            return Boolean.FALSE;
+//        }
+        
+        return false;
     }
     
 }

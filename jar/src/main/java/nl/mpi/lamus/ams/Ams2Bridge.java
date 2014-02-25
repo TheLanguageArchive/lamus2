@@ -19,16 +19,16 @@ package nl.mpi.lamus.ams;
 //import nl.mpi.lat.ams.model.NodeLicense;
 //import nl.mpi.lat.ams.model.NodePcplLicense;
 import java.net.URI;
-import nl.mpi.lat.ams.model.NodePcplRule;
-import nl.mpi.lat.ams.service.LicenseService;
-import nl.mpi.lat.ams.service.RuleService;
-import nl.mpi.lat.auth.authentication.AuthenticationService;
-import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-import nl.mpi.lat.auth.principal.LatPrincipal;
-import nl.mpi.lat.auth.principal.PrincipalService;
-import nl.mpi.lat.fabric.FabricService;
-import nl.mpi.lat.fabric.NodeID;
-import nl.mpi.latimpl.core.LatServiceImpl;
+//import nl.mpi.lat.ams.model.NodePcplRule;
+//import nl.mpi.lat.ams.service.LicenseService;
+//import nl.mpi.lat.ams.service.RuleService;
+//import nl.mpi.lat.auth.authentication.AuthenticationService;
+//import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
+//import nl.mpi.lat.auth.principal.LatPrincipal;
+//import nl.mpi.lat.auth.principal.PrincipalService;
+//import nl.mpi.lat.fabric.FabricService;
+//import nl.mpi.lat.fabric.NodeID;
+//import nl.mpi.latimpl.core.LatServiceImpl;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,33 +45,33 @@ import org.springframework.stereotype.Component;
  * @version	$Revision$
  */
 //@Component
-public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
+public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
     
     private final static Logger logger = LoggerFactory.getLogger(Ams2Bridge.class);
     /**
      * provides access to principals' data
      */
-    private PrincipalService mPrincipalSrv;
+//    private PrincipalService mPrincipalSrv;
     /**
      * handles authentication
      */
-    private AuthenticationService mAuthenticationSrv;
+//    private AuthenticationService mAuthenticationSrv;
     /**
      * handles authorization
      */
-    private AdvAuthorizationService mAuthorizationSrv;
+//    private AdvAuthorizationService mAuthorizationSrv;
     /**
      * handles access to node data from corpusstrutcture db
      */
-    private FabricService mFabricSrv;
+//    private FabricService mFabricSrv;
     /**
      * handles license management
      */
-    private LicenseService mLicenseSrv;
+//    private LicenseService mLicenseSrv;
     /**
      * handles rule management
      */
-    private RuleService mRuleSrv;
+//    private RuleService mRuleSrv;
     private String baseURL;
     private String recalcURL;
     private String recalcParam;
@@ -84,17 +84,17 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
 //		this.initServices(null, null, null, null, null, null, null);
     }
             
-    @Autowired
-    public Ams2Bridge(PrincipalService principalSrv, @Qualifier("integratedAuthenticationSrv") AuthenticationService authenticationSrv,
-            AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
-            LicenseService licenseSrv, RuleService ruleSrv) {
-        this.mPrincipalSrv = principalSrv;
-        this.mAuthenticationSrv = authenticationSrv;
-        this.mAuthorizationSrv = authorizationSrv;
-        this.mFabricSrv = fabricSrv;
-        this.mLicenseSrv = licenseSrv;
-        this.mRuleSrv = ruleSrv;
-    }
+//    @Autowired
+//    public Ams2Bridge(PrincipalService principalSrv, @Qualifier("integratedAuthenticationSrv") AuthenticationService authenticationSrv,
+//            AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
+//            LicenseService licenseSrv, RuleService ruleSrv) {
+//        this.mPrincipalSrv = principalSrv;
+//        this.mAuthenticationSrv = authenticationSrv;
+//        this.mAuthorizationSrv = authorizationSrv;
+//        this.mFabricSrv = fabricSrv;
+//        this.mLicenseSrv = licenseSrv;
+//        this.mRuleSrv = ruleSrv;
+//    }
 
     /**
      * constructor to specify utilized services and their configuration
@@ -163,9 +163,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the authorizationSrv
      */
-    public AdvAuthorizationService getAuthorizationSrv() {
-        return this.mAuthorizationSrv;
-    }
+//    public AdvAuthorizationService getAuthorizationSrv() {
+//        return this.mAuthorizationSrv;
+//    }
 
     /**
      * @param authorizationSrv the authorizationSrv to set
@@ -177,9 +177,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the principalSrv
      */
-    public PrincipalService getPrincipalSrv() {
-        return this.mPrincipalSrv;
-    }
+//    public PrincipalService getPrincipalSrv() {
+//        return this.mPrincipalSrv;
+//    }
 
     /**
      * @param principalSrv the principalSrv to set
@@ -191,9 +191,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the authenticationSrv
      */
-    public AuthenticationService getAuthenticationSrv() {
-        return this.mAuthenticationSrv;
-    }
+//    public AuthenticationService getAuthenticationSrv() {
+//        return this.mAuthenticationSrv;
+//    }
 
     /**
      * @param authenticationSrv the authenticationSrv to set
@@ -205,9 +205,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the fabricSrv
      */
-    public FabricService getFabricSrv() {
-        return this.mFabricSrv;
-    }
+//    public FabricService getFabricSrv() {
+//        return this.mFabricSrv;
+//    }
 
     /**
      * @param fabricSrv the fabricSrv to set
@@ -219,9 +219,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the licenseSrv
      */
-    public LicenseService getLicenseSrv() {
-        return mLicenseSrv;
-    }
+//    public LicenseService getLicenseSrv() {
+//        return mLicenseSrv;
+//    }
 
     /**
      * @param licenseSrv the licenseSrv to set
@@ -233,9 +233,9 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
     /**
      * @return the ruleSrv
      */
-    public RuleService getRuleSrv() {
-        return mRuleSrv;
-    }
+//    public RuleService getRuleSrv() {
+//        return mRuleSrv;
+//    }
 
     /**
      * @param ruleSrv the ruleSrv to set
@@ -249,9 +249,11 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      */
     @Override
     public boolean getStatus() {
-        return this.getAuthorizationSrv() != null
-                && this.getAuthenticationSrv() != null
-                && this.getPrincipalSrv() != null;
+//        return this.getAuthorizationSrv() != null
+//                && this.getAuthenticationSrv() != null
+//                && this.getPrincipalSrv() != null;
+        
+        return true;
     }
 //    
 //    public String getBaseURL() {
@@ -283,8 +285,8 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      */
     @Override
     public void close() {
-        // unimplemented: db access control handled by hibernate
-        logger.debug("closing ams2Bridge...");
+//        // unimplemented: db access control handled by hibernate
+//        logger.debug("closing ams2Bridge...");
         this.close(null);
     }
 
@@ -293,11 +295,11 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      */
     @Override
     public void close(String reason) {
-        // unimplemented: db access control handled by hibernate
+//        // unimplemented: db access control handled by hibernate
         logger.debug("closing ams2Bridge due to " + reason);
-        if (this.getFabricSrv() != null) {
-            this.getFabricSrv().close();
-        }
+//        if (this.getFabricSrv() != null) {
+//            this.getFabricSrv().close();
+//        }
     }
 
     /**
@@ -337,12 +339,12 @@ public class Ams2Bridge extends LatServiceImpl implements AmsBridge {
      * @param ourl the target resource
      * @return target for all DomainEditor options
      */
-    private NodePcplRule getDomEditorRuleOpts(String userId, String nodeIdStr) {
-        NodeID nodeIDObj = this.getFabricSrv().newNodeID(nodeIdStr);
-        LatPrincipal pcpl = this.getPrincipalSrv().getUser(userId);
-        NodePcplRule result = this.getAuthorizationSrv().getEffectiveDomainEditorRule(nodeIDObj, pcpl);
-        return result;
-    }
+//    private NodePcplRule getDomEditorRuleOpts(String userId, String nodeIdStr) {
+//        NodeID nodeIDObj = this.getFabricSrv().newNodeID(nodeIdStr);
+//        LatPrincipal pcpl = this.getPrincipalSrv().getUser(userId);
+//        NodePcplRule result = this.getAuthorizationSrv().getEffectiveDomainEditorRule(nodeIDObj, pcpl);
+//        return result;
+//    }
 
     /**
      * @see nl.mpi.lamus.ams.AmsBridge#setUsedStorageSpace(java.lang.String, java.net.URI, long)

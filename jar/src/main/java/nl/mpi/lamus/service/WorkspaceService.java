@@ -23,7 +23,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -47,10 +46,9 @@ public interface WorkspaceService extends Serializable {
      * @param userID ID of the user
      * @param archiveNodeURI URI of the node in the archive
      * @return Workspace object
-     * @throws UnknownNodeException if the node is not found
      */
     public Workspace createWorkspace(String userID, URI archiveNodeURI)
-            throws UnknownNodeException, NodeAccessException, WorkspaceImportException;
+            throws NodeAccessException, WorkspaceImportException;
     
     /**
      * Deletes the workspace with the given ID.

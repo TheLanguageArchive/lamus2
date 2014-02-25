@@ -28,7 +28,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -113,7 +112,7 @@ public class GeneralNodeExporterTest {
 
 
     @Test
-    public void exportChangedTopNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+    public void exportChangedTopNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
     
         /*
          * File already exists in the archive.
@@ -165,7 +164,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportChangedMetadataNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+    public void exportChangedMetadataNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         /*
          * File already exists in the archive.
@@ -227,7 +226,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportUnchangedMetadataNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportUnchangedMetadataNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -275,7 +274,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -307,13 +306,12 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
         final String expectedErrorMessage = "Node not found in archive database for URI " + node.getArchiveURI();
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceTreeExporter).explore(workspace, node);
             
-            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(throwException(expectedException));
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(null));
         }});
         
         try {
@@ -322,12 +320,12 @@ public class GeneralNodeExporterTest {
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
             assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals("Cause different from expected", expectedException, ex.getCause());
+            assertEquals("Cause different from expected", null, ex.getCause());
         }
     }
     
     @Test
-    public void exportNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         generalNodeExporter.setWorkspace(null);
         
@@ -371,7 +369,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportChangedMetadataNodeIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+    public void exportChangedMetadataNodeIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -430,7 +428,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportChangedMetadataNodeMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+    public void exportChangedMetadataNodeMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -489,7 +487,7 @@ public class GeneralNodeExporterTest {
     }
     
     @Test
-    public void exportChangedMetadataNodeTransformerException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, TransformerException, WorkspaceExportException {
+    public void exportChangedMetadataNodeTransformerException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";

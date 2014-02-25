@@ -22,40 +22,39 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.sql.DataSource;
-import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+//import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
 import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
-import nl.mpi.corpusstructure.CorpusStructureDBWrite;
-import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
+//import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
+//import nl.mpi.corpusstructure.CorpusStructureDBWrite;
+//import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
 import nl.mpi.lamus.ams.Ams2Bridge;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.workspace.stories.utils.WorkspaceStepsCorpusStructureProviderFactory;
-import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
-import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
-import nl.mpi.lat.ams.authentication.impl.LdapAuthenticationSrv;
-import nl.mpi.lat.ams.dao.*;
-import nl.mpi.lat.ams.service.LicenseService;
-import nl.mpi.lat.ams.service.RuleService;
-import nl.mpi.lat.ams.service.impl.*;
-import nl.mpi.lat.auth.authentication.AuthenticationService;
-import nl.mpi.lat.auth.authentication.EncryptionService;
-import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-import nl.mpi.lat.auth.federation.DamLrService;
-import nl.mpi.lat.auth.principal.PrincipalService;
-import nl.mpi.lat.fabric.FabricService;
-import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
-import nl.mpi.latimpl.fabric.FabricSrv;
+//import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
+//import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
+//import nl.mpi.lat.ams.authentication.impl.LdapAuthenticationSrv;
+//import nl.mpi.lat.ams.dao.*;
+//import nl.mpi.lat.ams.service.LicenseService;
+//import nl.mpi.lat.ams.service.RuleService;
+//import nl.mpi.lat.ams.service.impl.*;
+//import nl.mpi.lat.auth.authentication.AuthenticationService;
+//import nl.mpi.lat.auth.authentication.EncryptionService;
+//import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
+//import nl.mpi.lat.auth.federation.DamLrService;
+//import nl.mpi.lat.auth.principal.PrincipalService;
+//import nl.mpi.lat.fabric.FabricService;
+//import nl.mpi.latimpl.auth.authentication.UnixCryptSrv;
+//import nl.mpi.latimpl.fabric.FabricSrv;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.identifierresolver.IdentifierResolver;
 import nl.mpi.metadata.identifierresolver.URLResolver;
-import nl.mpi.versioning.manager.VersioningAPI;
+//import nl.mpi.versioning.manager.VersioningAPI;
 import org.apache.commons.io.FileUtils;
-import org.delaman.ldap.ArchiveUserAuthImpl;
+//import org.delaman.ldap.ArchiveUserAuthImpl;
 import org.hibernate.SessionFactory;
 import org.jbehave.core.configuration.spring.SpringStoryReporterBuilder;
 import static org.jbehave.core.reporters.Format.*;
@@ -148,21 +147,21 @@ public class WorkspaceStoriesConfig {
         return nodeResolver;
     }
     
-    @Bean
-    @Qualifier("ArchiveObjectsDB")
-    public CorpusStructureDBWriteImpl archiveObjectsDB() {
-        return corpusStructureDBWrite();
-    }
+//    @Bean
+//    @Qualifier("ArchiveObjectsDB")
+//    public CorpusStructureDBWriteImpl archiveObjectsDB() {
+//        return corpusStructureDBWrite();
+//    }
 
-    private CorpusStructureDBWriteImpl csDBWrite;
+//    private CorpusStructureDBWriteImpl csDBWrite;
 
-    private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
-        if(csDBWrite == null) {
-            corpusstructureDataSource();
-            csDBWrite = new CorpusStructureDBWriteImpl("jdbc:hsqldb:mem:corpusstructure", false, "sa", "");
-        }
-        return csDBWrite;
-    }
+//    private CorpusStructureDBWriteImpl corpusStructureDBWrite() {
+//        if(csDBWrite == null) {
+//            corpusstructureDataSource();
+//            csDBWrite = new CorpusStructureDBWriteImpl("jdbc:hsqldb:mem:corpusstructure", false, "sa", "");
+//        }
+//        return csDBWrite;
+//    }
 
     @Bean
     @Qualifier("corpusstructureDataSource")
@@ -183,28 +182,28 @@ public class WorkspaceStoriesConfig {
                 .build();
     }
     
-    private VersioningAPI versioningAPI;
+//    private VersioningAPI versioningAPI;
     
-    @Bean
-    public VersioningAPI versioningAPI() {
-        corpusStructureDBWrite();
-        if(versioningAPI == null) {
-            versioningAPI = new VersioningAPI("jdbc:hsqldb:mem:corpusstructure");
-        }
-        return versioningAPI;
-    }
+//    @Bean
+//    public VersioningAPI versioningAPI() {
+//        corpusStructureDBWrite();
+//        if(versioningAPI == null) {
+//            versioningAPI = new VersioningAPI("jdbc:hsqldb:mem:corpusstructure");
+//        }
+//        return versioningAPI;
+//    }
     
-    private SearchClient searchClient;
+//    private SearchClient searchClient;
     
-    @Bean
-    public SearchClient searchClient() throws SQLException {
-        if(searchClient == null) {
-            corpusStructureDBWrite();
-            createAnnexDB();
-            searchClient = new SearchClient("jdbc:hsqldb:mem:corpusstructure", "sa", "", null, "jdbc:hsqldb:mem:annex", "sa", "");
-        }
-        return searchClient;
-    }
+//    @Bean
+//    public SearchClient searchClient() throws SQLException {
+//        if(searchClient == null) {
+//            corpusStructureDBWrite();
+//            createAnnexDB();
+//            searchClient = new SearchClient("jdbc:hsqldb:mem:corpusstructure", "sa", "", null, "jdbc:hsqldb:mem:annex", "sa", "");
+//        }
+//        return searchClient;
+//    }
     
     private void createAnnexDB() {
         new EmbeddedDatabaseBuilder()
@@ -252,61 +251,61 @@ public class WorkspaceStoriesConfig {
     }
     
     
-    private PrincipalSrv pcplSrv;
+//    private PrincipalSrv pcplSrv;
+//
+//    @Bean
+//    public PrincipalService principalSrv() throws Exception {
+//        if(pcplSrv == null) {
+//            pcplSrv = new PrincipalSrv();
+//            pcplSrv.setPcplDao(principalDao());
+//            pcplSrv.setUserDao(userDao());
+//            pcplSrv.setGroupDao(groupDao());
+//            pcplSrv.setEncryptionSrv(encryptionSrv());
+//        }
+//        return pcplSrv;
+//
+//    }
 
-    @Bean
-    public PrincipalService principalSrv() throws Exception {
-        if(pcplSrv == null) {
-            pcplSrv = new PrincipalSrv();
-            pcplSrv.setPcplDao(principalDao());
-            pcplSrv.setUserDao(userDao());
-            pcplSrv.setGroupDao(groupDao());
-            pcplSrv.setEncryptionSrv(encryptionSrv());
-        }
-        return pcplSrv;
-
-    }
-
-    private PrincipalDao pcplDao;
-
-    private PrincipalDao principalDao() throws Exception {
-        if(pcplDao == null) {
-            pcplDao = new PrincipalDao();
-            pcplDao.setSessionFactory(sessionFactory());
-        }
-        return pcplDao;
-    }
+//    private PrincipalDao pcplDao;
+//
+//    private PrincipalDao principalDao() throws Exception {
+//        if(pcplDao == null) {
+//            pcplDao = new PrincipalDao();
+//            pcplDao.setSessionFactory(sessionFactory());
+//        }
+//        return pcplDao;
+//    }
 
 
-    private UserDao uDao;
+//    private UserDao uDao;
+//
+//    private UserDao userDao() throws Exception {
+//        if(uDao == null) {
+//            uDao = new UserDao();
+//            uDao.setSessionFactory(sessionFactory());
+//        }
+//        return uDao;
+//    }
 
-    private UserDao userDao() throws Exception {
-        if(uDao == null) {
-            uDao = new UserDao();
-            uDao.setSessionFactory(sessionFactory());
-        }
-        return uDao;
-    }
+//    private GroupDao gDao;
+//
+//    private GroupDao groupDao() throws Exception {
+//        if(gDao == null) {
+//            gDao = new GroupDao();
+//            gDao.setSessionFactory(sessionFactory());
+//        }
+//        return gDao;
+//    }
 
-    private GroupDao gDao;
-
-    private GroupDao groupDao() throws Exception {
-        if(gDao == null) {
-            gDao = new GroupDao();
-            gDao.setSessionFactory(sessionFactory());
-        }
-        return gDao;
-    }
-
-    private EncryptionService encSrv;
-
-    private EncryptionService encryptionSrv() {
-        if(encSrv == null) {
-            encSrv = new UnixCryptSrv();
-            encSrv.setAutoPrefix(true);
-        }
-        return encSrv;
-    }    
+//    private EncryptionService encSrv;
+//
+//    private EncryptionService encryptionSrv() {
+//        if(encSrv == null) {
+//            encSrv = new UnixCryptSrv();
+//            encSrv.setAutoPrefix(true);
+//        }
+//        return encSrv;
+//    }    
 
     private SessionFactory sesFactory;
 
@@ -340,180 +339,180 @@ public class WorkspaceStoriesConfig {
         return sesFactory;
     }
     
-    private IntegratedAuthenticationSrv autheSrv;
+//    private IntegratedAuthenticationSrv autheSrv;
+//    
+//    @Bean
+//    @Qualifier("integratedAuthenticationSrv")
+//    public AuthenticationService authenticationSrv() throws Exception {
+//        if(autheSrv == null) {
+//            autheSrv = new IntegratedAuthenticationSrv();
+//            List<AuthenticationService> authenticationServices = new ArrayList<AuthenticationService>();
+//            authenticationServices.add(ldapAuthenticationSrv());
+//            authenticationServices.add(amsAuthenticationSrv());
+//            autheSrv.setServices(authenticationServices);
+//        }
+//        return autheSrv;
+//    }
     
-    @Bean
-    @Qualifier("integratedAuthenticationSrv")
-    public AuthenticationService authenticationSrv() throws Exception {
-        if(autheSrv == null) {
-            autheSrv = new IntegratedAuthenticationSrv();
-            List<AuthenticationService> authenticationServices = new ArrayList<AuthenticationService>();
-            authenticationServices.add(ldapAuthenticationSrv());
-            authenticationServices.add(amsAuthenticationSrv());
-            autheSrv.setServices(authenticationServices);
-        }
-        return autheSrv;
-    }
+//    private LdapAuthenticationSrv ldapAutheSrv;
+//    
+//    private AuthenticationService ldapAuthenticationSrv() {
+//        if(ldapAutheSrv == null) {
+//            ldapAutheSrv = new LdapAuthenticationSrv();
+//            ldapAutheSrv.setUseFederateID(true);
+//            ldapAutheSrv.setDamlrSrv(damlrSrv());
+//            ldapAutheSrv.setDamlrLdapApi(damlrLdapApi());
+//        }
+//        return ldapAutheSrv;
+//    }
     
-    private LdapAuthenticationSrv ldapAutheSrv;
+//    private AmsDbAuthenticationSrv amsAutheSrv;
+//    
+//    private AuthenticationService amsAuthenticationSrv() throws Exception {
+//        if(amsAutheSrv == null) {
+//            amsAutheSrv = new AmsDbAuthenticationSrv();
+//            amsAutheSrv.setUseFederateID(true);
+//            amsAutheSrv.setPrincipalSrv(principalSrv());
+//            amsAutheSrv.setEncryptionSrv(encryptionSrv());
+//            amsAutheSrv.setDamlrSrv(damlrSrv());
+//        }
+//        return amsAutheSrv;
+//    }
     
-    private AuthenticationService ldapAuthenticationSrv() {
-        if(ldapAutheSrv == null) {
-            ldapAutheSrv = new LdapAuthenticationSrv();
-            ldapAutheSrv.setUseFederateID(true);
-            ldapAutheSrv.setDamlrSrv(damlrSrv());
-            ldapAutheSrv.setDamlrLdapApi(damlrLdapApi());
-        }
-        return ldapAutheSrv;
-    }
+//    private DamLrSrv damlrSrv;
+//    
+//    private DamLrService damlrSrv() {
+//        if(damlrSrv == null) {
+//            damlrSrv = new DamLrSrv();
+//            damlrSrv.setDefaultHostingInstitute("MPINLA");
+//            damlrSrv.setDefaultHostingService("ams2/ldap");
+//            damlrSrv.setDefaultFedID("mpi.nl");
+//            damlrSrv.setDefaultDelimiter("@");
+//            damlrSrv.setUseFederateID(true);
+//            damlrSrv.setDamlrLdapApi(damlrLdapApi());
+//            damlrSrv.setLdapEnabled(false);
+//
+//        //TODO use an embedded LDAP for testing
+//        }
+//        
+//        return damlrSrv;
+//    }
     
-    private AmsDbAuthenticationSrv amsAutheSrv;
+//    private ArchiveUserAuthImpl damlrLdapApi;
+//    
+//    private ArchiveUserAuthImpl damlrLdapApi() {
+//        if(damlrLdapApi == null) {
+//            damlrLdapApi = new ArchiveUserAuthImpl();
+//            damlrLdapApi.setEncryptionSrv(encryptionSrv());
+////        damlrLdapApi.setLdapJndiName(null);
+////        damlrLdapApi.setKerberosJndiName(null);
+//        
+//        //TODO use an embedded LDAP for testing
+//        }
+//        
+//        return damlrLdapApi;
+//    }
     
-    private AuthenticationService amsAuthenticationSrv() throws Exception {
-        if(amsAutheSrv == null) {
-            amsAutheSrv = new AmsDbAuthenticationSrv();
-            amsAutheSrv.setUseFederateID(true);
-            amsAutheSrv.setPrincipalSrv(principalSrv());
-            amsAutheSrv.setEncryptionSrv(encryptionSrv());
-            amsAutheSrv.setDamlrSrv(damlrSrv());
-        }
-        return amsAutheSrv;
-    }
-    
-    private DamLrSrv damlrSrv;
-    
-    private DamLrService damlrSrv() {
-        if(damlrSrv == null) {
-            damlrSrv = new DamLrSrv();
-            damlrSrv.setDefaultHostingInstitute("MPINLA");
-            damlrSrv.setDefaultHostingService("ams2/ldap");
-            damlrSrv.setDefaultFedID("mpi.nl");
-            damlrSrv.setDefaultDelimiter("@");
-            damlrSrv.setUseFederateID(true);
-            damlrSrv.setDamlrLdapApi(damlrLdapApi());
-            damlrSrv.setLdapEnabled(false);
+//    private AmsAuthorizationSrv authoSrv;
+//
+//    @Bean
+//    public AdvAuthorizationService authorizationSrv() throws Exception {
+//        if(authoSrv == null) {
+//            authoSrv = new AmsAuthorizationSrv();
+//            authoSrv.setNodeAuthDao(nodeAuthDao());
+//            authoSrv.setFabricSrv(fabricSrv());
+//            authoSrv.setLicenseSrv(licenseSrv());
+//            authoSrv.setRuleSrv(ruleSrv());
+//            authoSrv.setRuleEvaluationSrv(corpusDbAuthSrv());
+//        }
+//        return authoSrv;
+//    }
 
-        //TODO use an embedded LDAP for testing
-        }
-        
-        return damlrSrv;
-    }
-    
-    private ArchiveUserAuthImpl damlrLdapApi;
-    
-    private ArchiveUserAuthImpl damlrLdapApi() {
-        if(damlrLdapApi == null) {
-            damlrLdapApi = new ArchiveUserAuthImpl();
-            damlrLdapApi.setEncryptionSrv(encryptionSrv());
-//        damlrLdapApi.setLdapJndiName(null);
-//        damlrLdapApi.setKerberosJndiName(null);
-        
-        //TODO use an embedded LDAP for testing
-        }
-        
-        return damlrLdapApi;
-    }
-    
-    private AmsAuthorizationSrv authoSrv;
+//    private NodeAuthorizationDao nAuthDao;
+//
+//    private NodeAuthorizationDao nodeAuthDao() throws Exception {
+//        if(nAuthDao == null) {
+//            nAuthDao = new NodeAuthorizationDao();
+//            nAuthDao.setSessionFactory(sessionFactory());
+//        }
+//        return nAuthDao;
+//    }
 
-    @Bean
-    public AdvAuthorizationService authorizationSrv() throws Exception {
-        if(authoSrv == null) {
-            authoSrv = new AmsAuthorizationSrv();
-            authoSrv.setNodeAuthDao(nodeAuthDao());
-            authoSrv.setFabricSrv(fabricSrv());
-            authoSrv.setLicenseSrv(licenseSrv());
-            authoSrv.setRuleSrv(ruleSrv());
-            authoSrv.setRuleEvaluationSrv(corpusDbAuthSrv());
-        }
-        return authoSrv;
-    }
+//    private CsDbAuthSrv csdbAuthSrv;
+//
+//    private CsDbAuthSrv corpusDbAuthSrv() throws Exception {
+//        if(csdbAuthSrv == null) {
+//            csdbAuthSrv = new CsDbAuthSrv();
+//            csdbAuthSrv.setFabricSrv(fabricSrv());
+//            csdbAuthSrv.setPrincipalSrv(principalSrv());
+//        }
+//        return csdbAuthSrv;
+//    }
 
-    private NodeAuthorizationDao nAuthDao;
+//    private FabricSrv fSrv;
+//
+//    @Bean
+//    public FabricService fabricSrv() {
+//        if(fSrv == null) {
+//            fSrv = new FabricSrv();
+//            fSrv.setStructDB(archiveObjectsDB());
+//            fSrv.setArchObjDB(archiveObjectsDB());
+//        }
+//        return fSrv;
+//    }
 
-    private NodeAuthorizationDao nodeAuthDao() throws Exception {
-        if(nAuthDao == null) {
-            nAuthDao = new NodeAuthorizationDao();
-            nAuthDao.setSessionFactory(sessionFactory());
-        }
-        return nAuthDao;
-    }
+//    private LicenseSrv lSrv;
+//
+//    @Bean
+//    public LicenseService licenseSrv() throws Exception {
+//        if(lSrv == null) {
+//            lSrv = new LicenseSrv();
+//            lSrv.setLicenseDao(licenseDao());
+//            lSrv.setNodeLicenseDao(nodeLicenseDao());
+//        }
+//        return lSrv;
+//    }
 
-    private CsDbAuthSrv csdbAuthSrv;
+//    private LicenseDao lDao;
+//
+//    private LicenseDao licenseDao() throws Exception {
+//        if(lDao == null) {
+//            lDao = new LicenseDao();
+//            lDao.setSessionFactory(sessionFactory());
+//        }
+//        return lDao;
+//    }
 
-    private CsDbAuthSrv corpusDbAuthSrv() throws Exception {
-        if(csdbAuthSrv == null) {
-            csdbAuthSrv = new CsDbAuthSrv();
-            csdbAuthSrv.setFabricSrv(fabricSrv());
-            csdbAuthSrv.setPrincipalSrv(principalSrv());
-        }
-        return csdbAuthSrv;
-    }
+//    private NodeLicenseDao nLDao;
+//
+//    private NodeLicenseDao nodeLicenseDao() throws Exception {
+//        if(nLDao == null) {
+//            nLDao = new NodeLicenseDao();
+//            nLDao.setSessionFactory(sessionFactory());
+//        }
+//        return nLDao;
+//    }
 
-    private FabricSrv fSrv;
+//    private RuleSrv rSrv;
+//
+//    @Bean
+//    public RuleService ruleSrv() throws Exception {
+//        if(rSrv == null) {
+//            rSrv = new RuleSrv();
+//            rSrv.setRuleDao(ruleDao());
+//        }
+//        return rSrv;
+//    }
 
-    @Bean
-    public FabricService fabricSrv() {
-        if(fSrv == null) {
-            fSrv = new FabricSrv();
-            fSrv.setStructDB(archiveObjectsDB());
-            fSrv.setArchObjDB(archiveObjectsDB());
-        }
-        return fSrv;
-    }
-
-    private LicenseSrv lSrv;
-
-    @Bean
-    public LicenseService licenseSrv() throws Exception {
-        if(lSrv == null) {
-            lSrv = new LicenseSrv();
-            lSrv.setLicenseDao(licenseDao());
-            lSrv.setNodeLicenseDao(nodeLicenseDao());
-        }
-        return lSrv;
-    }
-
-    private LicenseDao lDao;
-
-    private LicenseDao licenseDao() throws Exception {
-        if(lDao == null) {
-            lDao = new LicenseDao();
-            lDao.setSessionFactory(sessionFactory());
-        }
-        return lDao;
-    }
-
-    private NodeLicenseDao nLDao;
-
-    private NodeLicenseDao nodeLicenseDao() throws Exception {
-        if(nLDao == null) {
-            nLDao = new NodeLicenseDao();
-            nLDao.setSessionFactory(sessionFactory());
-        }
-        return nLDao;
-    }
-
-    private RuleSrv rSrv;
-
-    @Bean
-    public RuleService ruleSrv() throws Exception {
-        if(rSrv == null) {
-            rSrv = new RuleSrv();
-            rSrv.setRuleDao(ruleDao());
-        }
-        return rSrv;
-    }
-
-    private RuleDao rDao;
-
-    private RuleDao ruleDao() throws Exception {
-        if(rDao == null) {
-            rDao = new RuleDao();
-            rDao.setSessionFactory(sessionFactory());
-        }
-        return rDao;
-    }
+//    private RuleDao rDao;
+//
+//    private RuleDao ruleDao() throws Exception {
+//        if(rDao == null) {
+//            rDao = new RuleDao();
+//            rDao.setSessionFactory(sessionFactory());
+//        }
+//        return rDao;
+//    }
     
     @Bean
     public ExecutorService executorService() {

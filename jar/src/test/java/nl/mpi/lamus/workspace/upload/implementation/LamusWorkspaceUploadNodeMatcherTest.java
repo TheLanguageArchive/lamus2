@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
@@ -101,7 +100,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     
     
     @Test
-    public void findNodeForMetadataHandle() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+    public void findNodeForMetadataHandle() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -136,7 +135,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
     
     @Test
-    public void findNodeForResourceHandle() throws URISyntaxException, UnknownNodeException, MalformedURLException {
+    public void findNodeForResourceHandle() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -178,7 +177,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
     
     @Test
-    public void findNodeForResourceHandlePointingToArchive() throws URISyntaxException, UnknownNodeException, MalformedURLException {
+    public void findNodeForResourceHandlePointingToArchive() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -225,7 +224,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
     
     @Test
-    public void findNodeForResourceHandleWithoutMatchInTheArchive() throws URISyntaxException, UnknownNodeException, MalformedURLException {
+    public void findNodeForResourceHandleWithoutMatchInTheArchive() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -238,12 +237,10 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI firstNodeURI = new URI(UUID.randomUUID().toString());
         final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
         
-        final UnknownNodeException expectedException = new UnknownNodeException("some error message");
-        
         context.checking(new Expectations() {{
             
-            //this exception will cause the corpus node, and therefore the archive URL, to be null
-            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(throwException(expectedException));
+            //this will cause the corpus node, and therefore the archive URL, to be null
+            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(null));
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(wsUploadDirectory));
             
@@ -268,7 +265,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
     
     @Test
-    public void findNodeForResourceHandleWithNullArchiveURIRetrieved() throws URISyntaxException, UnknownNodeException, MalformedURLException {
+    public void findNodeForResourceHandleWithNullArchiveURIRetrieved() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -279,13 +276,12 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
         
-        final UnknownNodeException firstExpectedException = new UnknownNodeException("some error message");
         final IllegalArgumentException secondExpectedException = new IllegalArgumentException("some error message");
         
         context.checking(new Expectations() {{
             
-            //this exception will cause the corpus node, and therefore the archive URL, to be null
-            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(throwException(firstExpectedException));
+            //this will cause the corpus node, and therefore the archive URL, to be null
+            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(null));
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(wsUploadDirectory));
             

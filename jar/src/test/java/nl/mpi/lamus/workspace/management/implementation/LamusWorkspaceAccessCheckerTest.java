@@ -25,10 +25,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
 import nl.mpi.lamus.exception.LockedNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -86,31 +87,27 @@ public class LamusWorkspaceAccessCheckerTest {
      * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
      */
     @Test
-    public void cannotCreateWorkspaceIfNodeIsUnknown() throws URISyntaxException, UnknownNodeException, NodeAccessException {
+    public void cannotCreateWorkspaceIfNodeIsUnknown() throws URISyntaxException, NodeAccessException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final String expectedMessage = "node not known";
-        final UnknownNodeException expectedException = new UnknownNodeException(expectedMessage);
+        final String expectedMessage = "Archive node not found: " + archiveNodeURI;
         
         context.checking(new Expectations() {{
-            oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(throwException(expectedException));
+            oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(null));
         }});
         
         try {
             nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             fail("should have thrown an exception");
-        } catch(UnknownNodeException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+        } catch(ArchiveNodeNotFoundException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", archiveNodeURI, ex.getNodeURI());
         }
     }
  
-
-    /**
-     * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
-     */
     @Test
-    public void cannotCreateWorkspaceIfNodeIsExternal() throws URISyntaxException, UnknownNodeException {
+    public void cannotCreateWorkspaceIfNodeIsExternal() throws URISyntaxException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -131,11 +128,29 @@ public class LamusWorkspaceAccessCheckerTest {
         }
     }
     
-    /**
-     * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
-     */
     @Test
-    public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() throws URISyntaxException, UnknownNodeException {
+    public void cannotCreateWorkspaceIfNodeIsNotMetadata() throws URISyntaxException, NodeAccessException {
+        
+        final String userID = "someUser";
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final String expectedMessage = "Selected node should be Metadata: " + archiveNodeURI;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.RESOURCE_AUDIO));
+        }});
+        
+        try {
+            nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Message different from expected", expectedMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() throws URISyntaxException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -144,6 +159,7 @@ public class LamusWorkspaceAccessCheckerTest {
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
         }});
         
@@ -158,11 +174,8 @@ public class LamusWorkspaceAccessCheckerTest {
         }
     }
     
-    /**
-     * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
-     */
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException, UnknownNodeException {
+    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -175,6 +188,7 @@ public class LamusWorkspaceAccessCheckerTest {
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
@@ -193,11 +207,8 @@ public class LamusWorkspaceAccessCheckerTest {
         }
     }
     
-    /**
-     * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
-     */
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException, UnknownNodeException {
+    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -210,6 +221,7 @@ public class LamusWorkspaceAccessCheckerTest {
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
@@ -227,11 +239,8 @@ public class LamusWorkspaceAccessCheckerTest {
         }
     }
     
-    /**
-     * Test of ensureWorkspaceCanBeCreated method, of class NodeAccessCheckerImpl.
-     */
     @Test
-    public void canCreateWorkspaceIfNodeIsNotLocked() throws URISyntaxException, UnknownNodeException, NodeAccessException {
+    public void canCreateWorkspaceIfNodeIsNotLocked() throws URISyntaxException, NodeAccessException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -239,6 +248,7 @@ public class LamusWorkspaceAccessCheckerTest {
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf (mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
         }});

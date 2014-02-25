@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.List;
 import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -124,6 +123,12 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         try {
             
             CorpusNode childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
+            
+            if(childCorpusNode == null) {
+                String errorMessage = "Error getting information for node " + childArchiveURI;
+                throwWorkspaceImportException(errorMessage, null);
+            }
+            
             childArchiveURL = nodeResolver.getUrl(childCorpusNode);
             childName = childCorpusNode.getName();
             childOnSite = childCorpusNode.isOnSite();
@@ -136,9 +141,6 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         } catch (MetadataException mdex) {
 	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
 	    throwWorkspaceImportException(errorMessage, mdex);
-        } catch (UnknownNodeException unex) {
-	    String errorMessage = "Error getting information for node " + childArchiveURI;
-	    throwWorkspaceImportException(errorMessage, unex);
         }
         
         WorkspaceNode childNode =

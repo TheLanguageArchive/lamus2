@@ -19,8 +19,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.versioning.manager.VersioningAPI;
+//import nl.mpi.annot.search.lib.SearchClient;
+//import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,8 +47,8 @@ public class JndiDatabaseBeans {
     //TODO add these properties to some configuration file and load them here
     //TODO for testing load a dummy one? take care of closing the connection
 
-    private VersioningAPI versioningAPI;
-    private SearchClient searchClient;
+//    private VersioningAPI versioningAPI;
+//    private SearchClient searchClient;
 
     
 //    @Bean
@@ -100,17 +100,17 @@ public class JndiDatabaseBeans {
         return (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
     }
 
-    @Bean
-    public VersioningAPI versioningAPI() {
-        if (versioningAPI == null) {
-            versioningAPI = new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
-        }
-        return versioningAPI;
-    }
+//    @Bean
+//    public VersioningAPI versioningAPI() {
+//        if (versioningAPI == null) {
+//            versioningAPI = new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
+//        }
+//        return versioningAPI;
+//    }
 
-    @Bean
-    public SearchClient searchClient() {
-        //TODO INITIALIZE SearchClient bean
-        return searchClient;
-    }
+//    @Bean
+//    public SearchClient searchClient() {
+//        //TODO INITIALIZE SearchClient bean
+//        return searchClient;
+//    }
 }

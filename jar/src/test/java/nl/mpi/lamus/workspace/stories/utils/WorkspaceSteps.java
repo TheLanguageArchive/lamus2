@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.*;
 import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.Ams2Bridge;
@@ -224,7 +223,7 @@ public class WorkspaceSteps {
     
     @Given("a metadata node with URI $childNodeUriStr which is a child of node with URI $parentNodeUriStr")
     public void aNodeWithIDWhichIsAChildOfNodeWIthID(@Named("childNodeURI") String childNodeUriStr, @Named("parentNodeURI") String parentNodeUriStr)
-            throws UnknownNodeException, URISyntaxException {
+            throws URISyntaxException {
         
         URI childNodeURI = new URI(childNodeUriStr);
         URI parentNodeURI = new URI(parentNodeUriStr);
@@ -256,7 +255,7 @@ public class WorkspaceSteps {
         
         WorkspaceStepsHelper.insertAmsDataInDBFromScript(this.amsDataSource);
         
-        assertNotNull("Principal with ID " + userID + " is null", this.ams2Bridge.getPrincipalSrv().getPrincipal(userID));
+//        assertNotNull("Principal with ID " + userID + " is null", this.ams2Bridge.getPrincipalSrv().getPrincipal(userID));
         
         //TODO FIX NODEID...
         //TODO FIX NODEID...
@@ -271,7 +270,7 @@ public class WorkspaceSteps {
     @Given("a workspace with ID $workspaceID created by $userID in node $topNodeArchiveUriStr")
     public void aWorkspaceWithIDCreatedByUserInNode(
             int workspaceID, String userID, String topNodeArchiveUriStr)
-            throws MalformedURLException, FileNotFoundException, IOException, MetadataException, UnknownNodeException, URISyntaxException, WorkspaceNotFoundException, WorkspaceNodeNotFoundException {
+            throws MalformedURLException, FileNotFoundException, IOException, MetadataException, URISyntaxException, WorkspaceNotFoundException, WorkspaceNodeNotFoundException {
         
         URI topNodeArchiveURI = new URI(topNodeArchiveUriStr);
         
@@ -328,7 +327,7 @@ public class WorkspaceSteps {
     }
     
     @Given("$filename has been linked to the workspace")
-    public void fileHasBeenLinkedToTheWorkspace(String filename) throws MalformedURLException, UnknownNodeException {
+    public void fileHasBeenLinkedToTheWorkspace(String filename) throws MalformedURLException {
         
 //        OurURL nodeArchiveURL = archiveObjectsDB.getObjectURL(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID), ArchiveAccessContext.getFileUrlContext());
         CorpusNode node = this.corpusStructureProvider.getNode(this.createdWorkspaceTopNodeArchiveURI);
@@ -353,7 +352,7 @@ public class WorkspaceSteps {
     }
     
     @Given("the top node has had some metadata added")
-    public void theTopNodeHasHadSomeMetadataAdded() throws IOException, MetadataException, UnknownNodeException, WorkspaceNodeNotFoundException {
+    public void theTopNodeHasHadSomeMetadataAdded() throws IOException, MetadataException, WorkspaceNodeNotFoundException {
         
 //        Node archiveNode = this.corpusStructureDB.getNode(NodeIdUtils.TONODEID(this.createdWorkspaceTopNodeArchiveID));
         CorpusNode archiveNode = this.corpusStructureProvider.getNode(this.createdWorkspaceTopNodeArchiveURI);
@@ -444,7 +443,7 @@ public class WorkspaceSteps {
     
     
     @When("that user chooses to create a workspace in the node with URI $nodeUriStr")
-    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException, UnknownNodeException, NodeAccessException, WorkspaceImportException {
+    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException, NodeAccessException, WorkspaceImportException {
 
         URI nodeURI = new URI(nodeUriStr);
         
@@ -603,7 +602,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the workspace files are present in the proper location in the filesystem")
-    public void theWorkspaceFilesArePresentInTheProperLocationInTheFilesystem() throws UnknownNodeException {
+    public void theWorkspaceFilesArePresentInTheProperLocationInTheFilesystem() {
         
         // filesystem
         File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + this.createdWorkspace.getWorkspaceID());
@@ -659,7 +658,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the new node is properly linked in the database, from parent node with URI $parentNodeUriStr")
-    public void theNewNodeIsProperlyLinkedInTheDatabaseFromTheParentNodeWithID(String parentNodeUriStr) throws UnknownNodeException, URISyntaxException {
+    public void theNewNodeIsProperlyLinkedInTheDatabaseFromTheParentNodeWithID(String parentNodeUriStr) throws URISyntaxException {
         
         URI parentNodeURI = new URI(parentNodeUriStr);
         
@@ -682,7 +681,7 @@ public class WorkspaceSteps {
     
     @Then("the new node is properly linked from the parent file (node with URI $parentNodeUriStr) and was assigned an archive handle")
     public void theNewNodeIsProperlyLinkedFromTheParentFileAndWasAssignedAnArchiveHandle(String parentNodeUriStr)
-            throws IOException, MetadataException, UnknownNodeException, URISyntaxException {
+            throws IOException, MetadataException, URISyntaxException {
         
         URI parentNodeURI = new URI(parentNodeUriStr);
         
@@ -728,7 +727,7 @@ public class WorkspaceSteps {
     
     @Then("$filename is present in the proper location in the filesystem, under the directory of the parent node $parentNodeUriStr")
     public void theNewFileIsPresentInTheProperLocationInTheFilesystemUnderTheDirectoryOfTheParentNode(String filename, String parentNodeUriStr)
-            throws UnknownNodeException, URISyntaxException, MalformedURLException {
+            throws URISyntaxException, MalformedURLException {
         
         URI parentNodeURI = new URI(parentNodeUriStr);
         
@@ -771,7 +770,7 @@ public class WorkspaceSteps {
     
     @Then("the children of $filename are also present in the database")
     public void theChildrenOfFileAreAlsoPresentInTheDatabase(String filename)
-            throws IOException, MetadataException, UnknownNodeException {
+            throws IOException, MetadataException {
         
         MetadataDocument document = this.metadataAPI.getMetadataDocument(this.newlyInsertedNodeUrl);
         assertTrue("Metadata document doesn't contain references" , document instanceof ReferencingMetadataDocument);
@@ -796,7 +795,7 @@ public class WorkspaceSteps {
     
     @Then("the metadata of the node with URI $archiveNodeUriStr has changed in the filesystem")
     public void theMetadataOfTheNodeWithURIHasChangedInTheFilesystem(String archiveNodeUriStr)
-            throws UnknownNodeException, URISyntaxException {
+            throws URISyntaxException {
         
         URI archiveNodeURI = new URI(archiveNodeUriStr);
         CorpusNode changedNode = this.corpusStructureProvider.getNode(archiveNodeURI);
@@ -807,7 +806,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the metadata of the node with URI $archiveNodeUriStr has changed in the database")
-    public void theMetadataOfTheNodeWithURIHasChangedInTheDatabase(String archiveNodeUriStr) throws URISyntaxException, UnknownNodeException {
+    public void theMetadataOfTheNodeWithURIHasChangedInTheDatabase(String archiveNodeUriStr) throws URISyntaxException {
 
         URI archiveNodeURI = new URI(archiveNodeUriStr);
         CorpusNode changedNode = this.corpusStructureProvider.getNode(archiveNodeURI);
@@ -818,7 +817,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the deleted node has been moved to the trash folder in the filesystem")
-    public void theDeletedNodeIsMarkedAsDeletedInTheDatabaseAndShouldNotBeLinkedToAnyNode() throws UnknownNodeException {
+    public void theDeletedNodeIsMarkedAsDeletedInTheDatabaseAndShouldNotBeLinkedToAnyNode() {
         
         File expectedFile = WorkspaceStepsHelper.getExpectedFileLocationForDeletedNode(
                 this.trashCanFolder, this.createdWorkspaceID, this.deletedNodeArchiveURL, this.deletedNodeArchiveURI);
@@ -828,7 +827,7 @@ public class WorkspaceSteps {
     }
     
     @Then("the deleted node has been updated in the database")
-    public void theDeletedNodeHasBeenUpdatedInTheDatabase() throws UnknownNodeException {
+    public void theDeletedNodeHasBeenUpdatedInTheDatabase() {
         
         File expectedFile = WorkspaceStepsHelper.getExpectedFileLocationForDeletedNode(
                 this.trashCanFolder, this.createdWorkspaceID, this.deletedNodeArchiveURL, this.deletedNodeArchiveURI);
@@ -842,7 +841,7 @@ public class WorkspaceSteps {
     }
     
     @Then("no changes were made to the archive")
-    public void noChangesWereMadeToTheArchive() throws UnknownNodeException {
+    public void noChangesWereMadeToTheArchive() {
         
 //        TreeSnapshot finalSelectedTreeSnapshot = WorkspaceStepsHelper.createSelectedTreeArchiveSnapshot(this.corpusStructureDB, this.archiveObjectsDB, this.createdWorkspaceTopNodeArchiveID);
         TreeSnapshot finalSelectedTreeSnapshot = WorkspaceStepsHelper.createSelectedTreeArchiveSnapshot(this.corpusStructureProvider, this.createdWorkspaceTopNodeArchiveURI);

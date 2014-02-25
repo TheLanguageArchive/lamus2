@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -132,7 +131,7 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithHandle()
-            throws URISyntaxException, MalformedURLException, UnknownNodeException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -200,7 +199,7 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithoutHandle()
-            throws URISyntaxException, MalformedURLException, UnknownNodeException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -291,7 +290,7 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void nodeUrlNull()
-            throws URISyntaxException, MalformedURLException, UnknownNodeException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -338,8 +337,8 @@ public class ResourceNodeImporterTest {
     }
     
     @Test
-    public void unknownNodeExceptionThrown()
-            throws URISyntaxException, MalformedURLException, UnknownNodeException, TypeCheckerException, WorkspaceImportException {
+    public void nodeIsNotFound()
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -364,29 +363,27 @@ public class ResourceNodeImporterTest {
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
         
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
-        
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
-            oneOf(mockCorpusStructureProvider).getNode(childURI); will(throwException(expectedException));
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(null));
         }});
         
         try {
             nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
             fail("Should have thrown exception");
         } catch(WorkspaceImportException ex) {
-            String expectedErrorMessage = "ResourceNodeImporter.importNode: error getting object URL for node " + childURI;
+            String expectedErrorMessage = "ResourceNodeImporter.importNode: error getting node " + childURI;
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-            assertEquals("Cause different from expected", expectedException, ex.getCause());
+            assertEquals("Cause different from expected", null, ex.getCause());
         }
         
     }
     
     @Test
     public void typecheckerExceptionThrown()
-            throws URISyntaxException, MalformedURLException, UnknownNodeException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;

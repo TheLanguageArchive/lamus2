@@ -18,10 +18,11 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.net.URI;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
 import nl.mpi.lamus.exception.LockedNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -65,12 +66,13 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
      */
     @Override
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
-            throws UnknownNodeException, NodeAccessException {
+            throws NodeAccessException {
         
-        CorpusNode node;
-        try {
-            node = this.corpusStructureProvider.getNode(archiveNodeURI);
-        } catch (UnknownNodeException ex) {
+        CorpusNode node = this.corpusStructureProvider.getNode(archiveNodeURI);
+
+        if(node == null) {
+            String message = "Archive node not found: " + archiveNodeURI;
+            ArchiveNodeNotFoundException ex = new ArchiveNodeNotFoundException(message, archiveNodeURI, null);
             logger.error(ex.getMessage(), ex);
             throw ex;
         }
@@ -78,6 +80,10 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             NodeAccessException ex = new ExternalNodeException(archiveNodeURI);
             logger.error(ex.getMessage(), ex);
             throw ex;
+        }
+        if(CorpusNodeType.COLLECTION != node.getType() && CorpusNodeType.METADATA != node.getType()) {
+            throw new IllegalArgumentException("Selected node should be Metadata: " + archiveNodeURI);
+            
         }
         if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
             NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);

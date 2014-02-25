@@ -38,11 +38,10 @@ import java.util.UUID;
 import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.CorpusStructureDB;
-import nl.mpi.corpusstructure.NodeIdUtils;
+//import nl.mpi.corpusstructure.ArchiveObjectsDB;
+//import nl.mpi.corpusstructure.CorpusStructureDB;
+//import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -155,7 +154,7 @@ public class WorkspaceStepsHelper {
             map.put("canonical", "t");
             map.put("valid", "t");
             map.put("vpath0", "" + parentNodeID);
-            map.put("vpath", "/" + NodeIdUtils.TONODEID(parentNodeID));
+//            map.put("vpath", "/" + NodeIdUtils.TONODEID(parentNodeID));
         }
         template.update(insertString, map);
     }
@@ -523,7 +522,7 @@ public class WorkspaceStepsHelper {
         FileUtils.cleanDirectory(trashcanDirectory);
     }
     
-    static TreeSnapshot createSelectedTreeArchiveSnapshot(CorpusStructureProvider csProvider, URI selectedNodeURI) throws UnknownNodeException {
+    static TreeSnapshot createSelectedTreeArchiveSnapshot(CorpusStructureProvider csProvider, URI selectedNodeURI) {
         
 //        Timestamp topNodeTimestamp = aoDB.getObjectTimestamp(NodeIdUtils.TONODEID(selectedNode));
         CorpusNode selectedNode = csProvider.getNode(selectedNodeURI);

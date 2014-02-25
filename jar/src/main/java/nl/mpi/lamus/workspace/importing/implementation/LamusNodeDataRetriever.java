@@ -23,10 +23,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -71,9 +71,15 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
 
     @Override
-    public URL getNodeArchiveURL(URI nodeArchiveURI) throws UnknownNodeException {
+    public URL getNodeArchiveURL(URI nodeArchiveURI) throws ArchiveNodeNotFoundException {
         
         CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
+        if(archiveNode == null) {
+            String message = "Archive node not found: " + nodeArchiveURI;
+            ArchiveNodeNotFoundException ex = new ArchiveNodeNotFoundException(message, nodeArchiveURI, null);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
         URL nodeArchiveURL = nodeResolver.getUrl(archiveNode);
         return nodeArchiveURL;
     }

@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -149,7 +149,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileIsArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                UnknownNodeException {
+                ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -217,7 +217,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileIsNotArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                UnknownNodeException {
+                ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -266,7 +266,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileCopyFails()
             throws URISyntaxException, MalformedURLException, IOException,
                 TypeCheckerException, WorkspaceNodeNotFoundException, WorkspaceException,
-                UnknownNodeException {
+                ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -369,7 +369,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileUnknownNodeException()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                UnknownNodeException {
+                ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -393,7 +393,7 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         
         final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        final ArchiveNodeNotFoundException expectedException = new ArchiveNodeNotFoundException("some exception message", workspaceTopNodeArchiveURI, null);
         
         context.checking(new Expectations() {{
             
@@ -424,7 +424,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -494,7 +494,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -568,7 +568,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -673,7 +673,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -698,7 +698,7 @@ public class LamusWorkspaceUploaderTest {
         uploadedFiles.add(mockFile1);
         
         final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
+        final ArchiveNodeNotFoundException expectedException = new ArchiveNodeNotFoundException("some exception message", workspaceTopNodeArchiveURI, null);
         
         //only one file in the collection, so only one loop cycle
         
@@ -724,7 +724,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -786,7 +786,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, UnknownNodeException, WorkspaceException {
+    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);

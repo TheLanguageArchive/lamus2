@@ -21,7 +21,6 @@ import java.io.IOException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -101,13 +100,12 @@ public class GeneralNodeExporter implements NodeExporter {
             
             //TODO ensureChecksum - will this be done by the crawler??
             
-            CorpusNode corpusNode = null;
-            try {
-                corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
-            } catch (UnknownNodeException ex) {
+            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+            if(corpusNode == null) {
                 String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(errorMessage, null);
             }
+            
 //            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
 //            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
             

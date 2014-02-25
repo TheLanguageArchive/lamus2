@@ -20,12 +20,12 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import nl.mpi.archiving.corpusstructure.adapter.AdapterUtils;
+//import nl.mpi.archiving.corpusstructure.adapter.AdapterUtils;
 import nl.mpi.archiving.corpusstructure.core.service.BaseNodeResolver;
-import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIAdapterNodeResolver;
+//import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIAdapterNodeResolver;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.corpusstructure.ArchiveAccessContext;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
+//import nl.mpi.corpusstructure.ArchiveAccessContext;
+//import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.util.OurURL;
 
 /**
@@ -35,11 +35,11 @@ import nl.mpi.util.OurURL;
  */
 public class WorkspaceStepsNodeResolver extends BaseNodeResolver implements Serializable  {
     
-    private final ArchiveObjectsDB ao;
+//    private final ArchiveObjectsDB ao;
 
-    public WorkspaceStepsNodeResolver(ArchiveObjectsDB ao) {
-	this.ao = ao;
-    }
+//    public WorkspaceStepsNodeResolver(ArchiveObjectsDB ao) {
+//	this.ao = ao;
+//    }
 
     /**
      * Resolves a CorpusNode, supporting 'node:' URIs as returned by the corpus structure adapter
@@ -50,21 +50,23 @@ public class WorkspaceStepsNodeResolver extends BaseNodeResolver implements Seri
      */
     @Override
     public URL getUrl(CorpusNode node) {
-	final URI nodeURI = node.getNodeURI();
-	if (nodeURI.getScheme().equalsIgnoreCase("node")) {
-	    final OurURL objectURL = ao.getObjectURL(AdapterUtils.toNodeIdString(nodeURI), ArchiveAccessContext.FILE_UX_URL);
-	    if (objectURL == null) {
-		return null;
-	    } else {
-		return objectURL.toURL();
-	    }
-	} else {
-	    try {
-		return nodeURI.toURL();
-	    } catch (MalformedURLException ex) {
-		//log error
-		return null;
-	    }
-	}
+//	final URI nodeURI = node.getNodeURI();
+//	if (nodeURI.getScheme().equalsIgnoreCase("node")) {
+//	    final OurURL objectURL = ao.getObjectURL(AdapterUtils.toNodeIdString(nodeURI), ArchiveAccessContext.FILE_UX_URL);
+//	    if (objectURL == null) {
+//		return null;
+//	    } else {
+//		return objectURL.toURL();
+//	    }
+//	} else {
+//	    try {
+//		return nodeURI.toURL();
+//	    } catch (MalformedURLException ex) {
+//		//log error
+//		return null;
+//	    }
+//	}
+        
+        throw new UnsupportedOperationException("not supported at the moment");
     }
 }

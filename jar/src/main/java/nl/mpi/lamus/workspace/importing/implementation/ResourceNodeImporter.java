@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -107,8 +106,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         try {
             
             childCorpusNode = corpusStructureProvider.getNode(childURI);
-            childURL = nodeResolver.getUrl(childCorpusNode);
+            if(childCorpusNode == null) {
+                String errorMessage = "ResourceNodeImporter.importNode: error getting node " + childURI;
+                logger.error(errorMessage);
+                throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), null);
+            }
             
+            childURL = nodeResolver.getUrl(childCorpusNode);
             if(childURL == null) {
                 String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
                 logger.error(errorMessage);
@@ -120,10 +124,6 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
             logger.error(errorMessage, muex);
             throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), muex);
-        } catch (UnknownNodeException unex) {
-	    String errorMessage = "ResourceNodeImporter.importNode: error getting object URL for node " + childURI;
-	    logger.error(errorMessage, unex);
-	    throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), unex);
         }
 
         String childMimetype = childLink.getMimetype();

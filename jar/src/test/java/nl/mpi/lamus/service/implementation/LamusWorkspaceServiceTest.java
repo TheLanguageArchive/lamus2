@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -103,31 +102,42 @@ public class LamusWorkspaceServiceTest {
     public void tearDown() {
     }
 
-
+    
     @Test
-    public void createWorkspaceThrowsUnknownNodeException()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
+    public void createWorkspaceNullUri()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
         
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = null;
         final String userID = "someUser";
-        final UnknownNodeException expectedException = new UnknownNodeException("node not found");
-        
-        context.checking(new Expectations() {{
-            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
-                will(throwException(expectedException));
-        }});
+        final String expectedMessage = "Both userID and archiveNodeURI should not be null";
         
         try {
             service.createWorkspace(userID, archiveNodeURI);
             fail("should have thrown exception");
-        } catch(UnknownNodeException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void createWorkspaceNullUser()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+        
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final String userID = null;
+        final String expectedMessage = "Both userID and archiveNodeURI should not be null";
+        
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
         }
     }
     
     @Test
     public void createWorkspaceThrowsNodeAccessException()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
@@ -148,7 +158,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceThrowsWorkspaceImportException()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, UnknownNodeException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
         
         final int workspaceID = 10;
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -171,7 +181,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceSuccess()
-            throws MalformedURLException, URISyntaxException, UnknownNodeException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";

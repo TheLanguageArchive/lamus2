@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
@@ -74,13 +73,12 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle) {
         
-        CorpusNode referenceCorpusNode = null;
+        CorpusNode referenceCorpusNode = corpusStructureProvider.getNode(handle);
         URL referenceUrl = null;
-        try {
-            referenceCorpusNode = corpusStructureProvider.getNode(handle);
+        if(referenceCorpusNode == null) {
+            logger.warn("Node not found in CS DB for handle " + handle.toString());
+        } else {
             referenceUrl = nodeResolver.getUrl(referenceCorpusNode);
-        } catch (UnknownNodeException ex) {
-            logger.warn("Node not found in CS DB for handle " + handle.toString(), ex);
         }
         
         File wsUploadDirectory = workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);

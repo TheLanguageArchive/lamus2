@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
-import nl.mpi.lamus.workspace.management.implementation.LamusWorkspaceNodeLinkManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,7 +26,6 @@ import java.util.Collection;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
@@ -148,7 +146,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
 
     @Test
-    public void linkNodesWithReferenceWithNullParentNodeAndChildLink() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+    public void linkNodesWithReferenceWithNullParentNodeAndChildLink() throws URISyntaxException, MalformedURLException {
         
         final int childNodeID = 2;
         final URI childNodeURI = new URI(UUID.randomUUID().toString());
@@ -173,7 +171,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
   
     @Test
-    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException, UnknownNodeException {
+    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException {
         
         final int childNodeID = 2;
         final URI childNodeURI = new URI(UUID.randomUUID().toString());

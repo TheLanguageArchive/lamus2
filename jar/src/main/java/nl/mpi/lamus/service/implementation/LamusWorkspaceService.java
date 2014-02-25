@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -76,7 +75,11 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public Workspace createWorkspace(String userID, URI archiveNodeURI)
-            throws UnknownNodeException, NodeAccessException, WorkspaceImportException {
+            throws NodeAccessException, WorkspaceImportException {
+        
+        if(userID == null || archiveNodeURI == null) {
+            throw new IllegalArgumentException("Both userID and archiveNodeURI should not be null");
+        }
 
         this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
         

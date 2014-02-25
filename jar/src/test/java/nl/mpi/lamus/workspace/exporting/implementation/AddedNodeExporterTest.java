@@ -27,7 +27,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
@@ -147,7 +146,7 @@ public class AddedNodeExporterTest {
      */
     @Test
     public void exportUploadedResourceNode()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, UnknownNodeException, WorkspaceExportException, TransformerException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException {
         
         final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());

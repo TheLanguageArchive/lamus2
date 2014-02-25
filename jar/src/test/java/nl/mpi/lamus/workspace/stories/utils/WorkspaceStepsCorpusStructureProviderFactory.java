@@ -17,19 +17,19 @@
 package nl.mpi.lamus.workspace.stories.utils;
 
 import java.io.Serializable;
-import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIAdapter;
-import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
-import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBFactory;
-import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBProxy;
-import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBFactory;
-import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBProxy;
+//import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIAdapter;
+//import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+//import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBFactory;
+//import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBProxy;
+//import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBFactory;
+//import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBProxy;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
-import nl.mpi.corpusstructure.ArchiveObjectsDB;
-import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
-import nl.mpi.corpusstructure.CorpusStructureDB;
-import nl.mpi.corpusstructure.CorpusStructureDBImpl;
+//import nl.mpi.corpusstructure.ArchiveObjectsDB;
+//import nl.mpi.corpusstructure.ArchiveObjectsDBImpl;
+//import nl.mpi.corpusstructure.CorpusStructureDB;
+//import nl.mpi.corpusstructure.CorpusStructureDBImpl;
 
 /**
  * Factory for {@link CorpusStructureProvider} and {@link NodeResolver}, to be used in the workspace stories,
@@ -39,8 +39,8 @@ import nl.mpi.corpusstructure.CorpusStructureDBImpl;
 public class WorkspaceStepsCorpusStructureProviderFactory implements CorpusStructureProviderFactory, Serializable {
     
     private final String dbname;
-    private CorpusStructureDBProxy corpusStructureDBProxy;
-    private ArchiveObjectsDBProxy archiveObjectsDBProxy;
+//    private CorpusStructureDBProxy corpusStructureDBProxy;
+//    private ArchiveObjectsDBProxy archiveObjectsDBProxy;
 
     /**
      *
@@ -49,32 +49,35 @@ public class WorkspaceStepsCorpusStructureProviderFactory implements CorpusStruc
      */
     public WorkspaceStepsCorpusStructureProviderFactory(String dbname) {
 	this.dbname = dbname;
-	this.corpusStructureDBProxy = new CorpusStructureDBProxy(new CorpusStructureDBImplFactory());
-	this.archiveObjectsDBProxy = new ArchiveObjectsDBProxy(new ArchiveObjectsDBImplFactory());
+//	this.corpusStructureDBProxy = new CorpusStructureDBProxy(new CorpusStructureDBImplFactory());
+//	this.archiveObjectsDBProxy = new ArchiveObjectsDBProxy(new ArchiveObjectsDBImplFactory());
+        throw new UnsupportedOperationException("not supported at the moment");
     }
 
     @Override
     public CorpusStructureProvider createCorpusStructureProvider() {
-	return new CorpusStructureAPIAdapter(corpusStructureDBProxy, archiveObjectsDBProxy);
+//	return new CorpusStructureAPIAdapter(corpusStructureDBProxy, archiveObjectsDBProxy);
+        throw new UnsupportedOperationException("not supported at the moment");
     }
 
     public NodeResolver createNodeResolver() {
-	return new WorkspaceStepsNodeResolver(archiveObjectsDBProxy);
+//	return new WorkspaceStepsNodeResolver(archiveObjectsDBProxy);
+        throw new UnsupportedOperationException("not supported at the moment");
     }
 
-    private class CorpusStructureDBImplFactory implements CorpusStructureDBFactory, Serializable {
-
-	@Override
-	public CorpusStructureDB newCSDB() {
-	    return new CorpusStructureDBImpl(dbname);
-	}
-    }
-
-    private class ArchiveObjectsDBImplFactory implements ArchiveObjectsDBFactory, Serializable {
-
-	@Override
-	public ArchiveObjectsDB newAO() {
-	    return new ArchiveObjectsDBImpl(dbname);
-	}
-    }
+//    private class CorpusStructureDBImplFactory implements CorpusStructureDBFactory, Serializable {
+//
+//	@Override
+//	public CorpusStructureDB newCSDB() {
+//	    return new CorpusStructureDBImpl(dbname);
+//	}
+//    }
+//
+//    private class ArchiveObjectsDBImplFactory implements ArchiveObjectsDBFactory, Serializable {
+//
+//	@Override
+//	public ArchiveObjectsDB newAO() {
+//	    return new ArchiveObjectsDBImpl(dbname);
+//	}
+//    }
 }

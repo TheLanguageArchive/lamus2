@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -105,7 +105,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         URL topNodeArchiveURL;
         try {
             topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-        } catch (UnknownNodeException ex) {
+        } catch (ArchiveNodeNotFoundException ex) {
             String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
             logger.error(errorMessage, ex);
             throw new WorkspaceException(errorMessage, workspaceID, ex);
@@ -157,7 +157,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         URL topNodeArchiveURL;
         try {
             topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-        } catch (UnknownNodeException ex) {
+        } catch (ArchiveNodeNotFoundException ex) {
             String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
             logger.error(errorMessage, ex);
             throw new WorkspaceException(errorMessage, workspaceID, ex);

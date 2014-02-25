@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
@@ -130,7 +129,7 @@ public class LamusWorkspaceUploadHelperTest {
     }
     
     @Test
-    public void assureLinksPidMetadataReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+    public void assureLinksPidMetadataReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
         final int workspaceID = 1;
         
@@ -169,7 +168,7 @@ public class LamusWorkspaceUploadHelperTest {
     }
     
     @Test
-    public void assureLinksPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+    public void assureLinksPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
         final int workspaceID = 1;
         
@@ -203,7 +202,7 @@ public class LamusWorkspaceUploadHelperTest {
     }
     
     @Test
-    public void assureLinksArchiveExternalPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, UnknownNodeException {
+    public void assureLinksArchiveExternalPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
         final int workspaceID = 1;
         

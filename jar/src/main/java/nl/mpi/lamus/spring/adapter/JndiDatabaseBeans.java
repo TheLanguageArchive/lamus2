@@ -20,8 +20,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import nl.mpi.annot.search.lib.SearchClient;
-import nl.mpi.versioning.manager.VersioningAPI;
+//import nl.mpi.annot.search.lib.SearchClient;
+//import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,14 +47,14 @@ public class JndiDatabaseBeans {
         return (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
     }
 
-    @Bean
-    public VersioningAPI versioningAPI() {
-        return new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
-    }
+//    @Bean
+//    public VersioningAPI versioningAPI() {
+//        return new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
+//    }
 
-    @Bean
-    public SearchClient searchClient() {
-        //TODO INITIALIZE SearchClient bean
-        return null;
-    }
+//    @Bean
+//    public SearchClient searchClient() {
+//        //TODO INITIALIZE SearchClient bean
+//        return null;
+//    }
 }

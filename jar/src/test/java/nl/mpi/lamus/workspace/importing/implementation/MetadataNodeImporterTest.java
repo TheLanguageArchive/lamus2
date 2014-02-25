@@ -25,7 +25,6 @@ import java.util.List;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -137,7 +136,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importTopNodeWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
@@ -183,7 +182,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importTopNodeWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
@@ -225,7 +224,7 @@ public class MetadataNodeImporterTest {
    
     @Test
     public void importNodeMetadataDocumentThrowsIOException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, UnknownNodeException {
+        IOException, MetadataException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -260,7 +259,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importNodeMetadataDocumentThrowsMetadataException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, UnknownNodeException {
+        IOException, MetadataException {
 
         final URL testChildURL = new URL("http://some.url/node.something");
         final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -294,18 +293,16 @@ public class MetadataNodeImporterTest {
     }
     
     @Test
-    public void importNodeMetadataDocumentThrowsUnknownNodeException() throws MalformedURLException, URISyntaxException,
-        IOException, MetadataException, UnknownNodeException {
+    public void importNodeMetadataDocumentCantFindNode() throws MalformedURLException, URISyntaxException,
+        IOException, MetadataException {
 
         final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         
         testWorkspace.setTopNodeArchiveURI(testURI);
         
-        final UnknownNodeException expectedException = new UnknownNodeException("this is an exception thrown by the method 'getMetadataDocument'");
-        
         context.checking(new Expectations() {{
             
-            oneOf(mockCorpusStructureProvider).getNode(testURI); will(throwException(expectedException));
+            oneOf(mockCorpusStructureProvider).getNode(testURI); will(returnValue(null));
             
         }});
         
@@ -316,13 +313,13 @@ public class MetadataNodeImporterTest {
             String errorMessage = "Error getting information for node " + testURI;
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-            assertEquals("Cause different from expected", expectedException, ex.getCause());
+            assertEquals("Cause different from expected", null, ex.getCause());
         }
     }
     
     @Test
     public void importNormalNodeWithHandleAndLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -376,7 +373,7 @@ public class MetadataNodeImporterTest {
 
     @Test
     public void importNormalNodeWithHandleAndNoLinks() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -427,7 +424,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importNormalNodeWithNoHandle() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -480,7 +477,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void importExternalNode() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -535,7 +532,7 @@ public class MetadataNodeImporterTest {
 
     @Test
     public void getNewWorkspaceNodeThrowsMalformedURLException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -598,7 +595,7 @@ public class MetadataNodeImporterTest {
         
     @Test
     public void getNewWorkspaceNodeThrowsIOException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -661,7 +658,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void getNewWorkspaceNodeThrowsTransformerException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
@@ -724,7 +721,7 @@ public class MetadataNodeImporterTest {
     
     @Test
     public void getNewWorkspaceNodeThrowsMetadataException() throws MalformedURLException, IOException, MetadataException, URISyntaxException,
-        WorkspaceImportException, UnknownNodeException, TransformerException {
+        WorkspaceImportException, TransformerException {
 
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;

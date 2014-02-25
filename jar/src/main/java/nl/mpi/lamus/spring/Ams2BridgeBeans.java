@@ -15,14 +15,14 @@
  */
 package nl.mpi.lamus.spring;
 
-import nl.mpi.common.util.spring.SpringContextLoader;
-import nl.mpi.lat.ams.Constants;
-import nl.mpi.lat.ams.service.LicenseService;
-import nl.mpi.lat.ams.service.RuleService;
-import nl.mpi.lat.auth.authentication.AuthenticationService;
-import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-import nl.mpi.lat.auth.principal.PrincipalService;
-import nl.mpi.lat.fabric.FabricService;
+//import nl.mpi.common.util.spring.SpringContextLoader;
+//import nl.mpi.lat.ams.Constants;
+//import nl.mpi.lat.ams.service.LicenseService;
+//import nl.mpi.lat.ams.service.RuleService;
+//import nl.mpi.lat.auth.authentication.AuthenticationService;
+//import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
+//import nl.mpi.lat.auth.principal.PrincipalService;
+//import nl.mpi.lat.fabric.FabricService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,113 +42,113 @@ import org.springframework.context.annotation.Profile;
 //@Profile("production")
 public class Ams2BridgeBeans {
     
-    private SpringContextLoader contextLoader;
+//    private SpringContextLoader contextLoader;
     
-    private PrincipalService pcplSrv;
-    private AuthenticationService autheSrv;
-    private AdvAuthorizationService authoSrv;
-    private FabricService fabSrv;
-    private LicenseService licSrv;
-    private RuleService ruleSrv;
+//    private PrincipalService pcplSrv;
+//    private AuthenticationService autheSrv;
+//    private AdvAuthorizationService authoSrv;
+//    private FabricService fabSrv;
+//    private LicenseService licSrv;
+//    private RuleService ruleSrv;
     
     /**
      * Initialises the context loader that will retrieve the beans from the
      * configuration provided by AMS2.
      */
-    private void initialiseContextLoader() {
-        this.contextLoader = new SpringContextLoader();
-        this.contextLoader.init("spring-ams2-core.xml");
-    }
+//    private void initialiseContextLoader() {
+//        this.contextLoader = new SpringContextLoader();
+//        this.contextLoader.init("spring-ams2-core.xml");
+//    }
     
     /**
      * @return PrincipalService bean, to be used by the connection to AMS2
      */
-    @Bean
-    public PrincipalService principalService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        
-        if(this.pcplSrv == null) {
-            this.pcplSrv = (PrincipalService) this.contextLoader.getBean(Constants.BEAN_PRINCIPAL_SRV);
-        }
-        return this.pcplSrv;
-    }
+//    @Bean
+//    public PrincipalService principalService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        
+//        if(this.pcplSrv == null) {
+//            this.pcplSrv = (PrincipalService) this.contextLoader.getBean(Constants.BEAN_PRINCIPAL_SRV);
+//        }
+//        return this.pcplSrv;
+//    }
     
     /**
      * @return AuthenticationService bean, to be used by the connection to AMS2
      */
-    @Bean
-    @Qualifier("integratedAuthenticationSrv")
-    public AuthenticationService authenticationService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        if(this.autheSrv == null) {
-            this.autheSrv = (AuthenticationService) this.contextLoader.getBean(Constants.BEAN_INTEGRATED_AUTHENTICATION_SRV);
-        }
-        return this.autheSrv;
-    }
+//    @Bean
+//    @Qualifier("integratedAuthenticationSrv")
+//    public AuthenticationService authenticationService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        if(this.autheSrv == null) {
+//            this.autheSrv = (AuthenticationService) this.contextLoader.getBean(Constants.BEAN_INTEGRATED_AUTHENTICATION_SRV);
+//        }
+//        return this.autheSrv;
+//    }
     
     /**
      * @return AuthorizationService bean, to be used by the connection to AMS2
      */
-    @Bean
-    public AdvAuthorizationService authorizationService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        if(this.authoSrv == null) {
-            this.authoSrv = (AdvAuthorizationService) contextLoader.getBean(Constants.BEAN_AUTHORIZATION_SRV);
-        }
-        return this.authoSrv;
-    }
+//    @Bean
+//    public AdvAuthorizationService authorizationService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        if(this.authoSrv == null) {
+//            this.authoSrv = (AdvAuthorizationService) contextLoader.getBean(Constants.BEAN_AUTHORIZATION_SRV);
+//        }
+//        return this.authoSrv;
+//    }
     
     /**
      * @return FabricService bean, to be used by the connection to AMS2
      */
-    @Bean
-    public FabricService fabricService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        if(this.fabSrv == null) {
-            this.fabSrv = (FabricService) contextLoader.getBean(Constants.BEAN_FABRIC_SRV);
-        }
-        return this.fabSrv;
-    }
+//    @Bean
+//    public FabricService fabricService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        if(this.fabSrv == null) {
+//            this.fabSrv = (FabricService) contextLoader.getBean(Constants.BEAN_FABRIC_SRV);
+//        }
+//        return this.fabSrv;
+//    }
     
     /**
      * @return LicenseService bean, to be used by the connection to AMS2
      */
-    @Bean
-    public LicenseService licenseService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        if(this.licSrv == null) {
-            this.licSrv = (LicenseService) contextLoader.getBean(Constants.BEAN_LICENSE_SRV);
-        }
-        return this.licSrv;
-    }
+//    @Bean
+//    public LicenseService licenseService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        if(this.licSrv == null) {
+//            this.licSrv = (LicenseService) contextLoader.getBean(Constants.BEAN_LICENSE_SRV);
+//        }
+//        return this.licSrv;
+//    }
     
     /**
      * @return RuleService bean, to be used by the connection to AMS2
      */
-    @Bean
-    public RuleService ruleService() {
-        
-        if(this.contextLoader == null) {
-            initialiseContextLoader();
-        }
-        if(this.ruleSrv == null) {
-            this.ruleSrv = (RuleService) contextLoader.getBean(Constants.BEAN_RULE_SRV);
-        }
-        return this.ruleSrv;
-    }
+//    @Bean
+//    public RuleService ruleService() {
+//        
+//        if(this.contextLoader == null) {
+//            initialiseContextLoader();
+//        }
+//        if(this.ruleSrv == null) {
+//            this.ruleSrv = (RuleService) contextLoader.getBean(Constants.BEAN_RULE_SRV);
+//        }
+//        return this.ruleSrv;
+//    }
 }

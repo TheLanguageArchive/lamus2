@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -95,7 +94,7 @@ public class UnlinkedNodeExporterTest {
     //TODO SIMILAR TO DeleteNodeExporterTest FOR NOW
     
     @Test
-    public void exportNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
@@ -149,7 +148,7 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
 
         context.checking(new Expectations() {{
@@ -213,7 +212,7 @@ public class UnlinkedNodeExporterTest {
 //    }
     
     @Test
-    public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
+    public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         unlinkedNodeExporter.setWorkspace(null);
         

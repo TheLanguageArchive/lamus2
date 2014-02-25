@@ -219,7 +219,7 @@
             <artifactId>corpus-structure-2-provider</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -229,7 +229,7 @@
                     <artifactId>handle</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-crawler</artifactId>
@@ -237,15 +237,15 @@
         </dependency>
         
         
-        <dependency>
+<!--        <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>ams2</artifactId>
             <version>1.4.9.3</version>
             <exclusions>
-<!--                <exclusion>
+                <exclusion>
                     <groupId>commons-fileupload</groupId>
                     <artifactId>commons-fileupload</artifactId>
-                </exclusion>-->
+                </exclusion>
                 <exclusion>
                     <groupId>org.springframework</groupId>
                     <artifactId>spring</artifactId>
@@ -259,7 +259,7 @@
                     <artifactId>hibernate</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>metadata-api</artifactId>
@@ -295,11 +295,11 @@
             <version>14.0.1</version>
         </dependency>-->
         
-        <dependency>
+<!--        <dependency>
             <groupId>nl.mpi.annot.search</groupId>
             <artifactId>annot-search-lib</artifactId>
             <version>1.2.2</version>
-        </dependency>
+        </dependency>-->
         
         
         
