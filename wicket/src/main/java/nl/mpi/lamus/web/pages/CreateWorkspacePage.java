@@ -16,25 +16,19 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
+import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.exception.NodeAccessException;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.web.components.NavigationPanel;
-import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
@@ -44,9 +38,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
-import org.apache.wicket.markup.html.form.ListChoice;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -68,7 +60,10 @@ public class CreateWorkspacePage extends LamusPage {
     
     // Page components
     private final Form nodeIdForm;
+    private Button submitButton;
+    private Label warningMessage;
 
+    
     public CreateWorkspacePage() {
 	super();
         
@@ -96,8 +91,17 @@ public class CreateWorkspacePage extends LamusPage {
 	tree.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
 	    @Override
 	    public void nodeSelectionChanged(AjaxRequestTarget target, ArchiveTreePanel treePanel) {
-		final LinkedTreeNode node = (LinkedTreeNode) treePanel.getSelectedNodes().iterator().next();
-		nodeIdForm.setModel(new CompoundPropertyModel<LinkedTreeNode>(node));
+		final CorpusNode node = (CorpusNode) treePanel.getSelectedNodes().iterator().next();
+                
+                if(CorpusNodeType.COLLECTION != node.getType() && CorpusNodeType.METADATA != node.getType()) { //only metadata should be selectable
+                    submitButton.setEnabled(false);
+                    warningMessage.setVisible(true);
+                } else {
+                    submitButton.setEnabled(true);
+                    warningMessage.setVisible(false);
+                }
+                
+		nodeIdForm.setModel(new CompoundPropertyModel<CorpusNode>(node));
 
 		if (target != null) {
 		    // Ajax, refresh nodeIdForm
@@ -122,8 +126,9 @@ public class CreateWorkspacePage extends LamusPage {
 	final Form<CorpusNode> form = new Form<CorpusNode>(id);
 	form.add(new Label("name"));
 	form.add(new Label("nodeURI"));
+        form.add(new Label("type"));
 
-	final Button submitButton = new Button("createWorkspace") {
+	submitButton = new Button("createWorkspace") {
 	    @Override
 	    public void onSubmit() {
 		final String currentUserId = LamusSession.get().getUserId();
@@ -132,8 +137,6 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-                } catch (UnknownNodeException ex) {
-                    Session.get().error(ex.getMessage());
                 } catch (NodeAccessException ex) {
                     Session.get().error(ex.getMessage());
                 } catch (WorkspaceImportException ex) {
@@ -141,7 +144,12 @@ public class CreateWorkspacePage extends LamusPage {
                 }
 	    }
 	};
+        submitButton.setEnabled(false);
 	form.add(submitButton);
+        
+        warningMessage = new Label("warning_message", "Please select a metadata node as top node of the workspace");
+        warningMessage.setVisible(false);
+        form.add(warningMessage);
 
 	// Put details/submit form in container for refresh through AJAX 
 	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");

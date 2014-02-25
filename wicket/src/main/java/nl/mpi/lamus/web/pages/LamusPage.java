@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.SharedResourceReference;
 
 /**
  * Reference page that contains common features
@@ -36,11 +37,11 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 public class LamusPage extends WebPage {
 
 //    public static final PackageResourceReference CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lams.css");
-    public static final PackageResourceReference LAMUS2_CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lamus2.css");
+//    public static final PackageResourceReference LAMUS2_CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lamus2.css");
 //    public static final PackageResourceReference LANA_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lana.gif");
-    public static final PackageResourceReference TLA_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "tla_logo.png");
-    public static final PackageResourceReference CLARIN_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
-    public static final PackageResourceReference HOME_ICON_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "home.png");
+//    public static final PackageResourceReference TLA_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "/tla_logo.png");
+//    public static final PackageResourceReference CLARIN_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
+//    public static final PackageResourceReference HOME_ICON_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "home.png");
     
     public LamusPage() {
 //        this("Lamus2 Language Archive Management and Upload System");
@@ -55,9 +56,11 @@ public class LamusPage extends WebPage {
     public LamusPage(String appName) {
         super();
 	add(new FeedbackPanel("feedbackPanel"));
-        add(new Image("header_tla_logo", TLA_LOGO_RESOURCE_REFERENCE));
+//        add(new Image("header_tla_logo", TLA_LOGO_RESOURCE_REFERENCE));
+        add(new Image("header_tla_logo", new SharedResourceReference("tlaLogoImage")));
         add(new Label("header_appname", appName));
-        add(new Image("header_clarin_logo", CLARIN_LOGO_RESOURCE_REFERENCE));
+//        add(new Image("header_clarin_logo", CLARIN_LOGO_RESOURCE_REFERENCE));
+        add(new Image("header_clarin_logo", new SharedResourceReference("clarinInvertedImage")));
         
         Link homePageLink = new Link("home_page_link") {
             @Override
@@ -66,7 +69,8 @@ public class LamusPage extends WebPage {
                 setResponsePage(resultPage);
             }
         };
-        homePageLink.add(new Image("home_image", HOME_ICON_RESOURCE_REFERENCE));
+//        homePageLink.add(new Image("home_image", HOME_ICON_RESOURCE_REFERENCE));
+        homePageLink.add(new Image("home_image", new SharedResourceReference("homeImage")));
         add(homePageLink);
         
         add(new Label("header_username", new Model<String>(LamusSession.get().getUserId())));
@@ -87,6 +91,9 @@ public class LamusPage extends WebPage {
         super.renderHead(response);
 //        response.renderCSSReference(CSS_RESOURCE_REFERENCE);
 //        response.render(CssHeaderItem.forReference(CSS_RESOURCE_REFERENCE));
-        response.render(CssHeaderItem.forReference(LAMUS2_CSS_RESOURCE_REFERENCE));
+        
+//        response.render(CssHeaderItem.forReference(LAMUS2_CSS_RESOURCE_REFERENCE));
+        response.render(CssHeaderItem.forReference(new SharedResourceReference("lamus2Css")));
+        
     }
 }

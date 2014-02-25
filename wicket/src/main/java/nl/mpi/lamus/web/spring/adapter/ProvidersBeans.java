@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.web.spring.adapter;
 
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
 import nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class ProvidersBeans {
     @Bean
     @Scope("prototype")
     @Qualifier("createWorkspaceTreeProvider")
-    public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() throws UnknownNodeException {
+    public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() {
         return new CorpusStructureTreeModelProvider(csdbFactory);
     }
 }

@@ -28,13 +28,9 @@
         </composition>
         
         <authorization><!-- pages that need a login: all (except some) -->
-            <location  target="/*" />
+            <!--<location  target="/*" />-->
+            <location target="/CreateWorkspacePage" />
+            <location target="/SelectWorkspacePage" />
         </authorization>
-        <handler>
-            <ignore><!-- pages that need no login: -->
-                <location target="/IndexPage" />
-                <location target="/" />
-            </ignore>
-        </handler>
     </shhaa>
 </ROOT>

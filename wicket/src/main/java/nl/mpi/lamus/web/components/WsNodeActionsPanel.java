@@ -88,7 +88,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
                     
                 };
                 
-                nodeActionButton.add(AttributeModifier.append("class", new Model<String>("icon-submit_ws")));
+                nodeActionButton.add(AttributeModifier.append("class", new Model<String>("icon-unlink_node")));
                 
                 li.add(nodeActionButton);
             }

@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.web.spring.adapter;
 
-import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+//import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import org.springframework.context.annotation.Bean;
@@ -31,18 +31,18 @@ import org.springframework.context.annotation.Profile;
 @Profile("cmdi-adapter-csdb")
 public class CorpusstructureBeans {
     
-    @Bean
-    public CorpusStructureAPIProviderFactory csdbFactory() {
-        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
-    }
+//    @Bean
+//    public CorpusStructureAPIProviderFactory csdbFactory() {
+//        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
+//    }
     
-    @Bean
-    public CorpusStructureProvider csdb() {
-        return csdbFactory().createCorpusStructureProvider();
-    }
+//    @Bean
+//    public CorpusStructureProvider csdb() {
+//        return csdbFactory().createCorpusStructureProvider();
+//    }
     
-    @Bean
-    public NodeResolver nodeResolver() {
-        return csdbFactory().createNodeResolver();
-    }
+//    @Bean
+//    public NodeResolver nodeResolver() {
+//        return csdbFactory().createNodeResolver();
+//    }
 }

@@ -84,6 +84,7 @@ public class SelectWorkspacePage extends LamusPage {
         ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
         listWorkspaces.setMaxRows(5);
         listWorkspaces.setNullValid(false);
+        listWorkspaces.setRequired(true);
         final Form<Workspace> form = new Form<Workspace>(id, workspaceModel);
 
         Button submitButton = new Button("openWorkspace") {
@@ -91,8 +92,12 @@ public class SelectWorkspacePage extends LamusPage {
             @Override
             public void onSubmit() {
                 try {
-                    Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
-                    setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
+                    if(form.getModelObject() != null) {
+                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
+                        setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
+                    } else {
+                        //TODO MESSAGE IN FEEDBACK PANEL?
+                    }
                 } catch (WorkspaceNotFoundException ex) {
                     Session.get().error(ex.getMessage());
                 } catch (WorkspaceAccessException ex) {

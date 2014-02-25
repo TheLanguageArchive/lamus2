@@ -18,12 +18,15 @@ package nl.mpi.lamus.web;
 
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
+import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.springframework.beans.BeansException;
@@ -67,6 +70,25 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/IndexPage", IndexPage.class);
         mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
         mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
+        
+        PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");
+        getSharedResources().add("lamus2Css", lamus2CssReference.getResource());
+        mountResource("/css/lamus2.css", lamus2CssReference);
+        
+        PackageResourceReference tlaLogoImageReference = new PackageResourceReference(LamusPage.class, "tla_logo.png");
+        getSharedResources().add("tlaLogoImage", tlaLogoImageReference.getResource());
+//        mountResource("/images/tla_logo.png", tlaLogoImageReference);
+        PackageResourceReference homeImageReference = new PackageResourceReference(LamusPage.class, "home.png");
+        getSharedResources().add("homeImage", homeImageReference.getResource());
+//        mountResource("/images/home.png", homeImageReference);
+        PackageResourceReference clarinInvertedImageReference = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
+        getSharedResources().add("clarinInvertedImage", clarinInvertedImageReference.getResource());
+//        mountResource("/images/CLARIN-inverted.png", clarinInvertedImageReference);
+        
+        mountResource("/fonts/lamus_icon_font/lamus_icon_font.eot", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.eot"));
+        mountResource("/fonts/lamus_icon_font/lamus_icon_font.svg", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.svg"));
+        mountResource("/fonts/lamus_icon_font/lamus_icon_font.ttf", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.ttf"));
+        mountResource("/fonts/lamus_icon_font/lamus_icon_font.woff", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.woff"));
     }
 
     @Override

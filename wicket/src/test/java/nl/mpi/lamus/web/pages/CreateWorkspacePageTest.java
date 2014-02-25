@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.UnknownNodeException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
@@ -126,7 +125,10 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertLabel("formContainer:nodeIdForm:nodeURI", ""); //TODO test when node selection changes
         
         getTester().assertComponent("formContainer:nodeIdForm:createWorkspace", Button.class);
-        getTester().assertEnabled("formContainer:nodeIdForm:createWorkspace");
+        getTester().assertDisabled("formContainer:nodeIdForm:createWorkspace"); //initially disabled
+        
+        
+        //TODO other tests
     }
     
     @Test
@@ -150,7 +152,9 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void formSubmitted() throws UnknownNodeException, NodeAccessException, WorkspaceImportException {
+    public void formSubmitted() throws NodeAccessException, WorkspaceImportException {
+        
+        getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm:createWorkspace").setEnabled(true);
         
         Form<CorpusNode> form = (Form<CorpusNode>) getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm");
         form.setModel(new CompoundPropertyModel<CorpusNode>(expectedSelectedNode));
