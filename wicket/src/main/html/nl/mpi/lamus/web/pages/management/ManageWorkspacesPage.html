@@ -18,21 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <head>
-        <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Manage Workspaces</title>
     </head>
     <body>
-        <wicket:panel>
-
-            <!--<div id="navigation">-->
-            <ul class="navigationMenu">
-                    <li><a href="#" wicket:id="createWorkspaceLink">Create Workspace</a></li>
-                    <li><a href="#" wicket:id="selectWorkspaceLink">Open Workspace</a></li>
-                    <li><a href="#" wicket:id="requestStorageSpaceLink">Request storage space</a></li>
-                    <li><a href="#" wicket:id="managementLink">Management</a></li>
-                </ul>
-            <!--</div>-->
+        <wicket:extend>
             
-	</wicket:panel>
+            <!--<span wicket:id="navigator">[dataview navigator]</span>-->
+            <table cellspacing="0" class="dataview" wicket:id="table">
+            </table>
+            
+        </wicket:extend>
     </body>
 </html>

@@ -59,5 +59,13 @@ public class NavigationPanel extends Panel {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
+        
+        add(new Link("managementLink") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(pagesProvider.getManageWorkspacesPage());
+            }
+        });
     }
 }

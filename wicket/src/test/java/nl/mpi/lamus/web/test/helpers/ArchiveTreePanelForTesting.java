@@ -33,8 +33,8 @@ public class ArchiveTreePanelForTesting<T extends GenericTreeNode & Serializable
         super(id, provider);
     }
     
-    public ArchiveTreePanelForTesting(String id, GenericTreeModelProvider provider, ArchiveTreeNodeIconProvider<T> iconProvider) {
-        super(id, provider, iconProvider);
+    public ArchiveTreePanelForTesting(String id, GenericTreeModelProvider provider, ArchiveTreeNodeIconProvider<T> iconProvider, boolean multipleSelectionAllowed) {
+        super(id, provider, iconProvider, multipleSelectionAllowed);
     }
     
     public void selectNode(T node) {

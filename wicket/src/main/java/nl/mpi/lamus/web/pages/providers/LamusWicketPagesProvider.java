@@ -21,6 +21,7 @@ import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
+import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +47,9 @@ public class LamusWicketPagesProvider {
     
     public WorkspacePage getWorkspacePage(Workspace workspace) {
         return new WorkspacePage(new WorkspaceModel(workspace));
+    }
+    
+    public ManageWorkspacesPage getManageWorkspacesPage() {
+        return new ManageWorkspacesPage();
     }
 }

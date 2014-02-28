@@ -31,6 +31,7 @@ import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
+import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
@@ -198,4 +199,12 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         assertNotNull("Page should not be null", resultPage);
     }
     
+    @Test
+    @DirtiesContext
+    public void getManageWorkspacePage() {
+        
+        ManageWorkspacesPage resultPage = pagesProvider.getManageWorkspacesPage();
+        
+        assertNotNull("Page should not be null", resultPage);
+    }
 }

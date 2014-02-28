@@ -212,4 +212,14 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public boolean userHasWorkspaces(String userID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<Workspace> listAllWorkspaces() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

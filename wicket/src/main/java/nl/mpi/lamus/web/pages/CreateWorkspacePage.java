@@ -39,6 +39,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -62,6 +63,7 @@ public class CreateWorkspacePage extends LamusPage {
     private final Form nodeIdForm;
     private Button submitButton;
     private Label warningMessage;
+    private Model<String> warningMessageModel;
 
     
     public CreateWorkspacePage() {
@@ -87,27 +89,43 @@ public class CreateWorkspacePage extends LamusPage {
      * @return created tree panel
      */
     private ArchiveTreePanel createArchiveTreePanel(final String id) {
-	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider);
+	ArchiveTreePanel tree = new ArchiveTreePanel(id, archiveTreeProvider, false);
 	tree.addArchiveTreePanelListener(new ArchiveTreePanelListener() {
 	    @Override
 	    public void nodeSelectionChanged(AjaxRequestTarget target, ArchiveTreePanel treePanel) {
-		final CorpusNode node = (CorpusNode) treePanel.getSelectedNodes().iterator().next();
                 
-                if(CorpusNodeType.COLLECTION != node.getType() && CorpusNodeType.METADATA != node.getType()) { //only metadata should be selectable
+                if(treePanel.getSelectedNodes().isEmpty()) {
                     submitButton.setEnabled(false);
+                    warningMessageModel.setObject("Please select a metadata node as top node of the workspace");
                     warningMessage.setVisible(true);
+                    
+                    nodeIdForm.setModelObject(null);
+                } else if(treePanel.getSelectedNodes().size() > 1) {
+                    submitButton.setEnabled(false);
+                    warningMessageModel.setObject("Please select only one node as top node of the workspace");
+                    warningMessage.setVisible(true);
+                    
+                    nodeIdForm.setModelObject(null);
                 } else {
-                    submitButton.setEnabled(true);
-                    warningMessage.setVisible(false);
-                }
                 
-		nodeIdForm.setModel(new CompoundPropertyModel<CorpusNode>(node));
+                    final CorpusNode node = (CorpusNode) treePanel.getSelectedNodes().iterator().next();
 
-		if (target != null) {
-		    // Ajax, refresh nodeIdForm
-		    target.add(nodeIdForm);
-		}
-	    }
+                    if(CorpusNodeType.COLLECTION != node.getType() && CorpusNodeType.METADATA != node.getType()) { //only metadata should be selectable
+                        submitButton.setEnabled(false);
+                        warningMessageModel.setObject("Please select a metadata node as top node of the workspace");
+                        warningMessage.setVisible(true);
+                    } else {
+                        submitButton.setEnabled(true);
+                        warningMessage.setVisible(false);
+                    }
+
+                    nodeIdForm.setModel(new CompoundPropertyModel<CorpusNode>(node));
+                }
+                if (target != null) {
+                    // Ajax, refresh nodeIdForm
+                    target.add(nodeIdForm);
+                }
+            }
 	});
 	tree.setLinkType(LinkType.AJAX_FALLBACK);
 	// Add to page
@@ -131,7 +149,7 @@ public class CreateWorkspacePage extends LamusPage {
 	submitButton = new Button("createWorkspace") {
 	    @Override
 	    public void onSubmit() {
-		final String currentUserId = LamusSession.get().getUserId();
+                final String currentUserId = LamusSession.get().getUserId();
 		final URI selectedNodeURI = form.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
                 try {
@@ -147,7 +165,9 @@ public class CreateWorkspacePage extends LamusPage {
         submitButton.setEnabled(false);
 	form.add(submitButton);
         
-        warningMessage = new Label("warning_message", "Please select a metadata node as top node of the workspace");
+        warningMessageModel = Model.of("Please select a metadata node as top node of the workspace");
+        
+        warningMessage = new Label("warning_message", warningMessageModel);
         warningMessage.setVisible(false);
         form.add(warningMessage);
 

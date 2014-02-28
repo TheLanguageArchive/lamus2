@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web;
 
+import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.LamusPage;
@@ -39,6 +40,8 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
     
     @SpringBean
     private LamusSessionFactory lamusSessionFactory;
+//    @SpringBean
+//    private WorkspaceService workspaceService;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
 	this.lamusSessionFactory = sessionFactory;
@@ -50,7 +53,11 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         if(!LamusSession.get().isAuthenticated()) {
             return IndexPage.class;
         } else {
-            return CreateWorkspacePage.class;
+//            if(workspaceService.userHasWorkspaces(LamusSession.get().getUserId())) {
+//                return SelectWorkspacePage.class;
+//            } else {
+                return CreateWorkspacePage.class;
+//            }
         }
         // if user logged in
             // if has open workspaces, set "select workspace page" as homepage
@@ -85,10 +92,15 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         getSharedResources().add("clarinInvertedImage", clarinInvertedImageReference.getResource());
 //        mountResource("/images/CLARIN-inverted.png", clarinInvertedImageReference);
         
-        mountResource("/fonts/lamus_icon_font/lamus_icon_font.eot", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.eot"));
-        mountResource("/fonts/lamus_icon_font/lamus_icon_font.svg", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.svg"));
-        mountResource("/fonts/lamus_icon_font/lamus_icon_font.ttf", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.ttf"));
-        mountResource("/fonts/lamus_icon_font/lamus_icon_font.woff", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.woff"));
+//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.eot", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.eot"));
+//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.svg", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.svg"));
+//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.ttf", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.ttf"));
+//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.woff", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.woff"));
+        
+        mountResource("/fonts/icomoon/icomoon.eot", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.eot"));
+        mountResource("/fonts/icomoon/icomoon.svg", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.svg"));
+        mountResource("/fonts/icomoon/icomoon.ttf", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.ttf"));
+        mountResource("/fonts/icomoon/icomoon.woff", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.woff"));
     }
 
     @Override

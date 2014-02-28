@@ -27,14 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <h2>Link files</h2>
                 <form wicket:id="linkNodesForm">
                     <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
-                    <input wicket:id="linkNodesButton" type="submit"/>
+                    <input class="ws_button ws_button-3 ws_button-3b icon-link_node" wicket:id="linkNodesButton" type="submit"/>
+                    <span class="ws_create_warning_message" wicket:id="link_node_warning_message">[WARNING MESSAGE]</span>
                 </form>
                 <div>
                 <h4>Link and external file</h4>
                 <form wicket:id="linkExternalNodesForm">
                     <p>File location: </p>
                     <input wicket:id="externalNodeLocation" type="text" maxlength="200"/>
-                    <input wicket:id="linkExternalNodeButton" type="submit"/>
+                    <input class="ws_button ws_button-3 ws_button-3b icon-link_node" wicket:id="linkExternalNodeButton" type="submit"/>
+                    <span class="ws_create_warning_message" wicket:id="link_external_node_warning_message">[WARNING MESSAGE]</span>
                 </form>
                 </div>
             </div>
