@@ -129,6 +129,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
         return this.getWorkspaceDao().getWorkspacesForUser(userID);
     }
 
+    @Override
+    public List<Workspace> getAllWorkspaces() {
+        return this.getWorkspaceDao().getAllWorkspaces();
+    }
+
     /**
      * @see WorkspaceDao#isNodeLocked(java.net.URI)
      */

@@ -383,12 +383,102 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getExistingWorkspacesForUser() {
+    public void getExistingWorkspacesForUserBothInitialised() {
         
         String userID = "user1";
         
         Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace1);
         Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneUninitialised() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.UNINITIALISED);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneInitialising() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneInitialisationError() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneSleeping() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.SLEEPING);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace1);
         expectedList.add(workspace2);
@@ -408,6 +498,9 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         updateWorkspaceStatusInDb(workspace1);
         
         Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
@@ -417,15 +510,39 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getExistingWorkspacesForUserOneError() {
+    public void getExistingWorkspacesForUserOneClosedTimeout() {
         
         String userID = "user1";
         
         Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
-        workspace1.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+        workspace1.setStatus(WorkspaceStatus.CLOSED_TIMEOUT);
         updateWorkspaceStatusInDb(workspace1);
         
         Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneRefused() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.REFUSED);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
@@ -444,6 +561,51 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         updateWorkspaceStatusInDb(workspace1);
         
         Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOneError() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getExistingWorkspacesForUserOnePending() {
+        
+        String userID = "user1";
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE);
+        updateWorkspaceStatusInDb(workspace1);
+        
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB(userID, Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
         Collection<Workspace> expectedList = new ArrayList<Workspace>();
         expectedList.add(workspace2);
         
@@ -459,7 +621,47 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
-        assertEquals("Retrieved list should be empty", 0, retrievedList.size());
+        assertTrue("Retrieved list should be empty", retrievedList.isEmpty());
+    }
+    
+    @Test
+    public void getAllWorkspacesOneExists() {
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB("randomUser", Boolean.FALSE);
+        
+        List<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        
+        List<Workspace> retrievedList = workspaceDao.getAllWorkspaces();
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getAllWorkspacesSeveralExist() {
+        
+        Workspace workspace1 = insertTestWorkspaceWithGivenUserIntoDB("randomUser", Boolean.FALSE);
+        Workspace workspace2 = insertTestWorkspaceWithGivenUserIntoDB("anotherRandomUser", Boolean.TRUE);
+        Workspace workspace3 = insertTestWorkspaceWithGivenUserIntoDB("yetAnotherRandomUser", Boolean.FALSE);
+        workspace3.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+        updateWorkspaceStatusInDb(workspace3);
+        
+        List<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        expectedList.add(workspace3);
+        
+        List<Workspace> retrievedList = workspaceDao.getAllWorkspaces();
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getAllWorkspacesNoneExists() {
+        
+        List<Workspace> retrievedList = workspaceDao.getAllWorkspaces();
+        
+        assertTrue("Retrieved list should be empty", retrievedList.isEmpty());
     }
 
     /**

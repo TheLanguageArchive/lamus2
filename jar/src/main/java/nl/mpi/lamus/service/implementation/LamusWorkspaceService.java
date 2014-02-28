@@ -136,11 +136,32 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
 
     /**
+     * @see WorkspaceService#listAllWorkspaces()
+     */
+    @Override
+    public List<Workspace> listAllWorkspaces() {
+        
+        return this.workspaceDao.getAllWorkspaces();
+    }
+    
+    /**
+     * @see WorkspaceService#userHasWorkspaces(java.lang.String)
+     */
+    @Override
+    public boolean userHasWorkspaces(String userID) {
+        return !listUserWorkspaces(userID).isEmpty();
+    }
+
+    /**
      * @see WorkspaceService#openWorkspace(java.lang.String, int)
      */
     @Override
     public Workspace openWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        if(userID == null) {
+            throw new IllegalArgumentException("userID should not be null");
+        }
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         

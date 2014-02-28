@@ -93,9 +93,15 @@ public interface WorkspaceDao {
      * Retrieves a collection of workspaces created by the given user.
      * 
      * @param userID ID of the user to use in the query
-     * @return Collectio of workspaces created by the given user
+     * @return Collection of workspaces created by the given user
      */
     public Collection<Workspace> getWorkspacesForUser(String userID);
+    
+    /**
+     * Retrieves a list containing all workspaces in the database.
+     * @return List with all the workspaces
+     */
+    public List<Workspace> getAllWorkspaces();
     
     /**
      * Checks if the archive node with the given ID is locked

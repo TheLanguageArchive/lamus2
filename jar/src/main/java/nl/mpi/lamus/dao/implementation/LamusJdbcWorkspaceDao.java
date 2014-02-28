@@ -334,14 +334,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Retrieving list of workspace created by user with ID: " + userID);
         
         String queryWorkspaceListSql = "SELECT * FROM workspace WHERE user_id = :user_id"
-                + " AND status NOT IN (:submitted_status, :error_status, :success_status)";
+                + " AND status IN (:initialised_status, :sleeping_status)";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("user_id", userID)
-                .addValue("submitted_status", WorkspaceStatus.SUBMITTED.toString())
-                .addValue("error_status", WorkspaceStatus.DATA_MOVED_ERROR.toString())
-                .addValue("success_status", WorkspaceStatus.DATA_MOVED_SUCCESS.toString());
+                .addValue("initialised_status", WorkspaceStatus.INITIALISED.toString())
+                .addValue("sleeping_status", WorkspaceStatus.SLEEPING.toString());
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
+        
+        return listToReturn;
+    }
+
+    @Override
+    public List<Workspace> getAllWorkspaces() {
+        
+        logger.debug("Retrieving list of all workspaces");
+        
+        String queryWorkspaceListSql = "SELECT * FROM workspace";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        
+        List<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
         
         return listToReturn;
     }

@@ -77,6 +77,18 @@ public interface WorkspaceService extends Serializable {
     public Collection<Workspace> listUserWorkspaces(String userID);
     
     /**
+     * Retrieves a list containing all workspaces.
+     * @return  List with all workspaces
+     */
+    public List<Workspace> listAllWorkspaces();
+    
+    /**
+     * @param userID ID of the user
+     * @return true if the user has active workspaces
+     */
+    public boolean userHasWorkspaces(String userID);
+    
+    /**
      * Opens a workspace, retrieving the corresponding object from the database.
      * While doing so, it also updates the session start date of the workspace.
      * 

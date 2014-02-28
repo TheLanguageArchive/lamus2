@@ -362,6 +362,95 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void listAllWorkspaces() throws URISyntaxException, MalformedURLException {
+        
+        final String userID = "someUser";
+        final Date date = Calendar.getInstance().getTime();
+        Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
+                date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        final List<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getAllWorkspaces(); will(returnValue(expectedList));
+        }});
+        
+        List<Workspace> result = service.listAllWorkspaces();
+        
+        assertEquals("Retrieved list different from expected", expectedList, result);
+    }
+    
+    @Test
+    public void userHasActiveWorkspaces() throws URISyntaxException, MalformedURLException {
+        
+        final String userID = "someUser";
+        final Date date = Calendar.getInstance().getTime();
+        Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
+                date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesForUser(userID); will(returnValue(expectedList));
+        }});
+        
+        boolean result = service.userHasWorkspaces(userID);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void userHasActiveAndInactiveWorkspaces() throws URISyntaxException, MalformedURLException {
+        
+        final String userID = "someUser";
+        final Date date = Calendar.getInstance().getTime();
+        Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
+                date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
+        Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
+        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesForUser(userID); will(returnValue(expectedList));
+        }});
+        
+        boolean result = service.userHasWorkspaces(userID);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void userHasNoActiveWorkspaces() throws URISyntaxException, MalformedURLException {
+        
+        final String userID = "someUser";
+        final Date date = Calendar.getInstance().getTime();
+        Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
+                date, null, date, null, 0L, 10000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
+        Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_DURING_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
+        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesForUser(userID); will(returnValue(expectedList));
+        }});
+        
+        boolean result = service.userHasWorkspaces(userID);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
     public void openExistingWorkspace()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
@@ -420,6 +509,21 @@ public class LamusWorkspaceServiceTest {
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void openWorkspaceNullUser()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String expectedMessage = "userID should not be null";
+        
+        try {
+            service.openWorkspace(null, workspaceID);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
         }
     }
     
