@@ -291,7 +291,7 @@
         
         <dependency>
             <groupId>nl.mpi</groupId>
-            <artifactId>handle-util</artifactId>
+            <artifactId>handle-utils</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         
