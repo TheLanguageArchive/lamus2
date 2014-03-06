@@ -23,6 +23,8 @@ import java.util.Properties;
 import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
 import nl.mpi.archiving.corpusstructure.tools.crawler.ResolverImpl;
 import nl.mpi.archiving.corpusstructure.tools.crawler.cmdi.CmdiCrawler;
+import nl.mpi.archiving.corpusstructure.tools.crawler.dao.ApplicationManagedDaoContainer;
+import nl.mpi.archiving.corpusstructure.tools.crawler.dao.DaoContainer;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.LocalFsUtilities;
 import nl.mpi.lamus.archive.CrawlerBridge;
@@ -106,42 +108,41 @@ public class LamusCrawlerBridge implements CrawlerBridge {
     @Override
     public Crawler setUpCrawler() {
         
-        Crawler crawler = null;
+        /* crawler options */
+        Properties archiveProperties = new Properties();
+        archiveProperties.put("hostname", crawlerHostName);
+        archiveProperties.put("domainname", crawlerDomainName);
+        archiveProperties.put("prefixes", handlePrefix);
+        archiveProperties.put("amsurl", crawlerAmsUrl);
+        archiveProperties.put("mdsurl", crawlerMdsUrl);
+
+        /* crawler jpa/database options */
+        Map jpaProperties = new HashMap();
+
+        String driverClassNameString = "DriverClassName=" + crawlerDbDriverClassName;
+        String urlString = "Url=" + crawlerDbUrl;
+        String maxActiveString = "MaxActive=" + crawlerDbMaxActive;
+        String maxWaitString = "MaxWait=" + crawlerDbMaxWait;
+        String testOnBorrowString = "TestOnBorrow=" + crawlerDbTestOnBorrow;
+        String userNameString = "Username=" + crawlerDbUsername;
+        String passwordString = "Password=" + crawlerDbPassword;
+
+        jpaProperties.put(
+                "openjpa.ConnectionProperties",
+                driverClassNameString + "," + urlString + "," + maxActiveString + "," + maxWaitString + "," + testOnBorrowString + "," + userNameString + "," + passwordString);
+        jpaProperties.put(
+                    "openjpa.ConnectionDriverName",
+                    crawlerConnectionDriverName);
+
+        // create the crawler
+
+        DaoContainer daoContainer = ApplicationManagedDaoContainer.getInstanceWithProperties(jpaProperties);
         
+        //TODO load properties from somewhere else?
         //TODO Provide this as a bean instead, using the context to fill in the properties?
-        
-        try {    
-            /* crawler options */
-            Properties archiveProperties = new Properties();
-            archiveProperties.put("hostname", crawlerHostName);
-            archiveProperties.put("domainname", crawlerDomainName);
-            archiveProperties.put("prefixes", handlePrefix);
-            archiveProperties.put("amsurl", crawlerAmsUrl);
-            archiveProperties.put("mdsurl", crawlerMdsUrl);
-            
-            /* crawler jpa/database options */
-            Map jpaProperties = new HashMap();
-            
-            String driverClassNameString = "DriverClassName=" + crawlerDbDriverClassName;
-            String urlString = "Url=" + crawlerDbUrl;
-            String maxActiveString = "MaxActive=" + crawlerDbMaxActive;
-            String maxWaitString = "MaxWait=" + crawlerDbMaxWait;
-            String testOnBorrowString = "TestOnBorrow=" + crawlerDbTestOnBorrow;
-            String userNameString = "Username=" + crawlerDbUsername;
-            String passwordString = "Password=" + crawlerDbPassword;
-            
-            jpaProperties.put(
-                    "openjpa.ConnectionProperties",
-                    driverClassNameString + "," + urlString + "," + maxActiveString + "," + maxWaitString + "," + testOnBorrowString + "," + userNameString + "," + passwordString);
-            jpaProperties.put(
-                        "openjpa.ConnectionDriverName",
-                        crawlerConnectionDriverName);
-            
-            // create the crawler
-            crawler = new CmdiCrawler(jpaProperties, archiveProperties, crawlerHdlProxyDomain);
-        } catch (URISyntaxException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
-        }
+
+        Crawler crawler = new CmdiCrawler(daoContainer);
+        crawler.configure(archiveProperties);
         
         return crawler;
     }

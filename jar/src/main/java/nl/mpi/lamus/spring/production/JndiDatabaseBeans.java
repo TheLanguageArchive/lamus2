@@ -15,17 +15,28 @@
  */
 package nl.mpi.lamus.spring.production;
 
+import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchivePropertyDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.CorpusStructureDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchivePropertyDaoImpl;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchiveObjectDaoImpl;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.CorpusStructureDaoImpl;
 //import nl.mpi.annot.search.lib.SearchClient;
 //import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 /**
  * Configuration class containing some beans related with databases. To be used
@@ -35,6 +46,7 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 //@EnableTransactionManagement
+//@ComponentScan("nl.mpi.archiving")
 @Profile(value = {"production", "demoserver"})
 @ImportResource("classpath:/config/production/csdb.xml")
 public class JndiDatabaseBeans {
@@ -57,7 +69,7 @@ public class JndiDatabaseBeans {
 //        Context ctx = new InitialContext();
 //        return (DataSource) ctx.lookup("java:comp/env/jdbc/CSDB2");
 //    }
-    
+//    
 //    @Bean  
 //    public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws NamingException {
 //            return new LocalContainerEntityManagerFactoryBean() {{
@@ -88,6 +100,21 @@ public class JndiDatabaseBeans {
 //        }};
 //    }
     
+    
+//    @Bean
+//    public ArchiveDao archiveDao() {
+//        return new ArchiveDaoImpl();
+//    }
+//    
+//    @Bean
+//    public ArchiveObjectsDao aoDao() {
+//        return new ArchiveObjectsDaoImpl();
+//    }
+//    
+//    @Bean
+//    public CorpusStructureDao csDao() {
+//        return new CorpusStructureDaoImpl();
+//    }
     
     /**
      * @return DataSource bean corresponding to the Lamus2 database

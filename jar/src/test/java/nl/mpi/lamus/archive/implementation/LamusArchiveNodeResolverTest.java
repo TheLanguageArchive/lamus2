@@ -18,7 +18,7 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import nl.mpi.archiving.corpusstructure.core.database.pojo.Archiveobject;
+import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
 import nl.mpi.archiving.corpusstructure.provider.db.model.CorpusNodeImpl;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -49,7 +49,7 @@ public class LamusArchiveNodeResolverTest {
     private final String dbLocalRoot = "file:/some/local/folder/cmdi_test/";
     
     @Mock CorpusNodeImpl mockCorpusNode;
-    @Mock Archiveobject mockArchiveObject;
+    @Mock ArchiveObject mockArchiveObject;
     
     public LamusArchiveNodeResolverTest() {
     }
