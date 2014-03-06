@@ -31,6 +31,14 @@
             <!--<location  target="/*" />-->
             <location target="/CreateWorkspacePage" />
             <location target="/SelectWorkspacePage" />
+            <location target="/ManageWorkspacePage" />
+            <location target="/LoginInfoPage" />
         </authorization>
+        
+        <handler>
+            <pages>
+                <info action="dI">/LoginInfoPage</info>
+            </pages>
+        </handler>
     </shhaa>
 </ROOT>

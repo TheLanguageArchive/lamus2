@@ -20,7 +20,9 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.LamusPage;
+import nl.mpi.lamus.web.pages.LoginInfoPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
+import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -77,6 +79,8 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/IndexPage", IndexPage.class);
         mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
         mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
+        mountPage("/ManageWorkspacePage", ManageWorkspacesPage.class);
+        mountPage("/LoginInfoPage", LoginInfoPage.class);
         
         PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");
         getSharedResources().add("lamus2Css", lamus2CssReference.getResource());
