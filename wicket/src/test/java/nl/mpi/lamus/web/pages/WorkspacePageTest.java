@@ -72,6 +72,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         setType(WorkspaceNodeType.METADATA);
     }};
 
+    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    
 
     @Override
     protected void setUpTest() throws Exception {
@@ -93,6 +95,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
+        
+        addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         
         wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspace));
         getTester().startPage(wsPage);

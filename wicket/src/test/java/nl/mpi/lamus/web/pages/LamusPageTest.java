@@ -29,9 +29,12 @@ import org.springframework.test.annotation.DirtiesContext;
  */
 public class LamusPageTest extends AbstractLamusWicketTest {
     
+    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     
     @Override
     protected void setUpTest() {
+        
+        addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         
         LamusPage page = new LamusPage(AbstractLamusWicketTest.MOCK_LAMUS_PAGE_TITLE);
         getTester().startPage(page);

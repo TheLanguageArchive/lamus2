@@ -26,8 +26,8 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.SharedResourceReference;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
  * Reference page that contains common features
@@ -42,6 +42,9 @@ public class LamusPage extends WebPage {
 //    public static final PackageResourceReference TLA_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "/tla_logo.png");
 //    public static final PackageResourceReference CLARIN_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
 //    public static final PackageResourceReference HOME_ICON_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "home.png");
+    
+    @SpringBean(name = "registerUrl")
+    private String registerUrl;
     
     public LamusPage() {
 //        this("Lamus2 Language Archive Management and Upload System");
@@ -72,6 +75,8 @@ public class LamusPage extends WebPage {
 //        homePageLink.add(new Image("home_image", HOME_ICON_RESOURCE_REFERENCE));
         homePageLink.add(new Image("home_image", new SharedResourceReference("homeImage")));
         add(homePageLink);
+        
+        add(new ExternalLink("register_link", Model.of(registerUrl)));
         
         add(new Label("header_username", new Model<String>(LamusSession.get().getUserId())));
         

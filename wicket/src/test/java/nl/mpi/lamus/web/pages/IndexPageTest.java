@@ -61,6 +61,7 @@ public class IndexPageTest extends AbstractLamusWicketTest {
     
     @Mock private CreateWorkspacePage mockCreateWorkspacePage;
     @Mock private SelectWorkspacePage mockSelectWorkspacePage;
+    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     
     
     @Override
@@ -72,6 +73,7 @@ public class IndexPageTest extends AbstractLamusWicketTest {
         when(mockPagesProviderBean.getSelectWorkspacePage()).thenReturn(mockSelectWorkspacePage);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         
         indexPage = new IndexPage();
         getTester().startPage(indexPage);

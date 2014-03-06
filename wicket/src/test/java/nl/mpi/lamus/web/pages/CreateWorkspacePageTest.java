@@ -62,12 +62,13 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     private MockCorpusNode mockArchiveRootNode;
     private String mockArchiveRootNodeName;
     private URI mockArchiveRootNodeURI;
+    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     
     private MockCorpusNode expectedSelectedNode;
 
     public CreateWorkspacePageTest() throws URISyntaxException {
         mockArchiveRootNodeName = "RootNode";
-        this.mockArchiveRootNodeURI = new URI("root:node:0");
+        mockArchiveRootNodeURI = new URI("root:node:0");
     }
 
     @Override
@@ -84,6 +85,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockTreeModelProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         
         createWsPage = new CreateWorkspacePage();
         getTester().startPage(createWsPage);
