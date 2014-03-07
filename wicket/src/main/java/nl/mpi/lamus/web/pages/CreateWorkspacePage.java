@@ -172,10 +172,11 @@ public class CreateWorkspacePage extends LamusPage {
         form.add(warningMessage);
 
 	// Put details/submit form in container for refresh through AJAX 
-	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
-	formContainer.add(form);
+//	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
+//	formContainer.add(form);
 	// Add container to page
-	add(formContainer);
+//	add(formContainer);
+        add(form);
 
 	return form;
     }

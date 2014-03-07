@@ -112,22 +112,22 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertComponent("archiveTree", ArchiveTreePanel.class);
         getTester().assertEnabled("archiveTree");
         
-        getTester().assertComponent("formContainer", WebMarkupContainer.class);
-        getTester().assertEnabled("formContainer");
+//        getTester().assertComponent("formContainer", WebMarkupContainer.class);
+//        getTester().assertEnabled("formContainer");
         
-        getTester().assertComponent("formContainer:nodeIdForm", Form.class);
-        getTester().assertEnabled("formContainer:nodeIdForm");
+        getTester().assertComponent("nodeIdForm", Form.class);
+        getTester().assertEnabled("nodeIdForm");
 
-        getTester().assertComponent("formContainer:nodeIdForm:name", Label.class);
-        getTester().assertEnabled("formContainer:nodeIdForm:name");
-        getTester().assertLabel("formContainer:nodeIdForm:name", ""); //TODO test when node selection changes
+        getTester().assertComponent("nodeIdForm:name", Label.class);
+        getTester().assertEnabled("nodeIdForm:name");
+        getTester().assertLabel("nodeIdForm:name", ""); //TODO test when node selection changes
         
-        getTester().assertComponent("formContainer:nodeIdForm:nodeURI", Label.class);
-        getTester().assertEnabled("formContainer:nodeIdForm:nodeURI");
-        getTester().assertLabel("formContainer:nodeIdForm:nodeURI", ""); //TODO test when node selection changes
+        getTester().assertComponent("nodeIdForm:nodeURI", Label.class);
+        getTester().assertEnabled("nodeIdForm:nodeURI");
+        getTester().assertLabel("nodeIdForm:nodeURI", ""); //TODO test when node selection changes
         
-        getTester().assertComponent("formContainer:nodeIdForm:createWorkspace", Button.class);
-        getTester().assertDisabled("formContainer:nodeIdForm:createWorkspace"); //initially disabled
+        getTester().assertComponent("nodeIdForm:createWorkspace", Button.class);
+        getTester().assertDisabled("nodeIdForm:createWorkspace"); //initially disabled
         
         
         //TODO other tests
@@ -156,12 +156,12 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void formSubmitted() throws NodeAccessException, WorkspaceImportException {
         
-        getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm:createWorkspace").setEnabled(true);
+        getTester().getComponentFromLastRenderedPage("nodeIdForm:createWorkspace").setEnabled(true);
         
-        Form<CorpusNode> form = (Form<CorpusNode>) getTester().getComponentFromLastRenderedPage("formContainer:nodeIdForm");
+        Form<CorpusNode> form = (Form<CorpusNode>) getTester().getComponentFromLastRenderedPage("nodeIdForm");
         form.setModel(new CompoundPropertyModel<CorpusNode>(expectedSelectedNode));
         
-        FormTester formTester = getTester().newFormTester("formContainer:nodeIdForm", false);
+        FormTester formTester = getTester().newFormTester("nodeIdForm", false);
         
         formTester.submit("createWorkspace");
 
