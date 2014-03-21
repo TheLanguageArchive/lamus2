@@ -16,28 +16,14 @@
  */
 package nl.mpi.lamus.web.components;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import java.util.Collection;
 import nl.mpi.lamus.service.WorkspaceTreeService;
-import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
-import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
-import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.workspace.actions.implementation.LinkExternalNodesAction;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -45,13 +31,10 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author guisil
  */
-public class LinkNodesPanel extends GenericPanel<WorkspaceTreeNode> {
+public class LinkNodesPanel extends FeedbackPanelAwarePanel {
     
     @SpringBean
     protected WorkspaceTreeService workspaceService;
-    
-    @SpringBean
-    private WorkspaceNodeFactory workspaceNodeFactory;
     
     @SpringBean(name = "unlinkedNodesProviderFactory")
     private UnlinkedNodesModelProviderFactory providerFactory;
@@ -59,191 +42,41 @@ public class LinkNodesPanel extends GenericPanel<WorkspaceTreeNode> {
     private IModel<WorkspaceTreeNode> model;
     
     private UnlinkedNodesPanel unlinkedNodesPanel;
-    private Button linkNodesButton;
-    private Label linkNodesWarningMessage;
-    private TextField<String> externalNodeLocation;
-    private Button linkExternalNodeButton;
-    private Label linkExternalNodeWarningMessage;
+    private ExternalNodesPanel externalNodesPanel;
     
     private Workspace currentWorkspace;
     
     
-    public LinkNodesPanel(String id, IModel<WorkspaceTreeNode> model, Workspace currentWs) {
-        super(id, model);
+    public LinkNodesPanel(String id, IModel<WorkspaceTreeNode> model, Workspace currentWs, FeedbackPanel feedbackPanel) {
+        super(id, model, feedbackPanel);
         this.model = model;
         
         this.currentWorkspace = currentWs;
         
-        LinkNodesForm linkNodesForm = new LinkNodesForm("linkNodesForm", new LoadableDetachableModel<LinkNodesAction>() {
-
-            @Override
-            protected LinkNodesAction load() {
-                return new LinkNodesAction();
-            }
-        });
-        
         unlinkedNodesPanel =
                 new UnlinkedNodesPanel(
                     "unlinkedNodesPanel",
-                    new Model<Workspace>(currentWorkspace), providerFactory.createTreeModelProvider(workspaceService, currentWs.getWorkspaceID()));
-        
-        linkNodesForm.add(unlinkedNodesPanel);
-        
-        linkNodesButton = new Button("linkNodesButton", new Model("Link")) {
+                    new Model<Workspace>(currentWorkspace), providerFactory.createTreeModelProvider(workspaceService, currentWs.getWorkspaceID()),
+                    feedbackPanel);
+        add(unlinkedNodesPanel);
+
+        externalNodesPanel = new ExternalNodesPanel("externalNodesPanel", new Model<Workspace>(currentWorkspace), feedbackPanel) {
 
             @Override
-            protected void onConfigure() {
-                super.onConfigure(); //To change body of generated methods, choose Tools | Templates.
-                
-                if(LinkNodesPanel.this.getModelObject() != null && LinkNodesPanel.this.getModelObject().isMetadata()) {
-                    setVisible(true);
-                } else {
-                    setVisible(false);
-                }
+            public void addComponentToTarget(AjaxRequestTarget target) {
+                target.add(unlinkedNodesPanel);
             }
         };
-        
-        linkNodesForm.add(linkNodesButton);
-
-        linkNodesWarningMessage = new Label("link_node_warning_message", Model.of("At least one unlinked node must be selected for the linking to take place"));
-        linkNodesWarningMessage.setVisible(false);
-        linkNodesForm.add(linkNodesWarningMessage);
-        
-        add(linkNodesForm);
-        
-        Form<LinkExternalNodesAction> linkExternalNodesForm = new LinkExternalNodesForm("linkExternalNodesForm", new LoadableDetachableModel<LinkExternalNodesAction>() {
-
-            //TODO Maybe it's not a bad idea to just create another LinkNodesForm,
-                // create a workspace node for the inserted external URL
-                    // and execute normally the link action...
-            
-            
-            
-            @Override
-            protected LinkExternalNodesAction load() {
-                return new LinkExternalNodesAction();
-            }
-        });
-        
-        externalNodeLocation = new TextField<String>("externalNodeLocation", new Model(""));
-        linkExternalNodesForm.add(externalNodeLocation);
-        
-        linkExternalNodeButton = new Button("linkExternalNodeButton", new Model("Link External Node")) {
-
-            @Override
-            protected void onConfigure() {
-                super.onConfigure(); //To change body of generated methods, choose Tools | Templates.
-                
-                if(LinkNodesPanel.this.getModelObject() != null && LinkNodesPanel.this.getModelObject().isMetadata()) {
-                    setVisible(true);
-                } else {
-                    setVisible(false);
-                }
-            }
-        };
-        linkExternalNodesForm.add(linkExternalNodeButton);
-        
-        linkExternalNodeWarningMessage = new Label("link_external_node_warning_message", Model.of("A valid URL must be entered for the linking to take place"));
-        linkExternalNodeWarningMessage.setVisible(false);
-        linkExternalNodesForm.add(linkExternalNodeWarningMessage);
-        
-        add(linkExternalNodesForm);
+        add(externalNodesPanel);
     }
     
     
     // to override from the page where the panel is included
-    protected void refreshStuff() {
+    protected void refreshTreeAndPanels() {
 
     }
     
-    private class LinkNodesForm extends Form<LinkNodesAction> {
-        
-//        boolean linkExternalNodes;
-        
-        LinkNodesForm(String id, IModel<LinkNodesAction> model) {
-            super(id, model);
-//            this.linkExternalNodes = linkExternalNodes;
-        }
-
-        @Override
-        protected void onSubmit() {
-            try {
-                
-                if(unlinkedNodesPanel.getSelectedUnlinkedNodes().isEmpty()) {
-                    changeWarningMessagesVisibility(true, false);
-                    return;
-                }
-                
-                getModelObject().execute(
-                        LamusSession.get().getUserId(), model.getObject(),
-                            unlinkedNodesPanel.getSelectedUnlinkedNodes(), workspaceService);
-                
-            } catch (WorkspaceNotFoundException ex) {
-                Session.get().error(ex.getMessage());
-            } catch (WorkspaceAccessException ex) {
-                Session.get().error(ex.getMessage());
-            } catch (WorkspaceException ex) {
-                Session.get().error(ex.getMessage());
-            }
-            LinkNodesPanel.this.refreshStuff();            
-            
-            unlinkedNodesPanel = new UnlinkedNodesPanel(
-                        "unlinkedNodesPanel",
-                        new Model<Workspace>(currentWorkspace), providerFactory.createTreeModelProvider(workspaceService, currentWorkspace.getWorkspaceID()));
-            
-            addOrReplace(unlinkedNodesPanel);
-        }
-    }
-    
-    private class LinkExternalNodesForm extends Form<LinkExternalNodesAction> {
-        
-        LinkExternalNodesForm(String id, IModel<LinkExternalNodesAction> model) {
-            super(id, model);
-        }
-
-        @Override
-        protected void onSubmit() {
-            try {
-                
-                
-                URL externalNodeUrl = new URL(externalNodeLocation.getValue());
-                
-                WorkspaceNode externalNode =
-                        workspaceNodeFactory.getNewExternalNode(
-                            model.getObject().getWorkspaceID(), externalNodeUrl);
-                
-                getModelObject().execute(LamusSession.get().getUserId(), model.getObject(), externalNode , workspaceService);
-                
-            } catch (MalformedURLException ex) {
-//                Session.get().error(ex.getMessage());
-                changeWarningMessagesVisibility(false, true);
-            } catch (WorkspaceNotFoundException ex) {
-                Session.get().error(ex.getMessage());
-            } catch (WorkspaceAccessException ex) {
-                Session.get().error(ex.getMessage());
-            } catch (WorkspaceException ex) {
-                Session.get().error(ex.getMessage());
-            }
-            LinkNodesPanel.this.refreshStuff();
-        }
-    }
-    
-
-    @Override
-    protected void onModelChanged() {
-        super.onModelChanged(); //To change body of generated methods, choose Tools | Templates.
-        
-        if(getModelObject() != null) {
-            linkNodesButton.setVisible(true);
-            linkExternalNodeButton.setVisible(true);
-        } else {
-            linkNodesButton.setVisible(false);
-            linkExternalNodeButton.setVisible(false);
-        }
-    }
-    
-    private void changeWarningMessagesVisibility(boolean linkNodesWarningMessageVisible, boolean linkExternalNodesWarningMessageVisible) {
-        linkNodesWarningMessage.setVisible(linkNodesWarningMessageVisible);
-        linkExternalNodeWarningMessage.setVisible(linkExternalNodesWarningMessageVisible);
+    public Collection<WorkspaceTreeNode> getSelectedUnlinkedNodes() {
+        return unlinkedNodesPanel.getSelectedUnlinkedNodes();
     }
 }

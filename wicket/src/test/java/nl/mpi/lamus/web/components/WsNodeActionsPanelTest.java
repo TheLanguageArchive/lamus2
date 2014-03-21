@@ -95,7 +95,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(selectedNodes)) {
 
             @Override
-            public void refreshStuff() {
+            public void refreshTreeAndPanels() {
                 refreshStuffCalled = true;
             }
         };
@@ -106,6 +106,9 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     protected void tearDownTest() throws Exception {
         
     }
+    
+    
+    //TODO FIX THESE TESTS
     
     
     @Test
@@ -152,7 +155,9 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         
         //for some reason the actual WorkspaceService object that is used in the call is not the same as expected
             // - something to do with the object proxy created by Mockito and passed on?
-        verify(mockDeleteAction).execute(eq(AbstractLamusWicketTest.MOCK_USER_ID), eq(selectedNodes), any(WorkspaceService.class));
+        verify(mockDeleteAction).setSelectedTreeNodes(selectedNodes);
+        verify(mockDeleteAction).setSelectedChildNodes(any(Collection.class));
+        verify(mockDeleteAction).execute(eq(AbstractLamusWicketTest.MOCK_USER_ID), any(WorkspaceService.class));
         assertTrue("refreshStuff not called", refreshStuffCalled);
     }
 }

@@ -23,16 +23,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:panel>
-
-            <!--<div id="navigation">-->
             <ul class="navigationMenu">
-                    <li><a href="#" wicket:id="createWorkspaceLink">Create Workspace</a></li>
-                    <li><a href="#" wicket:id="selectWorkspaceLink">Open Workspace</a></li>
-                    <li><a href="#" wicket:id="requestStorageSpaceLink">Request storage space</a></li>
-                    <li><a href="#" wicket:id="managementLink">Management</a></li>
+                    <li>
+                        <a href="#" wicket:id="createWorkspaceLink">
+                            <wicket:message key="navigation_panel_create_workspace"></wicket:message>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" wicket:id="selectWorkspaceLink">
+                            <wicket:message key="navigation_panel_open_workspace"></wicket:message>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" wicket:id="requestStorageSpaceLink">
+                            <wicket:message key="navigation_panel_request_storage_space"></wicket:message>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" wicket:id="managementLink">
+                            <wicket:message key="navigation_panel_management"></wicket:message>
+                        </a>
+                    </li>
                 </ul>
-            <!--</div>-->
-            
 	</wicket:panel>
     </body>
 </html>

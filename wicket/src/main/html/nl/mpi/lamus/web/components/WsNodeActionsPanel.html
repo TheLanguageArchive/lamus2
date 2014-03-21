@@ -25,7 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <wicket:panel>
             <form id="wsNodeActionsForm" wicket:id="wsNodeActionsForm">
                 <span wicket:id="wsNodeActions">
-                    <input class="ws_button ws_button-3 ws_button-3b" wicket:id="nodeActionButton" type="submit" value="node action button" />
+                    <button class="ws_button ws_button-3 ws_button-3b" wicket:id="nodeActionButton" value="node action button">
+                        <span wicket:id="nodeActionLabel"></span>
+                    </button>
                 </span>
             </form>
         </wicket:panel>

@@ -107,6 +107,22 @@ header > ul#header_info_container > li > a:hover {
     text-decoration: underline;
 }
 
+
+/* Feedback panel */
+
+.feedbackPanel {
+    /*float: right;*/
+}
+
+.feedbackPanel ul {
+    float: right;
+}
+
+.feedbackPanel li span {
+    float: right;
+    padding-right: 20px;
+}
+
 /* Navigation menu */
 
 #navigationPanel {
@@ -413,11 +429,11 @@ a#loginOrLogoutLink:hover {
 
 @font-face {
         font-family: 'icomoon';
-        src:url('/fonts/icomoon/icomoon.eot?z6wkbj');
-        src:url('/fonts/icomoon/icomoon.eot?#iefixz6wkbj') format('embedded-opentype'),
-                url('/fonts/icomoon/icomoon.woff?z6wkbj') format('woff'),
-                url('/fonts/icomoon/icomoon.ttf?z6wkbj') format('truetype'),
-                url('/fonts/icomoon/icomoon.svg?z6wkbj#icomoon') format('svg');
+        src:url('/fonts/icomoon/icomoon.eot');
+        src:url('/fonts/icomoon/icomoon.eot?#iefix') format('embedded-opentype'),
+                url('/fonts/icomoon/icomoon.woff') format('woff'),
+                url('/fonts/icomoon/icomoon.ttf') format('truetype'),
+                url('/fonts/icomoon/icomoon.svg#icomoon') format('svg');
         font-weight: normal;
         font-style: normal;
 }
@@ -439,8 +455,8 @@ a#loginOrLogoutLink:hover {
 }*/
 
 div#wsNodeActionsPanel {
-    float: left;
-    /*width: 40%;*/
+    float: right;
+    width: 30%;
     margin-top: 10px;
     margin-bottom: 10px;
 }
@@ -450,6 +466,8 @@ div#wsNodeActionsPanel {
     margin-top: 5px;
     margin-bottom: 5px;
     padding: 0px;
+    
+    width: 100%;
 }
 
 
@@ -591,22 +609,22 @@ div.treePanel {
 
 
 
-.managementActionLink {
+.tableActionLink {
     color: #c0c0c0;
     text-decoration: none;
 }
 
-.managementActionLink:visited {
+.tableActionLink:visited {
     color: #808080;
     text-decoration: none;
 }
 
-.managementActionLink:hover {
+.tableActionLink:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-.managementActionLink:active {
+.tableActionLink:active {
     color: #ff0000;
     text-decoration: underline;
 }

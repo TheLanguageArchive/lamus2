@@ -36,7 +36,6 @@ import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressB
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -50,12 +49,35 @@ import org.slf4j.LoggerFactory;
  */
 public class UploadPanel extends Panel {
     
+    private static final Logger log = LoggerFactory.getLogger(UploadPanel.class);
+
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
 
     @SpringBean
     private WorkspaceService workspaceService;
     
     private final IModel<Workspace> model;
+    
+    
+    /**
+     * Constructor.
+     *
+     * @param parameters Page parameters
+     */
+    public UploadPanel(String id, IModel<Workspace> model) {
+        
+        super(id, model);
+        
+        this.model = model;
+
+        // Add upload form with progress bar that uses HTML <input type="file" multiple />, so it can upload
+        // more than one file in browsers which support "multiple" attribute
+        final FileUploadForm progressUploadForm = new FileUploadForm("progressUpload");
+
+        progressUploadForm.add(new UploadProgressBar("progress", progressUploadForm,
+                progressUploadForm.fileUploadField));
+        add(progressUploadForm);
+    }
     
 
     /**
@@ -98,13 +120,10 @@ public class UploadPanel extends Panel {
                 for (FileUpload upload : uploads) {
                     // Create a new file
                     File newFile = new File(uploadDirectory, upload.getClientFileName());
-
-//                    File newFile = new File(upload.getClientFileName());
                     
                     if(newFile.isDirectory()) {
                         continue;
                     }
-
                     
                     //TODO a better way of deciding this? typechecker?
                     if(newFile.getName().endsWith(".zip")) {
@@ -135,20 +154,13 @@ public class UploadPanel extends Panel {
 
                             zipInputStream.close();
 
-                            UploadPanel.this.info("saved contents of file: " + upload.getClientFileName());
+                            UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + upload.getClientFileName());
                         } catch(IOException ex) {
                             UploadPanel.this.error(ex.getMessage());
                         }
                     } else {
                     
-                    
-                    //TODO Check if file exists already
-
                         try {
-
-//                        workspaceService.uploadFileIntoWorkspace(
-//                                LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), upload.getClientFileName());
-
                             //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
 
                             // Save to new file
@@ -158,10 +170,9 @@ public class UploadPanel extends Panel {
                             //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
                             copiedFiles.add(newFile);
 
-
-                            UploadPanel.this.info("saved file: " + upload.getClientFileName());
+                            UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + upload.getClientFileName());
                         } catch (Exception e) {
-                            throw new IllegalStateException("Unable to write file", e);
+                            throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);
                         }
                     }
                 }
@@ -180,49 +191,5 @@ public class UploadPanel extends Panel {
                 
             }
         }
-    }
-    /**
-     * Log.
-     */
-    private static final Logger log = LoggerFactory.getLogger(UploadPanel.class);
-    /**
-     * Reference to listview for easy access.
-     */
-//    private final WorkspaceNodeListView nodeListView;
-
-    /**
-     * Constructor.
-     *
-     * @param parameters Page parameters
-     */
-    public UploadPanel(String id, IModel<Workspace> model) {
-        
-        super(id, model);
-        
-        this.model = model;
-        
-//        final String currentUserID = LamusSession.get().getUserId();
-
-        // Create feedback panels
-        final FeedbackPanel uploadFeedback = new FeedbackPanel("uploadFeedback");
-
-        // Add uploadFeedback to the page itself
-        add(uploadFeedback);
-
-
-        // Add folder view
-     
-//        add(new UnlinkedNodesPanel("unlinkedNodesPanel", model));
-        
-        
-        
-
-        // Add upload form with progress bar that uses HTML <input type="file" multiple />, so it can upload
-        // more than one file in browsers which support "multiple" attribute
-        final FileUploadForm progressUploadForm = new FileUploadForm("progressUpload");
-
-        progressUploadForm.add(new UploadProgressBar("progress", progressUploadForm,
-                progressUploadForm.fileUploadField));
-        add(progressUploadForm);
     }
 }

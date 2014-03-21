@@ -26,12 +26,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 /**
@@ -91,10 +86,6 @@ public class NodeInfoPanelTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:archiveURL");
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:archiveURL", mockWorkspaceNode.getArchiveURL().toString());
         
-        getTester().assertComponent("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:workspaceID", Label.class);
-        getTester().assertEnabled("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:workspaceID");
-        getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:workspaceID", "" + mockWorkspaceNode.getWorkspaceID());
-        
         getTester().assertComponent("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:type", Label.class);
         getTester().assertEnabled("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:type");
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:type", "" + mockWorkspaceNode.getType());
@@ -104,15 +95,11 @@ public class NodeInfoPanelTest extends AbstractLamusWicketTest {
     @DirtiesContext
     public void updateModelNodeIdForm() {
         
-//        Form<WorkspaceTreeNode> nodeIdForm = (Form<WorkspaceTreeNode>) getTester().getComponentFromLastRenderedPage("nodeInfoPanel:nodeInfoContainer:nodeInfoForm");
-//        nodeIdForm.setModel(new CompoundPropertyModel<WorkspaceTreeNode>(mockWorkspaceNode));
-        
         nodeInfoPanel.setDefaultModel(new CompoundPropertyModel<WorkspaceTreeNode>(mockWorkspaceNode));
         
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:name", mockWorkspaceNode.getName());
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:archiveURI", mockWorkspaceNode.getArchiveURI().toString());
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:archiveURL", mockWorkspaceNode.getArchiveURL().toString());
-        getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:workspaceID", "" + mockWorkspaceNode.getWorkspaceID());
         getTester().assertLabel("nodeInfoPanel:nodeInfoContainer:nodeInfoForm:type", mockWorkspaceNode.getType().toString());
     }
 }

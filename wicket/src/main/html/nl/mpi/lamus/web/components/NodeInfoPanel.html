@@ -20,13 +20,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <body>
         <wicket:panel>
             <div id="nodeInfoContainer" class="infoContainer" wicket:id="nodeInfoContainer">
-                <h2>Selected Node Information</h2>
+                <h2>
+                    <wicket:message key="node_info_panel_title"></wicket:message>
+                </h2>
                 <form wicket:id="nodeInfoForm">
-                    <p>Selected node: <span wicket:id="name">Node name</span></p>
-                    <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
-                    <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
-                    <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
-                    <p>Type: <span wicket:id="type">Type</span></p>
+                    <p>
+                        <wicket:message key="node_info_panel_selected_node_name"></wicket:message>
+                        <span wicket:id="name">[node_name]</span>
+                    </p>
+                    <p>
+                        <wicket:message key="node_info_panel_selected_node_archive_uri"></wicket:message>
+                        <span wicket:id="archiveURI">[node_archive_uri]</span>
+                    </p>
+                    <p>
+                        <wicket:message key="node_info_panel_selected_node_archive_url"></wicket:message>
+                        <span wicket:id="archiveURL">[node_archive_url]</span>
+                    </p>
+                    <p>
+                        <wicket:message key="node_info_panel_selected_node_type"></wicket:message>
+                        <span wicket:id="type">[node_type]</span>
+                    </p>
                 </form>
             </div>
         </wicket:panel>

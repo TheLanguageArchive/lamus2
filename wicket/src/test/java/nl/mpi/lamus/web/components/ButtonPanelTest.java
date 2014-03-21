@@ -18,7 +18,6 @@ package nl.mpi.lamus.web.components;
 
 import java.io.File;
 import java.io.IOException;
-import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -27,7 +26,6 @@ import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
-import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.markup.html.form.Button;
@@ -49,11 +47,8 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     private ButtonPanel buttonPanel;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
-    @Mock private WsNodeActionsProvider mockTreeNodeActionsProviderBean;
     
     @Mock private LamusWicketPagesProvider mockPagesProviderBean;
-    
-    @Mock private LinkedTreeModelProvider mockTreeModelProvider;
     
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     

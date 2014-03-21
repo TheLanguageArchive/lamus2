@@ -23,23 +23,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:extend>
-
             <div id="navigationPanel" wicket:id="navigationPanel" />
-                
-                <div class="mainPageContent">
-            
-                    <div wicket:id="formContainer">
-                        <form wicket:id="workspaceForm">
-                            <p>
-                                <label>Select a workspace :</label>
-                                <br />
-                                <select id="workspaceSelection" wicket:id="workspaceSelection"></select>
-                            </p>
-                            <input class="ws_button ws_button-3 ws_button-3b" wicket:id="openWorkspace" type="submit" value="Open selected Workspace"/>
-                        </form>
-                    </div>
-                    
+            <div class="mainPageContent">
+                <div wicket:id="formContainer">
+                    <form wicket:id="workspaceForm">
+                        <p>
+                            <label>
+                                <wicket:message key="select_workspace_title"></wicket:message>
+                            </label>
+                            <br />
+                            <select id="workspaceSelection" wicket:id="workspaceSelection"></select>
+                        </p>
+                        <input class="ws_button ws_button-3 ws_button-3b" wicket:id="openWorkspace" type="submit" wicket:message="value:select_workspace_button" />
+                    </form>
                 </div>
+            </div>
         </wicket:extend>
     </body>
 </html>

@@ -39,9 +39,7 @@ public class NodeInfoPanel extends Panel {
         form.add(new Label("name"));
 	form.add(new Label("archiveURI"));
 	form.add(new Label("archiveURL"));
-	form.add(new Label("workspaceID"));
 	form.add(new Label("type"));
-        
         
         // Put details/submit form in container for refresh through AJAX 
 	final MarkupContainer formContainer = new WebMarkupContainer("nodeInfoContainer");

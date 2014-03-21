@@ -22,7 +22,6 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
-import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
@@ -66,7 +65,7 @@ public final class ButtonPanel extends Panel {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
 
-            final Button submitWorkspaceButton = new Button("submitWorkspacebutton") {
+            final Button submitWorkspaceButton = new Button("submitWorkspaceButton") {
 
                 @Override
                 public void onSubmit() {

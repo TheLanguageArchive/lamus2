@@ -24,21 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <body>
         <wicket:panel>
             <div class="infoContainer">
-                <h2>Link files</h2>
-                <form wicket:id="linkNodesForm">
-                    <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
-                    <input class="ws_button ws_button-3 ws_button-3b icon-link_node" wicket:id="linkNodesButton" type="submit"/>
-                    <span class="ws_create_warning_message" wicket:id="link_node_warning_message">[WARNING MESSAGE]</span>
-                </form>
-                <div>
-                <h4>Link and external file</h4>
-                <form wicket:id="linkExternalNodesForm">
-                    <p>File location: </p>
-                    <input wicket:id="externalNodeLocation" type="text" maxlength="200"/>
-                    <input class="ws_button ws_button-3 ws_button-3b icon-link_node" wicket:id="linkExternalNodeButton" type="submit"/>
-                    <span class="ws_create_warning_message" wicket:id="link_external_node_warning_message">[WARNING MESSAGE]</span>
-                </form>
-                </div>
+                <h2>
+                    <wicket:message key="link_nodes_panel_title"></wicket:message>
+                </h2>
+                <div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>
+                <div id="externalNodesPanel" wicket:id="externalNodesPanel">[external nodes panel]</div>
             </div>
         </wicket:panel>
     </body>

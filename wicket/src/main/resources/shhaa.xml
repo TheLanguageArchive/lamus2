@@ -32,13 +32,13 @@
             <location target="/CreateWorkspacePage" />
             <location target="/SelectWorkspacePage" />
             <location target="/ManageWorkspacePage" />
-            <location target="/LoginInfoPage" />
+            <!--<location target="/LoginInfoPage" />-->
         </authorization>
         
-        <handler>
+<!--        <handler>
             <pages>
                 <info action="dI">/LoginInfoPage</info>
             </pages>
-        </handler>
+        </handler>-->
     </shhaa>
 </ROOT>

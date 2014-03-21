@@ -36,7 +36,7 @@ public class LamusPageTest extends AbstractLamusWicketTest {
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         
-        LamusPage page = new LamusPage(AbstractLamusWicketTest.MOCK_LAMUS_PAGE_TITLE);
+        LamusPage page = new LamusPage();
         getTester().startPage(page);
     }
 

@@ -20,7 +20,6 @@ import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
-import nl.mpi.archiving.tree.LinkedTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -30,10 +29,8 @@ import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.workspace.model.Workspace;
-import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -82,7 +79,6 @@ public class CreateWorkspacePage extends LamusPage {
         return navPanel;
     }
     
-    
     /**
      * Creates and adds an archive tree panel
      *
@@ -97,33 +93,28 @@ public class CreateWorkspacePage extends LamusPage {
                 if(treePanel.getSelectedNodes().isEmpty()) {
                     submitButton.setEnabled(false);
                     warningMessageModel.setObject("Please select a metadata node as top node of the workspace");
-                    warningMessage.setVisible(true);
-                    
+                    info("Please select a metadata node as top node of the workspace");
                     nodeIdForm.setModelObject(null);
                 } else if(treePanel.getSelectedNodes().size() > 1) {
                     submitButton.setEnabled(false);
                     warningMessageModel.setObject("Please select only one node as top node of the workspace");
-                    warningMessage.setVisible(true);
-                    
+                    info("Please select only one node as top node of the workspace");
                     nodeIdForm.setModelObject(null);
                 } else {
-                
                     final CorpusNode node = (CorpusNode) treePanel.getSelectedNodes().iterator().next();
-
                     if(CorpusNodeType.COLLECTION != node.getType() && CorpusNodeType.METADATA != node.getType()) { //only metadata should be selectable
                         submitButton.setEnabled(false);
                         warningMessageModel.setObject("Please select a metadata node as top node of the workspace");
-                        warningMessage.setVisible(true);
+                        info("Please select a metadata node as top node of the workspace");
                     } else {
                         submitButton.setEnabled(true);
-                        warningMessage.setVisible(false);
                     }
-
                     nodeIdForm.setModel(new CompoundPropertyModel<CorpusNode>(node));
                 }
                 if (target != null) {
                     // Ajax, refresh nodeIdForm
                     target.add(nodeIdForm);
+                    target.add(getFeedbackPanel());
                 }
             }
 	});
@@ -171,11 +162,6 @@ public class CreateWorkspacePage extends LamusPage {
         warningMessage.setVisible(false);
         form.add(warningMessage);
 
-	// Put details/submit form in container for refresh through AJAX 
-//	final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
-//	formContainer.add(form);
-	// Add container to page
-//	add(formContainer);
         add(form);
 
 	return form;

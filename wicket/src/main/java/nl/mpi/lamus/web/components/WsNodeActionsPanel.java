@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
-import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -44,6 +44,8 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
     @SpringBean
     private WorkspaceService workspaceService;
     private final Form<Collection<WorkspaceTreeNode>> form;
+    
+    private Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
 
     public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
 	super(id, model);
@@ -52,11 +54,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
         //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
         
-        //TODO Add other buttons
-        
-        
 	add(form);
-
     }
 
     @Override
@@ -68,7 +66,6 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
     }
 
     
-    
     private ListView<WsTreeNodesAction> createListView(List<WsTreeNodesAction> nodeActionsList) {
         
         return new ListView<WsTreeNodesAction>("wsNodeActions", nodeActionsList) {
@@ -77,18 +74,23 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
             protected void populateItem(ListItem<WsTreeNodesAction> li) {
                 
                 Button nodeActionButton = new WsNodeActionButton(
-                        "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), li.getModelObject(),
+                        "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes, li.getModelObject(),
                         WsNodeActionsPanel.this.workspaceService) {
 
                     @Override
                     public void refreshStuff() {
-                        WsNodeActionsPanel.this.refreshStuff();
+                        WsNodeActionsPanel.this.refreshTreeAndPanels();
                     }
-                    
+
+                    @Override
+                    public void refreshSelectedUnlinkedNodes() {
+                        WsNodeActionsPanel.this.refreshSelectedUnlinkedNodes();
+                    }
                     
                 };
                 
                 nodeActionButton.add(AttributeModifier.append("class", new Model<String>("icon-unlink_node")));
+                nodeActionButton.add(new Label("nodeActionLabel", getLocalizer().getString(nodeActionButton.getModelObject(), this)));
                 
                 li.add(nodeActionButton);
             }
@@ -96,7 +98,13 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
     }
     
     
+    public void refreshTreeAndPanels() {
+    }
     
-    public void refreshStuff() {
+    public void refreshSelectedUnlinkedNodes() {
+    }
+    
+    public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
+        this.selectedUnlinkedNodes = selectedUnlinkedNodes;
     }
 }

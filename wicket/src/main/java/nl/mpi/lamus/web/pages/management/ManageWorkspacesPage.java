@@ -51,15 +51,21 @@ public class ManageWorkspacesPage extends LamusPage {
     @SpringBean
     private WorkspaceService workspaceService;
     
-    private DataView<Workspace> dataView;
     
     public ManageWorkspacesPage() {
         
-//        add(new PagingNavigator("navigator", dataView));
+        List<IColumn<Workspace, String>> columns = createColumns();
+
+        DataTable<Workspace, String> dataTable = createDataTable(columns);
+        add(dataTable);
+    }
+    
+    
+    private List<IColumn<Workspace, String>> createColumns() {
         
         List<IColumn<Workspace, String>> columns = new ArrayList<IColumn<Workspace, String>>();
 
-        columns.add(new AbstractColumn<Workspace, String>(new Model<String>("Actions")) {
+        columns.add(new AbstractColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_actions", this))) {
             
             @Override
             public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId, IModel<Workspace> model) {
@@ -85,24 +91,29 @@ public class ManageWorkspacesPage extends LamusPage {
                     }
                     
                 };
-                deleteLink.add(AttributeModifier.append("class", new Model<String>("managementActionLink")));
+                deleteLink.setBody(Model.of(getLocalizer().getString("management_table_delete_button", ManageWorkspacesPage.this)));
+                deleteLink.add(AttributeModifier.append("class", new Model<String>("tableActionLink")));
                 cellItem.add(deleteLink);
             }
         });
 
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("ID"), "workspaceID"/*, "workspaceID"*/));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("User"), "userID"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Top node"), "topNodeArchiveURI"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Start date"), "startDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("End date"), "endDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Session start"), "sessionStartDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Session end"), "sessionEndDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Used storage"), "usedStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Max storage"), "maxStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Status"), "status"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>("Message"), "message"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID"/*, "workspaceID"*/));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_user_id", this)), "userID"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_start_date", this)), "startDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_end_date", this)), "endDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_session_end_date", this)), "sessionEndDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_used_storage", this)), "usedStorageSpace"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_max_storage", this)), "maxStorageSpace"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_status", this)), "status"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_message", this)), "message"));
         
-
+        return columns;
+    }
+    
+    private DataTable<Workspace, String> createDataTable(List<IColumn<Workspace, String>> columns) {
+        
         DataTable<Workspace, String> dataTable = new AjaxFallbackDefaultDataTable<Workspace, String>("table", columns,
             new SortableWorkspaceDataProvider(workspaceService), 8) {
 
@@ -112,8 +123,8 @@ public class ManageWorkspacesPage extends LamusPage {
             }
         };
         dataTable.setOutputMarkupId(true);
-        add(dataTable);
         
+        return dataTable;
     }
     
     private void refreshDataView() {

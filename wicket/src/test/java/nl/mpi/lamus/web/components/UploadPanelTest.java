@@ -17,7 +17,6 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
-import java.io.InputStream;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.WorkspaceModel;
@@ -28,13 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
@@ -60,9 +53,9 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
     
 //    @Mock private FileUploadField mockFileUploadField;
 //    @Mock private FileUpload mockFileUpload;
-    @Mock private InputStream mockFileInputStream;
+//    @Mock private InputStream mockFileInputStream;
     
-    private File mockFileToUpload;
+//    private File mockFileToUpload;
     
     private String mockFilename = "someimage.jpg";
     
@@ -149,12 +142,6 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
         
         getTester().assertComponent("uploadPanel:progressUpload:progress", UploadProgressBar.class);
         getTester().assertEnabled("uploadPanel:progressUpload:progress");
-        
-        getTester().assertComponent("uploadPanel:uploadFeedback", FeedbackPanel.class);
-        getTester().assertEnabled("uploadPanel:uploadFeedback");
-        
-//        getTester().assertComponent("unlinkedNodesPanel", UnlinkedNodesPanel.class);
-//        getTester().assertEnabled("unlinkedNodesPanel");
     }
     
     

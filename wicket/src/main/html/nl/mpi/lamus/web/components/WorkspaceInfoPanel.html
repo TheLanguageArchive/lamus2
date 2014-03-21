@@ -20,10 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <body>
         <wicket:panel>
             <div id="workspaceInfoContainer" class="infoContainer" wicket:id="workspaceInfoContainer">
-                <h2>Workspace information</h2>
-                <p>User ID: <span wicket:id="userID">user1</span></p>
-                <p>ID: <span wicket:id="workspaceID">123</span></p>
-                <p>Status: <span wicket:id="status">STATUS</span></p>
+                <h2>
+                    <wicket:message key="workspace_info_panel_title"></wicket:message>
+                </h2>
+                <p>
+                    <wicket:message key="workspace_info_panel_user_id_label"></wicket:message>
+                    <span wicket:id="userID">user1</span>
+                </p>
+                <p>
+                    <wicket:message key="workspace_info_panel_workspace_id_label"></wicket:message>
+                    <span wicket:id="workspaceID">123</span>
+                </p>
+                <p>
+                    <wicket:message key="workspace_info_panel_status_label"></wicket:message>
+                    <span wicket:id="status">STATUS</span>
+                </p>
             </div>
             <div id="nodeInfoPanel" wicket:id="nodeInfoPanel">[NODE INFO PANEL]</div>
         </wicket:panel>

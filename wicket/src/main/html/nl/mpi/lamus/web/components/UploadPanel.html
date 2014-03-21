@@ -18,32 +18,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
     <body>
-                <wicket:panel>
-            <!--    <form wicket:id="simpleUpload">
-                 <fieldset>
-                  <legend>Upload form</legend>
-                    <p>
-                    <label for="upload">File</label>
-                    <input wicket:id="fileInput" type="file" />
-                    </p>
-                    <input type="submit" value="Upload!"/>
-                 </fieldset>
-                </form>-->
+        <wicket:panel>
             <form wicket:id="progressUpload" class="infoContainer">
                 <fieldset>
-                    <legend>Upload form with progress bar and HTML5 &lt;input type="file" <strong>multiple</strong> /&gt;, so it can upload more than one file in browsers which support <em>multiple</em> attribute</legend>
+                    <legend>
+                        <wicket:message key="upload_panel_title"></wicket:message>
+                    </legend>
                     <p>
-                        <label for="upload">File</label>
+                        <label for="upload">
+                            <wicket:message key="upload_panel_file_label"></wicket:message>
+                        </label>
                         <input wicket:id="fileInput" type="file" multiple="multiple" webkitdirectory="" directory=""/>
                     </p>
-                    <input type="submit" value="Upload!"/>
+                    <input type="submit">
+                        <wicket:message key="upload_panel_submit_button"></wicket:message>
+                    </input>
                     <span wicket:id="progress">[[upload progressbar]]</span>
                 </fieldset>
             </form>
-            <div>
-                <span wicket:id="uploadFeedback"/>
-            </div>
-            <!--<div id="unlinkedNodesPanel" wicket:id="unlinkedNodesPanel">[unlinked nodes panel]</div>-->
         </wicket:panel>
     </body>
 </html>

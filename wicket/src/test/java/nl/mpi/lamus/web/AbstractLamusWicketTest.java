@@ -42,11 +42,10 @@ public abstract class AbstractLamusWicketTest {
     protected static final String BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER = "createWorkspaceTreeProvider";
     protected static final String BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER = "nodeActionsProvider";
     protected static final String BEAN_NAME_PAGES_PROVIDER = "pagesProvider";
-//    protected static final String BEAN_NAME_UNLINKED_ROOT_NODE = "unlinkedRootNode";
     protected static final String BEAN_NAME_REGISTER_URL = "registerUrl";
     
     protected static final String MOCK_USER_ID = "testUser";
-    protected static final String MOCK_LAMUS_PAGE_TITLE = "test title";
+    protected static final String MOCK_LAMUS_PAGE_TITLE = "The Language Archive - LAMUS 2";
     
     private ApplicationContextMock applicationContextMock;
     

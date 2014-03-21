@@ -20,67 +20,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <head>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
         <wicket:link>
-            <!--<link rel="stylesheet" href="css/lamus2.css" type="text/css" media="screen" title="Stylesheet" />-->
+            <link rel="stylesheet" href="lamus2.css" type="text/css" media="screen" title="Stylesheet" />
         </wicket:link>
         <title>Lamus</title>
     </head>
-<!--    <body topmargin="0" leftmargin="5" marginwidth="5" marginheight="0">
-	<table border="0" cellspacing="0" cellpadding="0" width="100%">
-	    <tr>
-		<td width="62"><img wicket:id="image" src="lana.gif"/></td>
-		<td>&nbsp;&nbsp;</td>
-                <td wicket:id="pageTitle" class="appname" valign="middle" style="white-space: nowrap">PAGE TITLE</td>
-		<td>&nbsp;&nbsp;</td>
-		<td class="username">
-		    user: <span wicket:id="username" valign="right">username</span>
-		    <a class="menulink" href="logout.html">Logout</a>
-		</td>
-
-	    </tr>
-	</table>
-	<div wicket:id="feedbackPanel" />
-    <wicket:child/>
-</body>-->
-
-
-<body>
-    <header>
-        <img id="header_tla_logo" class="header_components header_components_logos" wicket:id="header_tla_logo" src="tla_logo.png" alt=""/>
-        <span id="header_appname" class="header_components header_components_general" wicket:id="header_appname">[APPNAME]</span>
-        <img id="header_clarin_logo" class="header_components header_components_logos" wicket:id="header_clarin_logo" src="CLARIN-inverted.png" alt=""/>
-        <ul id="header_info_container">
-            <li>
-                <a wicket:id="home_page_link" href="[HOME_PAGE]">
-                    <img id="header_home" class="header_components header_components_general" wicket:id="home_image" src="home.png" alt="Home"/>
-                </a>
-            </li>
-            <li>
-                <a href="aboutPage" target="_blank">about</a>
-            </li>
-            <li>
-                <a href="manual" target="_blank">manual</a>
-            </li>
-            <li>
-                <a wicket:id="register_link" href="[REGISTER_PAGE]" target="_blank">register</a>
-            </li>
-            <li>
-                <span id="header_userinfo">
-                    <span class="header_components header_components_labels">user:</span>
-                    <em>
-                        <span class="header_components header_components_general" wicket:id="header_username">[USERNAME]</span>
-                    </em>
-                </span>
-            </li>
-            <li>
-                <a id="loginOrLogoutLink" wicket:id="loginOrLogoutLink" href="[LOGIN_OR_LOGOUT]">LOGIN_OR_LOGOUT</a>
-            </li>
-        </ul>
-    </header>
-    <div wicket:id="feedbackPanel" class="feedbackPanel" />
-    <wicket:child/>
-</body>
-
-
-
-
+    <body>
+        <header>
+            <img id="header_tla_logo" class="header_components header_components_logos" wicket:id="header_tla_logo" src="tla_logo.png" alt=""/>
+            <span id="header_appname" class="header_components header_components_general" wicket:id="header_appname">[APPNAME]</span>
+            <img id="header_clarin_logo" class="header_components header_components_logos" wicket:id="header_clarin_logo" src="CLARIN-inverted.png" alt=""/>
+            <ul id="header_info_container">
+                <li>
+                    <a wicket:id="home_page_link" href="[HOME_PAGE]">
+                        <img id="header_home" class="header_components header_components_general" wicket:id="home_image" src="home.png" alt="Home"/>
+                    </a>
+                </li>
+                <li>
+                    <a href="aboutPage" target="_blank">
+                        <wicket:message key="header_about_link"></wicket:message>
+                    </a>
+                </li>
+                <li>
+                    <a href="manual" target="_blank">
+                        <wicket:message key="header_manual_link"></wicket:message>
+                    </a>
+                </li>
+                <li>
+                    <a wicket:id="register_link" href="[REGISTER_PAGE]" target="_blank">
+                        <wicket:message key="header_register_link"></wicket:message>
+                    </a>
+                </li>
+                <li>
+                    <span id="header_userinfo">
+                        <span class="header_components header_components_labels">
+                            <wicket:message key="header_user_label"></wicket:message>
+                        </span>
+                        <em>
+                            <span class="header_components header_components_general" wicket:id="header_username">[USERNAME]</span>
+                        </em>
+                    </span>
+                </li>
+                <li>
+                    <a id="loginOrLogoutLink" wicket:id="loginOrLogoutLink" href="[LOGIN_OR_LOGOUT]">LOGIN_OR_LOGOUT</a>
+                </li>
+            </ul>
+        </header>
+        <div wicket:id="feedbackPanel" class="feedbackPanel" />
+        <wicket:child/>
+    </body>
 </html>

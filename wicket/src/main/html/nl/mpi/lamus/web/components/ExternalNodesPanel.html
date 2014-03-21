@@ -23,10 +23,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <wicket:panel>
-            <h4>
-                <wicket:message key="unlinked_nodes_panel_title"></wicket:message>
-            </h4>
-            <div wicket:id="unlinkedNodesTableTree" class="tableTree"></div>
+            <div class="infoContainer">
+                <h4>
+                    <wicket:message key="external_nodes_panel_title"></wicket:message>
+                </h4>
+                <a href="#" wicket:id="link">
+                    <wicket:message key="external_nodes_panel_new_item_link"></wicket:message>
+                </a>
+                <form wicket:id="form">
+                    <input type="text" wicket:id="externalUrl" /> 
+                    <input type="button" wicket:id="add" wicket:message="value:external_nodes_panel_add_button" />
+                    <wicket:message key="external_nodes_panel_or_space"></wicket:message>
+                    <input type="button" wicket:id="cancel" wicket:message="value:external_nodes_panel_cancel_button" />
+                </form>
+            </div>
         </wicket:panel>
     </body>
 </html>

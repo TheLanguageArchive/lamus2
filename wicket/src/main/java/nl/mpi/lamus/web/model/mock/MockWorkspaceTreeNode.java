@@ -217,5 +217,9 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     public List<WorkspaceTreeNode> getChildren() {
         return children;
     }
-    
+
+    @Override
+    public String getStatusAsString() {
+        return this.status.toString();
+    }
 }

@@ -17,8 +17,6 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.session.LamusSession;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -36,33 +34,24 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  */
 public class LamusPage extends WebPage {
 
-//    public static final PackageResourceReference CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lams.css");
-//    public static final PackageResourceReference LAMUS2_CSS_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lamus2.css");
-//    public static final PackageResourceReference LANA_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "lana.gif");
-//    public static final PackageResourceReference TLA_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "/tla_logo.png");
-//    public static final PackageResourceReference CLARIN_LOGO_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
-//    public static final PackageResourceReference HOME_ICON_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "home.png");
-    
     @SpringBean(name = "registerUrl")
     private String registerUrl;
     
-    public LamusPage() {
-//        this("Lamus2 Language Archive Management and Upload System");
-        this("The Language Archive");
-    }
-
+    private FeedbackPanel feedbackPanel;
+    
     /**
      * edit title of the page, logo and userName
-     *
-     * @param appName
      */
-    public LamusPage(String appName) {
+    public LamusPage() {
         super();
-	add(new FeedbackPanel("feedbackPanel"));
-//        add(new Image("header_tla_logo", TLA_LOGO_RESOURCE_REFERENCE));
+        
+        String appName = getLocalizer().getString("header_app_name", this);
+        
+        feedbackPanel = new FeedbackPanel("feedbackPanel");
+        feedbackPanel.setOutputMarkupId(true);
+	add(feedbackPanel);
         add(new Image("header_tla_logo", new SharedResourceReference("tlaLogoImage")));
         add(new Label("header_appname", appName));
-//        add(new Image("header_clarin_logo", CLARIN_LOGO_RESOURCE_REFERENCE));
         add(new Image("header_clarin_logo", new SharedResourceReference("clarinInvertedImage")));
         
         Link homePageLink = new Link("home_page_link") {
@@ -72,7 +61,6 @@ public class LamusPage extends WebPage {
                 setResponsePage(resultPage);
             }
         };
-//        homePageLink.add(new Image("home_image", HOME_ICON_RESOURCE_REFERENCE));
         homePageLink.add(new Image("home_image", new SharedResourceReference("homeImage")));
         add(homePageLink);
         
@@ -81,24 +69,16 @@ public class LamusPage extends WebPage {
         add(new Label("header_username", new Model<String>(LamusSession.get().getUserId())));
         
         if("anonymous".equals(LamusSession.get().getUserId())) {
-            add(new ExternalLink("loginOrLogoutLink", "login", "login"));
+            add(new ExternalLink("loginOrLogoutLink", "login", getLocalizer().getString("header_login_label", this)));
         } else {
-            add(new ExternalLink("loginOrLogoutLink", "logout", "logout"));
+            add(new ExternalLink("loginOrLogoutLink", "logout", getLocalizer().getString("header_logout_label", this)));
         }
         
         //TODO THE URLs IN THESE LINKS ARE NOT VALID AT THE MOMENT...
-        
-        
-    }
 
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-//        response.renderCSSReference(CSS_RESOURCE_REFERENCE);
-//        response.render(CssHeaderItem.forReference(CSS_RESOURCE_REFERENCE));
-        
-//        response.render(CssHeaderItem.forReference(LAMUS2_CSS_RESOURCE_REFERENCE));
-        response.render(CssHeaderItem.forReference(new SharedResourceReference("lamus2Css")));
-        
+    }
+    
+    protected FeedbackPanel getFeedbackPanel() {
+        return feedbackPanel;
     }
 }
