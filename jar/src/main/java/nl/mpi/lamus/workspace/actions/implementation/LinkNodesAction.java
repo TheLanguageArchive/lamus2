@@ -19,7 +19,6 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
