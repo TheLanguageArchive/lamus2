@@ -47,6 +47,7 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         metadataActions = new ArrayList<WsTreeNodesAction>();
         metadataActions.add(new DeleteNodesAction());
         metadataActions.add(new UnlinkNodesAction());
+        metadataActions.add(new LinkNodesAction());
         
         
         multipleNodesActions = new ArrayList<WsTreeNodesAction>();

@@ -78,6 +78,7 @@ public class LamusWsNodeActionsProviderTest {
         expectedMetadataNodeActions = new ArrayList<WsTreeNodesAction>();
         expectedMetadataNodeActions.add(new DeleteNodesAction());
         expectedMetadataNodeActions.add(new UnlinkNodesAction());
+        expectedMetadataNodeActions.add(new LinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataActions", expectedMetadataNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<WsTreeNodesAction>();

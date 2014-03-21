@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
-import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -29,10 +28,14 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * 
  * @author guisil
  */
-public class DeleteNodesAction implements WsTreeNodesAction {
+public class DeleteNodesAction extends WsTreeNodesAction {
 
-    private final String name = "Delete";
+    private final String name = "delete_node_action";
     
+    
+    public DeleteNodesAction() {
+        super();
+    }
     
     /**
      * @see WsTreeNodesAction#getName()
@@ -43,12 +46,25 @@ public class DeleteNodesAction implements WsTreeNodesAction {
     }
    
     /**
-     * @see WsTreeNodesAction#execute(java.lang.String, java.util.Collection, nl.mpi.lamus.service.WorkspaceService)
+     * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService)
      */
     @Override
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
-        for(WorkspaceTreeNode currentNode : nodes) {
+    public void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        if(wsService == null) {
+            throw new IllegalArgumentException("WorkspaceService should have been set");
+        }
+        
+        if(selectedTreeNodes == null) {
+            throw new IllegalArgumentException("Action for deleting nodes requires at least one tree node; currently null");
+        }
+        else if(selectedTreeNodes.isEmpty()) {
+            throw new IllegalArgumentException("Action for deleting nodes requires at least one tree node; currently selected " + selectedTreeNodes.size());
+        }
+        
+        // childNodes not used for this action
+        
+        for(WorkspaceTreeNode currentNode : selectedTreeNodes) {
             wsService.deleteNode(userID, currentNode);
         }
     }

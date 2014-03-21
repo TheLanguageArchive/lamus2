@@ -401,4 +401,9 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     public void setFormat(String format) {
         this.format = format;
     }
+
+    @Override
+    public String getStatusAsString() {
+        return this.status.toString();
+    }
 }

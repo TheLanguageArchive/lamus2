@@ -16,12 +16,12 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
-import java.util.Collection;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsParentMultipleChildNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -29,9 +29,9 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * 
  * @author guisil
  */
-public class LinkNodesAction implements WsParentMultipleChildNodesAction {
+public class LinkNodesAction extends WsTreeNodesAction {
 
-    private final String name = "Link";
+    private final String name = "link_node_action";
     
     
     /**
@@ -43,13 +43,30 @@ public class LinkNodesAction implements WsParentMultipleChildNodesAction {
     }
 
     /**
-     * @see WsParentMultipleChildNodesAction#execute(java.lang.String, nl.mpi.lamus.workspace.tree.WorkspaceTreeNode, java.util.Collection, nl.mpi.lamus.service.WorkspaceService)
+     * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService)
      */
     @Override
-    public void execute(String userID, WorkspaceTreeNode parentNode, Collection<WorkspaceTreeNode> childNodes, WorkspaceService wsService)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
-        for(WorkspaceTreeNode currentNode : childNodes) {
-            wsService.linkNodes(userID, parentNode, currentNode);
+    public void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        if(wsService == null) {
+            throw new IllegalArgumentException("WorkspaceService should have been set");
+        }
+        
+        if(selectedTreeNodes == null) {
+            throw new IllegalArgumentException("Action for linking nodes requires exactly one tree node; currently null");
+        }
+        else if(selectedTreeNodes.size() != 1) {
+            throw new IllegalArgumentException("Action for linking nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size());
+        }
+        if(selectedChildNodes == null) {
+            throw new IllegalArgumentException("Action for linking nodes requires at least one selected child node; currently null");
+        }
+        else if(selectedChildNodes.isEmpty()) {
+            throw new IllegalArgumentException("Action for linking nodes requires at least one selected child node");
+        }
+        
+        for(WorkspaceTreeNode currentNode : selectedChildNodes) {
+            wsService.linkNodes(userID, selectedTreeNodes.iterator().next(), currentNode);
         }
     }
 }

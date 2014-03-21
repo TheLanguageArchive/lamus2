@@ -49,7 +49,7 @@ public class LinkExternalNodesActionTest {
     
     private WsParentSingleChildNodeAction linkExternalNodesAction;
     
-    private String expectedActionName = "Link External Node";
+    private String expectedActionName = "link_external_node_action";
     
     public LinkExternalNodesActionTest() {
     }

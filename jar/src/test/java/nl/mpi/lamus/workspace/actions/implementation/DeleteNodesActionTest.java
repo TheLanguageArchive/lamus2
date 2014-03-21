@@ -50,7 +50,8 @@ public class DeleteNodesActionTest {
     
     private WsTreeNodesAction deleteNodesAction;
     
-    private String expectedActionName = "Delete";
+    private String expectedActionName = "delete_node_action";
+    private String userID = "testUser";
     
     
     public DeleteNodesActionTest() {
@@ -84,44 +85,93 @@ public class DeleteNodesActionTest {
     }
     
     @Test
+    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        String expectedExceptionMessage = "Action for deleting nodes requires at least one tree node; currently null";
+        
+        try {
+            deleteNodesAction.execute(userID, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        
+        String expectedExceptionMessage = "Action for deleting nodes requires at least one tree node; currently selected " + selectedTreeNodes.size();
+        
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+
+        try {
+            deleteNodesAction.execute(userID, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
+        
+        String expectedExceptionMessage = "WorkspaceService should have been set";
+        
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+
+        try {
+            deleteNodesAction.execute(userID, null);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
     public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-        selectedNodes.add(mockTreeNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeOne);
         }});
 
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         //TODO is there an advantage on passing the parent node in this particular type of action?
-        deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
+        deleteNodesAction.execute(userID, mockWorkspaceService);
     }
     
     @Test
     public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-        selectedNodes.add(mockTreeNodeOne);
-        selectedNodes.add(mockTreeNodeTwo);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
+        selectedTreeNodes.add(mockTreeNodeTwo);
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeOne);
             oneOf(mockWorkspaceService).deleteNode(userID, mockTreeNodeTwo);
         }});
 
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         //TODO is there an advantage on passing the parent node in this particular type of action?
-        deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
+        deleteNodesAction.execute(userID, mockWorkspaceService);
     }
     
     @Test
     public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-        selectedNodes.add(mockTreeNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
         
@@ -130,8 +180,10 @@ public class DeleteNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -142,9 +194,8 @@ public class DeleteNodesActionTest {
     public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-        selectedNodes.add(mockTreeNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
         
@@ -153,8 +204,10 @@ public class DeleteNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -165,9 +218,8 @@ public class DeleteNodesActionTest {
     public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-        selectedNodes.add(mockTreeNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);
         
@@ -176,8 +228,10 @@ public class DeleteNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            deleteNodesAction.execute(userID, selectedNodes, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

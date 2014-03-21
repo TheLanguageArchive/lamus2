@@ -51,7 +51,8 @@ public class UnlinkNodesActionTest {
     
     private WsTreeNodesAction unlinkNodesAction;
     
-    private String expectedActionName = "Unlink";
+    private String expectedActionName = "unlink_node_action";
+    private String userID = "testUser";
 
     
     public UnlinkNodesActionTest() {
@@ -85,27 +86,73 @@ public class UnlinkNodesActionTest {
     }
     
     @Test
-    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
-        childNodes.add(mockChildNodeOne);
+        String expectedExceptionMessage = "Action for unlinking nodes requires at least one tree node; currently null";
+        
+        try {
+            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        String expectedExceptionMessage = "Action for unlinking nodes requires at least one tree node; currently selected " + selectedTreeNodes.size();
+                
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+
+        try {
+            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
+        String expectedExceptionMessage = "WorkspaceService should have been set";
+
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
+        try {
+            unlinkNodesAction.execute(userID, null);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
         
         context.checking(new Expectations() {{
             oneOf(mockChildNodeOne).getParent(); will(returnValue(mockParentNode));
             oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockChildNodeOne);
         }});
 
-        unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
+        unlinkNodesAction.execute(userID, mockWorkspaceService);
     }
     
     @Test
     public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
-        childNodes.add(mockChildNodeOne);
-        childNodes.add(mockChildNodeTwo);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
+        selectedTreeNodes.add(mockChildNodeTwo);
         
         context.checking(new Expectations() {{
             oneOf(mockChildNodeOne).getParent(); will(returnValue(mockParentNode));
@@ -114,16 +161,17 @@ public class UnlinkNodesActionTest {
             oneOf(mockWorkspaceService).unlinkNodes(userID, mockParentNode, mockChildNodeTwo);
         }});
 
-        unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
+        unlinkNodesAction.execute(userID, mockWorkspaceService);
     }
     
     @Test
     public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
-        childNodes.add(mockChildNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
         
@@ -133,8 +181,10 @@ public class UnlinkNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -145,9 +195,8 @@ public class UnlinkNodesActionTest {
     public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
-        childNodes.add(mockChildNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
         
@@ -157,8 +206,10 @@ public class UnlinkNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -169,9 +220,8 @@ public class UnlinkNodesActionTest {
     public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
 
         final int workspaceID = 10;
-        final String userID = "testUser";
-        Collection<WorkspaceTreeNode> childNodes = new ArrayList<WorkspaceTreeNode>();
-        childNodes.add(mockChildNodeOne);
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        selectedTreeNodes.add(mockChildNodeOne);
         
         final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);
         
@@ -181,8 +231,10 @@ public class UnlinkNodesActionTest {
                 will(throwException(expectedException));
         }});
 
+        unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
+        
         try {
-            unlinkNodesAction.execute(userID, childNodes, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

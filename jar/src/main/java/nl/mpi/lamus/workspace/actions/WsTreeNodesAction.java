@@ -29,15 +29,39 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * 
  * @author guisil
  */
-public interface WsTreeNodesAction extends WsNodesAction {
+public abstract class WsTreeNodesAction implements WsNodesAction {
+    
+    protected Collection<WorkspaceTreeNode> selectedTreeNodes;
+    protected Collection<WorkspaceTreeNode> selectedChildNodes;
+
     
     /**
      * Executes the action.
+     * The setters might have to be used first, in order to set the selected tree nodes
+     * and/or selected child nodes.
      * 
-     * @param userID ID of the user
-     * @param nodes nodes involved in the action
-     * @param wsService service which will be called to perform the action
+     * @param userID ID of the user to execute the action
+     * @param wsService WorkspaceService to be used to execute the actions
      */
-    public void execute(String userID, Collection<WorkspaceTreeNode> nodes, WorkspaceService wsService)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+    public abstract void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+    
+    /**
+     * Sets the collection of nodes to be used in the action as selected nodes
+     * (e.g. in the action for deleting nodes, these are the nodes to be deleted from the tree)
+     * 
+     * @param selectedTreeNodes Nodes currently selected in the tree
+     */
+    public void setSelectedTreeNodes(Collection<WorkspaceTreeNode> selectedTreeNodes) {
+        this.selectedTreeNodes = selectedTreeNodes;
+    }
+    
+    /**
+     * Sets the collection of nodes to be used in the action as child nodes
+     * (e.g. in the action for linking nodes, these are the nodes to be linked to the tree)
+     * 
+     * @param selectedChildNodes Nodes currently selected as child nodes
+     */
+    public void setSelectedChildNodes(Collection<WorkspaceTreeNode> selectedChildNodes) {
+        this.selectedChildNodes = selectedChildNodes;
+    }
 }

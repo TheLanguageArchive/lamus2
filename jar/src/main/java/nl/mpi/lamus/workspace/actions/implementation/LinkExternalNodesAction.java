@@ -31,7 +31,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  */
 public class LinkExternalNodesAction implements WsParentSingleChildNodeAction {
 
-    private final String name = "Link External Node";
+    private final String name = "link_external_node_action";
     
     
     /**
