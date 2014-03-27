@@ -217,12 +217,12 @@
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-provider</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0-beta-2</version>
         </dependency>
 <!--        <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0-beta-2</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.handle</groupId>
@@ -232,8 +232,8 @@
         </dependency>-->
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
-            <artifactId>corpus-structure-2-crawler</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>corpus-structure-2-crawler-core</artifactId>
+            <version>1.0-beta-2</version>
         </dependency>
         
         

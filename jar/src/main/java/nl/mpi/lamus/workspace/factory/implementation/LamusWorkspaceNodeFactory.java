@@ -70,8 +70,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             MetadataDocument document, String name, boolean onSite) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        node.setName(name);
-        node.setTitle(name);
+        
+        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
+        
+        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
+        node.setName(displayValue);
+        node.setTitle(displayValue);
         node.setType(WorkspaceNodeType.METADATA);
         node.setFormat("text/x-cmdi+xml"); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
@@ -94,8 +98,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             Reference resourceReference, String mimetype, String name, boolean onSite) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        node.setName(name);
-        node.setTitle("(type=" + mimetype + ")"); //TODO CHANGE THIS
+        
+        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
+        
+        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
+        node.setName(displayValue);
+        node.setTitle(displayValue); //TODO CHANGE THIS
         node.setType(WorkspaceNodeType.RESOURCE);
         node.setFormat(mimetype);
         
@@ -118,7 +126,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
-        String displayValue = FilenameUtils.getName(FilenameUtils.getName(workspaceURL.getPath()));
+        String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         node.setName(displayValue);
         node.setTitle(displayValue);
         node.setOriginURL(originURL);
@@ -147,7 +155,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workpaceID);
-        String displayValue = FilenameUtils.getName(FilenameUtils.getName(originURL.getPath()));
+        String displayValue = FilenameUtils.getName(originURL.getPath());
         node.setName(displayValue);
         node.setTitle(displayValue);
         node.setOriginURL(originURL);
@@ -169,8 +177,12 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
-        node.setName(archiveNode.getName());
-        node.setTitle(archiveNode.getName());
+        
+        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
+        
+        String displayValue = FilenameUtils.getName(archiveURL.getPath());
+        node.setName(displayValue);
+        node.setTitle(displayValue);
         node.setArchiveURI(archiveNode.getNodeURI());
         node.setArchiveURL(archiveURL);
         node.setOriginURL(archiveURL);

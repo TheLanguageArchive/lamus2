@@ -98,6 +98,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
@@ -106,8 +107,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.TRUE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(nodeName);
-        expectedNode.setTitle(nodeName);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
@@ -135,6 +136,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
@@ -143,8 +145,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.FALSE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(nodeName);
-        expectedNode.setTitle(nodeName);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
@@ -172,6 +174,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName.txt";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String nodeMimetype = "text/plain";
@@ -179,8 +182,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.TRUE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(nodeName);
-        expectedNode.setTitle("(type=" + nodeMimetype + ")"); //TODO CHANGE THIS
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeMimetype);
         expectedNode.setStatus(nodeStatus);
@@ -202,6 +205,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName.txt";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String nodeMimetype = "text/plain";
@@ -209,8 +213,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.FALSE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(nodeName);
-        expectedNode.setTitle("(type=" + nodeMimetype + ")"); //TODO CHANGE THIS
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeMimetype);
         expectedNode.setStatus(nodeStatus);
@@ -331,7 +335,7 @@ public class LamusWorkspaceNodeFactoryTest {
         
         context.checking(new Expectations() {{
             
-            exactly(2).of(mockCorpusNode).getName(); will(returnValue(displayValue));
+//            exactly(2).of(mockCorpusNode).getName(); will(returnValue(displayValue));
             oneOf(mockCorpusNode).getNodeURI(); will(returnValue(archiveURI));
         }});
         

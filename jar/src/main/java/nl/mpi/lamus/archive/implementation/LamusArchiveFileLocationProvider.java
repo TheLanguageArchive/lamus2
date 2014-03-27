@@ -79,5 +79,16 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
         // in other cases (including when the httpRoot is already present, returns the same file
         return location;
     }
+
+    @Override
+    public URI getUriWithLocalRoot(URI location) throws URISyntaxException {
+        
+        if(location.toString().startsWith(dbHttpRoot)) {
+            return new URI(location.toString().replace(dbHttpRoot, dbLocalRoot));
+        }
+        
+        // in other cases (including when the httpRoot is already present, returns the same file
+        return location;
+    }
     
 }

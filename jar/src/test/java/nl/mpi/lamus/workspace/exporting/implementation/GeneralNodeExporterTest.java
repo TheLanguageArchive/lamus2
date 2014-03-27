@@ -30,6 +30,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -73,6 +74,7 @@ public class GeneralNodeExporterTest {
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
+    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     
     @Mock MetadataDocument mockMetadataDocument;
     @Mock StreamResult mockStreamResult;
@@ -101,7 +103,8 @@ public class GeneralNodeExporterTest {
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
         
         generalNodeExporter = new GeneralNodeExporter(mockMetadataAPI, mockWorkspaceFileHandler,
-                mockWorkspaceTreeExporter, mockCorpusStructureProvider, mockArchiveFileHelper);
+                mockWorkspaceTreeExporter, mockCorpusStructureProvider, mockArchiveFileHelper,
+                mockArchiveFileLocationProvider);
         generalNodeExporter.setWorkspace(workspace);
     }
     
@@ -130,7 +133,7 @@ public class GeneralNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final File nodeArchiveFile = new File(nodeArchiveURL.toURI().getSchemeSpecificPart());
         final String nodeName = "someNode";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "text/x-cmdi+xml";
@@ -155,6 +158,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
+            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveURL.toURI()));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -194,7 +198,7 @@ public class GeneralNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final File nodeArchiveFile = new File(nodeArchiveURL.toURI().getSchemeSpecificPart());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         
@@ -217,6 +221,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
+            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveURL.toURI()));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -389,7 +394,6 @@ public class GeneralNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         
@@ -448,7 +452,6 @@ public class GeneralNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         
@@ -507,7 +510,7 @@ public class GeneralNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
+        final File nodeArchiveFile = new File(nodeArchiveURL.toURI().getSchemeSpecificPart());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         
@@ -533,6 +536,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockMetadataDocument));
+            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveURL.toURI()));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nodeArchiveFile); will(returnValue(mockStreamResult));
             
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -578,10 +582,8 @@ public class GeneralNodeExporterTest {
         final String pdfExtension = "pdf";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + pdfExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
-        final File nodeWsFile = new File(nodeWsURL.getPath());
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/location/" + nodeFilename);
-        final File nodeArchiveFile = new File(nodeArchiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
         final URI nodeSchemaLocation = new URI("http://some.location");
         

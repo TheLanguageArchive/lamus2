@@ -149,7 +149,7 @@ public class LamusArchiveFileLocationProviderTest {
     }
     
     @Test
-    public void getFileContainingAlreadyHttpRoot() throws URISyntaxException {
+    public void getHttpUriContainingAlreadyHttpRoot() throws URISyntaxException {
         
         String fileRelativePath = "anotherFolder/file.cmdi";
         URI initialLocation = new URI(dbHttpRoot + fileRelativePath);
@@ -161,7 +161,7 @@ public class LamusArchiveFileLocationProviderTest {
     }
     
     @Test
-    public void getFileContainingLocalRoot() throws URISyntaxException {
+    public void getHttpUriContainingLocalRoot() throws URISyntaxException {
         
         String fileRelativePath = "anotherFolder/file.cmdi";
         URI initialLocation = new URI(dbLocalRoot + fileRelativePath);
@@ -173,13 +173,49 @@ public class LamusArchiveFileLocationProviderTest {
     }
     
     @Test
-    public void getFileContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
+    public void getHttpUriContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
         
         String fileAbsolutePath = "http://alternative/root/anotherFolder/file.cmdi";
         URI initialLocation = new URI(fileAbsolutePath);
         URI expectedLocation = initialLocation;
         
         URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getLocalUriContainingAlreadyLocalRoot() throws URISyntaxException {
+        
+        String fileRelativePath = "anotherFolder/file.cmdi";
+        URI initialLocation = new URI(dbLocalRoot + fileRelativePath);
+        URI expectedLocation = initialLocation;
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getLocalUriContainingHttpRoot() throws URISyntaxException {
+        
+        String fileRelativePath = "anotherFolder/file.cmdi";
+        URI initialLocation = new URI(dbHttpRoot + fileRelativePath);
+        URI expectedLocation = new URI(dbLocalRoot + fileRelativePath);
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getLocalUriContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
+        
+        String fileAbsolutePath = "http://alternative/root/anotherFolder/file.cmdi";
+        URI initialLocation = new URI(fileAbsolutePath);
+        URI expectedLocation = initialLocation;
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }

@@ -121,7 +121,15 @@ public class AddedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
-        String parentArchivePath = parentNode.getArchiveURL().getPath();
+//        String parentArchivePath = parentNode.getArchiveURL().getPath();
+        String parentArchivePath = null;
+        try {
+            parentArchivePath = archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI()).getSchemeSpecificPart();
+        } catch (URISyntaxException ex) {
+            String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
+            throwWorkspaceExportException(errorMessage, ex);
+        }
+        
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
         
         File nextAvailableFile = retrieveAndUpdateNewArchivePath(currentNode, currentNodeFilename, parentArchivePath);

@@ -50,4 +50,14 @@ public interface ArchiveFileLocationProvider {
      * @return URI with the archive HTTP Root prefix
      */
     public URI getUriWithHttpRoot(URI location) throws URISyntaxException;
+    
+    /**
+     * Retrieves the given URI with the archive Local Root prefix (if the URI
+     * starts with the HTTP Root prefix, it is replaced, otherwise the URI
+     * is not changed).
+     * 
+     * @param location
+     * @return URI with the archive local Root prefix
+     */
+    public URI getUriWithLocalRoot(URI location) throws URISyntaxException;
 }

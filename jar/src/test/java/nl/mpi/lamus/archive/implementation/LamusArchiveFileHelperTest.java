@@ -437,6 +437,22 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
+    public void createFileAndDirectoriesDirectoryExistingAlready() throws IOException {
+        
+        final String dirPath = "/some/path";
+        final String fileName = "file.cmdi";
+        
+        final File dir = testFolder.newFolder(dirPath);
+        FileUtils.forceMkdir(dir);
+        assertTrue("Directory should have been created", dir.exists());
+        final File file = new File(dir, fileName);
+        
+        testArchiveFileHelper.createFileAndDirectories(file);
+        
+        assertTrue("File should have been created", file.exists());
+    }
+    
+    @Test
     public void createFileAndDirectoriesBothExistingAlready() throws IOException {
         
         final String dirPath = "/some/path";

@@ -167,7 +167,7 @@ public class AddedNodeExporterTest {
         final String nodeFormat = currentNode.getFormat();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -221,7 +221,7 @@ public class AddedNodeExporterTest {
         final String nodeFormat = currentNode.getFormat();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -283,7 +283,7 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
                 
         final String expectedErrorMessage = "Error getting new file for node " + nodeWsURL;
         final IOException expectedException = new IOException("some exception message");
@@ -318,7 +318,7 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         
         final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeWsURL;
         final MetadataException expectedException = new MetadataException("some exception message");
@@ -360,7 +360,7 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", testWorkspace.getWorkspaceID(), null);
         
@@ -398,7 +398,7 @@ public class AddedNodeExporterTest {
         final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -450,7 +450,7 @@ public class AddedNodeExporterTest {
         final URI nodeNewArchiveUriToUriHttpRoot = new URI("http://server/archive/root/somenode/" + nodeWsFilename);
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.getPath();
+        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -492,10 +492,12 @@ public class AddedNodeExporterTest {
     private void checkFirstInvocations(
             final URL parentNodeArchiveURL, final URL nodeWsURL, final WorkspaceNodeType nodeType,
             final String nodeWsFilename, final File nextAvailableFile,
-            final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException {
+            final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException, URISyntaxException {
         
         context.checking(new Expectations() {{
             oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(parentNodeArchiveURL.toURI());
+                will(returnValue(parentNodeArchiveURL.toURI())); //in this case the url would already be local, so no changes happen
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
         }});

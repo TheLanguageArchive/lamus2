@@ -134,7 +134,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private NodeExporter getGeneralNodeExporter(Workspace workspace) {
         if(generalNodeExporter == null) {
             generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler,
-                    workspaceTreeExporter, corpusStructureProvider, archiveFileHelper);
+                    workspaceTreeExporter, corpusStructureProvider, archiveFileHelper,
+                    archiveFileLocationProvider);
         }
         generalNodeExporter.setWorkspace(workspace);
         return generalNodeExporter;

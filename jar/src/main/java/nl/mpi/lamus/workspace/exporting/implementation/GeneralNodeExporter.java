@@ -18,11 +18,13 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -48,21 +50,24 @@ public class GeneralNodeExporter implements NodeExporter {
 
     private Workspace workspace;
     
-    private MetadataAPI metadataAPI;
-    private WorkspaceFileHandler workspaceFileHandler;
-    private WorkspaceTreeExporter workspaceTreeExporter;
-    private CorpusStructureProvider corpusStructureProvider;
-    private ArchiveFileHelper archiveFileHelper;
+    private final MetadataAPI metadataAPI;
+    private final WorkspaceFileHandler workspaceFileHandler;
+    private final WorkspaceTreeExporter workspaceTreeExporter;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final ArchiveFileHelper archiveFileHelper;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler,
             WorkspaceTreeExporter wsTreeExporter,
-            CorpusStructureProvider csProvider, ArchiveFileHelper archiveFileHelper) {
+            CorpusStructureProvider csProvider, ArchiveFileHelper archiveFileHelper,
+            ArchiveFileLocationProvider archiveFileLocationProvider) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
         this.corpusStructureProvider = csProvider;
         this.archiveFileHelper = archiveFileHelper;
+        this.archiveFileLocationProvider = archiveFileLocationProvider;
     }
     
     /**
@@ -134,7 +139,14 @@ public class GeneralNodeExporter implements NodeExporter {
             }
 
             File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
-            File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
+//            File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
+            File nodeArchiveFile = null;
+            try {
+                nodeArchiveFile = new File(archiveFileLocationProvider.getUriWithLocalRoot(currentNode.getArchiveURL().toURI()).getSchemeSpecificPart());
+            } catch (URISyntaxException ex) {
+                String errorMessage = "Error retrieving archive location of node " + currentNode.getArchiveURI();
+                throwWorkspaceExportException(errorMessage, ex);
+            }
             StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
             
             try {
