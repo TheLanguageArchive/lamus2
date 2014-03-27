@@ -30,9 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         </label>
                         <input wicket:id="fileInput" type="file" multiple="multiple" webkitdirectory="" directory=""/>
                     </p>
-                    <input type="submit">
-                        <wicket:message key="upload_panel_submit_button"></wicket:message>
-                    </input>
+                    <input type="submit" wicket:message="value:upload_panel_submit_button" />
                     <span wicket:id="progress">[[upload progressbar]]</span>
                 </fieldset>
             </form>

@@ -59,15 +59,6 @@ public class WsNodeActionButton extends Button {
         final String currentUserId = LamusSession.get().getUserId();
         try {
             
-            if(selectedTreeNodes == null || selectedTreeNodes.isEmpty()) {
-                Session.get().info("No tree node was selected");
-                return;
-            }
-            if(selectedChildNodes == null || selectedChildNodes.isEmpty()) {
-                Session.get().info("No nodes to link were selected");
-                return;
-            }
-            
             this.action.setSelectedTreeNodes(selectedTreeNodes);
             this.action.setSelectedChildNodes(selectedChildNodes);
             

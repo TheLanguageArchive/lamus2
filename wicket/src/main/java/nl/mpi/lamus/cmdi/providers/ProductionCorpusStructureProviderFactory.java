@@ -54,7 +54,9 @@ public class ProductionCorpusStructureProviderFactory implements CorpusStructure
     @Override
     public CorpusStructureProvider createCorpusStructureProvider() {
 	logger.debug("Constructing new CorpusStructureProviderImpl");
-	return new CorpusStructureProviderImpl(archiveDao, aoDao, csDao);
+	CorpusStructureProviderImpl provider =  new CorpusStructureProviderImpl(archiveDao, aoDao, csDao);
+        provider.initialize();
+        return provider;
     }
 
     @Override
