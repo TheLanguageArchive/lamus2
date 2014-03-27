@@ -82,9 +82,9 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/ManageWorkspacePage", ManageWorkspacesPage.class);
         mountPage("/LoginInfoPage", LoginInfoPage.class);
         
-        PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");
-        getSharedResources().add("lamus2Css", lamus2CssReference.getResource());
-        mountResource("/css/lamus2.css", lamus2CssReference);
+//        PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");
+//        getSharedResources().add("lamus2Css", lamus2CssReference.getResource());
+//        mountResource("/css/lamus2.css", lamus2CssReference);
         
         PackageResourceReference tlaLogoImageReference = new PackageResourceReference(LamusPage.class, "tla_logo.png");
         getSharedResources().add("tlaLogoImage", tlaLogoImageReference.getResource());
@@ -101,10 +101,10 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
 //        mountResource("/fonts/lamus_icon_font/lamus_icon_font.ttf", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.ttf"));
 //        mountResource("/fonts/lamus_icon_font/lamus_icon_font.woff", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.woff"));
         
-        mountResource("/css/fonts/icomoon/icomoon.eot", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.eot"));
-        mountResource("/css/fonts/icomoon/icomoon.svg", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.svg"));
-        mountResource("/css/fonts/icomoon/icomoon.ttf", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.ttf"));
-        mountResource("/css/fonts/icomoon/icomoon.woff", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.woff"));
+//        mountResource("/css/fonts/icomoon/icomoon.eot", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.eot"));
+//        mountResource("/css/fonts/icomoon/icomoon.svg", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.svg"));
+//        mountResource("/css/fonts/icomoon/icomoon.ttf", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.ttf"));
+//        mountResource("/css/fonts/icomoon/icomoon.woff", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.woff"));
     }
 
     @Override

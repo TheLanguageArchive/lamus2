@@ -355,24 +355,40 @@ a#loginOrLogoutLink:hover {
     content: "\e600";
 }
 
-.icon-submit_ws:before {
-    content: "\e6c0";
+.icon-create_ws:before {
+    content: "\e601";
 }
 
-.icon-delete_ws:before {
+.icon-open_ws:before {
+    content: "\e60a";
+}
+
+.icon-submit_ws:before {
     content: "\e602";
 }
 
+.icon-delete_ws:before {
+    content: "\e607";
+}
+
 .icon-link_node:before {
-    content: "\e603";
+    content: "\e606";
 }
 
 .icon-delete_node:before {
-    content: "\e604";
+    content: "\e605";
 }
 
 .icon-unlink_node:before {
-    content: "\e605";
+    content: "\e609";
+}
+
+.icon-replace_node:before {
+    content: "\e608";
+}
+
+.icon-delete_unlinked_node:before {
+    content: "\e60b";
 }
 
 /* Button 3 */
@@ -429,11 +445,11 @@ a#loginOrLogoutLink:hover {
 
 @font-face {
         font-family: 'icomoon';
-        src:url('/fonts/icomoon/icomoon.eot');
-        src:url('/fonts/icomoon/icomoon.eot?#iefix') format('embedded-opentype'),
-                url('/fonts/icomoon/icomoon.woff') format('woff'),
-                url('/fonts/icomoon/icomoon.ttf') format('truetype'),
-                url('/fonts/icomoon/icomoon.svg#icomoon') format('svg');
+        src:url('fonts/icomoon_lamus/icomoon.eot');
+        src:url('fonts/icomoon_lamus/icomoon.eot?#iefix') format('embedded-opentype'),
+                url('fonts/icomoon_lamus/icomoon.woff') format('woff'),
+                url('fonts/icomoon_lamus/icomoon.ttf') format('truetype'),
+                url('fonts/icomoon_lamus/icomoon.svg#icomoon') format('svg');
         font-weight: normal;
         font-style: normal;
 }

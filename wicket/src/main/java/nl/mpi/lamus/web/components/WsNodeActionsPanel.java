@@ -89,7 +89,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
                     
                 };
                 
-                nodeActionButton.add(AttributeModifier.append("class", new Model<String>("icon-unlink_node")));
+                nodeActionButton.add(AttributeModifier.append("class", new Model<String>(getIconNameForNodeAction(li.getModelObject()))));
                 nodeActionButton.add(new Label("nodeActionLabel", getLocalizer().getString(nodeActionButton.getModelObject(), this)));
                 
                 li.add(nodeActionButton);
@@ -106,5 +106,24 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
     
     public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
         this.selectedUnlinkedNodes = selectedUnlinkedNodes;
+    }
+    
+    
+    private String getIconNameForNodeAction(WsTreeNodesAction action) {
+        
+        if("unlink_node_action".equals(action.getName())) {
+            return "icon-unlink_node";
+        }
+        if("delete_node_action".equals(action.getName())) {
+            return "icon-delete_node";
+        }
+        if("link_node_action".equals(action.getName())) {
+            return "icon-link_node";
+        }
+        if("replace_node_action".equals(action.getName())) {
+            return "icon-replace_node";
+        }
+        
+        return "";
     }
 }
