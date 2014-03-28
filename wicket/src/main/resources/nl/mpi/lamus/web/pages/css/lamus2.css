@@ -355,41 +355,51 @@ a#loginOrLogoutLink:hover {
     content: "\e600";
 }
 
-.icon-create_ws:before {
+.icon-open_ws:before {
     content: "\e601";
 }
 
-.icon-open_ws:before {
-    content: "\e60a";
-}
-
-.icon-submit_ws:before {
+.icon-create_ws:before {
     content: "\e602";
 }
 
+.icon-submit_ws:before {
+    content: "\e603";
+}
+
 .icon-delete_ws:before {
-    content: "\e607";
+    content: "\e604";
+}
+
+
+.icon-delete_node:before {
+    content: "\e605";
 }
 
 .icon-link_node:before {
     content: "\e606";
 }
 
-.icon-delete_node:before {
-    content: "\e605";
+.icon-replace_node:before {
+    content: "\e608";
 }
 
 .icon-unlink_node:before {
     content: "\e609";
 }
 
-.icon-replace_node:before {
-    content: "\e608";
+.icon-delete_unlinked_node:before {
+    content: "\e610";
 }
 
-.icon-delete_unlinked_node:before {
-    content: "\e60b";
+.icon-download:before {
+    content: "\e611";
 }
+
+.icon-upload:before {
+    content: "\e612";
+}
+
 
 /* Button 3 */
 .ws_button-3 {
