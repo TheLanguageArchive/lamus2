@@ -235,4 +235,11 @@ public interface WorkspaceDao {
      * @param workspace 
      */
     public void cleanWorkspaceNodesAndLinks(Workspace workspace);
+    
+    /**
+     * Replaces a node by a its newer version.
+     * @param oldNode
+     * @param newNode
+     */
+    public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode);
 }

@@ -36,6 +36,11 @@ CREATE TABLE node_link (
 	child_uri                   varchar(255)                    NOT NULL,
         PRIMARY KEY (parent_workspace_node_id, child_workspace_node_id));
 
+CREATE TABLE node_replacement (
+        old_node_id         integer                         NOT NULL,
+        new_node_id         integer                         NOT NULL,
+        PRIMARY KEY (old_node_id, new_node_id));
+
 
 ALTER TABLE node
     ADD CONSTRAINT workspace_node
@@ -49,4 +54,13 @@ ALTER TABLE node_link
 ALTER TABLE node_link
     ADD CONSTRAINT node_link_child
         FOREIGN KEY (child_workspace_node_id)
+        REFERENCES node (workspace_node_id);
+
+ALTER TABLE node_replacement
+    ADD CONSTRAINT node_replacement_old
+        FOREIGN KEY (old_node_id)
+        REFERENCES node (workspace_node_id);
+ALTER TABLE node_replacement
+    ADD CONSTRAINT node_replacement_new
+        FOREIGN KEY (new_node_id)
         REFERENCES node (workspace_node_id);

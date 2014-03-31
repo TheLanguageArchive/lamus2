@@ -61,6 +61,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     private SimpleJdbcInsert insertWorkspace;
     private SimpleJdbcInsert insertWorkspaceNode;
     private SimpleJdbcInsert insertWorkspaceNodeLink;
+    private SimpleJdbcInsert insertNodeReplacement;
     
     public LamusJdbcWorkspaceDao(DataSource dataSource) {
         this.setDataSource(dataSource);
@@ -119,6 +120,12 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "child_workspace_node_id",
                     "child_uri");
         //TODO Inject table and column names
+        
+        this.insertNodeReplacement = new SimpleJdbcInsert(datasource)
+                .withTableName("node_replacement")
+                .usingColumns(
+                    "old_node_id",
+                    "new_node_id");
         
     }
     
@@ -772,6 +779,47 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.info("Nodes and links belonging to workspace " + workspace.getWorkspaceID() + " were deleted");
     }
+
+    /**
+     * @see WorkspaceDao#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode) {
+                
+        setWorkspaceNodeAsReplaced(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+        
+        createNodeVersion(oldNode, newNode);
+    }
+    
+    
+    private void setWorkspaceNodeAsReplaced(int workspaceID, int nodeID) {
+        
+        logger.debug("Setting node " + nodeID + " in workspace " + workspaceID + " as replaced");
+        
+        String updateSql = "UPDATE node SET status = :status"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("status", WorkspaceNodeStatus.NODE_REPLACED.toString())
+                .addValue("workspace_node_id", nodeID);
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Node " + nodeID + " in workspace " + workspaceID + " was set as replaced");
+    }
+    
+    private void createNodeVersion(WorkspaceNode oldNode, WorkspaceNode newNode) {
+        
+        logger.debug("Adding to the database a replacement link between old node with ID: " + oldNode.getWorkspaceNodeID()
+                + " and new node with ID: " + newNode.getWorkspaceNodeID());
+        
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("old_node_id", oldNode.getWorkspaceNodeID())
+                .addValue("new_node_id", newNode.getWorkspaceNodeID());
+        this.insertNodeReplacement.execute(parameters);
+
+        logger.info("Replacement link added to the database. Old node ID: " + oldNode.getWorkspaceNodeID()
+                + "; New node ID: " + newNode.getWorkspaceNodeID());
+    }
+    
 
     
     /**

@@ -269,4 +269,12 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public void cleanWorkspaceNodesAndLinks(Workspace workspace) {
         this.getWorkspaceDao().cleanWorkspaceNodesAndLinks(workspace);
     }
+
+    /**
+     * @see WorkspaceDao#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode) {
+        this.getWorkspaceDao().replaceNode(oldNode, newNode);
+    }
 }

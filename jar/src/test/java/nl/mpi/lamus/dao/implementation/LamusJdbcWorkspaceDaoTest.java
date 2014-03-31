@@ -1493,7 +1493,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
         assertNotNull("Node should exist in the database", retrievedNode);
-        assertEquals("Not should be set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode.getStatus());
+        assertEquals("Node should be set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode.getStatus());
     }
     
     @Test
@@ -1525,6 +1525,33 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertEquals("Final number of workspaces different from expected", intermediateNumberOfWorkspaces, finalNumberOfWorkspaces);
         assertEquals("Final number of nodes different from expected", initialNumberOfNodes, finalNumberOfNodes);
         assertEquals("Final number of links different from expected", initialNumberOfLinks, finalNumberOfLinks);
+    }
+    
+    @Test
+    public void replaceNode() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfRows = countRowsInTable("node_replacement");
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
+        WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
+        
+        this.workspaceDao.replaceNode(node1, node2);
+
+        int finalNumberOfRows = countRowsInTable("node_replacement");
+        assertEquals("An entry should have been added in the node_replacement table", finalNumberOfRows, initialNumberOfRows + 1);
+        
+        int olderNodeID = getOlderNode(node2.getWorkspaceNodeID());
+        assertEquals("Older version of node different from expected", node1.getWorkspaceNodeID(), olderNodeID);
+        int newerNodeID = getNewerNode(node1.getWorkspaceNodeID());
+        assertEquals("Newer version of node different from expected", node2.getWorkspaceNodeID(), newerNodeID);
+        
+        WorkspaceNode retrievedNode1 = getNodeFromDB(node1.getWorkspaceNodeID());
+        assertFalse("Old node should have been changed", node1.equals(retrievedNode1));
+        assertEquals("Old node should have been set as replaced", WorkspaceNodeStatus.NODE_REPLACED, retrievedNode1.getStatus());
+        
+        WorkspaceNode retrievedNode2 = getNodeFromDB(node2.getWorkspaceNodeID());
+        assertEquals("New node should not have been changed", node2, retrievedNode2);
     }
     
 
@@ -1575,10 +1602,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, null, null, Boolean.FALSE);
         
-        String insertNodeSql = "INSERT INTO node (workspace_id, name, type, format, status) values (?, ?, ?, ?, ?)";
+        String insertNodeSql = "INSERT INTO node (workspace_id, workspace_url, name, type, format, status) values (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
-                testWorkspaceNode.getName(), testWorkspaceNode.getType(),
-                testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
+                testWorkspaceNode.getWorkspaceURL(), testWorkspaceNode.getName(),
+                testWorkspaceNode.getType(), testWorkspaceNode.getFormat(), testWorkspaceNode.getStatus());
         
         int workspaceNodeID = getIdentityFromDB();
         testWorkspaceNode.setWorkspaceNodeID(workspaceNodeID);
@@ -1680,6 +1707,20 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
             nodeLink = null;
         }
         return nodeLink;
+    }
+    
+    private int getOlderNode(int newNodeID) {
+        
+        String selectSql = "SELECT old_node_id FROM node_replacement WHERE new_node_id = ?";
+        int olderNodeID = jdbcTemplate.queryForInt(selectSql, newNodeID);
+        return olderNodeID;
+    }
+    
+    private int getNewerNode(int oldNodeID) {
+        
+        String selectSql = "SELECT new_node_id FROM node_replacement WHERE old_node_id = ?";
+        int newerNodeID = jdbcTemplate.queryForInt(selectSql, oldNodeID);
+        return newerNodeID;
     }
 
     private Workspace copyWorkspace(Workspace ws) {
