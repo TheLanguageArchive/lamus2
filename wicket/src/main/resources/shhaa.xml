@@ -29,9 +29,9 @@
         
         <authorization><!-- pages that need a login: all (except some) -->
             <!--<location  target="/*" />-->
-            <location target="/CreateWorkspacePage" />
-            <location target="/SelectWorkspacePage" />
-            <location target="/ManageWorkspacePage" />
+            <location target="/CreateWorkspacePage*" />
+            <location target="/SelectWorkspacePage*" />
+            <location target="/ManageWorkspacePage*" />
             <!--<location target="/LoginInfoPage" />-->
         </authorization>
         
