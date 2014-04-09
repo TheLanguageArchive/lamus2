@@ -241,7 +241,7 @@ a#loginOrLogoutLink:hover {
 
 .buttonPanel {
     float: left;
-    width: 60%;
+    width: 54%;
     margin-left: 10px;
     margin-top: 10px;
     margin-right: 0px;
@@ -482,7 +482,7 @@ a#loginOrLogoutLink:hover {
 
 div#wsNodeActionsPanel {
     float: right;
-    width: 30%;
+    width: 44%;
     margin-top: 10px;
     margin-bottom: 10px;
 }

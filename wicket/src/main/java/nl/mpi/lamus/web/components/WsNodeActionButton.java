@@ -60,15 +60,17 @@ public class WsNodeActionButton extends Button {
         try {
             
             this.action.setSelectedTreeNodes(selectedTreeNodes);
-            this.action.setSelectedChildNodes(selectedChildNodes);
+            this.action.setSelectedUnlinkedNodes(selectedChildNodes);
             
             this.action.execute(currentUserId, workspaceService);
             
-        } catch (WorkspaceNotFoundException ex) {
+        } catch(WorkspaceNotFoundException ex) {
             Session.get().error(ex.getMessage());
-        } catch (WorkspaceAccessException ex) {
+        } catch(WorkspaceAccessException ex) {
             Session.get().error(ex.getMessage());
-        } catch (WorkspaceException ex) {
+        } catch(WorkspaceException ex) {
+            Session.get().error(ex.getMessage());
+        } catch(IllegalArgumentException ex) {
             Session.get().error(ex.getMessage());
         }
         

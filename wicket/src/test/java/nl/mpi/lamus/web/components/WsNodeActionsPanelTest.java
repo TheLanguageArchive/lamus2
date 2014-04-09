@@ -156,7 +156,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         //for some reason the actual WorkspaceService object that is used in the call is not the same as expected
             // - something to do with the object proxy created by Mockito and passed on?
         verify(mockDeleteAction).setSelectedTreeNodes(selectedNodes);
-        verify(mockDeleteAction).setSelectedChildNodes(any(Collection.class));
+        verify(mockDeleteAction).setSelectedUnlinkedNodes(any(Collection.class));
         verify(mockDeleteAction).execute(eq(AbstractLamusWicketTest.MOCK_USER_ID), any(WorkspaceService.class));
         assertTrue("refreshStuff not called", refreshStuffCalled);
     }
