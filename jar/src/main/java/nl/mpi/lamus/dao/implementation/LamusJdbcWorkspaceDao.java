@@ -25,7 +25,6 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -187,10 +186,12 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Deleting workspace with ID " + workspaceID);
         
+        String deleteNodeReplacementSql = "DELETE FROM node_replacement WHERE old_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeLinkSql = "DELETE FROM node_link WHERE parent_workspace_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeSql = "DELETE FROM node WHERE workspace_ID = :workspace_id;";
         String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        this.namedParameterJdbcTemplate.update(deleteNodeReplacementSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteWorkspaceSql, namedParameters);
@@ -637,11 +638,12 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Retrieving list containing unlinked nodes of the workspace with ID: " + workspaceID);
         
         String queryUnlinkedNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
-                + " AND workspace_id = :workspace_id AND status NOT LIKE :status"
+                + " AND workspace_id = :workspace_id AND status NOT LIKE :status_deleted AND status NOT LIKE :status_replaced"
                 + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("workspace_id", workspaceID)
-                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString());
+                .addValue("status_deleted", WorkspaceNodeStatus.NODE_DELETED.toString())
+                .addValue("status_replaced", WorkspaceNodeStatus.NODE_REPLACED.toString());
         
         List<WorkspaceNode> listToReturn =
                 this.namedParameterJdbcTemplate.query(queryUnlinkedNodeListSql, namedParameters, new WorkspaceNodeMapper());

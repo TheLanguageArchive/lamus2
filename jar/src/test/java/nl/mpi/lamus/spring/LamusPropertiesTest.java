@@ -87,6 +87,9 @@ public class LamusPropertiesTest {
     @Qualifier("dbLocalRoot")
     private String dbLocalRoot;
     @Autowired
+    @Qualifier("crawlerArchiveName")
+    private String crawlerArchiveName;
+    @Autowired
     @Qualifier("crawlerHostName")
     private String crawlerHostName;
     @Autowired

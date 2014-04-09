@@ -250,6 +250,24 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
     }
     
+    /**
+     * @see WorkspaceNodeLinkManager#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode, WorkspaceNode newNode) throws WorkspaceException {
+        
+        unlinkNodes(parentNode, oldNode);
+        
+        linkNodes(parentNode, newNode);
+        
+        workspaceDao.replaceNode(oldNode, newNode);
+        
+        //TODO case when old node was newly added in the workspace
+        
+        //TODO case when the old node and/or the new node are external
+        
+    }
+    
     
     private void throwWorkspaceException(String errorMessage, int workspaceID, Exception cause) throws WorkspaceException {
         logger.error(errorMessage, cause);

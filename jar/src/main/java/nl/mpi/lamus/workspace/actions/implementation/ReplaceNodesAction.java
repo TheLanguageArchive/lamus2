@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,30 +17,30 @@
 package nl.mpi.lamus.workspace.actions.implementation;
 
 import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Implementation of the action to link nodes.
+ * Implementation of the action to replace nodes.
  * 
  * @author guisil
  */
-public class LinkNodesAction extends WsTreeNodesAction {
+public class ReplaceNodesAction extends WsTreeNodesAction {
 
-    private final String name = "link_node_action";
+    private final String name = "replace_node_action";
     
     
     /**
-     * @see WsParentMultipleChildNodesAction#getName()
+     * @see WsTreeNodesAction#getName()
      */
     @Override
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService)
      */
@@ -52,20 +52,23 @@ public class LinkNodesAction extends WsTreeNodesAction {
         }
         
         if(selectedTreeNodes == null) {
-            throw new IllegalArgumentException("Action for linking nodes requires exactly one tree node; currently null");
+            throw new IllegalArgumentException("Action for replacing nodes requires exactly one tree node; currently null");
         }
         else if(selectedTreeNodes.size() != 1) {
-            throw new IllegalArgumentException("Action for linking nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size());
+            throw new IllegalArgumentException("Action for replacing nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size());
         }
         if(selectedUnlinkedNodes == null) {
-            throw new IllegalArgumentException("Action for linking nodes requires at least one selected child node; currently null");
+            throw new IllegalArgumentException("Action for replacing nodes requires exactly one selected unlinked node; currently null");
         }
-        else if(selectedUnlinkedNodes.isEmpty()) {
-            throw new IllegalArgumentException("Action for linking nodes requires at least one selected child node");
+        else if(selectedUnlinkedNodes.size() != 1) {
+            throw new IllegalArgumentException("Action for replacing nodes requires exactly one selected unlinked node; currently selected " + selectedUnlinkedNodes.size());
         }
         
-        for(WorkspaceTreeNode currentNode : selectedUnlinkedNodes) {
-            wsService.linkNodes(userID, selectedTreeNodes.iterator().next(), currentNode);
-        }
+        WorkspaceTreeNode oldNode = selectedTreeNodes.iterator().next();
+        WorkspaceTreeNode newNode = selectedUnlinkedNodes.iterator().next();
+        WorkspaceTreeNode parentNode = oldNode.getParent();
+        
+        wsService.replaceTree(userID, oldNode, newNode, parentNode);
     }
+    
 }

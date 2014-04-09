@@ -32,7 +32,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 public abstract class WsTreeNodesAction implements WsNodesAction {
     
     protected Collection<WorkspaceTreeNode> selectedTreeNodes;
-    protected Collection<WorkspaceTreeNode> selectedChildNodes;
+    protected Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
 
     
     /**
@@ -56,12 +56,12 @@ public abstract class WsTreeNodesAction implements WsNodesAction {
     }
     
     /**
-     * Sets the collection of nodes to be used in the action as child nodes
+     * Sets the collection of unlinked nodes to be used in the action
      * (e.g. in the action for linking nodes, these are the nodes to be linked to the tree)
      * 
-     * @param selectedChildNodes Nodes currently selected as child nodes
+     * @param selectedUnlinkedNodes Nodes currently selected as child nodes
      */
-    public void setSelectedChildNodes(Collection<WorkspaceTreeNode> selectedChildNodes) {
-        this.selectedChildNodes = selectedChildNodes;
+    public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedChildNodes) {
+        this.selectedUnlinkedNodes = selectedChildNodes;
     }
 }

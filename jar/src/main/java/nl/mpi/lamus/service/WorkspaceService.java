@@ -162,6 +162,19 @@ public interface WorkspaceService extends Serializable {
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
     
     /**
+     * Replaces a tree by a new version of that same tree.
+     * The parameters can be either the top node of the trees involved (old and new)
+     * or the two leaf nodes involved (in case only one node is to be replaced).
+     * 
+     * @param userID ID of the user
+     * @param oldTreeTopNode top node of the tree to be replaced
+     * @param newTreeTopNode top node of the new tree
+     * @param parentNode parent node of the node to replace
+     */
+    public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+    
+    /**
      * Uploads the given files into the workspace.
      * 
      * @param userID ID of the user

@@ -46,6 +46,7 @@ import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -70,9 +71,12 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceUploader mockWorkspaceUploader;
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
+    @Mock private LamusNodeReplaceManager mockNodeReplaceManager;
     
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
+    @Mock private WorkspaceNode mockOldNode;
+    @Mock private WorkspaceNode mockNewNode;
     @Mock private File mockWorkspaceUploadDirectory;
     @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
     @Mock private InputStream mockInputStream;
@@ -95,7 +99,8 @@ public class LamusWorkspaceServiceTest {
     public void setUp() {
         service = new LamusWorkspaceService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinkManager, mockWorkspaceNodeManager);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
+                mockWorkspaceNodeManager, mockNodeReplaceManager);
     }
     
     @After
@@ -1232,6 +1237,112 @@ public class LamusWorkspaceServiceTest {
         try {
             service.deleteNode(userID, mockChildNode);
             fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void replaceNodeWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int oldNodeID = 10;
+        final int newNodeID = 20;
+        final String userID = "testUser";
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeReplaceManager).replaceTree(mockOldNode, mockNewNode, mockParentNode);
+        }});
+        
+        service.replaceTree(userID, mockOldNode, mockNewNode, mockParentNode);
+    }
+    
+    @Test
+    public void replaceNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int oldNodeID = 10;
+        final int newNodeID = 20;
+        final String userID = "testUser";
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeReplaceManager).replaceTree(mockOldNode, mockNewNode, mockParentNode);
+        }});
+        
+        try {
+            service.replaceTree(userID, mockOldNode, mockNewNode, mockParentNode);
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void replaceNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int oldNodeID = 10;
+        final int newNodeID = 20;
+        final String userID = "testUser";
+        
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeReplaceManager).replaceTree(mockOldNode, mockNewNode, mockParentNode);
+        }});
+        
+        try {
+            service.replaceTree(userID, mockOldNode, mockNewNode, mockParentNode);
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void replaceNodeWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int oldNodeID = 10;
+        final int newNodeID = 20;
+        final String userID = "testUser";
+        
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeReplaceManager).replaceTree(mockOldNode, mockNewNode, mockParentNode);
+        }});
+        
+        try {
+            service.replaceTree(userID, mockOldNode, mockNewNode, mockParentNode);
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
         }

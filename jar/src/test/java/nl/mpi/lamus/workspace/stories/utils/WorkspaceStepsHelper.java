@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+//import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 //import nl.mpi.corpusstructure.ArchiveObjectsDB;
 //import nl.mpi.corpusstructure.CorpusStructureDB;

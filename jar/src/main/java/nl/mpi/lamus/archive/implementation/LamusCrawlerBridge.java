@@ -40,6 +40,10 @@ import org.springframework.stereotype.Component;
 public class LamusCrawlerBridge implements CrawlerBridge {
     
     @Autowired
+    @Qualifier("crawlerArchiveName")
+    private String crawlerArchiveName;
+    
+    @Autowired
     @Qualifier("crawlerHostName")
     private String crawlerHostName;
     
@@ -110,11 +114,14 @@ public class LamusCrawlerBridge implements CrawlerBridge {
         
         /* crawler options */
         Properties archiveProperties = new Properties();
+        archiveProperties.put("archivename", crawlerArchiveName);
         archiveProperties.put("hostname", crawlerHostName);
         archiveProperties.put("domainname", crawlerDomainName);
         archiveProperties.put("prefixes", handlePrefix);
         archiveProperties.put("amsurl", crawlerAmsUrl);
         archiveProperties.put("mdsurl", crawlerMdsUrl);
+        archiveProperties.put("httproot", dbHttpRoot);
+        archiveProperties.put("localfsroot", dbLocalRoot);
 
         /* crawler jpa/database options */
         Map jpaProperties = new HashMap();
@@ -151,7 +158,7 @@ public class LamusCrawlerBridge implements CrawlerBridge {
     public HandlerUtilities setUpHandlerUtilities() {
         
         //TODO Keep this implementation of the resolver, or use something else?
-        return new LocalFsUtilities(new ResolverImpl(), dbHttpRoot, dbLocalRoot);
+        return new LocalFsUtilities(new ResolverImpl(), null, dbHttpRoot, dbLocalRoot);
     }
     
 }

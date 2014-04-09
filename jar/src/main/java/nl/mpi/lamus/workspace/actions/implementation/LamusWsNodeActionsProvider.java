@@ -43,12 +43,13 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         resourcesActions = new ArrayList<WsTreeNodesAction>();
         resourcesActions.add(new DeleteNodesAction());
         resourcesActions.add(new UnlinkNodesAction());
+        resourcesActions.add(new ReplaceNodesAction());
                 
         metadataActions = new ArrayList<WsTreeNodesAction>();
         metadataActions.add(new DeleteNodesAction());
         metadataActions.add(new UnlinkNodesAction());
         metadataActions.add(new LinkNodesAction());
-        
+        metadataActions.add(new ReplaceNodesAction());
         
         multipleNodesActions = new ArrayList<WsTreeNodesAction>();
     }

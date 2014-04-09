@@ -26,6 +26,7 @@ import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,9 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
 
     @Autowired
     public LamusWorkspaceTreeService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
-            WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsnManager) {
-        super(aChecker, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager);
+            WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager,
+            WorkspaceNodeManager wsnManager, LamusNodeReplaceManager topNodeReplaceManager) {
+        super(aChecker, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager, topNodeReplaceManager);
     }
     
     /**

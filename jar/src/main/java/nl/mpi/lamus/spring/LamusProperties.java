@@ -201,6 +201,14 @@ public class LamusProperties {
         return dbLocalRoot;
     }
     
+    @Value("${crawler_archivename}")
+    private String crawlerArchiveName;
+    @Bean
+    @Qualifier("crawlerArchiveName")
+    public String crawlerArchiveName() {
+        return crawlerArchiveName;
+    }
+    
     @Value("${crawler_hostname}")
     private String crawlerHostName;
     @Bean

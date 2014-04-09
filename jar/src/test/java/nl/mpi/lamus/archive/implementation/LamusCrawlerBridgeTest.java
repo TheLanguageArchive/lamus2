@@ -37,6 +37,7 @@ public class LamusCrawlerBridgeTest {
     
     private CrawlerBridge crawlerBridge;
     
+    private String crawlerArchiveName = "TestingArchive";
     private String crawlerHostName = "host.mpi.nl";
     private String crawlerDomainName = "mpi.nl";
     private String handlePrefix = "01234";
@@ -75,6 +76,7 @@ public class LamusCrawlerBridgeTest {
         
         crawlerBridge = new LamusCrawlerBridge();
         
+        ReflectionTestUtils.setField(crawlerBridge, "crawlerArchiveName", crawlerArchiveName);
         ReflectionTestUtils.setField(crawlerBridge, "crawlerHostName", crawlerHostName);
         ReflectionTestUtils.setField(crawlerBridge, "crawlerDomainName", crawlerDomainName);
         ReflectionTestUtils.setField(crawlerBridge, "handlePrefix", handlePrefix);

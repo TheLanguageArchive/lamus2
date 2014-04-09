@@ -38,6 +38,7 @@ import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,16 +58,19 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceUploader workspaceUploader;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
     private final WorkspaceNodeManager workspaceNodeManager;
+    private final LamusNodeReplaceManager nodeReplaceManager;
 
     public LamusWorkspaceService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
             WorkspaceDao wsDao, WorkspaceUploader wsUploader,
-            WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager) {
+            WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager,
+            LamusNodeReplaceManager topNodeReplaceManager) {
         this.nodeAccessChecker = aChecker;
         this.workspaceManager = wsManager;
         this.workspaceDao = wsDao;
         this.workspaceUploader = wsUploader;
         this.workspaceNodeLinkManager = wsnLinkManager;
         this.workspaceNodeManager = wsNodeManager;
+        this.nodeReplaceManager = topNodeReplaceManager;
     }
     
     
@@ -232,6 +236,20 @@ public class LamusWorkspaceService implements WorkspaceService {
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
         
         this.workspaceNodeManager.deleteNodesRecursively(node);
+    }
+
+    /**
+     * @see WorkspaceService#replaceTree(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        logger.debug("Triggered tree replacement. Old node " + oldTreeTopNode.getWorkspaceNodeID() + "; new node: " + newTreeTopNode.getWorkspaceNodeID());
+        
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, oldTreeTopNode.getWorkspaceID());
+        
+        this.nodeReplaceManager.replaceTree(oldTreeTopNode, newTreeTopNode, parentNode);
     }
 
     /**

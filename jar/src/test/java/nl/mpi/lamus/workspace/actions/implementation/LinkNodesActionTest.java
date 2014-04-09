@@ -90,7 +90,7 @@ public class LinkNodesActionTest {
         selectedChildNodes.add(mockChildNodeOne);
         String expectedExceptionMessage = "Action for linking nodes requires exactly one tree node; currently null";
         
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);
@@ -126,7 +126,7 @@ public class LinkNodesActionTest {
         String expectedExceptionMessage = "Action for linking nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size();
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);
@@ -145,7 +145,7 @@ public class LinkNodesActionTest {
         String expectedExceptionMessage = "Action for linking nodes requires at least one selected child node";
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);
@@ -165,7 +165,7 @@ public class LinkNodesActionTest {
         String expectedExceptionMessage = "WorkspaceService should have been set";
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
             linkNodesAction.execute(userID, null);
@@ -188,7 +188,7 @@ public class LinkNodesActionTest {
         }});
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         linkNodesAction.execute(userID, mockWorkspaceService);
     }
@@ -208,7 +208,7 @@ public class LinkNodesActionTest {
         }});
 
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
         linkNodesAction.execute(userID, mockWorkspaceService);
     }
@@ -230,7 +230,7 @@ public class LinkNodesActionTest {
         }});
 
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);
@@ -257,7 +257,7 @@ public class LinkNodesActionTest {
         }});
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);
@@ -284,7 +284,7 @@ public class LinkNodesActionTest {
         }});
 
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
-        linkNodesAction.setSelectedChildNodes(selectedChildNodes);
+        linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
         try {
             linkNodesAction.execute(userID, mockWorkspaceService);

@@ -31,10 +31,12 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -44,7 +46,10 @@ import static org.junit.Assert.*;
  */
 public class LamusWorkspaceTreeServiceTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
+    
     private WorkspaceTreeService service;
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
     @Mock private WorkspaceManager mockWorkspaceManager;
@@ -52,6 +57,7 @@ public class LamusWorkspaceTreeServiceTest {
     @Mock private WorkspaceUploader mockWorkspaceUploader;
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
+    @Mock private LamusNodeReplaceManager mockTopNodeReplaceManager;
     
     public LamusWorkspaceTreeServiceTest() {
     }
@@ -68,7 +74,8 @@ public class LamusWorkspaceTreeServiceTest {
     public void setUp() {
         service = new LamusWorkspaceTreeService(
                 mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
-                mockWorkspaceUploader, mockWorkspaceNodeLinkManager, mockWorkspaceNodeManager);
+                mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
+                mockWorkspaceNodeManager, mockTopNodeReplaceManager);
     }
     
     @After
