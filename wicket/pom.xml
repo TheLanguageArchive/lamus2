@@ -90,8 +90,8 @@
 	</dependency>
 	<dependency>
 	    <groupId>nl.mpi.corpusstructure</groupId>
-	    <artifactId>corpus-structure-tree-model</artifactId>
-	    <version>1.0-beta-2</version>
+	    <artifactId>corpus-structure-2-tree-model</artifactId>
+	    <version>1.0-beta-3.1</version>
 	</dependency>
 <!--        <dependency>
             <groupId>nl.mpi</groupId>
@@ -123,7 +123,7 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit4</artifactId>
             <version>2.6.0</version>
@@ -134,7 +134,7 @@
             <artifactId>jmock-legacy</artifactId>
             <version>2.6.0</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-easymock</artifactId>
