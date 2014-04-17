@@ -16,20 +16,38 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.util.Calendar;
+import nl.mpi.lamus.workspace.exporting.NodeExporter;
+import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import org.jmock.auto.Mock;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
 
 /**
  *
  * @author guisil
  */
 public class ReplacedNodeExporterTest {
+    
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
+    
+    @Mock SearchClientBridge mockSearchClientBridge;
+    
+    private NodeExporter replacedNodeExporter;
+    private Workspace testWorkspace;
     
     public ReplacedNodeExporterTest() {
     }
@@ -44,50 +62,26 @@ public class ReplacedNodeExporterTest {
     
     @Before
     public void setUp() {
+        
+        replacedNodeExporter = new ReplacedNodeExporter(mockSearchClientBridge);
+        
+        testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
+                Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
+                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
+        replacedNodeExporter.setWorkspace(testWorkspace);
     }
     
     @After
     public void tearDown() {
     }
 
-    /**
-     * Test of getWorkspace method, of class ReplacedNodeExporter.
-     */
-    @Test
-    public void testGetWorkspace() {
-        System.out.println("getWorkspace");
-        ReplacedNodeExporter instance = new ReplacedNodeExporter();
-        Workspace expResult = null;
-        Workspace result = instance.getWorkspace();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
 
-    /**
-     * Test of setWorkspace method, of class ReplacedNodeExporter.
-     */
     @Test
-    public void testSetWorkspace() {
-        System.out.println("setWorkspace");
-        Workspace workspace = null;
-        ReplacedNodeExporter instance = new ReplacedNodeExporter();
-        instance.setWorkspace(workspace);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of exportNode method, of class ReplacedNodeExporter.
-     */
-    @Test
-    public void testExportNode() {
-        System.out.println("exportNode");
-        WorkspaceNode parentNode = null;
-        WorkspaceNode currentNode = null;
-        ReplacedNodeExporter instance = new ReplacedNodeExporter();
-        instance.exportNode(parentNode, currentNode);
-        // TODO review the generated test code and remove the default call to fail.
+    public void exportReplacedResourceNode() {
+    
+        
+        
+        
         fail("The test case is a prototype.");
     }
 }

@@ -23,6 +23,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 
 /**
  * Data access layer for the workspace data.
@@ -237,9 +238,25 @@ public interface WorkspaceDao {
     public void cleanWorkspaceNodesAndLinks(Workspace workspace);
     
     /**
+     * Retrieves the node which replaced the given node.
+     * @param workspaceID ID of the workspace
+     * @param workspaceNodeID ID of the node which was replaced
+     * @return WorkspaceNode object corresponding to the newer version
+     */
+    public WorkspaceNode getNewerVersionOfNode(int workspaceID, int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException;
+    
+    /**
      * Replaces a node by a its newer version.
      * @param oldNode
      * @param newNode
      */
     public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode);
+    
+    /**
+     * Retrieves a collection of node replacements, each indicating the
+     * node to be replaced and its new version.
+     * @return Collection of node replacements
+     */
+    public Collection<WorkspaceNodeReplacement> getAllNodeReplacements();
 }

@@ -33,6 +33,7 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -782,16 +783,70 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Nodes and links belonging to workspace " + workspace.getWorkspaceID() + " were deleted");
     }
 
+    
+    /**
+     * @see WorkspaceDao#getNewerVersionOfNode(int, int)
+     */
+    @Override
+    public WorkspaceNode getNewerVersionOfNode(int workspaceID, int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException {
+        
+        logger.debug("Retrieving newer version of node " + workspaceNodeID);
+        
+        String queryWorkspaceNodeSql = "SELECT * FROM node WHERE workspace_node_id IN (SELECT new_node_id FROM node_replacement WHERE old_node_id = :node_id)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("node_id", workspaceNodeID);
+        
+        WorkspaceNode newerVersion;
+        try {
+            newerVersion = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            String errorMessage = "Newer version of node with ID " + workspaceNodeID + " not found in the database";
+            logger.error(errorMessage, ex);
+            throw new WorkspaceNodeNotFoundException(errorMessage, workspaceID, -1, ex);
+        }
+        
+        logger.info("Newer version of node with ID " + workspaceNodeID + " retrieved from the database");
+        
+        return newerVersion;
+    }
+    
     /**
      * @see WorkspaceDao#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
     public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode) {
-                
+        
+        logger.debug("Replacing node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
+        
         setWorkspaceNodeAsReplaced(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
         
         createNodeVersion(oldNode, newNode);
     }
+
+    /**
+     * @see WorkspaceDao#getAllNodeReplacements()
+     */
+    @Override
+    public Collection<WorkspaceNodeReplacement> getAllNodeReplacements() {
+        
+        logger.debug("Retrieving collection containing all node replacements present in the database");
+        
+        String queryNodeReplacementsSql =
+                "SELECT coalesce(a.archive_uri, a.archive_url, a.origin_url) old_node_uri,"
+                + " coalesce(b.archive_uri, b.archive_url, b.origin_url) new_node_uri FROM"
+                + " (SELECT workspace_node_id, archive_uri, archive_url, origin_url from node) a,"
+                + " (SELECT workspace_node_id, archive_uri, archive_url, origin_url from node) b,"
+                + " (SELECT old_node_id, new_node_id from node_replacement) c"
+                + " WHERE c.old_node_id = a.workspace_node_id and c.new_node_id = b.workspace_node_id;";
+        
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        
+        Collection<WorkspaceNodeReplacement> collectionToReturn =
+                this.namedParameterJdbcTemplate.query(queryNodeReplacementsSql, namedParameters, new WorkspaceNodeReplacementMapper());
+        
+        return collectionToReturn;
+    }
+    
     
     
     private void setWorkspaceNodeAsReplaced(int workspaceID, int nodeID) {
@@ -970,6 +1025,38 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     rs.getInt("child_workspace_node_id"),
                     childURI);
             return workspaceNodeLink;
+        }
+    }
+    
+    private static final class WorkspaceNodeReplacementMapper implements RowMapper<WorkspaceNodeReplacement> {
+
+        @Override
+        public WorkspaceNodeReplacement mapRow(ResultSet rs, int i) throws SQLException {
+            
+            String oldNodeURIStr = rs.getString("old_node_uri");
+            URI oldNodeURI = null;
+            if(oldNodeURIStr != null && !oldNodeURIStr.isEmpty()) {
+                try {
+                    oldNodeURI = new URI(oldNodeURIStr);
+                } catch (URISyntaxException ex) {
+                    logger.warn("Archive URI is malformed; null used instead", ex);
+                }
+            }
+            
+            String newNodeURIStr = rs.getString("new_node_uri");
+            URI newNodeURI = null;
+            if(newNodeURIStr != null && !newNodeURIStr.isEmpty()) {
+                try {
+                    newNodeURI = new URI(newNodeURIStr);
+                } catch (URISyntaxException ex) {
+                    logger.warn("Archive URI is malformed; null used instead", ex);
+                }
+            }
+            
+            WorkspaceNodeReplacement nodeReplacement = new LamusWorkspaceNodeReplacement(
+                    oldNodeURI,
+                    newNodeURI);
+            return nodeReplacement;
         }
     }
 }

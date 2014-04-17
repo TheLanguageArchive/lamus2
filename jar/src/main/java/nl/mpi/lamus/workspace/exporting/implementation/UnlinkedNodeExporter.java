@@ -20,7 +20,7 @@ import java.net.URL;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
-import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
+import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
@@ -34,15 +34,15 @@ public class UnlinkedNodeExporter implements NodeExporter{
     
     private static final Logger logger = LoggerFactory.getLogger(UnlinkedNodeExporter.class);
 
-    private final TrashCanHandler trashCanHandler;
+    private final VersioningHandler versioningHandler;
     private final SearchClientBridge searchClientBridge;
     
     private Workspace workspace;
     
-    public UnlinkedNodeExporter(TrashCanHandler trashCanHandler,
+    public UnlinkedNodeExporter(VersioningHandler versioningHandler,
             SearchClientBridge sClientBridge) {
 
-        this.trashCanHandler = trashCanHandler;
+        this.versioningHandler = versioningHandler;
         this.searchClientBridge = sClientBridge;
     }
     
@@ -89,7 +89,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         //TODO What to do with this URL? Update it and use to inform the crawler of the change?
         
-        URL trashedNodeArchiveURL = this.trashCanHandler.moveFileToTrashCan(currentNode);
+        URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
         currentNode.setArchiveURL(trashedNodeArchiveURL);
         
         searchClientBridge.removeNode(currentNode.getArchiveURI());

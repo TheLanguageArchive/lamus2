@@ -18,6 +18,7 @@ package nl.mpi.lamus.archive;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
@@ -141,4 +142,36 @@ public interface ArchiveFileHelper {
      * @return true if the file has changed
      */
     public boolean hasArchiveFileChanged(FileInfo archiveFileInfo, File workspaceFile);
+    
+    /**
+     * Retrieves the directory where a replaced node in the given workspace
+     * should be located.
+     * @param workspaceID
+     * @return Directory for the replaced node
+     */
+    public File getDirectoryForReplacedNode(int workspaceID);
+    
+    /**
+     * Retrieves the directory where a deleted node in the given workspace
+     * should be located.
+     * @param workspaceID
+     * @return Directory for the deleted node
+     */
+    public File getDirectoryForDeletedNode(int workspaceID);
+    
+    /**
+     * Retrieves the file location for the given base directory and path.
+     * @param baseDirectory
+     * @param archiveNodeURI
+     * @param archiveNodeURL
+     * @return target file
+     */
+    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL);
+    
+    /**
+     * Checks if target directory can be written to.
+     * @param targetDirectory
+     * @return true if target directory can be written to
+     */
+    public boolean canWriteTargetDirectory(File targetDirectory);
 }

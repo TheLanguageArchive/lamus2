@@ -18,6 +18,8 @@ package nl.mpi.lamus.archive.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
@@ -64,6 +66,12 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Qualifier("resourcesDirectoryName")
     private String resourcesDirectoryName;
     
+    @Autowired
+    @Qualifier("trashCanBaseDirectory")
+    private File trashCanBaseDirectory;
+    @Autowired
+    @Qualifier("versioningBaseDirectory")
+    private File versioningBaseDirectory;
     
     /**
      * 
@@ -300,5 +308,89 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         }
         
         return false;
+    }
+
+    /**
+     * @see ArchiveFileHelper#getDirectoryForReplacedNode(int)
+     */
+    @Override
+    public File getDirectoryForReplacedNode(int workspaceID) {
+        
+        return getSubDirectoryFor(workspaceID, false);
+    }
+
+    /**
+     * @see ArchiveFileHelper#getDirectoryForDeletedNode(int)
+     */
+    @Override
+    public File getDirectoryForDeletedNode(int workspaceID) {
+        
+        return getSubDirectoryFor(workspaceID, true);
+    }
+
+    /**
+     * @see ArchiveFileHelper#getTargetFileForReplacedOrDeletedNode(java.io.File, java.net.URI, java.net.URL)
+     */
+    @Override
+    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL) {
+        
+        File archiveNodeFile = new File(archiveNodeURL.getPath());
+        String fileBaseName = getFileBasename(archiveNodeFile.getPath());
+        StringBuilder fileNameBuilder = new StringBuilder().append("v").append(archiveNodeURI).append("__.").append(fileBaseName);
+        
+        File targetFile = new File(baseDirectory, fileNameBuilder.toString());
+        
+        return targetFile;
+    }
+
+    /**
+     * @see ArchiveFileHelper#canWriteTargetDirectory(java.io.File)
+     */
+    @Override
+    public boolean canWriteTargetDirectory(File targetDirectory) {
+        
+        if(!targetDirectory.exists()) {
+            if(!targetDirectory.mkdirs()) {
+                logger.warn("LamusTrashVersioningHandler: Failed to create directories for " + targetDirectory);
+                return false;
+            }
+        }
+        if(!targetDirectory.isDirectory()) {
+            logger.error("LamusTrashVersioningHandler: target directory isn't a directory (?)");
+            return false;
+        }
+        if(!targetDirectory.canWrite()) {
+            logger.error("LamusTrashVersioningHandler: Cannot write directory " + targetDirectory);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    
+    private File getSubDirectoryFor(int workspaceID, boolean isNodeDeleted) {
+        
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        
+        StringBuilder directoryName = new StringBuilder();
+        directoryName.append(year);
+        directoryName.append("-");
+        if(month < 10) {
+            directoryName.append("0");
+        }
+        directoryName.append(month);
+        
+        File baseDirectoryToUse = null;
+        if(isNodeDeleted) {
+            baseDirectoryToUse = trashCanBaseDirectory;
+        } else { // node is replaced
+            baseDirectoryToUse = versioningBaseDirectory;
+        }
+        
+        File subDirectory = new File(baseDirectoryToUse, directoryName.toString());
+        File subSubDirectory = new File(subDirectory, "" + workspaceID);
+        
+        return subSubDirectory;
     }
 }

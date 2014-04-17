@@ -152,6 +152,14 @@ public class LamusProperties {
         return new File(trashCanBaseDirectory);
     }
     
+    @Value("${versioning_base_directory}")
+    private String versioningBaseDirectory;
+    @Bean
+    @Qualifier("versioningBaseDirectory")
+    public File versioningBaseDirectory() {
+        return new File(versioningBaseDirectory);
+    }
+    
     @Value("${custom_typechecker_config_files_and_folders}")
     private String customTypecheckerFoldersAndConfigFiles;
     @Bean
@@ -364,4 +372,27 @@ public class LamusProperties {
         return handleAdminHandlePassword;
     }
     
+    @Value("{corpusstructure_service_location}")
+    private String corpusStructureServiceLocation;
+    @Bean
+    @Qualifier("corpusStructureServiceLocation")
+    public String corpusStructureServiceLocation() {
+        return corpusStructureServiceLocation;
+    }
+    
+    @Value("{corpusstructure_service_versioning_path}")
+    private String corpusStructureServiceVersioningPath;
+    @Bean
+    @Qualifier("corpusStructureServiceVersioningPath")
+    public String corpusStructureServiceVersioningPath() {
+        return corpusStructureServiceVersioningPath;
+    }
+    
+    @Value("{corpusstructure_service_version_creation_path}")
+    private String corpusStructureServiceVersionCreationPath;
+    @Bean
+    @Qualifier("corpusStructureServiceVersionCreationPath")
+    public String corpusStructureServiceVersionCreationPath() {
+        return corpusStructureServiceVersionCreationPath;
+    }
 }

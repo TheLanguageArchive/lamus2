@@ -29,12 +29,15 @@ import java.util.concurrent.Future;
 import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
 import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
+import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.CrawlerBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
@@ -70,11 +73,14 @@ public class WorkspaceExportRunnerTest {
     @Mock NodeExporterFactory mockNodeExporterFactory;
     @Mock UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock CrawlerBridge mockCrawlerBridge;
+    @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
     
     @Mock NodeExporter mockNodeExporter;
     
     @Mock Crawler mockCrawler;
     @Mock HandlerUtilities mockHandlerUtilities;
+    
+    @Mock Collection<WorkspaceNodeReplacement> mockNodeReplacementsCollection;
     
     private WorkspaceExportRunner workspaceExportRunner;
     
@@ -91,7 +97,10 @@ public class WorkspaceExportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceExportRunner = new WorkspaceExportRunner(mockWorkspaceDao, mockNodeExporterFactory, mockUnlinkedAndDeletedNodesExportHandler, mockCrawlerBridge);
+        workspaceExportRunner = new WorkspaceExportRunner(
+                mockWorkspaceDao, mockNodeExporterFactory,
+                mockUnlinkedAndDeletedNodesExportHandler,
+                mockCrawlerBridge, mockCorpusStructureServiceBridge);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -100,11 +109,8 @@ public class WorkspaceExportRunnerTest {
     }
     
 
-    /**
-     * Test of call method, of class WorkspaceExportRunner.
-     */
     @Test
-    public void callExporterForAddedNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException {
+    public void callExporterForGeneralNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException, VersionCreationException {
         
         final int workspaceID = 1;
         
@@ -163,6 +169,11 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
                         
             oneOf(mockCrawler).startCrawler(testChildArchiveURI, mockHandlerUtilities);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
+                when(exporting.isNot("finished"));
+            oneOf(mockCorpusStructureServiceBridge).createVersions(mockNodeReplacementsCollection);
                 then(exporting.is("finished"));
         }});
         
@@ -209,6 +220,76 @@ public class WorkspaceExportRunnerTest {
         synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
         
         assertTrue("Execution result should have been successful (true)", result);
+    }
+    
+    @Test
+    public void callExporterWithFailedVersionCreation() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException, VersionCreationException {
+        
+        final int workspaceID = 1;
+        
+        
+        
+        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
+        
+        final int testChildWorkspaceNodeID = 10;
+        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final String testDisplayValue = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        workspaceNodes.add(testNode);
+        
+        final VersionCreationException expectedCause = new VersionCreationException("some exception message", null);
+        
+        final States exporting = context.states("exporting");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+//            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
+                when(exporting.isNot("finished"));
+            
+//            oneOf(mockWorkspaceTreeExporter).explore(testNode);
+//                then(exporting.is("finished"));
+                
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporter).exportNode(null, testNode);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockCrawlerBridge).setUpCrawler(); will(returnValue(mockCrawler));
+                when(exporting.isNot("finished"));
+            oneOf(mockCrawlerBridge).setUpHandlerUtilities(); will(returnValue(mockHandlerUtilities));
+                when(exporting.isNot("finished"));
+                        
+            oneOf(mockCrawler).startCrawler(testChildArchiveURI, mockHandlerUtilities);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
+                when(exporting.isNot("finished"));
+            oneOf(mockCorpusStructureServiceBridge).createVersions(mockNodeReplacementsCollection);
+                will(throwException(expectedCause));
+                then(exporting.is("finished"));
+        }});
+        
+        boolean result = executeRunner();
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+        
+        assertFalse("Execution result should have been unsuccessful (false)", result);
     }
     
     

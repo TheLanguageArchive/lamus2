@@ -76,6 +76,9 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("trashCanBaseDirectory")
     private File trashCanBaseDirectory;
+    @Autowired
+    @Qualifier("versioningBaseDirectory")
+    private File versioningBaseDirectory;
     @Resource
     @Qualifier("customTypecheckerFolderToConfigFileMap")
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
@@ -149,6 +152,15 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("handleAdminHandlePassword")
     private String handleAdminHandlePassword;
+    @Autowired
+    @Qualifier("corpusStructureServiceLocation")
+    private String corpusStructureServiceLocation;
+    @Autowired
+    @Qualifier("corpusStructureServiceVersioningPath")
+    private String corpusStructureServiceVersioningPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceVersionCreationPath")
+    private String corpusStructureServiceVersionCreationPath;
     
     
     public LamusPropertiesTest() {
@@ -211,8 +223,11 @@ public class LamusPropertiesTest {
         assertEquals("resourcesDirectoryName different from expected", expectedResourcesDirectoryName, resourcesDirectoryName);
         
                 
-        String expectedTrashCanBaseDirectoryPath = "/lat/corpora/version_archive";
+        String expectedTrashCanBaseDirectoryPath = "/lat/corpora/trashcan";
         assertEquals("trashCanBaseDirectory different from expected", expectedTrashCanBaseDirectoryPath, trashCanBaseDirectory.getPath());
+        
+        String expectedVersioningBaseDirectoryPath = "/lat/corpora/versioning";
+        assertEquals("versioningBaseDirectory different from expected", expectedVersioningBaseDirectoryPath, versioningBaseDirectory.getPath());
         
 //        File typecheckerFolder1 = new File("folder1");
 //        File typecheckerFolder2 = new File("folder2");

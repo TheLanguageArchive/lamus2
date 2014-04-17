@@ -19,6 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -73,6 +77,9 @@ public class LamusArchiveFileHelperTest {
     private final String metadataDirectoryName = "Metadata";
     private final String resourcesDirectoryName = "Resources";
     
+    private File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
+    private File versioningBaseDirectory = new File("/lat/corpora/versioning/");
+    
     public LamusArchiveFileHelperTest() {
     }
 
@@ -94,6 +101,9 @@ public class LamusArchiveFileHelperTest {
         
         ReflectionTestUtils.setField(testArchiveFileHelper, "metadataDirectoryName", metadataDirectoryName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "resourcesDirectoryName", resourcesDirectoryName);
+        
+        ReflectionTestUtils.setField(testArchiveFileHelper, "trashCanBaseDirectory", trashCanBaseDirectory);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "versioningBaseDirectory", versioningBaseDirectory);
     }
     
     @After
@@ -585,5 +595,179 @@ public class LamusArchiveFileHelperTest {
         boolean result = testArchiveFileHelper.hasArchiveFileChanged(mockArchiveFileInfo, mockWorkspaceFile);
         
         assertFalse("Result should be false", result);
+    }
+    
+    
+    @Test
+    public void getDirectoryForDeletedNode() {
+        
+        int workspaceID = 10;
+        
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        
+        StringBuilder directoryName = new StringBuilder();
+        directoryName.append(year);
+        directoryName.append("-");
+        if(month < 10) {
+            directoryName.append("0");
+        }
+        directoryName.append(month);
+        File subDirectory = new File(trashCanBaseDirectory, directoryName.toString());
+        File expectedDirectory = new File(subDirectory, "" + workspaceID);
+
+        
+        File result = testArchiveFileHelper.getDirectoryForDeletedNode(workspaceID);
+        
+        assertEquals("Target trashcan sub-directory is different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForReplacedNode() {
+        
+        int workspaceID = 10;
+        
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        
+        StringBuilder directoryName = new StringBuilder();
+        directoryName.append(year);
+        directoryName.append("-");
+        if(month < 10) {
+            directoryName.append("0");
+        }
+        directoryName.append(month);
+        File subDirectory = new File(versioningBaseDirectory, directoryName.toString());
+        File expectedDirectory = new File(subDirectory, "" + workspaceID);
+
+        
+        File result = testArchiveFileHelper.getDirectoryForReplacedNode(workspaceID);
+        
+        assertEquals("Target versioning sub-directory is different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getTargetFileForDeletedNode() throws MalformedURLException, URISyntaxException {
+        
+        final URI testArchiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URL testNodeArchiveURL = new URL("file:/lat/corpora/archive/node.cmdi");
+        final File testNodeFile = new File(testNodeArchiveURL.getPath());
+        final String fileBaseName = "node.cmdi";
+        
+        final String versionDirectoryName = "2013-05";
+        final File versionFullDirectory = new File(trashCanBaseDirectory, versionDirectoryName);
+        
+        StringBuilder fileNameBuilder = new StringBuilder();
+        fileNameBuilder.append("v").append(testArchiveNodeURI).append("__.").append(fileBaseName);
+        File expectedTargetFile = new File(versionFullDirectory, fileNameBuilder.toString());
+        
+        context.checking(new Expectations() {{
+            
+//            oneOf(mockArchiveFileHelper).getFileBasename(testNodeFile.getPath()); will(returnValue(fileBaseName));
+        }});
+        
+        File result = testArchiveFileHelper.getTargetFileForReplacedOrDeletedNode(versionFullDirectory, testArchiveNodeURI, testNodeArchiveURL);
+        
+        assertEquals("Returned file name different from expected", expectedTargetFile, result);
+    }
+    
+    @Test
+    public void canWriteExistingTargetDirectory() throws IOException {
+        
+        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        targetDirectory.mkdirs();
+        
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        
+        assertTrue("Target directory should be writable", result);
+    }
+    
+    @Test
+    public void canWriteNonExistingTargetDirectory() throws IOException {
+        
+        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        
+        assertTrue("Target directory should have been created and be writable", result);
+    }
+    
+    @Test
+    public void cannotWriteTargetDirectory() throws IOException {
+        
+        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        targetDirectory.mkdirs();
+        targetDirectory.setReadOnly();
+        
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        
+        assertFalse("Target directory should not be writable", result);
+    }
+    
+    @Test
+    public void targetDirectoryIsNotDirectory() throws IOException {
+        
+        File someFile = testFolder.newFile("someFile");
+        someFile.createNewFile();
+        
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(someFile);
+        
+        assertFalse("Target directory is not a directory, therefore it should fail", result);
+    }
+    
+    @Test
+    public void moveFileToTargetLocationSucceeds() throws IOException {
+        
+        File currentFolder = testFolder.newFolder("/lat/corpora/archive/somefolder");
+        currentFolder.mkdirs();
+        File currentFile = new File(currentFolder, "file");
+        currentFile.createNewFile();
+        File targetFolder = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        targetFolder.mkdirs();
+        File targetFile = new File(targetFolder, "v100__.file");
+        
+        boolean result = testArchiveFileHelper.moveFileToTargetLocation(currentFile, targetFile);
+        
+        assertTrue("File moving result should be true", result);
+        assertFalse("File shouldn't exist in its old location", currentFile.exists());
+        assertTrue("File should exist in its target location", targetFile.exists());
+    }
+    
+    @Test
+    public void moveFileToTargetLocationFailsReadOnly() throws IOException {
+        
+        File currentFolder = testFolder.newFolder("/lat/corpora/archive/somefolder");
+        currentFolder.mkdirs();
+        File currentFile = new File(currentFolder, "file");
+        currentFile.createNewFile();
+        File targetFolder = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        targetFolder.mkdirs();
+        targetFolder.setReadOnly();
+        File targetFile = new File(targetFolder, "v100__.file");
+        
+        boolean result = testArchiveFileHelper.moveFileToTargetLocation(currentFile, targetFile);
+        
+        assertFalse("File moving result should be false", result);
+        assertTrue("File shouldn't exist in its old location", currentFile.exists());
+        assertFalse("File should exist in its target location", targetFile.exists());
+    }
+    
+    @Test
+    public void moveFileToTargetLocationFailsFileAlreadyExists() throws IOException {
+        
+        File currentFolder = testFolder.newFolder("/lat/corpora/archive/somefolder");
+        currentFolder.mkdirs();
+        File currentFile = new File(currentFolder, "file");
+        currentFile.createNewFile();
+        File targetFolder = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        targetFolder.mkdirs();
+        targetFolder.setReadOnly();
+        File targetFile = new File(targetFolder, "v100__.file");
+        
+        boolean result = testArchiveFileHelper.moveFileToTargetLocation(currentFile, targetFile);
+        
+        assertFalse("File moving result should be false", result);
+        assertTrue("File shouldn't exist in its old location", currentFile.exists());
+        assertFalse("File should exist in its target location", targetFile.exists());
     }
 }

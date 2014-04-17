@@ -15,16 +15,20 @@
  */
 package nl.mpi.lamus.workspace.exporting;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
 import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
 import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
+import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.CrawlerBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,21 +41,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkspaceExportRunner implements Callable<Boolean> {
 
-    private WorkspaceDao workspaceDao;
-    private NodeExporterFactory nodeExporterFactory;
-    private UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
-    private CrawlerBridge crawlerBridge;
+    private final  WorkspaceDao workspaceDao;
+    private final NodeExporterFactory nodeExporterFactory;
+    private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
+    private final CrawlerBridge crawlerBridge;
+    private final CorpusStructureServiceBridge corpusStructureServiceBridge;
     
     private Workspace workspace;
 //    private boolean keepUnlinkedFiles;
 
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
-            UnlinkedAndDeletedNodesExportHandler dnExportHandler, CrawlerBridge crawlerBridge) {
+            UnlinkedAndDeletedNodesExportHandler dnExportHandler,
+            CrawlerBridge crawlerBridge, CorpusStructureServiceBridge csServiceBridge) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
         this.unlinkedAndDeletedNodesExportHandler = dnExportHandler;
         this.crawlerBridge = crawlerBridge;
+        this.corpusStructureServiceBridge = csServiceBridge;
     }
     
     /**
@@ -115,14 +122,14 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 //            currentNodeExporter.exportNode(currentNode);
 //        }
         
-        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(this.workspace.getWorkspaceID());
+        WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
 //        workspaceTreeExporter.explore(topNode);
         
-        NodeExporter topNodeExporter = this.nodeExporterFactory.getNodeExporterForNode(this.workspace, topNode);
+        NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
         topNodeExporter.exportNode(null, topNode);
         
         //TODO Export unlinked and deleted nodes...
-        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(this.workspace);
+        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace);
         
         //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem
@@ -132,6 +139,19 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         HandlerUtilities handlerUtilities = crawlerBridge.setUpHandlerUtilities();
         crawler.startCrawler(topNode.getArchiveURI(), handlerUtilities);
         
+        
+        
+        //TODO CALL VERSION CREATION...
+        Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
+        
+        try {
+            corpusStructureServiceBridge.createVersions(nodeReplacements);
+        } catch(VersionCreationException ex) {
+            
+            //TODO throw exception instead?
+            
+            return Boolean.FALSE;
+        }
         
         //TODO fix permissions
         

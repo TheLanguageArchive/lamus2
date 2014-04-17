@@ -22,8 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
-import nl.mpi.lamus.workspace.exporting.TrashVersioningHandler;
+import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -44,6 +43,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
 /**
  *
@@ -51,16 +51,15 @@ import static org.powermock.api.support.membermodification.MemberModifier.stub;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class})
-public class LamusTrashCanHandlerTest {
+public class LamusVersioningHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Mock TrashVersioningHandler mockTrashVersioningHandler;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     
-    private TrashCanHandler trashCanHandler;
+    private VersioningHandler versioningHandler;
     
-    public LamusTrashCanHandlerTest() {
+    public LamusVersioningHandlerTest() {
     }
     
     @BeforeClass
@@ -74,16 +73,14 @@ public class LamusTrashCanHandlerTest {
     @Before
     public void setUp() {
         
-        trashCanHandler = new LamusTrashCanHandler(mockTrashVersioningHandler, mockArchiveFileHelper);
+        versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper);
     }
     
     @After
     public void tearDown() {
     }
 
-    /**
-     * Test of moveFileToTrashCan method, of class LamusTrashCanHandler.
-     */
+    
     @Test
     public void moveFileToTrashCanSucceeds() throws MalformedURLException, URISyntaxException {
         
@@ -96,9 +93,9 @@ public class LamusTrashCanHandlerTest {
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeArchiveURI).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
-        final File versionDirectory = new File("/lat/corpora/version-archive/trash/2013-05/10");
-        final File versionFile = new File(versionDirectory, fileNameBuilder.toString());
-        final URL versionURL = versionFile.toURI().toURL();
+        final File trashedDirectory = new File("/lat/corpora/trashcan/2013-05/10");
+        final File trashedFile = new File(trashedDirectory, fileNameBuilder.toString());
+        final URL trashedURL = trashedFile.toURI().toURL();
         
         final WorkspaceNode testNode = getTestNode(workspaceID, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL);
         
@@ -106,17 +103,54 @@ public class LamusTrashCanHandlerTest {
         context.checking(new Expectations() {{
             
 //            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
-            oneOf(mockTrashVersioningHandler).getDirectoryForNodeVersion(workspaceID); will(returnValue(versionDirectory));
-            oneOf(mockTrashVersioningHandler).canWriteTargetDirectory(versionDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockTrashVersioningHandler).getTargetFileForNodeVersion(versionDirectory, testNodeArchiveURI, testNodeArchiveURL); will(returnValue(versionFile));
-            oneOf(mockTrashVersioningHandler).moveFileToTargetLocation(archiveFile, versionFile); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeArchiveURI, testNodeArchiveURL); will(returnValue(trashedFile));
+//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, trashedFile); will(returnValue(Boolean.TRUE));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
         
-        URL result = trashCanHandler.moveFileToTrashCan(testNode);
+        URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
         
-        assertEquals("Version URL different from expected", versionURL, result);
+        assertEquals("Version URL different from expected", trashedURL, result);
+    }
+    
+    @Test
+    public void moveFileToVersioningSucceeds() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
+        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testNodeArchiveURL = new URL("file:/lat/corpora/archive/somefolder/node.cmdi");
+        
+        final String fileBaseName = "node.cmdi";
+        final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeArchiveURI).append("__.").append(fileBaseName);
+        final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
+        final File archiveFile = new File(archiveDirectory, fileBaseName);
+        final File versioningDirectory = new File("/lat/corpora/versioning/2013-05/10");
+        final File versioningFile = new File(versioningDirectory, fileNameBuilder.toString());
+        final URL versioningURL = versioningFile.toURI().toURL();
+        
+        final WorkspaceNode testNode = getTestNode(workspaceID, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL);
+        
+        
+        context.checking(new Expectations() {{
+            
+//            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
+            oneOf(mockArchiveFileHelper).getDirectoryForReplacedNode(workspaceID); will(returnValue(versioningDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(versioningDirectory); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeArchiveURI, testNodeArchiveURL); will(returnValue(versioningFile));
+//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, versioningFile); will(returnValue(Boolean.TRUE));
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        
+        URL result = versioningHandler.moveFileToVersioningFolder(testNode);
+        
+        assertEquals("Version URL different from expected", versioningURL, result);
     }
     
     @Test
@@ -131,23 +165,24 @@ public class LamusTrashCanHandlerTest {
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeArchiveURI).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
-        final File versionDirectory = new File("/lat/corpora/version-archive/trash/2013-05/10");
-        final File versionFile = new File(versionDirectory, fileNameBuilder.toString());
+        final File trashedDirectory = new File("/lat/corpora/trashcan/2013-05/10");
+        final File trashedFile = new File(trashedDirectory, fileNameBuilder.toString());
         
         final WorkspaceNode testNode = getTestNode(workspaceID, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL);
         
         context.checking(new Expectations() {{
             
 //            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
-            oneOf(mockTrashVersioningHandler).getDirectoryForNodeVersion(workspaceID); will(returnValue(versionDirectory));
-            oneOf(mockTrashVersioningHandler).canWriteTargetDirectory(versionDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockTrashVersioningHandler).getTargetFileForNodeVersion(versionDirectory, testNodeArchiveURI, testNodeArchiveURL); will(returnValue(versionFile));
-            oneOf(mockTrashVersioningHandler).moveFileToTargetLocation(archiveFile, versionFile); will(returnValue(Boolean.FALSE));
+            oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeArchiveURI, testNodeArchiveURL); will(returnValue(trashedFile));
+//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, trashedFile); will(returnValue(Boolean.FALSE));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
         
-        URL result = trashCanHandler.moveFileToTrashCan(testNode);
+        URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
         
         assertNull("Result should be null", result);
     }
@@ -164,21 +199,21 @@ public class LamusTrashCanHandlerTest {
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeArchiveURI).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
-        final File versionDirectory = new File("/lat/corpora/version-archive/trash/2013-05/10");
-        final File versionFile = new File(versionDirectory, fileNameBuilder.toString());
+        final File trashedDirectory = new File("/lat/corpora/trashcan/2013-05/10");
+        final File trashedFile = new File(trashedDirectory, fileNameBuilder.toString());
         
         final WorkspaceNode testNode = getTestNode(workspaceID, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL);
         
         context.checking(new Expectations() {{
             
 //            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
-            oneOf(mockTrashVersioningHandler).getDirectoryForNodeVersion(workspaceID); will(returnValue(versionDirectory));
-            oneOf(mockTrashVersioningHandler).canWriteTargetDirectory(versionDirectory); will(returnValue(Boolean.FALSE));
+            oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.FALSE));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
         
-        URL result = trashCanHandler.moveFileToTrashCan(testNode);
+        URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
         
         assertNull("Result should be null", result);
     }

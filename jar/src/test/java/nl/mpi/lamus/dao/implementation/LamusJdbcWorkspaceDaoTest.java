@@ -30,6 +30,7 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -1588,6 +1589,62 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void getNewerVersionOfNodeExists() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI oldURI = new URI(UUID.randomUUID().toString());
+        URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, Boolean.TRUE);
+        
+        URI newURI = new URI(UUID.randomUUID().toString());
+        URL newURL = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode, newNode);
+        
+        WorkspaceNode retrievedNode = this.workspaceDao.getNewerVersionOfNode(testWorkspace.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+        
+        assertEquals("Retrieved node different from expected", newNode, retrievedNode);
+    }
+    
+    @Test
+    public void getNewerVersionOfNodeDoesNotExist() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI oldURI = new URI(UUID.randomUUID().toString());
+        URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, Boolean.TRUE);
+        setNodeAsReplaced(oldNode);
+        
+        URI newURI = new URI(UUID.randomUUID().toString());
+        URL newURL = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
+        
+        String expectedExceptionMessage = "Newer version of node with ID " + oldNode.getWorkspaceNodeID() + " not found in the database";
+        
+        try {
+            this.workspaceDao.getNewerVersionOfNode(testWorkspace.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+            fail("should have thrown exception");
+        } catch(WorkspaceNodeNotFoundException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("workspaceID in Exception different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertTrue("Cause of exception different from expected", ex.getCause() instanceof EmptyResultDataAccessException);
+        }
+    }
+    
+    @Test
     public void replaceNode() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_replacement");
@@ -1612,6 +1669,65 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         WorkspaceNode retrievedNode2 = getNodeFromDB(node2.getWorkspaceNodeID());
         assertEquals("New node should not have been changed", node2, retrievedNode2);
+    }
+    
+    @Test
+    public void getAllNodeReplacements() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI oldURI_1 = new URI(UUID.randomUUID().toString());
+        URL oldURL_1 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_1, oldURL_1, Boolean.TRUE);
+        
+        URI oldURI_2 = new URI(UUID.randomUUID().toString());
+        URL oldURL_2 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_2, oldURL_2, Boolean.TRUE);
+        
+        URI newURI_1 = new URI(UUID.randomUUID().toString());
+        URL newURL_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_1, newURL_1, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_1);
+        
+        URI newURI_2 = new URI(UUID.randomUUID().toString());
+        URL newURL_2 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_2, newURL_2, Boolean.TRUE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_2);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode_1, newNode_1);
+        WorkspaceNodeReplacement replacement_1 =
+                new LamusWorkspaceNodeReplacement(oldNode_1.getArchiveURI(), newNode_1.getArchiveURI());
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode_2, newNode_2);
+        WorkspaceNodeReplacement replacement_2 =
+                new LamusWorkspaceNodeReplacement(oldNode_2.getArchiveURI(), newNode_2.getArchiveURI());
+        
+        Collection<WorkspaceNodeReplacement> retrievedCollection = this.workspaceDao.getAllNodeReplacements();
+        
+        assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.size() == 2);
+        assertTrue("Not all expected replacements are present in the collection", retrievedCollection.contains(replacement_1) && retrievedCollection.contains(replacement_2));
+    }
+    
+    @Test
+    public void getAllNodeReplacementWithExternalNode() {
+        fail("not tested yet");
+        
+        //TODO this should not lead to replacements...
+    }
+    
+    //TODO WORTH TESTING???
+    @Test
+    public void getAllNodeReplacementWithoutArchiveURI() {
+        fail("not tested yet");
+    }
+    //TODO WORTH TESTING???
+    @Test
+    public void getAllNodeReplacementsEmpty() {
+        fail("not tested yet");
     }
     
 

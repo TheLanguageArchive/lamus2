@@ -25,6 +25,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.tree.WorkspaceDaoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,10 +272,26 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#getNewerVersionOfNode(int, int)
+     */
+    @Override
+    public WorkspaceNode getNewerVersionOfNode(int workspaceID, int workspaceNodeID) throws WorkspaceNodeNotFoundException {
+        return this.getWorkspaceDao().getNewerVersionOfNode(workspaceID, workspaceNodeID);
+    }
+    
+    /**
      * @see WorkspaceDao#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
     public void replaceNode(WorkspaceNode oldNode, WorkspaceNode newNode) {
         this.getWorkspaceDao().replaceNode(oldNode, newNode);
+    }
+
+    /**
+     * @see WorkspaceDao#getAllNodeReplacements()
+     */
+    @Override
+    public Collection<WorkspaceNodeReplacement> getAllNodeReplacements() {
+        return this.getWorkspaceDao().getAllNodeReplacements();
     }
 }

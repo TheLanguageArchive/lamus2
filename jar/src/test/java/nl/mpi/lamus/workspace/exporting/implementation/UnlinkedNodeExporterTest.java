@@ -27,7 +27,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
-import nl.mpi.lamus.workspace.exporting.TrashCanHandler;
+import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -57,7 +57,7 @@ public class UnlinkedNodeExporterTest {
     private NodeExporter unlinkedNodeExporter;
     private Workspace testWorkspace;
     
-    @Mock TrashCanHandler mockTrashCanHandler;
+    @Mock VersioningHandler mockVersioningHandler;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock SearchClientBridge mockSearchClientBridge;
     
@@ -78,7 +78,7 @@ public class UnlinkedNodeExporterTest {
     @Before
     public void setUp() {
         
-        unlinkedNodeExporter = new DeletedNodeExporter(mockTrashCanHandler, mockSearchClientBridge);
+        unlinkedNodeExporter = new UnlinkedNodeExporter(mockVersioningHandler, mockSearchClientBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -119,7 +119,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
-            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
 //            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
@@ -191,7 +191,7 @@ public class UnlinkedNodeExporterTest {
 //            
 //            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
 //            
-//            oneOf(mockTrashCanHandler).moveFileToTrashCan(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+//            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
 //            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
 //            
 //            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
