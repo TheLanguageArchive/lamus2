@@ -23,9 +23,11 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Session;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.model.Model;
@@ -63,6 +65,9 @@ public class WsNodeActionButton extends Button {
             this.action.setSelectedUnlinkedNodes(selectedChildNodes);
             
             this.action.execute(currentUserId, workspaceService);
+            
+            //tell the unlinked nodes panel to clear the selected nodes
+            send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
             
         } catch(WorkspaceNotFoundException ex) {
             Session.get().error(ex.getMessage());

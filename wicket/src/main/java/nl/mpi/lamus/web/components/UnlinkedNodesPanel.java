@@ -27,6 +27,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.web.unlinkednodes.model.WorkspaceTreeNodeExpansion;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
@@ -35,6 +36,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
@@ -207,6 +209,14 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         }
         
         send(this, Broadcast.BUBBLE, new SelectedUnlinkedNodesWrapper(checked));
+    }
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        
+        if(event.getPayload() instanceof ClearSelectedUnlinkedNodes) {
+            clearSelectedUnlinkedNodes();
+        }
     }
     
     

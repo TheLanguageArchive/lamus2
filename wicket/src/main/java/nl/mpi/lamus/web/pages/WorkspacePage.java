@@ -29,6 +29,7 @@ import nl.mpi.lamus.web.components.LinkNodesPanel;
 import nl.mpi.lamus.web.components.UploadPanel;
 import nl.mpi.lamus.web.components.WorkspaceInfoPanel;
 import nl.mpi.lamus.web.components.WsNodeActionsPanel;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -249,6 +250,10 @@ public class WorkspacePage extends LamusPage {
         if(event.getPayload() instanceof SelectedUnlinkedNodesWrapper) {
             selectedUnlinkedNodes = ((SelectedUnlinkedNodesWrapper)event.getPayload()).getSelectedUnlinkedNodes();
             send(wsNodeActionsPanel, Broadcast.BREADTH, event.getPayload());
+        }
+        if(event.getPayload() instanceof ClearSelectedUnlinkedNodes) {
+            selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+            send(linkNodesPanel, Broadcast.BREADTH, event.getPayload());
         }
     }
 }

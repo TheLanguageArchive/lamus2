@@ -34,6 +34,11 @@
 	<level value="info" />
     </logger>
     
+    <!-- CRAWLER -->
+    <logger name="nl.mpi.archiving.corpusstructure.tools.crawler">
+        <level value="debug" />
+    </logger>
+    
     <!-- LAMUS -->
     <logger name="nl.mpi.lamus">
         <level value="debug" />
