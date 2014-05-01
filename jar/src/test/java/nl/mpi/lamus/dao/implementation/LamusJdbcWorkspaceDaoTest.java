@@ -1651,6 +1651,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
         WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
+        setNodeAsCopy(node1);
         WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
         
         this.workspaceDao.replaceNode(node1, node2);
@@ -1666,6 +1667,33 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode retrievedNode1 = getNodeFromDB(node1.getWorkspaceNodeID());
         assertFalse("Old node should have been changed", node1.equals(retrievedNode1));
         assertEquals("Old node should have been set as replaced", WorkspaceNodeStatus.NODE_REPLACED, retrievedNode1.getStatus());
+        
+        WorkspaceNode retrievedNode2 = getNodeFromDB(node2.getWorkspaceNodeID());
+        assertEquals("New node should not have been changed", node2, retrievedNode2);
+    }
+    
+    @Test
+    public void replaceNewNode() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfRows = countRowsInTable("node_replacement");
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
+        WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
+        
+        this.workspaceDao.replaceNode(node1, node2);
+
+        int finalNumberOfRows = countRowsInTable("node_replacement");
+        assertEquals("No entry should have been added in the node_replacement table", finalNumberOfRows, initialNumberOfRows);
+        
+//        int olderNodeID = getOlderNode(node2.getWorkspaceNodeID());
+//        assertEquals("Older version of node different from expected", node1.getWorkspaceNodeID(), olderNodeID);
+//        int newerNodeID = getNewerNode(node1.getWorkspaceNodeID());
+//        assertEquals("Newer version of node different from expected", node2.getWorkspaceNodeID(), newerNodeID);
+        
+        WorkspaceNode retrievedNode1 = getNodeFromDB(node1.getWorkspaceNodeID());
+        assertFalse("Old node should have been changed", node1.equals(retrievedNode1));
+        assertEquals("Old node should have been set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode1.getStatus());
         
         WorkspaceNode retrievedNode2 = getNodeFromDB(node2.getWorkspaceNodeID());
         assertEquals("New node should not have been changed", node2, retrievedNode2);
@@ -1937,6 +1965,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         String updateNodeSql = "UPDATE node SET status = ? WHERE workspace_node_id = ?";
         jdbcTemplate.update(updateNodeSql, WorkspaceNodeStatus.NODE_REPLACED.toString(), node.getWorkspaceNodeID());
         node.setStatus(WorkspaceNodeStatus.NODE_REPLACED);
+    }
+    
+    private void setNodeAsCopy(WorkspaceNode node) {
+        
+        String updateNodeSql = "UPDATE node SET status = ? WHERE workspace_node_id = ?";
+        jdbcTemplate.update(updateNodeSql, WorkspaceNodeStatus.NODE_ISCOPY.toString(), node.getWorkspaceNodeID());
+        node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
     }
     
     private void addNodeReplacement(WorkspaceNode oldNode, WorkspaceNode newNode) {

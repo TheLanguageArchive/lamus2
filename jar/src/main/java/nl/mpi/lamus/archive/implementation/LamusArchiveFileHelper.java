@@ -336,7 +336,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         
         File archiveNodeFile = new File(archiveNodeURL.getPath());
         String fileBaseName = getFileBasename(archiveNodeFile.getPath());
-        StringBuilder fileNameBuilder = new StringBuilder().append("v").append(archiveNodeURI).append("__.").append(fileBaseName);
+        StringBuilder fileNameBuilder = new StringBuilder().append("v_").append(archiveNodeURI).append("__.").append(fileBaseName);
         
         File targetFile = new File(baseDirectory, fileNameBuilder.toString());
         

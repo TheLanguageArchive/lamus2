@@ -107,7 +107,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
         final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
         final URL testNodeArchiveURL = testNodeOriginURL;
         
@@ -120,8 +121,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
                 testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, testNodeFormat);
         
-//        final StringBuilder testNodeVersionFileNameBuilder = new StringBuilder().append("v").append(testArchiveNodeID).append("__.").append(testBaseName);
-        
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         context.checking(new Expectations() {{
@@ -132,21 +131,12 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
-            
-//            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
-            
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            
-            
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).deleteHandle(testNodeArchiveURI);
+            oneOf(mockHandleManager).deleteHandle(testNodeArchiveURIWithoutHdl);
             oneOf(mockWorkspaceNode).setArchiveURI(null);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
             
@@ -189,7 +179,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
         final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
         final URL testNodeArchiveURL = testNodeOriginURL;
         
@@ -223,9 +214,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         final WorkspaceNode testNewNode = new LamusWorkspaceNode(testNewWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNewNodeSchemaLocation,
                 testNewNodeDisplayValue, "", testNewNodeType, testNewNodeWsURL, testNewNodeArchiveURI, testNewNodeArchiveURL, testNewNodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, testNewNodeFormat);
         
-//        final StringBuilder testNodeVersionFileNameBuilder = new StringBuilder().append("v").append(testArchiveNodeID).append("__.").append(testBaseName);
-        
-        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
@@ -233,11 +221,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
-
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
-            oneOf(mockWorkspaceDao).getNewerVersionOfNode(testWorkspace.getWorkspaceID(), testWorkspaceNodeID); will(returnValue(testNewNode));
-
+            
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
@@ -247,7 +231,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURI, testNodeVersionArchiveHttpUrl.toURI());
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpUrl.toURI());
             
         }});
         
@@ -313,7 +297,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
         final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
         final URL testNodeArchiveURL = testNodeOriginURL;
         
@@ -339,15 +324,12 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).deleteHandle(testNodeArchiveURI); will(throwException(expectedExceptionCause));
+            oneOf(mockHandleManager).deleteHandle(testNodeArchiveURIWithoutHdl); will(throwException(expectedExceptionCause));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
 
         }});
@@ -369,7 +351,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
         final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
         final URL testNodeArchiveURL = testNodeOriginURL;
         
@@ -414,10 +397,6 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
 
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
-            oneOf(mockWorkspaceDao).getNewerVersionOfNode(testWorkspace.getWorkspaceID(), testWorkspaceNodeID); will(returnValue(testNewNode));
-
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
@@ -427,7 +406,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURI, testNodeVersionArchiveHttpUrl.toURI());
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpUrl.toURI());
                 will(throwException(expectedExceptionCause));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNewNodeArchiveURL));
             

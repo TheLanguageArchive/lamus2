@@ -18,8 +18,11 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
@@ -38,13 +41,15 @@ public class LamusVersioningHandler implements VersioningHandler {
     private static final Logger logger = LoggerFactory.getLogger(LamusVersioningHandler.class);
     
     private final ArchiveFileHelper archiveFileHelper;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     @Autowired
-    public LamusVersioningHandler(ArchiveFileHelper fileHelper) {
+    public LamusVersioningHandler(ArchiveFileHelper fileHelper, ArchiveFileLocationProvider fileLocationProvider) {
         
         //TODO check constructor from the trashcan in the old lamus
         
         this.archiveFileHelper = fileHelper;
+        this.archiveFileLocationProvider = fileLocationProvider;
     }
 
     /**
@@ -73,7 +78,22 @@ public class LamusVersioningHandler implements VersioningHandler {
         
 //        File currentFile = archiveFileHelper.getArchiveLocationForNodeID(nodeToMove.getArchiveNodeID());
         
-        File currentFile = FileUtils.toFile(nodeToMove.getArchiveURL());
+        URL localArchiveUrl;
+        try {
+            URI localArchiveUri = archiveFileLocationProvider.getUriWithLocalRoot(nodeToMove.getArchiveURL().toURI());
+            localArchiveUrl = localArchiveUri.toURL();
+        } catch (URISyntaxException ex) {
+//                String errorMessage = "Error getting new target URI for node " + currentNode.getArchiveURL();
+//                throwWorkspaceExportException(errorMessage, ex);
+            
+            logger.error("Problem retrieving archive location of node " + nodeToMove.getWorkspaceNodeID(), ex);
+            return null;
+        } catch (MalformedURLException ex) {
+            logger.error("Problem retrieving archive location of node " + nodeToMove.getWorkspaceNodeID(), ex);
+            return null;
+        }
+        
+        File currentFile = FileUtils.toFile(localArchiveUrl);
         
         File targetDirectory = null;
         if(toDelete) {
@@ -83,6 +103,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
 
         if(!archiveFileHelper.canWriteTargetDirectory(targetDirectory)) {
+            logger.error("Problem with write permissions in target directory " + targetDirectory);
             return null;
         }
         

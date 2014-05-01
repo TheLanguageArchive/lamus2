@@ -372,7 +372,7 @@ public class LamusProperties {
         return handleAdminHandlePassword;
     }
     
-    @Value("{corpusstructure_service_location}")
+    @Value("${corpusstructure_service_location}")
     private String corpusStructureServiceLocation;
     @Bean
     @Qualifier("corpusStructureServiceLocation")
@@ -380,7 +380,7 @@ public class LamusProperties {
         return corpusStructureServiceLocation;
     }
     
-    @Value("{corpusstructure_service_versioning_path}")
+    @Value("${corpusstructure_service_versioning_path}")
     private String corpusStructureServiceVersioningPath;
     @Bean
     @Qualifier("corpusStructureServiceVersioningPath")
@@ -388,7 +388,7 @@ public class LamusProperties {
         return corpusStructureServiceVersioningPath;
     }
     
-    @Value("{corpusstructure_service_version_creation_path}")
+    @Value("${corpusstructure_service_version_creation_path}")
     private String corpusStructureServiceVersionCreationPath;
     @Bean
     @Qualifier("corpusStructureServiceVersionCreationPath")

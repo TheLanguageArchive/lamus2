@@ -158,7 +158,7 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void getStreamResultForWorkspaceNodeFileSuccessfully() throws MalformedURLException, URISyntaxException {
+    public void getStreamResultForWorkspaceNodeFileSuccessfully() throws MalformedURLException, URISyntaxException, IOException {
         
         String nodeFilename = "someNode.cmdi";
         URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
@@ -199,7 +199,7 @@ public class LamusWorkspaceFileHandlerTest {
         return workspace;
     }
     
-    private File createTestBaseDirectory() {
+    private File createTestBaseDirectory() throws IOException {
         File baseDirectory = testFolder.newFolder("workspace_base_directory");
         return baseDirectory;
     }

@@ -110,7 +110,7 @@ public class WorkspaceExportRunnerTest {
     
 
     @Test
-    public void callExporterForGeneralNode() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException, VersionCreationException {
+    public void callExporterForGeneralNodeWithoutVersions() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException, VersionCreationException {
         
         final int workspaceID = 1;
         
@@ -173,7 +173,7 @@ public class WorkspaceExportRunnerTest {
             
             oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
                 when(exporting.isNot("finished"));
-            oneOf(mockCorpusStructureServiceBridge).createVersions(mockNodeReplacementsCollection);
+            oneOf(mockNodeReplacementsCollection).isEmpty(); will(returnValue(Boolean.TRUE));
                 then(exporting.is("finished"));
         }});
         
@@ -278,6 +278,8 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
             
             oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
+                when(exporting.isNot("finished"));
+            oneOf(mockNodeReplacementsCollection).isEmpty(); will(returnValue(Boolean.FALSE));
                 when(exporting.isNot("finished"));
             oneOf(mockCorpusStructureServiceBridge).createVersions(mockNodeReplacementsCollection);
                 will(throwException(expectedCause));

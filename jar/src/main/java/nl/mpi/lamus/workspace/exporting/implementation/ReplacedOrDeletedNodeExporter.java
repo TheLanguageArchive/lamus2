@@ -117,6 +117,10 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
 //        }
         
         
+        //TODO TAKE CARE OF NEW NODES THAT WERE REPLACED
+        //TODO ALSO NODES REPLACING NODES WHICH HAD REPLACED OTHER NODES AND SO ON...
+        // THESE SHOULD BE EVENTUALLY REMOVED FROM THE REPLACEMENTS TABLE SO THAT THEY DON'T GET ADDED TO THE CS DB
+        
         
         searchClientBridge.removeNode(currentNode.getArchiveURI());
         
@@ -136,17 +140,31 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalStateException("This exporter only supports deleted or replaced nodes. Current node status: " + currentNode.getStatusAsString());
         }
         currentNode.setArchiveURL(targetArchiveURL);
+        
+        if(targetArchiveURL == null) {
+            //TODO send some sort of notification at this point
+                //the fact that the file didn't make it to the trash or versioning archive shouldn't cause the export to stop
+            //TODO have exceptions thrown instead of returning null from the move method?
+            
+            logger.warn("Problem moving file to its target location");
+        }
     }
     
     private void updateHandleLocation(WorkspaceNode currentNode) throws WorkspaceExportException {
         
         if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
             try {
-                handleManager.deleteHandle(currentNode.getArchiveURI());
+                handleManager.deleteHandle(new URI(currentNode.getArchiveURI().getSchemeSpecificPart()));
+                
+                //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
+                
             } catch (HandleException ex) {
                 String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             } catch (IOException ex) {
+                String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
+                throwWorkspaceExportException(errorMessage, ex);
+            } catch (URISyntaxException ex) {
                 String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             }
@@ -169,11 +187,18 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 throwWorkspaceExportException(errorMessage, ex);
             }
             try {
-                handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()), currentNode.getArchiveURI(), newTargetUri);
+                handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
+                        new URI(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
+                
+                //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
+                
             } catch (HandleException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             } catch (IOException ex) {
+                String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
+                throwWorkspaceExportException(errorMessage, ex);
+            } catch (URISyntaxException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             }

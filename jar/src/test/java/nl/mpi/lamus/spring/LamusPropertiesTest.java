@@ -223,10 +223,10 @@ public class LamusPropertiesTest {
         assertEquals("resourcesDirectoryName different from expected", expectedResourcesDirectoryName, resourcesDirectoryName);
         
                 
-        String expectedTrashCanBaseDirectoryPath = "/lat/corpora/trashcan";
+        String expectedTrashCanBaseDirectoryPath = "/lat/corpora/cmdi_test/trashcan";
         assertEquals("trashCanBaseDirectory different from expected", expectedTrashCanBaseDirectoryPath, trashCanBaseDirectory.getPath());
         
-        String expectedVersioningBaseDirectoryPath = "/lat/corpora/versioning";
+        String expectedVersioningBaseDirectoryPath = "/lat/corpora/cmdi_test/versioning";
         assertEquals("versioningBaseDirectory different from expected", expectedVersioningBaseDirectoryPath, versioningBaseDirectory.getPath());
         
 //        File typecheckerFolder1 = new File("folder1");

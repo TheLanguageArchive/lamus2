@@ -144,13 +144,15 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         //TODO CALL VERSION CREATION...
         Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
         
-        try {
-            corpusStructureServiceBridge.createVersions(nodeReplacements);
-        } catch(VersionCreationException ex) {
-            
-            //TODO throw exception instead?
-            
-            return Boolean.FALSE;
+        if(!nodeReplacements.isEmpty()) {
+            try {
+                corpusStructureServiceBridge.createVersions(nodeReplacements);
+            } catch(VersionCreationException ex) {
+
+                //TODO throw exception instead?
+
+                return Boolean.FALSE;
+            }
         }
         
         //TODO fix permissions

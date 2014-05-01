@@ -818,9 +818,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Replacing node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
         
-        setWorkspaceNodeAsReplaced(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
-        
-        createNodeVersion(oldNode, newNode);
+        if(WorkspaceNodeStatus.NODE_CREATED.equals(oldNode.getStatus()) ||
+                WorkspaceNodeStatus.NODE_UPLOADED.equals(oldNode.getStatus())) {
+            
+            setWorkspaceNodeAsDeleted(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+        } else {
+            setWorkspaceNodeAsReplaced(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+            createNodeVersion(oldNode, newNode);
+        }
     }
 
     /**

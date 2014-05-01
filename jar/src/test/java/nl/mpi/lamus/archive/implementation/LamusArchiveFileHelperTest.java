@@ -658,7 +658,7 @@ public class LamusArchiveFileHelperTest {
         final File versionFullDirectory = new File(trashCanBaseDirectory, versionDirectoryName);
         
         StringBuilder fileNameBuilder = new StringBuilder();
-        fileNameBuilder.append("v").append(testArchiveNodeURI).append("__.").append(fileBaseName);
+        fileNameBuilder.append("v_").append(testArchiveNodeURI).append("__.").append(fileBaseName);
         File expectedTargetFile = new File(versionFullDirectory, fileNameBuilder.toString());
         
         context.checking(new Expectations() {{

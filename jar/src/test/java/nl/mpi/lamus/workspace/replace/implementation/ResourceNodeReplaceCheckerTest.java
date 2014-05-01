@@ -259,8 +259,37 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeNotInArchive() {
-        fail("not tested yet");
+    public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
+        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            //old node not in archive, which means it was newly added in this workspace
+                // it should be replaced normally, the dao layer will take care of setting it as deleted instead or replaced
+            
+            oneOf(mockOldNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockCorpusStructureProvider).getNode(null); will(returnValue(null));
+            
+            oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
+            
+            //TODO MULTIPLE PARENTS???
+            
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     

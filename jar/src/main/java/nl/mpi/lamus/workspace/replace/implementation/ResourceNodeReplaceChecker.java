@@ -63,11 +63,8 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
         
         CorpusNode archiveNode = corpusStructureProvider.getNode(oldNode.getArchiveURI());
         
-        if(archiveNode == null) {
-            throw new UnsupportedOperationException("null archive node not handled yet");
-        }
-        
-        if(archiveFileHelper.hasArchiveFileChanged(archiveNode.getFileInfo(), new File(newNode.getWorkspaceURL().getPath()))) {
+        if(archiveNode == null ||
+                archiveFileHelper.hasArchiveFileChanged(archiveNode.getFileInfo(), new File(newNode.getWorkspaceURL().getPath()))) {
             
             replaceActionManager.addActionToList(replaceActionFactory.getReplaceAction(oldNode, parentNode, newNode, newNodeAlreadyLinked), actions);
             
