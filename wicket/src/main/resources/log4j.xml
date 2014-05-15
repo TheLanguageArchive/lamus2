@@ -56,7 +56,11 @@
     </logger>
     <logger name="log4j.logger.org.apache.wicket.RequestCycle">
 	<level value="info" />
-    </logger>  
+    </logger>
+    
+    <logger name="org.springframework">
+        <level value="info" />
+    </logger>
 
     <root> 
 	<priority value ="info" /> 

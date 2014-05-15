@@ -28,7 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <label for="upload">
                             <wicket:message key="upload_panel_file_label"></wicket:message>
                         </label>
-                        <input wicket:id="fileInput" type="file" multiple="multiple" webkitdirectory="" directory=""/>
+                        <!-- Removed webkitdirectory attribute because at the moment
+                        it's less annoying to be able to only select files
+                        than to only be able to select directories (only applicable to Google Chrome) -->
+                        <input wicket:id="fileInput" type="file" multiple="multiple" directory=""/>
                     </p>
                     <input type="submit" wicket:message="value:upload_panel_submit_button" />
                     <span wicket:id="progress">[[upload progressbar]]</span>
