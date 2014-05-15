@@ -213,7 +213,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace expectedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(expectedWorkspace, topURI, topURL, true);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(expectedWorkspace, topURI, topURL, null, true, WorkspaceNodeStatus.NODE_ISCOPY);
         int expectedTopNodeID = topNode.getWorkspaceNodeID();
         URI expectedTopNodeURI = topNode.getArchiveURI();
         URL expectedTopNodeURL = topNode.getArchiveURL();
@@ -698,7 +698,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL nodeURL = new URL("file:/archive/folder/node.cmdi");
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, Boolean.TRUE);
+        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
         
@@ -717,7 +717,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL nodeURL = new URL("file:/archive/folder/node.cmdi");
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, Boolean.TRUE);
+        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
         
@@ -738,8 +738,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, Boolean.TRUE);
+        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
         
@@ -758,7 +758,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL nodeURL = new URL("file:/archive/folder/node.cmdi");
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         Collection<WorkspaceNode> retrievedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeUriToCheck);
         
@@ -778,8 +778,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         
-        WorkspaceNode firstTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, Boolean.TRUE);
-        WorkspaceNode secondTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, Boolean.TRUE);
+        WorkspaceNode firstTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        WorkspaceNode secondTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         Collection<WorkspaceNode> testNodes = new ArrayList<WorkspaceNode>();
         testNodes.add(firstTestNode);
         testNodes.add(secondTestNode);
@@ -862,7 +862,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URL expectedURL = new URL("http:/totally/different.url");
 
         testNode.setWorkspaceURL(expectedURL);
@@ -881,7 +881,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
 
         testNode.setWorkspaceURL(null);
         
@@ -899,7 +899,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI expectedURI = new URI(UUID.randomUUID().toString());
 
         testNode.setArchiveURI(expectedURI);
@@ -918,7 +918,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
 
         testNode.setArchiveURI(null);
         
@@ -936,7 +936,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URL expectedURL = new URL("file:/archive/folder/different_test.cmdi");
 
         testNode.setArchiveURL(expectedURL);
@@ -955,7 +955,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
 
         testNode.setArchiveURL(null);
         
@@ -1063,7 +1063,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         WorkspaceNode result = this.workspaceDao.getWorkspaceNode(testNode.getWorkspaceNodeID());
         
@@ -1094,7 +1094,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.FALSE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.FALSE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         WorkspaceNode result = this.workspaceDao.getWorkspaceNode(testNode.getWorkspaceNodeID());
         
@@ -1108,7 +1108,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         WorkspaceNode result = this.workspaceDao.getWorkspaceNode(testNode.getWorkspaceNodeID());
         
@@ -1122,7 +1122,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         testWorkspace.setTopNodeID(testNode.getWorkspaceNodeID());
 //        testWorkspace.setTopNodeArchiveID(testNode.getArchiveNodeID());
         testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
@@ -1141,7 +1141,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
 //        testWorkspace.setTopNodeID(testNode.getWorkspaceNodeID());
 //        testWorkspace.setTopNodeArchiveID(testNode.getArchiveNodeID());
         testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
@@ -1165,10 +1165,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI parentURI = new URI(UUID.randomUUID().toString());
         URL parentURL = new URL("file:/archive/folder/parent.cmdi");
-        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/child.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getNodesForWorkspace(testWorkspace.getWorkspaceID());
         
@@ -1195,10 +1195,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI parentURI = new URI(UUID.randomUUID().toString());
         URL parentURL = new URL("file:/archive/folder/parent.cmdi");
-        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/child.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getChildWorkspaceNodes(parentNode.getWorkspaceNodeID());
@@ -1214,7 +1214,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI parentURI = new URI(UUID.randomUUID().toString());
         URL parentURL = new URL("file:/archive/folder/parent.cmdi");
-        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getChildWorkspaceNodes(parentNode.getWorkspaceNodeID());
         
@@ -1280,10 +1280,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI parentURI = new URI(UUID.randomUUID().toString());
         URL parentURL = new URL("file:/archive/folder/parent.cmdi");
-        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/child.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
@@ -1299,7 +1299,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/child.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
         
@@ -1322,7 +1322,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsDeleted(testNode);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
@@ -1338,7 +1338,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
-        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
         
@@ -1353,10 +1353,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI parentURI = new URI(UUID.randomUUID().toString());
         URL parentURL = new URL("file:/archive/folder/parent.cmdi");
-        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, Boolean.TRUE);
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/child.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
         setNodeAsDeleted(parentNode);
         setNodeAsDeleted(childNode);
@@ -1374,10 +1374,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI firstURI = new URI(UUID.randomUUID().toString());
         URL firstURL = new URL("file:/archive/folder/first.cmdi");
-        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, Boolean.TRUE);
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI secondURI = new URI(UUID.randomUUID().toString());
         URL secondURL = new URL("file:/archive/folder/second.cmdi");
-        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, secondURI, secondURL, Boolean.TRUE);
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, secondURI, secondURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsDeleted(firstNode);
         setNodeAsDeleted(secondNode);
         
@@ -1395,10 +1395,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI firstURI = new URI(UUID.randomUUID().toString());
         URL firstURL = new URL("file:/archive/folder/first.cmdi");
-        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, Boolean.TRUE);
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         URI secondURI = new URI(UUID.randomUUID().toString());
         URL secondURL = new URL("file:/archive/folder/second.cmdi");
-        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, secondURI, secondURL, Boolean.TRUE);
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, secondURI, secondURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsDeleted(firstNode);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
@@ -1417,7 +1417,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI firstURI = new URI(UUID.randomUUID().toString());
         URL firstURL = new URL("file:/archive/folder/first.cmdi");
-        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, Boolean.TRUE);
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, firstURI, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, firstNode);
         
         Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedAndDeletedTopNodes(testWorkspace.getWorkspaceID());
@@ -1432,15 +1432,15 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/childnode.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         URI unlinkedURI = new URI(UUID.randomUUID().toString());
         URL unlinkedURL = new URL("file:/archive/folder/unlinkednode.cmdi");
-        WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, Boolean.TRUE);
+        WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
         
@@ -1455,11 +1455,11 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/childnode.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         
         List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
@@ -1474,15 +1474,15 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/childnode.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         URI deletedURI = new URI(UUID.randomUUID().toString());
         URL deletedURL = new URL("file:/archive/folder/deletednode.cmdi");
-        WorkspaceNode deletedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, deletedURI, deletedURL, Boolean.TRUE);
+        WorkspaceNode deletedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, deletedURI, deletedURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsDeleted(deletedNode);
         
         List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
@@ -1497,15 +1497,15 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         URI childURI = new URI(UUID.randomUUID().toString());
         URL childURL = new URL("file:/archive/folder/childnode.cmdi");
-        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, Boolean.TRUE);
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
         URI deletedURI = new URI(UUID.randomUUID().toString());
         URL deletedURL = new URL("file:/archive/folder/deletednode.cmdi");
-        WorkspaceNode deletedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, deletedURI, deletedURL, Boolean.TRUE);
+        WorkspaceNode deletedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, deletedURI, deletedURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsReplaced(deletedNode);
         
         List<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodes(testWorkspace.getWorkspaceID());
@@ -1563,29 +1563,36 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int initialNumberOfWorkspaces = countRowsInTable("workspace");
         int initialNumberOfNodes = countRowsInTable("node");
         int initialNumberOfLinks = countRowsInTable("node_link");
+        int initialNumberOfReplacements = countRowsInTable("node_replacement");
         
         Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
         WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node3 = insertTestWorkspaceNodeIntoDB(ws);
         setNodeAsParentAndInsertLinkIntoDatabase(node1, node2);
+        setNodeAsReplacedAndAddReplacementInDatabase(node2, node3);
         
         int intermediateNumberOfWorkspaces = countRowsInTable("workspace");
         int intermediateNumberOfNodes = countRowsInTable("node");
         int intermediateNumberOfLinks = countRowsInTable("node_link");
+        int intermediateNumberOfReplacements = countRowsInTable("node_replacement");
         
         assertEquals("Intermediate number of workspaces different from expected", initialNumberOfWorkspaces + 1, intermediateNumberOfWorkspaces);
-        assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 2, intermediateNumberOfNodes);
+        assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 3, intermediateNumberOfNodes);
         assertEquals("Intermediate number of links different from expected", initialNumberOfLinks + 1, intermediateNumberOfLinks);
+        assertEquals("Intermediate number of replacements different from expected", initialNumberOfReplacements + 1, intermediateNumberOfReplacements);
         
         this.workspaceDao.cleanWorkspaceNodesAndLinks(ws);
         
         int finalNumberOfWorkspaces = countRowsInTable("workspace");
         int finalNumberOfNodes = countRowsInTable("node");
         int finalNumberOfLinks = countRowsInTable("node_link");
+        int finalNumberOfReplacements = countRowsInTable("node_replacement");
         
         assertEquals("Final number of workspaces different from expected", intermediateNumberOfWorkspaces, finalNumberOfWorkspaces);
         assertEquals("Final number of nodes different from expected", initialNumberOfNodes, finalNumberOfNodes);
         assertEquals("Final number of links different from expected", initialNumberOfLinks, finalNumberOfLinks);
+        assertEquals("Final number of replacements different from expected", initialNumberOfReplacements, finalNumberOfReplacements);
     }
     
     @Test
@@ -1594,16 +1601,16 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         
         URI oldURI = new URI(UUID.randomUUID().toString());
         URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
-        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, Boolean.TRUE);
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         URI newURI = new URI(UUID.randomUUID().toString());
         URL newURL = new URL("file:/archive/folder/newnode.cmdi");
-        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, Boolean.TRUE);
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
         
         setNodeAsReplacedAndAddReplacementInDatabase(oldNode, newNode);
@@ -1619,17 +1626,17 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         
         URI oldURI = new URI(UUID.randomUUID().toString());
         URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
-        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, Boolean.TRUE);
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsReplaced(oldNode);
         
         URI newURI = new URI(UUID.randomUUID().toString());
         URL newURL = new URL("file:/archive/folder/newnode.cmdi");
-        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, Boolean.TRUE);
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
         
         String expectedExceptionMessage = "Newer version of node with ID " + oldNode.getWorkspaceNodeID() + " not found in the database";
@@ -1705,25 +1712,25 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI = new URI(UUID.randomUUID().toString());
         URL topURL = new URL("file:/archive/folder/topnode.cmdi");
-        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, Boolean.TRUE);
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
         
         URI oldURI_1 = new URI(UUID.randomUUID().toString());
         URL oldURL_1 = new URL("file:/archive/folder/oldnode.cmdi");
-        WorkspaceNode oldNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_1, oldURL_1, Boolean.TRUE);
+        WorkspaceNode oldNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_1, oldURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         URI oldURI_2 = new URI(UUID.randomUUID().toString());
         URL oldURL_2 = new URL("file:/archive/folder/oldnode.cmdi");
-        WorkspaceNode oldNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_2, oldURL_2, Boolean.TRUE);
+        WorkspaceNode oldNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI_2, oldURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
         
         URI newURI_1 = new URI(UUID.randomUUID().toString());
         URL newURL_1 = new URL("file:/archive/folder/newnode.cmdi");
-        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_1, newURL_1, Boolean.TRUE);
+        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_1, newURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_1);
         
         URI newURI_2 = new URI(UUID.randomUUID().toString());
         URL newURL_2 = new URL("file:/archive/folder/newnode.cmdi");
-        WorkspaceNode newNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_2, newURL_2, Boolean.TRUE);
+        WorkspaceNode newNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_2, newURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED);
         setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_2);
         
         setNodeAsReplacedAndAddReplacementInDatabase(oldNode_1, newNode_1);
@@ -1741,21 +1748,87 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getAllNodeReplacementWithExternalNode() {
-        fail("not tested yet");
+    public void getAllNodeReplacementWithoutArchiveURI() throws URISyntaxException, MalformedURLException {
         
-        //TODO this should not lead to replacements...
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URL oldURL_1 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, null, oldURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        
+        URL newURL_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, null, newURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_1);
+        
+        //node replacement should contain the archiveURL, since archiveURI is null
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode_1, newNode_1);
+        WorkspaceNodeReplacement replacement_1 =
+                new LamusWorkspaceNodeReplacement(oldNode_1.getArchiveURL().toURI(), newNode_1.getArchiveURL().toURI());
+        
+        Collection<WorkspaceNodeReplacement> retrievedCollection = this.workspaceDao.getAllNodeReplacements();
+        
+        assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.size() == 1);
+        assertTrue("Not all expected replacements are present in the collection", retrievedCollection.contains(replacement_1));
     }
     
-    //TODO WORTH TESTING???
     @Test
-    public void getAllNodeReplacementWithoutArchiveURI() {
-        fail("not tested yet");
+    public void getAllNodeReplacementWithExternalNode() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URL oldURL_1 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, null, null, oldURL_1, Boolean.TRUE, WorkspaceNodeStatus.NODE_EXTERNAL);
+        oldNode_1.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        oldNode_1.setOriginURL(oldURL_1);
+          
+        URL newURL_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, null, null, newURL_1, Boolean.TRUE, WorkspaceNodeStatus.NODE_EXTERNAL);
+        newNode_1.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        newNode_1.setOriginURL(newURL_1);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_1);
+        
+        //node replacements should contain the originURL, since both archiveURI and archiveURL are null
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode_1, newNode_1);
+        WorkspaceNodeReplacement replacement_1 =
+                new LamusWorkspaceNodeReplacement(oldNode_1.getOriginURL().toURI(), newNode_1.getOriginURL().toURI());
+        
+        Collection<WorkspaceNodeReplacement> retrievedCollection = this.workspaceDao.getAllNodeReplacements();
+        
+        assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.size() == 1);
+        assertTrue("Not all expected replacements are present in the collection", retrievedCollection.contains(replacement_1));
     }
-    //TODO WORTH TESTING???
+    
     @Test
-    public void getAllNodeReplacementsEmpty() {
-        fail("not tested yet");
+    public void getAllNodeReplacementsEmpty() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = new URI(UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI newURI_1 = new URI(UUID.randomUUID().toString());
+        URL newURL_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_1, newURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_1);
+        
+        URI newURI_2 = new URI(UUID.randomUUID().toString());
+        URL newURL_2 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI_2, newURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode_2);
+        
+        Collection<WorkspaceNodeReplacement> retrievedCollection = this.workspaceDao.getAllNodeReplacements();
+        
+        assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.isEmpty());
     }
     
 
@@ -1804,7 +1877,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     
     private WorkspaceNode insertTestWorkspaceNodeIntoDB(Workspace workspace) throws URISyntaxException, MalformedURLException {
         
-        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, null, null, Boolean.FALSE);
+        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, null, null, null, Boolean.FALSE, WorkspaceNodeStatus.NODE_CREATED);
         
         String insertNodeSql = "INSERT INTO node (workspace_id, workspace_url, name, type, format, status) values (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(insertNodeSql, testWorkspaceNode.getWorkspaceID(),
@@ -1817,9 +1890,10 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         return testWorkspaceNode;
     }
     
-    private WorkspaceNode insertTestWorkspaceNodeWithUriIntoDB(Workspace workspace, URI archiveURI, URL archiveURL, boolean withProfileSchemaURI) throws MalformedURLException, URISyntaxException {
+    private WorkspaceNode insertTestWorkspaceNodeWithUriIntoDB(Workspace workspace, URI archiveURI, URL archiveURL, URL originURL, boolean withProfileSchemaURI, WorkspaceNodeStatus status)
+            throws MalformedURLException, URISyntaxException {
         
-        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, archiveURI, archiveURL, withProfileSchemaURI);
+        WorkspaceNode testWorkspaceNode = createWorkspaceNode(workspace, archiveURI, archiveURL, originURL, withProfileSchemaURI, status);
         
         String insertNodeSql = "INSERT INTO node (workspace_id, profile_schema_uri, workspace_url, archive_uri, archive_url, origin_url, name, type, format, status) "
                 + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1834,7 +1908,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         return testWorkspaceNode;
     }
     
-    private WorkspaceNode createWorkspaceNode(Workspace workspace, URI archiveURI, URL archiveURL, boolean withProfileSchemaURI) throws URISyntaxException, MalformedURLException {
+    private WorkspaceNode createWorkspaceNode(Workspace workspace, URI archiveURI, URL archiveURL, URL originURL, boolean withProfileSchemaURI, WorkspaceNodeStatus status)
+            throws URISyntaxException, MalformedURLException {
         
         WorkspaceNode testWorkspaceNode = new LamusWorkspaceNode();
         testWorkspaceNode.setWorkspaceID(workspace.getWorkspaceID());
@@ -1845,12 +1920,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         testWorkspaceNode.setWorkspaceURL(standardWorkspaceUrlForNode);
         testWorkspaceNode.setArchiveURI(archiveURI);
         testWorkspaceNode.setArchiveURL(archiveURL);
-        testWorkspaceNode.setOriginURL(archiveURL);
+        testWorkspaceNode.setOriginURL(originURL);
 
         testWorkspaceNode.setName("someNode");
         testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
         testWorkspaceNode.setFormat("someFormat");
-        testWorkspaceNode.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        testWorkspaceNode.setStatus(status);
         
         return testWorkspaceNode;
     }

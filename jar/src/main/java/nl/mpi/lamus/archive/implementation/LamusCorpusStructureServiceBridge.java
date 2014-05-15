@@ -90,8 +90,9 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         }
         
         for(WorkspaceNodeReplacement replacement : responseNodeReplacements) {
+            logger.debug("Retrieving result of replacement. Old node: " + replacement.getOldNodeURI().toString() + " ; New node: " + replacement.getNewNodeURI().toString());
             if(!"OK".equals(replacement.getReplacementStatus().toUpperCase())) {
-                String errorMessage = "Error during version creation: " + replacement.getReplacementError();
+                String errorMessage = "Error during version creation. Status: " + replacement.getReplacementStatus() + "; error: " + replacement.getReplacementError();
                 logger.error(errorMessage);
                 throw new VersionCreationException(errorMessage, null);
             }

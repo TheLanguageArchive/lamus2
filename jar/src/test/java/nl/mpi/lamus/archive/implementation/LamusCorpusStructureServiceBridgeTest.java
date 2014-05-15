@@ -173,7 +173,7 @@ public class LamusCorpusStructureServiceBridgeTest {
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         expectedNodeReplacementCollection.add(secondNodeReplacement);
         
-        final String expectedMessage = "Error during version creation: " + secondReplacementError;
+        final String expectedMessage = "Error during version creation. Status: " + secondReplacementStatus + "; error: " + secondReplacementError;
         
         context.checking(new Expectations() {{
 

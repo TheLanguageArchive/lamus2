@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.implementation.NodeImporterFactoryBean;
 import nl.mpi.lamus.workspace.importing.implementation.MetadataNodeImporter;
 import nl.mpi.lamus.workspace.importing.implementation.TopNodeImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -52,9 +51,7 @@ public class WorkspaceImportRunnerTest {
     
     private WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceDao mockWorkspaceDao = context.mock(WorkspaceDao.class);
-    private final WorkspaceNodeExplorer mockWorkspaceFileExplorer = context.mock(WorkspaceNodeExplorer.class);
     private final TopNodeImporter mockTopNodeImporter = context.mock(TopNodeImporter.class);
-    private final NodeImporterFactoryBean mockFileImporterFactoryBean = context.mock(NodeImporterFactoryBean.class);
     
     private final Workspace mockWorkspace = context.mock(Workspace.class);
     private final URI topNodeArchiveURI;
@@ -74,8 +71,7 @@ public class WorkspaceImportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockWorkspaceFileExplorer,
-                mockFileImporterFactoryBean, mockTopNodeImporter);
+        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockTopNodeImporter);
         workspaceImportRunner.setWorkspace(mockWorkspace);
         workspaceImportRunner.setTopNodeArchiveURI(topNodeArchiveURI);
     }

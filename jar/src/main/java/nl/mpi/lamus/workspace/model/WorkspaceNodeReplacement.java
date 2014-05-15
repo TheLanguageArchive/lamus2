@@ -24,13 +24,13 @@ import java.net.URI;
  */
 public interface WorkspaceNodeReplacement {
     
-    public URI getOldArchiveNodeURI();
+    public URI getOldNodeURI();
     
-    public void setOldArchiveNodeURI(URI oldNodeURI);
+    public void setOldNodeURI(URI oldNodeURI);
     
-    public URI getNewArchiveNodeURI();
+    public URI getNewNodeURI();
     
-    public void setNewArchiveNodeURI(URI newNodeURI);
+    public void setNewNodeURI(URI newNodeURI);
     
     public String getReplacementStatus();
     

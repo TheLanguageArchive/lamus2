@@ -182,7 +182,8 @@ public class AddedNodeExporterTest {
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
-        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
         checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
@@ -238,7 +239,8 @@ public class AddedNodeExporterTest {
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
-        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
         checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
         
@@ -382,6 +384,7 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
         final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
         final WorkspaceNode parentNode = getParentNode();
@@ -416,7 +419,8 @@ public class AddedNodeExporterTest {
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
-        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, expectedException);
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, expectedException);
         
         try {
             addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
@@ -470,7 +474,8 @@ public class AddedNodeExporterTest {
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
-        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile, nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, null);
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
         checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
         
@@ -605,7 +610,7 @@ public class AddedNodeExporterTest {
     private void checkHandleAssignmentInvocations(
             final URL nodeWsURL, final URL nodeNewArchiveURL, final File nodeWsFile,
             final URI nodeNewArchiveUrlToUri, final URI nodeNewArchiveUriToUriHttpRoot,
-            final URI nodeNewArchiveHandle, final Exception expectedException) throws HandleException, IOException, URISyntaxException {
+            final URI nodeNewArchiveHandle, final URI preparedNewArchiveHandle, final Exception expectedException) throws HandleException, IOException, URISyntaxException {
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeNewArchiveURL));
@@ -623,7 +628,8 @@ public class AddedNodeExporterTest {
             context.checking(new Expectations() {{
                 oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
                 oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpRoot); will(returnValue(nodeNewArchiveHandle));
-                oneOf(mockChildWsNode).setArchiveURI(nodeNewArchiveHandle);
+                oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+                oneOf(mockChildWsNode).setArchiveURI(preparedNewArchiveHandle);
                 oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildWsNode);
             }});
         }

@@ -22,6 +22,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ public class LamusNodeReplaceCheckerFactory implements NodeReplaceCheckerFactory
     private final ArchiveFileHelper archiveFileHelper;
     private final ReplaceActionManager replaceActionManager;
     private final ReplaceActionFactory replaceActionFactory;
+    private final NodeReplaceExplorer nodeReplaceExplorer;
     
     private NodeReplaceChecker metadataNodeReplaceChecker;
     private NodeReplaceChecker resourceNodeReplaceChecker;
@@ -51,11 +53,12 @@ public class LamusNodeReplaceCheckerFactory implements NodeReplaceCheckerFactory
     @Autowired
     public LamusNodeReplaceCheckerFactory(CorpusStructureProvider csProvider,
             ArchiveFileHelper aFileHelper, ReplaceActionManager actionManager,
-            ReplaceActionFactory actionFactory) {
+            ReplaceActionFactory actionFactory, NodeReplaceExplorer replaceExplorer) {
         corpusStructureProvider = csProvider;
         archiveFileHelper = aFileHelper;
         replaceActionManager = actionManager;
         replaceActionFactory = actionFactory;
+        nodeReplaceExplorer = replaceExplorer;
     }
     
     /**
@@ -75,7 +78,8 @@ public class LamusNodeReplaceCheckerFactory implements NodeReplaceCheckerFactory
         logger.debug("Retrieving NodeReplaceChecker instance for a metadata node");
         
         if(metadataNodeReplaceChecker == null) {
-            metadataNodeReplaceChecker = new MetadataNodeReplaceChecker();
+            metadataNodeReplaceChecker = new MetadataNodeReplaceChecker(replaceActionManager,
+                    replaceActionFactory, nodeReplaceExplorer);
         }
         return metadataNodeReplaceChecker;
     }

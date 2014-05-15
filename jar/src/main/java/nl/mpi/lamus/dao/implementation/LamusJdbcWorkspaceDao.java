@@ -772,11 +772,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Cleaning nodes and links belonging to workspace " + workspace.getWorkspaceID());
         
+        String deleteReplacementsSql =
+                "DELETE FROM node_replacement WHERE old_node_id in (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteLinksSql =
                 "DELETE FROM node_link WHERE parent_workspace_node_id in (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodesSql =
                 "DELETE FROM node WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(deleteReplacementsSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteLinksSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodesSql, namedParameters);
         

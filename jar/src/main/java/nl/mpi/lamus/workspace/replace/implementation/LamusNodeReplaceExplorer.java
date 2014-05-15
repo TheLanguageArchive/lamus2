@@ -18,12 +18,14 @@ package nl.mpi.lamus.workspace.replace.implementation;
 
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
+import org.springframework.stereotype.Component;
 
 /**
  * @see NodeReplaceExplorer
  * 
  * @author guisil
  */
+@Component
 public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
 
     /**

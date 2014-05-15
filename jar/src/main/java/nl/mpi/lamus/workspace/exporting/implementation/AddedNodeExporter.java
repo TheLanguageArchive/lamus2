@@ -285,7 +285,7 @@ public class AddedNodeExporter implements NodeExporter {
             URI targetUri = archiveFileLocationProvider.getUriWithHttpRoot(currentNode.getArchiveURL().toURI());
             
             URI newNodeArchiveHandle = handleManager.assignNewHandle(new File(currentNode.getWorkspaceURL().getPath()), targetUri);
-            currentNode.setArchiveURI(newNodeArchiveHandle);
+            currentNode.setArchiveURI(handleManager.prepareHandleWithHdlPrefix(newNodeArchiveHandle));
             workspaceDao.updateNodeArchiveUri(currentNode);
         } catch (URISyntaxException ex) {
             String errorMessage = "Error assigning new handle for node " + currentNode.getWorkspaceURL();

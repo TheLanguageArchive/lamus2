@@ -19,7 +19,6 @@ import java.net.URI;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.implementation.NodeImporterFactoryBean;
 import nl.mpi.lamus.workspace.importing.implementation.TopNodeImporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
@@ -39,8 +38,6 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
     
     private final WorkspaceDao workspaceDao;
-    private final WorkspaceNodeExplorer workspaceFileExplorer;
-    private final NodeImporterFactoryBean fileImporterFactoryBean;
     
     private final TopNodeImporter topNodeImporter;
     
@@ -48,11 +45,8 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     private URI topNodeArchiveURI = null;
     
     @Autowired
-    public WorkspaceImportRunner(WorkspaceDao workspaceDao, WorkspaceNodeExplorer workspaceFileExplorer,
-        NodeImporterFactoryBean fileImporterFactoryBean, TopNodeImporter topNodeImporter) {
+    public WorkspaceImportRunner(WorkspaceDao workspaceDao, TopNodeImporter topNodeImporter) {
         this.workspaceDao = workspaceDao;
-        this.workspaceFileExplorer = workspaceFileExplorer;
-        this.fileImporterFactoryBean = fileImporterFactoryBean;
         this.topNodeImporter = topNodeImporter;
     }
     

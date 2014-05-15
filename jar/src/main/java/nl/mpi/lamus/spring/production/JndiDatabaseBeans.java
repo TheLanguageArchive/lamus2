@@ -20,23 +20,31 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import nl.mpi.archiving.corpusstructure.core.database.dao.ArchivePropertyDao;
 import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchivePropertyDao;
 import nl.mpi.archiving.corpusstructure.core.database.dao.CorpusStructureDao;
-import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchivePropertyDaoImpl;
 import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchiveObjectDaoImpl;
+import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchivePropertyDaoImpl;
 import nl.mpi.archiving.corpusstructure.core.database.dao.impl.CorpusStructureDaoImpl;
-//import nl.mpi.annot.search.lib.SearchClient;
-//import nl.mpi.versioning.manager.VersioningAPI;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
+import nl.mpi.archiving.corpusstructure.provider.db.CorpusStructureProviderImpl;
+import nl.mpi.archiving.corpusstructure.provider.db.service.impl.CorpusStructureProviderNodeResolver;
+//import org.apache.openjpa.persistence.PersistenceProviderImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Configuration class containing some beans related with databases. To be used
@@ -46,10 +54,18 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
  */
 @Configuration
 //@EnableTransactionManagement
-//@ComponentScan("nl.mpi.archiving")
+//@ComponentScan("nl.mpi.archiving.corpusstructure")
 @Profile(value = {"production", "demoserver"})
 @ImportResource("classpath:/config/production/csdb.xml")
 public class JndiDatabaseBeans {
+    
+    
+//    @Autowired
+//    private CorpusStructureProviderFactory cspFactory;
+    
+    private ArchivePropertyDao archiveDao;
+    private ArchiveObjectDao aoDao;
+    private CorpusStructureDao csDao;
     
     
 //    @Resource
@@ -69,22 +85,25 @@ public class JndiDatabaseBeans {
 //        Context ctx = new InitialContext();
 //        return (DataSource) ctx.lookup("java:comp/env/jdbc/CSDB2");
 //    }
-//    
+    
 //    @Bean  
 //    public LocalContainerEntityManagerFactoryBean entityManagerFactory() throws NamingException {
 //            return new LocalContainerEntityManagerFactoryBean() {{
 //                
-//                setPackagesToScan("nl.mpi.archiving.corpusstructure.core.database.pojo");
+////                setPackagesToScan("nl.mpi.archiving.corpusstructure.core.database.pojo");
 //                setDataSource(corpusStructureDataSource());
 //                setJpaVendorAdapter(
 //                        new HibernateJpaVendorAdapter() {{
 //                            setGenerateDdl(true);
 //                        }});
+//                
+////                setPersistenceProviderClass(PersistenceProviderImpl.class);
 //                setPersistenceUnitName("corpusstructure2-persistency");
+//                
 //                setJpaProperties(hibProperties());
 //            }};
 //    }
-//    
+    
 //    private Properties hibProperties() {
 //        return new Properties() {{
 //            put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -92,28 +111,73 @@ public class JndiDatabaseBeans {
 //            put("hibernate.hbm2ddl.auto", "update");
 //        }};
 //    }
-//    
+    
 //    @Bean  
 //    public JpaTransactionManager transactionManager() throws NamingException {
 //        return new JpaTransactionManager() {{
 //            setEntityManagerFactory(entityManagerFactory().getObject());
 //        }};
 //    }
+//    @Bean
+//    public PlatformTransactionManager transactionManager() throws NamingException{
+////        return new JpaTransactionManager() {{
+////            setEntityManagerFactory(
+////                    entityManagerFactory().getObject());
+////        }};
+//        
+//        JpaTransactionManager transactionManager = new JpaTransactionManager();
+//        transactionManager.setEntityManagerFactory(
+//                entityManagerFactory().getObject());
+// 
+//        return transactionManager;
+//    }
+    
+//    @Bean
+//    public PersistenceExceptionTranslationPostProcessor exceptionTranslation(){
+//        return new PersistenceExceptionTranslationPostProcessor();
+//    }
     
     
 //    @Bean
-//    public ArchiveDao archiveDao() {
-//        return new ArchiveDaoImpl();
+//    public ArchivePropertyDao archiveDao() {
+////        if(archiveDao == null) {
+////            archiveDao = new ArchivePropertyDaoImpl();
+////        }
+////        return archiveDao;
+//        return new ArchivePropertyDaoImpl();
 //    }
-//    
+    
 //    @Bean
-//    public ArchiveObjectsDao aoDao() {
-//        return new ArchiveObjectsDaoImpl();
+//    public ArchiveObjectDao aoDao() {
+////        if(aoDao == null) {
+////            aoDao = new ArchiveObjectDaoImpl();
+////        }
+////        return aoDao;
+//        return new ArchiveObjectDaoImpl();
 //    }
-//    
+    
 //    @Bean
 //    public CorpusStructureDao csDao() {
+////        if(csDao == null) {
+////            csDao = new CorpusStructureDaoImpl();
+////        }
+////        return csDao;
 //        return new CorpusStructureDaoImpl();
+//    }
+    
+//    @Bean
+//    @Qualifier("corpusStructureProvider")
+//    public CorpusStructureProvider corpusStructureProvider() {
+//        CorpusStructureProvider csProvider = new CorpusStructureProviderImpl(archiveDao(), aoDao(), csDao());
+//        csProvider.initialize();
+//        return csProvider;
+////        return cspFactory.createCorpusStructureProvider();
+//    }
+    
+//    @Bean
+//    @Qualifier("nodeResolver")
+//    public NodeResolver nodeResolver() {
+//        return new CorpusStructureProviderNodeResolver();
 //    }
     
     /**

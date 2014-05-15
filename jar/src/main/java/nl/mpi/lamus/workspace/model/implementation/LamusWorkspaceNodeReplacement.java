@@ -27,48 +27,48 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
 
-    private URI oldArchiveNodeURI;
-    private URI newArchiveNodeURI;
+    private URI oldNodeURI;
+    private URI newNodeURI;
     private String replacementStatus = "";
     private String replacementError = "";
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI) {
-        this.oldArchiveNodeURI = oldArchiveNodeURI;
-        this.newArchiveNodeURI = newArchiveNodeURI;
+        this.oldNodeURI = oldArchiveNodeURI;
+        this.newNodeURI = newArchiveNodeURI;
     }
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI, String replacementStatus) {
-        this.oldArchiveNodeURI = oldArchiveNodeURI;
-        this.newArchiveNodeURI = newArchiveNodeURI;
+        this.oldNodeURI = oldArchiveNodeURI;
+        this.newNodeURI = newArchiveNodeURI;
         this.replacementStatus = replacementStatus;
     }
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI, String replacementStatus, String replacementError) {
-        this.oldArchiveNodeURI = oldArchiveNodeURI;
-        this.newArchiveNodeURI = newArchiveNodeURI;
+        this.oldNodeURI = oldArchiveNodeURI;
+        this.newNodeURI = newArchiveNodeURI;
         this.replacementStatus = replacementStatus;
         this.replacementError = replacementError;
     }
     
 
     @Override
-    public URI getOldArchiveNodeURI() {
-        return this.oldArchiveNodeURI;
+    public URI getOldNodeURI() {
+        return this.oldNodeURI;
     }
 
     @Override
-    public void setOldArchiveNodeURI(URI oldNodeURI) {
-        this.oldArchiveNodeURI = oldNodeURI;
+    public void setOldNodeURI(URI oldNodeURI) {
+        this.oldNodeURI = oldNodeURI;
     }
 
     @Override
-    public URI getNewArchiveNodeURI() {
-        return this.newArchiveNodeURI;
+    public URI getNewNodeURI() {
+        return this.newNodeURI;
     }
 
     @Override
-    public void setNewArchiveNodeURI(URI newNodeURI) {
-        this.newArchiveNodeURI = newNodeURI;
+    public void setNewNodeURI(URI newNodeURI) {
+        this.newNodeURI = newNodeURI;
     }
 
     @Override
@@ -96,8 +96,8 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
     public int hashCode() {
         
         HashCodeBuilder hashCodeB = new HashCodeBuilder()
-                .append(this.oldArchiveNodeURI)
-                .append(this.newArchiveNodeURI)
+                .append(this.oldNodeURI)
+                .append(this.newNodeURI)
                 .append(this.replacementStatus)
                 .append(this.replacementError);
                 
@@ -118,8 +118,8 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
         
         
         EqualsBuilder equalsB = new EqualsBuilder()
-                .append(this.oldArchiveNodeURI, other.getOldArchiveNodeURI())
-                .append(this.newArchiveNodeURI, other.getNewArchiveNodeURI())
+                .append(this.oldNodeURI, other.getOldNodeURI())
+                .append(this.newNodeURI, other.getNewNodeURI())
                 .append(this.replacementStatus, other.getReplacementStatus())
                 .append(this.replacementError, other.replacementError);
         
@@ -129,8 +129,8 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
     @Override
     public String toString() {
         
-        String stringResult = "Old Node Archive URI: " + this.oldArchiveNodeURI +
-                ", New Node Archive URI: " + this.newArchiveNodeURI +
+        String stringResult = "Old Node Archive URI: " + this.oldNodeURI +
+                ", New Node Archive URI: " + this.newNodeURI +
                 ", Replacement Status: " + this.replacementStatus +
                 ", Replacement Error: " + this.replacementError;
         

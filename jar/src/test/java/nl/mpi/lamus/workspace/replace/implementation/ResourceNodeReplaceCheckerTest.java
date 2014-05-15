@@ -54,8 +54,6 @@ import org.junit.Rule;
  *
  * @author guisil
  */
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest({Checksum.class})
 public class ResourceNodeReplaceCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{

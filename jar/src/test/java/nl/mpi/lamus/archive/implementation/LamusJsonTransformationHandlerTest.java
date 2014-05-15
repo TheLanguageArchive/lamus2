@@ -98,7 +98,7 @@ public class LamusJsonTransformationHandlerTest {
     }
     
     @Test
-    public void createNodeReplacementCollectionFromJsonObjectStatusOk() throws URISyntaxException {
+    public void createNodeReplacementCollectionFromMultipleJsonObjectStatusOk() throws URISyntaxException {
         
         URI firstOldNodeURI = new URI(UUID.randomUUID().toString());
         URI firstNewNodeURI = new URI(UUID.randomUUID().toString());
@@ -131,6 +131,35 @@ public class LamusJsonTransformationHandlerTest {
                     .add("status", secondReplacementStatus));
         
         createObjectBuilder.add("versions", versionsArrayBuilder);
+        mainObjectBuilder.add("created", createObjectBuilder);
+        
+        JsonObject createdObject = mainObjectBuilder.build();
+        
+        
+        Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
+        
+        assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
+    }
+    
+    @Test
+    public void createNodeReplacementCollectionFromSingleJsonObjectStatusOk() throws URISyntaxException {
+        
+        URI firstOldNodeURI = new URI(UUID.randomUUID().toString());
+        URI firstNewNodeURI = new URI(UUID.randomUUID().toString());
+        String firstReplacementStatus = "Ok";
+        WorkspaceNodeReplacement firstNodeReplacement = new LamusWorkspaceNodeReplacement(firstOldNodeURI, firstNewNodeURI, firstReplacementStatus.toUpperCase());
+        
+        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        expectedNodeReplacementCollection.add(firstNodeReplacement);
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder createObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder versionsObjectBuilder = Json.createObjectBuilder()
+                .add("from", firstOldNodeURI.toString())
+                .add("to", firstNewNodeURI.toString())
+                .add("status", firstReplacementStatus);
+        
+        createObjectBuilder.add("versions", versionsObjectBuilder);
         mainObjectBuilder.add("created", createObjectBuilder);
         
         JsonObject createdObject = mainObjectBuilder.build();

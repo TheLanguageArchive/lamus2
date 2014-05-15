@@ -28,6 +28,8 @@ import javax.json.JsonObjectBuilder;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,6 +38,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusJsonTransformationHandler implements JsonTransformationHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusJsonTransformationHandler.class);
 
     /**
      * @see JsonTransformationHandler#createJsonObjectFromNodeReplacementCollection(java.util.Collection)
@@ -51,8 +55,8 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
             
             versionsArrayBuilder.add(
                     Json.createObjectBuilder()
-                        .add("from", nodeReplacement.getOldArchiveNodeURI().toString())
-                        .add("to", nodeReplacement.getNewArchiveNodeURI().toString()));
+                        .add("from", nodeReplacement.getOldNodeURI().toString())
+                        .add("to", nodeReplacement.getNewNodeURI().toString()));
         }
         
         createObjectBuilder.add("versions", versionsArrayBuilder);
@@ -70,23 +74,43 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
         
         JsonObject created = jsonObject.getJsonObject("created");
-        JsonArray versions = created.getJsonArray("versions");
         
-        for(int i = 0; i < versions.size(); i++) {
-            WorkspaceNodeReplacement currentReplacement;
-            JsonObject currentObject = versions.getJsonObject(i);
-            URI oldNodeURI = new URI(currentObject.getString("from"));
-            URI newNodeURI = new URI(currentObject.getString("to"));
-            String status = currentObject.getString("status").toUpperCase();
-            if("OK".equals(status)) {
-                currentReplacement = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status);
-            } else {
-                String error = currentObject.getString("error");
-                currentReplacement = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status, error);
+        JsonArray versionsArray = null;
+        try {
+            versionsArray = created.getJsonArray("versions");
+        } catch(ClassCastException ex) {
+            logger.debug("'versions' is not a JsonArray, will try to cast to JsonObject");
+        }
+        
+        if(versionsArray != null) {
+            for(int i = 0; i < versionsArray.size(); i++) {
+                JsonObject currentObject = versionsArray.getJsonObject(i);
+                WorkspaceNodeReplacement currentReplacement = getNodeReplacementFromJsonObject(currentObject);
+                nodeReplacementCollection.add(currentReplacement);
             }
-            nodeReplacementCollection.add(currentReplacement);
+        } else {
+            JsonObject versionsObject = created.getJsonObject("versions");
+            WorkspaceNodeReplacement replacement = getNodeReplacementFromJsonObject(versionsObject);
+            nodeReplacementCollection.add(replacement);
         }
         
         return nodeReplacementCollection;
+    }
+    
+    private WorkspaceNodeReplacement getNodeReplacementFromJsonObject(JsonObject innerObject) throws URISyntaxException {
+        
+        WorkspaceNodeReplacement replacementToReturn;
+        
+        URI oldNodeURI = new URI(innerObject.getString("from"));
+        URI newNodeURI = new URI(innerObject.getString("to"));
+        String status = innerObject.getString("status").toUpperCase();
+        if("OK".equals(status)) {
+            replacementToReturn = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status);
+        } else {
+            String error = innerObject.getString("error");
+            replacementToReturn = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status, error);
+        }
+        
+        return replacementToReturn;
     }
 }

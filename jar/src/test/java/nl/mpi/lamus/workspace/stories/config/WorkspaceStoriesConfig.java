@@ -55,7 +55,7 @@ import nl.mpi.metadata.identifierresolver.URLResolver;
 //import nl.mpi.versioning.manager.VersioningAPI;
 import org.apache.commons.io.FileUtils;
 //import org.delaman.ldap.ArchiveUserAuthImpl;
-import org.hibernate.SessionFactory;
+//import org.hibernate.SessionFactory;
 import org.jbehave.core.configuration.spring.SpringStoryReporterBuilder;
 import static org.jbehave.core.reporters.Format.*;
 import org.junit.Rule;
@@ -307,37 +307,37 @@ public class WorkspaceStoriesConfig {
 //        return encSrv;
 //    }    
 
-    private SessionFactory sesFactory;
-
-    private SessionFactory sessionFactory() throws Exception {
-        if(sesFactory == null) {
-
-            LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
-            sessionFactoryBean.setDataSource(amsDataSource);
-
-            String [] mappingResources = {
-            "orm/principal.hbm.xml",
-                "orm/nodeauth.hbm.xml",
-                "orm/rule.hbm.xml",
-                "orm/license.hbm.xml" 
-            };
-
-            Properties hibernateProperties = new Properties();
-            hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
-            hibernateProperties.setProperty("hibernate.cache.use_query_cache", "true");
-            hibernateProperties.setProperty("hibernate.cache.use_second_level_cache", "true");
-            hibernateProperties.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
-            hibernateProperties.setProperty("hibernate.cache.provider_configuration_file_resource_path", "/ehcache.xml");
-
-            sessionFactoryBean.setMappingResources(mappingResources);
-            sessionFactoryBean.setHibernateProperties(hibernateProperties);
-
-            sessionFactoryBean.afterPropertiesSet();
-
-            sesFactory = (SessionFactory) sessionFactoryBean.getObject();
-        }
-        return sesFactory;
-    }
+//    private SessionFactory sesFactory;
+//
+//    private SessionFactory sessionFactory() throws Exception {
+//        if(sesFactory == null) {
+//
+//            LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+//            sessionFactoryBean.setDataSource(amsDataSource);
+//
+//            String [] mappingResources = {
+//            "orm/principal.hbm.xml",
+//                "orm/nodeauth.hbm.xml",
+//                "orm/rule.hbm.xml",
+//                "orm/license.hbm.xml" 
+//            };
+//
+//            Properties hibernateProperties = new Properties();
+//            hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+//            hibernateProperties.setProperty("hibernate.cache.use_query_cache", "true");
+//            hibernateProperties.setProperty("hibernate.cache.use_second_level_cache", "true");
+//            hibernateProperties.setProperty("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
+//            hibernateProperties.setProperty("hibernate.cache.provider_configuration_file_resource_path", "/ehcache.xml");
+//
+//            sessionFactoryBean.setMappingResources(mappingResources);
+//            sessionFactoryBean.setHibernateProperties(hibernateProperties);
+//
+//            sessionFactoryBean.afterPropertiesSet();
+//
+//            sesFactory = (SessionFactory) sessionFactoryBean.getObject();
+//        }
+//        return sesFactory;
+//    }
     
 //    private IntegratedAuthenticationSrv autheSrv;
 //    

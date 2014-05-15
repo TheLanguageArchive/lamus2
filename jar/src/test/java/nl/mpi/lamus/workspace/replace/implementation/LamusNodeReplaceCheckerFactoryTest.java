@@ -31,6 +31,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import org.jmock.Expectations;
@@ -56,6 +57,7 @@ public class LamusNodeReplaceCheckerFactoryTest {
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock ReplaceActionManager mockReplaceActionManager;
     @Mock ReplaceActionFactory mockReplaceActionFactory;
+    @Mock NodeReplaceExplorer mockNodeReplaceExplorer;
     
     private NodeReplaceCheckerFactory nodeReplaceManagerFactory;
     
@@ -73,7 +75,10 @@ public class LamusNodeReplaceCheckerFactoryTest {
     @Before
     public void setUp() {
         
-        nodeReplaceManagerFactory = new LamusNodeReplaceCheckerFactory(mockCorpusStructureProvider, mockArchiveFileHelper, mockReplaceActionManager, mockReplaceActionFactory);
+        nodeReplaceManagerFactory = new LamusNodeReplaceCheckerFactory(
+                mockCorpusStructureProvider, mockArchiveFileHelper,
+                mockReplaceActionManager, mockReplaceActionFactory,
+                mockNodeReplaceExplorer);
     }
     
     @After

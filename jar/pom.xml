@@ -125,31 +125,36 @@
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.4-702.jdbc3</version>
+            <version>8.4-702.jdbc4</version>
         </dependency>
         
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.4.RELEASE</version>
+            <version>3.2.8.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>3.2.8.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>3.2.4.RELEASE</version>
+            <version>3.2.8.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.2.4.RELEASE</version>
+            <version>3.2.8.RELEASE</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>3.2.4.RELEASE</version>
+            <version>3.2.8.RELEASE</version>
         </dependency>
 <!--        <dependency>
             <groupId>org.hibernate</groupId>
@@ -186,10 +191,16 @@
         </dependency>
         
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-        </dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>1.7.5</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-log4j12</artifactId>
+	    <version>1.7.5</version>
+	</dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -221,7 +232,7 @@
 <!--        <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.0-beta-3.1</version>
+            <version>1.0-beta-5-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.handle</groupId>
@@ -268,7 +279,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>metadata-api</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>nl.mpi</groupId>
@@ -315,11 +326,11 @@
             <version>4.2.4.Final</version>
         </dependency>
         
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.openjpa</groupId>
             <artifactId>openjpa-all</artifactId>
             <version>2.3.0</version>
-        </dependency>
+        </dependency>-->
         
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
@@ -408,6 +419,7 @@
                 <version>3.1</version>
                 <configuration>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    <!--<compilerArgument>-javaagent:${user.home}/.m2/repository/org/apache/openjpa/openjpa-all/2.3.0/openjpa-all-2.3.0.jar</compilerArgument>-->
                 </configuration>
             </plugin>
             
