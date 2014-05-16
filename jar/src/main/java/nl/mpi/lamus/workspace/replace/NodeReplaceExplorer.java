@@ -16,7 +16,9 @@
  */
 package nl.mpi.lamus.workspace.replace;
 
+import java.util.List;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 
 /**
  * Class used to explore the child nodes and call the correct replace checker
@@ -32,5 +34,5 @@ public interface NodeReplaceExplorer {
      * @param oldNode node to be replaced
      * @param newNode new version od the node
      */
-    public void exploreReplace(WorkspaceNode oldNode, WorkspaceNode newNode);
+    public void exploreReplace(WorkspaceNode oldNode, WorkspaceNode newNode, List<NodeReplaceAction> actions);
 }

@@ -29,6 +29,7 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -42,6 +43,9 @@ import nl.mpi.metadata.api.model.MetadataReference;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
+import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
@@ -80,6 +84,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     
     @Mock WorkspaceNodeLink mockWorkspaceNodeLink;
     
@@ -99,9 +104,15 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Mock MetadataDocument mockNotReferencingDocument;
     
+    @Mock CMDIDocument mockParentCmdiDocument;
+    @Mock MetadataResourceProxy mockChildMetadataResourceProxy;
+    @Mock DataResourceProxy mockChildDataResourceProxy;
+    @Mock CMDIDocument mockChildCmdiDocument;
+    
     @Mock File mockParentFile;
     @Mock StreamResult mockParentStreamResult;
     @Mock File mockChildFile;
+    @Mock StreamResult mockChildStreamResult;
     
     
     public LamusWorkspaceNodeLinkManagerTest() {
@@ -120,7 +131,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         nodeLinkManager = new LamusWorkspaceNodeLinkManager(
                 mockWorkspaceNodeLinkFactory, mockWorkspaceDao,
-                mockMetadataAPI, mockWorkspaceFileHandler);
+                mockMetadataAPI, mockWorkspaceFileHandler,
+                mockMetadataApiBridge);
     }
     
     @After
@@ -1252,8 +1264,90 @@ public class LamusWorkspaceNodeLinkManagerTest {
         nodeLinkManager.replaceNode(mockParentNode, mockOldNode, mockNewNode);
     }
     
+    @Test
+    public void removeArchiveUriFromResourceChildNode() throws WorkspaceException, MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+        
+        final int workspaceID = 1;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            oneOf(mockParentDocument).getDocumentReferenceByURI(childArchiveURI); will(returnValue(mockChildDataResourceProxy));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockChildDataResourceProxy).setURI(childURI);
+
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+            
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+    }
     
+    @Test
+    public void removeArchiveUriFromMetadataChildNode() throws WorkspaceException, MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+        
+        final int workspaceID = 1;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
+        final URI childURI = childURL.toURI();
+        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            oneOf(mockParentDocument).getDocumentReferenceByURI(childArchiveURI); will(returnValue(mockChildMetadataResourceProxy));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockChildMetadataResourceProxy).setURI(childURI);
+
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+            
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(childURL); will(returnValue(mockChildCmdiDocument));
+            oneOf(mockChildCmdiDocument).setHandle(null);
+            
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, childURL);
+
+            //remove archive URI and URL
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+    }
     
+    @Test
+    public void removeArchiveUriExceptions() {
+        fail("not tested yet");
+    }
+
     
     private void checkUnlinkNodeExpectations(
             final int workspaceID, final URL childURL,

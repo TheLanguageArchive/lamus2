@@ -24,6 +24,7 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -31,6 +32,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -53,15 +55,18 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     private final WorkspaceDao workspaceDao;
     private final MetadataAPI metadataAPI;
     private final WorkspaceFileHandler workspaceFileHandler;
+    private final MetadataApiBridge metadataApiBridge;
     
     @Autowired
     public LamusWorkspaceNodeLinkManager(WorkspaceNodeLinkFactory nodeLinkFactory,
-            WorkspaceDao wsDao, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler) {
+            WorkspaceDao wsDao, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler,
+            MetadataApiBridge mdApiBridge) {
         
         this.workspaceNodeLinkFactory = nodeLinkFactory;
         this.workspaceDao = wsDao;
         this.metadataAPI = mdAPI;
         this.workspaceFileHandler = wsFileHandler;
+        this.metadataApiBridge = mdApiBridge;
     }
 
     /**
@@ -265,6 +270,53 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         //TODO case when old node was newly added in the workspace
         
         //TODO case when the old node and/or the new node are external
+        
+    }
+    
+    /**
+     * @see WorkspaceNodeLinkManager#removeArchiveUriFromChildNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void removeArchiveUriFromChildNode(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
+        try {
+            MetadataDocument tempParentDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
+            ReferencingMetadataDocument parentDocument;
+            if(tempParentDocument instanceof ReferencingMetadataDocument) {
+                parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+            } else {
+                throw new UnsupportedOperationException("not referencing document not handled yet");
+            }
+            Reference childReference = parentDocument.getDocumentReferenceByURI(childNode.getArchiveURI());
+            childReference.setURI(childNode.getWorkspaceURL().toURI());
+            
+            metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
+            
+            if(childNode.isMetadata()) {
+                MetadataDocument tempChildDocument = metadataAPI.getMetadataDocument(childNode.getWorkspaceURL());
+                HandleCarrier childHandleCarrier = null;
+                if(tempChildDocument instanceof HandleCarrier) {
+                    childHandleCarrier = (HandleCarrier) tempChildDocument;
+                } else {
+                    throw new UnsupportedOperationException("not handle carrier child document not handled yet");
+                }
+                childHandleCarrier.setHandle(null);
+                metadataApiBridge.saveMetadataDocument((MetadataDocument) childHandleCarrier, childNode.getWorkspaceURL());
+            }
+            
+            childNode.setArchiveURI(null);
+            childNode.setArchiveURL(null);
+            workspaceDao.updateNodeArchiveUri(childNode);
+            workspaceDao.updateNodeArchiveUrl(childNode);
+            
+        } catch (IOException ex) {
+            throw new UnsupportedOperationException("exception not handled yet");
+        } catch (MetadataException ex) {
+            throw new UnsupportedOperationException("exception not handled yet");
+        } catch (URISyntaxException ex) {
+            throw new UnsupportedOperationException("exception not handled yet");
+        } catch (TransformerException ex) {
+            throw new UnsupportedOperationException("exception not handled yet");
+        }
         
     }
     

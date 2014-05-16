@@ -20,12 +20,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +46,12 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     private static final Logger logger = LoggerFactory.getLogger(LamusMetadataApiBridge.class);
     
     private MetadataAPI metadataAPI;
-    
+    private WorkspaceFileHandler workspaceFileHandler;
     
     @Autowired
-    public LamusMetadataApiBridge(MetadataAPI mdApi) {
+    public LamusMetadataApiBridge(MetadataAPI mdApi, WorkspaceFileHandler wsFileHandler) {
         this.metadataAPI = mdApi;
+        this.workspaceFileHandler = wsFileHandler;
     }
     
     /**
@@ -83,6 +88,16 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public HeaderInfo getNewSelfHandleHeaderInfo(URI handle) {
         return new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, handle.toString());
+    }
+
+    /**
+     * @see MetadataApiBridge#saveMetadataDocument(nl.mpi.metadata.api.model.MetadataDocument, java.net.URL)
+     */
+    @Override
+    public void saveMetadataDocument(MetadataDocument document, URL targetURL) throws IOException, TransformerException, MetadataException {
+        
+        StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(targetURL));
+        metadataAPI.writeMetadataDocument(document, documentStreamResult);
     }
     
 }

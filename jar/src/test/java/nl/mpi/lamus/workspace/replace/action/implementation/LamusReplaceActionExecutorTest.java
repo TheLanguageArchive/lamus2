@@ -51,6 +51,7 @@ public class LamusReplaceActionExecutorTest {
     @Mock UnlinkNodeReplaceAction mockUnlinkAction;
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
+    @Mock RemoveArchiveUriReplaceAction mockRemoveArchiveUriAction;
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
     @Mock WorkspaceNode mockNewChildNode;
@@ -221,6 +222,43 @@ public class LamusReplaceActionExecutorTest {
         
         try {
             replaceActionExecutor.execute(mockReplaceAction);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void executeRemoveArchiveUriActionSuccessful() throws WorkspaceException {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockRemoveArchiveUriAction).getParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockRemoveArchiveUriAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+        }});
+        
+        replaceActionExecutor.execute(mockRemoveArchiveUriAction);
+    }
+    
+    @Test
+    public void executeRemoveArchiveUriActionUnsuccessful() throws WorkspaceException {
+        
+        final int workspaceID = 10;
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockRemoveArchiveUriAction).getParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockRemoveArchiveUriAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            replaceActionExecutor.execute(mockRemoveArchiveUriAction);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

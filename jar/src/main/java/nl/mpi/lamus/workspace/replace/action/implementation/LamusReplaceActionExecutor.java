@@ -63,7 +63,9 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         } else if(action instanceof LinkNodeReplaceAction) {
             executeLinkAction((LinkNodeReplaceAction) action); //(ws, tag, (LinkNodeAction) currentAction, error);
         } else if(action instanceof MoveLinkLocationNodeReplaceAction) {
-            executeMoveLinkLocation((MoveLinkLocationNodeReplaceAction) action); //(ws, tag, (MoveLinkLocationAction) currentAction, error);
+            executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action); //(ws, tag, (MoveLinkLocationAction) currentAction, error);
+        } else if(action instanceof RemoveArchiveUriReplaceAction) {
+            executeRemoveArchiveUriAction((RemoveArchiveUriReplaceAction) action);
         }
     }
     
@@ -91,7 +93,6 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing Unlink Action: " + action.toString());
 
         workspaceNodeLinkManager.unlinkNodes(action.getParentNode(), action.getAffectedNode());
-        
     }
     
     private void executeLinkAction(LinkNodeReplaceAction action) throws WorkspaceException {
@@ -99,10 +100,16 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing Link Action: " + action.toString());
 
         workspaceNodeLinkManager.linkNodes(action.getParentNode(), action.getAffectedNode());
-        
     }
     
-    private void executeMoveLinkLocation(MoveLinkLocationNodeReplaceAction action) {
+    private void executeMoveLinkLocationAction(MoveLinkLocationNodeReplaceAction action) {
         throw new UnsupportedOperationException("not implemented yet");
+    }
+    
+    private void executeRemoveArchiveUriAction(RemoveArchiveUriReplaceAction action) throws WorkspaceException {
+        
+        logger.debug("Executing Remove Archive URI Action: " + action.toString());
+        
+        workspaceNodeLinkManager.removeArchiveUriFromChildNode(action.getParentNode(), action.getAffectedNode());
     }
 }

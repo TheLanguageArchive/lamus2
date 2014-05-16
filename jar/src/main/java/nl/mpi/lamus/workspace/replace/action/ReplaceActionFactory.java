@@ -20,6 +20,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.DeleteNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.LinkNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.MoveLinkLocationNodeReplaceAction;
+import nl.mpi.lamus.workspace.replace.action.implementation.RemoveArchiveUriReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.ReplaceNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeReplaceAction;
 
@@ -65,4 +66,11 @@ public interface ReplaceActionFactory {
      * @return new "unlink node" action
      */
     public UnlinkNodeReplaceAction getUnlinkAction(WorkspaceNode affectedNode, WorkspaceNode parentNode);
+    
+    /**
+     * @param affectedNode node to have its URI removed
+     * @param parentNode parent node
+     * @return  new "remove archive uri" action
+     */
+    public RemoveArchiveUriReplaceAction getRemoveArchiveUriAction(WorkspaceNode affectedNode, WorkspaceNode parentNode);
 }

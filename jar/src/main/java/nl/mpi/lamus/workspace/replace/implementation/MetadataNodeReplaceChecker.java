@@ -17,9 +17,6 @@
 package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.util.List;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -93,7 +90,7 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         
         //TODO CHECK CIRCULAR LINKS
         
-        nodeReplaceExplorer.exploreReplace(oldNode, newNode);
+        nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
     }
     
 }

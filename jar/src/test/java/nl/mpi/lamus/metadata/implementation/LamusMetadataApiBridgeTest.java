@@ -16,17 +16,23 @@
  */
 package nl.mpi.lamus.metadata.implementation;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataDocumentException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
+import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -38,11 +44,18 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.junit.runner.RunWith;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author guisil
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({FileUtils.class})
 public class LamusMetadataApiBridgeTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -52,7 +65,11 @@ public class LamusMetadataApiBridgeTest {
     private LamusMetadataApiBridge lamusMetadataApiBridge;
     
     @Mock MetadataAPI mockMetadataAPI;
+    @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    
     @Mock MetadataDocument mockMetadataDocument;
+    @Mock File mockFile;
+    @Mock StreamResult mockStreamResult;
     
     
     public LamusMetadataApiBridgeTest() {
@@ -68,7 +85,7 @@ public class LamusMetadataApiBridgeTest {
     
     @Before
     public void setUp() {
-        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI);
+        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI, mockWorkspaceFileHandler);
     }
     
     @After
@@ -183,5 +200,41 @@ public class LamusMetadataApiBridgeTest {
         assertNotNull("Retrieved header info should not be null", retrievedHeaderInfo);
         assertEquals("Header info name different from expected", CMDIConstants.CMD_HEADER_MD_SELF_LINK, retrievedHeaderInfo.getName());
         assertEquals("Header info value different from expected", handle.toString(), retrievedHeaderInfo.getValue());
+    }
+    
+    @Test
+    public void saveMetadataDocument() throws MalformedURLException, IOException, TransformerException, MetadataException {
+        
+        final URL documentURL = new URL("file:/some/location/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        lamusMetadataApiBridge.saveMetadataDocument(mockMetadataDocument, documentURL);
+    }
+    
+    @Test
+    public void saveMetadataDocumentThrowsException() throws IOException, TransformerException, MetadataException {
+        
+        final URL documentURL = new URL("file:/some/location/file.cmdi");
+        final MetadataException expectedException = new MetadataDocumentException(mockMetadataDocument, "some exception message");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult); will(throwException(expectedException));
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        try {
+            lamusMetadataApiBridge.saveMetadataDocument(mockMetadataDocument, documentURL);
+            fail("shourd have thrown exception");
+        } catch(MetadataException ex) {
+            assertEquals("exception different from expected", expectedException, ex);
+        }
     }
 }

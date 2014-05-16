@@ -16,18 +16,11 @@
  */
 package nl.mpi.lamus.workspace.replace.implementation;
 
-import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
@@ -47,7 +40,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 
 /**
@@ -127,7 +119,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             //TODO MULTIPLE PARENTS???
             
-            oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode);
+            oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
             
         }});
         

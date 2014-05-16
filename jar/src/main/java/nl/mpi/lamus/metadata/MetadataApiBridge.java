@@ -16,9 +16,13 @@
  */
 package nl.mpi.lamus.metadata;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
+import nl.mpi.metadata.api.model.MetadataDocument;
 
 /**
  * Provides some functionality that interacts with the Metadata API.
@@ -41,4 +45,12 @@ public interface MetadataApiBridge {
      * @return HeaderInfo object containing the handle
      */
     public HeaderInfo getNewSelfHandleHeaderInfo(URI handle);
+    
+    /**
+     * Saves given document in the given location
+     * @param document document to save
+     * @param targetURL location where the file should be saved
+     */
+    public void saveMetadataDocument(MetadataDocument document, URL targetURL)
+            throws IOException, TransformerException, MetadataException;
 }

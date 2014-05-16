@@ -82,4 +82,13 @@ public interface WorkspaceNodeLinkManager {
      */
     public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode, WorkspaceNode newNode)
             throws WorkspaceException;
+    
+    /**
+     * Removes the Archive URI from the given child node, including
+     * from the reference in the parent node and in the file itself, if it is metadata.
+     * @param parentNode WorkspaceNode object corresponding to the parent node
+     * @param childNode WorkspaceNode object corresponding to the child node
+     */
+    public void removeArchiveUriFromChildNode(WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceException;
 }
