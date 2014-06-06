@@ -16,7 +16,9 @@
  */
 package nl.mpi.lamus.web.components;
 
+import java.util.Collection;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -29,6 +31,9 @@ public class NavigationPanel extends Panel {
     
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
+    
+    @SpringBean(name = "managerUsers")
+    private Collection<String> managerUsers;
     
     /**
      * Constructor.
@@ -60,12 +65,16 @@ public class NavigationPanel extends Panel {
             }
         });
         
-        add(new Link("managementLink") {
+        Link managementLink = new Link("managementLink") {
 
             @Override
             public void onClick() {
                 setResponsePage(pagesProvider.getManageWorkspacesPage());
             }
-        });
+        };
+        if(!managerUsers.contains(LamusSession.get().getUserId())) {
+            managementLink.setVisible(false);
+        }
+        add(managementLink);
     }
 }

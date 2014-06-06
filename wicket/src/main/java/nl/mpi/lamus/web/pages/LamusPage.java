@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.SharedResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -66,7 +67,7 @@ public class LamusPage extends WebPage {
         
         add(new ExternalLink("register_link", Model.of(registerUrl)));
         
-        add(new Label("header_username", new Model<String>(LamusSession.get().getUserId())));
+        add(new Label("header_username", new HeaderUsernameModel()));
         
         if("anonymous".equals(LamusSession.get().getUserId())) {
             add(new ExternalLink("loginOrLogoutLink", "login", getLocalizer().getString("header_login_label", this)));
@@ -80,5 +81,16 @@ public class LamusPage extends WebPage {
     
     protected FeedbackPanel getFeedbackPanel() {
         return feedbackPanel;
+    }
+    
+    private static class HeaderUsernameModel extends AbstractReadOnlyModel<String> {
+
+        public HeaderUsernameModel() {
+        }
+
+        @Override
+        public String getObject() {
+            return LamusSession.get().getUserId();
+        }
     }
 }

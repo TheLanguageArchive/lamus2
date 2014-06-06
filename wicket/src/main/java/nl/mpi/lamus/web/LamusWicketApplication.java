@@ -79,7 +79,7 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/IndexPage", IndexPage.class);
         mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
         mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
-        mountPage("/ManageWorkspacePage", ManageWorkspacesPage.class);
+//        mountPage("/ManageWorkspacePage", ManageWorkspacesPage.class);
         mountPage("/LoginInfoPage", LoginInfoPage.class);
         
 //        PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");

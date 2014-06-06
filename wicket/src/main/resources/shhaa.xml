@@ -31,7 +31,9 @@
             <!--<location  target="/*" />-->
             <location target="/CreateWorkspacePage*" />
             <location target="/SelectWorkspacePage*" />
-            <location target="/ManageWorkspacePage*" />
+<!--            <location target="/ManageWorkspacePage*" >
+                <require id="email">${shhaa.corpman}</require>
+            </location>-->
             <!--<location target="/LoginInfoPage" />-->
         </authorization>
         
