@@ -25,7 +25,6 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
@@ -45,9 +44,6 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     @Autowired
     private CorpusStructureProvider corpusStructureProvider;
-    
-    @Autowired
-    private SearchClientBridge searchClientBridge;
     
     @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
@@ -118,7 +114,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private AddedNodeExporter getAddedNodeExporter(Workspace workspace) {
         if(addedNodeExporter == null) {
             addedNodeExporter = new AddedNodeExporter(archiveFileLocationProvider, workspaceFileHandler,
-                    metadataAPI, workspaceDao, searchClientBridge, workspaceTreeExporter, nodeDataRetriever,
+                    metadataAPI, workspaceDao, workspaceTreeExporter, nodeDataRetriever,
                     corpusStructureProvider, nodeResolver, handleManager, metadataApiBridge);
         }
         addedNodeExporter.setWorkspace(workspace);
@@ -127,7 +123,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     private NodeExporter getReplacedOrDeletedNodeExporter(Workspace workspace) {
         if(replacedOrDeletedNodeExporter == null) {
-            replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(versioningHandler, workspaceDao, searchClientBridge, handleManager, archiveFileLocationProvider);
+            replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(versioningHandler, workspaceDao, handleManager, archiveFileLocationProvider);
         }
         replacedOrDeletedNodeExporter.setWorkspace(workspace);
         return replacedOrDeletedNodeExporter;
@@ -145,7 +141,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     
     private NodeExporter getUnlinkedNodeExporter(Workspace workspace) {
         if(unlinkedNodeExporter == null) {
-            unlinkedNodeExporter = new UnlinkedNodeExporter(versioningHandler, searchClientBridge);
+            unlinkedNodeExporter = new UnlinkedNodeExporter(versioningHandler);
         }
         unlinkedNodeExporter.setWorkspace(workspace);
         return unlinkedNodeExporter;

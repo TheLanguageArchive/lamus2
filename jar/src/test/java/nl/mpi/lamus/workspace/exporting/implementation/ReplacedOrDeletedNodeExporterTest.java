@@ -32,7 +32,6 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -66,7 +65,6 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Mock VersioningHandler mockVersioningHandler;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock SearchClientBridge mockSearchClientBridge;
     @Mock HandleManager mockHandleManager;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     
@@ -87,7 +85,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Before
     public void setUp() {
         replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(
-                mockVersioningHandler, mockWorkspaceDao, mockSearchClientBridge,
+                mockVersioningHandler, mockWorkspaceDao,
                 mockHandleManager, mockArchiveFileLocationProvider);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
@@ -131,8 +129,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
@@ -222,8 +220,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
@@ -324,8 +322,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
@@ -397,8 +395,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
 
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));

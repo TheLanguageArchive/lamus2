@@ -1344,8 +1344,137 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void removeArchiveUriExceptions() {
-        fail("not tested yet");
+    public void removeArchiveUri_MetadataException_GetParentDocument() throws MalformedURLException, IOException, MetadataException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        
+        final int parentID = 100;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final int childID = 200;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        
+        final MetadataException expectedCause = new MetadataException("some exception message");
+        String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(throwException(expectedCause));
+            
+            //exception
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+        }});
+
+        try {
+            nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void removeArchiveUri_IOException_SaveParentDocument() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        
+        final int parentID = 100;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final int childID = 200;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        
+        final IOException expectedCause = new IOException("some exception message");
+        String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            oneOf(mockParentDocument).getDocumentReferenceByURI(childArchiveURI); will(returnValue(mockChildDataResourceProxy));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockChildDataResourceProxy).setURI(childURI);
+
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL); will(throwException(expectedCause));
+            
+            //exception
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+        }});
+        
+        try {
+            nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void removeArchiveUri_TransformerException_SaveChildDocument() throws WorkspaceException, MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+        
+        final int workspaceID = 1;
+        
+        final int parentID = 100;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final int childID = 200;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
+        final URI childURI = childURL.toURI();
+        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        
+        final TransformerException expectedCause = new TransformerException("some exception message");
+        String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            oneOf(mockParentDocument).getDocumentReferenceByURI(childArchiveURI); will(returnValue(mockChildMetadataResourceProxy));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockChildMetadataResourceProxy).setURI(childURI);
+
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+            
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(childURL); will(returnValue(mockChildCmdiDocument));
+            oneOf(mockChildCmdiDocument).setHandle(null);
+            
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, childURL); will(throwException(expectedCause));
+            
+            //exception
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+        }});
+        
+        try {
+            nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
     }
 
     

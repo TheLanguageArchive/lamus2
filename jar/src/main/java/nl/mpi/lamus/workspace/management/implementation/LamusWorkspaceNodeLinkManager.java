@@ -309,13 +309,17 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             workspaceDao.updateNodeArchiveUrl(childNode);
             
         } catch (IOException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         } catch (MetadataException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         } catch (URISyntaxException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         } catch (TransformerException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
+            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         }
         
     }

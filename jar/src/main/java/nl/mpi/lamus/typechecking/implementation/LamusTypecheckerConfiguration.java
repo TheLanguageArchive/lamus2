@@ -51,11 +51,7 @@ public class LamusTypecheckerConfiguration implements TypecheckerConfiguration {
             return TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
         }
         
-        // TODO default judgement should be different
-            // The typechecker doesn't support CMDI at the moment, so this is letting everything pass
-            // but anyway these checks should be improved to support multiple configurations
-//        return TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        return TypecheckerJudgement.UNARCHIVABLE;
+        return TypecheckerJudgement.ARCHIVABLE_LONGTERM;
     }
     
 }

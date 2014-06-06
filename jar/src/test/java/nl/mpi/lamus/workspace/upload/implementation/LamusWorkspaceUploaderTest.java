@@ -470,6 +470,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
+            oneOf(mockFile1).getName(); will(returnValue(filename));
                 
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             
@@ -542,7 +543,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
-                
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(uploadedFileArchiveURI));
@@ -630,6 +632,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
+            oneOf(mockFile1).getName(); will(returnValue(filename1));
                 
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype1));
                 
@@ -649,6 +652,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
+            oneOf(mockFile2).getName(); will(returnValue(filename2));
                 
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype2));
                 
@@ -834,7 +838,6 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
-            
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
             

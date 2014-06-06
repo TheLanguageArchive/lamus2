@@ -26,7 +26,6 @@ import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -49,19 +48,17 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     
     private final VersioningHandler versioningHandler;
     private final WorkspaceDao workspaceDao;
-    private final SearchClientBridge searchClientBridge;
     private final HandleManager handleManager;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     private Workspace workspace;
     
     public ReplacedOrDeletedNodeExporter(VersioningHandler versioningHandler,
-            WorkspaceDao wsDao, SearchClientBridge sClientBridge,
-            HandleManager handleManager, ArchiveFileLocationProvider locationProvider) {
+            WorkspaceDao wsDao, HandleManager handleManager,
+            ArchiveFileLocationProvider locationProvider) {
 
         this.versioningHandler = versioningHandler;
         this.workspaceDao = wsDao;
-        this.searchClientBridge = sClientBridge;
         this.handleManager = handleManager;
         this.archiveFileLocationProvider = locationProvider;
     }
@@ -121,8 +118,8 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         //TODO ALSO NODES REPLACING NODES WHICH HAD REPLACED OTHER NODES AND SO ON...
         // THESE SHOULD BE EVENTUALLY REMOVED FROM THE REPLACEMENTS TABLE SO THAT THEY DON'T GET ADDED TO THE CS DB
         
-        
-        searchClientBridge.removeNode(currentNode.getArchiveURI());
+        //TODO is this necessary?
+//        searchClientBridge.removeNode(currentNode.getArchiveURI());
         
         updateHandleLocation(currentNode);
         

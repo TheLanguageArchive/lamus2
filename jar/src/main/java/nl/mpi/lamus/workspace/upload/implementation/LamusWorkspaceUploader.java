@@ -203,6 +203,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 FileUtils.forceDelete(currentFile);
                 
                 continue;
+            } else {
+                String debugMessage = "File [" + currentFile.getName() + "] archivable: " + message;
+                logger.debug(debugMessage);
             }
             
             String nodeMimetype = typecheckedResults.getCheckedMimetype();

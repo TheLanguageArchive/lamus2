@@ -16,6 +16,8 @@
 package nl.mpi.lamus.spring;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -394,5 +396,23 @@ public class LamusProperties {
     @Qualifier("corpusStructureServiceVersionCreationPath")
     public String corpusStructureServiceVersionCreationPath() {
         return corpusStructureServiceVersionCreationPath;
+    }
+    
+    @Value("${manager_users}")
+    private String managerUsers;
+    @Bean
+    @Qualifier("managerUsers")
+    public Collection<String> managerUsers() {
+        
+        Collection<String> collectionToReturn = new ArrayList<String>();
+        
+        String[] usernames = managerUsers.split(",");
+        if(usernames.length > 0) {
+            for(String username : usernames) {
+                collectionToReturn.add(username);
+            }
+        }
+        
+        return collectionToReturn;
     }
 }

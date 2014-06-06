@@ -19,7 +19,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.net.URL;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -35,15 +34,12 @@ public class UnlinkedNodeExporter implements NodeExporter{
     private static final Logger logger = LoggerFactory.getLogger(UnlinkedNodeExporter.class);
 
     private final VersioningHandler versioningHandler;
-    private final SearchClientBridge searchClientBridge;
     
     private Workspace workspace;
     
-    public UnlinkedNodeExporter(VersioningHandler versioningHandler,
-            SearchClientBridge sClientBridge) {
+    public UnlinkedNodeExporter(VersioningHandler versioningHandler) {
 
         this.versioningHandler = versioningHandler;
-        this.searchClientBridge = sClientBridge;
     }
     
     /**
@@ -92,7 +88,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
         URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
         currentNode.setArchiveURL(trashedNodeArchiveURL);
         
-        searchClientBridge.removeNode(currentNode.getArchiveURI());
+        //TODO is this necessary?
+//        searchClientBridge.removeNode(currentNode.getArchiveURI());
         
         //TODO REMOVE LINK FROM PARENT (IF THERE IS ONE)
     }

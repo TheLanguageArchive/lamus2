@@ -27,7 +27,6 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -57,7 +56,6 @@ public class LamusNodeExporterFactoryTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Mock SearchClientBridge mockSearchClientBridge;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock MetadataAPI mockMetadataAPI;

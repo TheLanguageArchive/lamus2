@@ -44,6 +44,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -75,10 +76,13 @@ public class LamusNodeReplaceCheckerFactoryTest {
     @Before
     public void setUp() {
         
-        nodeReplaceManagerFactory = new LamusNodeReplaceCheckerFactory(
-                mockCorpusStructureProvider, mockArchiveFileHelper,
-                mockReplaceActionManager, mockReplaceActionFactory,
-                mockNodeReplaceExplorer);
+        nodeReplaceManagerFactory = new LamusNodeReplaceCheckerFactory();
+        
+        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "archiveFileHelper", mockArchiveFileHelper);
+        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "replaceActionManager", mockReplaceActionManager);
+        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "replaceActionFactory", mockReplaceActionFactory);
+        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "nodeReplaceExplorer", mockNodeReplaceExplorer);
     }
     
     @After

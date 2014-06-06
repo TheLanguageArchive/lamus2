@@ -36,7 +36,6 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -80,7 +79,6 @@ public class AddedNodeExporterTest {
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock SearchClientBridge mockSearchClientBridge;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
 //    @Mock AmsBridge mockAmsBridge;
     @Mock NodeDataRetriever mockNodeDataRetriever;
@@ -127,7 +125,7 @@ public class AddedNodeExporterTest {
     @Before
     public void setUp() {
         addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
-                mockMetadataAPI, mockWorkspaceDao, mockSearchClientBridge, mockWorkspaceTreeExporter,
+                mockMetadataAPI, mockWorkspaceDao, mockWorkspaceTreeExporter,
                 mockNodeDataRetriever, mockCorpusStructureProvider, mockNodeResolver, mockHandleManager, mockMetadataApiBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
@@ -191,7 +189,7 @@ public class AddedNodeExporterTest {
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle, parentNodeWsURL, parentNodeWsFile, null);
         
-        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
+//        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
         addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
@@ -248,7 +246,7 @@ public class AddedNodeExporterTest {
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle, parentNodeWsURL, parentNodeWsFile, null);
         
-        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
+//        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
         
         
         addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
@@ -673,16 +671,16 @@ public class AddedNodeExporterTest {
         }
     }
     
-    private void checkSearchClientInvocations(final String nodeFormat, final URI nodeNewArchiveHandle) {
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockChildWsNode).getFormat(); will(returnValue(nodeFormat));
-            oneOf(mockSearchClientBridge).isFormatSearchable(nodeFormat); will(returnValue(Boolean.TRUE));
-            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
-            oneOf(mockSearchClientBridge).addNode(nodeNewArchiveHandle);
-        }});
-    }
+//    private void checkSearchClientInvocations(final String nodeFormat, final URI nodeNewArchiveHandle) {
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockChildWsNode).getFormat(); will(returnValue(nodeFormat));
+//            oneOf(mockSearchClientBridge).isFormatSearchable(nodeFormat); will(returnValue(Boolean.TRUE));
+//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
+//            oneOf(mockSearchClientBridge).addNode(nodeNewArchiveHandle);
+//        }});
+//    }
     
     
     

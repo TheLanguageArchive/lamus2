@@ -33,7 +33,6 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -63,7 +62,6 @@ public class AddedNodeExporter implements NodeExporter {
     private final WorkspaceFileHandler workspaceFileHandler;
     private final MetadataAPI metadataAPI;
     private final WorkspaceDao workspaceDao;
-    private final SearchClientBridge searchClientBridge;
     private final WorkspaceTreeExporter workspaceTreeExporter;
     private final NodeDataRetriever nodeDataRetriever;
     private final CorpusStructureProvider corpusStructureProvider;
@@ -74,8 +72,7 @@ public class AddedNodeExporter implements NodeExporter {
     private Workspace workspace;
     
     public AddedNodeExporter(ArchiveFileLocationProvider aflProvider, WorkspaceFileHandler wsFileHandler,
-            MetadataAPI mdAPI, WorkspaceDao wsDao,
-            SearchClientBridge scBridge, WorkspaceTreeExporter wsTreeExporter,
+            MetadataAPI mdAPI, WorkspaceDao wsDao, WorkspaceTreeExporter wsTreeExporter,
             NodeDataRetriever nodeDataRetriever,
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             HandleManager handleManager, MetadataApiBridge mdApiBridge) {
@@ -83,7 +80,6 @@ public class AddedNodeExporter implements NodeExporter {
         this.workspaceFileHandler = wsFileHandler;
         this.metadataAPI = mdAPI;
         this.workspaceDao = wsDao;
-        this.searchClientBridge = scBridge;
         this.workspaceTreeExporter = wsTreeExporter;
         this.nodeDataRetriever = nodeDataRetriever;
         this.corpusStructureProvider = csProvider;
@@ -154,10 +150,10 @@ public class AddedNodeExporter implements NodeExporter {
             
         updateReferenceInParent(currentNode, parentNode, referencingParentDocument);
         
-        
-        if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
-            searchClientBridge.addNode(currentNode.getArchiveURI());
-        }
+        //TODO is this necessary?
+//        if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
+//            searchClientBridge.addNode(currentNode.getArchiveURI());
+//        }
     }
     
     private File retrieveAndUpdateNewArchivePath(WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath) throws WorkspaceExportException {

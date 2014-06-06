@@ -40,26 +40,34 @@ public class LamusNodeReplaceCheckerFactory implements NodeReplaceCheckerFactory
 
     private static final Logger logger = LoggerFactory.getLogger(LamusNodeReplaceCheckerFactory.class);
     
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final ArchiveFileHelper archiveFileHelper;
-    private final ReplaceActionManager replaceActionManager;
-    private final ReplaceActionFactory replaceActionFactory;
-    private final NodeReplaceExplorer nodeReplaceExplorer;
+    @Autowired
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private ArchiveFileHelper archiveFileHelper;
+    @Autowired
+    private ReplaceActionManager replaceActionManager;
+    @Autowired
+    private ReplaceActionFactory replaceActionFactory;
+    @Autowired
+    private NodeReplaceExplorer nodeReplaceExplorer;
     
     private NodeReplaceChecker metadataNodeReplaceChecker;
     private NodeReplaceChecker resourceNodeReplaceChecker;
     
-    
-    @Autowired
-    public LamusNodeReplaceCheckerFactory(CorpusStructureProvider csProvider,
-            ArchiveFileHelper aFileHelper, ReplaceActionManager actionManager,
-            ReplaceActionFactory actionFactory, NodeReplaceExplorer replaceExplorer) {
-        corpusStructureProvider = csProvider;
-        archiveFileHelper = aFileHelper;
-        replaceActionManager = actionManager;
-        replaceActionFactory = actionFactory;
-        nodeReplaceExplorer = replaceExplorer;
+    public LamusNodeReplaceCheckerFactory() {
+        
     }
+    
+//    @Autowired
+//    public LamusNodeReplaceCheckerFactory(CorpusStructureProvider csProvider,
+//            ArchiveFileHelper aFileHelper, ReplaceActionManager actionManager,
+//            ReplaceActionFactory actionFactory, NodeReplaceExplorer replaceExplorer) {
+//        corpusStructureProvider = csProvider;
+//        archiveFileHelper = aFileHelper;
+//        replaceActionManager = actionManager;
+//        replaceActionFactory = actionFactory;
+//        nodeReplaceExplorer = replaceExplorer;
+//    }
     
     /**
      * @see NodeReplaceCheckerFactory#getReplaceCheckerForNode(nl.mpi.lamus.workspace.model.WorkspaceNode)

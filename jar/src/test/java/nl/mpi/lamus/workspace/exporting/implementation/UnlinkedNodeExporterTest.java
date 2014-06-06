@@ -26,7 +26,6 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
-import nl.mpi.lamus.workspace.exporting.SearchClientBridge;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -59,7 +58,6 @@ public class UnlinkedNodeExporterTest {
     
     @Mock VersioningHandler mockVersioningHandler;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock SearchClientBridge mockSearchClientBridge;
     
     @Mock WorkspaceNode mockWorkspaceNode;
     @Mock CorpusNode mockCorpusNode;
@@ -78,7 +76,7 @@ public class UnlinkedNodeExporterTest {
     @Before
     public void setUp() {
         
-        unlinkedNodeExporter = new UnlinkedNodeExporter(mockVersioningHandler, mockSearchClientBridge);
+        unlinkedNodeExporter = new UnlinkedNodeExporter(mockVersioningHandler);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -127,8 +125,8 @@ public class UnlinkedNodeExporterTest {
             
 //            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
             
         }});
         

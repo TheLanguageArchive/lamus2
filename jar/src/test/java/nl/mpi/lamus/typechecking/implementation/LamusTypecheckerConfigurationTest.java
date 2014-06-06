@@ -76,8 +76,7 @@ public class LamusTypecheckerConfigurationTest {
     public void getAcceptableJudgementForNormalLocation() throws MalformedURLException {
         
         //TODO change this in order to support multiple configurations
-//        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.UNARCHIVABLE;
+        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
         URL location = new URL("http://someServer/random_folder");
         
         TypecheckerJudgement retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
