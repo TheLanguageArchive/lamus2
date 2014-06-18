@@ -61,6 +61,10 @@
     <logger name="org.springframework">
         <level value="info" />
     </logger>
+    
+    <logger name="org.hibernate">
+        <level value="info" />
+    </logger>
 
     <root> 
 	<priority value ="info" /> 

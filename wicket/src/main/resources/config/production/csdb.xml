@@ -33,6 +33,11 @@
 	    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 		<property name="generateDdl" value="true" />
 	    </bean>
+<!--            <bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
+                <property name="showSql" value="true" />
+                <property name="generateDdl" value="true" />
+                <property name="databasePlatform" value="org.apache.openjpa.jdbc.sql.PostgresDictionary" />
+            </bean>-->
 	</property>
 	<property name="persistenceUnitName" value="corpusstructure2-persistency" />
 <!--	<property name="jpaProperties">
@@ -61,6 +66,8 @@
     
      <!-- CSDB created from factory --> 
     <bean id="corpusStructureProvider" factory-bean="providerFactory" factory-method="createCorpusStructureProvider" />
+    
+    <bean id="accessInfoProvider" factory-bean="providerFactory" factory-method="createAccessInfoProvider" />
     
     <bean id="nodeResolver" class="nl.mpi.archiving.corpusstructure.provider.db.service.impl.CorpusStructureProviderNodeResolver" />
     
