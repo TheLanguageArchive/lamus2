@@ -28,6 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
@@ -56,8 +57,8 @@ public class LamusWorkspaceAccessCheckerTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     private WorkspaceAccessChecker nodeAccessChecker;
     @Mock private CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock private AmsBridge mockAmsBridge;
     @Mock private WorkspaceDao mockWorkspaceDao;
+    @Mock private CorpusStructureAccessChecker mockCorpusStructureAccessChecker;
     
     @Mock private CorpusNode mockCorpusNode;
     @Mock private WorkspaceNode mockWorkspaceNode1;
@@ -76,7 +77,8 @@ public class LamusWorkspaceAccessCheckerTest {
     
     @Before
     public void setUp() {
-        nodeAccessChecker = new LamusWorkspaceAccessChecker(mockCorpusStructureProvider, mockAmsBridge, mockWorkspaceDao);
+        nodeAccessChecker = new LamusWorkspaceAccessChecker(
+                mockCorpusStructureProvider, mockWorkspaceDao, mockCorpusStructureAccessChecker);
     }
     
     @After
@@ -160,7 +162,8 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
-            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
+//            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.FALSE));
         }});
         
         try {
@@ -189,7 +192,8 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
-            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+//            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -222,7 +226,8 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
-            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+//            oneOf(mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -249,7 +254,8 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
             oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
-            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+//            oneOf (mockAmsBridge).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf (mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
         }});
         

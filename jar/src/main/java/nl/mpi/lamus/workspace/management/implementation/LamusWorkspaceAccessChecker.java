@@ -20,7 +20,7 @@ import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
@@ -50,15 +50,16 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
     private final CorpusStructureProvider corpusStructureProvider;
-    private final AmsBridge amsBridge;
     private final WorkspaceDao workspaceDao;
+    private final CorpusStructureAccessChecker corpusStructureAccessChecker;
     
     
     @Autowired
-    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, AmsBridge amsBridge, WorkspaceDao workspaceDao) {
+    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider,
+            WorkspaceDao workspaceDao, CorpusStructureAccessChecker csAccessChecker) {
         this.corpusStructureProvider = csProvider;
-        this.amsBridge = amsBridge;
         this.workspaceDao = workspaceDao;
+        this.corpusStructureAccessChecker = csAccessChecker;
     }
 
     /**
@@ -85,7 +86,12 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             throw new IllegalArgumentException("Selected node should be Metadata: " + archiveNodeURI);
             
         }
-        if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
+        
+        //TODO replaced the usage of AMS Bridge (and the associated service because it wasn't working properly due to some hibernate lazy loading issues of the users...)
+        //TODO should use some service instead (maybe provided by the corpus structure)
+        
+//        if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
+        if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
             NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
             logger.error(ex.getMessage(), ex);
             throw ex;

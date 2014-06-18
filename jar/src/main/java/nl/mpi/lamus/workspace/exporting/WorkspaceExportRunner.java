@@ -17,11 +17,7 @@ package nl.mpi.lamus.workspace.exporting;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
-import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
-import nl.mpi.archiving.corpusstructure.tools.crawler.exception.CrawlerException;
-import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
-import nl.mpi.lamus.archive.CrawlerBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -44,7 +40,6 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private final  WorkspaceDao workspaceDao;
     private final NodeExporterFactory nodeExporterFactory;
     private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
-    private final CrawlerBridge crawlerBridge;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
     
     private Workspace workspace;
@@ -53,11 +48,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
             UnlinkedAndDeletedNodesExportHandler dnExportHandler,
-            CrawlerBridge crawlerBridge, CorpusStructureServiceBridge csServiceBridge) {
+            CorpusStructureServiceBridge csServiceBridge) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
         this.unlinkedAndDeletedNodesExportHandler = dnExportHandler;
-        this.crawlerBridge = crawlerBridge;
         this.corpusStructureServiceBridge = csServiceBridge;
     }
     
@@ -83,7 +77,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * @return true if export is successful
      */
     @Override
-    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerException {
+    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException {
         
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)
@@ -134,14 +128,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem
         
-        //TODO call crawler
-        Crawler crawler = crawlerBridge.setUpCrawler();
-        HandlerUtilities handlerUtilities = crawlerBridge.setUpHandlerUtilities();
-        crawler.startCrawler(topNode.getArchiveURI(), handlerUtilities);
+        // crawler service
+        corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
         
-        
-        
-        //TODO CALL VERSION CREATION...
+        // version creation service
         Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
         
         if(!nodeReplacements.isEmpty()) {

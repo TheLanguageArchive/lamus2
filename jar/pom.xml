@@ -23,12 +23,6 @@
             <version>1.3</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-core</artifactId>
@@ -109,11 +103,6 @@
             <scope>test</scope>
         </dependency>
         
-<!--        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>2.2.2</version>
-        </dependency>-->
         <dependency>
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
@@ -132,36 +121,42 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.8.RELEASE</version>
+            <version>3.2.9.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>3.2.8.RELEASE</version>
+            <version>3.2.9.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>3.2.8.RELEASE</version>
+            <version>3.2.9.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.2.8.RELEASE</version>
+            <version>3.2.9.RELEASE</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>3.2.8.RELEASE</version>
+            <version>3.2.9.RELEASE</version>
         </dependency>
-<!--        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.1.1.Final</version>
-            <scope>test</scope>
-        </dependency>-->
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>3.2.9.RELEASE</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>3.2.9.RELEASE</version>
+        </dependency>
         
         <dependency>
             <groupId>hsqldb</groupId>
@@ -218,39 +213,17 @@
                 </exclusion>
             </exclusions>-->
         </dependency>
-<!--        <dependency>
-            <groupId>nl.mpi</groupId>
-            <artifactId>corpusstructure-api</artifactId>
-            <version>1.7.9</version>
-        </dependency>-->
         
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-provider</artifactId>
             <version>1.0-beta-5-SNAPSHOT</version>
         </dependency>
+        
 <!--        <dependency>
-            <groupId>nl.mpi.corpusstructure</groupId>
-            <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.0-beta-5-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.handle</groupId>
-                    <artifactId>handle</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
-        <dependency>
-            <groupId>nl.mpi.corpusstructure</groupId>
-            <artifactId>corpus-structure-2-crawler-core</artifactId>
-            <version>1.0-beta-5-SNAPSHOT</version>
-        </dependency>
-        
-        
-        <dependency>
             <groupId>nl.mpi</groupId>
-            <artifactId>ams2</artifactId>
-            <version>1.4.9.3</version>
+            <artifactId>ams2-war</artifactId>
+            <version>2.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-fileupload</groupId>
@@ -275,7 +248,14 @@
                 </exclusion>
                 
             </exclusions>
+        </dependency>-->
+        
+        <dependency>
+            <groupId>nl.mpi</groupId>
+            <artifactId>ams2-api</artifactId>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
+        
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>metadata-api</artifactId>
@@ -305,25 +285,17 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         
-<!--        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>14.0.1</version>
-        </dependency>-->
-        
-<!--        <dependency>
-            <groupId>nl.mpi.annot.search</groupId>
-            <artifactId>annot-search-lib</artifactId>
-            <version>1.2.2</version>
-        </dependency>-->
-        
-        
         
         <!-- CS Providers beans -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.2.4.Final</version>
+            <version>4.3.5.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.3.5.Final</version>
         </dependency>
         
 <!--        <dependency>

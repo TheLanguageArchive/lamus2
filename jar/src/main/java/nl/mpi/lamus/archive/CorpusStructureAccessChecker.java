@@ -16,25 +16,15 @@
  */
 package nl.mpi.lamus.archive;
 
-import nl.mpi.archiving.corpusstructure.tools.crawler.Crawler;
-import nl.mpi.archiving.corpusstructure.tools.crawler.handler.utils.HandlerUtilities;
+import java.net.URI;
 
 /**
- * Provides a bridge to interact with the crawler.
- * 
+ *
  * @author guisil
  */
-public interface CrawlerBridge {
+public interface CorpusStructureAccessChecker {
     
-    /**
-     * Sets up the crawler
-     * @return 
-     */
-    public Crawler setUpCrawler();
+
     
-    /**
-     * Sets up the handler utilities, which are to be passed to the crawler
-     * @return 
-     */
-    public HandlerUtilities setUpHandlerUtilities();
+    public boolean hasWriteAccess(String userId, URI archiveNodeURI);
 }

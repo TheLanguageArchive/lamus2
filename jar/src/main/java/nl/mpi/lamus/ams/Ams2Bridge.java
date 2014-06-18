@@ -44,206 +44,19 @@ import org.springframework.stereotype.Component;
  * @author	last modified by $Author$, created by mategg
  * @version	$Revision$
  */
-//@Component
+@Component
 public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
     
     private final static Logger logger = LoggerFactory.getLogger(Ams2Bridge.class);
-    /**
-     * provides access to principals' data
-     */
-//    private PrincipalService mPrincipalSrv;
-    /**
-     * handles authentication
-     */
-//    private AuthenticationService mAuthenticationSrv;
-    /**
-     * handles authorization
-     */
-//    private AdvAuthorizationService mAuthorizationSrv;
-    /**
-     * handles access to node data from corpusstrutcture db
-     */
-//    private FabricService mFabricSrv;
-    /**
-     * handles license management
-     */
-//    private LicenseService mLicenseSrv;
-    /**
-     * handles rule management
-     */
-//    private RuleService mRuleSrv;
+
+    
     private String baseURL;
     private String recalcURL;
     private String recalcParam;
 
-    /**
-     * default constructor, no special configuration <=> loads default settings
-     */
-    public Ams2Bridge() {
-		// load defaults
-//		this.initServices(null, null, null, null, null, null, null);
-    }
-            
-//    @Autowired
-//    public Ams2Bridge(PrincipalService principalSrv, @Qualifier("integratedAuthenticationSrv") AuthenticationService authenticationSrv,
-//            AdvAuthorizationService authorizationSrv, FabricService fabricSrv,
-//            LicenseService licenseSrv, RuleService ruleSrv) {
-//        this.mPrincipalSrv = principalSrv;
-//        this.mAuthenticationSrv = authenticationSrv;
-//        this.mAuthorizationSrv = authorizationSrv;
-//        this.mFabricSrv = fabricSrv;
-//        this.mLicenseSrv = licenseSrv;
-//        this.mRuleSrv = ruleSrv;
-//    }
 
-    /**
-     * constructor to specify utilized services and their configuration
-     * (springConfig files). for parameter details see {@link #initServices(String, String, String, String)}
-     *
-     * @param springConfigPaths comma separated relative paths to multiple
-     * spring-config files defining the utilized services
-     * @param authorizationSrv name of the (spring-bean) service which
-     * implements {@link AdvAuthorizationService}
-     * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
-     * @param authenticationSrv name of the (spring-bean) service which
-     * implements {@link AuthenticationService}
-     * @see #initServices(String, String, String, String)
-     */
-//	public Ams2Bridge(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
-//			String licenseSrv, String ruleSrv) {
-//		this.initServices(springConfigPaths, authorizationSrv, principalSrv, authenticationSrv, fabricSrv, licenseSrv, ruleSrv);
-//	}
-    /**
-     * initializes utilized services and their configuration (springConfig
-     * files). note: all parameters can be null, if no value is given (null),
-     * the default config is used.
-     *
-     * spring-ams2-auth.xml is used as default config you can
-     * overwrite/extend... this config by adding further spring-servlets
-     * (comma-separated) to the springConfigPaths the actual beans which will be
-     * instantiated are the ones which have been defined in the LATEST given
-     * file => by this way you can also easily overwrite some settings e.g.
-     * datasource strings etc... (just define same bean with adapted settings in
-     * a new config file and add this file to this list)
-     *
-     * @param springConfigPaths comma separated relative paths to multiple
-     * spring-config files defining the utilized services
-     * @param authorizationSrv name of the (spring-bean) service which
-     * implements {@link AdvAuthorizationService}
-     * @param principalSrv name of the (spring-bean) service which implements {@link PrincipalService}
-     * @param authenticationSrv name of the (spring-bean) service which
-     * implements {@link AuthenticationService}
-     */
-//	private void initServices(String springConfigPaths, String authorizationSrv, String principalSrv, String authenticationSrv, String fabricSrv, 
-//			String licenseSrv, String ruleSrv) {
-//		SpringContextLoader spring = new SpringContextLoader();
-//		spring.init(Text.notEmpty(springConfigPaths) 
-//				? springConfigPaths 
-//				: "spring-ams2-core.xml");
-//
-//		// load services: use given values if exist (not empty) otherwise defaults
-//		this.setAuthorizationSrv((AdvAuthorizationService) spring.getBean(
-//				Text.notEmpty(authorizationSrv) ? authorizationSrv : Constants.BEAN_AUTHORIZATION_SRV));
-//		
-//		this.setPrincipalSrv((PrincipalService) spring.getBean(
-//				Text.notEmpty(principalSrv) ? principalSrv : Constants.BEAN_PRINCIPAL_SRV));
-//		
-//		this.setAuthenticationSrv((AuthenticationService) spring.getBean(
-//				Text.notEmpty(authenticationSrv) ? authenticationSrv : Constants.BEAN_INTEGRATED_AUTHENTICATION_SRV));
-//		
-//		this.setFabricSrv((FabricService) spring.getBean(
-//				Text.notEmpty(fabricSrv) ? fabricSrv : Constants.BEAN_FABRIC_SRV));
-//		
-//		this.setLicenseSrv((LicenseService) spring.getBean(
-//				Text.notEmpty(licenseSrv) ? licenseSrv : Constants.BEAN_LICENSE_SRV));
-//		
-//		this.setRuleSrv((RuleService) spring.getBean(
-//				Text.notEmpty(ruleSrv) ? ruleSrv : Constants.BEAN_RULE_SRV));
-//	}
-    /**
-     * @return the authorizationSrv
-     */
-//    public AdvAuthorizationService getAuthorizationSrv() {
-//        return this.mAuthorizationSrv;
-//    }
-
-    /**
-     * @param authorizationSrv the authorizationSrv to set
-     */
-//    private void setAuthorizationSrv(AdvAuthorizationService authorizationSrv) {
-//        this.mAuthorizationSrv = authorizationSrv;
-//    }
-
-    /**
-     * @return the principalSrv
-     */
-//    public PrincipalService getPrincipalSrv() {
-//        return this.mPrincipalSrv;
-//    }
-
-    /**
-     * @param principalSrv the principalSrv to set
-     */
-//    private void setPrincipalSrv(PrincipalService principalSrv) {
-//        this.mPrincipalSrv = principalSrv;
-//    }
-
-    /**
-     * @return the authenticationSrv
-     */
-//    public AuthenticationService getAuthenticationSrv() {
-//        return this.mAuthenticationSrv;
-//    }
-
-    /**
-     * @param authenticationSrv the authenticationSrv to set
-     */
-//    private void setAuthenticationSrv(AuthenticationService authenticationSrv) {
-//        this.mAuthenticationSrv = authenticationSrv;
-//    }
-
-    /**
-     * @return the fabricSrv
-     */
-//    public FabricService getFabricSrv() {
-//        return this.mFabricSrv;
-//    }
-
-    /**
-     * @param fabricSrv the fabricSrv to set
-     */
-//    public void setFabricSrv(FabricService fabricSrv) {
-//        this.mFabricSrv = fabricSrv;
-//    }
-
-    /**
-     * @return the licenseSrv
-     */
-//    public LicenseService getLicenseSrv() {
-//        return mLicenseSrv;
-//    }
-
-    /**
-     * @param licenseSrv the licenseSrv to set
-     */
-//    public void setLicenseSrv(LicenseService licenseSrv) {
-//        this.mLicenseSrv = licenseSrv;
-//    }
-
-    /**
-     * @return the ruleSrv
-     */
-//    public RuleService getRuleSrv() {
-//        return mRuleSrv;
-//    }
-
-    /**
-     * @param ruleSrv the ruleSrv to set
-     */
-//    public void setRuleSrv(RuleService ruleSrv) {
-//        this.mRuleSrv = ruleSrv;
-//    }
-
+    
+    
     /**
      * @see lams.ams.AmsBridge#getStatus()
      */
@@ -302,35 +115,7 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
 //        }
     }
 
-    /**
-     * @see lams.ams.AmsBridge#validateUser(java.lang.String, java.lang.String)
-     */
-    /*
-     * removed form interface public boolean validateUser(String username,
-     * String password) { try {
-     * this.getAuthenticationSrv().authenticate(username, password); return
-     * true; } catch(AuthenticationException aE) { return false; }
-     * catch(Exception eE) { _log.error("error during authentication", eE);
-     * return false; }
-	}
-     */
-    /**
-     * @see nl.mpi.lamus.ams.AmsBridge#hasWriteAccess(java.lang.String, java.net.URI)
-     */
-    @Override
-    public boolean hasWriteAccess(String userId, URI archiveNodeURI) {
-        
-//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
-        
-//        LatPrincipal user = this.getPrincipalSrv().getUser(userId);
-//        NodeID target = this.getFabricSrv().newNodeID(nodeIdStr);
-//        return this.getAuthorizationSrv().isWriteable(user, target);
-        
-        
-        
-        return true;
-        
-    }
+
 
     /**
      * provides the NodePcplRule target for all DomainEditor options

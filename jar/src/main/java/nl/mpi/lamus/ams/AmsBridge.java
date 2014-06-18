@@ -44,24 +44,8 @@ public interface AmsBridge extends Serializable {
 	 */
 	public void close(String reason);
 	
-	/**
-	 * authenticates given user(uid) by given pw
-	 * @param username
-	 * @param password
-	 * @return
-	 */
-// removed, cause no longer needed, came from old/unused/removed lams.Authenticate
-//	public boolean validateUser(String username, String password);
-	
-	/**
-	 * determines whether given user (uid) has write access to given archive node
-	 * @param userId  destined user's uid
-	 * @param archiveNodeURI URI of the archive node to be checked
-	 * @return true/false according to whether given user (uid) has write access to given resource
-	 */
-	public boolean hasWriteAccess(String userId, URI archiveNodeURI);
-	
-	/**
+
+        /**
 	 * sets the used-storage-space for the given user(uid) on the given archive node
 	 * to given value
 	 * @param uid target user's uid

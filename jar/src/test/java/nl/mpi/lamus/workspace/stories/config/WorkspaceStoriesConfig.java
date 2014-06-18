@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.stories.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,13 +24,10 @@ import javax.sql.DataSource;
 //import nl.mpi.annot.search.lib.SearchClient;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
 import nl.mpi.bcarchive.typecheck.FileType;
 //import nl.mpi.corpusstructure.ArchiveObjectsDBWrite;
 //import nl.mpi.corpusstructure.CorpusStructureDBWrite;
 //import nl.mpi.corpusstructure.CorpusStructureDBWriteImpl;
-import nl.mpi.lamus.ams.Ams2Bridge;
-import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.workspace.stories.utils.WorkspaceStepsCorpusStructureProviderFactory;
 //import nl.mpi.lat.ams.authentication.impl.AmsDbAuthenticationSrv;
 //import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
@@ -56,21 +52,14 @@ import nl.mpi.metadata.identifierresolver.URLResolver;
 import org.apache.commons.io.FileUtils;
 //import org.delaman.ldap.ArchiveUserAuthImpl;
 //import org.hibernate.SessionFactory;
-import org.jbehave.core.configuration.spring.SpringStoryReporterBuilder;
-import static org.jbehave.core.reporters.Format.*;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
  *

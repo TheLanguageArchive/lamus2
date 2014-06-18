@@ -52,6 +52,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -63,60 +64,9 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 //@ActiveProfiles("testing")
 public class Ams2BridgeTest {
     
-    //TODO Disabled tests while AMS is not updated to support URIs, CS Provider and so on
-        // (at the moment the beans to be injected are still incompatible with CMDI)
-    
-    
-////    @Configuration
-////    @ComponentScan("nl.mpi.lamus.ams")
-////    @Profile("testing")
-//    static class ContextConfiguration {
-//        
-////        @Bean
-//        public PrincipalService principalSrv(){
-//            return new PrincipalSrv();
-//        }
-//        
-////        @Bean
-////        @Qualifier("integratedAuthenticationSrv")
-//        public AuthenticationService authenticationSrv() {
-//            return new IntegratedAuthenticationSrv();
-//        }
-//        
-////        @Bean
-//        public AdvAuthorizationService authorizationSrv() {
-//            return new AmsAuthorizationSrv();
-//        }
-//        
-////        @Bean
-//        public FabricService fabricSrv() {
-//            return new FabricSrv();
-//        }
-//        
-////        @Bean
-//        public LicenseService licenseSrv() {
-//            return new LicenseSrv();
-//        }
-//        
-////        @Bean
-//        public RuleService ruleSrv() {
-//            return new RuleSrv();
-//        }
-//    }
-    
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Autowired
-    Ams2Bridge testAms2BridgeFromSpringContext;
-    
-    private Ams2Bridge testAms2BridgeWithMockServices;
-    private Ams2Bridge testAms2BridgeWithNullFabricService;
-//    @Mock PrincipalService mockPrincipalSrv;
-//    @Mock AuthenticationService mockAuthenticationSrv;
-//    @Mock AdvAuthorizationService mockAuthorizationSrv;
-//    @Mock FabricService mockFabricSrv;
-//    @Mock LicenseService mockLicenseSrv;
-//    @Mock RuleService mockRuleSrv;
+    private Ams2Bridge ams2Bridge;
     
 //    @Mock LatUser mockUser;
 //    @Mock NodeID mockNodeID;
@@ -134,164 +84,15 @@ public class Ams2BridgeTest {
     
     @Before
     public void setUp() {
-//        testAms2BridgeWithMockServices = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
-//                mockAuthorizationSrv, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
-//        testAms2BridgeWithNullFabricService = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
-//                mockAuthorizationSrv, null, mockLicenseSrv, mockRuleSrv);
+        
+        ams2Bridge = new Ams2Bridge();
     }
     
     @After
     public void tearDown() {
     }
 
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void authorizationServiceInitialisedWhenInjected() {
-        
-//        AdvAuthorizationService authorizationSrv = testAms2BridgeFromSpringContext.getAuthorizationSrv();
-//        assertNotNull(authorizationSrv);
-    }
-    
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void principalServiceInitialisedWhenInjected() {
-        
-//        PrincipalService principalSrv = testAms2BridgeFromSpringContext.getPrincipalSrv();
-//        assertNotNull(principalSrv);
-    }
-    
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void authenticationServiceInitialisedWhenInjected() {
-        
-//        AuthenticationService authenticationSrv = testAms2BridgeFromSpringContext.getAuthenticationSrv();
-//        assertNotNull(authenticationSrv);
-    }
-    
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void fabricServiceInitialisedWhenInjected() {
-        
-//        FabricService fabricSrv = testAms2BridgeFromSpringContext.getFabricSrv();
-//        assertNotNull(fabricSrv);
-    }
-    
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void licenseServiceInitialisedWhenInjected() {
-        
-//        LicenseService licenseSrv = testAms2BridgeFromSpringContext.getLicenseSrv();
-//        assertNotNull(licenseSrv);
-    }
-    
-    /**
-     * Test the constructor without parameters
-     */
-//    @Test
-    public void ruleServiceInitialisedWhenInjected() {
-
-//        RuleService ruleSrv = testAms2BridgeFromSpringContext.getRuleSrv();
-//        assertNotNull(ruleSrv);
-    }
-    
-//    @Test
-    public void statusIsFalseWhenAuthenticationServiceIsNull() {
-        
-//        Ams2Bridge ams2BridgeWithNullAuthorizationService = new Ams2Bridge(mockPrincipalSrv, null,
-//                mockAuthorizationSrv, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
-//        assertFalse(ams2BridgeWithNullAuthorizationService.getStatus());
-    }
-    
-//    @Test
-    public void statusIsFalseWhenAuthorizationServiceIsNull() {
-        
-//        Ams2Bridge ams2BridgeWithNullAuthorizationService = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
-//                null, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
-//        assertFalse(ams2BridgeWithNullAuthorizationService.getStatus());
-    }
-    
-//    @Test
-    public void statusIsFalseWhenPrincipalServiceIsNull() {
-        
-//        Ams2Bridge ams2BridgeWithNullAuthorizationService = new Ams2Bridge(null, mockAuthenticationSrv,
-//                mockAuthorizationSrv, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
-//        assertFalse(ams2BridgeWithNullAuthorizationService.getStatus());
-    }
-    
-//    @Test
-    public void statusIsTrueWhenAllServicesAreNotNull() {
-        
-//        Ams2Bridge ams2BridgeWithNullAuthorizationService = new Ams2Bridge(mockPrincipalSrv, mockAuthenticationSrv,
-//                mockAuthorizationSrv, mockFabricSrv, mockLicenseSrv, mockRuleSrv);
-//        assertTrue(ams2BridgeWithNullAuthorizationService.getStatus());
-    }
-    
-//    @Test
-    public void fabricServiceIsCalledWhenClosing() {
-        
-//        context.checking(new Expectations() {{
-//            oneOf (mockFabricSrv).close();
-//        }});
-//        
-//        testAms2BridgeWithMockServices.close();
-    }
-    
-//    @Test
-    public void doNothingWhenClosingAndFabricServiceIsNull() {
-        
-//        context.checking(new Expectations() {{
-//            never (mockFabricSrv).close();
-//        }});
-//        
-//        testAms2BridgeWithNullFabricService.close();
-    }
-    
-//    @Test
-    public void userHasWriteAccess() throws URISyntaxException {
-        
-        final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-
-//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
-        
-//        context.checking(new Expectations() {{
-//            oneOf (mockPrincipalSrv).getUser(userID); will(returnValue(mockUser));
-//            oneOf (mockFabricSrv).newNodeID(nodeIDStr); will(returnValue(mockNodeID));
-//            oneOf (mockAuthorizationSrv).isWriteable(mockUser, mockNodeID); will(returnValue(true));
-//        }});
-        
-        boolean hasAccess = testAms2BridgeWithMockServices.hasWriteAccess(userID, archiveNodeURI);
-        assertTrue(hasAccess);
-    }
-    
-//    @Test
-    public void userDoesNotHaveWriteAccess() {
-        
-//TODO Temporarily commented out, until AMS is changed in order to support URIs instead of NodeIDs
-        
-//        final String userID = "someUser";
-//        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-//        
-//        context.checking(new Expectations() {{
-//            oneOf (mockPrincipalSrv).getUser(userID); will(returnValue(mockUser));
-//            oneOf (mockFabricSrv).newNodeID(nodeIDStr); will(returnValue(mockNodeID));
-//            oneOf (mockAuthorizationSrv).isWriteable(mockUser, mockNodeID); will(returnValue(false));
-//        }});
-//        
-//        boolean hasAccess = testAms2BridgeWithMockServices.hasWriteAccess(userID, archiveNodeURI);
-//        assertFalse(hasAccess);
-    }
-    
+   
 //    @Test
     public void getUsedStorageSpaceUnknownNodeException() {
         

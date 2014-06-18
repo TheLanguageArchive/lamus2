@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.util.implementation;
 
+import java.net.URI;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -34,16 +35,12 @@ import org.springframework.stereotype.Component;
 public class LamusJerseyHelper implements JerseyHelper {
 
     /**
-     * @see JerseyHelper#postRequest(javax.json.JsonObject, java.lang.String, java.lang.String[])
+     * @see JerseyHelper#postRequestWithJson(javax.json.JsonObject, java.lang.String, java.lang.String[])
      */
     @Override
-    public JsonObject postRequest(JsonObject requestJsonObject, String location, String... paths) {
-        Client client = ClientBuilder.newClient();
+    public JsonObject postRequestWithJson(JsonObject requestJsonObject, String location, String... paths) {
         
-        WebTarget finalTarget = client.target(location);
-        for(String path : paths) {
-            finalTarget = finalTarget.path(path);
-        }
+        WebTarget finalTarget = getTargetForService(location, paths);
         
         Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
         
@@ -57,5 +54,35 @@ public class LamusJerseyHelper implements JerseyHelper {
         
         
         //TODO how to unit test this? most of these objects from javax.ws.rs cannot be mocked
+    }
+
+    /**
+     * @see JerseyHelper#postRequestWithUri(java.net.URI, java.lang.String, java.lang.String[])
+     */
+    @Override
+    public JsonObject postRequestWithUri(URI requestUri, String location, String... paths) {
+        
+        WebTarget finalTarget = getTargetForService(location, paths);
+        
+        Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
+        
+        Entity<String> uriEntity = Entity.entity("root=" + requestUri.toString(), MediaType.APPLICATION_FORM_URLENCODED);
+        
+        JsonObject responseJsonObject = invocationBuilder.post(uriEntity, JsonObject.class);
+        
+        return responseJsonObject;
+    }
+    
+    
+    private WebTarget getTargetForService(String location, String... paths) {
+        
+        Client client = ClientBuilder.newClient();
+        
+        WebTarget finalTarget = client.target(location);
+        for(String path : paths) {
+            finalTarget = finalTarget.path(path);
+        }
+        
+        return finalTarget;
     }
 }

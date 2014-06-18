@@ -162,11 +162,11 @@ public interface ArchiveFileHelper {
     /**
      * Retrieves the file location for the given base directory and path.
      * @param baseDirectory
-     * @param archiveNodeURI
+     * @param archiveNodeUriStr
      * @param archiveNodeURL
      * @return target file
      */
-    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL);
+    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, String archiveNodeUriStr, URL archiveNodeURL);
     
     /**
      * Checks if target directory can be written to.

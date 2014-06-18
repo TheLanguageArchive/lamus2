@@ -217,4 +217,37 @@ public class LamusJsonTransformationHandlerTest {
         
         assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
     }
+    
+    @Test
+    public void getCrawlIdFromJsonObjectStatusOk() throws URISyntaxException {
+        
+        String crawlId = "1234556";
+        URI crawlRootUri = new URI(UUID.randomUUID().toString());
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder crawlerStartObjectBuilder = Json.createObjectBuilder();
+        
+        crawlerStartObjectBuilder
+                .add("id", crawlId)
+                .add("root", crawlRootUri.toString());
+        
+        mainObjectBuilder.add("crawlerStart", crawlerStartObjectBuilder);
+        
+        JsonObject crawlStartObject = mainObjectBuilder.build();
+        
+        
+        String retrievedId = jsonTransformationHandler.getCrawlIdFromJsonObject(crawlStartObject);
+        
+        assertEquals("Retrieved crawl ID different from expected", crawlId, retrievedId);
+    }
+    
+    @Test
+    public void getCrawlIdFromJsonObjectStatusFailed() {
+        fail("not tested yet");
+    }
+    
+    @Test
+    public void getCrawlIdFromJsonObjectNoStatus() {
+        fail("not tested yet");
+    }
 }

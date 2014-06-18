@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.spring.production;
 
-import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -23,28 +22,11 @@ import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
 import nl.mpi.archiving.corpusstructure.core.database.dao.ArchivePropertyDao;
 import nl.mpi.archiving.corpusstructure.core.database.dao.CorpusStructureDao;
-import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchiveObjectDaoImpl;
-import nl.mpi.archiving.corpusstructure.core.database.dao.impl.ArchivePropertyDaoImpl;
-import nl.mpi.archiving.corpusstructure.core.database.dao.impl.CorpusStructureDaoImpl;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
-import nl.mpi.archiving.corpusstructure.provider.db.CorpusStructureProviderImpl;
-import nl.mpi.archiving.corpusstructure.provider.db.service.impl.CorpusStructureProviderNodeResolver;
-//import org.apache.openjpa.persistence.PersistenceProviderImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
-import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Configuration class containing some beans related with databases. To be used

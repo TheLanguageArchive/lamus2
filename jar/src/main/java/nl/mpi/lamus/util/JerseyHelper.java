@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.util;
 
+import java.net.URI;
 import javax.json.JsonObject;
 
 /**
@@ -33,5 +34,16 @@ public interface JerseyHelper {
      *              to the service location in order to call the required method
      * @return JSON object containing the response
      */
-    public JsonObject postRequest(JsonObject requestJsonObject, String location, String... paths);
+    public JsonObject postRequestWithJson(JsonObject requestJsonObject, String location, String... paths);
+    
+    /**
+     * Submits a POST request to the service in the given location and paths,
+     * passing the given String.
+     * @param requestUri URI to be passed to the request
+     * @param location Location of the service
+     * @param paths Paths (each path is like a directory name) to be appended
+     *              to the service location in order to call the required method
+     * @return JSON object containing the response
+     */
+    public JsonObject postRequestWithUri(URI requestUri, String location, String... paths);
 }

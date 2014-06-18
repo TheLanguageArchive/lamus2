@@ -211,118 +211,6 @@ public class LamusProperties {
         return dbLocalRoot;
     }
     
-    @Value("${crawler_archivename}")
-    private String crawlerArchiveName;
-    @Bean
-    @Qualifier("crawlerArchiveName")
-    public String crawlerArchiveName() {
-        return crawlerArchiveName;
-    }
-    
-    @Value("${crawler_hostname}")
-    private String crawlerHostName;
-    @Bean
-    @Qualifier("crawlerHostName")
-    public String crawlerHostName() {
-        return crawlerHostName;
-    }
-    
-    @Value("${crawler_domainname}")
-    private String crawlerDomainName;
-    @Bean
-    @Qualifier("crawlerDomainName")
-    public String crawlerDomainName() {
-        return crawlerDomainName;
-    }
-    
-    @Value("${crawler_amsurl}")
-    private String crawlerAmsUrl;
-    @Bean
-    @Qualifier("crawlerAmsUrl")
-    public String crawlerAmsUrl() {
-        return crawlerAmsUrl;
-    }
-    
-    @Value("${crawler_mdsurl}")
-    private String crawlerMdsUrl;
-    @Bean
-    @Qualifier("crawlerMdsUrl")
-    public String crawlerMdsUrl() {
-        return crawlerMdsUrl;
-    }
-    
-    @Value("${crawler_dbdriverclassname}")
-    private String crawlerDbDriverClassName;
-    @Bean
-    @Qualifier("crawlerDbDriverClassName")
-    public String crawlerDbDriverClassName() {
-        return crawlerDbDriverClassName;
-    }
-    
-    @Value("${crawler_dburl}")
-    private String crawlerDbUrl;
-    @Bean
-    @Qualifier("crawlerDbUrl")
-    public String crawlerDbUrl() {
-        return crawlerDbUrl;
-    }
-    
-    @Value("${crawler_dbmaxactive}")
-    private String crawlerDbMaxActive;
-    @Bean
-    @Qualifier("crawlerDbMaxActive")
-    public String crawlerDbMaxActive() {
-        return crawlerDbMaxActive;
-    }
-    
-    @Value("${crawler_dbmaxwait}")
-    private String crawlerDbMaxWait;
-    @Bean
-    @Qualifier("crawlerDbMaxWait")
-    public String crawlerDbMaxWait() {
-        return crawlerDbMaxWait;
-    }
-    
-    @Value("${crawler_dbtestonborrow}")
-    private String crawlerDbTestOnBorrow;
-    @Bean
-    @Qualifier("crawlerDbTestOnBorrow")
-    public String crawlerDbTestOnBorrow() {
-        return crawlerDbTestOnBorrow;
-    }
-    
-    @Value("${crawler_dbusername}")
-    private String crawlerDbUsername;
-    @Bean
-    @Qualifier("crawlerDbUsername")
-    public String crawlerDbUsername() {
-        return crawlerDbUsername;
-    }
-    
-    @Value("${crawler_dbpassword}")
-    private String crawlerDbPassword;
-    @Bean
-    @Qualifier("crawlerDbPassword")
-    public String crawlerDbPassword() {
-        return crawlerDbPassword;
-    }
-    
-    @Value("${crawler_connectiondrivername}")
-    private String crawlerConnectionDriverName;
-    @Bean
-    @Qualifier("crawlerConnectionDriverName")
-    public String crawlerConnectionDriverName() {
-        return crawlerConnectionDriverName;
-    }
-    
-    @Value("${crawler_hdlproxydomain}")
-    private String crawlerHdlProxyDomain;
-    @Bean
-    @Qualifier("crawlerHdlProxyDomain")
-    public String crawlerHdlProxyDomain() {
-        return crawlerHdlProxyDomain;
-    }
-    
     
     //handle properties
     
@@ -396,6 +284,22 @@ public class LamusProperties {
     @Qualifier("corpusStructureServiceVersionCreationPath")
     public String corpusStructureServiceVersionCreationPath() {
         return corpusStructureServiceVersionCreationPath;
+    }
+    
+    @Value("${corpusstructure_service_crawler_path}")
+    private String corpusStructureServiceCrawlerPath;
+    @Bean
+    @Qualifier("corpusStructureServiceCrawlerPath")
+    public String corpusStructureServiceCrawlerPath() {
+        return corpusStructureServiceCrawlerPath;
+    }
+    
+    @Value("${corpusstructure_service_crawler_start_path}")
+    private String corpusStructureServiceCrawlerStartPath;
+    @Bean
+    @Qualifier("corpusStructureServiceCrawlerStartPath")
+    public String corpusStructureServiceCrawlerStartPath() {
+        return corpusStructureServiceCrawlerStartPath;
     }
     
     @Value("${manager_users}")

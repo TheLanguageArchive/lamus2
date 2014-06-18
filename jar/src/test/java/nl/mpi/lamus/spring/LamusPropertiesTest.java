@@ -89,51 +89,7 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("dbLocalRoot")
     private String dbLocalRoot;
-    @Autowired
-    @Qualifier("crawlerArchiveName")
-    private String crawlerArchiveName;
-    @Autowired
-    @Qualifier("crawlerHostName")
-    private String crawlerHostName;
-    @Autowired
-    @Qualifier("crawlerDomainName")
-    private String crawlerDomainName;
-//    @Autowired
-//    @Qualifier("crawlerPrefixes")
-//    private String crawlerPrefixes;
-    @Autowired
-    @Qualifier("crawlerAmsUrl")
-    private String crawlerAmsUrl;
-    @Autowired
-    @Qualifier("crawlerMdsUrl")
-    private String crawlerMdsUrl;
-    @Autowired
-    @Qualifier("crawlerDbDriverClassName")
-    private String crawlerDbDriverClassName;
-    @Autowired
-    @Qualifier("crawlerDbUrl")
-    private String crawlerDbUrl;
-    @Autowired
-    @Qualifier("crawlerDbMaxActive")
-    private String crawlerDbMaxActive;
-    @Autowired
-    @Qualifier("crawlerDbMaxWait")
-    private String crawlerDbMaxWait;
-    @Autowired
-    @Qualifier("crawlerDbTestOnBorrow")
-    private String crawlerDbTestOnBorrow;
-    @Autowired
-    @Qualifier("crawlerDbUsername")
-    private String crawlerDbUsername;
-    @Autowired
-    @Qualifier("crawlerDbPassword")
-    private String crawlerDbPassword;
-    @Autowired
-    @Qualifier("crawlerConnectionDriverName")
-    private String crawlerConnectionDriverName;
-    @Autowired
-    @Qualifier("crawlerHdlProxyDomain")
-    private String crawlerHdlProxyDomain;
+    
     @Autowired
     @Qualifier("handlePrefix")
     private String handlePrefix;
@@ -161,6 +117,12 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("corpusStructureServiceVersionCreationPath")
     private String corpusStructureServiceVersionCreationPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerPath")
+    private String corpusStructureServiceCrawlerPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerStartPath")
+    private String corpusStructureServiceCrawlerStartPath;
     
     
     public LamusPropertiesTest() {

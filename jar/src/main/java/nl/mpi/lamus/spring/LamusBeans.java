@@ -19,14 +19,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.annotation.Resource;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.handle.util.implementation.HandleInfoRetrieverImpl;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
-import nl.mpi.lamus.ams.Ams2Bridge;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lat.ams.IAmsRemoteService;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +32,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
+@ImportResource("classpath:nl/mpi/lamus/spring/amsService.xml")
 @ComponentScan("nl.mpi.lamus")
 @Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
 public class LamusBeans {
@@ -83,11 +84,11 @@ public class LamusBeans {
     
     
     //TODO Load beans from AMS
-    @Bean
-    public AmsBridge amsBridge() {
-        return new Ams2Bridge();
-    }
-    
+//    @Bean
+//    public AmsBridge amsBridge() {
+//        return new Ams2Bridge();
+//    }
+//    
     
     @Bean
     public HandleInfoRetriever handleInfoRetriever() {
@@ -108,4 +109,13 @@ public class LamusBeans {
     public nl.mpi.metadata.api.util.HandleUtil metadataApiHandleUtil() {
         return new nl.mpi.metadata.api.util.HandleUtil();
     }
+    
+//    @Bean
+//    public IAmsRemoteService amsRemoteService() {
+//        HttpInvokerProxyFactoryBean proxy = new HttpInvokerProxyFactoryBean();
+//        proxy.setServiceInterface(IAmsRemoteService.class);
+//        proxy.setServiceUrl("http://lux16.mpi.nl/am/ams2-cmdi/api/v1/httpinvoker/AmsRemoteService");
+//        IAmsRemoteService service = (IAmsRemoteService) proxy.getObject();
+//        return service;
+//    }
 }

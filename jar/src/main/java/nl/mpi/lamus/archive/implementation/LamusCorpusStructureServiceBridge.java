@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.archive.implementation;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import javax.json.JsonObject;
@@ -51,6 +52,12 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Autowired
     @Qualifier("corpusStructureServiceVersionCreationPath")
     private String corpusStructureServiceVersionCreationPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerPath")
+    private String corpusStructureServiceCrawlerPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerStartPath")
+    private String corpusStructureServiceCrawlerStartPath;
     
     @Autowired
     public LamusCorpusStructureServiceBridge(JsonTransformationHandler jsonTransformationHandler, JerseyHelper jerseyHelper) {
@@ -71,7 +78,7 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
                 jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacements);
         
         JsonObject responseJsonObject =
-                jerseyHelper.postRequest(
+                jerseyHelper.postRequestWithJson(
                     requestJsonObject,
                     corpusStructureServiceLocation,
                     corpusStructureServiceVersioningPath,
@@ -97,6 +104,30 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
                 throw new VersionCreationException(errorMessage, null);
             }
         }
+    }
+
+    /**
+     * @see CorpusStructureServiceBridge#callCrawler(java.net.URI)
+     */
+    @Override
+    public void callCrawler(URI nodeUri) {
+        
+        
+        JsonObject responseJsonObject =
+                jerseyHelper.postRequestWithUri(
+                    nodeUri,
+                    corpusStructureServiceLocation,
+                    corpusStructureServiceCrawlerPath,
+                    corpusStructureServiceCrawlerStartPath);
+        
+        String crawlId = jsonTransformationHandler.getCrawlIdFromJsonObject(responseJsonObject);
+        
+        
+        //TODO CHECK IF OK??
+        
+        //TODO RETURN
+        
+//        return crawlId;
     }
     
 }

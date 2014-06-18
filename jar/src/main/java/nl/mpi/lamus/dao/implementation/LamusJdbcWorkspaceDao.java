@@ -621,7 +621,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         String queryUnlinkedAndDeletedTopNodeListSql = "SELECT * FROM node"
                 + " WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
-                + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
+                + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id)"
+                + " AND workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         
         Collection<WorkspaceNode> listToReturn =

@@ -329,14 +329,14 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
 
     /**
-     * @see ArchiveFileHelper#getTargetFileForReplacedOrDeletedNode(java.io.File, java.net.URI, java.net.URL)
+     * @see ArchiveFileHelper#getTargetFileForReplacedOrDeletedNode(java.io.File, java.lang.String, java.net.URL)
      */
     @Override
-    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, URI archiveNodeURI, URL archiveNodeURL) {
+    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, String archiveNodeUriStr, URL archiveNodeURL) {
         
         File archiveNodeFile = new File(archiveNodeURL.getPath());
         String fileBaseName = getFileBasename(archiveNodeFile.getPath());
-        StringBuilder fileNameBuilder = new StringBuilder().append("v_").append(archiveNodeURI).append("__.").append(fileBaseName);
+        StringBuilder fileNameBuilder = new StringBuilder().append("v_").append(archiveNodeUriStr).append("__.").append(fileBaseName);
         
         File targetFile = new File(baseDirectory, fileNameBuilder.toString());
         

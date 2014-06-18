@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
@@ -42,14 +43,18 @@ public class LamusVersioningHandler implements VersioningHandler {
     
     private final ArchiveFileHelper archiveFileHelper;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
+    private final HandleInfoRetriever handleInfoRetriever;
     
     @Autowired
-    public LamusVersioningHandler(ArchiveFileHelper fileHelper, ArchiveFileLocationProvider fileLocationProvider) {
+    public LamusVersioningHandler(ArchiveFileHelper fileHelper,
+        ArchiveFileLocationProvider fileLocationProvider,
+        HandleInfoRetriever handleInfoRetriever) {
         
         //TODO check constructor from the trashcan in the old lamus
         
         this.archiveFileHelper = fileHelper;
         this.archiveFileLocationProvider = fileLocationProvider;
+        this.handleInfoRetriever = handleInfoRetriever;
     }
 
     /**
@@ -107,7 +112,8 @@ public class LamusVersioningHandler implements VersioningHandler {
             return null;
         }
         
-        File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(targetDirectory, nodeToMove.getArchiveURI(), nodeToMove.getArchiveURL());
+        File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(
+                targetDirectory, handleInfoRetriever.stripHandle(nodeToMove.getArchiveURI().toString()), nodeToMove.getArchiveURL());
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

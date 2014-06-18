@@ -66,6 +66,8 @@ public class LamusCorpusStructureServiceBridgeTest {
     private String corpusStructureServiceLocation = "http://some.fake/location";
     private String corpusStructureServiceVersioningPath = "version";
     private String corpusStructureServiceVersionCreationPath = "create";
+    private String corpusStructureServiceCrawlerPath = "crawler";
+    private String corpusStructureServiceCrawlerStartPath = "start";
     
     
     public LamusCorpusStructureServiceBridgeTest() {
@@ -87,6 +89,8 @@ public class LamusCorpusStructureServiceBridgeTest {
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceLocation", corpusStructureServiceLocation);
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceVersioningPath", corpusStructureServiceVersioningPath);
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceVersionCreationPath", corpusStructureServiceVersionCreationPath);
+        ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceCrawlerPath", corpusStructureServiceCrawlerPath);
+        ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceCrawlerStartPath", corpusStructureServiceCrawlerStartPath);
     }
     
     @After
@@ -116,7 +120,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequest(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -138,7 +142,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequest(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -180,7 +184,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequest(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -194,5 +198,31 @@ public class LamusCorpusStructureServiceBridgeTest {
         } catch(VersionCreationException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
         }
+    }
+    
+    @Test
+    public void callCrawlerOk() throws URISyntaxException {
+        
+        final URI uriToCrawl = new URI(UUID.randomUUID().toString());
+        final String crawlId = "12345667";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockJerseyHelper).postRequestWithUri(uriToCrawl, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerStartPath);
+                will(returnValue(mockResponseJsonObject));
+                
+            oneOf(mockJsonTransformationHandler).getCrawlIdFromJsonObject(mockResponseJsonObject);
+                will(returnValue(crawlId));
+                
+                //CHECK get ID of the crawl and get the details (succeded? failed?)
+        }});
+        
+        
+        csServiceBridge.callCrawler(uriToCrawl);
+    }
+    
+    @Test
+    public void callCrawlerFailed() {
+        fail("not tested yet");
     }
 }

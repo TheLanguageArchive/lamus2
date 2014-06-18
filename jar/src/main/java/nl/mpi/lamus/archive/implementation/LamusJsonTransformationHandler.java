@@ -96,6 +96,22 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         
         return nodeReplacementCollection;
     }
+
+    /**
+     * @see JsonTransformationHandler#getCrawlIdFromJsonObject(javax.json.JsonObject)
+     */
+    @Override
+    public String getCrawlIdFromJsonObject(JsonObject jsonObject) {
+        
+        JsonObject startCrawlObject = jsonObject.getJsonObject("crawlerStart");
+        
+        String idToReturn = startCrawlObject.getString("id");
+        
+        //TODO CHECK IF OK??
+        
+        return idToReturn;
+    }
+    
     
     private WorkspaceNodeReplacement getNodeReplacementFromJsonObject(JsonObject innerObject) throws URISyntaxException {
         

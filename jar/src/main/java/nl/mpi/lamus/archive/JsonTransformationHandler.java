@@ -40,4 +40,12 @@ public interface JsonTransformationHandler {
      * @return collection of WorkspaceNodeReplacement objects
      */
     public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject jsonObject) throws URISyntaxException;
+    
+    /**
+     * Gets a String containing the ID of the crawl, which is included in the
+     * given JsonObject (from the service response)
+     * @param jsonObject JSON object containing the ID
+     * @return ID of the crawl
+     */
+    public String getCrawlIdFromJsonObject(JsonObject jsonObject);
 }

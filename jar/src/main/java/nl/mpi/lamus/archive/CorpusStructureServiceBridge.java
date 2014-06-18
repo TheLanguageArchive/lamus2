@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.archive;
 
+import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -32,4 +33,10 @@ public interface CorpusStructureServiceBridge {
      * @param nodeReplacements Collection containing the node replacements that should be translated into version entries in the corpusstructure database
      */
     public void createVersions(Collection<WorkspaceNodeReplacement> nodeReplacements) throws VersionCreationException;
+    
+    /**
+     * Triggers the crawler for the given node
+     * @param nodeUri URI of the node to crawl
+     */
+    public void callCrawler(URI nodeUri);
 }
