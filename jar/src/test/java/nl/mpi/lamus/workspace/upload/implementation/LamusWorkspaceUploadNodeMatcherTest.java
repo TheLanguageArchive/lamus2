@@ -308,7 +308,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
 
     @Test
-    public void findNodeForUriMatches() throws URISyntaxException, MalformedURLException {
+    public void findNodeForPathMatches() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         
@@ -323,29 +323,27 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/child.txt");
         
         //reference will match the second node
-        final URI referenceURI = new URI("parent/child.txt");
+        final String referencePath = "parent/child.txt";
         
         context.checking(new Expectations() {{
             
             //loop
             //first node doesn't match the given reference URI, so it will continue the loop
             oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
-            oneOf(mockReference).getURI(); will(returnValue(referenceURI));
             
             //second iteration
             //second node matches the given reference URI, so it will return this node
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
-            oneOf(mockReference).getURI(); will(returnValue(referenceURI));
         }});
         
-        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForUri(nodesToCheck, mockReference);
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencePath);
         
         assertNotNull("Matching node should not be null", retrievedNode);
         assertEquals("Matching node different from expected", mockSecondNode, retrievedNode);
     }
     
     @Test
-    public void findNodeForUriDoesNotMatch() throws MalformedURLException, URISyntaxException {
+    public void findNodeForPathDoesNotMatch() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
         
@@ -360,23 +358,34 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
         
         //reference will match the second node
-        final URI referenceURI = new URI("parent/child.txt");
+        final String referencepath = "parent/child.txt";
         
         context.checking(new Expectations() {{
             
             //loop
             //first node doesn't match the given reference URI, so it will continue the loop
             oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
-            oneOf(mockReference).getURI(); will(returnValue(referenceURI));
             
             //second iteration
             //second node doesn't match the given reference URI, so it will continue the loop (in this case it will finish)
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
-            oneOf(mockReference).getURI(); will(returnValue(referenceURI));
         }});
         
         //no match was found, so a null value will be returned
-        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForUri(nodesToCheck, mockReference);
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencepath);
+        
+        assertNull("Matching node should be null", retrievedNode);
+    }
+    
+    @Test
+    public void findNodeForEmptyPath() {
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        //no match was found, so a null value will be returned
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, "");
         
         assertNull("Matching node should be null", retrievedNode);
     }

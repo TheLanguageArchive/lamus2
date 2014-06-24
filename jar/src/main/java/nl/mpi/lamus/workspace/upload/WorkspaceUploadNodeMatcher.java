@@ -40,13 +40,13 @@ public interface WorkspaceUploadNodeMatcher {
     public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle);
     
     /**
-     * Tries to find a matching node for the given URI.
+     * Tries to find a matching node for the given path.
      * 
      * @param nodesToCheck Collection of (uploaded) nodes to check
-     * @param reference reference containing a URI which is not a handle
-     * @return node that matches the given URI, null if none is found
+     * @param referencePath reference path to match
+     * @return node that matches the given path, null if none is found
      */
-    public WorkspaceNode findNodeForUri(Collection<WorkspaceNode> nodesToCheck, Reference reference);
+    public WorkspaceNode findNodeForPath(Collection<WorkspaceNode> nodesToCheck, String referencePath);
     
     /**
      * Checks if the given URI corresponds to an external location,

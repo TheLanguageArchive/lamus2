@@ -130,22 +130,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     }
     
     /**
-     * @see WorkspaceUploadNodeMatcher#findNodeForUri(java.util.Collection, nl.mpi.metadata.api.model.Reference)
-     */
-    @Override
-    public WorkspaceNode findNodeForUri(Collection<WorkspaceNode> nodesToCheck, Reference reference) {
-        
-        for(WorkspaceNode innerNode : nodesToCheck) {
-            
-            if(innerNode.getWorkspaceURL().toString().contains(reference.getURI().toString())) { //check if the node URL contains the relative path that comes in the link reference
-                return innerNode;
-            }
-        }
-        
-        return null;
-    }
-    
-    /**
      * @see WorkspaceUploadNodeMatcher#findExternalNodeForUri(int, java.net.URI)
      */
     @Override
@@ -172,4 +156,18 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
         }
     }
     
+    @Override
+    public WorkspaceNode findNodeForPath(Collection<WorkspaceNode> nodesToCheck, String referencePath) {
+        
+        if(!referencePath.isEmpty()) {
+            for(WorkspaceNode innerNode : nodesToCheck) {
+
+                if(innerNode.getWorkspaceURL().toString().contains(referencePath)) { //check if the node URL contains the relative path that comes in the link reference
+                    return innerNode;
+                }
+            }
+        }
+        
+        return null;
+    }
 }

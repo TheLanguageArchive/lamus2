@@ -20,10 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
@@ -91,41 +91,47 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         
         for(Reference ref : references) {
             
+            URL refLocalURL = ref.getLocation();
             URI refURI = ref.getURI();
             WorkspaceNode matchedNode = null;
 
-            if(metadataApiHandleUtil.isHandleUri(refURI)) {
+            if(refLocalURL != null) {
+                
+                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURL.toString());
+                
+                if(matchedNode != null) {
+                    if(refURI != null && !refURI.toString().isEmpty() && metadataApiHandleUtil.isHandleUri(refURI)) {
+                            matchedNode.setArchiveURI(refURI);
+                            workspaceDao.updateNodeArchiveUri(matchedNode);
+                    } else {
+                        try {
+                            updateReferenceUri(currentDocument, ref, refLocalURL.toURI(), null, matchedNode);
+                        } catch (URISyntaxException ex) {
+                            throw new UnsupportedOperationException("not handled yet");
+                        }
+                    }
+                }
+                
+            } else if(metadataApiHandleUtil.isHandleUri(refURI)) {
                 matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
                 
-                //set handle in DB
-                if(matchedNode != null && !handleMatcher.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
-                    matchedNode.setArchiveURI(refURI);
-                    workspaceDao.updateNodeArchiveUri(matchedNode);
+                if(matchedNode != null) {
+                
+                    updateReferenceUri(currentDocument, ref, null, matchedNode.getWorkspaceURL(), matchedNode);
+                    
+                    //set handle in DB
+                    if(!handleMatcher.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
+                        matchedNode.setArchiveURI(refURI);
+                        workspaceDao.updateNodeArchiveUri(matchedNode);
+                    }
                 }
                 
             } else {
 
-                matchedNode = workspaceUploadNodeMatcher.findNodeForUri(nodesToCheck, ref);
+                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
                 
                 if(matchedNode != null) {
-                    try {
-                        //change the reference URI to the workspace URL and save the document in the same location
-                        ref.setURI(matchedNode.getWorkspaceURL().toURI());
-                        File documentFile = new File(currentDocument.getFileLocation().getPath());
-                        StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
-                        metadataAPI.writeMetadataDocument(currentDocument, documentStreamResult);
-                        
-                        //TODO LEAVE SOME MESSAGE HERE
-                        
-                    } catch (URISyntaxException ex) {
-                        logger.error("Error updating the reference for node " + matchedNode.getWorkspaceNodeID() + " (from '" + ref.getURI() + "' to '" + matchedNode.getWorkspaceURL() + "'", ex);
-                    } catch (IOException ex) {
-                        logger.error("Error updating the reference for node " + matchedNode.getWorkspaceNodeID() + " (from '" + ref.getURI() + "' to '" + matchedNode.getWorkspaceURL() + "'", ex);
-                    } catch (TransformerException ex) {
-                        logger.error("Error updating the reference for node " + matchedNode.getWorkspaceNodeID() + " (from '" + ref.getURI() + "' to '" + matchedNode.getWorkspaceURL() + "'", ex);
-                    } catch (MetadataException ex) {
-                        logger.error("Error updating the reference for node " + matchedNode.getWorkspaceNodeID() + " (from '" + ref.getURI() + "' to '" + matchedNode.getWorkspaceURL() + "'", ex);
-                    }
+                    updateReferenceUri(currentDocument, ref, null, matchedNode.getWorkspaceURL(), matchedNode);
                 } else {
                     matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
                 }
@@ -150,14 +156,43 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     //TODO LEAVE SOME MESSAGE HERE
                     
                 } catch (MetadataException ex) {
-                    logger.error("Error removing reference '" + ref.getURI() + "' from node " + currentNode.getWorkspaceNodeID(), ex);
+                    logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
                 } catch (IOException ex) {
-                    logger.error("Error removing reference '" + ref.getURI() + "' from node " + currentNode.getWorkspaceNodeID(), ex);
+                    logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
                 } catch (TransformerException ex) {
-                    logger.error("Error removing reference '" + ref.getURI() + "' from node " + currentNode.getWorkspaceNodeID(), ex);
+                    logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
                 }
             }
             
+        }
+    }
+    
+    
+    private void updateReferenceUri(ReferencingMetadataDocument document, Reference ref, URI newUri, URL newLocation, WorkspaceNode referencedNode) {
+        
+        String oldUrl = "";
+        StringBuilder message = new StringBuilder();
+        if(newUri != null) {
+            String oldUri = (ref.getURI() != null) ? ref.getURI().toString() : "";
+            message.append("[old URI: '").append(oldUri).append("']");
+            ref.setURI(newUri);
+        }
+        if(newLocation != null) {
+            String oldLocation = (ref.getLocation() != null) ? ref.getLocation().toString() : "";
+            message.append("[old URL: '").append(oldLocation).append("']");
+            ref.setLocation(newLocation);
+        }
+        
+        try {
+            File documentFile = new File(document.getFileLocation().getPath());
+            StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
+            metadataAPI.writeMetadataDocument(document, documentStreamResult);
+        } catch (IOException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
+        } catch (TransformerException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
+        } catch (MetadataException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
         }
     }
     
