@@ -30,6 +30,10 @@
 	<level value="info" />
     </logger>
     
+    <logger name="nl.mpi.metadata">
+        <level value="debug" />
+    </logger>
+    
     <logger name="nl.mpi.util">
 	<level value="info" />
     </logger>
