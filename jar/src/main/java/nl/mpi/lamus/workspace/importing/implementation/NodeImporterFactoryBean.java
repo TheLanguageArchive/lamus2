@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
@@ -50,6 +51,8 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     @Autowired
     private MetadataAPI metadataApi;
     @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    @Autowired
     private NodeDataRetriever nodeDataRetriever;
     @Autowired
     private WorkspaceNodeLinkManager workspaceNodeLinkManager;
@@ -73,12 +76,12 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
     public NodeImporter getObject() throws Exception {
         if(ResourceNodeImporter.class.equals(nodeImporterType)) {
             return new ResourceNodeImporter(
-                    corpusStructureProvider, nodeResolver, workspaceDao,
+                    corpusStructureProvider, nodeResolver, workspaceDao, metadataApiBridge,
                     nodeDataRetriever, workspaceNodeFactory, workspaceNodeLinkFactory);
         } else {
             return new MetadataNodeImporter(
                     corpusStructureProvider, nodeResolver, workspaceDao,
-                    metadataApi, workspaceNodeLinkManager, workspaceFileImporter,
+                    metadataApi, metadataApiBridge, workspaceNodeLinkManager, workspaceFileImporter,
                     workspaceNodeFactory, workspaceNodeExplorer);
         }
     }

@@ -73,15 +73,9 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle) {
         
-        CorpusNode referenceCorpusNode = corpusStructureProvider.getNode(handle);
-        URL referenceUrl = null;
-        if(referenceCorpusNode == null) {
-            logger.warn("Node not found in CS DB for handle " + handle.toString());
-        } else {
-            referenceUrl = nodeResolver.getUrl(referenceCorpusNode);
-        }
         
-        File wsUploadDirectory = workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+//        File wsUploadDirectory = workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
         for(WorkspaceNode innerNode : nodesToCheck) {
             
@@ -97,26 +91,36 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
                     //TODO Or do something else?
                     continue;
                 }
-            } else {
-                
-                // There is no self link in a resource, of course, and there is no information about the path either
-                // Probably the best way is to find the resource in the archive and then try to match it with the path of one of the uploaded resources
-
-                // if the retrieved archive URL is null, we can't continue with this check
-                // (the node wasn't found in the corpusstructure DB)
-                if(referenceUrl == null) {
-                    continue;
-                }
-                
-                // use only the last part of the path to compare with the archive URL
-                String shortenedWorkspaceFilePath = innerNode.getWorkspaceURL().toString().replace(wsUploadDirectory.toString(), "");
-
-                if(referenceUrl.toString().contains(shortenedWorkspaceFilePath)) { // URL matches
-                    return innerNode;
-                }
+//            } else {
+//                
+//                // There is no self link in a resource, of course, and there is no information about the path either
+//                // Probably the best way is to find the resource in the archive and then try to match it with the path of one of the uploaded resources
+//
+//                // if the retrieved archive URL is null, we can't continue with this check
+//                // (the node wasn't found in the corpusstructure DB)
+//                if(referenceUrl == null) {
+//                    continue;
+//                }
+//                
+//                // use only the last part of the path to compare with the archive URL
+//                String shortenedWorkspaceFilePath = innerNode.getWorkspaceURL().toString().replace(wsUploadDirectory.toString(), "");
+//
+//                if(referenceUrl.toString().contains(shortenedWorkspaceFilePath)) { // URL matches
+//                    return innerNode;
+//                }
             }
         }
         
+        
+        CorpusNode referenceCorpusNode = corpusStructureProvider.getNode(handle);
+        URL referenceUrl = null;
+        if(referenceCorpusNode == null) {
+            logger.warn("Node not found in CS DB for handle " + handle.toString());
+        } else {
+            referenceUrl = nodeResolver.getUrl(referenceCorpusNode);
+        }
+            
+            
         if(referenceCorpusNode != null) { // match was not found but node exists in archive
             
             WorkspaceNode newNode = workspaceNodeFactory.getNewExternalNodeFromArchive(workspaceID, referenceCorpusNode, referenceUrl);

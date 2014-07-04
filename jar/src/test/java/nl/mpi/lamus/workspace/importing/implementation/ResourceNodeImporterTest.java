@@ -15,11 +15,13 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
+import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -27,6 +29,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
@@ -35,6 +38,7 @@ import nl.mpi.lamus.workspace.model.*;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -86,6 +90,7 @@ public class ResourceNodeImporterTest {
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock NodeDataRetriever mockNodeDataRetriever;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
@@ -118,10 +123,10 @@ public class ResourceNodeImporterTest {
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
         nodeImporter = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
-                mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
+                mockMetadataApiBridge, mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
 //        nodeImporter.setWorkspace(testWorkspace);
         nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
-                mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
+                mockMetadataApiBridge, mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
     }
     
     @After
@@ -131,7 +136,7 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithHandle()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -157,7 +162,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -188,9 +193,12 @@ public class ResourceNodeImporterTest {
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
-            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
@@ -199,7 +207,7 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithoutHandle()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
@@ -225,7 +233,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -256,13 +264,265 @@ public class ResourceNodeImporterTest {
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
 
-            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithoutHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
         //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithoutHandle);
+    }
+    
+    @Test
+    public void importResourceNodeThrowsIOException()
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int childWorkspaceNodeID = 10;
+        final String childNodeName = "file name label";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final String childNodeMimetype = "text/plain";
+        final URI childNodeSchemaLocation = new URI("file:/some.location");
+        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
+        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final URL childArchiveURL = childOriginURL;
+        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
+        
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+        
+        final IOException expectedException =
+                new IOException("this is an exception thrown by the method 'saveMetadataDocument'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
+            
+            
+            oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+                will(returnValue(true));
+                
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+                will(returnValue(mockTypecheckedResults));
+                
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
+                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite);
+                will(returnValue(testChildNode));
+
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+                will(returnValue(testNodeLink));
+            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
+                will(throwException(expectedException));
+        }});
+        
+        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
+        try {
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to save file " + parentWsURL + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void importResourceNodeThrowsTransformerException()
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int childWorkspaceNodeID = 10;
+        final String childNodeName = "file name label";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final String childNodeMimetype = "text/plain";
+        final URI childNodeSchemaLocation = new URI("file:/some.location");
+        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
+        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final URL childArchiveURL = childOriginURL;
+        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
+        
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+        
+        final TransformerException expectedException =
+                new TransformerException("this is an exception thrown by the method 'saveMetadataDocument'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
+            
+            
+            oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+                will(returnValue(true));
+                
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+                will(returnValue(mockTypecheckedResults));
+                
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
+                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite);
+                will(returnValue(testChildNode));
+
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+                will(returnValue(testNodeLink));
+            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
+                will(throwException(expectedException));
+        }});
+        
+        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
+        try {
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to save file " + parentWsURL + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void importResourceNodeThrowsMetadataException()
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int childWorkspaceNodeID = 10;
+        final String childNodeName = "file name label";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final String childNodeMimetype = "text/plain";
+        final URI childNodeSchemaLocation = new URI("file:/some.location");
+        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
+        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final URL childArchiveURL = childOriginURL;
+        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
+        
+        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURL;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childNodeMimetype);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+        
+        final MetadataException expectedException =
+                new MetadataException("this is an exception thrown by the method 'saveMetadataDocument'");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
+            
+            
+            oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+                will(returnValue(true));
+                
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+                will(returnValue(mockTypecheckedResults));
+                
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
+                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite);
+                will(returnValue(testChildNode));
+
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+                will(returnValue(testNodeLink));
+            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
+                will(throwException(expectedException));
+        }});
+        
+        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
+        try {
+            nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
+            fail("Should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to save file " + parentWsURL + " in workspace " + testWorkspace.getWorkspaceID();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
     }
     
     @Test
@@ -313,7 +573,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -361,7 +621,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -406,7 +666,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         final TypeCheckerException expectedException = new TypeCheckerException("some exception message", null);
         

@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -58,13 +57,11 @@ public class LamusWorkspaceNodeLinkFactoryTest {
 
         int testParentWorkspaceNodeID = 10;
         int testChildWorkspaceNodeID = 20;
-        URI testChildURI = new URI("http://some.uri");
         
         WorkspaceNodeLink testWorkspaceNodeLink = 
-                factory.getNewWorkspaceNodeLink(testParentWorkspaceNodeID, testChildWorkspaceNodeID, testChildURI);
+                factory.getNewWorkspaceNodeLink(testParentWorkspaceNodeID, testChildWorkspaceNodeID);
         
         assertEquals(testParentWorkspaceNodeID, testWorkspaceNodeLink.getParentWorkspaceNodeID());
         assertEquals(testChildWorkspaceNodeID, testWorkspaceNodeLink.getChildWorkspaceNodeID());
-        assertEquals(testChildURI, testWorkspaceNodeLink.getChildURI());
     }
 }

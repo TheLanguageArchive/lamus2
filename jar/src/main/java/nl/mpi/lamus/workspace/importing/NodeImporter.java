@@ -39,8 +39,8 @@ public interface NodeImporter<R extends Reference> {
      * @param workspace workspace where to import the node
      * @param parentNode parent of the node to be imported
      * @param parentDocument metadata document corresponding to the parent node
-     * @param childLink reference corresponding to the current node
+     * @param referenceFromParent reference corresponding to the current node
      */
     public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink) throws WorkspaceImportException;
+            Reference referenceFromParent) throws WorkspaceImportException;
 }

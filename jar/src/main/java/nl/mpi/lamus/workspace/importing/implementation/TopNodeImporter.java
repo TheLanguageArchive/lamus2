@@ -20,6 +20,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
@@ -41,12 +42,12 @@ public class TopNodeImporter {
     
     @Autowired
     public TopNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            WorkspaceDao wsDao, MetadataAPI mAPI,
+            WorkspaceDao wsDao, MetadataAPI mAPI, MetadataApiBridge mApiBridge,
 	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
             WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer) {
 
-	metadataNodeImporter = new MetadataNodeImporter(csProvider, nodeResolver, wsDao, mAPI,
-                nodeLinkManager, fileImporter, nodeFactory, workspaceNodeExplorer);
+	metadataNodeImporter = new MetadataNodeImporter(csProvider, nodeResolver, wsDao,
+                mAPI, mApiBridge, nodeLinkManager, fileImporter, nodeFactory, workspaceNodeExplorer);
     }
     
     /**

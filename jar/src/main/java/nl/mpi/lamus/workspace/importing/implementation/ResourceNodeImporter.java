@@ -15,9 +15,12 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.logging.Level;
+import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -25,11 +28,13 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.exception.TypeCheckerException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.model.*;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -52,7 +57,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
-    
+    private final MetadataApiBridge metadataApiBridge;
     private final NodeDataRetriever nodeDataRetriever;
     
     private final WorkspaceNodeFactory workspaceNodeFactory;
@@ -62,12 +67,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     
     @Autowired
     public ResourceNodeImporter(CorpusStructureProvider csProvider,
-            NodeResolver nodeResolver, WorkspaceDao wsDao,
+            NodeResolver nodeResolver, WorkspaceDao wsDao, MetadataApiBridge mdApiBridge,
             NodeDataRetriever nodeDataRetriever , WorkspaceNodeFactory wsNodeFactory,
             WorkspaceNodeLinkFactory wsNodeLinkFactory) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.workspaceDao = wsDao;
+        this.metadataApiBridge = mdApiBridge;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceNodeLinkFactory = wsNodeLinkFactory;
         this.nodeDataRetriever = nodeDataRetriever;
@@ -81,7 +87,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
      */
     @Override
     public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-            Reference childLink) throws WorkspaceImportException {
+            Reference referenceFromParent) throws WorkspaceImportException {
         
         workspace = ws;
         
@@ -92,12 +98,12 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         }
    
         URI childURI = null;
-        if(childLink instanceof HandleCarrier) {
-            childURI = ((HandleCarrier) childLink).getHandle();
+        if(referenceFromParent instanceof HandleCarrier) {
+            childURI = ((HandleCarrier) referenceFromParent).getHandle();
         }
         
         if(childURI == null) {
-            childURI = childLink.getURI();
+            childURI = referenceFromParent.getURI();
         }
         
         CorpusNode childCorpusNode = null;
@@ -126,9 +132,9 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), muex);
         }
 
-        String childMimetype = childLink.getMimetype();
+        String childMimetype = referenceFromParent.getMimetype();
 
-        if(nodeDataRetriever.shouldResourceBeTypechecked(childLink, childOurURL)) {
+        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childOurURL)) {
             
             TypecheckedResults typecheckedResults = null;    
             try {
@@ -141,7 +147,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), tcex);
             }
             
-            nodeDataRetriever.verifyTypecheckedResults(childOurURL, childLink, typecheckedResults);
+            nodeDataRetriever.verifyTypecheckedResults(childOurURL, referenceFromParent, typecheckedResults);
             
 //            childType = typecheckedResults.getCheckedNodeType();
             childMimetype = typecheckedResults.getCheckedMimetype();
@@ -149,15 +155,37 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         //TODO needsProtection?
 
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace.getWorkspaceID(), childURI, childURL, childLink, childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite());
+                workspace.getWorkspaceID(), childURI, childURL, referenceFromParent, childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite());
         workspaceDao.addWorkspaceNode(childNode);
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-                parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childURI);
+                parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
         workspaceDao.addWorkspaceNodeLink(nodeLink);
         
         //TODO DO NOT copy file to workspace folder... it will only exist as a link in the DB
             // and any changes made to it will be done during workspace submission
         
+        
+        referenceFromParent.setLocation(null);
+        try {
+            metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
+        } catch (IOException ioex) {
+            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
+		    + " in workspace " + workspace.getWorkspaceID();
+	    throwWorkspaceImportException(errorMessage, ioex);
+        } catch (TransformerException tex) {
+            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
+		    + " in workspace " + workspace.getWorkspaceID();
+	    throwWorkspaceImportException(errorMessage, tex);
+        } catch (MetadataException mdex) {
+            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
+		    + " in workspace " + workspace.getWorkspaceID();
+	    throwWorkspaceImportException(errorMessage, mdex);
+        }
+    }
+    
+    private void throwWorkspaceImportException(String errorMessage, Exception cause) throws WorkspaceImportException {
+        logger.error(errorMessage, cause);
+        throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), cause);
     }
 }

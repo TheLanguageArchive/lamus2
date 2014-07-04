@@ -117,8 +117,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .withTableName("node_link")
                 .usingColumns(
                     "parent_workspace_node_id",
-                    "child_workspace_node_id",
-                    "child_uri");
+                    "child_workspace_node_id");
         //TODO Inject table and column names
         
         this.insertNodeReplacement = new SimpleJdbcInsert(datasource)
@@ -732,15 +731,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Adding to the database a link between node with ID: " + nodeLink.getParentWorkspaceNodeID()
                 + " and node with ID: " + nodeLink.getChildWorkspaceNodeID());
         
-        String childResourceProxyURIStr = null;
-        if(nodeLink.getChildURI() != null) {
-            childResourceProxyURIStr = nodeLink.getChildURI().toString();
-        }
-        
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("parent_workspace_node_id", nodeLink.getParentWorkspaceNodeID())
-                .addValue("child_workspace_node_id", nodeLink.getChildWorkspaceNodeID())
-                .addValue("child_uri", childResourceProxyURIStr);
+                .addValue("child_workspace_node_id", nodeLink.getChildWorkspaceNodeID());
         this.insertWorkspaceNodeLink.execute(parameters);
 
         logger.info("Link added to the database. Parent node ID: " + nodeLink.getParentWorkspaceNodeID()
@@ -1019,20 +1012,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         @Override
         public WorkspaceNodeLink mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-            URI childURI = null;
-            if(rs.getString("child_uri") != null) {
-                try {
-                    childURI = new URI(rs.getString("child_uri"));
-                } catch (URISyntaxException ex) {
-                    logger.warn("Child URI has an invalid syntax; null used instead", ex);
-                }
-            }
             
             WorkspaceNodeLink workspaceNodeLink = new LamusWorkspaceNodeLink(
                     rs.getInt("parent_workspace_node_id"),
-                    rs.getInt("child_workspace_node_id"),
-                    childURI);
+                    rs.getInt("child_workspace_node_id"));
             return workspaceNodeLink;
         }
     }

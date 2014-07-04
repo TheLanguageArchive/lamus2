@@ -26,6 +26,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
@@ -53,6 +54,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
     private final MetadataAPI metadataAPI;
+    private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
     private final WorkspaceFileImporter workspaceFileImporter;
     private final WorkspaceNodeFactory workspaceNodeFactory;
@@ -61,7 +63,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private Workspace workspace = null;
     
     @Autowired
-    public MetadataNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver, WorkspaceDao wsDao, MetadataAPI mAPI,
+    public MetadataNodeImporter(CorpusStructureProvider csProvider,
+            NodeResolver nodeResolver, WorkspaceDao wsDao,
+            MetadataAPI mAPI, MetadataApiBridge mApiBridge,
 	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
             WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer) {
 
@@ -69,6 +73,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         this.nodeResolver = nodeResolver;
 	this.workspaceDao = wsDao;
 	this.metadataAPI = mAPI;
+        this.metadataApiBridge = mApiBridge;
         this.workspaceNodeLinkManager = nodeLinkManager;
         this.workspaceFileImporter = fileImporter;
 	this.workspaceNodeFactory = nodeFactory;
@@ -82,7 +87,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
      */
     @Override
     public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
-	    Reference childLink) throws WorkspaceImportException {
+	    Reference referenceFromParent) throws WorkspaceImportException {
 
         workspace = ws;
         
@@ -105,13 +110,13 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         URI childArchiveURI;
         
         //TODO another way of doing this?
-        if(childLink == null) { // top node
+        if(referenceFromParent == null) { // top node
             childArchiveURI = ws.getTopNodeArchiveURI();
         } else {
-            if(childLink instanceof HandleCarrier) {
-                childArchiveURI = ((HandleCarrier) childLink).getHandle();
+            if(referenceFromParent instanceof HandleCarrier) {
+                childArchiveURI = ((HandleCarrier) referenceFromParent).getHandle();
             } else {
-                childArchiveURI = childLink.getURI();
+                childArchiveURI = referenceFromParent.getURI();
             }
         }
         
@@ -147,7 +152,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
                 workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite);
         workspaceDao.addWorkspaceNode(childNode);
         
-        workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, childLink);
+        workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, referenceFromParent);
         
         if(childNode.isExternal()) {
             return;
@@ -155,6 +160,12 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         try {
             this.workspaceFileImporter.importMetadataFileToWorkspace(childArchiveURL, childNode, childDocument);
+            
+            if(referenceFromParent != null) {
+                referenceFromParent.setLocation(childNode.getWorkspaceURL());
+                metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
+            }
+            
 	} catch (MalformedURLException muex) {
             String errorMessage = "Failed to set URL for node " + childNode.getArchiveURI()
 		    + " in workspace " + workspace.getWorkspaceID();

@@ -29,7 +29,6 @@ public class LamusWorkspaceNodeLinkTest {
     
     private int parentWorkspaceNodeID = 1;
     private int childWorkspaceNodeID = 2;
-    private URI childURI;
     
     public LamusWorkspaceNodeLinkTest() {
     }
@@ -44,8 +43,6 @@ public class LamusWorkspaceNodeLinkTest {
     
     @Before
     public void setUp() throws URISyntaxException {
-        
-        this.childURI = new URI("http://some.uri");
     }
     
     @After
@@ -58,13 +55,12 @@ public class LamusWorkspaceNodeLinkTest {
     @Test
     public void constructorWithAllParametersProperlyCreatesWorkspace() {
 
-        WorkspaceNodeLink testLink = new LamusWorkspaceNodeLink(this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+        WorkspaceNodeLink testLink = new LamusWorkspaceNodeLink(this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         assertEquals("Value for 'parentWorkspaceNodeID' is not the expected one.",
                 this.parentWorkspaceNodeID, testLink.getParentWorkspaceNodeID());
         assertEquals("Value for 'childWorkspaceNodeID' is not the expected one.",
                 this.childWorkspaceNodeID, testLink.getChildWorkspaceNodeID());
-        assertEquals("Value for 'childURI' is not the expected one.", this.childURI, testLink.getChildURI());
     }
 
     /**
@@ -74,10 +70,10 @@ public class LamusWorkspaceNodeLinkTest {
     public void nodesAreEqual() {
 
         WorkspaceNodeLink testWorkspaceNodeLink1 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         WorkspaceNodeLink testWorkspaceNodeLink2 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         assertEquals("Workspace objects are not equal.", testWorkspaceNodeLink1, testWorkspaceNodeLink2);
     }
@@ -86,53 +82,22 @@ public class LamusWorkspaceNodeLinkTest {
     public void nodesHaveSameHashCode() {
 
         WorkspaceNodeLink testWorkspaceNodeLink1 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         WorkspaceNodeLink testWorkspaceNodeLink2 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         assertEquals("Workspace objects don't have the same hashcode.", testWorkspaceNodeLink1.hashCode(), testWorkspaceNodeLink2.hashCode());
-    }
-    
-    /**
-     * Test of equals method, of class LamusWorkspace.
-     */
-    @Test
-    public void nodesAreNotEqual() throws URISyntaxException {
-        
-        URI differentURI = new URI("http://some/different/uri");
-        WorkspaceNodeLink testWorkspaceNodeLink1 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
-        
-        WorkspaceNodeLink testWorkspaceNodeLink2 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, differentURI);
-        
-        assertFalse("Workspace objects should not be equal.",
-                testWorkspaceNodeLink1.equals(testWorkspaceNodeLink2));
-    }
-    
-    @Test
-    public void nodesHaveDifferentHashCodes() throws URISyntaxException {
-        
-        URI differentURI = new URI("http://some/different/uri");
-        WorkspaceNodeLink testWorkspaceNodeLink1 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
-        
-        WorkspaceNodeLink testWorkspaceNodeLink2 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, differentURI);
-        
-        assertFalse("Workspace objects should not have the same hashcode.",
-                testWorkspaceNodeLink1.hashCode() == testWorkspaceNodeLink2.hashCode());
     }
     
     @Test
     public void nodesComparedWithObjectOfDifferentType() {
 
         WorkspaceNodeLink testWorkspaceNodeLink1 = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         WorkspaceNodeLink testWorkspaceNodeLink2 = new SomeOtherWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         assertFalse("Workspace objects should not be equal.",
                 testWorkspaceNodeLink1.equals(testWorkspaceNodeLink2));
@@ -142,11 +107,10 @@ public class LamusWorkspaceNodeLinkTest {
     public void testToString() {
         
         WorkspaceNodeLink testWorkspaceNodeLink = new LamusWorkspaceNodeLink(
-                this.parentWorkspaceNodeID, this.childWorkspaceNodeID, this.childURI);
+                this.parentWorkspaceNodeID, this.childWorkspaceNodeID);
         
         String expectedString = "Parent Workspace Node ID: " + testWorkspaceNodeLink.getParentWorkspaceNodeID()
-                + ", Child Workspace Node ID: " + testWorkspaceNodeLink.getChildWorkspaceNodeID()
-                + ", Child URI: " + testWorkspaceNodeLink.getChildURI();
+                + ", Child Workspace Node ID: " + testWorkspaceNodeLink.getChildWorkspaceNodeID();
         
         String actualString = testWorkspaceNodeLink.toString();
         
@@ -158,23 +122,19 @@ class SomeOtherWorkspaceNodeLink implements WorkspaceNodeLink {
 
     private int parentWorkspaceNodeID;
     private int childWorkspaceNodeID;
-    private URI childURI;
     
-    public SomeOtherWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childResourceProxyURI) {
+    public SomeOtherWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID) {
         this.parentWorkspaceNodeID = parentWorkspaceNodeID;
         this.childWorkspaceNodeID = childWorkspaceNodeID;
-        this.childURI = childResourceProxyURI;
     }
     
+    @Override
     public int getParentWorkspaceNodeID() {
         return this.parentWorkspaceNodeID;
     }
 
+    @Override
     public int getChildWorkspaceNodeID() {
         return this.childWorkspaceNodeID;
-    }
-
-    public URI getChildURI() {
-        return this.childURI;
     }
 }

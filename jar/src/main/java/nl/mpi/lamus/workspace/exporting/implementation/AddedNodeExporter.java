@@ -147,8 +147,9 @@ public class AddedNodeExporter implements NodeExporter {
         moveFileIntoArchive(currentNode, nextAvailableFile, currentDocument, currentNodeWorkspaceFile);
         
         ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(parentNode);
+        String currentPathRelativeToParent = archiveFileLocationProvider.getChildPathRelativeToParent(parentArchivePath, nextAvailableFile.getAbsolutePath());
             
-        updateReferenceInParent(currentNode, parentNode, referencingParentDocument);
+        updateReferenceInParent(currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
         
         //TODO is this necessary?
 //        if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
@@ -251,11 +252,14 @@ public class AddedNodeExporter implements NodeExporter {
     }
     
     private void updateReferenceInParent(
-            WorkspaceNode currentNode, WorkspaceNode parentNode, ReferencingMetadataDocument referencingParentDocument) throws WorkspaceExportException {
+            WorkspaceNode currentNode, WorkspaceNode parentNode,
+            ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {    
-            Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getWorkspaceURL().toURI());
+            Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL());
             currentReference.setURI(handleManager.prepareHandleWithHdlPrefix(currentNode.getArchiveURI()));
+            URL currentUrlRelativeToParent = new URL(parentNode.getArchiveURL(), currentPathRelativeToParent);
+            currentReference.setLocation(currentUrlRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
             metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
             

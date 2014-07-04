@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.model.implementation;
 
-import java.net.URI;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -28,12 +27,10 @@ public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
 
     private int parentWorkspaceNodeID;
     private int childWorkspaceNodeID;
-    private URI childURI;
     
-    public LamusWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childResourceProxyURI) {
+    public LamusWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID) {
         this.parentWorkspaceNodeID = parentWorkspaceNodeID;
         this.childWorkspaceNodeID = childWorkspaceNodeID;
-        this.childURI = childResourceProxyURI;
     }
     
     @Override
@@ -45,19 +42,13 @@ public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
     public int getChildWorkspaceNodeID() {
         return this.childWorkspaceNodeID;
     }
-
-    @Override
-    public URI getChildURI() {
-        return this.childURI;
-    }
     
     @Override
     public int hashCode() {
         
         HashCodeBuilder hashCodeB = new HashCodeBuilder()
                 .append(this.parentWorkspaceNodeID)
-                .append(this.childWorkspaceNodeID)
-                .append(this.childURI);
+                .append(this.childWorkspaceNodeID);
                 
         return hashCodeB.toHashCode();
     }
@@ -77,8 +68,7 @@ public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
         
         EqualsBuilder equalsB = new EqualsBuilder()
                 .append(this.parentWorkspaceNodeID, other.getParentWorkspaceNodeID())
-                .append(this.childWorkspaceNodeID, other.getChildWorkspaceNodeID())
-                .append(this.childURI, other.getChildURI());
+                .append(this.childWorkspaceNodeID, other.getChildWorkspaceNodeID());
         
         return equalsB.isEquals();
     }
@@ -87,8 +77,7 @@ public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
     public String toString() {
         
         String stringResult = "Parent Workspace Node ID: " + this.parentWorkspaceNodeID +
-                ", Child Workspace Node ID: " + this.childWorkspaceNodeID +
-                ", Child URI: " + this.childURI;
+                ", Child Workspace Node ID: " + this.childWorkspaceNodeID;
         
         return stringResult;
     }

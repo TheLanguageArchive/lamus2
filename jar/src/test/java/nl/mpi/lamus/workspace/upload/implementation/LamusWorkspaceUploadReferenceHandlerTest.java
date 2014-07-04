@@ -145,8 +145,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 will(returnValue(mockSecondNode));
 
             //empty URI, so it will be set with the value of the location URL
-            exactly(2).of(mockFirstReference).getURI(); will(returnValue(firstRefURI));
-            oneOf(mockFirstReference).setURI(firstRefLocalUrl.toURI());
+//            exactly(2).of(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            oneOf(mockFirstReference).setURI(new URI(""));
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -247,8 +247,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             //URI is not a handle, so it should be cleared (since the local URL is already present in the localURI attribute)
             oneOf(mockMetadataApiHandleUtil).isHandleUri(firstRefURI); will(returnValue(Boolean.FALSE));
             
-            exactly(2).of(mockFirstReference).getURI(); will(returnValue(firstRefURI));
-            oneOf(mockFirstReference).setURI(firstRefLocalUrl.toURI());
+//            exactly(2).of(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            oneOf(mockFirstReference).setURI(new URI(""));
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);

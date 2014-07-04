@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.factory;
 
-import java.net.URI;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 
 /**
@@ -30,9 +29,8 @@ public interface WorkspaceNodeLinkFactory {
      * 
      * @param parentWorkspaceNodeID ID of the parent node
      * @param childWorkspaceNodeID ID of the child node
-     * @param childURI URI of the child node
      * @return created WorkspaceNodeLink object
      */
-    public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childURI);
+    public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID);
     
 }

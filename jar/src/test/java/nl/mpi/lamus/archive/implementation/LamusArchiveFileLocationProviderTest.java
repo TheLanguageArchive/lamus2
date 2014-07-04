@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -145,6 +146,58 @@ public class LamusArchiveFileLocationProviderTest {
         } catch(IOException ex) {
             assertNotNull(ex);
             assertEquals("Exception different from expected", ioException, ex);
+        }
+    }
+    
+    @Test
+    public void getRelativePath_ChildPathIsInChildDirectoryOfParent() {
+        
+        final String parentPath = "/archive/path/parentdir/parent.cmdi";
+        final String childPath = "/archive/path/parentdir/childdir/child.cmdi";
+        final String expectedRelativePath = "childdir/child.cmdi";
+        
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        
+        assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
+    }
+    
+    @Test
+    public void getRelativePath_ChildPathIsNotInChildDirectoryOfParent() {
+        
+        final String parentPath = "/archive/path/parentdir/parent.cmdi";
+        final String childPath = "/archive/path/otherparentdir/childdir/child.cmdi";
+        final String expectedRelativePath = "../otherparentdir/childdir/child.cmdi";
+        
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        
+        assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
+    }
+    
+    @Test
+    public void getRelativePath_ChildPathIsInSameDirectoryOfParent() {
+        
+        final String parentPath = "/archive/path/parentdir/parent.cmdi";
+        final String childPath = "/archive/path/parentdir/child.cmdi";
+        final String expectedRelativePath = "child.cmdi";
+        
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        
+        assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
+    }
+    
+    @Test
+    public void getRelativePath_ChildPathEqualsParentPath() {
+        
+        final String parentPath = "/archive/path/parentdir/parent.cmdi";
+        final String childPath = "/archive/path/parentdir/parent.cmdi";
+        
+        final String expectedExceptionMessage = "Parent and child path should point to different files";
+        
+        try {
+            archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+            fail("should have thrown exception");
+        } catch(IllegalStateException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
     }
     

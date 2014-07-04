@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -90,7 +91,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
 	    //TODO add information about parent link
 	    // add the link in the database
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-		    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childLink.getURI());
+		    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
 	    this.workspaceDao.addWorkspaceNodeLink(nodeLink);
 	    //TODO possible problems with adding the link? if the link already exists?
 	} else {
@@ -106,7 +107,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
-        URI childNodeURI = getNodeURI(childNode);
+//        URI childNodeURI = getNodeURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -128,12 +129,20 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         
         try {
+            URL childLocation = childNode.getWorkspaceURL();
+            URI childUri;
+            if(childLocation != null) {
+                childUri = childNode.getArchiveURI();
+            } else {
+                childUri = getNodeURI(childNode);
+            }
+            
             if(childNode.isMetadata()) {
                 parentDocument.createDocumentMetadataReference(
-                        childNodeURI, childNode.getFormat());
+                        childUri, childLocation, childNode.getFormat());
             } else {
                 parentDocument.createDocumentResourceReference(
-                        childNodeURI, childNode.getType().toString(), childNode.getFormat());
+                        childUri, childLocation, childNode.getType().toString(), childNode.getFormat());
             }
             
             StreamResult parentStreamResult =
@@ -161,11 +170,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     @Override
     public void linkNodesOnlyInDb(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
         
-        URI childNodeURI = getNodeURI(childNode);
-        
         WorkspaceNodeLink nodeLink =
                 this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-                    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID(), childNodeURI);
+                    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
         
         this.workspaceDao.addWorkspaceNodeLink(nodeLink);
     }
@@ -178,8 +185,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throws WorkspaceException {
         
         int workspaceID = parentNode.getWorkspaceID();
-        
-        URI childNodeURI = getNodeURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -202,23 +207,12 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
 
         try {
-//            URI childURI;
             
-//            if(!childNode.getPid().isEmpty()) {
-//                childURI = new URI(childNode.getPid());
-//            } else {
-//                childURI = childNode.getWorkspaceURL().toURI();
-//            }
-
-            URI uriToQuery = childNode.getArchiveURI();
-            
-            if(uriToQuery == null) {
-                uriToQuery = childNodeURI;
+            Reference childReference = parentDocument.getDocumentReferenceByLocation(childNode.getWorkspaceURL());
+            if(childReference == null) {
+                childReference = parentDocument.getDocumentReferenceByURI(getNodeURI(childNode));
             }
             
-            //TODO CHECK IF URI IS NULL OR NOT... HOW TO USE URL TO RETRIEVE REFERENCE?
-            
-            Reference childReference = parentDocument.getDocumentReferenceByURI(uriToQuery);
             parentDocument.removeDocumentReference(childReference);
             
             StreamResult parentStreamResult =
@@ -334,10 +328,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         URI nodeURI = null;
         try {
-            if(node.getWorkspaceURL() != null) {
-                nodeURI = node.getWorkspaceURL().toURI();
-            } else if(node.getArchiveURI() != null) {
+            if(node.getArchiveURI() != null) {
                 nodeURI = node.getArchiveURI();
+            } else if(node.getWorkspaceURL() != null) {
+                nodeURI = node.getWorkspaceURL().toURI();
             } else { //in case of a newly added external node, this is the only available location
                 nodeURI = node.getOriginURL().toURI();
             }

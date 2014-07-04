@@ -20,6 +20,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
@@ -55,7 +56,8 @@ public class TopNodeImporterTest {
     @Mock CorpusStructureProvider mockCsProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWsDao;
-    @Mock MetadataAPI metadataAPI;
+    @Mock MetadataAPI mockMetadataAPI;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceNodeLinkManager mockNodeLinkManager;
     @Mock WorkspaceFileImporter mockFileImporter;
     @Mock WorkspaceNodeFactory mockNodeFactory;
@@ -78,8 +80,8 @@ public class TopNodeImporterTest {
     @Before
     public void setUp() {
         
-        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, metadataAPI,
-                mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer);
+        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, mockMetadataAPI,
+                mockMetadataApiBridge, mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer);
         
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);
     }

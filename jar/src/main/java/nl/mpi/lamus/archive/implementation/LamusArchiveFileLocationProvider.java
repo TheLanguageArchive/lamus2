@@ -19,9 +19,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +67,24 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
         archiveFileHelper.createFileAndDirectories(finalFile);
         
         return finalFile;
+    }
+
+    /**
+     * @see ArchiveFileLocationProvider#getChildUrlRelativeToParent(java.lang.String, java.lang.String)
+     */
+    @Override
+    public String getChildPathRelativeToParent(String parentNodePath, String childNodePath) {
+        
+        if(parentNodePath.equals(childNodePath)) {
+            throw new IllegalStateException("Parent and child path should point to different files");
+        }
+        
+        String parentDirectory = FilenameUtils.getFullPath(parentNodePath);
+        Path parentDirPath = Paths.get(parentDirectory);
+        Path childFilePath = Paths.get(childNodePath);
+        Path relativePath = parentDirPath.relativize(childFilePath);
+        
+        return relativePath.toString();
     }
 
     /**

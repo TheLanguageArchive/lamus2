@@ -34,7 +34,6 @@ CREATE TABLE node (
 CREATE TABLE node_link (
         parent_workspace_node_id integer NOT NULL,
         child_workspace_node_id integer NOT NULL,
-        child_uri varchar(255) NOT NULL,
         PRIMARY KEY (parent_workspace_node_id, child_workspace_node_id));
 
 CREATE TABLE node_replacement (

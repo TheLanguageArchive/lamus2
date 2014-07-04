@@ -15,8 +15,6 @@
  */
 package nl.mpi.lamus.workspace.model;
 
-import java.net.URI;
-
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
@@ -26,6 +24,4 @@ public interface WorkspaceNodeLink {
     public int getParentWorkspaceNodeID();
     
     public int getChildWorkspaceNodeID();
-    
-    public URI getChildURI();
 }

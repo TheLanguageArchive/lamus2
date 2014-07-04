@@ -104,12 +104,16 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                             matchedNode.setArchiveURI(refURI);
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                     } else {
-                        try {
-                            updateReferenceUri(currentDocument, ref, refLocalURL.toURI(), null, matchedNode);
-                        } catch (URISyntaxException ex) {
-                            throw new UnsupportedOperationException("not handled yet");
-                        }
+//                        try {
+//                            updateReferenceUri(currentDocument, ref, refLocalURL.toURI(), null, matchedNode);
+//                        } catch (URISyntaxException ex) {
+//                            throw new UnsupportedOperationException("not handled yet");
+//                        }
+                        
+                        clearReferenceUri(currentDocument, ref, matchedNode);
+                        
                     }
+                    
                 }
                 
             } else if(metadataApiHandleUtil.isHandleUri(refURI)) {
@@ -117,7 +121,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 
                 if(matchedNode != null) {
                 
-                    updateReferenceUri(currentDocument, ref, null, matchedNode.getWorkspaceURL(), matchedNode);
+                    updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL(), matchedNode);
                     
                     //set handle in DB
                     if(!handleMatcher.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
@@ -131,7 +135,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
                 
                 if(matchedNode != null) {
-                    updateReferenceUri(currentDocument, ref, null, matchedNode.getWorkspaceURL(), matchedNode);
+                    updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL(), matchedNode);
                 } else {
                     matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
                 }
@@ -168,20 +172,35 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     }
     
     
-    private void updateReferenceUri(ReferencingMetadataDocument document, Reference ref, URI newUri, URL newLocation, WorkspaceNode referencedNode) {
+    private void clearReferenceUri(ReferencingMetadataDocument document, Reference ref, WorkspaceNode referencedNode) {
         
-        String oldUrl = "";
+        try {
+            ref.setURI(new URI(""));
+        } catch (URISyntaxException ex) {
+           throw new UnsupportedOperationException("not handled yet");
+        }
+        
+        try {
+            File documentFile = new File(document.getFileLocation().getPath());
+            StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
+            metadataAPI.writeMetadataDocument(document, documentStreamResult);
+        } catch (IOException ex) {
+            logger.error("Error clearing the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
+        } catch (TransformerException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
+        } catch (MetadataException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
+        }
+    }
+    
+    
+    private void updateLocalUrl(ReferencingMetadataDocument document, Reference ref, URL newLocation, WorkspaceNode referencedNode) {
+        
         StringBuilder message = new StringBuilder();
-        if(newUri != null) {
-            String oldUri = (ref.getURI() != null) ? ref.getURI().toString() : "";
-            message.append("[old URI: '").append(oldUri).append("']");
-            ref.setURI(newUri);
-        }
-        if(newLocation != null) {
-            String oldLocation = (ref.getLocation() != null) ? ref.getLocation().toString() : "";
-            message.append("[old URL: '").append(oldLocation).append("']");
-            ref.setLocation(newLocation);
-        }
+        
+        String oldLocation = (ref.getLocation() != null) ? ref.getLocation().toString() : "";
+        message.append("[old URL: '").append(oldLocation).append("']");
+        ref.setLocation(newLocation);
         
         try {
             File documentFile = new File(document.getFileLocation().getPath());

@@ -975,11 +975,9 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
         WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
-
-        URI someResourceProxyURI = new URI("resource.proxy.id");
         
         WorkspaceNodeLink insertedLink = 
-                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), testChildNode.getWorkspaceNodeID(), someResourceProxyURI);
+                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), testChildNode.getWorkspaceNodeID());
         
         this.workspaceDao.addWorkspaceNodeLink(insertedLink);
         
@@ -994,11 +992,9 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
         int fakeNodeID = 100;
-
-        URI someResourceProxyURI = new URI("resource.proxy.id");
         
         WorkspaceNodeLink insertedLink = 
-                new LamusWorkspaceNodeLink(fakeNodeID, testChildNode.getWorkspaceNodeID(), someResourceProxyURI);
+                new LamusWorkspaceNodeLink(fakeNodeID, testChildNode.getWorkspaceNodeID());
         
         try {
             this.workspaceDao.addWorkspaceNodeLink(insertedLink);
@@ -1019,32 +1015,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
         int fakeNodeID = 100;
 
-        URI someResourceProxyURI = new URI("resource.proxy.id");
-        
         WorkspaceNodeLink insertedLink = 
-                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), fakeNodeID, someResourceProxyURI);
-        
-        try {
-            this.workspaceDao.addWorkspaceNodeLink(insertedLink);
-            fail("An exception should have been thrown.");
-        } catch(DataIntegrityViolationException ex) {
-            assertTrue("Cause of exception is not of the expected type.", ex.getCause() instanceof SQLException);
-        }
-        
-        assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node_link"));
-    }
-    
-    @Test
-    public void addWorkspaceNodeLinkWhenChildResourceProxyIsNull() throws URISyntaxException, MalformedURLException {
-        
-        int initialNumberOfRows = countRowsInTable("node_link");
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        WorkspaceNode testParentNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
-        WorkspaceNode testChildNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
-        
-        WorkspaceNodeLink insertedLink = 
-                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), testChildNode.getWorkspaceNodeID(), null);
+                new LamusWorkspaceNodeLink(testParentNode.getWorkspaceNodeID(), fakeNodeID);
         
         try {
             this.workspaceDao.addWorkspaceNodeLink(insertedLink);
@@ -2032,14 +2004,11 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     
     private void setNodeAsParentAndInsertLinkIntoDatabase(WorkspaceNode parent, WorkspaceNode child) throws URISyntaxException {
         
-        URI childResourceProxy = new URI("http://some_uri.jpg");
+        WorkspaceNodeLink link = new LamusWorkspaceNodeLink(parent.getWorkspaceNodeID(), child.getWorkspaceNodeID());
         
-        WorkspaceNodeLink link = new LamusWorkspaceNodeLink(parent.getWorkspaceNodeID(), child.getWorkspaceNodeID(), childResourceProxy);
-        
-        String insertLinkSql = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id, child_uri) "
-                + "VALUES (?, ?, ?)";
-        jdbcTemplate.update(insertLinkSql, link.getParentWorkspaceNodeID(), link.getChildWorkspaceNodeID(),
-                link.getChildURI());
+        String insertLinkSql = "INSERT INTO node_link (parent_workspace_node_id, child_workspace_node_id) "
+                + "VALUES (?, ?)";
+        jdbcTemplate.update(insertLinkSql, link.getParentWorkspaceNodeID(), link.getChildWorkspaceNodeID());
     }
     
     private void setNodeAsDeleted(WorkspaceNode node) {
@@ -2201,19 +2170,9 @@ class WorkspaceNodeLinkRowMapper implements RowMapper<WorkspaceNodeLink> {
     @Override
     public WorkspaceNodeLink mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-        URI childURI = null;
-        if(rs.getString("child_uri") != null) {
-            try {
-                childURI = new URI(rs.getString("child_uri"));
-            } catch (URISyntaxException ex) {
-                fail("Child URI has an invalid syntax; null used instead");
-            }
-        }
-
         WorkspaceNodeLink workspaceNodeLink = new LamusWorkspaceNodeLink(
                 rs.getInt("parent_workspace_node_id"),
-                rs.getInt("child_workspace_node_id"),
-                childURI);
+                rs.getInt("child_workspace_node_id"));
         return workspaceNodeLink;
     }
 }

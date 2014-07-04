@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
-import java.net.URI;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
@@ -29,11 +28,11 @@ import org.springframework.stereotype.Component;
 public class LamusWorkspaceNodeLinkFactory implements WorkspaceNodeLinkFactory {
 
     /**
-     * @see WorkspaceNodeLinkFactory#getNewWorkspaceNodeLink(int, int, java.net.URI)
+     * @see WorkspaceNodeLinkFactory#getNewWorkspaceNodeLink(int, int)
      */
     @Override
-    public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID, URI childURI) {
-        return new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID, childURI);
+    public WorkspaceNodeLink getNewWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID) {
+        return new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
     }
     
 }

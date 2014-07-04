@@ -42,6 +42,16 @@ public interface ArchiveFileLocationProvider {
     public File getAvailableFile(String parentNodePath, String filenameAttempt, WorkspaceNodeType nodeType) throws IOException;
     
     /**
+     * Given a parent and a child path, gets the relative path
+     * from the parent directory to the child file.
+     * 
+     * @param parentNodePath path of the parent file
+     * @param childNodePath path of the child file
+     * @return relative path between the parent directory and the child file
+     */
+    public String getChildPathRelativeToParent(String parentNodePath, String childNodePath);
+    
+    /**
      * Retrieves the given URI with the archive HTTP Root prefix (if the URI
      * starts with the local Root prefix, it is replaced, otherwise the URI
      * is not changed).
