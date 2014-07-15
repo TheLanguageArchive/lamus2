@@ -21,22 +21,19 @@ import javax.servlet.http.HttpServletRequest;
 import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.*;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
 /**
  *
@@ -45,10 +42,6 @@ import static org.powermock.api.support.membermodification.MemberModifier.stub;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RequestCycle.class})
 public class ProductionLamusSessionTest {
-    
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
-        setImposteriser(ClassImposteriser.INSTANCE);
-    }};
     
     private LamusSession session;
     
@@ -72,9 +65,9 @@ public class ProductionLamusSessionTest {
     @Before
     public void setUp() {
         
-        context.checking(new Expectations() {{
-            oneOf(mockRequest).getLocale(); will(returnValue(locale));
-        }});
+        MockitoAnnotations.initMocks(this);
+        
+        when(mockRequest.getLocale()).thenReturn(locale);
         
         session = new ProductionLamusSession(mockRequest);
     }
@@ -90,16 +83,18 @@ public class ProductionLamusSessionTest {
         
         final String expectedUserId = "someUser";
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockRequestCycle).getRequest(); will(returnValue(mockRequest));
-            oneOf(mockRequest).getContainerRequest(); will(returnValue(mockHttpServletRequest));
-            oneOf(mockHttpServletRequest).getRemoteUser(); will(returnValue(expectedUserId));
-        }});
-   
-        stub(method(RequestCycle.class, "get")).toReturn(mockRequestCycle);
+        PowerMockito.mockStatic(RequestCycle.class);
+        when(RequestCycle.get()).thenReturn(mockRequestCycle);
+        
+        when(mockRequestCycle.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getContainerRequest()).thenReturn(mockHttpServletRequest);
+        when(mockHttpServletRequest.getRemoteUser()).thenReturn(expectedUserId);
         
         String retrievedUserId = session.getUserId();
+        
+        verify(mockRequestCycle).getRequest();
+        verify(mockRequest).getContainerRequest();
+        verify(mockHttpServletRequest).getRemoteUser();
         
         assertEquals("Retrieved userId different from expected", expectedUserId, retrievedUserId);
     }
@@ -109,16 +104,18 @@ public class ProductionLamusSessionTest {
         
         final String expectedUserId = "anonymous";
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockRequestCycle).getRequest(); will(returnValue(mockRequest));
-            oneOf(mockRequest).getContainerRequest(); will(returnValue(mockHttpServletRequest));
-            oneOf(mockHttpServletRequest).getRemoteUser(); will(returnValue(null));
-        }});
-
-        stub(method(RequestCycle.class, "get")).toReturn(mockRequestCycle);
+        PowerMockito.mockStatic(RequestCycle.class);
+        when(RequestCycle.get()).thenReturn(mockRequestCycle);
+        
+        when(mockRequestCycle.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getContainerRequest()).thenReturn(mockHttpServletRequest);
+        when(mockHttpServletRequest.getRemoteUser()).thenReturn(null);
         
         String retrievedUserId = session.getUserId();
+
+        verify(mockRequestCycle).getRequest();
+        verify(mockRequest).getContainerRequest();
+        verify(mockHttpServletRequest).getRemoteUser();
         
         assertEquals("Retrieved userId different from expected", expectedUserId, retrievedUserId);
     }
@@ -128,16 +125,18 @@ public class ProductionLamusSessionTest {
         
         final String expectedUserId = "anonymous";
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockRequestCycle).getRequest(); will(returnValue(mockRequest));
-            oneOf(mockRequest).getContainerRequest(); will(returnValue(mockHttpServletRequest));
-            oneOf(mockHttpServletRequest).getRemoteUser(); will(returnValue(""));
-        }});
-
-        stub(method(RequestCycle.class, "get")).toReturn(mockRequestCycle);
+        PowerMockito.mockStatic(RequestCycle.class);
+        when(RequestCycle.get()).thenReturn(mockRequestCycle);
+        
+        when(mockRequestCycle.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getContainerRequest()).thenReturn(mockHttpServletRequest);
+        when(mockHttpServletRequest.getRemoteUser()).thenReturn("");
         
         String retrievedUserId = session.getUserId();
+        
+        verify(mockRequestCycle).getRequest();
+        verify(mockRequest).getContainerRequest();
+        verify(mockHttpServletRequest).getRemoteUser();
         
         assertEquals("Retrieved userId different from expected", expectedUserId, retrievedUserId);
     }
@@ -147,16 +146,18 @@ public class ProductionLamusSessionTest {
         
         final String userId = "someUser";
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockRequestCycle).getRequest(); will(returnValue(mockRequest));
-            oneOf(mockRequest).getContainerRequest(); will(returnValue(mockHttpServletRequest));
-            oneOf(mockHttpServletRequest).getRemoteUser(); will(returnValue(userId));
-        }});
-
-        stub(method(RequestCycle.class, "get")).toReturn(mockRequestCycle);
+        PowerMockito.mockStatic(RequestCycle.class);
+        when(RequestCycle.get()).thenReturn(mockRequestCycle);
+        
+        when(mockRequestCycle.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getContainerRequest()).thenReturn(mockHttpServletRequest);
+        when(mockHttpServletRequest.getRemoteUser()).thenReturn(userId);
         
         boolean result = session.isAuthenticated();
+        
+        verify(mockRequestCycle).getRequest();
+        verify(mockRequest).getContainerRequest();
+        verify(mockHttpServletRequest).getRemoteUser();
         
         assertTrue("Result should be true", result);
     }
@@ -166,16 +167,18 @@ public class ProductionLamusSessionTest {
         
         final String userId = "";
         
-        context.checking(new Expectations() {{
-            
-            oneOf(mockRequestCycle).getRequest(); will(returnValue(mockRequest));
-            oneOf(mockRequest).getContainerRequest(); will(returnValue(mockHttpServletRequest));
-            oneOf(mockHttpServletRequest).getRemoteUser(); will(returnValue(userId));
-        }});
-
-        stub(method(RequestCycle.class, "get")).toReturn(mockRequestCycle);
+        PowerMockito.mockStatic(RequestCycle.class);
+        when(RequestCycle.get()).thenReturn(mockRequestCycle);
+        
+        when(mockRequestCycle.getRequest()).thenReturn(mockRequest);
+        when(mockRequest.getContainerRequest()).thenReturn(mockHttpServletRequest);
+        when(mockHttpServletRequest.getRemoteUser()).thenReturn(userId);
         
         boolean result = session.isAuthenticated();
+        
+        verify(mockRequestCycle).getRequest();
+        verify(mockRequest).getContainerRequest();
+        verify(mockHttpServletRequest).getRemoteUser();
         
         assertFalse("Result should be false", result);
     }

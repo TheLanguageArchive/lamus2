@@ -19,6 +19,7 @@ package nl.mpi.lamus.web.pages;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
@@ -33,7 +34,6 @@ import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -57,6 +57,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     @Mock private LamusWicketPagesProvider mockPagesProviderBean;
     @Mock private Workspace mockWorkspace;
     @Mock private WorkspacePage mockWorkspacePage;
+    @Mock private Collection<String> mockManagerUsers;
     
     private GenericTreeModelProvider mockTreeModelProviderBean;
     private MockCorpusNode mockArchiveRootNode;
@@ -86,6 +87,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockTreeModelProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
         
         createWsPage = new CreateWorkspacePage();
         getTester().startPage(createWsPage);

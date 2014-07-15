@@ -1,3 +1,5 @@
+package nl.mpi.lamus.schedulers.implementation;
+
 /*
  * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
  *
@@ -14,14 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.web.session.production;
 
-import java.util.Locale;
-import nl.mpi.lamus.web.session.LamusSession;
-import nl.mpi.lamus.web.session.LamusSessionFactory;
-import org.apache.wicket.Application;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.Response;
+
+import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
+import nl.mpi.lamus.schedulers.WorkspaceFinaliser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -29,25 +27,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
 
 /**
  *
  * @author guisil
  */
-public class ProductionLamusSessionFactoryTest {
+public class LamusWorkspaceFinaliserTest {
     
-    private LamusSessionFactory lamusSessionFactory;
+    @Mock WorkspaceCrawlerChecker mockWorkspaceCrawlerChecker;
     
-    @Mock Application mockApplication;
-    @Mock Request mockRequest;
-    @Mock Response mockResponse;
-    
-    private final Locale locale = Locale.ENGLISH;
+    private WorkspaceFinaliser workspaceFinaliser;
     
     
-    public ProductionLamusSessionFactoryTest() {
+    public LamusWorkspaceFinaliserTest() {
     }
     
     @BeforeClass
@@ -63,23 +57,19 @@ public class ProductionLamusSessionFactoryTest {
         
         MockitoAnnotations.initMocks(this);
         
-        when(mockRequest.getLocale()).thenReturn(locale);
-        
-        lamusSessionFactory = new ProductionLamusSessionFactory();
+        workspaceFinaliser = new LamusWorkspaceFinaliser(mockWorkspaceCrawlerChecker);
     }
     
     @After
     public void tearDown() {
     }
+    
 
-    /**
-     * Test of createSession method, of class ProductionLamusSessionFactory.
-     */
     @Test
-    public void createSession() {
+    public void checkAndFinaliseWorkspaces() {
+
+        workspaceFinaliser.checkAndFinaliseWorkspaces();
         
-        LamusSession retrievedSession = lamusSessionFactory.createSession(mockApplication, mockRequest, mockResponse);
-        
-        assertNotNull("Retrieved session should not be null", retrievedSession);
+        verify(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
     }
 }

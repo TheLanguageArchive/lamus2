@@ -30,6 +30,8 @@ import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.ReplaceNodesAction;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Component;
@@ -58,6 +60,8 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     
     @Mock private DeleteNodesAction mockDeleteAction;
     @Mock private UnlinkNodesAction mockUnlinkAction;
+    @Mock private LinkNodesAction mockLinkAction;
+    @Mock private ReplaceNodesAction mockReplaceAction;
     
     private int mockWorkspaceID = 1;
     private MockWorkspaceTreeNode mockWorkspaceNode = new MockWorkspaceTreeNode() {{
@@ -82,11 +86,15 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         
         expectedActionsList.add(mockDeleteAction);
         expectedActionsList.add(mockUnlinkAction);
+        expectedActionsList.add(mockLinkAction);
+        expectedActionsList.add(mockReplaceAction);
         
         when(mockTreeNodeActionsProviderBean.getActions(selectedNodes)).thenReturn(expectedActionsList);
         
-        when(mockDeleteAction.getName()).thenReturn("Delete");
-        when(mockUnlinkAction.getName()).thenReturn("Unlink");
+        when(mockDeleteAction.getName()).thenReturn("delete_node_action");
+        when(mockUnlinkAction.getName()).thenReturn("unlink_node_action");
+        when(mockLinkAction.getName()).thenReturn("link_node_action");
+        when(mockReplaceAction.getName()).thenReturn("replace_node_action");
         
 
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
@@ -149,7 +157,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         Iterator<Component> itemButtons =  item.iterator();
             
         Component button = itemButtons.next();
-        assertEquals("Not the expected button", "Delete", (String) button.getDefaultModelObject());
+        assertEquals("Not the expected button", "delete_node_action", (String) button.getDefaultModelObject());
         FormTester formTester = getTester().newFormTester("wsNodeActionsPanel:wsNodeActionsForm", false);
         formTester.submit(button);
         

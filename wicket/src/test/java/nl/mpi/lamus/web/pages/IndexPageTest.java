@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import java.util.Collection;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.LamusWicketApplication;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
@@ -61,6 +62,7 @@ public class IndexPageTest extends AbstractLamusWicketTest {
     
     @Mock private CreateWorkspacePage mockCreateWorkspacePage;
     @Mock private SelectWorkspacePage mockSelectWorkspacePage;
+    @Mock private Collection<String> mockManagerUsers;
     private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     
     
@@ -74,6 +76,7 @@ public class IndexPageTest extends AbstractLamusWicketTest {
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
         
         indexPage = new IndexPage();
         getTester().startPage(indexPage);

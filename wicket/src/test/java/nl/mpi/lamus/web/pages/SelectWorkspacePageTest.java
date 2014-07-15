@@ -63,6 +63,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     @Mock private LamusWicketPagesProvider mockLamusWicketPagesProviderBean;
     @Mock private WorkspacePage mockWorkspacePage;
+    @Mock private Collection<String> mockManagerUsers;
 
     private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     
@@ -81,6 +82,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockLamusWicketPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
         
         selectWsPage = new SelectWorkspacePage();
         getTester().startPage(selectWsPage);

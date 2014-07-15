@@ -45,12 +45,12 @@ public class MockWorkspace implements Workspace {
     private String archiveInfo;
 
     @Override
-    public String getArchiveInfo() {
+    public String getCrawlerID() {
 	return archiveInfo;
     }
 
     @Override
-    public void setArchiveInfo(String archiveInfo) {
+    public void setCrawlerID(String archiveInfo) {
 	this.archiveInfo = archiveInfo;
     }
 

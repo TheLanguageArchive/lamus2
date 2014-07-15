@@ -86,6 +86,12 @@
 	    <groupId>nl.mpi</groupId>
 	    <artifactId>lamus2-jar</artifactId>
 	    <version>0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit-dep</artifactId>
+                </exclusion>
+            </exclusions>
 	</dependency>
 	<dependency>
 	    <groupId>nl.mpi.corpusstructure</groupId>

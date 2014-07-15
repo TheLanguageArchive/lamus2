@@ -89,6 +89,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     @Mock private GenericTreeModelProvider mockCreateWorkspaceTreeModelProviderBean;
     @Mock private WsNodeActionsProvider mockTreeNodeActionsProviderBean;
     @Mock private UnlinkedNodesModelProvider mockUnlinkedNodesModelProviderBean;
+    @Mock private Collection<String> mockManagerUsers;
     
 //    @Mock private UnlinkedRootWorkspaceNode mockUnlinkedRootWorkspaceNode;
     
@@ -146,10 +147,9 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
 //        addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_ROOT_NODE, mockUnlinkedRootWorkspaceNode);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
-        
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
-        
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
 
         pagesProvider = new LamusWicketPagesProvider();
     }
