@@ -32,9 +32,9 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.util.CalendarHelper;
-import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
+import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
+import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -67,7 +67,7 @@ public class LamusWorkspaceManagerTest {
     
     @Mock private Future<Boolean> mockFuture;
     @Mock private Workspace mockWorkspace;
-    @Mock private Calendar mockCalendar;
+    @Mock private Workspace mockSubmittedWorkspace;
 
     
     private final int numberOfDaysOfInactivityAllowedSinceLastSession = 60;
@@ -426,9 +426,9 @@ public class LamusWorkspaceManagerTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, expectedUserID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -457,9 +457,9 @@ public class LamusWorkspaceManagerTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final String expectedErrorMessage = "Directory for workpace " + workspaceID + " does not exist";
         
@@ -489,7 +489,7 @@ public class LamusWorkspaceManagerTest {
         final String submittedMessage = "workspace was submitted";
         
         final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
-        final String successfullySubmittedMessage = "data was successfully move to the archive";
+        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
@@ -508,17 +508,18 @@ public class LamusWorkspaceManagerTest {
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
             
-            oneOf(mockWorkspace).setSessionEndDate(endDate);
-            oneOf(mockWorkspace).setEndDate(endDate);
-            oneOf(mockWorkspace).setStatus(successfullySubmittedStatus);
-            oneOf(mockWorkspace).setMessage(successfullySubmittedMessage);
-            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
+            oneOf(mockSubmittedWorkspace).setSessionEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setStatus(successfullySubmittedStatus);
+            oneOf(mockSubmittedWorkspace).setMessage(successfullySubmittedMessage);
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
         }});
         
         
@@ -549,59 +550,48 @@ public class LamusWorkspaceManagerTest {
     
     @Test
     public void submitWorkspaceThreadInterrupted() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+        
         final int workspaceID = 1;
-        final String userID = "someUser";
-        final int topNodeID = 1;
-        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
-        final Date startDate = startCalendar.getTime();
-        final long usedStorageSpace = 0L;
-        final long maxStorageSpace = 10000000L;
-        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
-        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
+        
+        final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
+        final String submittedMessage = "workspace was submitted";
+        
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
-        final String initialMessage = "workspace is in good shape";
-        final String intermediateMessage = "workspace was submitted";
-        final String errorSubmittingMessage = "there were errors when submitting the workspace";
-        final String archiveInfo = "still not sure what this would be";
+        final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = new Date(endCalendar.getTime().getTime());
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                initialStatus, initialMessage, archiveInfo);
-        
-        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                intermediateStatus, intermediateMessage, archiveInfo);
-        
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
-                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
-        
         final String expectedErrorMessage = "Interruption in thread while submitting workspace " + workspaceID;
         final InterruptedException expectedException = new InterruptedException("some exception message");
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
+            oneOf(mockWorkspace).setStatus(submittedStatus);
+            oneOf(mockWorkspace).setMessage(submittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
-            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             
             oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
-            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+            
+            oneOf(mockSubmittedWorkspace).setSessionEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setStatus(errorSubmittingStatus);
+            oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
         }});
         
         try {
@@ -616,59 +606,48 @@ public class LamusWorkspaceManagerTest {
     
     @Test
     public void submitWorkspaceExecutionException() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+        
         final int workspaceID = 1;
-        final String userID = "someUser";
-        final int topNodeID = 1;
-        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
-        final Date startDate = startCalendar.getTime();
-        final long usedStorageSpace = 0L;
-        final long maxStorageSpace = 10000000L;
-        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
-        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
+        
+        final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
+        final String submittedMessage = "workspace was submitted";
+        
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
-        final String initialMessage = "workspace is in good shape";
-        final String intermediateMessage = "workspace was submitted";
-        final String errorSubmittingMessage = "there were errors when submitting the workspace";
-        final String archiveInfo = "still not sure what this would be";
+        final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = new Date(endCalendar.getTime().getTime());
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                initialStatus, initialMessage, archiveInfo);
-        
-        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                intermediateStatus, intermediateMessage, archiveInfo);
-        
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
-                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
-        
         final String expectedErrorMessage = "Problem with thread execution while submitting workspace " + workspaceID;
         final ExecutionException expectedException = new ExecutionException("some exception message", null);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
+            oneOf(mockWorkspace).setStatus(submittedStatus);
+            oneOf(mockWorkspace).setMessage(submittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
-            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             
             oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
-            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+            
+            oneOf(mockSubmittedWorkspace).setSessionEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setStatus(errorSubmittingStatus);
+            oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
         }});
         
         try {
@@ -683,58 +662,47 @@ public class LamusWorkspaceManagerTest {
     
     @Test
     public void submitWorkspaceFails() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+        
         final int workspaceID = 1;
-        final String userID = "someUser";
-        final int topNodeID = 1;
-        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.add(Calendar.DAY_OF_MONTH, -2);
-        final Date startDate = startCalendar.getTime();
-        final long usedStorageSpace = 0L;
-        final long maxStorageSpace = 10000000L;
-        final WorkspaceStatus initialStatus = WorkspaceStatus.INITIALISED;
-        final WorkspaceStatus intermediateStatus = WorkspaceStatus.SUBMITTED;
+        
+        final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
+        final String submittedMessage = "workspace was submitted";
+        
         final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
-        final String initialMessage = "workspace is in good shape";
-        final String intermediateMessage = "workspace was submitted";
-        final String errorSubmittingMessage = "there were errors when submitting the workspace";
-        final String archiveInfo = "still not sure what this would be";
+        final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final Workspace initialWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                initialStatus, initialMessage, archiveInfo);
-        
-        final Workspace intermediateWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace,
-                intermediateStatus, intermediateMessage, archiveInfo);
-        
-        final Workspace updatedWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, endDate, startDate, endDate, usedStorageSpace, maxStorageSpace,
-                errorSubmittingStatus, errorSubmittingMessage, archiveInfo);
-        
         final String expectedErrorMessage = "Workspace submission failed for workspace " + workspaceID;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(initialWorkspace));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(intermediateWorkspace);
+            oneOf(mockWorkspace).setStatus(submittedStatus);
+            oneOf(mockWorkspace).setMessage(submittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
-            oneOf(mockWorkspaceExportRunner).setWorkspace(initialWorkspace);
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
 //            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
-            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(updatedWorkspace);
-            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(updatedWorkspace);
+            
+            oneOf(mockSubmittedWorkspace).setSessionEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setStatus(errorSubmittingStatus);
+            oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
         }});
         
         try {

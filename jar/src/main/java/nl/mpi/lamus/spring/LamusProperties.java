@@ -302,6 +302,30 @@ public class LamusProperties {
         return corpusStructureServiceCrawlerStartPath;
     }
     
+    @Value("${corpusstructure_service_crawler_details_path}")
+    private String corpusStructureServiceCrawlerDetailsPath;
+    @Bean
+    @Qualifier("corpusStructureServiceCrawlerDetailsPath")
+    public String corpusStructureServiceCrawlerDetailsPath() {
+        return corpusStructureServiceCrawlerDetailsPath;
+    }
+    
+    @Value("${mail_server}")
+    private String mailServer;
+    @Bean
+    @Qualifier("mailServer")
+    public String mailServer() {
+        return mailServer;
+    }
+    
+    @Value("${mail_from_address}")
+    private String mailFromAddress;
+    @Bean
+    @Qualifier("mailFromAddress")
+    public String mailFromAddress() {
+        return mailFromAddress;
+    }
+    
     @Value("${manager_users}")
     private String managerUsers;
     @Bean

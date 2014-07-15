@@ -36,16 +36,25 @@ public interface JsonTransformationHandler {
     
     /**
      * Creates a collection of WorkspaceNodeReplacement objects from the given JSON object.
-     * @param jsonObject JSON object to transform
+     * @param versionsJsonObject JSON object to transform
      * @return collection of WorkspaceNodeReplacement objects
      */
-    public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject jsonObject) throws URISyntaxException;
+    public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject versionsJsonObject) throws URISyntaxException;
     
     /**
-     * Gets a String containing the ID of the crawl, which is included in the
+     * Gets a String containing the ID of the crawler, which is included in the
      * given JsonObject (from the service response)
-     * @param jsonObject JSON object containing the ID
-     * @return ID of the crawl
+     * @param crawlerStartJsonObject JSON object containing the ID
+     * @return ID of the crawler
      */
-    public String getCrawlIdFromJsonObject(JsonObject jsonObject);
+    public String getCrawlerIdFromJsonObject(JsonObject crawlerStartJsonObject);
+    
+    /**
+     * Given the JsonObject with details about a crawler,
+     * gets its state (if it's finished, and if it was successful or not)
+     * 
+     * @param crawlerStateJsonObject JSON object containing the crawler details
+     * @return String containing the crawler state
+     */
+    public String getCrawlerStateFromJsonObject(JsonObject crawlerStateJsonObject);
 }

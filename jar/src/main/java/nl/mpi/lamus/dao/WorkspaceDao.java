@@ -74,6 +74,13 @@ public interface WorkspaceDao {
     public void updateWorkspaceStatusMessage(Workspace workspace);
     
     /**
+     * Updates the ID of the crawler being executed for the workspace.
+     * 
+     * @param workspace workspace object already with the updated crawler ID
+     */
+    public void updateWorkspaceCrawlerID(Workspace workspace);
+    
+    /**
      * Updates the session end date and the end date of the given workspace
      * in order to finalise it.
      * 
@@ -97,6 +104,14 @@ public interface WorkspaceDao {
      * @return Collection of workspaces created by the given user
      */
     public Collection<Workspace> getWorkspacesForUser(String userID);
+    
+    /**
+     * Retrieves a collection of workspaces which have been
+     * submitted, but are yet to be finalised
+     * (i.e. are currently waiting for the result of the crawler).
+     * @return Collection of submitted but unfinished workspaces.
+     */
+    public Collection<Workspace> getWorkspacesInFinalStage();
     
     /**
      * Retrieves a list containing all workspaces in the database.

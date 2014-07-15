@@ -140,7 +140,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int initialNumberOfRows = countRowsInTable("workspace");
         
         Workspace insertedWorkspace = new LamusWorkspace("testUser", 0L, 10000L);
-        insertedWorkspace.setArchiveInfo("/blabla/blabla");
         
         workspaceDao.addWorkspace(insertedWorkspace);
         
@@ -252,7 +251,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertEquals("Workspace object retrieved from the database is different from expected.", workspace, retrievedWorkspace);
         assertEquals("Status of the workspace was not updated in the database.", expectedStatus, retrievedWorkspace.getStatus());
-        assertEquals("Status of the workspace was not updated in the database.", expectedMessage, retrievedWorkspace.getMessage());
+        assertEquals("Message of the workspace was not updated in the database.", expectedMessage, retrievedWorkspace.getMessage());
     }
     
     @Test
@@ -278,7 +277,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
         assertEquals("Workspace object retrieved from the database is different from expected.", workspace, retrievedWorkspace);
         assertEquals("Status of the workspace was not updated in the database.", workspace.getStatus(), retrievedWorkspace.getStatus());
-        assertEquals("Status of the workspace was not updated in the database.", workspace.getMessage(), retrievedWorkspace.getMessage());
+        assertEquals("Message of the workspace was not updated in the database.", workspace.getMessage(), retrievedWorkspace.getMessage());
     }
     
     @Test
@@ -304,7 +303,24 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
 
         assertEquals("Workspace object retrieved from the database is different from expected.", workspace, retrievedWorkspace);
         assertEquals("Status of the workspace was not updated in the database.", workspace.getStatus(), retrievedWorkspace.getStatus());
-        assertEquals("Status of the workspace was not updated in the database.", workspace.getMessage(), retrievedWorkspace.getMessage());
+        assertEquals("Message of the workspace was not updated in the database.", workspace.getMessage(), retrievedWorkspace.getMessage());
+    }
+    
+    @Test
+    public void updateCrawlerID() {
+        
+        Workspace workspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        String expectedCrawlerID = UUID.randomUUID().toString();
+        
+        workspace.setCrawlerID(expectedCrawlerID);
+        
+        workspaceDao.updateWorkspaceCrawlerID(workspace);
+        
+        Workspace retrievedWorkspace = getWorkspaceFromDB(workspace.getWorkspaceID());
+        
+        assertEquals("Workspace object retrieved from the database is different from expected.", workspace, retrievedWorkspace);
+        assertEquals("Crawler ID of the workspace was not updated in the database.", expectedCrawlerID, retrievedWorkspace.getCrawlerID());
     }
     
     @Test
@@ -644,6 +660,66 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Collection<Workspace> retrievedList = workspaceDao.getWorkspacesForUser(userID);
         
         assertTrue("Retrieved list should be empty", retrievedList.isEmpty());
+    }
+    
+    @Test
+    public void getWorkspacesInFinalStageOneSubmitted() {
+        
+        Workspace workspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace1);
+        Workspace workspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace2.setCrawlerID(UUID.randomUUID().toString());
+        updateWorkspaceStatusInDb(workspace2);
+        updateWorkspaceCrawlerIDInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesInFinalStage();
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getWorkspacesInFinalStageTwoSubmitted() {
+        
+        Workspace workspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace1.setCrawlerID(UUID.randomUUID().toString());
+        updateWorkspaceStatusInDb(workspace1);
+        updateWorkspaceCrawlerIDInDb(workspace1);
+        Workspace workspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace2.setCrawlerID(UUID.randomUUID().toString());
+        updateWorkspaceStatusInDb(workspace2);
+        updateWorkspaceCrawlerIDInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        expectedList.add(workspace1);
+        expectedList.add(workspace2);
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesInFinalStage();
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
+    }
+    
+    @Test
+    public void getWorkspacesInFinalStageNoneSubmitted() {
+        
+        Workspace workspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace1.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace1);
+        Workspace workspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        workspace2.setStatus(WorkspaceStatus.INITIALISED);
+        updateWorkspaceStatusInDb(workspace2);
+        
+        Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        
+        Collection<Workspace> retrievedList = workspaceDao.getWorkspacesInFinalStage();
+        
+        assertEquals("Retrieved list is different from expected", expectedList, retrievedList);
     }
     
     @Test
@@ -1831,7 +1907,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     private Workspace insertTestWorkspaceWithGivenUserIntoDB(String userID, boolean withEndDates) {
         
         Workspace testWorkspace = new LamusWorkspace(userID, 0L, 10000000L);
-        testWorkspace.setArchiveInfo("/blabla/blabla");
         Date now = Calendar.getInstance().getTime();
         if(withEndDates) {
             testWorkspace.setEndDate(now);
@@ -1847,7 +1922,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
             sessionEndDate = new Timestamp(testWorkspace.getSessionEndDate().getTime());
         }
         
-        String insertWorkspaceSql = "INSERT INTO workspace (user_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, message, archive_info)" +
+        String insertWorkspaceSql = "INSERT INTO workspace (user_id, start_date, end_date, session_start_date, session_end_date, used_storage_space, max_storage_space, status, message, crawler_id)" +
                         "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(insertWorkspaceSql,
                 testWorkspace.getUserID(),
@@ -1859,7 +1934,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
                 testWorkspace.getMaxStorageSpace(),
                 testWorkspace.getStatus(),
                 testWorkspace.getMessage(),
-                testWorkspace.getArchiveInfo());
+                testWorkspace.getCrawlerID());
 
         int workspaceID = getIdentityFromDB();
         testWorkspace.setWorkspaceID(workspaceID);
@@ -1998,7 +2073,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         Workspace copiedWs = new LamusWorkspace(
                 ws.getWorkspaceID(), ws.getUserID(), ws.getTopNodeID(), ws.getTopNodeArchiveURI(), ws.getTopNodeArchiveURL(), ws.getStartDate(), ws.getEndDate(),
                 ws.getSessionStartDate(), ws.getSessionEndDate(), ws.getUsedStorageSpace(), ws.getMaxStorageSpace(),
-                ws.getStatus(), ws.getMessage(), ws.getArchiveInfo());
+                ws.getStatus(), ws.getMessage(), ws.getCrawlerID());
         return copiedWs;
     }
     
@@ -2049,6 +2124,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         String updateWorkspaceSql = "UPDATE workspace SET status = ? WHERE workspace_id = ?";
         jdbcTemplate.update(updateWorkspaceSql, workspace.getStatus().toString(), workspace.getWorkspaceID());
     }
+    
+    private void updateWorkspaceCrawlerIDInDb(Workspace workspace) {
+        
+        String updateWorkspaceSql = "UPDATE workspace SET crawler_id = ? WHERE workspace_id = ?";
+        jdbcTemplate.update(updateWorkspaceSql, workspace.getCrawlerID(), workspace.getWorkspaceID());
+    }
 }
 
 class WorkspaceRowMapper implements RowMapper<Workspace> {
@@ -2096,7 +2177,7 @@ class WorkspaceRowMapper implements RowMapper<Workspace> {
                 rs.getLong("max_storage_space"),
                 WorkspaceStatus.valueOf(rs.getString("status")),
                 rs.getString("message"),
-                rs.getString("archive_info"));
+                rs.getString("crawler_id"));
         return workspace;
     }
  

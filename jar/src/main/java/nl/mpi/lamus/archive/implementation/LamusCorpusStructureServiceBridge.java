@@ -58,6 +58,9 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Autowired
     @Qualifier("corpusStructureServiceCrawlerStartPath")
     private String corpusStructureServiceCrawlerStartPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerDetailsPath")
+    private String corpusStructureServiceCrawlerDetailsPath;
     
     @Autowired
     public LamusCorpusStructureServiceBridge(JsonTransformationHandler jsonTransformationHandler, JerseyHelper jerseyHelper) {
@@ -71,14 +74,11 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Override
     public void createVersions(Collection<WorkspaceNodeReplacement> nodeReplacements) throws VersionCreationException {
         
-        
-        //TODO 
-        
         JsonObject requestJsonObject =
                 jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacements);
         
         JsonObject responseJsonObject =
-                jerseyHelper.postRequestWithJson(
+                jerseyHelper.postRequestCreateVersions(
                     requestJsonObject,
                     corpusStructureServiceLocation,
                     corpusStructureServiceVersioningPath,
@@ -86,7 +86,6 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         
         Collection<WorkspaceNodeReplacement> responseNodeReplacements;
         try {
-            //TODO HANDLE RESPONSE JSON OBJECT
             
             responseNodeReplacements =
                     jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(responseJsonObject);
@@ -110,24 +109,39 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
      * @see CorpusStructureServiceBridge#callCrawler(java.net.URI)
      */
     @Override
-    public void callCrawler(URI nodeUri) {
+    public String callCrawler(URI nodeUri) {
         
+        
+        //TODO catch possible exceptions
         
         JsonObject responseJsonObject =
-                jerseyHelper.postRequestWithUri(
+                jerseyHelper.postRequestCallCrawler(
                     nodeUri,
                     corpusStructureServiceLocation,
                     corpusStructureServiceCrawlerPath,
                     corpusStructureServiceCrawlerStartPath);
         
-        String crawlId = jsonTransformationHandler.getCrawlIdFromJsonObject(responseJsonObject);
+        String crawlerId = jsonTransformationHandler.getCrawlerIdFromJsonObject(responseJsonObject);
         
+        return crawlerId;
+    }
+
+    /**
+     * @see CorpusStructureServiceBridge#getCrawlerState(java.lang.String)
+     */
+    @Override
+    public String getCrawlerState(String crawlerID) {
         
-        //TODO CHECK IF OK??
+        JsonObject responseJsonObject =
+                jerseyHelper.getRequestCrawlerDetails(
+                    crawlerID,
+                    corpusStructureServiceLocation,
+                    corpusStructureServiceCrawlerPath,
+                    corpusStructureServiceCrawlerDetailsPath);
         
-        //TODO RETURN
+        String crawlerState = jsonTransformationHandler.getCrawlerStateFromJsonObject(responseJsonObject);
         
-//        return crawlId;
+        return crawlerState;
     }
     
 }

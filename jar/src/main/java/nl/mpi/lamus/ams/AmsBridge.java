@@ -75,7 +75,7 @@ public interface AmsBridge extends Serializable {
 	 * @param uid destined user's uid
 	 * @return the email address of given user(uid)
 	 */
-//	public String getMailAddress(String uid);
+	public String getMailAddress(String uid);
 
 	/**
 	 * provides the "real-name" of given user(uid): firstname surname

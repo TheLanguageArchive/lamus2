@@ -130,7 +130,7 @@ public class AddedNodeExporterTest {
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
-                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "archiveInfo/something");
+                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
         addedNodeExporter.setWorkspace(testWorkspace);
     }
     

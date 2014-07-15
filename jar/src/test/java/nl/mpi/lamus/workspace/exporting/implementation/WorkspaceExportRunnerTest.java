@@ -13,8 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.exporting;
+package nl.mpi.lamus.workspace.exporting.implementation;
 
+import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,6 +32,9 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.workspace.exporting.NodeExporter;
+import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
+import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -124,6 +128,8 @@ public class WorkspaceExportRunnerTest {
         
         workspaceNodes.add(testNode);
         
+        final String crawlerID = UUID.randomUUID().toString();
+        
         //1.0 synchronise files in the workspace with the lamus database
             // NOT necessary in the new lamus... every action in the workspace should be immediately reflected in the database
 
@@ -155,7 +161,11 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI);
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(returnValue(crawlerID));
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspace).setCrawlerID(crawlerID);
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
                 when(exporting.isNot("finished"));
                 
             oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
@@ -232,6 +242,8 @@ public class WorkspaceExportRunnerTest {
         
         workspaceNodes.add(testNode);
         
+        final String crawlerID = UUID.randomUUID().toString();
+        
         final VersionCreationException expectedCause = new VersionCreationException("some exception message", null);
         
         final States exporting = context.states("exporting");
@@ -256,12 +268,12 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI);
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(returnValue(crawlerID));
                 when(exporting.isNot("finished"));
-                
-                //TODO CHECK IF IT WORKED... WAIT??
-                
-                
+            oneOf(mockWorkspace).setCrawlerID(crawlerID);
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
+                when(exporting.isNot("finished"));
             
             oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
                 when(exporting.isNot("finished"));

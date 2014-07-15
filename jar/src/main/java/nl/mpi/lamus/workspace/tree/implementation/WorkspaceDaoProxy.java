@@ -107,6 +107,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#updateWorkspaceCrawlerID(nl.mpi.lamus.workspace.model.Workspace)
+     */
+    @Override
+    public void updateWorkspaceCrawlerID(Workspace workspace) {
+        this.getWorkspaceDao().updateWorkspaceCrawlerID(workspace);
+    }
+
+    /**
      * @see WorkspaceDao#updateWorkspaceStatusMessage(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
@@ -130,6 +138,17 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
         return this.getWorkspaceDao().getWorkspacesForUser(userID);
     }
 
+    /**
+     * @see WorkspaceDao#getWorkspacesInFinalStage()
+     */
+    @Override
+    public Collection<Workspace> getWorkspacesInFinalStage() {
+        return this.getWorkspaceDao().getWorkspacesInFinalStage();
+    }
+
+    /**
+     * @see WorkspaceDao#getAllWorkspaces()
+     */
     @Override
     public List<Workspace> getAllWorkspaces() {
         return this.getWorkspaceDao().getAllWorkspaces();

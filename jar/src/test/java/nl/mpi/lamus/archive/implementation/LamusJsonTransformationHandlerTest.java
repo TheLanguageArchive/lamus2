@@ -19,6 +19,7 @@ package nl.mpi.lamus.archive.implementation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.UUID;
 import javax.json.Json;
@@ -219,35 +220,69 @@ public class LamusJsonTransformationHandlerTest {
     }
     
     @Test
-    public void getCrawlIdFromJsonObjectStatusOk() throws URISyntaxException {
+    public void getCrawlerIdFromJsonObject() throws URISyntaxException {
         
-        String crawlId = "1234556";
-        URI crawlRootUri = new URI(UUID.randomUUID().toString());
+        String crawlerId = UUID.randomUUID().toString();
+        URI crawlerRootUri = new URI("hdl:" + UUID.randomUUID().toString());
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
         JsonObjectBuilder crawlerStartObjectBuilder = Json.createObjectBuilder();
         
         crawlerStartObjectBuilder
-                .add("id", crawlId)
-                .add("root", crawlRootUri.toString());
+                .add("id", crawlerId)
+                .add("root", crawlerRootUri.toString());
         
         mainObjectBuilder.add("crawlerStart", crawlerStartObjectBuilder);
         
-        JsonObject crawlStartObject = mainObjectBuilder.build();
+        JsonObject crawlerStartObject = mainObjectBuilder.build();
         
         
-        String retrievedId = jsonTransformationHandler.getCrawlIdFromJsonObject(crawlStartObject);
+        String retrievedId = jsonTransformationHandler.getCrawlerIdFromJsonObject(crawlerStartObject);
         
-        assertEquals("Retrieved crawl ID different from expected", crawlId, retrievedId);
+        assertEquals("Retrieved crawler ID different from expected", crawlerId, retrievedId);
     }
     
     @Test
-    public void getCrawlIdFromJsonObjectStatusFailed() {
-        fail("not tested yet");
-    }
-    
-    @Test
-    public void getCrawlIdFromJsonObjectNoStatus() {
-        fail("not tested yet");
+    public void getCrawlerStateFromJsonObject() throws URISyntaxException {
+        
+        UUID id = UUID.randomUUID();
+        URI rootUri = new URI("hdl:" + UUID.randomUUID().toString());
+        String state = "STARTED";
+        long metadataCount = 10;
+        long resourceCount = 75;
+        long count = 100;
+        long avgParseTimeMs = 30;
+        long avgPersistTimeMs = 100;
+        long avgProcessingTimeMs = 150;
+        long started = Calendar.getInstance().getTimeInMillis();
+        long ended = Calendar.getInstance().getTimeInMillis();
+        long runtime = 10000;
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder detailedCrawlerStateObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder stateObjectBuilder = Json.createObjectBuilder();
+        
+        stateObjectBuilder
+                .add("id", id.toString())
+                .add("root", rootUri.toString())
+                .add("state", state)
+                .add("metadataCount", metadataCount)
+                .add("resourceCount", resourceCount)
+                .add("count", count)
+                .add("avgParseTimeMs", avgParseTimeMs)
+                .add("avgPersistTimeMs", avgPersistTimeMs)
+                .add("avgProcessingTimeMs", avgProcessingTimeMs)
+                .add("started", started)
+                .add("ended", ended)
+                .add("runtime", runtime);
+        
+        detailedCrawlerStateObjectBuilder.add("state", stateObjectBuilder);
+        mainObjectBuilder.add("detailedCrawlerState", detailedCrawlerStateObjectBuilder);
+        
+        JsonObject detailedCrawlerStateObject = mainObjectBuilder.build();
+        
+        String retrievedState = jsonTransformationHandler.getCrawlerStateFromJsonObject(detailedCrawlerStateObject);
+        
+        assertEquals("Retrieved state different from expected", state, retrievedState);
     }
 }

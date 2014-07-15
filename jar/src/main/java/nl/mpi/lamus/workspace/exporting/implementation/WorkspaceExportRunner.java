@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.exporting;
+package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -22,6 +22,9 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.workspace.exporting.NodeExporter;
+import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
+import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -129,7 +132,9 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         //TODO cleanup WS DB / filesystem
         
         // crawler service
-        corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
+        String crawlerID = corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
+        workspace.setCrawlerID(crawlerID);
+        workspaceDao.updateWorkspaceCrawlerID(workspace);
         
         // version creation service
         Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();

@@ -91,9 +91,9 @@ public interface Workspace extends Serializable {
     
     public void setStatusMessageInitialised();
     
-    public String getArchiveInfo();
+    public String getCrawlerID();
     
-    public void setArchiveInfo(String archiveInfo);
+    public void setCrawlerID(String crawlerID);
     
     public String getWorkspaceSelectionDisplayString();
 }

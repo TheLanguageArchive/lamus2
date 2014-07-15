@@ -12,7 +12,7 @@ CREATE TABLE workspace (
 	max_storage_space           bigint,
 	status                      varchar(255)                    NOT NULL,
         message                     varchar(255)                    NOT NULL,
-        archive_info                varchar(255),
+        crawler_id                  varchar(255),
 	PRIMARY KEY (workspace_id));
 	
 CREATE TABLE node (

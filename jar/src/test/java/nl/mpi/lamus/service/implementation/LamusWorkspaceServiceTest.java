@@ -297,9 +297,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         context.checking(new Expectations() {{
             
@@ -324,9 +324,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -469,9 +469,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         context.checking(new Expectations() {{
             
@@ -498,9 +498,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -546,9 +546,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -579,9 +579,9 @@ public class LamusWorkspaceServiceTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace workspaceToRetrieve = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         final IOException expectedException = new IOException("some exception message");
         

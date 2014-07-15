@@ -43,7 +43,7 @@ public class LamusWorkspace implements Workspace {
     private long maxStorageSpace;
     private WorkspaceStatus status;
     private String message;
-    private String archiveInfo;
+    private String crawlerID;
     
     /**
      * Constructor to be used when creating a new workspace.
@@ -61,6 +61,7 @@ public class LamusWorkspace implements Workspace {
         this.sessionStartDate = now;
         this.status = WorkspaceStatus.UNINITIALISED;
         this.message = "Workspace uninitialised";
+        this.crawlerID = "";
         //TODO Change message, move to properties file
     }
     
@@ -79,11 +80,11 @@ public class LamusWorkspace implements Workspace {
      * @param maxStorageSpace
      * @param status
      * @param message
-     * @param archiveInfo 
+     * @param crawlerID 
      */
     public LamusWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
-            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
+            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String crawlerID) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
@@ -105,7 +106,7 @@ public class LamusWorkspace implements Workspace {
         this.maxStorageSpace = maxStorageSpace;
         this.status = status;
         this.message = message;
-        this.archiveInfo = archiveInfo;
+        this.crawlerID = crawlerID;
     }
     
     @Override
@@ -292,13 +293,13 @@ public class LamusWorkspace implements Workspace {
     }
 
     @Override
-    public String getArchiveInfo() {
-        return this.archiveInfo;
+    public String getCrawlerID() {
+        return this.crawlerID;
     }
 
     @Override
-    public void setArchiveInfo(String archiveInfo) {
-        this.archiveInfo = archiveInfo;
+    public void setCrawlerID(String crawlerID) {
+        this.crawlerID = crawlerID;
     }
     
     @Override
@@ -336,8 +337,8 @@ public class LamusWorkspace implements Workspace {
         if(this.message != null) {
             hashCodeB.append(this.message);
         }
-        if(this.archiveInfo != null) {
-            hashCodeB.append(this.archiveInfo);
+        if(this.crawlerID != null) {
+            hashCodeB.append(this.crawlerID);
         }
         
         return hashCodeB.toHashCode();
@@ -369,7 +370,7 @@ public class LamusWorkspace implements Workspace {
                 .append(this.maxStorageSpace, other.getMaxStorageSpace())
                 .append(this.status, other.getStatus())
                 .append(this.message, other.getMessage())
-                .append(this.archiveInfo, other.getArchiveInfo());
+                .append(this.crawlerID, other.getCrawlerID());
         
         return equalsB.isEquals();
     }
@@ -383,7 +384,7 @@ public class LamusWorkspace implements Workspace {
                 ", Start Date: " + this.startDate + ", End Date: " + this.endDate +
                 ", Session Start Date: " + this.sessionStartDate + ", Session End Date: " + this.sessionEndDate +
                 ", Used Storage Space: " + this.usedStorageSpace + ", Max Storage Space: " + this.maxStorageSpace +
-                ", Status: " + this.status + ", Message: " + this.message + ", Archive Info: " + this.archiveInfo;
+                ", Status: " + this.status + ", Message: " + this.message + ", Crawler ID: " + this.crawlerID;
         
         return stringResult;
     }

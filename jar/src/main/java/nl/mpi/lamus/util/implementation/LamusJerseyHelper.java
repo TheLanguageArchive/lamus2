@@ -35,10 +35,10 @@ import org.springframework.stereotype.Component;
 public class LamusJerseyHelper implements JerseyHelper {
 
     /**
-     * @see JerseyHelper#postRequestWithJson(javax.json.JsonObject, java.lang.String, java.lang.String[])
+     * @see JerseyHelper#postRequestCreateVersions(javax.json.JsonObject, java.lang.String, java.lang.String[])
      */
     @Override
-    public JsonObject postRequestWithJson(JsonObject requestJsonObject, String location, String... paths) {
+    public JsonObject postRequestCreateVersions(JsonObject requestJsonObject, String location, String... paths) {
         
         WebTarget finalTarget = getTargetForService(location, paths);
         
@@ -57,10 +57,10 @@ public class LamusJerseyHelper implements JerseyHelper {
     }
 
     /**
-     * @see JerseyHelper#postRequestWithUri(java.net.URI, java.lang.String, java.lang.String[])
+     * @see JerseyHelper#postRequestCallCrawler(java.net.URI, java.lang.String, java.lang.String[])
      */
     @Override
-    public JsonObject postRequestWithUri(URI requestUri, String location, String... paths) {
+    public JsonObject postRequestCallCrawler(URI requestUri, String location, String... paths) {
         
         WebTarget finalTarget = getTargetForService(location, paths);
         
@@ -69,6 +69,23 @@ public class LamusJerseyHelper implements JerseyHelper {
         Entity<String> uriEntity = Entity.entity("root=" + requestUri.toString(), MediaType.APPLICATION_FORM_URLENCODED);
         
         JsonObject responseJsonObject = invocationBuilder.post(uriEntity, JsonObject.class);
+        
+        return responseJsonObject;
+    }
+    
+    /**
+     * @see JerseyHelper#getRequestCrawlerDetails(java.lang.String, java.lang.String, java.lang.String[])
+     */
+    @Override
+    public JsonObject getRequestCrawlerDetails(String requestCrawlerID, String location, String... paths) {
+        
+        WebTarget finalTarget = getTargetForService(location, paths);
+        
+        Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
+        
+        Entity<String> stringEntity = Entity.entity(requestCrawlerID, MediaType.TEXT_PLAIN_TYPE);
+        
+        JsonObject responseJsonObject = invocationBuilder.get(JsonObject.class);
         
         return responseJsonObject;
     }
@@ -85,4 +102,5 @@ public class LamusJerseyHelper implements JerseyHelper {
         
         return finalTarget;
     }
+
 }

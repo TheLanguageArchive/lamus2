@@ -123,6 +123,16 @@ public class LamusPropertiesTest {
     @Autowired
     @Qualifier("corpusStructureServiceCrawlerStartPath")
     private String corpusStructureServiceCrawlerStartPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceCrawlerDetailsPath")
+    private String corpusStructureServiceCrawlerDetailsPath;
+    
+    @Autowired
+    @Qualifier("mailServer")
+    private String mailServer;
+    @Autowired
+    @Qualifier("mailFromAddress")
+    private String mailFromAddress;
     
     
     public LamusPropertiesTest() {

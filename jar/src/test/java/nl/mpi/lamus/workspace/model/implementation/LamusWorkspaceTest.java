@@ -43,7 +43,7 @@ public class LamusWorkspaceTest {
     private long maxStorageSpace = 10000000L;
     private WorkspaceStatus status = WorkspaceStatus.INITIALISED;
     private String message = "bla bla bla";
-    private String archiveInfo = "bla/bla|bla";
+    private String crawlerID = UUID.randomUUID().toString();
     
     public LamusWorkspaceTest() {
     }
@@ -94,7 +94,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Value for 'workspaceID' is not the expected one.", this.workspaceID, testWorkspace.getWorkspaceID());
         assertEquals("Value for 'userID' is not the expected one.", this.userID, testWorkspace.getUserID());
@@ -108,7 +108,7 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'maxStorageSpace' is not the expected one.", this.maxStorageSpace, testWorkspace.getMaxStorageSpace());
         assertEquals("Value for 'status' is not the expected one.", this.status, testWorkspace.getStatus());
         assertEquals("Value for 'message' is not the expected one.", this.message, testWorkspace.getMessage());
-        assertEquals("Value for 'archiveInfo' is not the expected one.", this.archiveInfo, testWorkspace.getArchiveInfo());
+        assertEquals("Value for 'crawlerID' is not the expected one.", this.crawlerID, testWorkspace.getCrawlerID());
     }
     
     /**
@@ -121,7 +121,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 null, null, null, null,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertNull("Value retrieved for 'startDate' should be null.", testWorkspace.getStartDate());
         assertNull("Value retrieved for 'sessionStartDate' should be null.", testWorkspace.getSessionStartDate());
@@ -142,7 +142,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 localTestDate, localTestDate, localTestDate, localTestDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         localCalendar.add(Calendar.HOUR, 2);
         localTestDate.setTime(localCalendar.getTimeInMillis());
@@ -167,13 +167,13 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Workspace testWorkspace2 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Workspace objects are not equal.", testWorkspace1, testWorkspace2);
     }
@@ -185,13 +185,13 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Workspace testWorkspace2 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Workspace objects don't have the same hashcode.", testWorkspace1.hashCode(), testWorkspace2.hashCode());
     }
@@ -210,13 +210,13 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Workspace testWorkspace2 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, differentDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertFalse("Workspace objects should not be equal.", testWorkspace1.equals(testWorkspace2));
     }
@@ -232,13 +232,13 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Workspace testWorkspace2 = new LamusWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, differentDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertFalse("Workspace objects should not have the same hashcode.", testWorkspace1.hashCode() == testWorkspace2.hashCode());
     }
@@ -250,13 +250,13 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Object testWorkspace2 = new SomeOtherWorkspace(
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertFalse("Workspace objects should not be equal.", testWorkspace1.equals(testWorkspace2));
     }
@@ -271,7 +271,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Retrieved value for 'startDate' does not match the inserted one.", this.testDate, testWorkspace.getStartDate());
         assertNotSame("The 'startDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
@@ -288,7 +288,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Calendar newCalendar = Calendar.getInstance();
         newCalendar.add(Calendar.HOUR, -1);
@@ -311,7 +311,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Retrieved value for 'endDate' does not match the inserted one.", this.testDate, testWorkspace.getEndDate());
         assertNotSame("The 'endDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
@@ -328,7 +328,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Calendar newCalendar = Calendar.getInstance();
         newCalendar.add(Calendar.HOUR, -1);
@@ -351,7 +351,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Retrieved value for 'sessionStartDate' does not match the inserted one.", this.testDate, testWorkspace.getSessionStartDate());
         assertNotSame("The 'sessionStartDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
@@ -368,7 +368,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Calendar newCalendar = Calendar.getInstance();
         newCalendar.add(Calendar.HOUR, -1);
@@ -391,7 +391,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         assertEquals("Retrieved value for 'sessionEndDate' does not match the inserted one.", this.testDate, testWorkspace.getSessionEndDate());
         assertNotSame("The 'sessionEndDate' object used to create the workspace and the one retrieved should be clones and not the exact same object.",
@@ -408,7 +408,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         
         Calendar newCalendar = Calendar.getInstance();
         newCalendar.add(Calendar.HOUR, -1);
@@ -428,7 +428,7 @@ public class LamusWorkspaceTest {
                 this.workspaceID, this.userID, this.topNodeID, this.topNodeArchiveURI, this.topNodeArchiveURL,
                 this.testDate, this.testDate, this.testDate, this.testDate,
                 this.usedStorageSpace, this.maxStorageSpace,
-                this.status, this.message, this.archiveInfo);
+                this.status, this.message, this.crawlerID);
         String expectedString = "Workspace ID: " + testWorkspace.getWorkspaceID()
                 + ", User ID: " + testWorkspace.getUserID()
                 + ", Top Node ID: " + testWorkspace.getTopNodeID()
@@ -442,7 +442,7 @@ public class LamusWorkspaceTest {
                 + ", Max Storage Space: " + testWorkspace.getMaxStorageSpace()
                 + ", Status: " + testWorkspace.getStatus()
                 + ", Message: " + testWorkspace.getMessage()
-                + ", Archive Info: " + testWorkspace.getArchiveInfo();
+                + ", Crawler ID: " + testWorkspace.getCrawlerID();
         
         String actualString = testWorkspace.toString();
         
@@ -483,7 +483,7 @@ class SomeOtherWorkspace implements Workspace {
     private long maxStorageSpace;
     private WorkspaceStatus status;
     private String message;
-    private String archiveInfo;
+    private String crawlerID;
     
     public SomeOtherWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
         this.userID = userID;
@@ -498,7 +498,7 @@ class SomeOtherWorkspace implements Workspace {
     
     public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
-            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String archiveInfo) {
+            long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String crawlerID) {
         this.workspaceID = workspaceID;
         this.userID = userID;
         this.topNodeID = topNodeID;
@@ -520,7 +520,7 @@ class SomeOtherWorkspace implements Workspace {
         this.maxStorageSpace = maxStorageSpace;
         this.status = status;
         this.message = message;
-        this.archiveInfo = archiveInfo;
+        this.crawlerID = crawlerID;
     }
     
     @Override
@@ -694,13 +694,13 @@ class SomeOtherWorkspace implements Workspace {
     }
 
     @Override
-    public String getArchiveInfo() {
-        return this.archiveInfo;
+    public String getCrawlerID() {
+        return this.crawlerID;
     }
 
     @Override
-    public void setArchiveInfo(String archiveInfo) {
-        this.archiveInfo = archiveInfo;
+    public void setCrawlerID(String crawlerID) {
+        this.crawlerID = crawlerID;
     }
 
     @Override

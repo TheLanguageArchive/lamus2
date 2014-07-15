@@ -93,7 +93,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "max_storage_space",
                     "status",
                     "message",
-                    "archive_info");
+                    "crawler_id");
         //TODO Inject table and column names
         
         this.insertWorkspaceNode = new SimpleJdbcInsert(datasource)
@@ -171,7 +171,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("max_storage_space", workspace.getMaxStorageSpace())
                 .addValue("status", statusStr)
                 .addValue("message", workspace.getMessage())
-                .addValue("archive_info", workspace.getArchiveInfo());
+                .addValue("crawler_id", workspace.getCrawlerID());
         Number newID = this.insertWorkspace.executeAndReturnKey(parameters);
         workspace.setWorkspaceID(newID.intValue());
         
@@ -284,6 +284,23 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Status of workspace " + workspace.getWorkspaceID() + " updated to \"" + statusStr
                 + "\" and message updated to \"" + workspace.getMessage() + "\"");
     }
+
+    /**
+     * @see WorkspaceDao#updateWorkspaceCrawlerID(nl.mpi.lamus.workspace.model.Workspace)
+     */
+    @Override
+    public void updateWorkspaceCrawlerID(Workspace workspace) {
+        
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting crawler ID to: " + workspace.getCrawlerID());
+        
+        String updateSql = "UPDATE workspace SET crawler_id = :crawler_id WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("crawler_id", workspace.getCrawlerID())
+                .addValue("workspace_id", workspace.getWorkspaceID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Crawler ID of workspace " + workspace.getWorkspaceID() + " updated to \"" + workspace.getCrawlerID());
+    }
     
     /**
      * @see WorkspaceDao#updateWorkspaceEndDates(nl.mpi.lamus.workspace.model.Workspace)
@@ -353,6 +370,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         return listToReturn;
     }
 
+    /**
+     * @see WorkspaceDao#getWorkspacesInFinalStage()
+     */
+    @Override
+    public Collection<Workspace> getWorkspacesInFinalStage() {
+        
+        logger.debug("Retrieving list of workspace in final stage (submitted but still waiting for result of crawler)");
+        
+        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE status LIKE :submitted_status";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("submitted_status", WorkspaceStatus.SUBMITTED.toString());
+        
+        Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
+        
+        return listToReturn;
+    }
+
+    /**
+     * @see WorkspaceDao#getAllWorkspaces()
+     */
     @Override
     public List<Workspace> getAllWorkspaces() {
         
@@ -929,7 +966,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     rs.getLong("max_storage_space"),
                     WorkspaceStatus.valueOf(rs.getString("status")),
                     rs.getString("message"),
-                    rs.getString("archive_info"));
+                    rs.getString("crawler_id"));
             return workspace;
         }
     }

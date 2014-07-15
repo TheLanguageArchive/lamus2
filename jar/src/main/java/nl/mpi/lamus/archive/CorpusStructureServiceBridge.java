@@ -37,6 +37,14 @@ public interface CorpusStructureServiceBridge {
     /**
      * Triggers the crawler for the given node
      * @param nodeUri URI of the node to crawl
+     * @return String containing the ID of the triggered crawler
      */
-    public void callCrawler(URI nodeUri);
+    public String callCrawler(URI nodeUri);
+    
+    /**
+     * Retrieves the state of the crawler corresponding to the given ID.
+     * @param crawlerID ID of the crawler to look for
+     * @return String containing the state of the crawler
+     */
+    public String getCrawlerState(String crawlerID);
 }

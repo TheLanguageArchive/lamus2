@@ -98,18 +98,26 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     }
 
     /**
-     * @see JsonTransformationHandler#getCrawlIdFromJsonObject(javax.json.JsonObject)
+     * @see JsonTransformationHandler#getCrawlerIdFromJsonObject(javax.json.JsonObject)
      */
     @Override
-    public String getCrawlIdFromJsonObject(JsonObject jsonObject) {
+    public String getCrawlerIdFromJsonObject(JsonObject jsonObject) {
         
         JsonObject startCrawlObject = jsonObject.getJsonObject("crawlerStart");
         
-        String idToReturn = startCrawlObject.getString("id");
+        return startCrawlObject.getString("id");
+    }
+
+    /**
+     * @see JsonTransformationHandler#getCrawlerStateFromJsonObject(javax.json.JsonObject)
+     */
+    @Override
+    public String getCrawlerStateFromJsonObject(JsonObject crawlerStateJsonObject) {
         
-        //TODO CHECK IF OK??
+        JsonObject detailedCrawlerStateObject = crawlerStateJsonObject.getJsonObject("detailedCrawlerState");
+        JsonObject stateObject = detailedCrawlerStateObject.getJsonObject("state");
         
-        return idToReturn;
+        return stateObject.getString("state");
     }
     
     

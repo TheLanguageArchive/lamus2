@@ -107,7 +107,7 @@ public class MetadataNodeImporterTest {
     public void setUp() {
         testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
-                0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "archiveInfo/something");
+                0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "");
         nodeImporter = new MetadataNodeImporter(
                 mockCorpusStructureProvider, mockNodeResolver,
                 mockWorkspaceDao, mockMetadataAPI, mockMetadataApiBridge,

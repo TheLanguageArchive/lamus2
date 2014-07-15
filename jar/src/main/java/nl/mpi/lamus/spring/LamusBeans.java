@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.handle.util.HandleManager;
@@ -67,8 +68,15 @@ public class LamusBeans {
     
     
     @Bean
-    public ExecutorService executorService() {
+    @Qualifier("WorkspaceExecutorService")
+    public ExecutorService workspaceExecutorService() {
         return Executors.newSingleThreadExecutor();
+    }
+    
+    @Bean
+    @Qualifier("CrawlCheckerExecutorService")
+    public ScheduledExecutorService crawlCheckerExecutorService() {
+        return Executors.newScheduledThreadPool(1);
     }
     
     //TODO change properties to initialise API

@@ -19,6 +19,7 @@ package nl.mpi.lamus.ams;
 //import nl.mpi.lat.ams.model.NodeLicense;
 //import nl.mpi.lat.ams.model.NodePcplLicense;
 import java.net.URI;
+import nl.mpi.lat.ams.IAmsRemoteService;
 //import nl.mpi.lat.ams.model.NodePcplRule;
 //import nl.mpi.lat.ams.service.LicenseService;
 //import nl.mpi.lat.ams.service.RuleService;
@@ -29,11 +30,9 @@ import java.net.URI;
 //import nl.mpi.lat.fabric.FabricService;
 //import nl.mpi.lat.fabric.NodeID;
 //import nl.mpi.latimpl.core.LatServiceImpl;
-import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,6 +54,8 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
     private String recalcParam;
 
 
+    @Autowired
+    private IAmsRemoteService amsRemoteService;
     
     
     /**
@@ -228,7 +229,8 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
     /**
      * @see lams.ams.AmsBridge#getMailAddress(java.lang.String)
      */
-//	public String getMailAddress(String uid) {
+    @Override
+    public String getMailAddress(String uid) {
 //		try {
 //			LatUser user = this.getPrincipalSrv().getUser(uid);
 //			return user != null ? user.getEmail() : null;
@@ -236,7 +238,11 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
 //			LOG.error("failed to load user from ams2: " + uid, eE);
 //			return null;
 //		}
-//	}
+            
+        
+        
+        return amsRemoteService.getUserEmailAddress(uid);
+    }
     /**
      * @see lams.ams.AmsBridge#getRealName(java.lang.String)
      */

@@ -18,6 +18,7 @@ package nl.mpi.lamus.ams;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import nl.mpi.lat.ams.IAmsRemoteService;
 //import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
 //import nl.mpi.lat.ams.model.NodeAuth;
 //import nl.mpi.lat.ams.model.NodePcplRule;
@@ -66,6 +67,8 @@ public class Ams2BridgeTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
+    @Mock IAmsRemoteService mockAmsRemoteService;
+    
     private Ams2Bridge ams2Bridge;
     
 //    @Mock LatUser mockUser;
@@ -86,12 +89,31 @@ public class Ams2BridgeTest {
     public void setUp() {
         
         ams2Bridge = new Ams2Bridge();
+        ReflectionTestUtils.setField(ams2Bridge, "amsRemoteService", mockAmsRemoteService);
     }
     
     @After
     public void tearDown() {
     }
 
+    
+    @Test
+    public void getMailAddress() {
+        
+        final String userID = "someUser";
+        final String emailAddress = "someUser@test.nl";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockAmsRemoteService).getUserEmailAddress(userID);
+                will(returnValue(emailAddress));
+        }});
+        
+        String retrievedEmailAddress = ams2Bridge.getMailAddress(userID);
+        
+        assertEquals("Retrieved email address different from expected", emailAddress, retrievedEmailAddress);
+    }
+    
    
 //    @Test
     public void getUsedStorageSpaceUnknownNodeException() {

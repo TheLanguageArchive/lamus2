@@ -68,6 +68,7 @@ public class LamusCorpusStructureServiceBridgeTest {
     private String corpusStructureServiceVersionCreationPath = "create";
     private String corpusStructureServiceCrawlerPath = "crawler";
     private String corpusStructureServiceCrawlerStartPath = "start";
+    private String corpusStructureServiceCrawlerDetailsPath = "details";
     
     
     public LamusCorpusStructureServiceBridgeTest() {
@@ -91,6 +92,7 @@ public class LamusCorpusStructureServiceBridgeTest {
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceVersionCreationPath", corpusStructureServiceVersionCreationPath);
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceCrawlerPath", corpusStructureServiceCrawlerPath);
         ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceCrawlerStartPath", corpusStructureServiceCrawlerStartPath);
+        ReflectionTestUtils.setField(csServiceBridge, "corpusStructureServiceCrawlerDetailsPath", corpusStructureServiceCrawlerDetailsPath);
     }
     
     @After
@@ -120,7 +122,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestCreateVersions(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -142,7 +144,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestCreateVersions(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -184,7 +186,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
-            oneOf(mockJerseyHelper).postRequestWithJson(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+            oneOf(mockJerseyHelper).postRequestCreateVersions(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
                 will(returnValue(mockResponseJsonObject));
             
             oneOf(mockJsonTransformationHandler).createNodeReplacementCollectionFromJsonObject(mockResponseJsonObject);
@@ -204,25 +206,47 @@ public class LamusCorpusStructureServiceBridgeTest {
     public void callCrawlerOk() throws URISyntaxException {
         
         final URI uriToCrawl = new URI(UUID.randomUUID().toString());
-        final String crawlId = "12345667";
+        final String crawlerId = UUID.randomUUID().toString();
         
         context.checking(new Expectations() {{
             
-            oneOf(mockJerseyHelper).postRequestWithUri(uriToCrawl, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerStartPath);
+            oneOf(mockJerseyHelper).postRequestCallCrawler(uriToCrawl, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerStartPath);
                 will(returnValue(mockResponseJsonObject));
                 
-            oneOf(mockJsonTransformationHandler).getCrawlIdFromJsonObject(mockResponseJsonObject);
-                will(returnValue(crawlId));
+            oneOf(mockJsonTransformationHandler).getCrawlerIdFromJsonObject(mockResponseJsonObject);
+                will(returnValue(crawlerId));
                 
-                //CHECK get ID of the crawl and get the details (succeded? failed?)
+                //CHECK get ID of the crawler and get the details (succeded? failed?)
         }});
         
         
-        csServiceBridge.callCrawler(uriToCrawl);
+        String retrievedCrawlerID = csServiceBridge.callCrawler(uriToCrawl);
+        
+        assertEquals("Retrieved crawler ID different from expected", crawlerId, retrievedCrawlerID);
     }
     
     @Test
     public void callCrawlerFailed() {
         fail("not tested yet");
+    }
+    
+    @Test
+    public void getCrawlerState() {
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        final String expectedCrawlerState = "SUCCESS";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockJerseyHelper).getRequestCrawlerDetails(crawlerID, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerDetailsPath);
+                will(returnValue(mockResponseJsonObject));
+            
+            oneOf(mockJsonTransformationHandler).getCrawlerStateFromJsonObject(mockResponseJsonObject);
+                will(returnValue(expectedCrawlerState));
+        }});
+        
+        String retrievedCrawlerState = csServiceBridge.getCrawlerState(crawlerID);
+        
+        assertEquals("Retrieved crawler state different from expected", expectedCrawlerState, retrievedCrawlerState);
     }
 }

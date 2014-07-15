@@ -276,9 +276,9 @@ public class LamusWorkspaceAccessCheckerTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         context.checking(new Expectations() {{
             
@@ -301,9 +301,9 @@ public class LamusWorkspaceAccessCheckerTest {
         final long maxStorageSpace = 10000000L;
         final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
         final String message = "workspace is in good shape";
-        final String archiveInfo = "still not sure what this would be";
+        final String crawlerID = "";
         final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
-                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, archiveInfo);
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
         
         
         final String otherUserID = "someOtherUser";

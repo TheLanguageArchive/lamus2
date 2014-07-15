@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing;
+package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import java.util.concurrent.Callable;

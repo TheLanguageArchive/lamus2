@@ -28,9 +28,9 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.util.CalendarHelper;
-import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunner;
+import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
-import nl.mpi.lamus.workspace.importing.WorkspaceImportRunner;
+import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -63,7 +63,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private int numberOfDaysOfInactivityAllowedSinceLastSession;
 
     @Autowired
-    public LamusWorkspaceManager(ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
+    public LamusWorkspaceManager(@Qualifier("WorkspaceExecutorService") ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
         WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
         CalendarHelper calendarHelper) {
         this.executorService = executorService;
@@ -183,6 +183,8 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         Boolean isSuccessful = false;
         
+        workspace = workspaceDao.getWorkspace(workspaceID);
+        
         try {
             isSuccessful = exportResult.get();
         } catch(InterruptedException iex) {
@@ -257,13 +259,13 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         if(submitSuccessful) {
             workspace.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
-            workspace.setMessage("data was successfully move to the archive");
+            workspace.setMessage("Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).");
             
             //TODO remove data from DB (nodes and links?)
             workspaceDao.cleanWorkspaceNodesAndLinks(workspace);
         } else {
             workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
-            workspace.setMessage("there were errors when submitting the workspace");
+            workspace.setMessage("There were errors when submitting the workspace. Please contact the corpus management team.");
         }
         
         workspaceDao.updateWorkspaceEndDates(workspace);
