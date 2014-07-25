@@ -23,12 +23,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  *
  * @author guisil
  */
 @Configuration
+@EnableScheduling
 @Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
 public class WicketBeans {
     
