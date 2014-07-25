@@ -113,6 +113,9 @@ public class LamusWorkspaceTreeExporterTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             //TODO FOR EACH CHILD NODE, GET THE PROPER EXPORTER AND CALL IT
@@ -155,6 +158,9 @@ public class LamusWorkspaceTreeExporterTest {
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             

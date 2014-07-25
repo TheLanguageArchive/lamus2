@@ -63,6 +63,8 @@ public class LamusVersioningHandler implements VersioningHandler {
     @Override
     public URL moveFileToTrashCanFolder(WorkspaceNode nodeToMove) {
         
+        logger.debug("Moving node to trash can folder; workspaceID: " + nodeToMove.getWorkspaceID() + "; nodeID: " + nodeToMove.getWorkspaceNodeID());
+        
         return moveFileTo(nodeToMove, true);
     }
 
@@ -71,6 +73,8 @@ public class LamusVersioningHandler implements VersioningHandler {
      */
     @Override
     public URL moveFileToVersioningFolder(WorkspaceNode nodeToMove) {
+        
+        logger.debug("Moving node to versioning folder; workspaceID: " + nodeToMove.getWorkspaceID() + "; nodeID: " + nodeToMove.getWorkspaceNodeID());
         
         return moveFileTo(nodeToMove, false);
     }

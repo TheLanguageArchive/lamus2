@@ -121,6 +121,10 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         
     
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockWorkspaceDao).getUnlinkedAndDeletedTopNodes(workspaceID); will(returnValue(unlinkedAndDeletedTopNodes));
         }});
@@ -174,6 +178,10 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         
     
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockWorkspaceDao).getUnlinkedAndDeletedTopNodes(workspaceID); will(returnValue(unlinkedAndDeletedTopNodes));
         }});

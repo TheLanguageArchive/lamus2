@@ -115,7 +115,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
             // if there was a way of checking just the leave nodes, it would be a bit easier
 
-        logger.info("A workspace can be created in node " + archiveNodeURI);
+        logger.debug("A workspace can be created in node " + archiveNodeURI + " by user " + userID);
         
     }
     
@@ -133,6 +133,8 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             logger.error(errorMessage);
             throw new WorkspaceAccessException(errorMessage, workspaceID, null);
         }
+        
+        logger.debug("User " + userID + " has access to workspace " + workspaceID);
     }
     
 }

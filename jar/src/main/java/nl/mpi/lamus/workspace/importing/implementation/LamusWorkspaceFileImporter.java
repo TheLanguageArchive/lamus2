@@ -61,6 +61,8 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
     public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
             throws MalformedURLException, IOException, TransformerException, MetadataException {
         
+        logger.debug("Importing file into workspace; fileUrl: " + archiveNodeURL + "; workspaceID: " + workspaceNode.getWorkspaceID());
+        
 	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, workspaceNode);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
 

@@ -149,6 +149,8 @@ public class GeneralNodeExporterTest {
         //TODO check if there are differences in the data present in the database? (or is this supposed to be done in the crawler?)
         //TODO call the tree exporter for this node in case it's metadata (can have children)
         
+        checkLoggerInvocations(-1, nodeWsID);
+        
         context.checking(new Expectations() {{
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
@@ -190,6 +192,7 @@ public class GeneralNodeExporterTest {
          * option 2 - find a way of checking efficiently for differences, and copy only if they exist
          */
         
+        final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
@@ -215,6 +218,8 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -308,6 +313,7 @@ public class GeneralNodeExporterTest {
     @Test
     public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
+        final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
@@ -324,6 +330,8 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
         final String expectedErrorMessage = "Node not found in archive database for URI " + nodeArchiveURI;
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -381,6 +389,8 @@ public class GeneralNodeExporterTest {
         
         final String metadataExtension = "cmdi";
         
+        final int parentNodeWsID = 1;
+        
         final int nodeWsID = 10;
         final String nodeName = "someNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
@@ -395,6 +405,8 @@ public class GeneralNodeExporterTest {
         
         final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeArchiveURI;
         final IOException expectedException = new IOException("some exception message");
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -433,6 +445,8 @@ public class GeneralNodeExporterTest {
         
         final String metadataExtension = "cmdi";
         
+        final int parentNodeWsID = 1;
+        
         final int nodeWsID = 10;
         final String nodeName = "someNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
@@ -447,6 +461,8 @@ public class GeneralNodeExporterTest {
         
         final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeArchiveURI;
         final MetadataException expectedException = new MetadataException("some exception message");
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -484,6 +500,8 @@ public class GeneralNodeExporterTest {
         
         final String metadataExtension = "cmdi";
         
+        final int parentNodeWsID = 1;
+        
         final int nodeWsID = 10;
         final String nodeName = "someNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
@@ -498,6 +516,8 @@ public class GeneralNodeExporterTest {
         
         final String expectedErrorMessage = "Error writing file for node " + nodeArchiveURI;
         final TransformerException expectedException = new TransformerException("some exception message");
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -548,6 +568,7 @@ public class GeneralNodeExporterTest {
          * option 2 - find a way of checking efficiently for differences, and copy only if they exist
          */
         
+        final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
@@ -573,6 +594,7 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
             
@@ -593,6 +615,17 @@ public class GeneralNodeExporterTest {
         generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
     }
     
+    
+    private void checkLoggerInvocations(final int parentNodeID, final int currentNodeID) {
+        
+        context.checking(new Expectations() {{
+            
+            if(parentNodeID > -1) {
+                oneOf(mockParentWsNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            }
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(currentNodeID));
+        }});
+    }
     
     private void checkParentReferenceUpdateInvocations(
             final URI childArchiveURI, final URL parentWsURL, final File parentWsFile,

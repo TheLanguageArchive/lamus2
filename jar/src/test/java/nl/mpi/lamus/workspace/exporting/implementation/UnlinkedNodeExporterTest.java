@@ -115,6 +115,9 @@ public class UnlinkedNodeExporterTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
@@ -148,8 +151,12 @@ public class UnlinkedNodeExporterTest {
     @Test
     public void exportNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
+        final int testWorkspaceNodeID = 10;
 
         context.checking(new Expectations() {{
+            
+            //logger
+            exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(null));

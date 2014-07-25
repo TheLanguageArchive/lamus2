@@ -61,10 +61,8 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     public void explore(Workspace workspace, WorkspaceNode nodeToExplore, ReferencingMetadataDocument nodeDocument, Collection<Reference> linksInNode)
         throws WorkspaceImportException {
         
+        logger.debug("Exploring references in metadata node to import; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + nodeToExplore.getWorkspaceNodeID());
         
-        //TODO for each link call recursive method to explore it
-        
-
         for(Reference currentLink : linksInNode) {
         
             //TODO check if the file does exist

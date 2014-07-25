@@ -123,6 +123,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -160,7 +163,12 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportDeletedNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
      
+        final int testWorkspaceNodeID = 10;
+        
         context.checking(new Expectations() {{
+            
+            //logger
+            exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(null));
@@ -214,6 +222,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -264,6 +275,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportNodeWithDifferentStatus() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
         
+        final int testWorkspaceNodeID = 10;
         final String testBaseName = "node.txt";
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
         final URL testNodeArchiveURL = testNodeOriginURL;
@@ -272,6 +284,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         final String expectedExceptionMessage = "This exporter only supports deleted or replaced nodes. Current node status: " + testNodeStatus.toString();
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
@@ -315,6 +330,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         final String expectedExceptionMessage = "Error deleting handle for node " + testNodeVersionArchiveURL;
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
@@ -388,6 +406,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         final String expectedExceptionMessage = "Error updating handle for node " + testNewNodeArchiveURL;
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             

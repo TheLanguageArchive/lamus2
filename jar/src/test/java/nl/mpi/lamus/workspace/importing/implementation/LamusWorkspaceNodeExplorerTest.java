@@ -82,6 +82,8 @@ public class LamusWorkspaceNodeExplorerTest {
     @Test
     public void exploreSuccessfullyLinkWithHandle() throws Exception {
 
+        final int nodeID = 10;
+        
         final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
         final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
@@ -104,9 +106,13 @@ public class LamusWorkspaceNodeExplorerTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
-
+                
                 oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
                 oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
                 oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
@@ -167,9 +173,9 @@ public class LamusWorkspaceNodeExplorerTest {
     
     @Test
     public void exploreThrowsException() throws Exception {
-        
-        final int workspaceID = 10;
 
+        final int nodeID = 10;
+        
         final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
         final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
@@ -193,6 +199,10 @@ public class LamusWorkspaceNodeExplorerTest {
         final Exception expectedException = new Exception("some exception message");
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
             
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
 

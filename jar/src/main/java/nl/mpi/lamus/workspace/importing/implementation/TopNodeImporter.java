@@ -27,6 +27,8 @@ import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TopNodeImporter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TopNodeImporter.class);
     
     private MetadataNodeImporter metadataNodeImporter;
     
@@ -58,6 +62,9 @@ public class TopNodeImporter {
      * @param childNodeArchiveURI archive URI of the current node
      */
     public void importNode(Workspace workspace, URI childNodeArchiveURI) throws WorkspaceImportException {
+        
+        logger.debug("Importing top node of workspace; nodeURI: " + childNodeArchiveURI);
+        
         workspace.setTopNodeArchiveURI(childNodeArchiveURI);
         metadataNodeImporter.importNode(workspace, null, null, null);
     }

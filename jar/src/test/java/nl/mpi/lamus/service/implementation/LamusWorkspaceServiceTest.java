@@ -932,14 +932,18 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void addNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException {
+    public void addNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
         final int workspaceID = 1;
+        final URL nodeURL = new URL("file:/workspace/node.cmdi");
         final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(nodeURL));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -954,14 +958,18 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void addNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException {
+    public void addNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
         final int workspaceID = 1;
+        final URL nodeURL = new URL("file:/workspace/node.cmdi");
         final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(nodeURL));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -976,12 +984,16 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void addNodeSuccessfully() throws WorkspaceNotFoundException, WorkspaceAccessException {
+    public void addNodeSuccessfully() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
         final int workspaceID = 1;
+        final URL nodeURL = new URL("file:/workspace/node.cmdi");
         final String userID = "testUser";
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(nodeURL));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
@@ -995,9 +1007,15 @@ public class LamusWorkspaceServiceTest {
     public void linkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
@@ -1011,11 +1029,17 @@ public class LamusWorkspaceServiceTest {
     public void linkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1033,11 +1057,17 @@ public class LamusWorkspaceServiceTest {
     public void linkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1055,11 +1085,17 @@ public class LamusWorkspaceServiceTest {
     public void linkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
@@ -1078,9 +1114,15 @@ public class LamusWorkspaceServiceTest {
     public void unlinkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
@@ -1094,11 +1136,17 @@ public class LamusWorkspaceServiceTest {
     public void unlinkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1116,11 +1164,17 @@ public class LamusWorkspaceServiceTest {
     public void unlinkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1138,11 +1192,17 @@ public class LamusWorkspaceServiceTest {
     public void unlinkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
         final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
@@ -1166,6 +1226,9 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
+            //logger
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceNodeManager).deleteNodesRecursively(mockChildNode);
@@ -1178,11 +1241,15 @@ public class LamusWorkspaceServiceTest {
     public void deleteNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int nodeID = 4;
         final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1200,11 +1267,15 @@ public class LamusWorkspaceServiceTest {
     public void deleteNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
         final int workspaceID = 1;
+        final int nodeID = 4;
         final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
@@ -1228,6 +1299,9 @@ public class LamusWorkspaceServiceTest {
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             
             oneOf(mockChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);

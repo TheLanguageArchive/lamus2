@@ -96,7 +96,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
 	}
-
+        
 	//TODO if not onsite: create external node
 	//TODO setURID
 	//TODO if no access: create forbidden node
@@ -119,6 +119,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
                 childArchiveURI = referenceFromParent.getURI();
             }
         }
+        
+        logger.debug("Importing node into new workspace; workspaceID: " + workspace.getWorkspaceID() + "; nodeURI: " + childArchiveURI);
         
         URL childArchiveURL = null;
         String childName = null;

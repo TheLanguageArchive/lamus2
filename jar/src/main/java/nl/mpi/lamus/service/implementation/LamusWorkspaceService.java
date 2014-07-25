@@ -81,6 +81,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public Workspace createWorkspace(String userID, URI archiveNodeURI)
             throws NodeAccessException, WorkspaceImportException {
         
+        logger.debug("Triggered creation of workspace; userID: " + userID + "; archiveNodeURI: " + archiveNodeURI);
+         
         if(userID == null || archiveNodeURI == null) {
             throw new IllegalArgumentException("Both userID and archiveNodeURI should not be null");
         }
@@ -100,6 +102,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public void deleteWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
+        logger.debug("Triggered deletion of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
+        
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         
         this.workspaceManager.deleteWorkspace(workspaceID);
@@ -111,6 +115,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public void submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+        
+        logger.debug("Triggered submission of workspace; userID " + userID + "; workspaceID: " + workspaceID);
 
         //TODO requests in this session?
         //TODO workspace should be initialised / connected
@@ -127,6 +133,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public Workspace getWorkspace(int workspaceID)
             throws WorkspaceNotFoundException {
         
+        logger.debug("Triggered retrieval of workspace; workspaceID: " + workspaceID);
+        
         return this.workspaceDao.getWorkspace(workspaceID);
     }
     
@@ -136,6 +144,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public Collection<Workspace> listUserWorkspaces(String userID) {
         
+        logger.debug("Triggered retrieval of all workspaces for user; userID: " + userID);
+        
         return this.workspaceDao.getWorkspacesForUser(userID);
     }
 
@@ -144,6 +154,8 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public List<Workspace> listAllWorkspaces() {
+        
+        logger.debug("Triggered retrieval of all workspaces");
         
         return this.workspaceDao.getAllWorkspaces();
     }
@@ -163,6 +175,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public Workspace openWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
+        logger.debug("Triggered opening of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
+        
         if(userID == null) {
             throw new IllegalArgumentException("userID should not be null");
         }
@@ -179,6 +193,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public WorkspaceNode getNode(int nodeID)
             throws WorkspaceNodeNotFoundException {
         
+        logger.debug("Triggered retrieval of node; nodeID: " + nodeID);
+        
         return this.workspaceDao.getWorkspaceNode(nodeID);
     }
 
@@ -188,6 +204,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public Collection<WorkspaceNode> getChildNodes(int nodeID) {
         
+        logger.debug("Triggered retrieval of child nodes; nodeID: " + nodeID);
+        
         return this.workspaceDao.getChildWorkspaceNodes(nodeID);
     }
 
@@ -196,6 +214,8 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void addNode(String userID, WorkspaceNode node) throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        logger.debug("Triggered node addition; userID: " + userID + "nodeWorkspaceURL: " + node.getWorkspaceURL());
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
         
@@ -209,6 +229,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
+        logger.debug("Triggered node linking; userID: " + userID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+        
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
         
         this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
@@ -220,6 +242,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        
+        logger.debug("Triggered node unlinking; userID: " + userID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
         
@@ -233,6 +257,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     public void deleteNode(String userID, WorkspaceNode node)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
+        logger.debug("Triggered node deletion; userID: " + userID + "; nodeID: " + node.getWorkspaceNodeID());
+        
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, node.getWorkspaceID());
         
         this.workspaceNodeManager.deleteNodesRecursively(node);
@@ -245,7 +271,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
         
-        logger.debug("Triggered tree replacement. Old node " + oldTreeTopNode.getWorkspaceNodeID() + "; new node: " + newTreeTopNode.getWorkspaceNodeID());
+        logger.debug("Triggered tree replacement; userID: " + userID + "; oldNodeID: " + oldTreeTopNode.getWorkspaceNodeID() + "; newNodeID: " + newTreeTopNode.getWorkspaceNodeID());
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, oldTreeTopNode.getWorkspaceID());
         
@@ -283,6 +309,8 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
             throws IOException, TypeCheckerException, WorkspaceException {
+        
+        logger.debug("Triggered file upload into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
             
         this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
     }
@@ -293,6 +321,9 @@ public class LamusWorkspaceService implements WorkspaceService {
     @Override
     public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
             throws IOException, WorkspaceException {
+        
+        logger.debug("Triggered processing of uploaded files; userID: " + userID + "; workspaceID: " + workspaceID);
+        
         return this.workspaceUploader.processUploadedFiles(workspaceID, uploadedFiles);
     }
     
@@ -301,6 +332,8 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public List<WorkspaceNode> listUnlinkedNodes(String userID, int workspaceID) {
+        
+        logger.debug("Triggered retrieval of unlinked nodes list; userID: " + userID + "; workspaceID: " + workspaceID);
         
         return this.workspaceDao.getUnlinkedNodes(workspaceID);
     }

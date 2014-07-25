@@ -24,6 +24,8 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDeletedNodesExportHandler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusUnlinkedAndDeletedNodesExportHandler.class);
 
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
@@ -51,6 +55,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
     @Override
     public void exploreUnlinkedAndDeletedNodes(Workspace workspace)
             throws WorkspaceExportException {
+        
+        logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID());
         
         Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = this.workspaceDao.getUnlinkedAndDeletedTopNodes(workspace.getWorkspaceID());
         

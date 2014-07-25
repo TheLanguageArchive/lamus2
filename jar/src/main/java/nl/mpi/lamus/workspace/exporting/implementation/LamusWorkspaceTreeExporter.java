@@ -24,6 +24,8 @@ import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
 
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceTreeExporter.class);
+    
     private WorkspaceDao workspaceDao;
     private NodeExporterFactory nodeExporterFactory;
     
@@ -49,6 +53,8 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
     @Override
     public void explore(Workspace workspace, WorkspaceNode node)
             throws WorkspaceExportException {
+        
+        logger.debug("Exploring references in metadata node to export; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + node.getWorkspaceNodeID());
         
         Collection<WorkspaceNode> children = workspaceDao.getChildWorkspaceNodes(node.getWorkspaceNodeID());
         

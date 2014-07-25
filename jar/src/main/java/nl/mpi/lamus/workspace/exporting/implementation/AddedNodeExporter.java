@@ -117,6 +117,8 @@ public class AddedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
+        logger.debug("Exporting added node to archive; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
+        
 //        String parentArchivePath = parentNode.getArchiveURL().getPath();
         String parentArchivePath = null;
         try {

@@ -103,6 +103,9 @@ public class GeneralNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
+        logger.debug("Exporting previously existing node to archive; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: "
+                + (parentNode != null ? parentNode.getWorkspaceNodeID() : -1) + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
+        
         URI parentArchiveLocalUri = null;
         String nodeArchivePath = null;
         try {

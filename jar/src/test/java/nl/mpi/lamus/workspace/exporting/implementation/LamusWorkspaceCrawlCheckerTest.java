@@ -102,6 +102,8 @@ public class LamusWorkspaceCrawlCheckerTest {
     @Test
     public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound() throws InterruptedException {
         
+        final int workspaceID_1 = 10;
+        
         final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         
@@ -119,6 +121,9 @@ public class LamusWorkspaceCrawlCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
+            //logger
+            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
@@ -131,6 +136,9 @@ public class LamusWorkspaceCrawlCheckerTest {
     
     @Test
     public void runTwoSuccessfulSubmittedWorkspacesFound() throws InterruptedException {
+        
+        final int workspaceID_1 = 10;
+        final int workspaceID_2 = 20;
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
@@ -152,6 +160,9 @@ public class LamusWorkspaceCrawlCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(firstCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(firstCrawlerID); will(returnValue(firstCrawlerState));
             
+            //logger
+            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
@@ -161,6 +172,9 @@ public class LamusWorkspaceCrawlCheckerTest {
             //loop - second iteration
             oneOf(mockSuccessfulSubmittedWorkspace2).getCrawlerID(); will(returnValue(secondCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(secondCrawlerID); will(returnValue(secondCrawlerState));
+            
+            //logger
+            exactly(2).of(mockSuccessfulSubmittedWorkspace2).getWorkspaceID(); will(returnValue(workspaceID_2));
             
             oneOf(mockSuccessfulSubmittedWorkspace2).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace2).setMessage(successfulMessage);
@@ -174,6 +188,8 @@ public class LamusWorkspaceCrawlCheckerTest {
     
     @Test
     public void runOneFailedSubmittedWorkspaceFound() throws InterruptedException {
+        
+        final int workspaceID_1 = 10;
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
         submittedWorkspaces.add(mockFailedSubmittedWorkspace);
@@ -191,6 +207,9 @@ public class LamusWorkspaceCrawlCheckerTest {
             //loop
             oneOf(mockFailedSubmittedWorkspace).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
+            
+            //logger
+            exactly(2).of(mockFailedSubmittedWorkspace).getWorkspaceID(); will(returnValue(workspaceID_1));
             
             oneOf(mockFailedSubmittedWorkspace).setStatus(failedStatus);
             oneOf(mockFailedSubmittedWorkspace).setMessage(failedMessage);

@@ -78,6 +78,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
 	if(parentNode == null && childLink == null) { //TODO find a better way of checking for the top node
             
+            logger.debug("Setting top node of workspace; workspaceID: " + workspace.getWorkspaceID() + "; topNodeID: " + childNode.getWorkspaceNodeID());
+            
 //            Workspace workspace;
 //
 //            workspace = this.workspaceDao.getWorkspace(childNode.getWorkspaceID());
@@ -88,6 +90,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             
 	    this.workspaceDao.updateWorkspaceTopNode(workspace);
 	} else if(parentNode != null && childLink != null) { //TODO Is there a situation when this would be different?
+            
+            logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+            
 	    //TODO add information about parent link
 	    // add the link in the database
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
@@ -106,6 +111,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
         
         int workspaceID = parentNode.getWorkspaceID();
+        
+        logger.debug("Linking nodes; workspaceID: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
 //        URI childNodeURI = getNodeURI(childNode);
         
@@ -186,6 +193,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         int workspaceID = parentNode.getWorkspaceID();
         
+        logger.debug("Unlinking nodes: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+        
         MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
@@ -241,6 +250,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     public void unlinkNodeFromAllParents(WorkspaceNode childNode)
             throws WorkspaceException {
         
+        logger.debug("Unlinking node from all parents; workspaceID: " + childNode.getWorkspaceID() + "; nodeID: " + childNode.getWorkspaceNodeID());
+        
         Collection<WorkspaceNode> parentNodes =
                 this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
         
@@ -254,6 +265,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      */
     @Override
     public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode, WorkspaceNode newNode) throws WorkspaceException {
+        
+        logger.debug("Replacing nodes; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; oldNodeID: " + oldNode.getWorkspaceNodeID() + "; newNodeID: " + newNode.getWorkspaceNodeID());
         
         unlinkNodes(parentNode, oldNode);
         
@@ -272,6 +285,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      */
     @Override
     public void removeArchiveUriFromChildNode(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
+        
+        logger.debug("Removing archive URI from child node; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+        
         try {
             MetadataDocument tempParentDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
             ReferencingMetadataDocument parentDocument;

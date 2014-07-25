@@ -174,6 +174,8 @@ public class AddedNodeExporterTest {
         final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
         
         
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
@@ -236,6 +238,8 @@ public class AddedNodeExporterTest {
         
         final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
         
+        
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
@@ -301,6 +305,8 @@ public class AddedNodeExporterTest {
         final IOException expectedException = new IOException("some exception message");
         
         
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
@@ -335,6 +341,8 @@ public class AddedNodeExporterTest {
         final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeWsURL;
         final MetadataException expectedException = new MetadataException("some exception message");
         
+        
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
@@ -377,6 +385,8 @@ public class AddedNodeExporterTest {
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", testWorkspace.getWorkspaceID(), null);
         
         
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, expectedException);
@@ -418,6 +428,8 @@ public class AddedNodeExporterTest {
         final String expectedErrorMessage = "Error assigning new handle for node " + nodeWsURL;
         final HandleException expectedException = new HandleException(HandleException.INVALID_VALUE, "some exception message");
         
+        
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
@@ -478,6 +490,8 @@ public class AddedNodeExporterTest {
         final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
         
         
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
         checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
@@ -507,6 +521,14 @@ public class AddedNodeExporterTest {
             assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
             assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
+    }
+    
+    private void checkLoggerInvocations(final int parentNodeID, final int currentNodeID) {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockParentWsNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(currentNodeID));
+        }});
     }
     
     

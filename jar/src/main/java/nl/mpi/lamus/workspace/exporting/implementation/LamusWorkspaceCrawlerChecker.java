@@ -55,9 +55,11 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     @Override
     public void checkCrawlersForSubmittedWorkspaces() {
         
-        logger.debug("Checking in there are submitted workspaces to be finalised");
+        logger.debug("Checking if there are submitted workspaces to be finalised");
         
         Collection<Workspace> submittedWorkspaces = workspaceDao.getWorkspacesInFinalStage();
+        
+        logger.debug("Found " + submittedWorkspaces.size() + " submitted workspaces");
         
         for(Workspace ws : submittedWorkspaces) {
             
@@ -82,6 +84,8 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     
     private void finaliseWorkspace(Workspace workspace, boolean isSuccessful) {
         
+        logger.debug("Finalising workspace " + workspace.getWorkspaceID() + " - " + (isSuccessful ? "SUCCESS" : "ERROR"));
+        
         if(isSuccessful) {
             workspace.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
             workspace.setMessage("Data was successfully moved to the archive and the crawler was successful.");
@@ -93,6 +97,8 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
         //TODO some more details about the situation (especially in case of failure)
+        
+        logger.debug("Sending email to owner of workspace " + workspace.getWorkspaceID());
         
         workspaceMailer.sendWorkspaceFinalMessage(workspace, isSuccessful);
     }

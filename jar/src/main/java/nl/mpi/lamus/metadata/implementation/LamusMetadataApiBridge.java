@@ -59,6 +59,9 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
      */
     @Override
     public URI getSelfHandleFromFile(URL fileURL) {
+        
+        logger.debug("Retrieving self handle from metadata file; fileUrl: " + fileURL);
+        
         MetadataDocument document;
         try {
             document = metadataAPI.getMetadataDocument(fileURL);
@@ -95,6 +98,8 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
      */
     @Override
     public void saveMetadataDocument(MetadataDocument document, URL targetURL) throws IOException, TransformerException, MetadataException {
+        
+        logger.debug("Saving metadata document; targetUrl: " + targetURL);
         
         StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(targetURL));
         metadataAPI.writeMetadataDocument(document, documentStreamResult);
