@@ -46,6 +46,9 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     @Qualifier("dbHttpRoot")
     private String dbHttpRoot;
     @Autowired
+    @Qualifier("dbHttpsRoot")
+    private String dbHttpsRoot;
+    @Autowired
     @Qualifier("dbLocalRoot")
     private String dbLocalRoot;
     
@@ -88,13 +91,13 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     }
 
     /**
-     * @see ArchiveFileLocationProvider#getUriWithHttpRoot(java.net.URI)
+     * @see ArchiveFileLocationProvider#getUriWithHttpsRoot(java.net.URI)
      */
     @Override
-    public URI getUriWithHttpRoot(URI location) throws URISyntaxException{
+    public URI getUriWithHttpsRoot(URI location) throws URISyntaxException{
         
         if(location.toString().startsWith(dbLocalRoot)) {
-            return new URI(location.toString().replace(dbLocalRoot, dbHttpRoot));
+            return new URI(location.toString().replace(dbLocalRoot, dbHttpsRoot));
         }
         
         // in other cases (including when the httpRoot is already present, returns the same file
@@ -104,6 +107,9 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     @Override
     public URI getUriWithLocalRoot(URI location) throws URISyntaxException {
         
+        if(location.toString().startsWith(dbHttpsRoot)) {
+            return new URI(location.toString().replace(dbHttpsRoot, dbLocalRoot));
+        }
         if(location.toString().startsWith(dbHttpRoot)) {
             return new URI(location.toString().replace(dbHttpRoot, dbLocalRoot));
         }

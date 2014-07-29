@@ -52,14 +52,14 @@ public interface ArchiveFileLocationProvider {
     public String getChildPathRelativeToParent(String parentNodePath, String childNodePath);
     
     /**
-     * Retrieves the given URI with the archive HTTP Root prefix (if the URI
+     * Retrieves the given URI with the archive HTTPS Root prefix (if the URI
      * starts with the local Root prefix, it is replaced, otherwise the URI
      * is not changed).
      * 
      * @param location
-     * @return URI with the archive HTTP Root prefix
+     * @return URI with the archive HTTPS Root prefix
      */
-    public URI getUriWithHttpRoot(URI location) throws URISyntaxException;
+    public URI getUriWithHttpsRoot(URI location) throws URISyntaxException;
     
     /**
      * Retrieves the given URI with the archive Local Root prefix (if the URI

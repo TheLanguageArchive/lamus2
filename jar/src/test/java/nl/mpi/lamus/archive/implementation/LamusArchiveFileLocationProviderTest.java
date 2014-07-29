@@ -50,6 +50,7 @@ public class LamusArchiveFileLocationProviderTest {
     
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     
+    private final String dbHttpsRoot = "https://some.server/archive/";
     private final String dbHttpRoot = "http://some.server/archive/";
     private final String dbLocalRoot = "file:/some/loca/folder/archive/";
     
@@ -72,6 +73,7 @@ public class LamusArchiveFileLocationProviderTest {
     @Before
     public void setUp() {
         archiveFileLocationProvider = new LamusArchiveFileLocationProvider(mockArchiveFileHelper);
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpsRoot", dbHttpsRoot);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpRoot", dbHttpRoot);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbLocalRoot", dbLocalRoot);
     }
@@ -205,10 +207,10 @@ public class LamusArchiveFileLocationProviderTest {
     public void getHttpUriContainingAlreadyHttpRoot() throws URISyntaxException {
         
         String fileRelativePath = "anotherFolder/file.cmdi";
-        URI initialLocation = new URI(dbHttpRoot + fileRelativePath);
+        URI initialLocation = new URI(dbHttpsRoot + fileRelativePath);
         URI expectedLocation = initialLocation;
         
-        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpsRoot(initialLocation);
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
@@ -218,9 +220,9 @@ public class LamusArchiveFileLocationProviderTest {
         
         String fileRelativePath = "anotherFolder/file.cmdi";
         URI initialLocation = new URI(dbLocalRoot + fileRelativePath);
-        URI expectedLocation = new URI(dbHttpRoot + fileRelativePath);
+        URI expectedLocation = new URI(dbHttpsRoot + fileRelativePath);
         
-        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpsRoot(initialLocation);
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
@@ -228,11 +230,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getHttpUriContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
         
-        String fileAbsolutePath = "http://alternative/root/anotherFolder/file.cmdi";
+        String fileAbsolutePath = "https://alternative/root/anotherFolder/file.cmdi";
         URI initialLocation = new URI(fileAbsolutePath);
         URI expectedLocation = initialLocation;
         
-        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpRoot(initialLocation);
+        URI retrievedFile = archiveFileLocationProvider.getUriWithHttpsRoot(initialLocation);
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
@@ -243,6 +245,18 @@ public class LamusArchiveFileLocationProviderTest {
         String fileRelativePath = "anotherFolder/file.cmdi";
         URI initialLocation = new URI(dbLocalRoot + fileRelativePath);
         URI expectedLocation = initialLocation;
+        
+        URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
+        
+        assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+    
+    @Test
+    public void getLocalUriContainingHttpsRoot() throws URISyntaxException {
+        
+        String fileRelativePath = "anotherFolder/file.cmdi";
+        URI initialLocation = new URI(dbHttpsRoot + fileRelativePath);
+        URI expectedLocation = new URI(dbLocalRoot + fileRelativePath);
         
         URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
         
