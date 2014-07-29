@@ -66,7 +66,7 @@ public class LamusJerseyHelper implements JerseyHelper {
         
         Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
         
-        Entity<String> uriEntity = Entity.entity("root=" + requestUri.toString(), MediaType.APPLICATION_FORM_URLENCODED);
+        Entity<String> uriEntity = Entity.entity("root=" + requestUri.toString() + "&forceUpdate=" + true, MediaType.APPLICATION_FORM_URLENCODED);
         
         JsonObject responseJsonObject = invocationBuilder.post(uriEntity, JsonObject.class);
         
@@ -79,11 +79,10 @@ public class LamusJerseyHelper implements JerseyHelper {
     @Override
     public JsonObject getRequestCrawlerDetails(String requestCrawlerID, String location, String... paths) {
         
-        WebTarget finalTarget = getTargetForService(location, paths);
+        WebTarget finalTarget =
+                getTargetForService(location, paths).path(requestCrawlerID);
         
         Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
-        
-        Entity<String> stringEntity = Entity.entity(requestCrawlerID, MediaType.TEXT_PLAIN_TYPE);
         
         JsonObject responseJsonObject = invocationBuilder.get(JsonObject.class);
         
