@@ -87,6 +87,9 @@ public class LamusPropertiesTest {
     @Qualifier("dbHttpRoot")
     private String dbHttpRoot;
     @Autowired
+    @Qualifier("dbHttpsRoot")
+    private String dbHttpsRoot;
+    @Autowired
     @Qualifier("dbLocalRoot")
     private String dbLocalRoot;
     

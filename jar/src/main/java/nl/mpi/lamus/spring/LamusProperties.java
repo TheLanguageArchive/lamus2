@@ -202,6 +202,13 @@ public class LamusProperties {
     public String dbHttpRoot() {
         return dbHttpRoot;
     }
+    @Value("${db_httpsroot}")
+    private String dbHttpsRoot;
+    @Bean
+    @Qualifier("dbHttpsRoot")
+    public String dbHttpsRoot() {
+        return dbHttpsRoot;
+    }
     
     @Value("${db_localroot}")
     private String dbLocalRoot;
