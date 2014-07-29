@@ -284,7 +284,7 @@ public class AddedNodeExporter implements NodeExporter {
         
         try {
             
-            URI targetUri = archiveFileLocationProvider.getUriWithHttpRoot(currentNode.getArchiveURL().toURI());
+            URI targetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
             
             URI newNodeArchiveHandle = handleManager.assignNewHandle(new File(currentNode.getWorkspaceURL().getPath()), targetUri);
             currentNode.setArchiveURI(handleManager.prepareHandleWithHdlPrefix(newNodeArchiveHandle));

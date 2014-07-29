@@ -181,7 +181,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
             URI newTargetUri = null;
             try {
-                 newTargetUri = archiveFileLocationProvider.getUriWithHttpRoot(currentNode.getArchiveURL().toURI());
+                 newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
             } catch (URISyntaxException ex) {
                 String errorMessage = "Error getting new target URI for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);

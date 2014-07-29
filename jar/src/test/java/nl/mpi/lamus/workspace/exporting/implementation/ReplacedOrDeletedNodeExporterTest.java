@@ -199,7 +199,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
-        final URL testNodeVersionArchiveHttpUrl = new URL("http:/remote/archive/version_folder/r_node.txt");
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.txt");
         
 
         final WorkspaceNode testOldNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
@@ -236,11 +236,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveFileLocationProvider).getUriWithHttpRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpUrl.toURI()));
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpUrl.toURI());
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
             
         }});
         
@@ -381,7 +381,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
-        final URL testNodeVersionArchiveHttpUrl = new URL("http:/remote/archive/version_folder/r_node.txt");
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.txt");
         
 
         final WorkspaceNode testOldNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
@@ -421,11 +421,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveFileLocationProvider).getUriWithHttpRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpUrl.toURI()));
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpUrl.toURI());
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
                 will(throwException(expectedExceptionCause));
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNewNodeArchiveURL));
             
