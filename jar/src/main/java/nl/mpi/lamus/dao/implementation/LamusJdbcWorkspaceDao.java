@@ -378,9 +378,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Retrieving list of workspace in final stage (submitted but still waiting for result of crawler)");
         
-        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE status LIKE :submitted_status";
+        String queryWorkspaceListSql = "SELECT * FROM workspace WHERE status LIKE :pending_db_update_status";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("submitted_status", WorkspaceStatus.SUBMITTED.toString());
+                .addValue("pending_db_update_status", WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE.toString());
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
         

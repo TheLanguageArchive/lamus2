@@ -669,7 +669,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         workspace1.setStatus(WorkspaceStatus.INITIALISED);
         updateWorkspaceStatusInDb(workspace1);
         Workspace workspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        workspace2.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace2.setStatus(WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE);
         workspace2.setCrawlerID(UUID.randomUUID().toString());
         updateWorkspaceStatusInDb(workspace2);
         updateWorkspaceCrawlerIDInDb(workspace2);
@@ -686,12 +686,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     public void getWorkspacesInFinalStageTwoSubmitted() {
         
         Workspace workspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        workspace1.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace1.setStatus(WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE);
         workspace1.setCrawlerID(UUID.randomUUID().toString());
         updateWorkspaceStatusInDb(workspace1);
         updateWorkspaceCrawlerIDInDb(workspace1);
         Workspace workspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        workspace2.setStatus(WorkspaceStatus.SUBMITTED);
+        workspace2.setStatus(WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE);
         workspace2.setCrawlerID(UUID.randomUUID().toString());
         updateWorkspaceStatusInDb(workspace2);
         updateWorkspaceCrawlerIDInDb(workspace2);
