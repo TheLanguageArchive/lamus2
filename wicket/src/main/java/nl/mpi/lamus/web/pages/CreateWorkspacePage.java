@@ -180,6 +180,12 @@ public class CreateWorkspacePage extends LamusPage {
             }
         };
         addTopNodeButton.setEnabled(false);
+        
+        
+        //TODO This should be removed once the functionality is implemented
+        addTopNodeButton.setVisible(false);
+                
+        
         form.add(addTopNodeButton);
         
         
