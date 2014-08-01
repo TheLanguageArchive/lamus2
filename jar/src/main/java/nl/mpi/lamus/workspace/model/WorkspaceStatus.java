@@ -101,5 +101,9 @@ public enum WorkspaceStatus {
      * ArchiveCrawler and AMS2 manually and leave this IR state or delete the IR
      * afterwards.
      */
-    PENDING_ARCHIVE_DB_UPDATE;
+    PENDING_ARCHIVE_DB_UPDATE,
+    
+    CRAWLER_ERROR,
+    
+    VERSIONING_ERROR;
 }

@@ -517,7 +517,6 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setEndDate(endDate);
             oneOf(mockSubmittedWorkspace).setStatus(successfullySubmittedStatus);
             oneOf(mockSubmittedWorkspace).setMessage(successfullySubmittedMessage);
-            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
         }});

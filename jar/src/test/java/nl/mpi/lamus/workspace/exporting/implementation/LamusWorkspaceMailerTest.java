@@ -94,11 +94,11 @@ public class LamusWorkspaceMailerTest {
             oneOf(mockMailHelper).sendMailMessage(mockMessage);
         }});
         
-        workspaceMailer.sendWorkspaceFinalMessage(mockWorkspace, Boolean.TRUE);
+        workspaceMailer.sendWorkspaceFinalMessage(mockWorkspace, Boolean.TRUE, Boolean.TRUE);
     }
     
     @Test
-    public void sendWorkspaceFinalMessageFailure() {
+    public void sendWorkspaceFinalMessageCrawlerFailure() {
         
         final int workspaceID = 10;
         final String userID = "someUser";
@@ -119,6 +119,31 @@ public class LamusWorkspaceMailerTest {
             oneOf(mockMailHelper).sendMailMessage(mockMessage);
         }});
         
-        workspaceMailer.sendWorkspaceFinalMessage(mockWorkspace, Boolean.FALSE);
+        workspaceMailer.sendWorkspaceFinalMessage(mockWorkspace, Boolean.FALSE, Boolean.TRUE);
+    }
+    
+    @Test
+    public void sendWorkspaceFinalMessageVersioningFailure() {
+        
+        final int workspaceID = 10;
+        final String userID = "someUser";
+        final String emailAddress = "someUser@test.nl";
+        
+        final String subject = "Workspace - Failure";
+        final String text = "Workspace " + workspaceID + " was successfully submitted.\n"
+                    + "Data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
+                    + "Please contact the corpus management team.";
+
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getUserID(); will(returnValue(userID));
+            oneOf(mockAmsBridge).getMailAddress(userID); will(returnValue(emailAddress));
+            
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text); will(returnValue(mockMessage));
+            oneOf(mockMailHelper).sendMailMessage(mockMessage);
+        }});
+        
+        workspaceMailer.sendWorkspaceFinalMessage(mockWorkspace, Boolean.TRUE, Boolean.FALSE);
     }
 }

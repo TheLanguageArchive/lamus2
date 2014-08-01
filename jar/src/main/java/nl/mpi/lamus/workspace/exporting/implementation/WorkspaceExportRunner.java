@@ -136,20 +136,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         workspace.setCrawlerID(crawlerID);
         workspaceDao.updateWorkspaceCrawlerID(workspace);
         
-        // version creation service
-        Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
-        
-        if(!nodeReplacements.isEmpty()) {
-            try {
-                corpusStructureServiceBridge.createVersions(nodeReplacements);
-            } catch(VersionCreationException ex) {
 
-                //TODO throw exception instead?
-
-                return Boolean.FALSE;
-            }
-        }
-        
         //TODO fix permissions
         
         //TODO call AMS recalculation

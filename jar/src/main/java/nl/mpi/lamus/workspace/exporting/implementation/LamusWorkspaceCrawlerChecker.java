@@ -19,9 +19,11 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,24 +84,50 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     }
     
     
-    private void finaliseWorkspace(Workspace workspace, boolean isSuccessful) {
+    private void finaliseWorkspace(Workspace workspace, boolean crawlerWasSuccessful) {
         
-        logger.debug("Finalising workspace " + workspace.getWorkspaceID() + " - " + (isSuccessful ? "SUCCESS" : "ERROR"));
+        logger.debug("Finalising workspace " + workspace.getWorkspaceID());
         
-        if(isSuccessful) {
+        boolean versioningWasSuccessful = Boolean.TRUE;
+        
+        // version creation service
+        Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
+        
+        if(!nodeReplacements.isEmpty()) {
+            
+            logger.debug("Creating archive versions of replaced nodes for workspace " + workspace.getWorkspaceID());
+            
+            try {
+                corpusStructureServiceBridge.createVersions(nodeReplacements);
+            } catch(VersionCreationException ex) {
+
+                logger.error("Error during archive versioning for workspace " + workspace.getWorkspaceID());
+
+                versioningWasSuccessful = Boolean.FALSE;
+            }
+        }
+        
+        if(!crawlerWasSuccessful) {
+            workspace.setStatus(WorkspaceStatus.CRAWLER_ERROR);
+            workspace.setMessage("Data was successfully moved to the archive but the crawler failed.");
+        } else if(!versioningWasSuccessful) {
+            workspace.setStatus(WorkspaceStatus.VERSIONING_ERROR);
+            workspace.setMessage("Data was successfully moved to the archive, the crawler was successful but archive versioning failed.");
+        } else {
             workspace.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
             workspace.setMessage("Data was successfully moved to the archive and the crawler was successful.");
-        } else {
-            workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
-            workspace.setMessage("Data was successfully moved to the archive but the crawler failed.");
         }
         
         workspaceDao.updateWorkspaceStatusMessage(workspace);
+        
+        if(crawlerWasSuccessful && versioningWasSuccessful) {
+            workspaceDao.cleanWorkspaceNodesAndLinks(workspace);
+        }
         
         //TODO some more details about the situation (especially in case of failure)
         
         logger.debug("Sending email to owner of workspace " + workspace.getWorkspaceID());
         
-        workspaceMailer.sendWorkspaceFinalMessage(workspace, isSuccessful);
+        workspaceMailer.sendWorkspaceFinalMessage(workspace, crawlerWasSuccessful, versioningWasSuccessful);
     }
 }

@@ -145,13 +145,9 @@ public class WorkspaceExportRunnerTest {
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(exporting.isNot("finished"));
-//            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
-//            oneOf(mockWorkspaceTreeExporter).explore(testNode);
-//                then(exporting.is("finished"));
-                
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
@@ -166,11 +162,6 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockWorkspace).setCrawlerID(crawlerID);
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
-                when(exporting.isNot("finished"));
-                
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
-                when(exporting.isNot("finished"));
-            oneOf(mockNodeReplacementsCollection).isEmpty(); will(returnValue(Boolean.TRUE));
                 then(exporting.is("finished"));
         }});
         
@@ -219,92 +210,11 @@ public class WorkspaceExportRunnerTest {
         assertTrue("Execution result should have been successful (true)", result);
     }
     
-    @Test
-    public void callExporterWithFailedVersionCreation() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, VersionCreationException {
-        
-        final int workspaceID = 1;
-        
-        
-        
-        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
-        
-        final int testChildWorkspaceNodeID = 10;
-        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
-        final URL testChildArchiveURL = testChildOriginURL;
-        final String testDisplayValue = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-        final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
-        
-        workspaceNodes.add(testNode);
-        
-        final String crawlerID = UUID.randomUUID().toString();
-        
-        final VersionCreationException expectedCause = new VersionCreationException("some exception message", null);
-        
-        final States exporting = context.states("exporting");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-                when(exporting.isNot("finished"));
-//            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(workspaceNodes));
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
-                when(exporting.isNot("finished"));
-            
-//            oneOf(mockWorkspaceTreeExporter).explore(testNode);
-//                then(exporting.is("finished"));
-                
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
-                when(exporting.isNot("finished"));
-            
-            oneOf(mockNodeExporter).exportNode(null, testNode);
-                when(exporting.isNot("finished"));
-                
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
-                when(exporting.isNot("finished"));
-                
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(returnValue(crawlerID));
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspace).setCrawlerID(crawlerID);
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
-                when(exporting.isNot("finished"));
-            
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(mockNodeReplacementsCollection));
-                when(exporting.isNot("finished"));
-            oneOf(mockNodeReplacementsCollection).isEmpty(); will(returnValue(Boolean.FALSE));
-                when(exporting.isNot("finished"));
-            oneOf(mockCorpusStructureServiceBridge).createVersions(mockNodeReplacementsCollection);
-                will(throwException(expectedCause));
-                then(exporting.is("finished"));
-        }});
-        
-        boolean result = executeRunner();
-        
-        long timeoutInMs = 2000L;
-        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
-        
-        assertFalse("Execution result should have been unsuccessful (false)", result);
-    }
-    
-    
-    //TODO EXCEPTIONS
-    //TODO EXCEPTIONS
-    //TODO EXCEPTIONS
-    
-    
+    //TODO Test exceptions
     
     
     private boolean executeRunner() throws InterruptedException, ExecutionException {
-        
-//        TaskExecutor executor = new SimpleAsyncTaskExecutor();
-//        executor.execute(workspaceImportRunner);
-        
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> result = executorService.submit(workspaceExportRunner);
         return result.get();

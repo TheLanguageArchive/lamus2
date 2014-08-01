@@ -44,22 +44,27 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
      * @see WorkspaceMailer#sendWorkspaceFinalMessage(nl.mpi.lamus.workspace.model.Workspace, boolean)
      */
     @Override
-    public void sendWorkspaceFinalMessage(Workspace workspace, boolean isSuccessful) {
+    public void sendWorkspaceFinalMessage(Workspace workspace, boolean crawlerWasSuccessful, boolean versioningWasSuccessful) {
         
         String toAddress = amsBridge.getMailAddress(workspace.getUserID());
         
         String subject;
         String text;
         
-        if(isSuccessful) {
-            subject = "Workspace - Success";
-            text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
-                    + "Data was moved into the archive and the database was updated.";
-        } else {
+        if(!crawlerWasSuccessful) {
             subject = "Workspace - Failure";
             text = "Workspace " + workspace.getWorkspaceID() + " was submitted.\n"
                     + "Data was moved into the archive but there were problems updating the database.\n"
                     + "Please contact the corpus management team.";
+        } else if(!versioningWasSuccessful) {
+            subject = "Workspace - Failure";
+            text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
+                    + "Data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
+                    + "Please contact the corpus management team.";
+        } else {
+            subject = "Workspace - Success";
+            text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
+                    + "Data was moved into the archive and the database was updated.";
         }
         
         Message mailMessage = mailHelper.getMailMessage(toAddress, subject, text);

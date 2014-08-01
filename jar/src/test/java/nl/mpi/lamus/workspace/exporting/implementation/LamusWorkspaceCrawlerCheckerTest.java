@@ -23,8 +23,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
@@ -45,7 +47,7 @@ import org.junit.Rule;
  *
  * @author guisil
  */
-public class LamusWorkspaceCrawlCheckerTest {
+public class LamusWorkspaceCrawlerCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
@@ -58,12 +60,14 @@ public class LamusWorkspaceCrawlCheckerTest {
     @Mock Workspace mockSuccessfulSubmittedWorkspace1;
     @Mock Workspace mockSuccessfulSubmittedWorkspace2;
     @Mock Workspace mockFailedSubmittedWorkspace;
+    @Mock WorkspaceNodeReplacement mockNodeReplacement1;
+    @Mock WorkspaceNodeReplacement mockNodeReplacement2;
     
     
     private LamusWorkspaceCrawlerChecker workspaceCrawlerChecker;
     
     
-    public LamusWorkspaceCrawlCheckerTest() {
+    public LamusWorkspaceCrawlerCheckerTest() {
     }
     
     @BeforeClass
@@ -100,7 +104,7 @@ public class LamusWorkspaceCrawlCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound() throws InterruptedException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithoutVersions() throws InterruptedException {
         
         final int workspaceID_1 = 10;
         
@@ -110,6 +114,8 @@ public class LamusWorkspaceCrawlCheckerTest {
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "SUCCESS";
         
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        
         final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
@@ -118,24 +124,29 @@ public class LamusWorkspaceCrawlCheckerTest {
             oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
             
             //loop
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            //logger
-            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
             
-            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE);
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});
         
         workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
     }
     
     @Test
-    public void runTwoSuccessfulSubmittedWorkspacesFound() throws InterruptedException {
+    public void runTwoSuccessfulSubmittedWorkspacesFound_WithoutVersions() throws InterruptedException {
         
         final int workspaceID_1 = 10;
         final int workspaceID_2 = 20;
@@ -149,38 +160,51 @@ public class LamusWorkspaceCrawlCheckerTest {
         final String secondCrawlerID = UUID.randomUUID().toString();
         final String secondCrawlerState = "SUCCESS";
         
+        final Collection<WorkspaceNodeReplacement> firstNodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> secondNodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        
         final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
-            
+
             oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
             
             //loop - first iteration
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(firstCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(firstCrawlerID); will(returnValue(firstCrawlerState));
             
-            //logger
-            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(firstNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
             
-            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE);
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
             
             //loop - second iteration
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace2).getWorkspaceID(); will(returnValue(workspaceID_2));
+            
             oneOf(mockSuccessfulSubmittedWorkspace2).getCrawlerID(); will(returnValue(secondCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(secondCrawlerID); will(returnValue(secondCrawlerState));
             
-            //logger
-            exactly(2).of(mockSuccessfulSubmittedWorkspace2).getWorkspaceID(); will(returnValue(workspaceID_2));
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(secondNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace2).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace2).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace2);
             
-            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace2, Boolean.TRUE);
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace2);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace2, Boolean.TRUE, Boolean.TRUE);
         }});
         
         workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
@@ -197,7 +221,9 @@ public class LamusWorkspaceCrawlCheckerTest {
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "CRASHED";
         
-        final WorkspaceStatus failedStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        
+        final WorkspaceStatus failedStatus = WorkspaceStatus.CRAWLER_ERROR;
         final String failedMessage = "Data was successfully moved to the archive but the crawler failed.";
         
         context.checking(new Expectations() {{
@@ -205,17 +231,110 @@ public class LamusWorkspaceCrawlCheckerTest {
             oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
             
             //loop
+            
+            //logger
+            allowing(mockFailedSubmittedWorkspace).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
             oneOf(mockFailedSubmittedWorkspace).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            //logger
-            exactly(2).of(mockFailedSubmittedWorkspace).getWorkspaceID(); will(returnValue(workspaceID_1));
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
             
             oneOf(mockFailedSubmittedWorkspace).setStatus(failedStatus);
             oneOf(mockFailedSubmittedWorkspace).setMessage(failedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockFailedSubmittedWorkspace);
             
-            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockFailedSubmittedWorkspace, Boolean.FALSE);
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockFailedSubmittedWorkspace, Boolean.FALSE, Boolean.TRUE);
+        }});
+        
+        workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
+    }
+    
+    @Test
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithSuccessfulVersions() throws InterruptedException, VersionCreationException {
+        
+        final int workspaceID_1 = 10;
+        
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        final String crawlerState = "SUCCESS";
+        
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        nodeReplacements.add(mockNodeReplacement1);
+        nodeReplacements.add(mockNodeReplacement2);
+        
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
+            
+            //loop
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
+            oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
+            
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements);
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
+            oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
+        }});
+        
+        workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
+    }
+    
+    @Test
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithFailedVersions() throws InterruptedException, VersionCreationException {
+        
+        final int workspaceID_1 = 10;
+        
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        final String crawlerState = "SUCCESS";
+        
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        nodeReplacements.add(mockNodeReplacement1);
+        nodeReplacements.add(mockNodeReplacement2);
+        
+        final VersionCreationException expectedException = new VersionCreationException("some error with versioning", null);
+        
+        final WorkspaceStatus failedStatus = WorkspaceStatus.VERSIONING_ERROR;
+        final String failedMessage = "Data was successfully moved to the archive, the crawler was successful but archive versioning failed.";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
+            
+            //loop
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
+            oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
+            
+            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements); will(throwException(expectedException));
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(failedStatus);
+            oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(failedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.FALSE);
         }});
         
         workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();

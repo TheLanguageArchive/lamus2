@@ -28,8 +28,9 @@ public interface WorkspaceMailer {
      * Sends a message when the workspace submission is finished.
      * 
      * @param workspace Workspace about which the message is concerned
-     * @param isSuccessful true if the submission process was successful
+     * @param crawlerWasSuccessful true if the crawling process was successful
+     * @param versioningWasSuccessful true if the version creation process was successful
      */
-    public void sendWorkspaceFinalMessage(Workspace workspace, boolean isSuccessful);
+    public void sendWorkspaceFinalMessage(Workspace workspace, boolean crawlerWasSuccessful, boolean versioningWasSuccessful);
     
 }
