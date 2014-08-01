@@ -122,6 +122,9 @@ public class ResourceNodeReplaceCheckerTest {
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
+        final String oldNodeFormat = "text/plain";
+        final String newNodeFormat = "text/plain";
+        
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
         
@@ -131,6 +134,8 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
+            oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
             //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
             
@@ -170,6 +175,9 @@ public class ResourceNodeReplaceCheckerTest {
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
+        final String oldNodeFormat = "text/plain";
+        final String newNodeFormat = "text/plain";
+        
         final boolean newNodeAlreadyLinked = Boolean.TRUE;
         
         context.checking(new Expectations() {{
@@ -178,6 +186,8 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
+            oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
             //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
             
@@ -224,6 +234,9 @@ public class ResourceNodeReplaceCheckerTest {
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
+        final String oldNodeFormat = "text/plain";
+        final String newNodeFormat = "text/plain";
+        
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
         context.checking(new Expectations() {{
@@ -231,6 +244,9 @@ public class ResourceNodeReplaceCheckerTest {
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
+            oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
             //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
             
@@ -266,6 +282,9 @@ public class ResourceNodeReplaceCheckerTest {
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
+        final String oldNodeFormat = "text/plain";
+        final String newNodeFormat = "text/plain";
+        
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
         context.checking(new Expectations() {{
@@ -273,6 +292,9 @@ public class ResourceNodeReplaceCheckerTest {
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
+            oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
             //old node not in archive, which means it was newly added in this workspace
                 // it should be replaced normally, the dao layer will take care of setting it as deleted instead or replaced
@@ -282,6 +304,50 @@ public class ResourceNodeReplaceCheckerTest {
             
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
+            
+            //TODO MULTIPLE PARENTS???
+            
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final URI oldNodeArchiveHandleURI = new URI(UUID.randomUUID().toString());
+        final URL oldNodeArchiveRemoteURL = new URL("http://remote/archive/file.txt");
+        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
+        final URL oldNodeArchiveLocalURL = new URL("file:/local/archive/file.txt");
+        final URI oldNodeArchiveLocalURI = oldNodeArchiveLocalURL.toURI();
+        
+        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.jpg");
+        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
+        
+        final String oldNodeFormat = "text/plain";
+        final String newNodeFormat = "image/jpeg";
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
+            oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
+            
+            oneOf(mockReplaceActionFactory).getUnlinkAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkAction, actions);
+            oneOf(mockReplaceActionFactory).getDeleteAction(mockOldNode); will(returnValue(mockDeleteAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
+            oneOf(mockReplaceActionFactory).getLinkAction(mockNewNode, mockParentNode); will(returnValue(mockLinkAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
             
             //TODO MULTIPLE PARENTS???
             

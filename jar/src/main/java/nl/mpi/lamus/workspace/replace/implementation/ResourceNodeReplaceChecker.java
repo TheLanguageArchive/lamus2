@@ -61,6 +61,14 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
         
         logger.debug("Deciding which actions should take place to perform the replacement of resource node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
         
+        if(!oldNode.getFormat().equals(newNode.getFormat())) {
+            
+            replaceActionManager.addActionToList(replaceActionFactory.getUnlinkAction(oldNode, parentNode), actions);
+            replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(oldNode), actions);
+            replaceActionManager.addActionToList(replaceActionFactory.getLinkAction(newNode, parentNode), actions);
+            return;
+        } 
+        
         CorpusNode archiveNode = corpusStructureProvider.getNode(oldNode.getArchiveURI());
         
         
