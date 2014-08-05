@@ -31,11 +31,9 @@
 	<property name="dataSource" ref="corpusStructureDataSource" />
 	<property name="jpaVendorAdapter">
 	    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-		<property name="generateDdl" value="true" />
 	    </bean>
 <!--            <bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
                 <property name="showSql" value="true" />
-                <property name="generateDdl" value="true" />
                 <property name="databasePlatform" value="org.apache.openjpa.jdbc.sql.PostgresDictionary" />
             </bean>-->
 	</property>
