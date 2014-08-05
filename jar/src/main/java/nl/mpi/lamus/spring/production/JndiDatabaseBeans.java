@@ -76,7 +76,6 @@ public class JndiDatabaseBeans {
 //                setDataSource(corpusStructureDataSource());
 //                setJpaVendorAdapter(
 //                        new HibernateJpaVendorAdapter() {{
-//                            setGenerateDdl(true);
 //                        }});
 //                
 ////                setPersistenceProviderClass(PersistenceProviderImpl.class);
