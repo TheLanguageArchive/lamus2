@@ -111,6 +111,15 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             }
         }
         
+        // Search in the rest of the workspace for matches
+        Collection<WorkspaceNode> matchingNodes = workspaceDao.getWorkspaceNodeByArchiveURI(handle);
+        if(matchingNodes.size() == 1) { // one match - shouldn't be more than that
+            logger.debug("One match in workspace for URI " + handle);
+            return matchingNodes.iterator().next();
+        } else if(matchingNodes.size() > 1) { // several matches - problem
+            logger.error("Several matches found in workspace for URI " + handle);
+            throw new IllegalStateException("Several matches found in workspace for URI " + handle);
+        }
         
         CorpusNode referenceCorpusNode = corpusStructureProvider.getNode(handle);
         URL referenceUrl = null;

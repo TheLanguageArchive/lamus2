@@ -1399,6 +1399,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
@@ -1440,6 +1442,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
@@ -1473,7 +1477,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void removeArchiveUri_MetadataException_GetParentDocument() throws MalformedURLException, IOException, MetadataException, WorkspaceException {
+    public void removeArchiveUri_MetadataException_GetParentDocument() throws MalformedURLException, IOException, MetadataException, WorkspaceException, URISyntaxException {
         
         final int workspaceID = 1;
         
@@ -1482,6 +1486,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int childID = 200;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
         
         final MetadataException expectedCause = new MetadataException("some exception message");
         String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
@@ -1492,6 +1497,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
+            
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(throwException(expectedCause));
@@ -1533,6 +1540,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
+            
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
@@ -1584,6 +1593,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childID));
             
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
+            
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
@@ -1619,6 +1630,30 @@ public class LamusWorkspaceNodeLinkManagerTest {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
             assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
         }
+    }
+    
+    @Test
+    public void removeArchiveUri_nullArchiveUri() throws MalformedURLException, URISyntaxException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 1;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final int childNodeID = 2;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
     }
 
     

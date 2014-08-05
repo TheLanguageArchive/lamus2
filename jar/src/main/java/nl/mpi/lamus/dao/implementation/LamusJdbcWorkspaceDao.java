@@ -529,17 +529,22 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#setWorkspaceNodeAsDeleted(int, int)
+     * @see WorkspaceDao#setWorkspaceNodeAsDeleted(int, int, boolean)
      */
     @Override
-    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID) {
+    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID, boolean isExternal) {
         
         logger.debug("Setting node " + nodeID + " in workspace " + workspaceID + " as deleted");
         
         String updateSql = "UPDATE node SET status = :status"
                 + " WHERE workspace_node_id = :workspace_node_id";
+        
+        WorkspaceNodeStatus deletedStatus = isExternal ?
+                WorkspaceNodeStatus.NODE_EXTERNAL_DELETED :
+                WorkspaceNodeStatus.NODE_DELETED;
+        
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("status", WorkspaceNodeStatus.NODE_DELETED.toString())
+                .addValue("status", deletedStatus.toString())
                 .addValue("workspace_node_id", nodeID);
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
@@ -676,11 +681,12 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.debug("Retrieving list containing unlinked nodes of the workspace with ID: " + workspaceID);
         
         String queryUnlinkedNodeListSql = "SELECT * FROM node WHERE workspace_node_id NOT IN (SELECT child_workspace_node_id from node_link)"
-                + " AND workspace_id = :workspace_id AND status NOT LIKE :status_deleted AND status NOT LIKE :status_replaced"
+                + " AND workspace_id = :workspace_id AND status NOT LIKE :status_deleted AND status NOT LIKE :status_external_deleted AND status NOT LIKE :status_replaced"
                 + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("workspace_id", workspaceID)
                 .addValue("status_deleted", WorkspaceNodeStatus.NODE_DELETED.toString())
+                .addValue("status_external_deleted", WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.toString())
                 .addValue("status_replaced", WorkspaceNodeStatus.NODE_REPLACED.toString());
         
         List<WorkspaceNode> listToReturn =
@@ -855,7 +861,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         if(WorkspaceNodeStatus.NODE_CREATED.equals(oldNode.getStatus()) ||
                 WorkspaceNodeStatus.NODE_UPLOADED.equals(oldNode.getStatus())) {
             
-            setWorkspaceNodeAsDeleted(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+            setWorkspaceNodeAsDeleted(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID(), oldNode.isExternal());
         } else {
             setWorkspaceNodeAsReplaced(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
             createNodeVersion(oldNode, newNode);

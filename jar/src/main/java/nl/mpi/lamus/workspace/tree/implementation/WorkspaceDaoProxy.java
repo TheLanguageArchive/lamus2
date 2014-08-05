@@ -179,11 +179,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
-     * @see WorkspaceDao#setWorkspaceNodeAsDeleted(int, int)
+     * @see WorkspaceDao#setWorkspaceNodeAsDeleted(int, int, boolean)
      */
     @Override
-    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID) {
-        this.getWorkspaceDao().setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID, boolean isExternal) {
+        this.getWorkspaceDao().setWorkspaceNodeAsDeleted(workspaceID, nodeID, isExternal);
     }
 
     /**

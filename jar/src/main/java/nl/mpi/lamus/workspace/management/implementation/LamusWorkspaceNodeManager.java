@@ -52,7 +52,10 @@ public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
             deleteNodesRecursively(child);
         }
         
-        workspaceDao.setWorkspaceNodeAsDeleted(rootNodeToDelete.getWorkspaceID(), rootNodeToDelete.getWorkspaceNodeID());
+        workspaceDao.setWorkspaceNodeAsDeleted(
+                rootNodeToDelete.getWorkspaceID(),
+                rootNodeToDelete.getWorkspaceNodeID(),
+                rootNodeToDelete.isExternal());
         
         workspaceNodeLinkManager.unlinkNodeFromAllParents(rootNodeToDelete);
     }

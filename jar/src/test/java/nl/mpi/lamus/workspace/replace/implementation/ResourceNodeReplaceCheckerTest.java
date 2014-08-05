@@ -134,6 +134,11 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
@@ -185,6 +190,11 @@ public class ResourceNodeReplaceCheckerTest {
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
@@ -245,6 +255,11 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
@@ -293,6 +308,11 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
@@ -339,6 +359,11 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
@@ -356,6 +381,67 @@ public class ResourceNodeReplaceCheckerTest {
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
+    @Test
+    public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final URL oldNodeArchiveRemoteURL = new URL("http://external/location/file.txt");
+        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
+        
+        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/someotherfile.txt");
+        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
+        
+        final String newNodeFormat = "text/plain";
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockReplaceActionFactory).getUnlinkAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkAction, actions);
+            oneOf(mockReplaceActionFactory).getDeleteAction(mockOldNode); will(returnValue(mockDeleteAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
+            oneOf(mockReplaceActionFactory).getLinkAction(mockNewNode, mockParentNode); will(returnValue(mockLinkAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
+            
+            //TODO MULTIPLE PARENTS???
+            
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceActionsNodesAreTheSame() {
+        
+        final int nodeID = 100;
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
     
     //TODO other tests
 }

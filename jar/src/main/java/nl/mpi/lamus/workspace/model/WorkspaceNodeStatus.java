@@ -79,6 +79,9 @@ public enum WorkspaceNodeStatus {
      * nodes.
      */
     NODE_EXTERNAL, // needed for newFreeNode calls in WorkSpaceViewController
+    
+    NODE_EXTERNAL_DELETED,
+    
     /**
      * REPLACED -> node got replaced by another node. Replaced nodes are similar
      * to deleted nodes but hold information used for version-linking to the new

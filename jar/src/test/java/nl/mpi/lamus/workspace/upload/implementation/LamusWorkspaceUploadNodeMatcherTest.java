@@ -67,6 +67,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     @Mock WorkspaceNode mockFirstNode;
     @Mock WorkspaceNode mockSecondNode;
     @Mock WorkspaceNode mockSomeOtherNode;
+    @Mock WorkspaceNode mockYetAnotherNode;
     @Mock WorkspaceNode mockExternalNode;
     @Mock CorpusNode mockCorpusNode;
     @Mock Reference mockReference;
@@ -182,7 +183,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
 //    }
     
     @Test
-    public void findNodeForResourceHandlePointingToArchive() throws URISyntaxException, MalformedURLException {
+    public void findNodeForResourceHandlePointingToNodeExistingInWorkspace() throws URISyntaxException, MalformedURLException {
         
         final int workspaceID = 10;
         final URI handleToMatch = new URI(UUID.randomUUID().toString());
@@ -197,6 +198,31 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URL archiveUrlInDb = new URL("file:/archive/path/" + commonPath + "/child.txt");
         final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
         final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
+        
+        context.checking(new Expectations() {{
+            
+        }});
+    }
+    
+    @Test
+    public void findNodeForResourceHandleWithMatchInWorkspace() throws URISyntaxException, MalformedURLException {
+        
+        final int workspaceID = 10;
+        final URI handleToMatch = new URI(UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        //handle will not match the URI of the first node
+        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
+        final String commonPath = "parent";
+        final URL archiveUrlInDb = new URL("file:/archive/path/" + commonPath + "/child.txt");
+        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
+        
+        final Collection<WorkspaceNode> matchesInWorkspace = new ArrayList<WorkspaceNode>();
+        matchesInWorkspace.add(mockSomeOtherNode);
         
         context.checking(new Expectations() {{
             
@@ -216,6 +242,108 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //  and create an external node pointing to the matched corpus node
             oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
 //            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(matchesInWorkspace));
+        }});
+        
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, handleToMatch);
+        
+        assertNotNull("Matching node should not be null", retrievedNode);
+        assertEquals("Matching node different from expected", mockSomeOtherNode, retrievedNode);
+    }
+    
+    @Test
+    public void findNodeForResourceHandleWithSeveralMatchesInWorkspace() throws URISyntaxException, MalformedURLException {
+        
+        final int workspaceID = 10;
+        final URI handleToMatch = new URI(UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        //handle will not match the URI of the first node
+        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
+        final String commonPath = "parent";
+        final URL archiveUrlInDb = new URL("file:/archive/path/" + commonPath + "/child.txt");
+        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
+        
+        final Collection<WorkspaceNode> matchesInWorkspace = new ArrayList<WorkspaceNode>();
+        matchesInWorkspace.add(mockSomeOtherNode);
+        matchesInWorkspace.add(mockYetAnotherNode);
+        
+        final String expectedExceptionMessage = "Several matches found in workspace for URI " + handleToMatch;
+        
+        context.checking(new Expectations() {{
+            
+//            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(mockCorpusNode));
+//            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(archiveUrlInDb));
+//            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(wsUploadDirectory));
+            
+            //loop
+            //first node is metadata and doesn't match the given handle, so it will continue the loop
+            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
+            oneOf(mockHandleMatcher).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            
+            //next iteration
+            //second node is resource, so a match will be searched in the corpusstructure DB
+            // and its URL will not match the one of the current node, so it will exit the loop
+            //  and create an external node pointing to the matched corpus node
+            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+//            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(matchesInWorkspace));
+        }});
+        
+        try {
+            workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, handleToMatch);
+            fail("should have thrown exception");
+        } catch(IllegalStateException ex) {
+            assertEquals(expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void findNodeForResourceHandlePointingToArchive() throws URISyntaxException, MalformedURLException {
+        
+        final int workspaceID = 10;
+        final URI handleToMatch = new URI(UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        //handle will not match the URI of the first node
+        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
+        final String commonPath = "parent";
+        final URL archiveUrlInDb = new URL("file:/archive/path/" + commonPath + "/child.txt");
+        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
+        
+        final Collection<WorkspaceNode> emptyMatchesInWorkspace = new ArrayList<WorkspaceNode>();
+        
+        context.checking(new Expectations() {{
+            
+//            oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(mockCorpusNode));
+//            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(archiveUrlInDb));
+//            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(wsUploadDirectory));
+            
+            //loop
+            //first node is metadata and doesn't match the given handle, so it will continue the loop
+            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
+            oneOf(mockHandleMatcher).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            
+            //next iteration
+            //second node is resource, so a match will be searched in the corpusstructure DB
+            // and its URL will not match the one of the current node, so it will exit the loop
+            //  and create an external node pointing to the matched corpus node
+            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+//            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
             
             oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(archiveUrlInDb));
@@ -245,6 +373,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI firstNodeURI = new URI(UUID.randomUUID().toString());
         final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
         
+        final Collection<WorkspaceNode> emptyMatchesInWorkspace = new ArrayList<WorkspaceNode>();
+        
         context.checking(new Expectations() {{
             
             //this will cause the corpus node, and therefore the archive URL, to be null
@@ -262,6 +392,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and since the retrieved archive URL is null, it will continue (in this case exit) the loop
             oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
 
             //since the node could not be found in the archive, an external archive node won't be created, and null will be returned instead
             oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(null));
@@ -287,6 +419,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         final IllegalArgumentException secondExpectedException = new IllegalArgumentException("some error message");
         
+        final Collection<WorkspaceNode> emptyMatchesInWorkspace = new ArrayList<WorkspaceNode>();
+        
         context.checking(new Expectations() {{
             
             //this will cause the corpus node, and therefore the archive URL, to be null
@@ -306,6 +440,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and since the retrieved archive URL is null, it will continue (in this case exit) the loop
             oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
 
             //since the node could not be found in the archive, an external archive node won't be created, and null will be returned instead
             oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(null));

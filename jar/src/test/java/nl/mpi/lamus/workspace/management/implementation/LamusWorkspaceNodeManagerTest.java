@@ -86,6 +86,7 @@ public class LamusWorkspaceNodeManagerTest {
         
         final int workspaceID = 10;
         final int nodeID = 101;
+        final boolean isExternal = Boolean.FALSE;
         
         final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
         
@@ -97,7 +98,8 @@ public class LamusWorkspaceNodeManagerTest {
             
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+            oneOf(mockNode).isExternal(); will(returnValue(isExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID, isExternal);
             
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
         }});
@@ -110,7 +112,10 @@ public class LamusWorkspaceNodeManagerTest {
         
         final int workspaceID = 10;
         final int nodeID = 101;
+        final boolean isNodeExternal = Boolean.FALSE;
         final int childNodeID = 102;
+        final boolean isChildNodeExternal = Boolean.FALSE;
+        
         
         final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
         childNodes.add(mockOneChildNode);
@@ -129,13 +134,15 @@ public class LamusWorkspaceNodeManagerTest {
             //child is marked as deleted
             oneOf(mockOneChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOneChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, childNodeID);
+            oneOf(mockOneChildNode).isExternal(); will(returnValue(isChildNodeExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, childNodeID, isChildNodeExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildNode);
 
             //back to the top node, which will be marked as deleted too
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+            oneOf(mockNode).isExternal(); will(returnValue(isNodeExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID, isNodeExternal);
             
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
         }});
@@ -148,10 +155,15 @@ public class LamusWorkspaceNodeManagerTest {
         
         final int workspaceID = 10;
         final int nodeID = 101;
+        final boolean isNodeExternal = Boolean.FALSE;
         final int oneChildNodeID = 102;
+        final boolean isOneChildExternal = Boolean.FALSE;
         final int anotherChildNodeID = 103;
+        final boolean isAnotherChildExternal = Boolean.FALSE;
         final int oneChildOneChildNodeID = 104;
+        final boolean isOneChildOneChildExternal = Boolean.FALSE;
         final int oneChildAnotherChildNodeID = 105;
+        final boolean isOneChildAnotherChildExternal = Boolean.FALSE;
         
         final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
         childNodes.add(mockOneChildNode);
@@ -181,7 +193,8 @@ public class LamusWorkspaceNodeManagerTest {
             //child first child marked as deleted
             oneOf(mockOneChildOneChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOneChildOneChildNode).getWorkspaceNodeID(); will(returnValue(oneChildOneChildNodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildOneChildNodeID);
+            oneOf(mockOneChildOneChildNode).isExternal(); will(returnValue(isOneChildOneChildExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildOneChildNodeID, isOneChildOneChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildOneChildNode);
             
             //another recursive call - first child - second child
@@ -191,13 +204,15 @@ public class LamusWorkspaceNodeManagerTest {
             //child second child marked as deleted
             oneOf(mockOneChildAnotherChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOneChildAnotherChildNode).getWorkspaceNodeID(); will(returnValue(oneChildAnotherChildNodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildAnotherChildNodeID);
+            oneOf(mockOneChildAnotherChildNode).isExternal(); will(returnValue(isOneChildAnotherChildExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildAnotherChildNodeID, isOneChildAnotherChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildAnotherChildNode);
             
             //back to the first child node - it is marked as deleted too
             oneOf(mockOneChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOneChildNode).getWorkspaceNodeID(); will(returnValue(oneChildNodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildNodeID);
+            oneOf(mockOneChildNode).isExternal(); will(returnValue(isOneChildExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildNodeID, isOneChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildNode);
             
             //recursive call - second child
@@ -207,13 +222,15 @@ public class LamusWorkspaceNodeManagerTest {
             //second child node is marked as deleted too
             oneOf(mockAnotherChildNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockAnotherChildNode).getWorkspaceNodeID(); will(returnValue(anotherChildNodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, anotherChildNodeID);
+            oneOf(mockAnotherChildNode).isExternal(); will(returnValue(isAnotherChildExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, anotherChildNodeID, isAnotherChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockAnotherChildNode);
 
             //back to the top node, which will be marked as deleted too
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID);
+            oneOf(mockNode).isExternal(); will(returnValue(isNodeExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID, isNodeExternal);
             
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
         }});

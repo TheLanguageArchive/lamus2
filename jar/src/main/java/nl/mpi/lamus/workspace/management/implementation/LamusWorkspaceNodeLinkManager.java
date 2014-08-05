@@ -288,6 +288,11 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         logger.debug("Removing archive URI from child node; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
+        if(childNode.getArchiveURI() == null) {
+            logger.debug("Archive URI already null. Skipping.");
+            return;
+        }
+        
         try {
             MetadataDocument tempParentDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
             ReferencingMetadataDocument parentDocument;

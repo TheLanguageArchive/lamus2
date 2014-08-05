@@ -60,8 +60,13 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
     public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions) {
         
         logger.debug("Deciding which actions should take place to perform the replacement of resource node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
+
+        if(oldNode.getWorkspaceNodeID() == newNode.getWorkspaceNodeID()) {
+            logger.debug("Old Node and New Node are the same.");
+            return;
+        }
         
-        if(!oldNode.getFormat().equals(newNode.getFormat())) {
+        if(oldNode.isExternal() || !oldNode.getFormat().equals(newNode.getFormat())) {
             
             replaceActionManager.addActionToList(replaceActionFactory.getUnlinkAction(oldNode, parentNode), actions);
             replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(oldNode), actions);

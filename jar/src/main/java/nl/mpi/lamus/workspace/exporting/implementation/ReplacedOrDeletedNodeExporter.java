@@ -93,6 +93,12 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         
         logger.debug("Exporting deleted or replaced node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         
+        if(currentNode.isExternal()) { // Nothing to do here. If an external node was removed, just let it go when the workspace is also removed.
+            
+            logger.debug("Node " + currentNode.getWorkspaceNodeID() + "is external; will be skipped and eventually deleted with the workspace");
+            return;
+        }
+        
         if(currentNode.getArchiveURL() == null) { //Assuming that if archiveURL is null, so is archiveURI
             
             logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the workspace previously; will be skipped and eventually deleted with the workspace folder");

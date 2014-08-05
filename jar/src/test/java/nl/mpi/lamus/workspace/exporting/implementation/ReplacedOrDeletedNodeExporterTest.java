@@ -126,6 +126,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             //logger
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -161,7 +163,24 @@ public class ReplacedOrDeletedNodeExporterTest {
     }
     
     @Test
-    public void exportDeletedNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+    public void exportDeletedExternalNode() throws WorkspaceExportException {
+        
+        final int testWorkspaceNodeID = 10;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+    }
+    
+    @Test
+    public void exportDeletedNodeWithoutArchiveURL() throws WorkspaceExportException {
      
         final int testWorkspaceNodeID = 10;
         
@@ -170,6 +189,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             //logger
             exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(null));
         }});
@@ -224,6 +245,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             //logger
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
@@ -288,6 +311,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             //logger
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -333,6 +358,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             //logger
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
@@ -409,6 +436,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             //logger
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             

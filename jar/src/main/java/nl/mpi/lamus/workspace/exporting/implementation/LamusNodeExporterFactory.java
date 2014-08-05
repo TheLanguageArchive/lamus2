@@ -92,6 +92,12 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
         if(workspace.getTopNodeID() != node.getWorkspaceNodeID()) {
             if(workspaceDao.getParentWorkspaceNodes(node.getWorkspaceNodeID()).isEmpty() &&
                     !WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus()) &&
+                    !WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus()) &&
+                    
+                    
+                    //TODO TEST THIS!!!!!
+                    
+                    
                     !WorkspaceNodeStatus.NODE_REPLACED.equals(node.getStatus())) { // unlinked node, but not deleted or replaced
                 return getUnlinkedNodeExporter(workspace);
             }
@@ -103,6 +109,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
                 return getAddedNodeExporter(workspace);
             }
             if(WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus()) ||
+                    WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus()) ||
                     WorkspaceNodeStatus.NODE_REPLACED.equals(node.getStatus())) {
                 return getReplacedOrDeletedNodeExporter(workspace);
             }

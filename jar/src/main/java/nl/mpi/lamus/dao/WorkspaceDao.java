@@ -147,8 +147,9 @@ public interface WorkspaceDao {
      * Sets a node as deleted in the database
      * @param workspaceID ID of the workspace
      * @param nodeID ID of the node
+     * @param isExternal true if node is external
      */
-    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID);
+    public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID, boolean isExternal);
     
     /**
      * Retrieves the node with the given ID.

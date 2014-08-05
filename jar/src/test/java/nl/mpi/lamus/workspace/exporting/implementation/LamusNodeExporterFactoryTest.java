@@ -248,6 +248,37 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
+    public void getNodeExporterForExternalDeletedNode() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURL;
+        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final String nodeName = "someName";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String nodeFormat = "";
+        final URI nodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_EXTERNAL_DELETED, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, node);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof ReplacedOrDeletedNodeExporter);
+        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+    }
+    
+    @Test
     public void getNodeExporterForReplacedNode() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 1;
