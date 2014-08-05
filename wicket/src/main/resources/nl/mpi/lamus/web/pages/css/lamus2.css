@@ -191,15 +191,28 @@ div.archiveTreePanelContainer {
 
 div.archiveTreePanelContainer div.treePanel {
     width: 100%;
-    height: 80%;
+    height: 70%;
+    
+    clear: both;
+    
+    overflow: auto;
+    
+    bottom: 0;
+    
+    border-left: 3px solid #1b324f;
+    /*border-top: 3px solid #1b324f;*/
+    /*border-right: 3px solid #1b324f;*/
+    border-bottom: 3px solid #1b324f;
+    
+    box-sizing: border-box;
 }
 
 
 div.archiveTreeFormContainer {
     clear: both;
     /*float: left;*/
-    height: 20%;
-    min-height: 100px;
+    /*height: 20%;*/
+    /*min-height: 100px;*/
 }
 
 
@@ -513,31 +526,44 @@ div.treePanelContainer {
 div.treePanelContainer div.treePanel {
     width: 100%;
     height: 100%;
+    
+    clear: both;
+    
+    overflow: auto;
+    
+    bottom: 0;
+    
+    /*border-left: 3px solid #1b324f;*/
+    border-top: 3px solid #1b324f;
+    border-right: 3px solid #1b324f;
+    /*border-bottom: 3px solid #1b324f;*/
+    
+    box-sizing: border-box;
 }
 
-div.treePanel {
+/*div.treePanel {
     clear: both;
-    /*float: left;*/
+    float: left;
     
-    /*height: 100%;*/
+    height: 100%;
     overflow: auto;
-    /*float: left;*/
+    float: left;
     bottom: 0;
-    /*width: 30%;*/
+    width: 30%;
     
     
     
-/*    overflow: auto; */
-/*    width: 100%;
-    height: 80%;*/
-    /*min-width: 300px;*/
-    /*min-height: 600px;*/
-    /*bottom:0;*/
+    overflow: auto; 
+    width: 100%;
+    height: 80%;
+    min-width: 300px;
+    min-height: 600px;
+    bottom:0;
     border-left: 3px solid #1b324f;
     border-top: 3px solid #1b324f;
     border-right: 3px solid #1b324f;
     border-bottom: 3px solid #1b324f;
-}
+}*/
 
 /*div.treePanel > div.archiveTree{
     margin-right: 0px;
