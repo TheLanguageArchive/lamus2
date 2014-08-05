@@ -34,13 +34,15 @@
 <!--            <location target="/ManageWorkspacePage*" >
                 <require id="email">${shhaa.corpman}</require>
             </location>-->
-            <!--<location target="/LoginInfoPage" />-->
+            <!--<location target="/LoginInfoPage*" />-->
+            <!--<location target="/login*" />-->
         </authorization>
         
-<!--        <handler>
+        <handler>
             <pages>
-                <info action="dI">/LoginInfoPage</info>
+                <!--<info action="dI">/LoginInfoPage</info>-->
+                <!--<info action="dI">/login.jsp</info>-->
             </pages>
-        </handler>-->
+        </handler>
     </shhaa>
 </ROOT>
