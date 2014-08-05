@@ -77,7 +77,7 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         
         //TODO replaceNodeVersioned
         
-        workspaceNodeLinkManager.replaceNode(action.getParentNode(), action.getAffectedNode(), action.getNewNode());
+        workspaceNodeLinkManager.replaceNode(action.getParentNode(), action.getAffectedNode(), action.getNewNode(), action.isAlreadyLinked());
     }
     
     private void executeDeleteAction(DeleteNodeReplaceAction action) throws WorkspaceException {

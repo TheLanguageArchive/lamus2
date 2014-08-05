@@ -261,16 +261,21 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     }
     
     /**
-     * @see WorkspaceNodeLinkManager#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceNodeLinkManager#replaceNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode, WorkspaceNode newNode) throws WorkspaceException {
+    public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode,
+            WorkspaceNode newNode, boolean isNewNodeAlreadyLinked) throws WorkspaceException {
         
-        logger.debug("Replacing nodes; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; oldNodeID: " + oldNode.getWorkspaceNodeID() + "; newNodeID: " + newNode.getWorkspaceNodeID());
+        logger.debug("Replacing nodes; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() +
+                "; oldNodeID: " + oldNode.getWorkspaceNodeID() + "; newNodeID: " + newNode.getWorkspaceNodeID() +
+                "; isNewNodeAlreadyLinked: " + isNewNodeAlreadyLinked);
         
-        unlinkNodes(parentNode, oldNode);
-        
-        linkNodes(parentNode, newNode);
+        if(!isNewNodeAlreadyLinked) {
+            
+            unlinkNodes(parentNode, oldNode);
+            linkNodes(parentNode, newNode);
+        }
         
         workspaceDao.replaceNode(oldNode, newNode);
         

@@ -1378,7 +1378,43 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         
-        nodeLinkManager.replaceNode(mockParentNode, mockOldNode, mockNewNode);
+        nodeLinkManager.replaceNode(mockParentNode, mockOldNode, mockNewNode, Boolean.FALSE);
+    }
+    
+    @Test
+    public void replaceResourceNode_NewNodeAlreadyLinked() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+     
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final int oldChildNodeID = 3;
+        final URL oldChildURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI oldChildURI = oldChildURL.toURI();
+        
+        final int newChildNodeID = 20;
+        final URL newChildURL = new URL("file:/lamus/workspace/" + workspaceID + "/another_child.txt");
+        final URI newChildURI = newChildURL.toURI();
+        
+        final String childMimetype = "text/plain";
+        final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
+        final String childStringType = childWsType.toString();
+        
+        
+        //replace node in DB (create new version and set old node as replaced)
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            
+            oneOf(mockWorkspaceDao).replaceNode(mockOldNode, mockNewNode);
+        }});
+        
+        
+        nodeLinkManager.replaceNode(mockParentNode, mockOldNode, mockNewNode, Boolean.TRUE);
     }
     
     @Test

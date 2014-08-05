@@ -79,8 +79,10 @@ public interface WorkspaceNodeLinkManager {
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param oldNode WorkspaceNode object corresponding to the old node
      * @param newNode WorkspaceNode object corresponding to the new node
+     * @param isNewNodeAlreadyLinked true if parent node and new node are already linked
      */
-    public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode, WorkspaceNode newNode)
+    public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode,
+            WorkspaceNode newNode, boolean isNewNodeAlreadyLinked)
             throws WorkspaceException;
     
     /**

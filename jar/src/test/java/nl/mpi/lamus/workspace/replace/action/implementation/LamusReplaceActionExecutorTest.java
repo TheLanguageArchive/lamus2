@@ -191,13 +191,16 @@ public class LamusReplaceActionExecutorTest {
     @Test
     public void executeReplaceActionSuccessful() throws WorkspaceException {
         
+        final boolean isAlreadyLinked = Boolean.FALSE;
+        
         context.checking(new Expectations() {{
             
             oneOf(mockReplaceAction).getParentNode(); will(returnValue(mockParentNode));
             oneOf(mockReplaceAction).getAffectedNode(); will(returnValue(mockChildNode));
             oneOf(mockReplaceAction).getNewNode(); will(returnValue(mockNewChildNode));
+            oneOf(mockReplaceAction).isAlreadyLinked(); will(returnValue(isAlreadyLinked));
             
-            oneOf(mockWorkspaceNodeLinkManager).replaceNode(mockParentNode, mockChildNode, mockNewChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).replaceNode(mockParentNode, mockChildNode, mockNewChildNode, isAlreadyLinked);
         }});
         
         replaceActionExecutor.execute(mockReplaceAction);
@@ -207,6 +210,7 @@ public class LamusReplaceActionExecutorTest {
     public void executeReplaceActionUnsuccessful() throws WorkspaceException {
         
         final int workspaceID = 10;
+        final boolean isAlreadyLinked = Boolean.FALSE;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
@@ -214,9 +218,9 @@ public class LamusReplaceActionExecutorTest {
             oneOf(mockReplaceAction).getParentNode(); will(returnValue(mockParentNode));
             oneOf(mockReplaceAction).getAffectedNode(); will(returnValue(mockChildNode));
             oneOf(mockReplaceAction).getNewNode(); will(returnValue(mockNewChildNode));
+            oneOf(mockReplaceAction).isAlreadyLinked(); will(returnValue(isAlreadyLinked));
             
-            
-            oneOf(mockWorkspaceNodeLinkManager).replaceNode(mockParentNode, mockChildNode, mockNewChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).replaceNode(mockParentNode, mockChildNode, mockNewChildNode, isAlreadyLinked);
                 will(throwException(expectedException));
         }});
         
