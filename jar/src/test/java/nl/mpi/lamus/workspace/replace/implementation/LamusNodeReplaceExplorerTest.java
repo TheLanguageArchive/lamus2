@@ -141,13 +141,13 @@ public class LamusNodeReplaceExplorerTest {
         nodeReplaceExplorer.exploreReplace(mockOldNode, mockNewNode, actions);
     }
     
-    @Test
-    public void exploreReplace_OldNodeWithChild_NullHandle() {
-        
-        //TODO DOES IT MAKE SENSE TO HANDLE THIS SITUATION?
-        
-        fail("not tested yet");
-    }
+//    @Test
+//    public void exploreReplace_OldNodeWithChild_NullHandle() {
+//        
+//        //TODO DOES IT MAKE SENSE TO HANDLE THIS SITUATION?
+//        
+//        fail("not tested yet");
+//    }
     
     @Test
     public void exploreReplace_OnlyNewNodeHasChildren() throws URISyntaxException, IOException, MetadataException, TransformerException {

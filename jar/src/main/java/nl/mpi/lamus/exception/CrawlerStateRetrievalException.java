@@ -14,23 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.exporting;
-
-import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
+package nl.mpi.lamus.exception;
 
 /**
- * Interface used to check if any of the workspaces recently submitted
- * have had their associated crawler finished. If so, the status of
- * the workspace will be set accordingly and an email will be sent
- * to its creator.
- * 
+ *
  * @author guisil
  */
-public interface WorkspaceCrawlerChecker {
-
-    /**
-     * Checks if there are submitted workspaces and finalises
-     * the ones for which the crawler has finished.
-     */
-    public void checkCrawlersForSubmittedWorkspaces() throws CrawlerStateRetrievalException;
+public class CrawlerStateRetrievalException extends Exception {
+    
+    public CrawlerStateRetrievalException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

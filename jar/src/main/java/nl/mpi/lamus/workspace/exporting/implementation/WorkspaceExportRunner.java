@@ -15,11 +15,10 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.VersionCreationException;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -27,7 +26,6 @@ import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -80,7 +78,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * @return true if export is successful
      */
     @Override
-    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException {
+    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerInvocationException {
         
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)

@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import javax.json.JsonObject;
+import javax.ws.rs.WebApplicationException;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.util.JerseyHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -162,6 +165,31 @@ public class LamusCorpusStructureServiceBridgeTest {
     }
     
     @Test
+    public void createVersionsAnotherException() throws URISyntaxException, VersionCreationException {
+        
+        final String expectedMessage = "Error with a URI during version creation";
+        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
+        
+        context.checking(new Expectations() {{
+
+            oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
+                will(returnValue(mockRequestJsonObject));
+            
+            oneOf(mockJerseyHelper).postRequestCreateVersions(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
+                will(throwException(expectedCause));
+            
+        }});
+        
+        try {
+            csServiceBridge.createVersions(mockNodeReplacementsCollection);
+            fail("should have thrown an exception");
+        } catch(VersionCreationException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
+    }
+    
+    @Test
     public void createVersionsFailed() throws URISyntaxException, VersionCreationException {
         
         URI firstOldNodeURI = new URI(UUID.randomUUID().toString());
@@ -203,7 +231,7 @@ public class LamusCorpusStructureServiceBridgeTest {
     }
     
     @Test
-    public void callCrawlerOk() throws URISyntaxException {
+    public void callCrawlerOk() throws URISyntaxException, CrawlerInvocationException {
         
         final URI uriToCrawl = new URI(UUID.randomUUID().toString());
         final String crawlerId = UUID.randomUUID().toString();
@@ -219,19 +247,37 @@ public class LamusCorpusStructureServiceBridgeTest {
                 //CHECK get ID of the crawler and get the details (succeded? failed?)
         }});
         
-        
         String retrievedCrawlerID = csServiceBridge.callCrawler(uriToCrawl);
         
         assertEquals("Retrieved crawler ID different from expected", crawlerId, retrievedCrawlerID);
     }
     
     @Test
-    public void callCrawlerFailed() {
-        fail("not tested yet");
+    public void callCrawlerFailed() throws URISyntaxException, CrawlerInvocationException {
+        
+        final URI uriToCrawl = new URI(UUID.randomUUID().toString());
+        
+        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
+        final String expectedMessage = "Error during crawler invocation for node " + uriToCrawl;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockJerseyHelper).postRequestCallCrawler(uriToCrawl, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerStartPath);
+                will(throwException(expectedCause));
+                
+                //CHECK get ID of the crawler and get the details (succeded? failed?)
+        }});
+        
+        try {
+            csServiceBridge.callCrawler(uriToCrawl);
+            fail("should have thrown an exception");
+        } catch(CrawlerInvocationException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
     }
     
     @Test
-    public void getCrawlerState() {
+    public void getCrawlerState() throws CrawlerStateRetrievalException {
         
         final String crawlerID = UUID.randomUUID().toString();
         final String expectedCrawlerState = "SUCCESS";
@@ -248,5 +294,27 @@ public class LamusCorpusStructureServiceBridgeTest {
         String retrievedCrawlerState = csServiceBridge.getCrawlerState(crawlerID);
         
         assertEquals("Retrieved crawler state different from expected", expectedCrawlerState, retrievedCrawlerState);
+    }
+    
+    @Test
+    public void getCrawlerStateFailed() throws CrawlerStateRetrievalException {
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        
+        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
+        final String expectedMessage = "Error during crawler state retrieval; crawlerID: " + crawlerID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockJerseyHelper).getRequestCrawlerDetails(crawlerID, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerDetailsPath);
+                will(throwException(expectedCause));
+        }});
+        
+        try {
+            csServiceBridge.getCrawlerState(crawlerID);
+            fail("should have thrown exception");
+        } catch(CrawlerStateRetrievalException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
     }
 }

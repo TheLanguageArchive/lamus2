@@ -22,6 +22,8 @@ import java.util.Collection;
 import javax.json.JsonObject;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.util.JerseyHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -77,12 +79,19 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         JsonObject requestJsonObject =
                 jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacements);
         
-        JsonObject responseJsonObject =
+        JsonObject responseJsonObject;
+        try {
+            responseJsonObject =
                 jerseyHelper.postRequestCreateVersions(
                     requestJsonObject,
                     corpusStructureServiceLocation,
                     corpusStructureServiceVersioningPath,
                     corpusStructureServiceVersionCreationPath);
+        } catch (Exception ex) {
+            String errorMessage = "Error with a URI during version creation";
+            logger.error(errorMessage, ex);
+            throw new VersionCreationException(errorMessage, ex);
+        }
         
         Collection<WorkspaceNodeReplacement> responseNodeReplacements;
         try {
@@ -109,17 +118,24 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
      * @see CorpusStructureServiceBridge#callCrawler(java.net.URI)
      */
     @Override
-    public String callCrawler(URI nodeUri) {
+    public String callCrawler(URI nodeUri) throws CrawlerInvocationException {
         
         
         //TODO catch possible exceptions
         
-        JsonObject responseJsonObject =
+        JsonObject responseJsonObject;
+        try {
+            responseJsonObject =
                 jerseyHelper.postRequestCallCrawler(
                     nodeUri,
                     corpusStructureServiceLocation,
                     corpusStructureServiceCrawlerPath,
                     corpusStructureServiceCrawlerStartPath);
+        } catch (Exception ex) {
+            String errorMessage = "Error during crawler invocation for node " + nodeUri;
+            logger.error(errorMessage, ex);
+            throw new CrawlerInvocationException(errorMessage, ex);
+        }
         
         String crawlerId = jsonTransformationHandler.getCrawlerIdFromJsonObject(responseJsonObject);
         
@@ -130,14 +146,21 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
      * @see CorpusStructureServiceBridge#getCrawlerState(java.lang.String)
      */
     @Override
-    public String getCrawlerState(String crawlerID) {
+    public String getCrawlerState(String crawlerID) throws CrawlerStateRetrievalException {
         
-        JsonObject responseJsonObject =
+        JsonObject responseJsonObject;
+        try {
+            responseJsonObject =
                 jerseyHelper.getRequestCrawlerDetails(
                     crawlerID,
                     corpusStructureServiceLocation,
                     corpusStructureServiceCrawlerPath,
                     corpusStructureServiceCrawlerDetailsPath);
+        } catch (Exception ex) {
+            String errorMessage = "Error during crawler state retrieval; crawlerID: " + crawlerID;
+            logger.error(errorMessage, ex);
+            throw new CrawlerStateRetrievalException(errorMessage, ex);
+        }
         
         String crawlerState = jsonTransformationHandler.getCrawlerStateFromJsonObject(responseJsonObject);
         

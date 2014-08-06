@@ -19,10 +19,9 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -30,10 +29,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
-import org.jmock.States;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -91,7 +88,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_NoSubmittedWorkspacesFound() throws InterruptedException {
+    public void checkCrawlersForSubmittedWorkspaces_NoSubmittedWorkspacesFound() throws InterruptedException, CrawlerStateRetrievalException {
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
         
@@ -104,7 +101,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithoutVersions() throws InterruptedException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException {
         
         final int workspaceID_1 = 10;
         
@@ -146,7 +143,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void runTwoSuccessfulSubmittedWorkspacesFound_WithoutVersions() throws InterruptedException {
+    public void runTwoSuccessfulSubmittedWorkspacesFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException {
         
         final int workspaceID_1 = 10;
         final int workspaceID_2 = 20;
@@ -211,7 +208,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void runOneFailedSubmittedWorkspaceFound() throws InterruptedException {
+    public void runOneFailedSubmittedWorkspaceFound() throws InterruptedException, CrawlerStateRetrievalException {
         
         final int workspaceID_1 = 10;
         
@@ -251,7 +248,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithSuccessfulVersions() throws InterruptedException, VersionCreationException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithSuccessfulVersions() throws InterruptedException, VersionCreationException, CrawlerStateRetrievalException {
         
         final int workspaceID_1 = 10;
         
@@ -296,7 +293,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithFailedVersions() throws InterruptedException, VersionCreationException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithFailedVersions() throws InterruptedException, VersionCreationException, CrawlerStateRetrievalException {
         
         final int workspaceID_1 = 10;
         
@@ -341,8 +338,35 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void runSomeOtherExceptionOrOther() {
+    public void checkCrawlersSubmittedWorkspaces_Exception() throws CrawlerStateRetrievalException {
         
-        fail("not tested yet");
+        final int workspaceID_1 = 10;
+        
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        
+        final CrawlerStateRetrievalException expectedException = new CrawlerStateRetrievalException("some exception message", null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
+            
+            //loop
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
+            oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(throwException(expectedException));
+        }});
+        
+        try {
+            workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
+            fail("should have thrown exception");
+        } catch(CrawlerStateRetrievalException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
 }

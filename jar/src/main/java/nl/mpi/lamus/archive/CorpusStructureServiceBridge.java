@@ -18,6 +18,8 @@ package nl.mpi.lamus.archive;
 
 import java.net.URI;
 import java.util.Collection;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 
@@ -39,12 +41,12 @@ public interface CorpusStructureServiceBridge {
      * @param nodeUri URI of the node to crawl
      * @return String containing the ID of the triggered crawler
      */
-    public String callCrawler(URI nodeUri);
+    public String callCrawler(URI nodeUri) throws CrawlerInvocationException;
     
     /**
      * Retrieves the state of the crawler corresponding to the given ID.
      * @param crawlerID ID of the crawler to look for
      * @return String containing the state of the crawler
      */
-    public String getCrawlerState(String crawlerID);
+    public String getCrawlerState(String crawlerID) throws CrawlerStateRetrievalException;
 }

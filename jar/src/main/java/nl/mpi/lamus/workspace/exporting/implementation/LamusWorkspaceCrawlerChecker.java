@@ -19,6 +19,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.util.Collection;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
@@ -55,7 +56,7 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
      * @see WorkspaceCrawlerChecker#checkCrawlersForSubmittedWorkspaces()
      */
     @Override
-    public void checkCrawlersForSubmittedWorkspaces() {
+    public void checkCrawlersForSubmittedWorkspaces() throws CrawlerStateRetrievalException {
         
         logger.debug("Checking if there are submitted workspaces to be finalised");
         

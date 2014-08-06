@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -106,7 +107,10 @@ public class WorkspaceExportRunnerTest {
     
 
     @Test
-    public void callExporterForGeneralNodeWithoutVersions() throws MalformedURLException, URISyntaxException, InterruptedException, ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException, VersionCreationException {
+    public void callExporterForGeneralNodeWithoutVersions()
+            throws MalformedURLException, URISyntaxException, InterruptedException,
+            ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,
+            VersionCreationException, CrawlerInvocationException {
         
         final int workspaceID = 1;
         
@@ -210,10 +214,71 @@ public class WorkspaceExportRunnerTest {
         assertTrue("Execution result should have been successful (true)", result);
     }
     
+    @Test
+    public void callExporterForGeneralNodeWithoutVersions_CrawlerInvocationException()
+            throws MalformedURLException, URISyntaxException, InterruptedException,
+            ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,
+            VersionCreationException, CrawlerInvocationException {
+        
+        final int workspaceID = 1;
+        
+        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
+        
+        final int testChildWorkspaceNodeID = 10;
+        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
+        final URL testChildArchiveURL = testChildOriginURL;
+        final String testDisplayValue = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = new URI("http://some.location");
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        
+        workspaceNodes.add(testNode);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        
+        final CrawlerInvocationException expectedCause = new CrawlerInvocationException("some exception message", null);
+        
+        final States exporting = context.states("exporting");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporter).exportNode(null, testNode);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(throwException(expectedCause));
+                then(exporting.is("finished"));
+        }});
+        
+        try {
+            executeRunner();
+            fail("should have thrown exception");
+        } catch(ExecutionException ex) {
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+    }
+    
     //TODO Test exceptions
     
     
-    private boolean executeRunner() throws InterruptedException, ExecutionException {
+    private boolean executeRunner() throws InterruptedException, ExecutionException, CrawlerInvocationException {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Boolean> result = executorService.submit(workspaceExportRunner);
