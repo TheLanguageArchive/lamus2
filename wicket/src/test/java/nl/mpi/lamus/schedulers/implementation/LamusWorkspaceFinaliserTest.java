@@ -18,6 +18,7 @@ package nl.mpi.lamus.schedulers.implementation;
  */
 
 
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
 import nl.mpi.lamus.schedulers.WorkspaceFinaliser;
 import org.junit.After;
@@ -66,9 +67,26 @@ public class LamusWorkspaceFinaliserTest {
     
 
     @Test
-    public void checkAndFinaliseWorkspaces() {
+    public void checkAndFinaliseWorkspaces() throws CrawlerStateRetrievalException {
 
         workspaceFinaliser.checkAndFinaliseWorkspaces();
+        
+        verify(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
+    }
+    
+    @Test
+    public void checkAndFinaliseWorkspaces_Exception() throws CrawlerStateRetrievalException {
+        
+        final CrawlerStateRetrievalException expectedException = new CrawlerStateRetrievalException("some exception message", null);
+
+        doThrow(expectedException).when(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
+        
+        try {
+            workspaceFinaliser.checkAndFinaliseWorkspaces();
+            fail("should have thrown exception");
+        } catch(CrawlerStateRetrievalException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
         
         verify(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
     }

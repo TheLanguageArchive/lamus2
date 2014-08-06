@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.schedulers;
 
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
+
 /**
  * Provides a way to trigger the workspace check and finalisation.
  * @author guisil
@@ -27,5 +29,5 @@ public interface WorkspaceFinaliser {
      * but not finalised yet. If everything is ready, it triggers
      * the finalisation of the workspace.
      */
-    public void checkAndFinaliseWorkspaces();
+    public void checkAndFinaliseWorkspaces() throws CrawlerStateRetrievalException;
 }

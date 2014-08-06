@@ -2,6 +2,7 @@ package nl.mpi.lamus.schedulers.implementation;
 
 
 
+import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
 import nl.mpi.lamus.schedulers.WorkspaceFinaliser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class LamusWorkspaceFinaliser implements WorkspaceFinaliser {
      */
     @Override
     @Scheduled(fixedDelay = 60000)
-    public void checkAndFinaliseWorkspaces() {
+    public void checkAndFinaliseWorkspaces() throws CrawlerStateRetrievalException {
         workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
     }
     
