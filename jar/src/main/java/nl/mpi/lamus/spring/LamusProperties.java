@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  *
@@ -35,7 +37,16 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySource(value="classpath:application.properties")
 @Profile(value = {"production", "cmdi-adapter-csdb", "demoserver"})
-public class LamusProperties {
+public class LamusProperties implements ServletContextAware {
+    
+    private ServletContext servletContext;
+    
+    
+    @Override
+    public void setServletContext(ServletContext sc) {
+        servletContext = sc;
+    }
+    
     
     // otherwise the properties don't get automatically injected with the Value annotations
     @Bean
@@ -108,59 +119,6 @@ public class LamusProperties {
         return orphansDirectoryBaseName;
     }
     
-    @Value("${workspace_base_directory}")
-    private String workspaceBaseDirectory;
-    @Bean
-    @Qualifier("workspaceBaseDirectory")
-    public File workspaceBaseDirectory() {
-        return new File(workspaceBaseDirectory);
-    }
-    
-    @Value("${workspace_upload_directory_name}")
-    private String workspaceUploadDirectoryName;
-    @Bean
-    @Qualifier("workspaceUploadDirectoryName")
-    public String workspaceUploadDirectoryName() {
-        return workspaceUploadDirectoryName;
-    }
-//    @Bean
-//    @Qualifier("workspaceUploadDirectory")
-//    public File workspaceUploadDirectory() {
-//        return new File(workspaceBaseDirectory, workspaceUploadDirectoryName);
-//    }
-
-    @Value("${metadata_directory_name}")
-    private String metadataDirectoryName;
-    @Bean
-    @Qualifier("metadataDirectoryName")
-    public String metadataDirectoryName() {
-        return metadataDirectoryName;
-    }
-    
-    @Value("${resources_directory_name}")
-    private String resourcesDirectoryName;
-    @Bean
-    @Qualifier("resourcesDirectoryName")
-    public String resourcesDirectoryName() {
-        return resourcesDirectoryName;
-    }
-    
-    
-    @Value("${trashcan_base_directory}")
-    private String trashCanBaseDirectory;
-    @Bean
-    @Qualifier("trashCanBaseDirectory")
-    public File trashCanBaseDirectory() {
-        return new File(trashCanBaseDirectory);
-    }
-    
-    @Value("${versioning_base_directory}")
-    private String versioningBaseDirectory;
-    @Bean
-    @Qualifier("versioningBaseDirectory")
-    public File versioningBaseDirectory() {
-        return new File(versioningBaseDirectory);
-    }
     
     @Value("${custom_typechecker_config_files_and_folders}")
     private String customTypecheckerFoldersAndConfigFiles;
@@ -192,156 +150,160 @@ public class LamusProperties {
         return mapToReturn;
     }
 
-        
-    // crawler properties
     
-    @Value("${db_httproot}")
-    private String dbHttpRoot;
+    // Properties loaded from the web server context
+    
+    @Bean
+    @Qualifier("workspaceBaseDirectory")
+    public File workspaceBaseDirectory() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.workspace_base_directory"));
+    }
+    
+    @Bean
+    @Qualifier("workspaceUploadDirectoryName")
+    public String workspaceUploadDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.workspace_upload_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("metadataDirectoryName")
+    public String metadataDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.metadata_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("resourcesDirectoryName")
+    public String resourcesDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.resources_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("trashCanBaseDirectory")
+    public File trashCanBaseDirectory() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.trashcan_base_directory"));
+    }
+    
+    @Bean
+    @Qualifier("versioningBaseDirectory")
+    public File versioningBaseDirectory() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.versioning_base_directory"));
+    }
+    
+    
     @Bean
     @Qualifier("dbHttpRoot")
     public String dbHttpRoot() {
-        return dbHttpRoot;
+        return servletContext.getInitParameter("nl.mpi.lamus.db.httproot");
     }
-    @Value("${db_httpsroot}")
-    private String dbHttpsRoot;
+
     @Bean
     @Qualifier("dbHttpsRoot")
     public String dbHttpsRoot() {
-        return dbHttpsRoot;
+        return servletContext.getInitParameter("nl.mpi.lamus.db.httpsroot");
     }
-    
-    @Value("${db_localroot}")
-    private String dbLocalRoot;
+
     @Bean
     @Qualifier("dbLocalRoot")
     public String dbLocalRoot() {
-        return dbLocalRoot;
+        return servletContext.getInitParameter("nl.mpi.lamus.db.localroot");
     }
     
     
-    //handle properties
-    
-    @Value("${handle_prefix}")
-    private String handlePrefix;
     @Bean
     @Qualifier("handlePrefix")
     public String handlePrefix() {
-        return handlePrefix;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.prefix");
     }
     
-    @Value("${handle_proxy}")
-    private String handleProxy;
     @Bean
     @Qualifier("handleProxy")
     public String handleProxy() {
-        return handleProxy;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.proxy");
     }
     
-    @Value("${handle_admin_key_file}")
-    private String handleAdminKeyFile;
     @Bean
     @Qualifier("handleAdminKeyFile")
     public String handleAdminKeyFile() {
-        return handleAdminKeyFile;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_key_file");
     }
     
-    @Value("${handle_admin_user_handle}")
-    private String handleAdminUserHandle;
     @Bean
     @Qualifier("handleAdminUserHandle")
     public String handleAdminUserHandle() {
-        return handleAdminUserHandle;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_user_handle");
     }
     
-    @Value("${handle_admin_user_handle_index}")
-    private String handleAdminUserHandleIndex;
     @Bean
     @Qualifier("handleAdminUserHandleIndex")
     public String handleAdminUserHandleIndex() {
-        return handleAdminUserHandleIndex;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_user_handle_index");
     }
     
-    @Value("${handle_admin_handle_password}")
-    private String handleAdminHandlePassword;
     @Bean
     @Qualifier("handleAdminHandlePassword")
     public String handleAdminHandlePassword() {
-        return handleAdminHandlePassword;
+        return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_handle_password");
     }
     
-    @Value("${corpusstructure_service_location}")
-    private String corpusStructureServiceLocation;
+    
     @Bean
     @Qualifier("corpusStructureServiceLocation")
     public String corpusStructureServiceLocation() {
-        return corpusStructureServiceLocation;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_location");
     }
     
-    @Value("${corpusstructure_service_versioning_path}")
-    private String corpusStructureServiceVersioningPath;
     @Bean
     @Qualifier("corpusStructureServiceVersioningPath")
     public String corpusStructureServiceVersioningPath() {
-        return corpusStructureServiceVersioningPath;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_versioning_path");
     }
     
-    @Value("${corpusstructure_service_version_creation_path}")
-    private String corpusStructureServiceVersionCreationPath;
     @Bean
     @Qualifier("corpusStructureServiceVersionCreationPath")
     public String corpusStructureServiceVersionCreationPath() {
-        return corpusStructureServiceVersionCreationPath;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_version_creation_path");
     }
     
-    @Value("${corpusstructure_service_crawler_path}")
-    private String corpusStructureServiceCrawlerPath;
     @Bean
     @Qualifier("corpusStructureServiceCrawlerPath")
     public String corpusStructureServiceCrawlerPath() {
-        return corpusStructureServiceCrawlerPath;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_crawler_path");
     }
     
-    @Value("${corpusstructure_service_crawler_start_path}")
-    private String corpusStructureServiceCrawlerStartPath;
     @Bean
     @Qualifier("corpusStructureServiceCrawlerStartPath")
     public String corpusStructureServiceCrawlerStartPath() {
-        return corpusStructureServiceCrawlerStartPath;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_crawler_start_path");
     }
     
-    @Value("${corpusstructure_service_crawler_details_path}")
-    private String corpusStructureServiceCrawlerDetailsPath;
     @Bean
     @Qualifier("corpusStructureServiceCrawlerDetailsPath")
     public String corpusStructureServiceCrawlerDetailsPath() {
-        return corpusStructureServiceCrawlerDetailsPath;
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_crawler_details_path");
     }
     
-    @Value("${mail_server}")
-    private String mailServer;
+    
     @Bean
     @Qualifier("mailServer")
     public String mailServer() {
-        return mailServer;
+        return servletContext.getInitParameter("nl.mpi.lamus.mail.server");
     }
     
-    @Value("${mail_from_address}")
-    private String mailFromAddress;
     @Bean
     @Qualifier("mailFromAddress")
     public String mailFromAddress() {
-        return mailFromAddress;
+        return servletContext.getInitParameter("nl.mpi.lamus.mail.from_address");
     }
     
-    @Value("${manager_users}")
-    private String managerUsers;
     @Bean
     @Qualifier("managerUsers")
     public Collection<String> managerUsers() {
         
+        String mUsers = servletContext.getInitParameter("nl.mpi.lamus.manager.users");
+        
         Collection<String> collectionToReturn = new ArrayList<String>();
         
-        String[] usernames = managerUsers.split(",");
+        String[] usernames = mUsers.split(",");
         if(usernames.length > 0) {
             for(String username : usernames) {
                 collectionToReturn.add(username);
