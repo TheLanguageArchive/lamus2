@@ -40,6 +40,15 @@ public interface MetadataApiBridge {
     public URI getSelfHandleFromFile(URL fileURL);
     
     /**
+     * Removes the self link (handle) from the given file, if it has one,
+     * and saves the document in the end.
+     * 
+     * @param fileURL URL of the file to have the self link removed
+     */
+    public void removeSelfHandleAndSaveDocument(URL fileURL)
+            throws IOException, TransformerException, MetadataException;
+    
+    /**
      * Creates a new HeaderInfo object containing the given handle
      * @param handle
      * @return HeaderInfo object containing the handle

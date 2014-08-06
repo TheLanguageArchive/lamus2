@@ -26,6 +26,7 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
@@ -82,6 +83,26 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
                 logger.warn("Error creating URI for handle " + selfLink.getValue(), ex);
                 return null;
             }
+        }
+    }
+
+    /**
+     * @see MetadataApiBridge#removeSelfHandleAndSaveDocument(java.net.URL)
+     */
+    @Override
+    public void removeSelfHandleAndSaveDocument(URL fileURL) throws IOException, TransformerException, MetadataException {
+        
+        logger.debug("Removing self handle from metadata file '{}'", fileURL);
+        
+        MetadataDocument document = metadataAPI.getMetadataDocument(fileURL);
+        
+        if(document instanceof HandleCarrier) {
+            
+            HandleCarrier documentWithHandle = (HandleCarrier) document;
+            documentWithHandle.setHandle(null);
+            saveMetadataDocument((MetadataDocument) documentWithHandle, fileURL);
+        } else {
+            logger.debug("Document in '{}' doesn't contain a self handle", fileURL);
         }
     }
 

@@ -32,6 +32,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -68,6 +69,7 @@ public class LamusMetadataApiBridgeTest {
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     
     @Mock MetadataDocument mockMetadataDocument;
+    @Mock CMDIDocument mockCmdiDocument;
     @Mock File mockFile;
     @Mock StreamResult mockStreamResult;
     
@@ -188,6 +190,110 @@ public class LamusMetadataApiBridgeTest {
         URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromFile(fileURL);
         
         assertNull("Retrieved handle should be null", retrievedHandle);
+    }
+    
+    @Test
+    public void removeSelfHandleFromFile() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
+                will(returnValue(mockCmdiDocument));
+            oneOf(mockCmdiDocument).setHandle(null);
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(fileURL);
+    }
+    
+    @Test
+    public void removeSelfHandleFromFile_NotHandleCarrier() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
+                will(returnValue(mockMetadataDocument));
+        }});
+        
+        lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(fileURL);
+    }
+    
+    @Test
+    public void removeSelfHandleFromFileThrowsIOException() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(fileURL);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void removeSelfHandleFromFileThrowsTransformerException() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        final TransformerException expectedException = new TransformerException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
+                    will(returnValue(mockCmdiDocument));
+            oneOf(mockCmdiDocument).setHandle(null);
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+                will(throwException(expectedException));
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        try {
+            lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(fileURL);
+            fail("should have thrown exception");
+        } catch(TransformerException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void removeSelfHandleFromFileThrowsMetadataException() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        final MetadataException expectedException = new MetadataException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(fileURL);
+            fail("should have thrown exception");
+        } catch(MetadataException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test

@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
+import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -31,8 +32,10 @@ import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -40,6 +43,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
+import nl.mpi.metadata.api.MetadataException;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -67,6 +71,8 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock HandleManager mockHandleManager;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
+    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     
     @Mock WorkspaceNode mockWorkspaceNode;
     @Mock CorpusNode mockCorpusNode;
@@ -86,7 +92,8 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void setUp() {
         replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(
                 mockVersioningHandler, mockWorkspaceDao,
-                mockHandleManager, mockArchiveFileLocationProvider);
+                mockHandleManager, mockArchiveFileLocationProvider,
+                mockWorkspaceTreeExporter, mockMetadataApiBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -130,6 +137,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -144,6 +153,74 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
+        }});
+        
+        //TODO Handle external nodes (those can't be deleted, just unlinked)
+        
+        
+        //retire version
+        //move to trash
+        //update csdb to point to the trash location
+        
+        //remove node from searchDB????
+        
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        
+    }
+    
+    @Test
+    public void exportDeletedMetadataNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException, HandleException, IOException, MetadataException, TransformerException {
+        
+        final int testWorkspaceNodeID = 10;
+        final String testBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
+        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+        final URL testNodeArchiveURL = testNodeOriginURL;
+        
+        final String testNodeDisplayValue = "node";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "text/x-cmdi+xml";
+        final URI testNodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+
+        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
+                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, testNodeFormat);
+        
+        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            
+            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+            
+            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockHandleManager).deleteHandle(testNodeArchiveURIWithoutHdl);
+            oneOf(mockWorkspaceNode).setArchiveURI(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(testNodeVersionArchiveURL);
             
         }});
         
@@ -250,6 +327,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
             
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -285,7 +364,86 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportReplacedMetadataNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
         
-        fail("not implemented/tested yet");
+        final int testWorkspaceNodeID = 10;
+        final String testBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
+        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+        final URL testNodeArchiveURL = testNodeOriginURL;
+        
+        final String testNodeDisplayValue = "node";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "text/x-cmdi+xml";
+        final URI testNodeSchemaLocation = new URI("http://some.location");
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        
+        final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.cmdi");
+        final String testNodeVersionArchivePath = "/versioning/location/r_node.cmdi";
+        final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.cmdi");
+        
+
+        final WorkspaceNode testOldNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
+                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, testNodeFormat);
+        
+        final int testNewWorkspaceNodeID = 20;
+        final String testNewBaseName = "node.cmdi";
+        final URL testNewNodeWsURL = new URL("file:/workspace/" + testBaseName);
+        final URI testNewNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL testNewNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
+        final URL testNewNodeArchiveURL = testNodeOriginURL;
+        
+        final String testNewNodeDisplayValue = "node";
+        final WorkspaceNodeType testNewNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNewNodeFormat = "text/x-cmdi+xml";
+        final URI testNewNodeSchemaLocation = new URI("http://some.location");
+        
+        final WorkspaceNode testNewNode = new LamusWorkspaceNode(testNewWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNewNodeSchemaLocation,
+                testNewNodeDisplayValue, "", testNewNodeType, testNewNodeWsURL, testNewNodeArchiveURI, testNewNodeArchiveURL, testNewNodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, testNewNodeFormat);
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockWorkspaceNode);
+            
+            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            
+//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
+            
+            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
+            
+            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
+            
+        }});
+        
+        //TODO Handle external nodes (those can't be deleted, just unlinked)
+        
+        
+        //retire version
+        //move to trash
+        //update csdb to point to the trash location
+        
+        //remove node from searchDB????
+        
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
     }
     
     //TODO EXCEPTIONS...
@@ -314,6 +472,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             
@@ -362,6 +522,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
@@ -440,6 +602,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
             exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));

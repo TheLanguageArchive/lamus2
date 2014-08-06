@@ -20,16 +20,21 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
+import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.metadata.api.MetadataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,17 +55,22 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private final WorkspaceDao workspaceDao;
     private final HandleManager handleManager;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
+    private final WorkspaceTreeExporter workspaceTreeExporter;
+    private final MetadataApiBridge metadataApiBridge;
     
     private Workspace workspace;
     
     public ReplacedOrDeletedNodeExporter(VersioningHandler versioningHandler,
             WorkspaceDao wsDao, HandleManager handleManager,
-            ArchiveFileLocationProvider locationProvider) {
+            ArchiveFileLocationProvider locationProvider,
+            WorkspaceTreeExporter wsTreeExporter, MetadataApiBridge mdApiBridge) {
 
         this.versioningHandler = versioningHandler;
         this.workspaceDao = wsDao;
         this.handleManager = handleManager;
         this.archiveFileLocationProvider = locationProvider;
+        this.workspaceTreeExporter = wsTreeExporter;
+        this.metadataApiBridge = mdApiBridge;
     }
     
     /**
@@ -106,6 +116,10 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             // to make it easier, that node can simply be skipped and eventually will be deleted together with the whole workspace folder
             return;
             
+        }
+        
+        if(currentNode.isMetadata() && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+            workspaceTreeExporter.explore(workspace, currentNode);
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);
@@ -179,9 +193,15 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             workspaceDao.updateNodeArchiveUri(currentNode);
             
             if(currentNode.isMetadata()) {
-                
-                //TODO IF NODES ARE METADATA, ALSO THE SELF LINK HAS TO BE UPDATED
-                throw new UnsupportedOperationException("not implemented yet");
+                try {
+                    metadataApiBridge.removeSelfHandleAndSaveDocument(currentNode.getArchiveURL());
+                } catch (IOException ex) {
+                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
+                } catch (TransformerException ex) {
+                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
+                } catch (MetadataException ex) {
+                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
+                }
             }
             
         } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {

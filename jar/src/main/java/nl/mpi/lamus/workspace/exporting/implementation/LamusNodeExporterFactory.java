@@ -130,7 +130,9 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
 
     private NodeExporter getReplacedOrDeletedNodeExporter(Workspace workspace) {
         if(replacedOrDeletedNodeExporter == null) {
-            replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(versioningHandler, workspaceDao, handleManager, archiveFileLocationProvider);
+            replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(versioningHandler,
+                    workspaceDao, handleManager, archiveFileLocationProvider,
+                    workspaceTreeExporter, metadataApiBridge);
         }
         replacedOrDeletedNodeExporter.setWorkspace(workspace);
         return replacedOrDeletedNodeExporter;
