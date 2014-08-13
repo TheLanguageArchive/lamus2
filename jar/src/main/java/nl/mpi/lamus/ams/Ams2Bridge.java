@@ -19,6 +19,8 @@ package nl.mpi.lamus.ams;
 //import nl.mpi.lat.ams.model.NodeLicense;
 //import nl.mpi.lat.ams.model.NodePcplLicense;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import nl.mpi.lat.ams.IAmsRemoteService;
 //import nl.mpi.lat.ams.model.NodePcplRule;
 //import nl.mpi.lat.ams.service.LicenseService;
@@ -160,7 +162,7 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
 //            // trigger recalculation to re-export modified data from ams2 to csdb
 //            // NOT necessarry here, cause used-storgage-space has no effect on/in ams2 (re)calculation
 //            // <=> max- vs. used-storage-space is checked & handled in lamus itself
-////		this.callAccessRightsManagementSystem(target.getParent().getNodeID().getMpiID());
+////		this.triggerAccessRightsRecalculation(target.getParent().getNodeID().getMpiID());
 //        } catch (RuntimeException rE) {
 //            logger.error("could not set UsedStorageSpace", rE);
 //            return;
@@ -269,49 +271,15 @@ public class Ams2Bridge implements AmsBridge { // extends LatServiceImpl {
 //		return result;
 //	}
     /**
-     * @see nl.mpi.lamus.ams.AmsBridge#callAccessRightsManagementSystem(java.net.URI)
+     * @see nl.mpi.lamus.ams.AmsBridge#triggerAccessRightsRecalculation(java.net.URI)
      */
     @Override
-    public void callAccessRightsManagementSystem(URI recalcDomainArchiveURI) {
-            
-            throw new UnsupportedOperationException("Ams2Bridge.callAccessRightsManagementSystem not implemented yet");
-            
-//		try {
-//			// build & check target url
-//			if(Text.empty(this.baseURL) || Text.empty(this.recalcURL)) {
-//				LOG.warn("no ams-url configured, access rights will not be updated");
-//				return;
-//			}
-//			StringBuilder amsurl = new StringBuilder();
-//			amsurl.append(this.baseURL).append("/").append(this.recalcURL);
-//			if(Text.notEmpty(recalcDomainMpiID) && Text.notEmpty(this.recalcParam)) {
-//				amsurl.append("?").append(this.recalcParam).append("=")
-//					.append( URLEncoder.encode(recalcDomainMpiID,"UTF-8"));
-//			}
-//			
-//			// the actual call
-//			OurURL amsurlServlet = new OurURL(amsurl.toString());
-//			LOG.info("ams2 recalculation called by " + amsurlServlet);
-//			
-//			URLConnection servletConnection = amsurlServlet.openConnection();
-//			servletConnection.setDoInput(true);
-//			servletConnection.setDoOutput(false);
-//			servletConnection.setUseCaches(false); // for the connection to the CGI / servlet, that is
-//			servletConnection.setRequestProperty("Content-Type", "text");
-//			InputStream instr = servletConnection.getInputStream();
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(instr));
-//			StringBuilder reply = new StringBuilder("ams2 recalculation call replied:\n");
-//			String line;
-//			while((line = reader.readLine()) != null) {
-//				reply.append(line);
-//			}
-//			reader.close();
-//			if (servletConnection instanceof HttpURLConnection)
-//				((HttpURLConnection)servletConnection).disconnect();
-//			LOG.info(reply.toString());
-//		} catch(Exception eE) {
-//			LOG.error("!! failed to call ams2 recalculation !!", eE);
-//		}
+    public void triggerAccessRightsRecalculation(URI recalcDomainArchiveURI) {
+        
+        Collection<URI> targetURIs = new ArrayList<>();
+        targetURIs.add(recalcDomainArchiveURI);
+        
+        amsRemoteService.triggerRightsRecalculation(targetURIs, true, true);
     }
     /**
      * @see lams.ams.AmsBridge#replaceNodeAms(String, String, String)

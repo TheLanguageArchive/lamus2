@@ -16,9 +16,12 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
@@ -53,6 +56,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
     @Mock WorkspaceMailer mockWorkspaceMailer;
+    @Mock AmsBridge mockAmsBridge;
     
     @Mock Workspace mockSuccessfulSubmittedWorkspace1;
     @Mock Workspace mockSuccessfulSubmittedWorkspace2;
@@ -78,7 +82,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Before
     public void setUp() {
         workspaceCrawlerChecker = new LamusWorkspaceCrawlerChecker(mockWorkspaceDao,
-                mockCorpusStructureServiceBridge, mockWorkspaceMailer);
+                mockCorpusStructureServiceBridge, mockWorkspaceMailer, mockAmsBridge);
     }
     
     @After
@@ -90,7 +94,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Test
     public void checkCrawlersForSubmittedWorkspaces_NoSubmittedWorkspacesFound() throws InterruptedException, CrawlerStateRetrievalException {
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -101,17 +105,18 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException, URISyntaxException {
         
         final int workspaceID_1 = 10;
+        final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "SUCCESS";
         
-        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
         final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
@@ -136,6 +141,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});
         
@@ -143,12 +151,14 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void runTwoSuccessfulSubmittedWorkspacesFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException {
+    public void runTwoSuccessfulSubmittedWorkspacesFound_WithoutVersions() throws InterruptedException, CrawlerStateRetrievalException, URISyntaxException {
         
         final int workspaceID_1 = 10;
+        final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
         final int workspaceID_2 = 20;
+        final URI topNodeURI_2 = new URI(UUID.randomUUID().toString());
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace2);
         
@@ -157,8 +167,8 @@ public class LamusWorkspaceCrawlerCheckerTest {
         final String secondCrawlerID = UUID.randomUUID().toString();
         final String secondCrawlerState = "SUCCESS";
         
-        final Collection<WorkspaceNodeReplacement> firstNodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
-        final Collection<WorkspaceNodeReplacement> secondNodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> firstNodeReplacements = new ArrayList<>();
+        final Collection<WorkspaceNodeReplacement> secondNodeReplacements = new ArrayList<>();
         
         final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
@@ -183,6 +193,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
             
             //loop - second iteration
@@ -201,6 +214,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace2);
             
+            oneOf(mockSuccessfulSubmittedWorkspace2).getTopNodeArchiveURI(); will(returnValue(topNodeURI_2));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_2);
+            
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace2, Boolean.TRUE, Boolean.TRUE);
         }});
         
@@ -212,13 +228,13 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockFailedSubmittedWorkspace);
         
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "CRASHED";
         
-        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
         final WorkspaceStatus failedStatus = WorkspaceStatus.CRAWLER_ERROR;
         final String failedMessage = "Data was successfully moved to the archive but the crawler failed.";
@@ -248,17 +264,18 @@ public class LamusWorkspaceCrawlerCheckerTest {
     }
     
     @Test
-    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithSuccessfulVersions() throws InterruptedException, VersionCreationException, CrawlerStateRetrievalException {
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithSuccessfulVersions() throws InterruptedException, VersionCreationException, CrawlerStateRetrievalException, URISyntaxException {
         
         final int workspaceID_1 = 10;
+        final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "SUCCESS";
         
-        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         nodeReplacements.add(mockNodeReplacement1);
         nodeReplacements.add(mockNodeReplacement2);
         
@@ -286,6 +303,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});
         
@@ -297,13 +317,13 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         
         final String crawlerID = UUID.randomUUID().toString();
         final String crawlerState = "SUCCESS";
         
-        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         nodeReplacements.add(mockNodeReplacement1);
         nodeReplacements.add(mockNodeReplacement2);
         
@@ -342,7 +362,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         
-        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
         
         final String crawlerID = UUID.randomUUID().toString();

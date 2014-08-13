@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
+import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
@@ -43,13 +44,15 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
     private final WorkspaceMailer workspaceMailer;
+    private final AmsBridge amsBridge;
 
     @Autowired
     public LamusWorkspaceCrawlerChecker(WorkspaceDao wsDao, CorpusStructureServiceBridge csServiceBridge,
-        WorkspaceMailer wsMailer) {
+        WorkspaceMailer wsMailer, AmsBridge amsBridge) {
         workspaceDao = wsDao;
         corpusStructureServiceBridge = csServiceBridge;
         workspaceMailer = wsMailer;
+        this.amsBridge = amsBridge;
     }
     
     /**
@@ -123,6 +126,10 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         
         if(crawlerWasSuccessful && versioningWasSuccessful) {
             workspaceDao.cleanWorkspaceNodesAndLinks(workspace);
+            
+            logger.debug("Triggering access rigths recalculation for workspace " + workspace.getWorkspaceID());
+            
+            amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
         }
         
         //TODO some more details about the situation (especially in case of failure)

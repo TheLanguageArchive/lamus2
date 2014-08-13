@@ -17,6 +17,8 @@ package nl.mpi.lamus.ams;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lat.ams.IAmsRemoteService;
 //import nl.mpi.lat.ams.authentication.impl.IntegratedAuthenticationSrv;
@@ -381,4 +383,20 @@ public class Ams2BridgeTest {
 //            oneOf (mockAuthorizationSrv).getEffectiveDomainEditorRule(mockNodeID, mockUser); will(returnValue(nodePcplRule));
 //        }});
 //    }
+    
+    @Test
+    public void triggerAccessRightsRecalculation() throws URISyntaxException {
+        
+        final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
+        
+        final Collection<URI> recalculationTargetURIs = new ArrayList<>();
+        recalculationTargetURIs.add(workspaceRootNodeURI);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockAmsRemoteService).triggerRightsRecalculation(recalculationTargetURIs, Boolean.TRUE, Boolean.TRUE);
+        }});
+        
+        ams2Bridge.triggerAccessRightsRecalculation(workspaceRootNodeURI);
+    }
 }

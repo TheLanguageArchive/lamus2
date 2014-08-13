@@ -89,7 +89,7 @@ public interface AmsBridge extends Serializable {
 	 * Recalculate the resource access rights for the updated part of the archive,
 	 * propagate them to the Apache htaccess file and signal the webserver
 	 */
-	public void callAccessRightsManagementSystem(URI recalcDomainArchiveURI);
+	public void triggerAccessRightsRecalculation(URI recalcDomainArchiveURI);
 
 	/**
 	 * Applies the necessary procedures to replace a node in AMS:
