@@ -405,6 +405,8 @@
                 <configuration>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                     <!--<compilerArgument>-javaagent:${user.home}/.m2/repository/org/apache/openjpa/openjpa-all/2.3.0/openjpa-all-2.3.0.jar</compilerArgument>-->
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             
