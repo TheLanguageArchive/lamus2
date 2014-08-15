@@ -39,6 +39,15 @@ public interface WorkspaceAccessChecker extends Serializable {
             throws NodeAccessException;
     
     /**
+     * Checks if the given node is accessible to the user
+     * (i.e. the user has permissions to access the node
+     * and the node is not locked in some other workspace already)
+     * @param userID ID of the user
+     * @param archiveNodeURI URI of the node
+     */
+    public void ensureBranchIsAccessible(String userID, URI archiveNodeURI);
+    
+    /**
      * Checks if the given user has access to the given workspace
      * (the user has access if he/she was the creator of the workspace).
      * @param userID ID of the user

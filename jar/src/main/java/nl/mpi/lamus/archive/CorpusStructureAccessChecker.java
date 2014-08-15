@@ -19,12 +19,18 @@ package nl.mpi.lamus.archive;
 import java.net.URI;
 
 /**
- *
+ * Interface providing access checking functionality regarding
+ * the corpus structure database.
  * @author guisil
  */
 public interface CorpusStructureAccessChecker {
     
-
-    
+    /**
+     * Checks if the given user has write access to the given node.
+     * 
+     * @param userId ID of the user
+     * @param archiveNodeURI URI of the node
+     * @return true if the user has access to the node
+     */
     public boolean hasWriteAccess(String userId, URI archiveNodeURI);
 }

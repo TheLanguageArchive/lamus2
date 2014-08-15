@@ -19,6 +19,8 @@ import java.net.URI;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
+import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -50,14 +52,16 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
     private final CorpusStructureProvider corpusStructureProvider;
+    private final ArchiveObjectDao archiveObjectDao;
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureAccessChecker corpusStructureAccessChecker;
     
     
     @Autowired
-    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider,
+    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, ArchiveObjectDao aoDao,
             WorkspaceDao workspaceDao, CorpusStructureAccessChecker csAccessChecker) {
         this.corpusStructureProvider = csProvider;
+        this.archiveObjectDao = aoDao;
         this.workspaceDao = workspaceDao;
         this.corpusStructureAccessChecker = csAccessChecker;
     }
@@ -90,33 +94,43 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         //TODO replaced the usage of AMS Bridge (and the associated service because it wasn't working properly due to some hibernate lazy loading issues of the users...)
         //TODO should use some service instead (maybe provided by the corpus structure)
         
-//        if(!this.amsBridge.hasWriteAccess(userID, archiveNodeURI)) {
-        if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
-            NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
-            logger.error(ex.getMessage(), ex);
-            throw ex;
-        }
+        logger.debug("Ensuring that node '{}' is accessible to user {}", archiveNodeURI, userID);
+        ensureWriteAccessToNode(userID, archiveNodeURI);
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
         
-        if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
-            Collection<WorkspaceNode> lockedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
-            int workspaceID = -1;
-            if(lockedNodes.size() == 1) {
-                workspaceID = lockedNodes.iterator().next().getWorkspaceID();
-            }
-            NodeAccessException ex = new LockedNodeException(archiveNodeURI, workspaceID);
-            logger.error(ex.getMessage(), ex);
-            throw ex;
-        }
+        logger.debug("Ensuring that node '{}' is not locked", archiveNodeURI);
+        ensureNodeIsNotLocked(archiveNodeURI);
         
         //TODO Should it check now if any of the child nodes is locked??
             // maybe that's too much to compute for a large workspace...
             // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
             // if there was a way of checking just the leave nodes, it would be a bit easier
+        
+        long nodeId = archiveObjectDao.select(archiveNodeURI).getId();
+        Collection<ArchiveObject> descendants = archiveObjectDao.selectDescendants(nodeId);
+        
+        logger.debug("Ensuring that the descendants of node '{}' (count = {}) are not locked and accessible to user {}", archiveNodeURI, descendants.size(), userID);
+        
+        for(ArchiveObject descendant : descendants) {
+            if(descendant.isOnsite()) {
+                URI descendantURI = descendant.getCanonicalUri();
+                ensureWriteAccessToNode(userID, descendantURI);
+                ensureNodeIsNotLocked(descendantURI);
+            }
+        }
+        
 
         logger.debug("A workspace can be created in node " + archiveNodeURI + " by user " + userID);
         
+    }
+
+    /**
+     * @see WorkspaceAccessChecker#ensureBranchIsAccessible(java.lang.String, java.net.URI)
+     */
+    @Override
+    public void ensureBranchIsAccessible(String userID, URI archiveNodeURI) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     /**
@@ -137,4 +151,25 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("User " + userID + " has access to workspace " + workspaceID);
     }
     
+    
+    private void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException {
+        if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
+            NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+    
+    private void ensureNodeIsNotLocked(URI archiveNodeURI) throws NodeAccessException {
+        if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
+            Collection<WorkspaceNode> lockedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
+            int workspaceID = -1;
+            if(lockedNodes.size() == 1) {
+                workspaceID = lockedNodes.iterator().next().getWorkspaceID();
+            }
+            NodeAccessException ex = new LockedNodeException(archiveNodeURI, workspaceID);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
 }

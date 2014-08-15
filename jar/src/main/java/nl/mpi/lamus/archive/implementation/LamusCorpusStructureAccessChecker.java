@@ -19,19 +19,21 @@ package nl.mpi.lamus.archive.implementation;
 import java.net.URI;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see CorpusStructureAccessChecker
  * @author guisil
  */
 @Component
 public class LamusCorpusStructureAccessChecker implements CorpusStructureAccessChecker {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusCorpusStructureAccessChecker.class);
  
     private final AccessInfoProvider accessInfoProvider;
     
@@ -40,23 +42,24 @@ public class LamusCorpusStructureAccessChecker implements CorpusStructureAccessC
         accessInfoProvider = aiProvider;
     }
     
-    
+    /**
+     * @see CorpusStructureAccessChecker#hasWriteAccess(java.lang.String, java.net.URI)
+     */
     @Override
     public boolean hasWriteAccess(String userId, URI archiveNodeURI) {
         
-        // NOT A SERVICE YET, BUT SHOULD PROBABLY BE
-        // USING THE AMS SERVICE WASN'T WORKING DUE TO LAZY LOADING PROBLEMS WITH HIBERNATE... TRYING DIFFERENT APPROACH
-        
-        
+        logger.debug("Checking if user {} has write access to node '{}'", userId, archiveNodeURI);
         
         Collection<ArchiveUser> writers = accessInfoProvider.getWriteRights(archiveNodeURI);
         
         for(ArchiveUser user : writers) {
             if(userId.equals(user.getUid())) {
+                logger.debug("User {} has write access to node '{}'", userId, archiveNodeURI);
                 return true;
             }
         }
         
+        logger.debug("User {} doesn't have write access to node '{}'", userId, archiveNodeURI);
         return false;
     }
 }
