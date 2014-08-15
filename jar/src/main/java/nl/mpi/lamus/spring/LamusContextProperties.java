@@ -36,9 +36,18 @@ public class LamusContextProperties {
     @Value("#{contextParameters['nl.mpi.rrsRegister']}")
     private String rrsRegister;
     
+    @Value("#{contextParameters['nl.mpi.lamus.lamus2_manualUrl']}")
+    private String manualUrl;
+    
     @Bean
     @Qualifier("registerUrl")
     public String registerUrl() {
         return rrsUrl + rrsRegister;
+    }
+    
+    @Bean
+    @Qualifier("manualUrl")
+    public String manualUrl() {
+        return manualUrl;
     }
 }
