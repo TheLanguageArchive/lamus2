@@ -307,9 +307,11 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
-            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, topNodeURI_1);
+//            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+//            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+//            oneOf(mockAmsBridge).triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, topNodeURI_1);
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculationWithVersionedNodes(topNodeURI_1, nodeReplacements);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});

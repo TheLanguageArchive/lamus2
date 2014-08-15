@@ -104,8 +104,30 @@ public class LamusAmsServiceBridgeTest {
     }
     
     @Test
-    public void triggerAccessRightsRecalculationWithVersionedNodes() {
-        fail("not tested yet");
+    public void triggerAccessRightsRecalculationWithVersionedNodes() throws URISyntaxException {
+        
+        final URI topNode = new URI(UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNodeReplacement> nodeReplacementsList = new ArrayList<>();
+        nodeReplacementsList.add(mockNodeReplacement_1);
+        nodeReplacementsList.add(mockNodeReplacement_2);
+        
+        final URI oldNodeURI_1 = new URI(UUID.randomUUID().toString());
+        final URI oldNodeURI_2 = new URI(UUID.randomUUID().toString());
+        
+        final Collection<URI> versionedNodes = new ArrayList<>();
+        versionedNodes.add(oldNodeURI_1);
+        versionedNodes.add(oldNodeURI_2);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeReplacement_1).getOldNodeURI(); will(returnValue(oldNodeURI_1));
+            oneOf(mockNodeReplacement_2).getOldNodeURI(); will(returnValue(oldNodeURI_2));
+            
+            oneOf(mockAmsRemoteService).triggerRightsRecalculationWithVersionedNodes(topNode, versionedNodes);
+        }});
+        
+        amsServiceBridge.triggerAccessRightsRecalculationWithVersionedNodes(topNode, nodeReplacementsList);
     }
     
     @Test

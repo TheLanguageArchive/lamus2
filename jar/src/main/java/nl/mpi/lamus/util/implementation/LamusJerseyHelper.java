@@ -66,7 +66,11 @@ public class LamusJerseyHelper implements JerseyHelper {
         
         Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
         
-        Entity<String> uriEntity = Entity.entity("root=" + requestUri.toString() + "&forceUpdate=" + true, MediaType.APPLICATION_FORM_URLENCODED);
+        Entity<String> uriEntity = Entity.entity(
+                "root=" + requestUri.toString()
+                + "&forceUpdate=" + true
+                + "&triggerAmsRecalculation=" + true,
+                MediaType.APPLICATION_FORM_URLENCODED);
         
         JsonObject responseJsonObject = invocationBuilder.post(uriEntity, JsonObject.class);
         
