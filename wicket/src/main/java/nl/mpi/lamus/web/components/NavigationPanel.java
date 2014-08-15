@@ -57,13 +57,17 @@ public class NavigationPanel extends Panel {
             }
         });
         
-        add(new Link("requestStorageSpaceLink") {
-
-            @Override
-            public void onClick() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        });
+        Link requestStorageLink =
+                new Link("requestStorageSpaceLink") {
+                    
+                    @Override
+                    public void onClick() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+                };
+        //TODO setting invisible, since this feature might not be necessary in the future
+        requestStorageLink.setVisible(false);
+        add(requestStorageLink);
         
         Link managementLink = new Link("managementLink") {
 
