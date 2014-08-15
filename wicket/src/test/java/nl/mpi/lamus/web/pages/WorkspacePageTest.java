@@ -73,6 +73,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     }};
 
     private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
     
 
     @Override
@@ -97,6 +98,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         
         wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspace));
         getTester().startPage(wsPage);

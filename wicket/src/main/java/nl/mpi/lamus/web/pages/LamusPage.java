@@ -16,7 +16,11 @@
  */
 package nl.mpi.lamus.web.pages;
 
+import nl.mpi.lamus.web.components.AboutPanel;
 import nl.mpi.lamus.web.session.LamusSession;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -37,6 +41,8 @@ public class LamusPage extends WebPage {
 
     @SpringBean(name = "registerUrl")
     private String registerUrl;
+    @SpringBean(name = "manualUrl")
+    private String manualUrl;
     
     private FeedbackPanel feedbackPanel;
     
@@ -64,6 +70,32 @@ public class LamusPage extends WebPage {
         };
         homePageLink.add(new Image("home_image", new SharedResourceReference("homeImage")));
         add(homePageLink);
+        
+        final ModalWindow modalAbout = new ModalWindow("modalAbout");
+        modalAbout.setContent(new AboutPanel(modalAbout.getContentId()));
+        modalAbout.setTitle("About LAMUS 2");
+        modalAbout.setCookieName("modal-about");
+        modalAbout.setCloseButtonCallback(new ModalWindow.CloseButtonCallback() {
+            @Override
+            public boolean onCloseButtonClicked(AjaxRequestTarget art) {
+                return true;
+            }
+        });
+        modalAbout.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
+            @Override
+            public void onClose(AjaxRequestTarget art) {
+            }
+        }));
+        add(modalAbout);
+        add(new AjaxLink<Void>("showModalAbout") {
+            @Override
+            public void onClick(AjaxRequestTarget art) {
+                modalAbout.show(art);
+            }
+        });
+        
+        
+        add(new ExternalLink("manual_link", Model.of(manualUrl)));
         
         add(new ExternalLink("register_link", Model.of(registerUrl)));
         

@@ -64,6 +64,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     private String mockArchiveRootNodeName;
     private URI mockArchiveRootNodeURI;
     private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private String mockManualUrl = "http:/test.mpi.nl/lamus/manual";
     
     private MockCorpusNode expectedSelectedNode;
 
@@ -87,6 +88,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockTreeModelProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
         
         createWsPage = new CreateWorkspacePage();

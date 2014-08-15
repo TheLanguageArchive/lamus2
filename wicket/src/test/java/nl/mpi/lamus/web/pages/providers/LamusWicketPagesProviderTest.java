@@ -110,6 +110,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     private File mockUploadDirectory;
     
     private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private String mockManualUrl = "http://test.mpi.nl/lamus/manual";
     
     @Override
     protected void setUpTest() throws Exception {
@@ -149,6 +150,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
 
         pagesProvider = new LamusWicketPagesProvider();
