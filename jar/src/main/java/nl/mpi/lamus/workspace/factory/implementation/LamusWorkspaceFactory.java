@@ -16,7 +16,7 @@
 package nl.mpi.lamus.workspace.factory.implementation;
 
 import java.net.URI;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
@@ -32,14 +32,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWorkspaceFactory implements WorkspaceFactory {
     
-    private final AmsBridge amsBridge;
+    private final AmsServiceBridge amsBridge;
     
     @Autowired
     @Qualifier("defaultMaxStorageSpaceInBytes")
     private long defaultMaxStorageSpaceInBytes;
     
     @Autowired
-    public LamusWorkspaceFactory(AmsBridge amsBridge) {
+    public LamusWorkspaceFactory(AmsServiceBridge amsBridge) {
         this.amsBridge = amsBridge;
     }
     

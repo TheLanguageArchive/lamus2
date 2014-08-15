@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import javax.mail.Message;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.util.MailHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -31,11 +31,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWorkspaceMailer implements WorkspaceMailer {
     
-    private final AmsBridge amsBridge;
+    private final AmsServiceBridge amsBridge;
     private final MailHelper mailHelper;
     
     @Autowired
-    public LamusWorkspaceMailer(AmsBridge amsBridge, MailHelper mailHelper) {
+    public LamusWorkspaceMailer(AmsServiceBridge amsBridge, MailHelper mailHelper) {
         this.amsBridge = amsBridge;
         this.mailHelper = mailHelper;
     }

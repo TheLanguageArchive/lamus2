@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
@@ -44,11 +44,11 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
     private final WorkspaceMailer workspaceMailer;
-    private final AmsBridge amsBridge;
+    private final AmsServiceBridge amsBridge;
 
     @Autowired
     public LamusWorkspaceCrawlerChecker(WorkspaceDao wsDao, CorpusStructureServiceBridge csServiceBridge,
-        WorkspaceMailer wsMailer, AmsBridge amsBridge) {
+        WorkspaceMailer wsMailer, AmsServiceBridge amsBridge) {
         workspaceDao = wsDao;
         corpusStructureServiceBridge = csServiceBridge;
         workspaceMailer = wsMailer;
@@ -109,6 +109,13 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
 
                 versioningWasSuccessful = Boolean.FALSE;
             }
+            
+            if(versioningWasSuccessful) {
+                amsBridge.triggerAmsNodeReplacements(nodeReplacements, workspace.getUserID());
+            }
+            
+            //TODO CHECK IF IT WAS SUCCESSFUL??
+            
         }
         
         if(!crawlerWasSuccessful) {
@@ -129,7 +136,16 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
             
             logger.debug("Triggering access rigths recalculation for workspace " + workspace.getWorkspaceID());
             
-            amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
+//            amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
+            
+            if(!nodeReplacements.isEmpty()) {
+//                amsBridge.triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, workspace.getTopNodeArchiveURI());
+                amsBridge.triggerAccessRightsRecalculationWithVersionedNodes(workspace.getTopNodeArchiveURI(), nodeReplacements);
+            } else {
+                amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
+            }
+            
+            //TODO CHECK IF IT WAS SUCCESSFUL??
         }
         
         //TODO some more details about the situation (especially in case of failure)

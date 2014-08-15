@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import javax.mail.Message;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.util.MailHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -43,7 +43,7 @@ public class LamusWorkspaceMailerTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
-    @Mock AmsBridge mockAmsBridge;
+    @Mock AmsServiceBridge mockAmsBridge;
     @Mock MailHelper mockMailHelper;
     
     @Mock Workspace mockWorkspace;

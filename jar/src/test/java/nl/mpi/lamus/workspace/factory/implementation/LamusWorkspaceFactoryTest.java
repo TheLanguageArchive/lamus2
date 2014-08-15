@@ -18,7 +18,7 @@ package nl.mpi.lamus.workspace.factory.implementation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -66,7 +66,7 @@ public class LamusWorkspaceFactoryTest {
         }
         
         @Bean
-        public AmsBridge amsBridge() {
+        public AmsServiceBridge amsBridge() {
             return null;
         }
         
@@ -78,7 +78,7 @@ public class LamusWorkspaceFactoryTest {
     }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    @Mock private AmsBridge mockAmsBridge;
+    @Mock private AmsServiceBridge mockAmsBridge;
     
     @Autowired
     private WorkspaceFactory factory;
@@ -114,7 +114,7 @@ public class LamusWorkspaceFactoryTest {
     /**
      * Tests if a workspace object is created,
      * by calling the method {@link WorkspaceFactory#getNewWorkspace(java.lang.String, int)},
-     * while retrieving the storage space values from {@link AmsBridge}
+     * while retrieving the storage space values from {@link AmsServiceBridge}
      */
     @Test
     public void workspaceObjectIsCreatedWithRetrievedStorageSpaceValues() {
@@ -143,7 +143,7 @@ public class LamusWorkspaceFactoryTest {
     /**
      * Tests if a workspace object is created,
      * by calling the method {@link WorkspaceFactory#getNewWorkspace(java.lang.String, int)},
-     * while retrieving the max storage space values from {@link AmsBridge}
+     * while retrieving the max storage space values from {@link AmsServiceBridge}
      * and using the default value for used space value
      */
     @Test
@@ -174,7 +174,7 @@ public class LamusWorkspaceFactoryTest {
     /**
      * Tests if a workspace object is created,
      * by calling the method {@link WorkspaceFactory#getNewWorkspace(java.lang.String, int)},
-     * while retrieving the used storage space values from {@link AmsBridge}
+     * while retrieving the used storage space values from {@link AmsServiceBridge}
      * and using the default value for max space value
      */
     @Test

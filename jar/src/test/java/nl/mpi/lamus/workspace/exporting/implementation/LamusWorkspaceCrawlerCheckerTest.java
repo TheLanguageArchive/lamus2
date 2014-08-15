@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
-import nl.mpi.lamus.ams.AmsBridge;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
@@ -56,7 +56,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
     @Mock WorkspaceMailer mockWorkspaceMailer;
-    @Mock AmsBridge mockAmsBridge;
+    @Mock AmsServiceBridge mockAmsBridge;
     
     @Mock Workspace mockSuccessfulSubmittedWorkspace1;
     @Mock Workspace mockSuccessfulSubmittedWorkspace2;
@@ -268,6 +268,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
+        final String userID = "someUser";
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
@@ -297,14 +298,18 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
             oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements);
             
+            oneOf(mockSuccessfulSubmittedWorkspace1).getUserID(); will(returnValue(userID));
+            oneOf(mockAmsBridge).triggerAmsNodeReplacements(nodeReplacements, userID);
+            
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
-            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            exactly(2).of(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
             oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, topNodeURI_1);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});

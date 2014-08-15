@@ -27,7 +27,6 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.ams.AmsBridge;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
@@ -185,7 +184,7 @@ public class LamusWorkspaceAccessCheckerTest {
         final int workspaceID = 10;
         final String expectedMessage = "Node with URI '" + archiveNodeURI + "' is already locked by workspace " + workspaceID;
         
-        final Collection<WorkspaceNode> lockedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
         lockedNodes.add(mockWorkspaceNode1);
         
         context.checking(new Expectations() {{
@@ -218,7 +217,7 @@ public class LamusWorkspaceAccessCheckerTest {
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String expectedMessage = "Node with URI '" + archiveNodeURI + "' is already locked by multiple workspaces";
         
-        final Collection<WorkspaceNode> lockedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
         lockedNodes.add(mockWorkspaceNode1);
         lockedNodes.add(mockWorkspaceNode2);
         

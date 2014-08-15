@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.ams.Ams2Bridge;
+import nl.mpi.lamus.ams.LamusAmsServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -118,7 +118,7 @@ public class WorkspaceSteps {
     private IdentifierResolver identifierResolver;
     
     @Autowired
-    private Ams2Bridge ams2Bridge;
+    private LamusAmsServiceBridge ams2Bridge;
 
     @Autowired
     private WorkspaceDao workspaceDao;
