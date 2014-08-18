@@ -154,6 +154,18 @@ public class LamusProperties implements ServletContextAware {
     // Properties loaded from the web server context
     
     @Bean
+    @Qualifier("registerUrl")
+    public String registerUrl() {
+        return servletContext.getInitParameter("nl.mpi.rrsUrl") + servletContext.getInitParameter("nl.mpi.rrsRegister");
+    }
+    
+    @Bean
+    @Qualifier("manualUrl")
+    public String manualUrl() {
+        return servletContext.getInitParameter("nl.mpi.lamus.lamus2_manualUrl");
+    }
+    
+    @Bean
     @Qualifier("workspaceBaseDirectory")
     public File workspaceBaseDirectory() {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.workspace_base_directory"));
