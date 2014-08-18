@@ -148,9 +148,4 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
     public void setFormat(String format) {
         this.format = format;
     }
-
-    @Override
-    public URI getPID() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

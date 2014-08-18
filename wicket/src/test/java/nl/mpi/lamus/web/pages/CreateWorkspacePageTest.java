@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeNode;
@@ -158,7 +159,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void formSubmitted() throws NodeAccessException, WorkspaceImportException {
+    public void formSubmitted() throws NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         getTester().getComponentFromLastRenderedPage("nodeIdForm:createWorkspace").setEnabled(true);
         

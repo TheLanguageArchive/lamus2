@@ -19,6 +19,7 @@ package nl.mpi.lamus.web.pages;
 import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanelListener;
@@ -156,6 +157,8 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
+                } catch (NodeNotFoundException ex) {
+                    Session.get().error(ex.getMessage());
                 } catch (NodeAccessException ex) {
                     Session.get().error(ex.getMessage());
                 } catch (WorkspaceImportException ex) {
