@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -149,7 +149,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileIsArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                ArchiveNodeNotFoundException {
+                NodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -217,7 +217,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileIsNotArchivable()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                ArchiveNodeNotFoundException {
+                NodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -266,7 +266,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileCopyFails()
             throws URISyntaxException, MalformedURLException, IOException,
                 TypeCheckerException, WorkspaceNodeNotFoundException, WorkspaceException,
-                ArchiveNodeNotFoundException {
+                NodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -369,7 +369,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadFileUnknownNodeException()
             throws TypeCheckerException, URISyntaxException, MalformedURLException,
                 IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                ArchiveNodeNotFoundException {
+                NodeNotFoundException {
         
         final int workspaceID = 1;
         final String filename = "someFile.cmdi";
@@ -393,7 +393,7 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         
         final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-        final ArchiveNodeNotFoundException expectedException = new ArchiveNodeNotFoundException("some exception message", workspaceTopNodeArchiveURI, null);
+        final NodeNotFoundException expectedException = new NodeNotFoundException(workspaceTopNodeArchiveURI, "some exception message");
         
         context.checking(new Expectations() {{
             
@@ -424,7 +424,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -445,10 +445,10 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setFormat(fileMimetype);
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         
-        final Collection<File> uploadedFiles = new ArrayList<File>();
+        final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
-        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
         
         //only one file in the collection, so only one loop cycle
@@ -495,7 +495,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -518,10 +518,10 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         uploadedNode.setArchiveURI(uploadedFileArchiveURI);
         
-        final Collection<File> uploadedFiles = new ArrayList<File>();
+        final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
-        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
         
         //only one file in the collection, so only one loop cycle
@@ -570,7 +570,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -605,11 +605,11 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode2.setFormat(fileMimetype2);
         uploadedNode2.setWorkspaceURL(uploadedFileURL2);
         
-        final Collection<File> uploadedFiles = new ArrayList<File>();
+        final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         uploadedFiles.add(mockFile2);
         
-        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode1);
         uploadedNodes.add(uploadedNode2);
         
@@ -677,7 +677,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -698,11 +698,11 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setFormat(fileMimetype);
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         
-        Collection<File> uploadedFiles = new ArrayList<File>();
+        Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
         final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-        final ArchiveNodeNotFoundException expectedException = new ArchiveNodeNotFoundException("some exception message", workspaceTopNodeArchiveURI, null);
+        final NodeNotFoundException expectedException = new NodeNotFoundException(workspaceTopNodeArchiveURI, "some exception message");
         
         //only one file in the collection, so only one loop cycle
         
@@ -728,7 +728,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -750,11 +750,11 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setType(fileType);
         uploadedNode.setFormat(fileMimetype);
         
-        final Collection<File> uploadedFiles = new ArrayList<File>();
+        final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
         //no successful uploads
-        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
         final String expectedErrorMessage = "Error retrieving URL from file " + uploadedFile.getPath();
         
@@ -790,7 +790,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, ArchiveNodeNotFoundException {
+    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -811,11 +811,11 @@ public class LamusWorkspaceUploaderTest {
         uploadedNode.setFormat(fileMimetype);
         uploadedNode.setWorkspaceURL(uploadedFileURL);
         
-        final Collection<File> uploadedFiles = new ArrayList<File>();
+        final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
         //no successful uploads
-        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
         String partExpectedErrorMessage = "File [" + filename + "] not archivable: ";
         

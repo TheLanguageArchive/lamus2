@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -105,7 +105,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         URL topNodeArchiveURL;
         try {
             topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-        } catch (ArchiveNodeNotFoundException ex) {
+        } catch (NodeNotFoundException ex) {
             String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
             logger.error(errorMessage, ex);
             throw new WorkspaceException(errorMessage, workspaceID, ex);
@@ -148,16 +148,16 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             throws IOException, WorkspaceException {
         
         // map containing the files that for some reason are not sucessfully processed, along with the reason for it
-        Map<File, String> failedFiles = new HashMap<File, String>();
+        Map<File, String> failedFiles = new HashMap<>();
         
         // collection containing the nodes that were eventually uploaded, to be used later for checking eventual links between them
-        Collection<WorkspaceNode> uploadedNodes = new ArrayList<WorkspaceNode>();
+        Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
         WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
         URL topNodeArchiveURL;
         try {
             topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-        } catch (ArchiveNodeNotFoundException ex) {
+        } catch (NodeNotFoundException ex) {
             String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
             logger.error(errorMessage, ex);
             throw new WorkspaceException(errorMessage, workspaceID, ex);
@@ -175,11 +175,11 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 failedFiles.put(currentFile, errorMessage);
                 continue;
             }
-        
-            InputStream currentInputStream = FileUtils.openInputStream(currentFile);
-        
-            TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(currentInputStream, currentFile.getName());
-            currentInputStream.close();
+            
+            TypecheckedResults typecheckedResults;
+            try (InputStream currentInputStream = FileUtils.openInputStream(currentFile)) {
+                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(currentInputStream, currentFile.getName());
+            }
             
             
             

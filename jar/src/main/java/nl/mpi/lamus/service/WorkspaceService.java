@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -48,7 +49,7 @@ public interface WorkspaceService extends Serializable {
      * @return Workspace object
      */
     public Workspace createWorkspace(String userID, URI archiveNodeURI)
-            throws NodeAccessException, WorkspaceImportException;
+            throws NodeAccessException, WorkspaceImportException, NodeNotFoundException;
     
     /**
      * Deletes the workspace with the given ID.

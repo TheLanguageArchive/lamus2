@@ -19,12 +19,12 @@ import java.net.URI;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
 import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
 import nl.mpi.lamus.exception.LockedNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -71,13 +71,13 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
      */
     @Override
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
-            throws NodeAccessException {
+            throws NodeAccessException, NodeNotFoundException {
         
         CorpusNode node = this.corpusStructureProvider.getNode(archiveNodeURI);
 
         if(node == null) {
             String message = "Archive node not found: " + archiveNodeURI;
-            ArchiveNodeNotFoundException ex = new ArchiveNodeNotFoundException(message, archiveNodeURI, null);
+            NodeNotFoundException ex = new NodeNotFoundException(archiveNodeURI, message);
             logger.error(ex.getMessage(), ex);
             throw ex;
         }
@@ -152,7 +152,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     }
     
     
-    private void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException {
+    private void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException, NodeNotFoundException {
         if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
             NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
             logger.error(ex.getMessage(), ex);

@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -79,7 +80,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public Workspace createWorkspace(String userID, URI archiveNodeURI)
-            throws NodeAccessException, WorkspaceImportException {
+            throws NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         logger.debug("Triggered creation of workspace; userID: " + userID + "; archiveNodeURI: " + archiveNodeURI);
          

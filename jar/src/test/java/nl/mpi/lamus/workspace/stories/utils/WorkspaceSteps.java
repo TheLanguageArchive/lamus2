@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.*;
 import javax.sql.DataSource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.LamusAmsServiceBridge;
@@ -443,7 +444,7 @@ public class WorkspaceSteps {
     
     
     @When("that user chooses to create a workspace in the node with URI $nodeUriStr")
-    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException, NodeAccessException, WorkspaceImportException {
+    public void thatUserChoosesToCreateAWorkspaceInTheNodeWithID(String nodeUriStr) throws URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
 
         URI nodeURI = new URI(nodeUriStr);
         

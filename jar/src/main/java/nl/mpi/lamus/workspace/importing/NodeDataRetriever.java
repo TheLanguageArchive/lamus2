@@ -15,12 +15,11 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.metadata.api.model.Reference;
@@ -54,7 +53,7 @@ public interface NodeDataRetriever {
      * @param nodeArchiveURI URI of the node in the archive
      * @return URL of the node in the archive
      */
-    public URL getNodeArchiveURL(URI nodeArchiveURI) throws ArchiveNodeNotFoundException;
+    public URL getNodeArchiveURL(URI nodeArchiveURI) throws NodeNotFoundException;
     
     /**
      * Decides if a resource should be typechecked (depending on its location and size).

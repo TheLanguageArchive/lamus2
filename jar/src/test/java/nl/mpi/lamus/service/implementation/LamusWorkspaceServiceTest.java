@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -110,7 +111,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceNullUri()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = null;
         final String userID = "someUser";
@@ -126,7 +127,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceNullUser()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = null;
@@ -141,8 +142,29 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void createWorkspaceThrowsNodeNotFoundException()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
+        
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final String userID = "someUser";
+        final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI, "access problem");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(NodeNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
     public void createWorkspaceThrowsNodeAccessException()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
@@ -163,7 +185,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceThrowsWorkspaceImportException()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final int workspaceID = 10;
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -186,7 +208,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void createWorkspaceSuccess()
-            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException {
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final String userID = "someUser";
@@ -352,7 +374,7 @@ public class LamusWorkspaceServiceTest {
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
-        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        final Collection<Workspace> expectedList = new ArrayList<>();
         expectedList.add(workspace1);
         expectedList.add(workspace2);
         
@@ -375,7 +397,7 @@ public class LamusWorkspaceServiceTest {
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
-        final List<Workspace> expectedList = new ArrayList<Workspace>();
+        final List<Workspace> expectedList = new ArrayList<>();
         expectedList.add(workspace1);
         expectedList.add(workspace2);
         
@@ -398,7 +420,7 @@ public class LamusWorkspaceServiceTest {
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
-        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        final Collection<Workspace> expectedList = new ArrayList<>();
         expectedList.add(workspace1);
         expectedList.add(workspace2);
         
@@ -421,7 +443,7 @@ public class LamusWorkspaceServiceTest {
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
-        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        final Collection<Workspace> expectedList = new ArrayList<>();
         expectedList.add(workspace1);
         
         context.checking(new Expectations() {{
@@ -443,7 +465,7 @@ public class LamusWorkspaceServiceTest {
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
                 date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_DURING_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
-        final Collection<Workspace> expectedList = new ArrayList<Workspace>();
+        final Collection<Workspace> expectedList = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -742,7 +764,7 @@ public class LamusWorkspaceServiceTest {
     public void getExistingChildNodes() {
         
         final int nodeID = 1;
-        final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<>();
         final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "jpeg");
         expectedChildNodes.add(childNode);
         

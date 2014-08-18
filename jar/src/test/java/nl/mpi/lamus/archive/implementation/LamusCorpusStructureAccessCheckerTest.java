@@ -22,9 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -78,12 +77,12 @@ public class LamusCorpusStructureAccessCheckerTest {
 
     
     @Test
-    public void userHasWriteAccess() throws URISyntaxException {
+    public void userHasWriteAccess() throws URISyntaxException, NodeNotFoundException {
         
         final String firstUserID = "firstUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
-        final Collection<ArchiveUser> writers = new ArrayList<ArchiveUser>();
+        final Collection<ArchiveUser> writers = new ArrayList<>();
         writers.add(mockFirstUserWithWriteAccess);
         
         context.checking(new Expectations() {{
@@ -100,13 +99,13 @@ public class LamusCorpusStructureAccessCheckerTest {
     }
     
     @Test
-    public void userHasWriteAccessLargerList() throws URISyntaxException {
+    public void userHasWriteAccessLargerList() throws URISyntaxException, NodeNotFoundException {
         
         final String firstUserID = "firstUser";
         final String secondUserID = "secondUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
-        final Collection<ArchiveUser> writers = new ArrayList<ArchiveUser>();
+        final Collection<ArchiveUser> writers = new ArrayList<>();
         writers.add(mockFirstUserWithWriteAccess);
         writers.add(mockSecondUserWithWriteAccess);
         
@@ -125,13 +124,13 @@ public class LamusCorpusStructureAccessCheckerTest {
     }
     
     @Test
-    public void userHasNoWriteAccess() throws URISyntaxException {
+    public void userHasNoWriteAccess() throws URISyntaxException, NodeNotFoundException {
         
         final String firstUserID = "firstUser";
         final String secondUserID = "secondUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         
-        final Collection<ArchiveUser> writers = new ArrayList<ArchiveUser>();
+        final Collection<ArchiveUser> writers = new ArrayList<>();
         writers.add(mockFirstUserWithWriteAccess);
         
         context.checking(new Expectations() {{
@@ -145,5 +144,27 @@ public class LamusCorpusStructureAccessCheckerTest {
         boolean result = corpusStructureAccessChecker.hasWriteAccess(secondUserID, archiveNodeURI);
         
         assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void hasWriteAccessThrowsException() throws URISyntaxException, NodeNotFoundException {
+        
+        final String firstUserID = "firstUser";
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        
+        final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockAccessInfoProvider).getWriteRights(archiveNodeURI);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            corpusStructureAccessChecker.hasWriteAccess(firstUserID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(NodeNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
 }

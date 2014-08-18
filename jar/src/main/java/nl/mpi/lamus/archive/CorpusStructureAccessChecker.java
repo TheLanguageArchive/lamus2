@@ -17,6 +17,7 @@
 package nl.mpi.lamus.archive;
 
 import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 
 /**
  * Interface providing access checking functionality regarding
@@ -32,5 +33,5 @@ public interface CorpusStructureAccessChecker {
      * @param archiveNodeURI URI of the node
      * @return true if the user has access to the node
      */
-    public boolean hasWriteAccess(String userId, URI archiveNodeURI);
+    public boolean hasWriteAccess(String userId, URI archiveNodeURI) throws NodeNotFoundException;
 }

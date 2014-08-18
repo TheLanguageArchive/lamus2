@@ -19,14 +19,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -71,12 +69,12 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
 
     @Override
-    public URL getNodeArchiveURL(URI nodeArchiveURI) throws ArchiveNodeNotFoundException {
+    public URL getNodeArchiveURL(URI nodeArchiveURI) throws NodeNotFoundException {
         
         CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
         if(archiveNode == null) {
             String message = "Archive node not found: " + nodeArchiveURI;
-            ArchiveNodeNotFoundException ex = new ArchiveNodeNotFoundException(message, nodeArchiveURI, null);
+            NodeNotFoundException ex = new NodeNotFoundException(nodeArchiveURI, message);
             logger.error(ex.getMessage(), ex);
             throw ex;
         }

@@ -26,12 +26,12 @@ import java.util.Date;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
 import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.ArchiveNodeNotFoundException;
 import nl.mpi.lamus.exception.ExternalNodeException;
 import nl.mpi.lamus.exception.LockedNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -114,14 +114,14 @@ public class LamusWorkspaceAccessCheckerTest {
         try {
             nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             fail("should have thrown an exception");
-        } catch(ArchiveNodeNotFoundException ex) {
+        } catch(NodeNotFoundException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
-            assertEquals("Exception node URI different from expected", archiveNodeURI, ex.getNodeURI());
+            assertEquals("Exception node URI different from expected", archiveNodeURI, ex.getNode());
         }
     }
  
     @Test
-    public void cannotCreateWorkspaceIfNodeIsExternal() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfNodeIsExternal() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -143,7 +143,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsNotMetadata() throws URISyntaxException, NodeAccessException {
+    public void cannotCreateWorkspaceIfNodeIsNotMetadata() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -164,7 +164,29 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfNodeIsNotFound() throws URISyntaxException, NodeNotFoundException, NodeAccessException {
+        
+        final String userID = "someUser";
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(NodeNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -189,7 +211,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -222,7 +244,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -254,7 +276,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfDescendantNodeIsNotAccessibleToUser() throws URISyntaxException, NodeAccessException {
+    public void cannotCreateWorkspaceIfDescendantNodeIsNotAccessibleToUser() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -295,7 +317,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfDescendantNodeIsLocked() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -344,7 +366,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfSecondDescendantNodeIsLocked() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfSecondDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -400,7 +422,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfDescendantNodeIsLockedMultipleTimes() throws URISyntaxException {
+    public void cannotCreateWorkspaceIfDescendantNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -448,7 +470,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void canCreateWorkspaceIfNodeWithoutDescendantsIsNotLocked() throws URISyntaxException, NodeAccessException {
+    public void canCreateWorkspaceIfNodeWithoutDescendantsIsNotLocked() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
@@ -472,7 +494,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void canCreateWorkspaceIfNodeAndDescendantsAreNotLocked_includingExternalDescendant() throws URISyntaxException, NodeAccessException {
+    public void canCreateWorkspaceIfNodeAndDescendantsAreNotLocked_includingExternalDescendant() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());

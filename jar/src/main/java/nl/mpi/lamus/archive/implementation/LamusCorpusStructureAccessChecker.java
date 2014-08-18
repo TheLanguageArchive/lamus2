@@ -19,6 +19,7 @@ package nl.mpi.lamus.archive.implementation;
 import java.net.URI;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.ArchiveUser;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class LamusCorpusStructureAccessChecker implements CorpusStructureAccessC
      * @see CorpusStructureAccessChecker#hasWriteAccess(java.lang.String, java.net.URI)
      */
     @Override
-    public boolean hasWriteAccess(String userId, URI archiveNodeURI) {
+    public boolean hasWriteAccess(String userId, URI archiveNodeURI) throws NodeNotFoundException {
         
         logger.debug("Checking if user {} has write access to node '{}'", userId, archiveNodeURI);
         

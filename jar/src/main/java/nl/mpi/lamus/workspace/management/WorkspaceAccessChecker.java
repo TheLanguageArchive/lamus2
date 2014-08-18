@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.management;
 
 import java.io.Serializable;
 import java.net.URI;
+import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -36,7 +37,7 @@ public interface WorkspaceAccessChecker extends Serializable {
      * @param archiveNodeURI URI of the node in which the workspace is supposed to be created
      */
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
-            throws NodeAccessException;
+            throws NodeAccessException, NodeNotFoundException;
     
     /**
      * Checks if the given node is accessible to the user
