@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>nl.mpi</groupId>
+		<artifactId>lamus2.parent</artifactId>
+		<version>1.0</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.mpi</groupId>
+	<artifactId>lamus2-targz</artifactId>
+	<packaging>pom</packaging>
+	<name>Lamus2 (targz)</name>
+	<description>Lamus2 Release tar.gz</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>nl.mpi</groupId>
+			<artifactId>lamus2-pages</artifactId>
+			<version>${version}</version>
+			<type>war</type>
+		</dependency>
+	</dependencies>
+
+	<build>
+
+		<directory>target</directory>
+		<outputDirectory>target</outputDirectory>
+
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
+					<finalName>lamus2-${version}</finalName>
+					<descriptors>
+						<descriptor>src/main/assembly/targz.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
