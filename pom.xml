@@ -14,8 +14,8 @@
     <artifactId>lamus2.parent</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
-    <name>LAMUS 2 (Parent project)</name>
-    <description>Parent pom for LAMUS 2 web app</description>
+    <name>Lamus2 (Parent project)</name>
+    <description>Parent pom for Lamus2 web app</description>
     <url>https://trac.mpi.nl/wiki/Lamus2</url>
     <ciManagement>
         <system>hudson</system>
@@ -30,7 +30,7 @@
 <!-- 		<module>api</module> -->
         <module>jar</module>
         <module>wicket</module>
-<!-- 		<module>targz</module> -->
+        <module>targz</module>
     </modules>
 
     <properties>
