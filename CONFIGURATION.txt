@@ -1,0 +1,235 @@
+LAMUS2 CONFIGURATION
+
+
+1.  Web container context
+
+1.1.    JNDI Resources
+
+Lamus2 needs the 'corpusstructure2' and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
+
+    <Resource
+            name="jdbc/CSDB2"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://localhost:5432/corpusstructure2"
+            username="dummy"
+            password="password"
+            maxActive="20"
+            maxIdle="5"
+            maxWait="4000"
+            removeAbandoned="true"
+            removeAbandonedTimeout="300"
+            logAbandoned="true"
+    />
+
+    <Resource 
+            name="jdbc/LAMUS2_DB" 
+            auth="Container" 
+            type="javax.sql.DataSource" 
+            driverClassName="org.postgresql.Driver" 
+            url="jdbc:postgresql://localhost:5432/lamus2" 
+            username="dummy" 
+            password="password" 
+            maxActive="15" 
+            maxIdle="5" 
+            maxWait="4000"
+            removeAbandoned="true"
+            removeAbandonedTimeout="300"
+            logAbandoned="true"
+    />
+
+
+1.2.    Context parameters
+
+The other necessary properties should be defined as parameters in the web context configuration.
+
+
+        <Parameter name="nl.mpi.lamus.lamus2_manualUrl"
+                   value="http://www.mpi.nl/corpus/html/lamus2/index.html"
+                   description="location of the  Lamus 2 Manual"
+                   override="false"/>
+
+
+        <Parameter name="nl.mpi.lamus.workspace_base_directory"
+                   value="/lat/corpora/lamus2/workspaces/"
+                   description="Base path for workspaces"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.workspace_upload_directory_name"
+                   value="upload"
+                   description="Sub-directory for uploaded files in the workspace"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.metadata_directory_name"
+                   value="Metadata"
+                   description="Sub-directory for metadata in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.resources_directory_name"
+                   value="Resources"
+                   description="Sub-directory for resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.trashcan_base_directory"
+                   value="/lat/corpora/cmdi_test/trashcan/"
+                   description="Path for deleted files in the archive"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.versioning_base_directory"
+                   value="/lat/corpora/cmdi_test/versioning/"
+                   description="Path for versioned files in the archive"
+                   override="false"/>
+
+
+        <Parameter name="nl.mpi.lamus.db.httproot"
+                   value="http://lux16.mpi.nl/cmdi_test/"
+                   description="Base for node http URL"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.db.httpsroot"
+                   value="https://lux16.mpi.nl/cmdi_test/"
+                   description="Base for node https URL"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.db.localroot"
+                   value="file:/lat/corpora/cmdi_test/"
+                   description="Base for node local URL"
+                   override="false"/>
+
+
+        <Parameter name="nl.mpi.lamus.mail.server"
+                   value="mailhost.mpi.nl"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.mail.from_address"
+                   value="lamus@mpi.nl"
+                   override="false"/>
+
+
+        <Parameter name="nl.mpi.lamus.manager.users"
+                   value="corpman@mpi.nl"
+                   override="false"/>
+
+
+        <Parameter name="nl.mpi.lamus.handle.prefix"
+                   value="11142"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.handle.proxy"
+                   value="hdl:"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.handle.admin_key_file"
+                   value="/lat/tools/cmdiHandleAssigner/admpriv.bin"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.handle.admin_user_handle"
+                   value="0.NA/11142"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.handle.admin_user_handle_index"
+                   value="300"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.handle.admin_handle_password"
+                   value="null"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_location"
+                   value="http://lux16.mpi.nl:8088/corpusstructure/api"
+                   description="Location of the corpusstructure service API"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_versioning_path"
+                   value="version"
+                   description="Path for the versioning service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_version_creation_path"
+                   value="create"
+                   description="Sub path for the versioning creation service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_crawler_path"
+                   value="crawler"
+                   description="Path for the crawler service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_crawler_start_path"
+                   value="start"
+                   description="Sub path for the crawler start service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_crawler_details_path"
+                   value="details"
+                   description="Sub path for the crawler details service"
+                   override="false"/>
+
+
+2.  Filters
+
+When building the application, a parameter is passed, indicating the server for which it is being compiled. This loads a few more properties from the filter file regarding the given server.
+So, whenever the a new server is used to deploy the application, a new filter file should be created.
+
+log.home=/lat/tomcat-corpman/logs
+shhaa.li=https://lux16.mpi.nl/Shibboleth.sso/Login
+shhaa.lo=https://lux16.mpi.nl/Shibboleth.sso/Logout
+
+
+3.  Frameworks
+
+3.1.    Spring
+
+Lamus2 uses Spring mostly for dependency injection.
+The chosen approach was the Java based configuration. So there are a few classes containing some bean definitions (usually under a package with "spring" in the name - for instance the class "LamusBeans"), but most of the beans are automatically created using annotations in the corresponding classes ("@Service" or "@Component"), while they are loaded into the depending classes using other annotations ("@Autowired" and "@Resource", for instance).
+The properties included in "properties" files, as well as the web container context parameters, are loaded in a beans class (most of them in "LamusProperties"), also using Spring.
+There are some beans which are defined multiple times with different values, depending on the usage. For instance, some beans require a value when the unit tests are being executed and a different one when the application is deployed in the server. For this purpose, a few Spring profiles are available. The profile for which a certain configuration file is used are defined with an annotation ("@Profile").
+
+In the server, a couple of parameters are also defined for this purpose. These are defined, at the moment, in the file "jkc#lamus2.xml".
+
+    <Parameter name="spring.profiles.default" value="cmdi-production" description="Default Spring profile, may be overridden using spring.profiles.active" />
+
+    <Parameter name="spring.profiles.active" value="production" />
+
+There are a few profiles mentioned throughout the code, but the most important are:
+
+    - production
+    - testing
+
+The remaining ones are used in less common situations or are still being developed:
+
+    - cmdi-adapter-csdb
+    - demoserver
+    - mock
+    - acceptance
+
+
+3.2.    Hibernate/JPA
+
+The JPA configuration is necessary in order to use the corpus structure API. More specifically, Lamus2 uses Hibernate to interact with it.
+This configuration is located in the 'wicket' project (war file), under "src/main/resources". In the war package, it's located in "WEB-INF/classes/META-INF/persistence.xml".
+
+At the moment it looks like this:
+
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="corpusstructure2-persistency" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+      <non-jta-data-source>java:/comp/env/jdbc/CSDB2</non-jta-data-source>
+      <class>nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveProperty</class>
+      <class>nl.mpi.archiving.corpusstructure.core.database.pojo.CorpusStructure</class>
+      <class>nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject</class>
+      <class>nl.mpi.archiving.corpusstructure.core.database.pojo.User</class>
+      <class>nl.mpi.archiving.corpusstructure.core.database.pojo.UserGroup</class>
+      <properties>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+        <property name="hibernate.show_sql" value="true" />
+      </properties>
+    </persistence-unit>
+</persistence>
+
+3.3.    Wicket
+
+This parameter is defined in "jkc#lamus2.xml" and indicates in which Wicket setting the application is being run.
+
+    <Parameter name="configuration" value="deployment" />

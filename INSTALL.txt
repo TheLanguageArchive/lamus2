@@ -1,0 +1,35 @@
+LAMUS2 INSTALLATION
+
+    SOURCES
+
+The LAMUS2 source code contains 3 modules: a jar package with most of the functionality,
+the main war which contains the web interface and a tar.gz archive that packs
+the war file (therefore it contains both modules, since the war contains the jar).
+It can be built using maven.
+
+To create all the artifacts for LAMUS2:
+  mvn package -DdeployTo=<name of the server where it will be deployed to>
+
+In order to, besides creating the artifacts, also install them into the local repository:
+  mvn install -DdeployTo=<name of the server where it will be deployed to>
+  
+The "deployTo" property should contain the name of the server where the war file is
+supposed to be deployed. The shibboleth configuration file (shhaa.xml) will be filtered
+accordingly (using a filter file with the corresponding name: "application.<server>.properties",
+under the directory "./src/main/filters").
+
+
+    COMPILED PACKAGE
+
+The war file (can be extracted from the tar.gz package) should be unpacked into
+the folder where the current version is usually located
+(i.e. in lux17, it would be "/lat/webapps/lamus2"). If the code was compiled for the server
+in question, no files need to be changed. If not, the configuration files (e.g. shhaa.xml)
+should be adapted.
+
+The files extracted from the war file need to be readable for the UID in which the tomcat is running.
+
+
+    CONFIGURATION
+Example configuration and some explanations can be found in the file named CONFIGURATION.
+
