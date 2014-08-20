@@ -251,7 +251,7 @@
         
         <dependency>
             <groupId>nl.mpi</groupId>
-            <artifactId>ams2-api</artifactId>
+            <artifactId>ams2_csdb2-api</artifactId>
             <version>2.0</version>
         </dependency>
         
