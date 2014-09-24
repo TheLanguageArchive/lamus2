@@ -21,6 +21,16 @@
 				<include>LICENSE*</include>
 			</includes>
 		</fileSet>
+                <fileSet>
+			<directory>${project.parent.basedir}/jar/src/main/sql</directory>
+			<outputDirectory>/scripts/</outputDirectory>
+			<includes>
+				<include>CreateDataSource.sql</include>
+				<include>CreateDataStructure.sql</include>
+				<include>DropDataSource.sql</include>
+                                <include>DropDataStructure.sql</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 
 	<moduleSets>
