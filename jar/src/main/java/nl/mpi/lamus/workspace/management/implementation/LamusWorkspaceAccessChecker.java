@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 
 import java.net.URI;
 import java.util.Collection;
+import javax.annotation.Resource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
@@ -37,6 +38,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +58,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureAccessChecker corpusStructureAccessChecker;
     
+    @Resource(name = "managerUsers")
+    private Collection<String> managerUsers;
+    
     
     @Autowired
     public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, ArchiveObjectDao aoDao,
@@ -73,7 +78,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
             throws NodeAccessException, NodeNotFoundException {
         
-        CorpusNode node = this.corpusStructureProvider.getNode(archiveNodeURI);
+        CorpusNode node = corpusStructureProvider.getNode(archiveNodeURI);
 
         if(node == null) {
             String message = "Archive node not found: " + archiveNodeURI;
@@ -140,7 +145,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     public void ensureUserHasAccessToWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException {
         
-        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
+        Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
         if(!userID.equals(workspace.getUserID())) {
             String errorMessage = "User with ID " + userID + " does not have access to workspace with ID " + workspaceID;
@@ -149,6 +154,21 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         }
         
         logger.debug("User " + userID + " has access to workspace " + workspaceID);
+    }
+
+    @Override
+    public void ensureUserCanDeleteWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        Workspace workspace = workspaceDao.getWorkspace(workspaceID);
+        
+        if(!userID.equals(workspace.getUserID()) && !managerUsers.contains(userID)) {
+            String errorMessage = "User with ID " + userID + " cannot delete workspace with ID " + workspaceID;
+            logger.error(errorMessage);
+            throw new WorkspaceAccessException(errorMessage, workspaceID, null);
+        }
+        
+        logger.debug("User " + userID + " can delete workspace " + workspaceID);
     }
     
     
@@ -162,7 +182,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     
     private void ensureNodeIsNotLocked(URI archiveNodeURI) throws NodeAccessException {
         if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
-            Collection<WorkspaceNode> lockedNodes = this.workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
+            Collection<WorkspaceNode> lockedNodes = workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
             int workspaceID = -1;
             if(lockedNodes.size() == 1) {
                 workspaceID = lockedNodes.iterator().next().getWorkspaceID();

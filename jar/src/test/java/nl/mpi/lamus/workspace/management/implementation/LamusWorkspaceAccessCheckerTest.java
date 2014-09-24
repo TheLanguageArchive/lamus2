@@ -49,6 +49,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -75,6 +76,8 @@ public class LamusWorkspaceAccessCheckerTest {
     @Mock private WorkspaceNode mockWorkspaceNode1;
     @Mock private WorkspaceNode mockWorkspaceNode2;
     
+    private final String managerUserID = "manager";
+    
     public LamusWorkspaceAccessCheckerTest() {
     }
 
@@ -88,9 +91,16 @@ public class LamusWorkspaceAccessCheckerTest {
     
     @Before
     public void setUp() {
+        
+        final Collection<String> managerUsers = new ArrayList();
+        managerUsers.add(managerUserID);
+
+        
         nodeAccessChecker = new LamusWorkspaceAccessChecker(
                 mockCorpusStructureProvider, mockArchiveObjectDao,
                 mockWorkspaceDao, mockCorpusStructureAccessChecker);
+        
+        ReflectionTestUtils.setField(nodeAccessChecker, "managerUsers", managerUsers);
     }
     
     @After
@@ -556,7 +566,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void throwsExceptionIfUserIsNotTheSame() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
+    public void doesNotHaveAccessToWorkspaceThrowsExceptionIfUserIsNotTheSame() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
@@ -592,7 +602,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void throwsExceptionIfWorkspaceIsNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException {
+    public void doesNotHaveAccessToWorkspaceThrowsExceptionIfWorkspaceIsNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException {
         
         final int workspaceID = 1;
         final String userID = "someUser";
@@ -611,4 +621,112 @@ public class LamusWorkspaceAccessCheckerTest {
         }
     }
     
+    @Test
+    public void userCanDeleteWorkspaceBecauseIsOwner() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final String wsUserID = "someUser";
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, wsUserID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        nodeAccessChecker.ensureUserCanDeleteWorkspace(wsUserID, workspaceID);
+    }
+    
+    @Test
+    public void userCanDeleteWorkspaceBecauseIsManager() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final String wsUserID = "someUser";
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, wsUserID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        nodeAccessChecker.ensureUserCanDeleteWorkspace(managerUserID, workspaceID);
+    }
+    
+    @Test
+    public void userCannotDeleteWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
+        
+        final String wsUserID = "someUser";
+        final String currentUserID = "someOtherUser";
+        
+        final int workspaceID = 1;
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, wsUserID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        final String expectedErrorMessage = "User with ID " + currentUserID + " cannot delete workspace with ID " + workspaceID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        try {
+            nodeAccessChecker.ensureUserCanDeleteWorkspace(currentUserID, workspaceID);
+            fail("exception should have been thrown");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void userCannotDeleteWorkspaceThrowsException() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final String wsUserID = "someUser";
+        final int workspaceID = 1;
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeAccessChecker.ensureUserCanDeleteWorkspace(wsUserID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
 }

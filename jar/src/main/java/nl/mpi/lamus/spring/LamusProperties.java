@@ -313,7 +313,7 @@ public class LamusProperties implements ServletContextAware {
         
         String mUsers = servletContext.getInitParameter("nl.mpi.lamus.manager.users");
         
-        Collection<String> collectionToReturn = new ArrayList<String>();
+        Collection<String> collectionToReturn = new ArrayList<>();
         
         String[] usernames = mUsers.split(",");
         if(usernames.length > 0) {

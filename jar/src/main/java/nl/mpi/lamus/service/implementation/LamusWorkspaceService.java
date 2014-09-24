@@ -105,7 +105,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         logger.debug("Triggered deletion of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
         
-        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
+        this.nodeAccessChecker.ensureUserCanDeleteWorkspace(userID, workspaceID);
         
         this.workspaceManager.deleteWorkspace(workspaceID);
     }

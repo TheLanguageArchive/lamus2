@@ -4,7 +4,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lat.ams.IAmsRemoteService;
 import org.slf4j.Logger;
@@ -66,7 +69,7 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
         
         logger.debug("Triggering access rights recalculation for node {}", topNode);
         
-        Collection<URI> targetURIs = new ArrayList<>();
+        Set<URI> targetURIs = new HashSet<>();
         targetURIs.add(topNode);
         
         amsRemoteService.triggerRightsRecalculation(targetURIs, true, true);
@@ -80,7 +83,7 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
         
         logger.debug("Triggering access rights recalculation for top node and versioned nodes");
         
-        Collection<URI> versionedNodes = new ArrayList<>();
+        Set<URI> versionedNodes = new LinkedHashSet<>();
         for(WorkspaceNodeReplacement replacement : nodeReplacements) {
             versionedNodes.add(replacement.getOldNodeURI());
         }
@@ -96,14 +99,14 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
         
         logger.debug("Triggering access rights recalculation for versioned nodes");
         
-        Collection<URI> versionedNodes = new ArrayList<>();
+        Set<URI> versionedNodes = new HashSet<>();
         for(WorkspaceNodeReplacement replacement : nodeReplacements) {
             versionedNodes.add(replacement.getOldNodeURI());
         }
         
         amsRemoteService.triggerRightsRecalculationForVersionedNodes(versionedNodes, true, false);
         
-        Collection<URI> targetURIs = new ArrayList<>();
+        Set<URI> targetURIs = new HashSet<>();
         targetURIs.add(topNode);
         
         amsRemoteService.triggerRightsRecalculation(targetURIs, false, true);

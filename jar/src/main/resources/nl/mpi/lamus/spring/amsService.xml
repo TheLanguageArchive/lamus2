@@ -17,7 +17,7 @@
     <tx:annotation-driven/>
     
     <bean id="amsRemoteService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-        <property name="serviceUrl" value="http://lux16.mpi.nl/am/ams2-cmdi/api/v1/httpinvoker/AmsRemoteService" />
+        <property name="serviceUrl" value="https://lux16.mpi.nl/am/ams2-cmdi/api/v1/httpinvoker/AmsRemoteService" />
         <property name="serviceInterface" value="nl.mpi.lat.ams.IAmsRemoteService" />
     </bean>
 

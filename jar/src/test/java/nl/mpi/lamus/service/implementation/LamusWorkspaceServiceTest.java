@@ -235,7 +235,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID);
         }});
         
@@ -252,7 +252,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+            oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID); will(throwException(expectedException));
         }});
         
         try {
@@ -273,7 +273,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+            oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID); will(throwException(expectedException));
         }});
         
         try {
@@ -294,7 +294,7 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID);
             oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID); will(throwException(expectedException));
         }});
         

@@ -20,7 +20,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lat.ams.IAmsRemoteService;
@@ -92,7 +95,7 @@ public class LamusAmsServiceBridgeTest {
         
         final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
         
-        final Collection<URI> recalculationTargetURIs = new ArrayList<>();
+        final Set<URI> recalculationTargetURIs = new HashSet<>();
         recalculationTargetURIs.add(workspaceRootNodeURI);
         
         context.checking(new Expectations() {{
@@ -115,7 +118,7 @@ public class LamusAmsServiceBridgeTest {
         final URI oldNodeURI_1 = new URI(UUID.randomUUID().toString());
         final URI oldNodeURI_2 = new URI(UUID.randomUUID().toString());
         
-        final Collection<URI> versionedNodes = new ArrayList<>();
+        final Set<URI> versionedNodes = new LinkedHashSet<>();
         versionedNodes.add(oldNodeURI_1);
         versionedNodes.add(oldNodeURI_2);
         
@@ -135,7 +138,7 @@ public class LamusAmsServiceBridgeTest {
         
         final URI topNode = new URI(UUID.randomUUID().toString());
         
-        final Collection<URI> recalculationTargetURIs = new ArrayList<>();
+        final Set<URI> recalculationTargetURIs = new HashSet<>();
         recalculationTargetURIs.add(topNode);
         
         final Collection<WorkspaceNodeReplacement> nodeReplacementsList = new ArrayList<>();
@@ -145,7 +148,7 @@ public class LamusAmsServiceBridgeTest {
         final URI oldNodeURI_1 = new URI(UUID.randomUUID().toString());
         final URI oldNodeURI_2 = new URI(UUID.randomUUID().toString());
         
-        final Collection<URI> versionedNodes = new ArrayList<>();
+        final Set<URI> versionedNodes = new HashSet<>();
         versionedNodes.add(oldNodeURI_1);
         versionedNodes.add(oldNodeURI_2);
         

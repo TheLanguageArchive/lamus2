@@ -57,4 +57,13 @@ public interface WorkspaceAccessChecker extends Serializable {
     public void ensureUserHasAccessToWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException;
 
+    /**
+     * Checks if the given user can delete the given workspace.
+     * This is true if the user is the owner of the workspace or
+     * if the user is a manager.
+     * @param userID ID of the user
+     * @param workspaceID  ID of the workspace
+     */
+    public void ensureUserCanDeleteWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException;
 }
