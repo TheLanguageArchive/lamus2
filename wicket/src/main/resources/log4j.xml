@@ -9,7 +9,7 @@
 	</layout> 
     </appender> 
     <appender name="logfile" class="org.apache.log4j.DailyRollingFileAppender"> 
-	<param name="File" value="${log.home}/lamus2.log"/> 
+	<param name="File" value="${catalina.base}/logs/lamus2.log"/> 
 	<layout class="org.apache.log4j.PatternLayout"> 
 	    <param name="ConversionPattern" value="%d %p [%c#%M:%L] - %m%n"/> 
 	</layout> 
@@ -63,11 +63,11 @@
     </logger>
     
     <logger name="org.springframework">
-        <level value="info" />
+        <level value="debug" />
     </logger>
     
     <logger name="org.hibernate">
-        <level value="info" />
+        <level value="debug" />
     </logger>
 
 <!--    <logger name="org.hibernate.sql">

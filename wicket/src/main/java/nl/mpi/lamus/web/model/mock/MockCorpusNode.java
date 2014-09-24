@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.tree.LinkedTreeNode;
@@ -43,6 +44,7 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
     private Date lastUpdate;
     private boolean isOnSite;
     private String format;
+    private CorpusNode olderVersion;
 
     public void setChildren(List<LinkedCorpusNode> children) {
 	this.children = children;
@@ -147,5 +149,14 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
     
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    @Override
+    public CorpusNode getOlderVersion() {
+        return olderVersion;
+    }
+    
+    public void setOlderVersion(CorpusNode olderVersion) {
+        this.olderVersion = olderVersion;
     }
 }
