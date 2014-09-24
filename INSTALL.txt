@@ -33,3 +33,14 @@ The files extracted from the war file need to be readable for the UID in which t
     CONFIGURATION
 Example configuration and some explanations can be found in the file named CONFIGURATION.
 
+
+    BOOTSTRAP
+
+The "lamus2" database and its structure are not created automatically, so if it's
+the first time the application is deployed to a server, this has to be done before
+running it.
+
+There are two SQL scripts which do this:
+"CreateDataSource.sql" creates the database, and "CreateDataStructure.sql" the tables.
+These scripts, together with the ones to drop the tables or the database, are
+provided in the tar.gz package, under the "scripts" directory.

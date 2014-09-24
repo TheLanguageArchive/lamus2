@@ -1,3 +1,9 @@
+lamus2-1.1-SNAPSHOT (2014-09-24)
+
+    Changes:
+        - DELETE WORKSPACE: In the management console, the manager is now able
+          to delete workspaces without being their owner.
+
 lamus2-1.0 (2014-08-20)
 
     First release
