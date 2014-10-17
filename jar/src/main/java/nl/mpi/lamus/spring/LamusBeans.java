@@ -25,7 +25,6 @@ import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.handle.util.implementation.HandleInfoRetrieverImpl;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
-import nl.mpi.lat.ams.IAmsRemoteService;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
-import org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean;
 
 /**
  *

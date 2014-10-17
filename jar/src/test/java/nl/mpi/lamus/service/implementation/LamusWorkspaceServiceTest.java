@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -67,6 +68,7 @@ public class LamusWorkspaceServiceTest {
     }};
     private WorkspaceService service;
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
+    @Mock private ArchivePidHelper mockArchivePidHelper;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
@@ -99,7 +101,8 @@ public class LamusWorkspaceServiceTest {
     @Before
     public void setUp() {
         service = new LamusWorkspaceService(
-                mockNodeAccessChecker, mockWorkspaceManager, mockWorkspaceDao,
+                mockNodeAccessChecker, mockArchivePidHelper,
+                mockWorkspaceManager, mockWorkspaceDao,
                 mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
                 mockWorkspaceNodeManager, mockNodeReplaceManager);
     }
@@ -145,12 +148,12 @@ public class LamusWorkspaceServiceTest {
     public void createWorkspaceThrowsNodeNotFoundException()
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("node:001");
         final String userID = "someUser";
         final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI, "access problem");
         
         context.checking(new Expectations() {{
-            oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI);
                 will(throwException(expectedException));
         }});
         
@@ -166,11 +169,13 @@ public class LamusWorkspaceServiceTest {
     public void createWorkspaceThrowsNodeAccessException()
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("node:001");
+        final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
         final String userID = "someUser";
         final NodeAccessException expectedException = new NodeAccessException("access problem", archiveNodeURI, null);
         
         context.checking(new Expectations() {{
+            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
                 will(throwException(expectedException));
         }});
@@ -188,14 +193,16 @@ public class LamusWorkspaceServiceTest {
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final int workspaceID = 10;
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("node:001");
+        final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
         final String userID = "someUser";
         final WorkspaceImportException expectedException = new WorkspaceImportException("some problem", workspaceID, null);
         
         context.checking(new Expectations() {{
+            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
-            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(throwException(expectedException));
+            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(throwException(expectedException));
         }});
         
         try {
@@ -210,16 +217,18 @@ public class LamusWorkspaceServiceTest {
     public void createWorkspaceSuccess()
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("node:001");
+        final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
         final String userID = "someUser";
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
+            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
-            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(returnValue(newWorkspace));
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeURI);

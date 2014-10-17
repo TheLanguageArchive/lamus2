@@ -24,8 +24,6 @@ import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -34,7 +32,6 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -63,9 +60,6 @@ public class AddedNodeExporter implements NodeExporter {
     private final MetadataAPI metadataAPI;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceTreeExporter workspaceTreeExporter;
-    private final NodeDataRetriever nodeDataRetriever;
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final NodeResolver nodeResolver;
     private final HandleManager handleManager;
     private final MetadataApiBridge metadataApiBridge;
     
@@ -73,17 +67,12 @@ public class AddedNodeExporter implements NodeExporter {
     
     public AddedNodeExporter(ArchiveFileLocationProvider aflProvider, WorkspaceFileHandler wsFileHandler,
             MetadataAPI mdAPI, WorkspaceDao wsDao, WorkspaceTreeExporter wsTreeExporter,
-            NodeDataRetriever nodeDataRetriever,
-            CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             HandleManager handleManager, MetadataApiBridge mdApiBridge) {
         this.archiveFileLocationProvider = aflProvider;
         this.workspaceFileHandler = wsFileHandler;
         this.metadataAPI = mdAPI;
         this.workspaceDao = wsDao;
         this.workspaceTreeExporter = wsTreeExporter;
-        this.nodeDataRetriever = nodeDataRetriever;
-        this.corpusStructureProvider = csProvider;
-        this.nodeResolver = nodeResolver;
         this.handleManager = handleManager;
         this.metadataApiBridge = mdApiBridge;
     }

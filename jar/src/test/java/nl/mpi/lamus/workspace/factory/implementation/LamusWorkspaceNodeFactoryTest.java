@@ -314,10 +314,36 @@ public class LamusWorkspaceNodeFactoryTest {
     }
     
     @Test
-    public void newExternalNodeFromArchive() throws MalformedURLException, URISyntaxException {
+    public void newExternalNodeFromArchiveWithPid() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final URI archiveURI = new URI(UUID.randomUUID().toString());
+        final URI archiveURI = new URI("node:001");
+        final URI archivePID = new URI("hdl:" + UUID.randomUUID().toString());
+        final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
+        final String displayValue = FilenameUtils.getName(archiveURL.getPath());
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        
+        WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(displayValue);
+        expectedNode.setTitle(displayValue);
+        expectedNode.setArchiveURI(archivePID);
+        expectedNode.setArchiveURL(archiveURL);
+        expectedNode.setOriginURL(archiveURL);
+        expectedNode.setType(nodeType);
+        expectedNode.setStatus(nodeStatus);
+        
+        WorkspaceNode retrievedNode = factory.getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, archivePID, archiveURL);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void newExternalNodeFromArchiveWithoutPid() throws MalformedURLException, URISyntaxException {
+        
+        final int workspaceID = 10;
+        final URI archiveURI = new URI("node:001");
         final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
         final String displayValue = FilenameUtils.getName(archiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
@@ -334,12 +360,10 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setStatus(nodeStatus);
         
         context.checking(new Expectations() {{
-            
-//            exactly(2).of(mockCorpusNode).getName(); will(returnValue(displayValue));
             oneOf(mockCorpusNode).getNodeURI(); will(returnValue(archiveURI));
         }});
         
-        WorkspaceNode retrievedNode = factory.getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, archiveURL);
+        WorkspaceNode retrievedNode = factory.getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, null, archiveURL);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
     }

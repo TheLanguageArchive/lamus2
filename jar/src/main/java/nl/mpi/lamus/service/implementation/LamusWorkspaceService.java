@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -54,6 +55,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceService.class);
 
     private final WorkspaceAccessChecker nodeAccessChecker;
+    private final ArchivePidHelper archivePidHelper;
     private final WorkspaceManager workspaceManager;
     protected final WorkspaceDao workspaceDao;
     private final WorkspaceUploader workspaceUploader;
@@ -61,11 +63,12 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceNodeManager workspaceNodeManager;
     private final LamusNodeReplaceManager nodeReplaceManager;
 
-    public LamusWorkspaceService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
-            WorkspaceDao wsDao, WorkspaceUploader wsUploader,
+    public LamusWorkspaceService(WorkspaceAccessChecker aChecker, ArchivePidHelper aPidHelper,
+            WorkspaceManager wsManager, WorkspaceDao wsDao, WorkspaceUploader wsUploader,
             WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager,
             LamusNodeReplaceManager topNodeReplaceManager) {
         this.nodeAccessChecker = aChecker;
+        this.archivePidHelper = aPidHelper;
         this.workspaceManager = wsManager;
         this.workspaceDao = wsDao;
         this.workspaceUploader = wsUploader;
@@ -87,13 +90,18 @@ public class LamusWorkspaceService implements WorkspaceService {
         if(userID == null || archiveNodeURI == null) {
             throw new IllegalArgumentException("Both userID and archiveNodeURI should not be null");
         }
+        
+        URI archiveUriToUse = this.archivePidHelper.getPidForNode(archiveNodeURI);
+        if(archiveUriToUse == null) {
+            archiveUriToUse = archiveNodeURI;
+        }
 
         this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
         
         //TODO what about the browser session? does it make sense to check for a workspace in the session? disconnect it?
         //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
         
-        return this.workspaceManager.createWorkspace(userID, archiveNodeURI);
+        return this.workspaceManager.createWorkspace(userID, archiveUriToUse);
     }
     
     /**

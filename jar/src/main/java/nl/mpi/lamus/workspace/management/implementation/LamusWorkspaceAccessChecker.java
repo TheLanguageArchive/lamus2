@@ -21,8 +21,7 @@ import javax.annotation.Resource;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
-import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
-import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -38,7 +37,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -54,7 +52,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceAccessChecker.class);    
 
     private final CorpusStructureProvider corpusStructureProvider;
-    private final ArchiveObjectDao archiveObjectDao;
+    private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureAccessChecker corpusStructureAccessChecker;
     
@@ -63,10 +61,10 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     
     
     @Autowired
-    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, ArchiveObjectDao aoDao,
+    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             WorkspaceDao workspaceDao, CorpusStructureAccessChecker csAccessChecker) {
         this.corpusStructureProvider = csProvider;
-        this.archiveObjectDao = aoDao;
+        this.nodeResolver = nodeResolver;
         this.workspaceDao = workspaceDao;
         this.corpusStructureAccessChecker = csAccessChecker;
     }
@@ -78,6 +76,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
             throws NodeAccessException, NodeNotFoundException {
         
+        //TODO Maybe this is not necessary anymore...
         CorpusNode node = corpusStructureProvider.getNode(archiveNodeURI);
 
         if(node == null) {
@@ -112,16 +111,17 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
             // if there was a way of checking just the leave nodes, it would be a bit easier
         
-        long nodeId = archiveObjectDao.select(archiveNodeURI).getId();
-        Collection<ArchiveObject> descendants = archiveObjectDao.selectDescendants(nodeId);
+        Collection<CorpusNode> descendants = corpusStructureProvider.getDescendantNodes(archiveNodeURI);
         
         logger.debug("Ensuring that the descendants of node '{}' (count = {}) are not locked and accessible to user {}", archiveNodeURI, descendants.size(), userID);
         
-        for(ArchiveObject descendant : descendants) {
-            if(descendant.isOnsite()) {
-                URI descendantURI = descendant.getCanonicalUri();
-                ensureWriteAccessToNode(userID, descendantURI);
-                ensureNodeIsNotLocked(descendantURI);
+        for(CorpusNode descendant : descendants) {
+            if(descendant.isOnSite()) {
+                
+                URI descendantPid = nodeResolver.getPID(descendant);
+                
+                ensureWriteAccessToNode(userID, descendantPid);
+                ensureNodeIsNotLocked(descendantPid);
             }
         }
         

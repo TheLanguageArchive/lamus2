@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 //@ComponentScan("nl.mpi.lamus")
 @Profile(value = {"cmdi-adapter-csdb"})
+@ImportResource("classpath:/config/adapter/csdb.xml")
 public class JndiDatabaseBeans {
     
     /**

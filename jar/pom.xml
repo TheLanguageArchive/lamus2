@@ -219,10 +219,16 @@
             <version>1.0.3-SNAPSHOT</version>
         </dependency>
         
-<!--        <dependency>
+        <dependency>
+            <groupId>nl.mpi.corpusstructure</groupId>
+            <artifactId>corpus-structure-2-adapter</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
             <groupId>nl.mpi</groupId>
-            <artifactId>ams2-war</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <artifactId>ams2</artifactId>
+            <version>1.5-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-fileupload</groupId>
@@ -236,10 +242,10 @@
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
-                <exclusion>
+<!--                <exclusion>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate</artifactId>
-                </exclusion>
+                </exclusion>-->
                 
                 <exclusion>
                     <groupId>net.handle</groupId>
@@ -247,13 +253,19 @@
                 </exclusion>
                 
             </exclusions>
+        </dependency>
+        
+<!--        <dependency>
+            <groupId>nl.mpi</groupId>
+            <artifactId>ams2.api</artifactId>
+            <version>1.5-SNAPSHOT</version>
         </dependency>-->
         
-        <dependency>
+<!--        <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>ams2_csdb2_uri.api</artifactId>
             <version>2.1-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
         
         <dependency>
             <groupId>nl.mpi</groupId>
@@ -263,7 +275,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>typechecker</artifactId>
-            <version>1.7.5-SNAPSHOT</version>
+            <version>1.7.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>
@@ -286,7 +298,7 @@
         
         
         <!-- CS Providers beans -->
-        <dependency>
+<!--        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>4.3.5.Final</version>
@@ -295,7 +307,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>4.3.5.Final</version>
-        </dependency>
+        </dependency>-->
         
 <!--        <dependency>
             <groupId>org.apache.openjpa</groupId>

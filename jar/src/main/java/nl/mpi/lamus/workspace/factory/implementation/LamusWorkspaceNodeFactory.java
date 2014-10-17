@@ -170,10 +170,10 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewExternalNodeFromArchive(int, nl.mpi.archiving.corpusstructure.core.CorpusNode, java.net.URL)
+     * @see WorkspaceNodeFactory#getNewExternalNodeFromArchive(int, nl.mpi.archiving.corpusstructure.core.CorpusNode, java.net.URI, java.net.URL)
      */
     @Override
-    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URL archiveURL) {
+    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URI archivePID, URL archiveURL) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
@@ -183,7 +183,13 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         String displayValue = FilenameUtils.getName(archiveURL.getPath());
         node.setName(displayValue);
         node.setTitle(displayValue);
-        node.setArchiveURI(archiveNode.getNodeURI());
+        
+        if(archivePID != null) {
+            node.setArchiveURI(archivePID);
+        } else {
+            node.setArchiveURI(archiveNode.getNodeURI());
+        }
+        
         node.setArchiveURL(archiveURL);
         node.setOriginURL(archiveURL);
         if(archiveURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?

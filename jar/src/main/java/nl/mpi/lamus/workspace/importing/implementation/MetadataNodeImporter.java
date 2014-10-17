@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.List;
 import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -136,7 +137,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
                 throwWorkspaceImportException(errorMessage, null);
             }
             
-            childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+//            childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+            URI childArchiveUrlUri = nodeResolver.getUrl(childCorpusNode, OutputFormat.CMDI);
+            childArchiveURL = childArchiveUrlUri.toURL();
             childName = childCorpusNode.getName();
             childOnSite = childCorpusNode.isOnSite();
             

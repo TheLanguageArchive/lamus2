@@ -29,7 +29,6 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
@@ -60,7 +59,6 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock HandleManagerImpl mockHandleMatcher;
-    @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
     
@@ -90,7 +88,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         workspaceUploadNodeMatcher = new LamusWorkspaceUploadNodeMatcher(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockHandleMatcher, mockWorkspaceDirectoryHandler,
+                mockHandleMatcher,
                 mockWorkspaceNodeFactory, mockWorkspaceDao);
     }
     
@@ -316,7 +314,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         nodesToCheck.add(mockSecondNode);
         
         //handle will not match the URI of the first node
-        final URI firstNodeURI = new URI(UUID.randomUUID().toString());
+        final URI firstNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String commonPath = "parent";
         final URL archiveUrlInDb = new URL("file:/archive/path/" + commonPath + "/child.txt");
         final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
@@ -347,8 +345,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(archiveUrlInDb));
-            
-            oneOf(mockWorkspaceNodeFactory).getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, archiveUrlInDb);
+
+            oneOf(mockWorkspaceNodeFactory).getNewExternalNodeFromArchive(workspaceID, mockCorpusNode, handleToMatch, archiveUrlInDb);
                 will(returnValue(mockSomeOtherNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(mockSomeOtherNode);
         }});

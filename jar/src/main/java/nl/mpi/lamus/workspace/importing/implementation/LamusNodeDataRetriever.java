@@ -31,7 +31,6 @@ import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
-import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
@@ -50,19 +49,16 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
-    private final MetadataAPI metadataAPI;
     private final FileTypeHandler fileTypeHandler;
     private TypecheckerConfiguration typecheckerConfiguration;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
     public LamusNodeDataRetriever(CorpusStructureProvider csProvider,
-        NodeResolver nodeResolver, MetadataAPI mAPI,
-        FileTypeHandler fileTypeHandler, TypecheckerConfiguration typecheckerConfiguration,
-        ArchiveFileHelper archiveFileHelper) {
+        NodeResolver nodeResolver, FileTypeHandler fileTypeHandler,
+        TypecheckerConfiguration typecheckerConfiguration, ArchiveFileHelper archiveFileHelper) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
-        this.metadataAPI = mAPI;
         this.fileTypeHandler = fileTypeHandler;
         this.typecheckerConfiguration = typecheckerConfiguration;
         this.archiveFileHelper = archiveFileHelper;

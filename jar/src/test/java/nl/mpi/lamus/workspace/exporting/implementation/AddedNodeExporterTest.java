@@ -27,8 +27,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -37,7 +35,6 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -80,12 +77,7 @@ public class AddedNodeExporterTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
-//    @Mock AmsBridge mockAmsBridge;
-    @Mock NodeDataRetriever mockNodeDataRetriever;
-    
-    @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock NodeResolver mockNodeResolver;
-    
+
     @Mock HandleManager mockHandleManager;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     
@@ -126,7 +118,7 @@ public class AddedNodeExporterTest {
     public void setUp() {
         addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
                 mockMetadataAPI, mockWorkspaceDao, mockWorkspaceTreeExporter,
-                mockNodeDataRetriever, mockCorpusStructureProvider, mockNodeResolver, mockHandleManager, mockMetadataApiBridge);
+                mockHandleManager, mockMetadataApiBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,

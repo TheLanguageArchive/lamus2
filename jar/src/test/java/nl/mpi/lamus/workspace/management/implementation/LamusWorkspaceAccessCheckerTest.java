@@ -27,8 +27,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
-import nl.mpi.archiving.corpusstructure.core.database.dao.ArchiveObjectDao;
-import nl.mpi.archiving.corpusstructure.core.database.pojo.ArchiveObject;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.CorpusStructureAccessChecker;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -64,14 +63,13 @@ public class LamusWorkspaceAccessCheckerTest {
     
     private WorkspaceAccessChecker nodeAccessChecker;
     @Mock private CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock private ArchiveObjectDao mockArchiveObjectDao;
+    @Mock private NodeResolver mockNodeResolver;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private CorpusStructureAccessChecker mockCorpusStructureAccessChecker;
     
     @Mock private CorpusNode mockCorpusNode;
-    @Mock private ArchiveObject mockArchiveObject;
-    @Mock private ArchiveObject mockArchiveObject_Descendant_1;
-    @Mock private ArchiveObject mockArchiveObject_Descendant_2;
+    @Mock private CorpusNode mockCorpusNode_Descendant_1;
+    @Mock private CorpusNode mockCorpusNode_Descendant_2;
     
     @Mock private WorkspaceNode mockWorkspaceNode1;
     @Mock private WorkspaceNode mockWorkspaceNode2;
@@ -97,7 +95,7 @@ public class LamusWorkspaceAccessCheckerTest {
 
         
         nodeAccessChecker = new LamusWorkspaceAccessChecker(
-                mockCorpusStructureProvider, mockArchiveObjectDao,
+                mockCorpusStructureProvider, mockNodeResolver,
                 mockWorkspaceDao, mockCorpusStructureAccessChecker);
         
         ReflectionTestUtils.setField(nodeAccessChecker, "managerUsers", managerUsers);
@@ -114,7 +112,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsUnknown() throws URISyntaxException, NodeAccessException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String expectedMessage = "Archive node not found: " + archiveNodeURI;
         
         context.checking(new Expectations() {{
@@ -134,7 +132,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsExternal() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String expectedMessage = "Node with URI '" + archiveNodeURI.toString() + "' is external";
         
         context.checking(new Expectations() {{
@@ -156,7 +154,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsNotMetadata() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String expectedMessage = "Selected node should be Metadata: " + archiveNodeURI;
         
         context.checking(new Expectations() {{
@@ -177,7 +175,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsNotFound() throws URISyntaxException, NodeNotFoundException, NodeAccessException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI);
         
         context.checking(new Expectations() {{
@@ -199,7 +197,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsNotAccessibleToUser() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String expectedMessage = "Node with URI '" + archiveNodeURI + "' is not writeable by user " + userID;
         
         context.checking(new Expectations() {{
@@ -224,7 +222,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final int workspaceID = 10;
         final String expectedMessage = "Node with URI '" + archiveNodeURI + "' is already locked by workspace " + workspaceID;
         
@@ -257,7 +255,7 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         final String expectedMessage = "Node with URI '" + archiveNodeURI + "' is already locked by multiple workspaces";
         
         final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
@@ -289,14 +287,13 @@ public class LamusWorkspaceAccessCheckerTest {
     public void cannotCreateWorkspaceIfDescendantNodeIsNotAccessibleToUser() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
         
         final String userID = "someUser";
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
+        final URI archiveNodeURI = new URI("hdl:" + UUID.randomUUID().toString());
         
-        final Collection<ArchiveObject> descendants = new ArrayList<>();
-        descendants.add(mockArchiveObject_Descendant_1);
+        final Collection<CorpusNode> descendants = new ArrayList<>();
+        descendants.add(mockCorpusNode_Descendant_1);
         
-        final URI archiveNodeURI_Descendant_1 = new URI(UUID.randomUUID().toString());
-        final String expectedMessage = "Node with URI '" + archiveNodeURI_Descendant_1 + "' is not writeable by user " + userID;
+        final URI corpusNodePID_Descendant_1 = new URI("hdl:" + UUID.randomUUID().toString());
+        final String expectedMessage = "Node with URI '" + corpusNodePID_Descendant_1 + "' is not writeable by user " + userID;
         
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
@@ -305,14 +302,12 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(descendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
             
             //loop
-            oneOf(mockArchiveObject_Descendant_1).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_1).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_1));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_1); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusNode_Descendant_1).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_1); will(returnValue(corpusNodePID_Descendant_1));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_1); will(returnValue(Boolean.FALSE));
         }});
         
         try {
@@ -321,7 +316,7 @@ public class LamusWorkspaceAccessCheckerTest {
         } catch(NodeAccessException ex) {
             assertTrue("Exception has a type different from expected", ex instanceof UnauthorizedNodeException);
             assertEquals("User ID different from expected", userID, ((UnauthorizedNodeException) ex).getUserID());
-            assertEquals("Node URI different from expected", archiveNodeURI_Descendant_1, ex.getNodeURI());
+            assertEquals("Node URI different from expected", corpusNodePID_Descendant_1, ex.getNodeURI());
             assertEquals("Message different from expected", expectedMessage, ex.getMessage());
         }
     }
@@ -331,14 +326,13 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
         
-        final Collection<ArchiveObject> descendants = new ArrayList<>();
-        descendants.add(mockArchiveObject_Descendant_1);
+        final Collection<CorpusNode> descendants = new ArrayList<>();
+        descendants.add(mockCorpusNode_Descendant_1);
         
-        final URI archiveNodeURI_Descendant_1 = new URI(UUID.randomUUID().toString());
+        final URI corpusNodePID_Descendant_1 = new URI("hdl:" + UUID.randomUUID().toString());
         final int workspaceID = 10;
-        final String expectedMessage = "Node with URI '" + archiveNodeURI_Descendant_1 + "' is already locked by workspace " + workspaceID;
+        final String expectedMessage = "Node with URI '" + corpusNodePID_Descendant_1 + "' is already locked by workspace " + workspaceID;
         
         final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
         lockedNodes.add(mockWorkspaceNode1);
@@ -350,17 +344,15 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(descendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
             
             //loop
-            oneOf(mockArchiveObject_Descendant_1).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_1).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_1));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_1); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI_Descendant_1); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusNode_Descendant_1).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_1); will(returnValue(corpusNodePID_Descendant_1));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_1); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).isNodeLocked(corpusNodePID_Descendant_1); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI_Descendant_1); will(returnValue(lockedNodes));
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(corpusNodePID_Descendant_1); will(returnValue(lockedNodes));
             oneOf(mockWorkspaceNode1).getWorkspaceID(); will(returnValue(workspaceID));
         }});
         
@@ -370,7 +362,7 @@ public class LamusWorkspaceAccessCheckerTest {
         } catch(NodeAccessException ex) {
             assertTrue("Exception has a type different from expected", ex instanceof LockedNodeException);
             assertEquals("Workspace ID different from expected", workspaceID, ((LockedNodeException) ex).getWorkspaceID());
-            assertEquals("Node URI different from expected", archiveNodeURI_Descendant_1, ex.getNodeURI());
+            assertEquals("Node URI different from expected", corpusNodePID_Descendant_1, ex.getNodeURI());
             assertEquals("Message different from expected", expectedMessage, ex.getMessage());
         }
     }
@@ -380,16 +372,15 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
         
-        final Collection<ArchiveObject> descendants = new ArrayList<>();
-        descendants.add(mockArchiveObject_Descendant_1);
-        descendants.add(mockArchiveObject_Descendant_2);
+        final Collection<CorpusNode> descendants = new ArrayList<>();
+        descendants.add(mockCorpusNode_Descendant_1);
+        descendants.add(mockCorpusNode_Descendant_2);
         
-        final URI archiveNodeURI_Descendant_1 = new URI(UUID.randomUUID().toString());
-        final URI archiveNodeURI_Descendant_2 = new URI(UUID.randomUUID().toString());
+        final URI corpusNodePID_Descendant_1 = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI corpusNodePID_Descendant_2 = new URI("hdl:" + UUID.randomUUID().toString());
         final int workspaceID = 10;
-        final String expectedMessage = "Node with URI '" + archiveNodeURI_Descendant_2 + "' is already locked by workspace " + workspaceID;
+        final String expectedMessage = "Node with URI '" + corpusNodePID_Descendant_2 + "' is already locked by workspace " + workspaceID;
         
         final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
         lockedNodes.add(mockWorkspaceNode2);
@@ -401,22 +392,20 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(descendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
             
             //loop
-            oneOf(mockArchiveObject_Descendant_1).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_1).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_1));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_1); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI_Descendant_1); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusNode_Descendant_1).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_1); will(returnValue(corpusNodePID_Descendant_1));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_1); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).isNodeLocked(corpusNodePID_Descendant_1); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObject_Descendant_2).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_2).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_2));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_2); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI_Descendant_2); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusNode_Descendant_2).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_2); will(returnValue(corpusNodePID_Descendant_2));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_2); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).isNodeLocked(corpusNodePID_Descendant_2); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI_Descendant_2); will(returnValue(lockedNodes));
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(corpusNodePID_Descendant_2); will(returnValue(lockedNodes));
             oneOf(mockWorkspaceNode2).getWorkspaceID(); will(returnValue(workspaceID));
         }});
         
@@ -426,7 +415,7 @@ public class LamusWorkspaceAccessCheckerTest {
         } catch(NodeAccessException ex) {
             assertTrue("Exception has a type different from expected", ex instanceof LockedNodeException);
             assertEquals("Workspace ID different from expected", workspaceID, ((LockedNodeException) ex).getWorkspaceID());
-            assertEquals("Node URI different from expected", archiveNodeURI_Descendant_2, ex.getNodeURI());
+            assertEquals("Node URI different from expected", corpusNodePID_Descendant_2, ex.getNodeURI());
             assertEquals("Message different from expected", expectedMessage, ex.getMessage());
         }
     }
@@ -436,13 +425,12 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
         
-        final Collection<ArchiveObject> descendants = new ArrayList<>();
-        descendants.add(mockArchiveObject_Descendant_1);
+        final Collection<CorpusNode> descendants = new ArrayList<>();
+        descendants.add(mockCorpusNode_Descendant_1);
         
-        final URI archiveNodeURI_Descendant_1 = new URI(UUID.randomUUID().toString());
-        final String expectedMessage = "Node with URI '" + archiveNodeURI_Descendant_1 + "' is already locked by multiple workspaces";
+        final URI corpusNodePID_Descendant_1 = new URI(UUID.randomUUID().toString());
+        final String expectedMessage = "Node with URI '" + corpusNodePID_Descendant_1 + "' is already locked by multiple workspaces";
         
         final Collection<WorkspaceNode> lockedNodes = new ArrayList<>();
         lockedNodes.add(mockWorkspaceNode1);
@@ -455,17 +443,15 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(descendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
             
             //loop
-            oneOf(mockArchiveObject_Descendant_1).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_1).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_1));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_1); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI_Descendant_1); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusNode_Descendant_1).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_1); will(returnValue(corpusNodePID_Descendant_1));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_1); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).isNodeLocked(corpusNodePID_Descendant_1); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI_Descendant_1); will(returnValue(lockedNodes));
+            oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(corpusNodePID_Descendant_1); will(returnValue(lockedNodes));
         }});
         
         try {
@@ -474,7 +460,7 @@ public class LamusWorkspaceAccessCheckerTest {
         } catch(NodeAccessException ex) {
             assertTrue("Exception has a type different from expected", ex instanceof LockedNodeException);
             assertEquals("Workspace ID different from expected", -1, ((LockedNodeException) ex).getWorkspaceID());
-            assertEquals("Node URI different from expected", archiveNodeURI_Descendant_1, ex.getNodeURI());
+            assertEquals("Node URI different from expected", corpusNodePID_Descendant_1, ex.getNodeURI());
             assertEquals("Message different from expected", expectedMessage, ex.getMessage());
         }
     }
@@ -484,9 +470,8 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
         
-        final Collection<ArchiveObject> noDescendants = new ArrayList<>();
+        final Collection<CorpusNode> noDescendants = new ArrayList<>();
         
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
@@ -495,9 +480,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(noDescendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(noDescendants));
         }});
         
         nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
@@ -508,13 +491,12 @@ public class LamusWorkspaceAccessCheckerTest {
         
         final String userID = "someUser";
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final long archiveNodeID = 10;
         
-        final Collection<ArchiveObject> descendants = new ArrayList<>();
-        descendants.add(mockArchiveObject_Descendant_1);
-        descendants.add(mockArchiveObject_Descendant_2);
+        final Collection<CorpusNode> descendants = new ArrayList<>();
+        descendants.add(mockCorpusNode_Descendant_1);
+        descendants.add(mockCorpusNode_Descendant_2);
         
-        final URI archiveNodeURI_Descendant_2 = new URI(UUID.randomUUID().toString());
+        final URI corpusNodePID_Descendant_2 = new URI(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
@@ -523,17 +505,15 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObjectDao).select(archiveNodeURI); will(returnValue(mockArchiveObject));
-            oneOf(mockArchiveObject).getId(); will(returnValue(archiveNodeID));
-            oneOf(mockArchiveObjectDao).selectDescendants(archiveNodeID); will(returnValue(descendants));
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
             
             //loop
-            oneOf(mockArchiveObject_Descendant_1).isOnsite(); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusNode_Descendant_1).isOnSite(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockArchiveObject_Descendant_2).isOnsite(); will(returnValue(Boolean.TRUE));
-            oneOf(mockArchiveObject_Descendant_2).getCanonicalUri(); will(returnValue(archiveNodeURI_Descendant_2));
-            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeURI_Descendant_2); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI_Descendant_2); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusNode_Descendant_2).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode_Descendant_2); will(returnValue(corpusNodePID_Descendant_2));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, corpusNodePID_Descendant_2); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).isNodeLocked(corpusNodePID_Descendant_2); will(returnValue(Boolean.FALSE));
         }});
         
         nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);

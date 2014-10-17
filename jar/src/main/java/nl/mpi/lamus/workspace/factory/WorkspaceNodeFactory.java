@@ -97,8 +97,9 @@ public interface WorkspaceNodeFactory {
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
      * @param archiveNode CorpusNode object corresponding to the archive node
+     * @param archivePID PID of the node in the archive
      * @param archiveURL URL of the node in the archive
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URL archiveURL);
+    public WorkspaceNode getNewExternalNodeFromArchive(int workspaceID, CorpusNode archiveNode, URI archivePID, URL archiveURL);
 }

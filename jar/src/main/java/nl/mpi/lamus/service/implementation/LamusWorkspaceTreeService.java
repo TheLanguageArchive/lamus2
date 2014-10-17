@@ -17,6 +17,7 @@ package nl.mpi.lamus.service.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -40,10 +41,10 @@ import org.springframework.stereotype.Service;
 public class LamusWorkspaceTreeService extends LamusWorkspaceService implements WorkspaceTreeService {
 
     @Autowired
-    public LamusWorkspaceTreeService(WorkspaceAccessChecker aChecker, WorkspaceManager wsManager,
+    public LamusWorkspaceTreeService(WorkspaceAccessChecker aChecker, ArchivePidHelper aPidHelper, WorkspaceManager wsManager,
             WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager,
             WorkspaceNodeManager wsnManager, LamusNodeReplaceManager topNodeReplaceManager) {
-        super(aChecker, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager, topNodeReplaceManager);
+        super(aChecker, aPidHelper, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager, topNodeReplaceManager);
     }
     
     /**

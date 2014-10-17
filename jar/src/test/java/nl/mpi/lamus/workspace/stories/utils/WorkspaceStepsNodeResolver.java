@@ -24,6 +24,7 @@ import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.service.BaseNodeResolver;
 //import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIAdapterNodeResolver;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 //import nl.mpi.corpusstructure.ArchiveAccessContext;
 //import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.util.OurURL;
@@ -72,6 +73,16 @@ public class WorkspaceStepsNodeResolver extends BaseNodeResolver implements Seri
 
     @Override
     public URI getPID(CorpusNode node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getId(CorpusNode node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public URI getUrl(CorpusNode node, OutputFormat format) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

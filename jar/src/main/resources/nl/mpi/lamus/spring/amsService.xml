@@ -12,13 +12,13 @@
 
           profile="production, cmdi-adapter-csdb, demoserver">
 
-    <context:annotation-config />
+<!--    <context:annotation-config />
     
     <tx:annotation-driven/>
     
     <bean id="amsRemoteService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
         <property name="serviceUrl" value="https://lux16.mpi.nl/am/ams2-cmdi/api/v1/httpinvoker/AmsRemoteService" />
         <property name="serviceInterface" value="nl.mpi.lat.ams.IAmsRemoteService" />
-    </bean>
+    </bean>-->
 
 </beans>

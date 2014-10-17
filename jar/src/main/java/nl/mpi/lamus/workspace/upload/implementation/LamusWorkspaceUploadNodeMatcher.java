@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -26,11 +25,9 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
-import nl.mpi.metadata.api.model.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +46,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     private CorpusStructureProvider corpusStructureProvider;
     private NodeResolver nodeResolver;
     private HandleManagerImpl handleMatcher;
-    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     private WorkspaceNodeFactory workspaceNodeFactory;
     private WorkspaceDao workspaceDao;
     
@@ -57,12 +53,11 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Autowired
     public LamusWorkspaceUploadNodeMatcher(
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            HandleManagerImpl handleMatcher, WorkspaceDirectoryHandler wsDirectoryHandler,
+            HandleManagerImpl handleMatcher,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.handleMatcher = handleMatcher;
-        this.workspaceDirectoryHandler = wsDirectoryHandler;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
     }
@@ -132,7 +127,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             
         if(referenceCorpusNode != null) { // match was not found but node exists in archive
             
-            WorkspaceNode newNode = workspaceNodeFactory.getNewExternalNodeFromArchive(workspaceID, referenceCorpusNode, referenceUrl);
+            WorkspaceNode newNode = workspaceNodeFactory.getNewExternalNodeFromArchive(workspaceID, referenceCorpusNode, handle, referenceUrl);
             workspaceDao.addWorkspaceNode(newNode);
             return newNode;
         }
@@ -152,10 +147,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
         
         try {
             validUrl = uri.toURL();
-        } catch(MalformedURLException ex) {
-            logger.warn(ex.getMessage(), ex);
-            return null;
-        } catch(IllegalArgumentException ex) {
+        } catch( MalformedURLException | IllegalArgumentException ex) {
             logger.warn(ex.getMessage(), ex);
             return null;
         }

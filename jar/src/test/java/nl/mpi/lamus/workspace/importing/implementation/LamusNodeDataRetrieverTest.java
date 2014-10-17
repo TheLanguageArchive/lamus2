@@ -35,7 +35,6 @@ import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -88,7 +87,6 @@ public class LamusNodeDataRetrieverTest {
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
-    @Mock MetadataAPI mockMetadataAPI;
     @Mock FileTypeHandler mockFileTypeHandler;
     @Mock TypecheckerConfiguration mockTypecheckerConfiguration;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
@@ -119,8 +117,7 @@ public class LamusNodeDataRetrieverTest {
     public void setUp() {
         testNodeDataRetriever = new LamusNodeDataRetriever(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockMetadataAPI, mockFileTypeHandler,
-                mockTypecheckerConfiguration, mockArchiveFileHelper);
+                mockFileTypeHandler, mockTypecheckerConfiguration, mockArchiveFileHelper);
     }
     
     @After
