@@ -45,6 +45,7 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
     private boolean isOnSite;
     private String format;
     private CorpusNode olderVersion;
+    private CorpusNode newerVersion;
 
     public void setChildren(List<LinkedCorpusNode> children) {
 	this.children = children;
@@ -158,5 +159,14 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
     
     public void setOlderVersion(CorpusNode olderVersion) {
         this.olderVersion = olderVersion;
+    }
+
+    @Override
+    public CorpusNode getNewerVersion() {
+        return newerVersion;
+    }
+    
+    public void setNewerVersion(CorpusNode newerVersion) {
+        this.newerVersion = newerVersion;
     }
 }

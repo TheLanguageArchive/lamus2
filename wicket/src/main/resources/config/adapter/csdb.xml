@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd"
+
+          profile="cmdi-adapter-csdb">
+
+    <context:annotation-config />
+    
+    <!-- CSDB factory for CorpusStructureAPI adapter -->
+    <bean id="csdbFactory" class="nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory">
+        <constructor-arg value="java:comp/env/jdbc/CSDB3" />
+        
+        
+        
+        <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
+        
+        
+        
+        
+    </bean>
+
+    <!-- Corpus structure provider created from factory -->
+    <bean id="corpusStructureProvider" factory-bean="csdbFactory" factory-method="createCorpusStructureProvider" />
+
+    <!-- Access info provider (also adapter) -->
+    <bean id="accessInfoProvider" factory-bean="csdbFactory" factory-method="createAccessInfoProvider" />
+
+    <!-- Node resolver that can do smart things with the 'node:xyz' URIs returned from the adapater corpus structure provider -->
+    <bean id="nodeResolver" factory-bean="csdbFactory" factory-method="createNodeResolver" />
+
+    <bean id="translator" class="nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter">
+        
+        
+        
+        
+        <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
+        
+        
+        
+        
+    </bean>
+    
+    
+    
+    
+</beans>

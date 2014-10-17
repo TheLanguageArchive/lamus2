@@ -140,7 +140,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     
-    <filter>
+<!--    <filter>
         <filter-name>OpenEntityManagerInViewFilter</filter-name>
         <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
         <init-param>
@@ -163,7 +163,7 @@
     <filter-mapping>
         <filter-name>OpenEntityManagerInViewFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping>-->
     
     <filter>
 	<filter-name>wicket.lamus2</filter-name>
@@ -179,7 +179,7 @@
     </filter-mapping>
     
     <resource-ref>
-	<res-ref-name>jdbc/CSDB</res-ref-name>
+	<res-ref-name>jdbc/CSDB3</res-ref-name>
 	<res-type>javax.sql.DataSource</res-type>
 	<res-auth>Container</res-auth>
 	<res-sharing-scope>Shareable</res-sharing-scope>
