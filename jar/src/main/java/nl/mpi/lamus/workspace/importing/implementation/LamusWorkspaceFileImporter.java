@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -55,20 +54,21 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
     }
 
     /**
-     * @see WorkspaceFileImporter#importMetadataFileToWorkspace(java.net.URL, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
+     * @see WorkspaceFileImporter#importMetadataFileToWorkspace(java.io.File,
+     *      nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
+    public void importMetadataFileToWorkspace(File archiveFile, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
             throws MalformedURLException, IOException, TransformerException, MetadataException {
         
-        logger.debug("Importing file into workspace; fileUrl: " + archiveNodeURL + "; workspaceID: " + workspaceNode.getWorkspaceID());
+        logger.debug("Importing file into workspace; archive file: " + archiveFile.getAbsolutePath() + "; workspaceID: " + workspaceNode.getWorkspaceID());
         
-	File nodeFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, workspaceNode);
-	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeFile);
+	File workspaceFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveFile, workspaceNode);
+	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(workspaceFile);
 
         metadataAPI.writeMetadataDocument(metadataDocument, streamResult);
         
-        workspaceNode.setWorkspaceURL(nodeFile.toURI().toURL());
+        workspaceNode.setWorkspaceURL(workspaceFile.toURI().toURL());
         this.workspaceDao.updateNodeWorkspaceURL(workspaceNode);
     }
 }

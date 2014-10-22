@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -58,10 +58,10 @@ public interface NodeDataRetriever {
     /**
      * Decides if a resource should be typechecked (depending on its location and size).
      * @param resourceReference Reference to the resource, from the parent metadata file
-     * @param resourceOurURL URL with the actual location of the resource
+     * @param resourceFile File object referring to the actual location of the resource
      * @return true if resource should be typechecked
      */
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceOurURL);
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile);
     
     /**
      * Invokes typechecking for the given resource.
@@ -70,16 +70,21 @@ public interface NodeDataRetriever {
      */
     public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException;
     
-    //TODO Should this replace the other method???
-    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws IOException;
+    /**
+     * Invokes typechecking for the given resource.
+     * @param resourceInputStream InputStream of the resource
+     * @param resourceFilename Filename of the resource
+     * @return results of the typechecker
+     */
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
     
     /**
      * Verifies the results of the typechecker.
-     * @param resourceURL URL of the resource
+     * @param resourceFile File object referring to the resource
      * @param resourceReference Reference to the resource, from the parent metadata file
      * @param typecheckedResults Object containing the result of the typechecker
      */
-    public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults);
+    public void verifyTypecheckedResults(File resourceFile, Reference resourceReference, TypecheckedResults typecheckedResults);
     
     /**
      * @param urlToCheckInConfiguration URL of the archive branch for which the configuration has to be checked (top node of the workspace)

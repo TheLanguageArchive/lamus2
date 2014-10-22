@@ -16,7 +16,6 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -79,49 +78,49 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
     
     /**
-     * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, nl.mpi.util.OurURL, int)
+     * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, java.io.File)
      */
     @Override
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, OurURL resourceOurURL) {
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile) {
         
         // if not onsite, don't use typechecker
         boolean performTypeCheck = true;
-        if(!archiveFileHelper.isUrlLocal(resourceOurURL)) {
-            
-            //TODO is this call supposed to be like this?
-            fileTypeHandler.setValues(resourceReference.getMimetype());
-            
-            //TODO change URID for the link in the file that is copied
-//            childLink.setURID("NONE"); // flag resource as not on site
-            
-            performTypeCheck = false;
-        } else {
-                File resFile = new File(resourceOurURL.getPath());
+//        if(!archiveFileHelper.isUrlLocal(resourceOurURL)) {
+//            
+//            //TODO is this call supposed to be like this?
+//            fileTypeHandler.setValues(resourceReference.getMimetype());
+//            
+//            //TODO change URID for the link in the file that is copied
+////            childLink.setURID("NONE"); // flag resource as not on site
+//            
+//            performTypeCheck = false;
+//        } else {
+//                File resFile = new File(resourceOurURL.getPath());
                 //TODO check if file is larger than the checker limit
                     // if so, do not typecheck
-                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resFile)) { // length==0 if !exists, no error
+                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resourceFile)) { // length==0 if !exists, no error
                     
                     // skip checks for big files if from archive
-                    if(archiveFileHelper.isFileInOrphansDirectory(resFile)) {
+                    if(archiveFileHelper.isFileInOrphansDirectory(resourceFile)) {
                         // really skip checks: no orphan either
                         performTypeCheck = false;
                         logger.debug("ResourceNodeImporter.importNode: Type specified in link " + resourceReference.getMimetype() +
-                            " trusted without checks for big (" + resFile.length() + " bytes) file from archive: " + resFile);
+                            " trusted without checks for big (" + resourceFile.length() + " bytes) file from archive: " + resourceFile);
                         
                         //TODO is this call supposed to be like this?
                         fileTypeHandler.setValues(resourceReference.getMimetype());
                     } else {
                         // will take a while, so log that we did not get stuck
-                        if (resFile.length() > (1024*1024)) { // can differ from recheckLimit
+                        if (resourceFile.length() > (1024*1024)) { // can differ from recheckLimit
                             logger.debug("ResourceNodeImporter.importNode: Check for 'big' orphan (" +
-                                    resFile.length() + " bytes) may take some time: " + resFile);
+                                    resourceFile.length() + " bytes) may take some time: " + resourceFile);
                         // small orphans are always checked, but without logging
                         }
                     }
                 } // else not too big, just check again
                 
 //            }
-        }
+//        }
         
         return performTypeCheck;
     }
@@ -154,20 +153,22 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
      * @see NodeDataRetriever#triggerResourceFileCheck(java.io.InputStream, java.lang.String)
      */
     @Override
-    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws IOException {
+    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException {
         
         fileTypeHandler.checkType(resourceInputStream, resourceFilename, null);
         
         return fileTypeHandler.getTypecheckedResults();
     }
     
-    //TODO review this method
+    
+    //TODO TEST this method
     
     /**
-     * @see NodeDataRetriever#verifyTypecheckedResults(nl.mpi.util.OurURL, nl.mpi.metadata.api.model.Reference, nl.mpi.lamus.typechecking.TypecheckedResults)
+     * @see NodeDataRetriever#verifyTypecheckedResults(java.io.File,
+     *      nl.mpi.metadata.api.model.Reference, nl.mpi.lamus.typechecking.TypecheckedResults)
      */
     @Override
-    public void verifyTypecheckedResults(OurURL resourceURL, Reference resourceReference, TypecheckedResults typecheckedResults) {
+    public void verifyTypecheckedResults(File resourceFile, Reference resourceReference, TypecheckedResults typecheckedResults) {
         
         String resourceReferenceMimetype = resourceReference.getMimetype();
         String resourceCheckedMimetype = typecheckedResults.getCheckedMimetype();
@@ -175,19 +176,19 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         if(typecheckedResults.isTypeUnspecified() && resourceReferenceMimetype != null) {
             //TODO WARN
             logger.warn("ResourceNodeImporter.importNode: Unrecognized file contents, assuming format " + resourceReferenceMimetype +
-                    " as specified in metadata file for file: " + resourceURL);
+                    " as specified in metadata file for file: " + resourceFile.getAbsolutePath());
             logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
-                    fileTypeHandler.getAnalysis() + " for: " + resourceURL);
+                    fileTypeHandler.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
         } else if(!resourceCheckedMimetype.equals(resourceReferenceMimetype)) {
             //TODO do stuff... WARN
             if (resourceReferenceMimetype != null) {
                 logger.warn("ResourceNodeImporter.importNode: Metadata file claimed format " + resourceReferenceMimetype + " but contents are " +
-                    fileTypeHandler.getMimetype() + " for file: " + resourceURL);
+                    fileTypeHandler.getMimetype() + " for file: " + resourceFile.getAbsolutePath());
 
                 //TODO if "un", WARN
                 if (resourceReferenceMimetype.startsWith("Un")) {
                     logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
-                        fileTypeHandler.getAnalysis() + " for: " + resourceURL);
+                        fileTypeHandler.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
                 }
             }
         }

@@ -424,7 +424,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -495,7 +495,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processOneUploadedMetadataFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -570,7 +570,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -677,7 +677,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -728,7 +728,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
@@ -790,7 +790,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException {
+    public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final int workspaceID = 1;
         final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);

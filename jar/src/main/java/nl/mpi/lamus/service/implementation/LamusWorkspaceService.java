@@ -329,7 +329,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, WorkspaceException {
+            throws IOException, TypeCheckerException, WorkspaceException {
         
         logger.debug("Triggered processing of uploaded files; userID: " + userID + "; workspaceID: " + workspaceID);
         

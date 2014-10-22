@@ -99,6 +99,7 @@ public class LamusNodeDataRetrieverTest {
     @Mock CorpusNode mockCorpusNode;
     @Mock WorkspaceNode mockWorkspaceNode;
     
+    @Mock File mockFile;
     @Mock InputStream mockInputStream;
     @Mock File mockTopWsFile;
     
@@ -165,35 +166,35 @@ public class LamusNodeDataRetrieverTest {
     @Test
     public void resourceToBeTypechecked() throws MalformedURLException {
         
-        final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
-        final File resourceFile = new File(resourceURL.getPath());
+//        final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
+//        final File resourceFile = new File(resourceURL.getPath());
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(with(equal(resourceFile))); will(returnValue(false));
+//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
+            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(false));
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
+        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertTrue("Result should be true", result);
     }
     
-    @Test
-    public void resourceNotOnSite() throws MalformedURLException {
-        
-        final OurURL resourceURL = new OurURL("http://some.uri/filename.txt");
-        final String resourceMimetype = "text/plain";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(false));
-            oneOf(mockReferenceWithHandle).getMimetype(); will(returnValue(resourceMimetype));
-            oneOf(mockFileTypeHandler).setValues(resourceMimetype);
-        }});
-        
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
-        assertFalse("Result should be false", result);
-    }
+//    @Test
+//    public void resourceNotOnSite() throws MalformedURLException {
+//        
+//        final OurURL resourceURL = new OurURL("http://some.uri/filename.txt");
+//        final String resourceMimetype = "text/plain";
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(false));
+//            oneOf(mockReferenceWithHandle).getMimetype(); will(returnValue(resourceMimetype));
+//            oneOf(mockFileTypeHandler).setValues(resourceMimetype);
+//        }});
+//        
+//        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
+//        assertFalse("Result should be false", result);
+//    }
     
     @Test
     public void resourceOverSizeLimitInOrphansDirectory() throws MalformedURLException {
@@ -201,17 +202,19 @@ public class LamusNodeDataRetrieverTest {
         final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
         final File resourceFile = new File(resourceURL.getPath());
         final String resourceMimetype = "text/plain";
+        final long fileLength = Long.MAX_VALUE;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(with(equal(resourceFile))); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(resourceFile); will(returnValue(true));
+//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
+            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(true));
+            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(mockFile); will(returnValue(true));
             exactly(2).of(mockReferenceWithHandle).getMimetype(); will(returnValue(resourceMimetype));
+            oneOf(mockFile).length(); will(returnValue(fileLength));
             oneOf(mockFileTypeHandler).setValues(resourceMimetype);
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
+        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertFalse("Result should be false", result);
     }
     
@@ -221,15 +224,17 @@ public class LamusNodeDataRetrieverTest {
         final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
         final File resourceFile = new File(resourceURL.getPath());
         final String resourceMimetype = "text/plain";
+        final long fileLength = Long.MAX_VALUE;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(with(equal(resourceFile))); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(resourceFile); will(returnValue(false));
+//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
+            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(true));
+            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(mockFile); will(returnValue(false));
+            exactly(2).of(mockFile).length(); will(returnValue(fileLength));
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
+        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertTrue("Result should be true", result);
     }
     
@@ -250,13 +255,8 @@ public class LamusNodeDataRetrieverTest {
         assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
     }
     
-    //TODO test remaining method
-    //TODO Is this really necessary?
-    
-    
-    
     @Test
-    public void testTriggerFileStreamCheck() throws IOException {
+    public void testTriggerFileStreamCheck() throws TypeCheckerException {
         
         final String filename = "file.txt";
         
@@ -271,22 +271,22 @@ public class LamusNodeDataRetrieverTest {
     }
 
     @Test
-    public void testTriggerFileStreamCheckThrowsException() throws IOException {
+    public void testTriggerFileStreamCheckThrowsException() throws TypeCheckerException {
         
         final String filename = "file.txt";
-        final IOException ioException = new IOException("some error message");
+        final TypeCheckerException expectedException = new TypeCheckerException("some error message", new IOException("some cause"));
         
         context.checking(new Expectations() {{
             
             oneOf(mockFileTypeHandler).checkType(mockInputStream, filename, null);
-                will(throwException(ioException));
+                will(throwException(expectedException));
         }});
         
         try {
             testNodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
             fail("An exception should have been thrown");
-        } catch(IOException ex) {
-            assertEquals("Exception thrown different from expected", ioException, ex);
+        } catch(TypeCheckerException ex) {
+            assertEquals("Exception thrown different from expected", expectedException, ex);
         }
         
     }

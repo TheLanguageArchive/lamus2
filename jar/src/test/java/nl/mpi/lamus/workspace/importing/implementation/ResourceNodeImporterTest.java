@@ -15,7 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,7 +44,6 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
-import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -103,6 +104,8 @@ public class ResourceNodeImporterTest {
     
     @Mock TypecheckedResults mockTypecheckedResults;
     @Mock CorpusNode mockCorpusNode;
+    @Mock File mockFile;
+    @Mock InputStream mockInputStream;
     
     private final int workspaceID = 1;
     
@@ -145,10 +148,11 @@ public class ResourceNodeImporterTest {
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         
@@ -169,19 +173,20 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
                 will(returnValue(true));
-                
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(returnValue(mockTypecheckedResults));
+            oneOf(mockInputStream).close();
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
@@ -215,11 +220,12 @@ public class ResourceNodeImporterTest {
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
         final URI childURI = childArchiveURL.toURI();
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         
@@ -240,19 +246,20 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithoutHandle).getURI(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithoutHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, mockFile);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(returnValue(mockTypecheckedResults));
+            oneOf(mockInputStream).close();
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithoutHandle, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithoutHandle, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
@@ -287,10 +294,11 @@ public class ResourceNodeImporterTest {
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         
@@ -314,19 +322,20 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(returnValue(mockTypecheckedResults));
+            oneOf(mockInputStream).close();
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
@@ -370,10 +379,11 @@ public class ResourceNodeImporterTest {
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         
@@ -397,19 +407,20 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(returnValue(mockTypecheckedResults));
+            oneOf(mockInputStream).close();
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
@@ -453,10 +464,11 @@ public class ResourceNodeImporterTest {
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
+
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         
@@ -480,19 +492,20 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
                 will(returnValue(true));
                 
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(returnValue(mockTypecheckedResults));
+            oneOf(mockInputStream).close();
                 
-            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(childOurURL, mockChildLinkWithHandle, mockTypecheckedResults);
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
@@ -534,7 +547,7 @@ public class ResourceNodeImporterTest {
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURL;
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
         
@@ -553,16 +566,8 @@ public class ResourceNodeImporterTest {
             throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
-        final int childWorkspaceNodeID = 10;
-        final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
-        final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
-        final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
         
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
@@ -571,9 +576,6 @@ public class ResourceNodeImporterTest {
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
-        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -601,16 +603,8 @@ public class ResourceNodeImporterTest {
             throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
-        final int childWorkspaceNodeID = 10;
-        final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
-        final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
-        final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
         
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
@@ -619,9 +613,6 @@ public class ResourceNodeImporterTest {
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
-        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
             
@@ -643,20 +634,16 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void typecheckerExceptionThrown()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
+            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException {
 
         final int parentWorkspaceNodeID = 1;
-        final int childWorkspaceNodeID = 10;
-        final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = new URI("file:/some.location");
         final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
-        final URL childWsURL = new URL("file:/workspace/folder/childname.txt");
-        final URL childOriginURL = new URL("file:/some.uri/childname.txt");
+        final String childFilename = "childname.txt";
+        final URL childOriginURL = new URL("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURL;
-        final OurURL childOurURL = new OurURL(childArchiveURL.toString());
-        
+
         final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
@@ -664,9 +651,6 @@ public class ResourceNodeImporterTest {
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, "cmdi");
-        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, WorkspaceNodeStatus.NODE_CREATED, childNodeMimetype);
-        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         final TypeCheckerException expectedException = new TypeCheckerException("some exception message", null);
         
@@ -675,17 +659,18 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
-            
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
-            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, childOurURL);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
                 will(returnValue(true));
-                
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childOurURL);
+            
+            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
                 will(throwException(expectedException));
+            oneOf(mockInputStream).close();
         }});
         
         try {
@@ -701,6 +686,8 @@ public class ResourceNodeImporterTest {
     
     
     //TODO MalformedURLException?
+    
+    //TODO IOException
     
     //TODO test if/else possible branches
 }

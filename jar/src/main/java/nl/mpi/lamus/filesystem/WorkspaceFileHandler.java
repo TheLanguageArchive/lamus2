@@ -17,13 +17,8 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.MetadataDocument;
 
 /**
  * Handler for operations related with the lamus files.
@@ -52,9 +47,9 @@ public interface WorkspaceFileHandler {
     /**
      * Construct a File object corresponding to the given node.
      * 
-     * @param archiveNodeURL URL of the node in the archive
-     * @param workspaceNode node with which to construct the File object.
+     * @param archiveFile archive file from which to retrieve the filename
+     * @param workspaceNode node with which to construct the File object
      * @return File object
      */
-    public File getFileForImportedWorkspaceNode(URL archiveNodeURL, WorkspaceNode workspaceNode);
+    public File getFileForImportedWorkspaceNode(File archiveFile, WorkspaceNode workspaceNode);
 }

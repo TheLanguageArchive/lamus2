@@ -63,6 +63,8 @@ public class LamusCorpusStructureServiceBridgeTest {
     @Mock JsonObject mockResponseJsonObject;
     @Mock Collection<WorkspaceNodeReplacement> mockResponseNodeReplacementsCollection;
     
+    @Mock WebApplicationException mockWebApplicationException;
+    
     
     private CorpusStructureServiceBridge csServiceBridge;
     
@@ -116,7 +118,7 @@ public class LamusCorpusStructureServiceBridgeTest {
         String secondReplacementStatus = "oK";
         WorkspaceNodeReplacement secondNodeReplacement = new LamusWorkspaceNodeReplacement(secondOldNodeURI, secondNewNodeURI, secondReplacementStatus.toUpperCase());
         
-        final Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<>();
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         expectedNodeReplacementCollection.add(secondNodeReplacement);
         
@@ -167,25 +169,22 @@ public class LamusCorpusStructureServiceBridgeTest {
     @Test
     public void createVersionsAnotherException() throws URISyntaxException, VersionCreationException {
         
-        final String expectedMessage = "Error with a URI during version creation";
-        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
-        
         context.checking(new Expectations() {{
 
             oneOf(mockJsonTransformationHandler).createJsonObjectFromNodeReplacementCollection(mockNodeReplacementsCollection);
                 will(returnValue(mockRequestJsonObject));
             
             oneOf(mockJerseyHelper).postRequestCreateVersions(mockRequestJsonObject, corpusStructureServiceLocation, corpusStructureServiceVersioningPath, corpusStructureServiceVersionCreationPath);
-                will(throwException(expectedCause));
+                will(throwException(mockWebApplicationException));
             
+            ignoring(mockWebApplicationException);
         }});
         
         try {
             csServiceBridge.createVersions(mockNodeReplacementsCollection);
             fail("should have thrown an exception");
         } catch(VersionCreationException ex) {
-            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
-            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+            assertEquals("Exception cause different from expected", mockWebApplicationException, ex.getCause());
         }
     }
     
@@ -203,7 +202,7 @@ public class LamusCorpusStructureServiceBridgeTest {
         String secondReplacementError = "reference is invalid for ArchiveObjectDaoImpl";
         WorkspaceNodeReplacement secondNodeReplacement = new LamusWorkspaceNodeReplacement(secondOldNodeURI, secondNewNodeURI, secondReplacementStatus.toUpperCase(), secondReplacementError);
         
-        final Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        final Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<>();
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         expectedNodeReplacementCollection.add(secondNodeReplacement);
         
@@ -257,13 +256,14 @@ public class LamusCorpusStructureServiceBridgeTest {
         
         final URI uriToCrawl = new URI(UUID.randomUUID().toString());
         
-        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
         final String expectedMessage = "Error during crawler invocation for node " + uriToCrawl;
         
         context.checking(new Expectations() {{
             
             oneOf(mockJerseyHelper).postRequestCallCrawler(uriToCrawl, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerStartPath);
-                will(throwException(expectedCause));
+                will(throwException(mockWebApplicationException));
+            
+            ignoring(mockWebApplicationException);
                 
                 //CHECK get ID of the crawler and get the details (succeded? failed?)
         }});
@@ -273,6 +273,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             fail("should have thrown an exception");
         } catch(CrawlerInvocationException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", mockWebApplicationException, ex.getCause());
         }
     }
     
@@ -300,14 +301,15 @@ public class LamusCorpusStructureServiceBridgeTest {
     public void getCrawlerStateFailed() throws CrawlerStateRetrievalException {
         
         final String crawlerID = UUID.randomUUID().toString();
-        
-        final WebApplicationException expectedCause = new WebApplicationException("some exception message");
+
         final String expectedMessage = "Error during crawler state retrieval; crawlerID: " + crawlerID;
         
         context.checking(new Expectations() {{
             
             oneOf(mockJerseyHelper).getRequestCrawlerDetails(crawlerID, corpusStructureServiceLocation, corpusStructureServiceCrawlerPath, corpusStructureServiceCrawlerDetailsPath);
-                will(throwException(expectedCause));
+                will(throwException(mockWebApplicationException));
+            
+            ignoring(mockWebApplicationException);
         }});
         
         try {
@@ -315,6 +317,7 @@ public class LamusCorpusStructureServiceBridgeTest {
             fail("should have thrown exception");
         } catch(CrawlerStateRetrievalException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", mockWebApplicationException, ex.getCause());
         }
     }
 }

@@ -73,9 +73,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
         
-        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
-        node.setName(displayValue);
-        node.setTitle(displayValue);
+//        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
+        node.setName(name);
+        node.setTitle(name);
         node.setType(WorkspaceNodeType.METADATA);
         node.setFormat("text/x-cmdi+xml"); //TODO get this based on what? typechecker?
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());

@@ -98,7 +98,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
-        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
+//        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
@@ -107,8 +107,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.TRUE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(nodeName);
+        expectedNode.setTitle(nodeName);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
@@ -136,7 +136,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/archive/folder/node.cmdi");
-        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
+//        final String displayValue = FilenameUtils.getName(nodeArchiveURL.getPath());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
@@ -145,8 +145,8 @@ public class LamusWorkspaceNodeFactoryTest {
         final boolean onSite = Boolean.FALSE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode(workspaceID, nodeArchiveURI, nodeArchiveURL);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(nodeName);
+        expectedNode.setTitle(nodeName);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);

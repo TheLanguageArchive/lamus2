@@ -904,7 +904,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void processUploadedFiles() throws IOException, WorkspaceException {
+    public void processUploadedFiles() throws IOException, WorkspaceException, TypeCheckerException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -921,7 +921,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void processUploadedFilesThrowsIOException() throws IOException, WorkspaceException {
+    public void processUploadedFilesThrowsIOException() throws IOException, WorkspaceException, TypeCheckerException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -942,7 +942,28 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void processUploadedFilesThrowsWorkspaceException() throws IOException, WorkspaceException {
+    public void processUploadedFilesThrowsTypeCheckerException() throws IOException, WorkspaceException, TypeCheckerException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final TypeCheckerException typeCheckerException = new TypeCheckerException("some error message", new IOException("some cause"));
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
+                will(throwException(typeCheckerException));
+        }});
+        
+        try {
+            service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+            fail("should have thrown exception");
+        } catch(TypeCheckerException ex) {
+            assertEquals("Exception different from expected", typeCheckerException, ex);
+        }
+    }
+    
+    @Test
+    public void processUploadedFilesThrowsWorkspaceException() throws IOException, WorkspaceException, TypeCheckerException {
         
         final int workspaceID = 1;
         final String userID = "testUser";

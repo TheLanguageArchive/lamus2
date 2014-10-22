@@ -15,8 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
@@ -38,7 +39,7 @@ import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
-import nl.mpi.util.OurURL;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,51 +105,45 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         if(childURI == null) {
             childURI = referenceFromParent.getURI();
         }
-        
-        CorpusNode childCorpusNode = null;
-        URL childURL = null;
-        OurURL childOurURL = null;
-        try {
             
-            childCorpusNode = corpusStructureProvider.getNode(childURI);
-            if(childCorpusNode == null) {
-                String errorMessage = "ResourceNodeImporter.importNode: error getting node " + childURI;
-                logger.error(errorMessage);
-                throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), null);
-            }
-            
-            childURL = nodeResolver.getUrl(childCorpusNode);
-            if(childURL == null) {
-                String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
-                logger.error(errorMessage);
-                throw new IllegalArgumentException(errorMessage);
-            }
-            childOurURL = new OurURL(childURL);
-            
-        } catch (MalformedURLException muex) {
-            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
-            logger.error(errorMessage, muex);
-            throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), muex);
+        CorpusNode childCorpusNode = corpusStructureProvider.getNode(childURI);
+        if(childCorpusNode == null) {
+            String errorMessage = "ResourceNodeImporter.importNode: error getting node " + childURI;
+            logger.error(errorMessage);
+            throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), null);
         }
+
+        URL childURL = nodeResolver.getUrl(childCorpusNode);
+        if(childURL == null) {
+            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+
+        File childFile = nodeResolver.getLocalFile(childCorpusNode);
 
         String childMimetype = referenceFromParent.getMimetype();
 
-        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childOurURL)) {
+        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childFile)) {
             
             TypecheckedResults typecheckedResults = null;    
+            InputStream childInputStream = null;
             try {
 
-                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childOurURL);
-
+                childInputStream = nodeResolver.getInputStream(childCorpusNode);
+                
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childInputStream, childFile.getName());
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), tcex);
+            } catch (IOException ex) {
+                throw new UnsupportedOperationException("not handled yet");
+            } finally {
+                IOUtils.closeQuietly(childInputStream);
             }
             
-            nodeDataRetriever.verifyTypecheckedResults(childOurURL, referenceFromParent, typecheckedResults);
-            
-//            childType = typecheckedResults.getCheckedNodeType();
+            nodeDataRetriever.verifyTypecheckedResults(childFile, referenceFromParent, typecheckedResults);
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
         //TODO needsProtection?
@@ -168,18 +163,10 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         referenceFromParent.setLocation(null);
         try {
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
-        } catch (IOException ioex) {
+        } catch (IOException | TransformerException | MetadataException ioex) {
             String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
 		    + " in workspace " + workspace.getWorkspaceID();
 	    throwWorkspaceImportException(errorMessage, ioex);
-        } catch (TransformerException tex) {
-            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, tex);
-        } catch (MetadataException mdex) {
-            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, mdex);
         }
     }
     

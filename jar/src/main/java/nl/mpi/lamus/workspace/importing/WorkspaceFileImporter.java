@@ -15,9 +15,9 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
@@ -33,10 +33,11 @@ public interface WorkspaceFileImporter {
     /**
      * Imports metadata files from the archive to the workspace
      * @param archiveNodeURL URL of the node in the archive
-     * @param node WorkspaceNode object corresponding to the node being imported
+     * @param archiveFile File corresponding to the archive node to be imported
+     * @param workspaceNode WorkspaceNode object corresponding to the node being imported
      * @param document MetadataDocument object corresponding to the node being imported
      */
-    public void importMetadataFileToWorkspace(URL archiveNodeURL, WorkspaceNode node, MetadataDocument document)
+    public void importMetadataFileToWorkspace(File archiveFile, WorkspaceNode workspaceNode, MetadataDocument document)
             throws MalformedURLException, IOException, TransformerException, MetadataException;
     
 }

@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -128,9 +129,10 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         boolean childOnSite = true;
         
         MetadataDocument childDocument = null;
+        CorpusNode childCorpusNode = null;
         try {
             
-            CorpusNode childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
+            childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
             
             if(childCorpusNode == null) {
                 String errorMessage = "Error getting information for node " + childArchiveURI;
@@ -145,12 +147,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
-        } catch (IOException ioex) {
+        } catch (IOException | MetadataException ioex) {
 	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
 	    throwWorkspaceImportException(errorMessage, ioex);
-        } catch (MetadataException mdex) {
-	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
-	    throwWorkspaceImportException(errorMessage, mdex);
         }
         
         WorkspaceNode childNode =
@@ -164,7 +163,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         }
         
         try {
-            this.workspaceFileImporter.importMetadataFileToWorkspace(childArchiveURL, childNode, childDocument);
+            File archiveFile = nodeResolver.getLocalFile(childCorpusNode);
+            this.workspaceFileImporter.importMetadataFileToWorkspace(archiveFile, childNode, childDocument);
             
             if(referenceFromParent != null) {
                 referenceFromParent.setLocation(childNode.getWorkspaceURL());

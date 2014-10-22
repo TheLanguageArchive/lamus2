@@ -15,10 +15,8 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import java.io.IOException;
 import java.io.InputStream;
 import nl.mpi.lamus.exception.TypeCheckerException;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
 
 /**
@@ -62,8 +60,14 @@ public interface FileTypeHandler {
      */
     public void checkType(OurURL resourceURL, String filename, String mimetype) throws TypeCheckerException;
     
-    //TODO Should this replace the other method???
-    public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws IOException;
+    /**
+     * 
+     * @param resourceInputStream
+     * @param resourceFilename
+     * @param mimetype
+     * @throws TypeCheckerException 
+     */
+    public void checkType(InputStream resourceInputStream, String resourceFilename, String mimetype) throws TypeCheckerException;
     
     /**
      * Stores the outcome of calculateCV, or override it, as done by DataMoverIn

@@ -22,8 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
@@ -34,11 +32,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.cmdi.api.type.CMDITypeException;
-import org.apache.commons.io.FilenameUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -56,7 +49,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -83,9 +75,8 @@ public class LamusWorkspaceFileHandlerTest {
     
     private File tempDirectory;
     
-    @Mock private MetadataAPI mockMetadataAPI;
-    @Mock private MetadataDocument mockMetadataDocument;
-    @Mock private StreamResult mockStreamResult;
+    @Mock private File mockArchiveFile;
+    @Mock private WorkspaceNode mockWorkspaceNode;
     
     public LamusWorkspaceFileHandlerTest() {
     }
@@ -177,16 +168,21 @@ public class LamusWorkspaceFileHandlerTest {
     @Test
     public void getFileForWorkspaceNodeSuccessfully() throws IOException, URISyntaxException {
         
-        String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        Workspace testWorkspace = createTestWorkspace();
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
+        final int workspaceID = 1;
+        final String nodeFilename = "someNode.cmdi";
+        final String archiveNodePath = "file:/somewhere/in/the/archive/" + nodeFilename;
         
-        File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + testWorkspace.getWorkspaceID());
+        File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
 //        String nodeFilename = FilenameUtils.getName(testWorkspaceNode.getArchiveURL().toString());
         File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
         
-        File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveNodeURL, testWorkspaceNode);
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockArchiveFile).getPath(); will(returnValue(archiveNodePath));
+        }});
+        
+        File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(mockArchiveFile, mockWorkspaceNode);
         
         assertEquals(expectedNodeFile, retrievedFile);
     }

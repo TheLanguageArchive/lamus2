@@ -58,5 +58,5 @@ public interface WorkspaceUploader {
      * @return Map containing the files which could not be successfully uploaded and the reason for each
      */
     public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, WorkspaceException;
+            throws IOException, TypeCheckerException, WorkspaceException;
 }

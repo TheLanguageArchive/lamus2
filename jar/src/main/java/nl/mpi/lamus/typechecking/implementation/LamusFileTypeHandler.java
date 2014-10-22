@@ -184,7 +184,7 @@ public class LamusFileTypeHandler implements FileTypeHandler {
      * @see FileTypeHandler#checkType(java.io.InputStream, java.lang.String, java.lang.String)
      */
     @Override
-    public void checkType(InputStream resourceInputStream, String resourceFilename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws IOException {
+    public void checkType(InputStream resourceInputStream, String resourceFilename,/* WorkspaceNodeType nodetype,*/ String mimetype) throws TypeCheckerException {
         
         if(mimetype == null) {
             this.mimetype = "Unknown";
@@ -247,7 +247,7 @@ public class LamusFileTypeHandler implements FileTypeHandler {
                     logger.warn(errorMessage);
                     this.mimetype = "Unknown";
                     this.analysis = "Read error for " + /*resourceURL*/ resourceFilename + " - " + ioe.getMessage();
-                    throw new IOException(errorMessage, ioe);
+                    throw new TypeCheckerException(errorMessage, ioe);
                 } //finally {
 //                    IOUtils.closeQuietly(iStream);
 //                }

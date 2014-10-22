@@ -145,7 +145,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
      */
     @Override
     public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, WorkspaceException {
+            throws IOException, TypeCheckerException, WorkspaceException {
         
         // map containing the files that for some reason are not sucessfully processed, along with the reason for it
         Map<File, String> failedFiles = new HashMap<>();

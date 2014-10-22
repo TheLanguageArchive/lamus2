@@ -17,15 +17,9 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.MetadataDocument;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -68,12 +62,12 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     }
 
     /**
-     * @see WorkspaceFileHandler#getFileForImportedWorkspaceNode(java.net.URL, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceFileHandler#getFileForImportedWorkspaceNode(java.io.File, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public File getFileForImportedWorkspaceNode(URL archiveNodeURL, WorkspaceNode workspaceNode) {
+    public File getFileForImportedWorkspaceNode(File archiveFile, WorkspaceNode workspaceNode) {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
-        String nodeFilename = FilenameUtils.getName(archiveNodeURL.toString());
+        String nodeFilename = FilenameUtils.getName(archiveFile.getPath());
         
         //TODO Should it be based on the name in the node's metadata??
         File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
