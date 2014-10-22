@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
@@ -183,9 +184,7 @@ public class UploadPanel extends Panel {
                         UploadPanel.this.error(failedUploads.get(failedFile));
                     }
                     
-                } catch (IOException ex) {
-                    UploadPanel.this.error(ex.getMessage());
-                } catch (WorkspaceException ex) {
+                } catch (IOException | WorkspaceException | TypeCheckerException ex) {
                     UploadPanel.this.error(ex.getMessage());
                 }
                 

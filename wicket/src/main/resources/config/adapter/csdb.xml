@@ -15,14 +15,7 @@
     <!-- CSDB factory for CorpusStructureAPI adapter -->
     <bean id="csdbFactory" class="nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory">
         <constructor-arg value="java:comp/env/jdbc/CSDB3" />
-        
-        
-        
         <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
-        
-        
-        
-        
     </bean>
 
     <!-- Corpus structure provider created from factory -->
@@ -35,15 +28,8 @@
     <bean id="nodeResolver" factory-bean="csdbFactory" factory-method="createNodeResolver" />
 
     <bean id="translator" class="nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter">
-        
-        
-        
-        
+        <constructor-arg ref="corpusStructureProvider" />
         <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
-        
-        
-        
-        
     </bean>
     
     

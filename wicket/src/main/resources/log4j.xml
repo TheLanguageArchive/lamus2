@@ -27,7 +27,7 @@
     
     <!-- MPI LIBRARIES -->
     <logger name="nl.mpi.corpusstructure">
-	<level value="info" />
+	<level value="debug" />
     </logger>
     
     <logger name="nl.mpi.metadata">

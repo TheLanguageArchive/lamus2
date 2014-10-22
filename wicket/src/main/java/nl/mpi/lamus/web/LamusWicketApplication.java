@@ -16,20 +16,16 @@
  */
 package nl.mpi.lamus.web;
 
-import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.LamusPage;
-import nl.mpi.lamus.web.pages.LoginInfoPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
-import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.springframework.beans.BeansException;
