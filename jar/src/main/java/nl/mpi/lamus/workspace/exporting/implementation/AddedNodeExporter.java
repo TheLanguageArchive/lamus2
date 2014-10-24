@@ -111,6 +111,8 @@ public class AddedNodeExporter implements NodeExporter {
 //        String parentArchivePath = parentNode.getArchiveURL().getPath();
         String parentArchivePath = null;
         try {
+            
+            //TODO MUDAR COMO NO OUTRO EXPORTER
             parentArchivePath = archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI()).getSchemeSpecificPart();
         } catch (URISyntaxException ex) {
             String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
@@ -138,7 +140,9 @@ public class AddedNodeExporter implements NodeExporter {
         moveFileIntoArchive(currentNode, nextAvailableFile, currentDocument, currentNodeWorkspaceFile);
         
         ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(parentNode);
-        String currentPathRelativeToParent = archiveFileLocationProvider.getChildPathRelativeToParent(parentArchivePath, nextAvailableFile.getAbsolutePath());
+        
+        //TODO FIX
+        String currentPathRelativeToParent = archiveFileLocationProvider.getChildPathRelativeToParent(null,null);//parentArchivePath, nextAvailableFile.getAbsolutePath());
             
         updateReferenceInParent(currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
         

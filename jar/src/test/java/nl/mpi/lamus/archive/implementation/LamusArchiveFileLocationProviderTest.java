@@ -154,11 +154,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getRelativePath_ChildPathIsInChildDirectoryOfParent() {
         
-        final String parentPath = "/archive/path/parentdir/parent.cmdi";
-        final String childPath = "/archive/path/parentdir/childdir/child.cmdi";
+        final File parentFile = new File(URI.create("file:/archive/path/parentdir/parent.cmdi"));
+        final File childFile = new File(URI.create("file:/archive/path/parentdir/childdir/child.cmdi"));
         final String expectedRelativePath = "childdir/child.cmdi";
         
-        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentFile, childFile);
         
         assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
     }
@@ -166,11 +166,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getRelativePath_ChildPathIsNotInChildDirectoryOfParent() {
         
-        final String parentPath = "/archive/path/parentdir/parent.cmdi";
-        final String childPath = "/archive/path/otherparentdir/childdir/child.cmdi";
+        final File parentFile = new File(URI.create("file:/archive/path/parentdir/parent.cmdi"));
+        final File childFile = new File(URI.create("file:/archive/path/otherparentdir/childdir/child.cmdi"));
         final String expectedRelativePath = "../otherparentdir/childdir/child.cmdi";
         
-        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentFile, childFile);
         
         assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
     }
@@ -178,11 +178,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getRelativePath_ChildPathIsInSameDirectoryOfParent() {
         
-        final String parentPath = "/archive/path/parentdir/parent.cmdi";
-        final String childPath = "/archive/path/parentdir/child.cmdi";
+        final File parentFile = new File(URI.create("file:/archive/path/parentdir/parent.cmdi"));
+        final File childFile = new File(URI.create("file:/archive/path/parentdir/child.cmdi"));
         final String expectedRelativePath = "child.cmdi";
         
-        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+        String retrievedRelativePath = archiveFileLocationProvider.getChildPathRelativeToParent(parentFile, childFile);
         
         assertEquals("Retrieved relative path different from expected", expectedRelativePath, retrievedRelativePath);
     }
@@ -190,13 +190,13 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getRelativePath_ChildPathEqualsParentPath() {
         
-        final String parentPath = "/archive/path/parentdir/parent.cmdi";
-        final String childPath = "/archive/path/parentdir/parent.cmdi";
+        final File parentFile = new File(URI.create("file:/archive/path/parentdir/parent.cmdi"));
+        final File childFile = new File(URI.create("file:/archive/path/parentdir/parent.cmdi"));
         
-        final String expectedExceptionMessage = "Parent and child path should point to different files";
+        final String expectedExceptionMessage = "Parent and child files should be different";
         
         try {
-            archiveFileLocationProvider.getChildPathRelativeToParent(parentPath, childPath);
+            archiveFileLocationProvider.getChildPathRelativeToParent(parentFile, childFile);
             fail("should have thrown exception");
         } catch(IllegalStateException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());

@@ -73,18 +73,18 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     }
 
     /**
-     * @see ArchiveFileLocationProvider#getChildUrlRelativeToParent(java.lang.String, java.lang.String)
+     * @see ArchiveFileLocationProvider#getChildPathRelativeToParent(java.io.File, java.lang.String)
      */
     @Override
-    public String getChildPathRelativeToParent(String parentNodePath, String childNodePath) {
+    public String getChildPathRelativeToParent(File parentNodeFile, File childNodeFile) {
         
-        if(parentNodePath.equals(childNodePath)) {
-            throw new IllegalStateException("Parent and child path should point to different files");
+        if(parentNodeFile.equals(childNodeFile)) {
+            throw new IllegalStateException("Parent and child files should be different");
         }
         
-        String parentDirectory = FilenameUtils.getFullPath(parentNodePath);
+        String parentDirectory = FilenameUtils.getFullPath(parentNodeFile.getAbsolutePath());
         Path parentDirPath = Paths.get(parentDirectory);
-        Path childFilePath = Paths.get(childNodePath);
+        Path childFilePath = Paths.get(childNodeFile.getAbsolutePath());
         Path relativePath = parentDirPath.relativize(childFilePath);
         
         return relativePath.toString();

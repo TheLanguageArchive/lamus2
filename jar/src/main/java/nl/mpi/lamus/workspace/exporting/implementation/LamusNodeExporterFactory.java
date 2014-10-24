@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
@@ -44,6 +45,9 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private CorpusStructureProvider corpusStructureProvider;
     
     @Autowired
+    private NodeResolver nodeResolver;
+    
+    @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     
     @Autowired
@@ -60,9 +64,6 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     
     @Autowired
     private VersioningHandler versioningHandler;
-    
-    @Autowired
-    private ArchiveFileHelper archiveFileHelper;
     
     @Autowired
     private HandleManager handleManager;
@@ -132,7 +133,7 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private NodeExporter getGeneralNodeExporter(Workspace workspace) {
         if(generalNodeExporter == null) {
             generalNodeExporter = new GeneralNodeExporter(metadataAPI, workspaceFileHandler,
-                    workspaceTreeExporter, corpusStructureProvider, archiveFileHelper,
+                    workspaceTreeExporter, corpusStructureProvider, nodeResolver,
                     archiveFileLocationProvider);
         }
         generalNodeExporter.setWorkspace(workspace);

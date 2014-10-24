@@ -24,8 +24,8 @@ import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -58,19 +58,19 @@ public class GeneralNodeExporter implements NodeExporter {
     private final WorkspaceFileHandler workspaceFileHandler;
     private final WorkspaceTreeExporter workspaceTreeExporter;
     private final CorpusStructureProvider corpusStructureProvider;
-    private final ArchiveFileHelper archiveFileHelper;
+    private final NodeResolver nodeResolver;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     public GeneralNodeExporter(MetadataAPI mAPI, WorkspaceFileHandler wsFileHandler,
             WorkspaceTreeExporter wsTreeExporter,
-            CorpusStructureProvider csProvider, ArchiveFileHelper archiveFileHelper,
+            CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             ArchiveFileLocationProvider archiveFileLocationProvider) {
         
         this.metadataAPI = mAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.workspaceTreeExporter = wsTreeExporter;
         this.corpusStructureProvider = csProvider;
-        this.archiveFileHelper = archiveFileHelper;
+        this.nodeResolver = nodeResolver;
         this.archiveFileLocationProvider = archiveFileLocationProvider;
     }
     
@@ -107,13 +107,23 @@ public class GeneralNodeExporter implements NodeExporter {
                 + (parentNode != null ? parentNode.getWorkspaceNodeID() : -1) + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         
         URI parentArchiveLocalUri = null;
-        String nodeArchivePath = null;
-        try {
-            nodeArchivePath = archiveFileLocationProvider.getUriWithLocalRoot(currentNode.getArchiveURL().toURI()).getSchemeSpecificPart();
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error retrieving archive location of node " + currentNode.getArchiveURI();
-            throwWorkspaceExportException(errorMessage, ex);
-        }
+//        String nodeArchivePath = null;
+//        try {
+//            nodeArchivePath = archiveFileLocationProvider.getUriWithLocalRoot(currentNode.getArchiveURL().toURI()).getSchemeSpecificPart();
+            
+            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+            if(corpusNode == null) {
+                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+                throwWorkspaceExportException(errorMessage, null);
+            }
+            
+            File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
+            
+            
+//        } catch (URISyntaxException ex) {
+//            String errorMessage = "Error retrieving archive location of node " + currentNode.getArchiveURI();
+//            throwWorkspaceExportException(errorMessage, ex);
+//        }
         
         if(currentNode.isMetadata()) {
             
@@ -121,11 +131,11 @@ public class GeneralNodeExporter implements NodeExporter {
             
             //TODO ensureChecksum - will this be done by the crawler??
             
-            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
-            if(corpusNode == null) {
-                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, null);
-            }
+//            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+//            if(corpusNode == null) {
+//                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+//                throwWorkspaceExportException(errorMessage, null);
+//            }
             
 //            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
 //            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
@@ -149,28 +159,19 @@ public class GeneralNodeExporter implements NodeExporter {
             MetadataDocument nodeDocument = null;
             try {
                 nodeDocument = metadataAPI.getMetadataDocument(currentNode.getWorkspaceURL());
-            } catch (IOException ex) {
-                String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (MetadataException ex) {
+            } catch (IOException | MetadataException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
                 throwWorkspaceExportException(errorMessage, ex);
             }
 
 //            File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
 //            File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
-            File nodeArchiveFile = new File(nodeArchivePath);
+//            File nodeArchiveFile = new File(nodeArchivePath);
             StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
             
             try {
                 metadataAPI.writeMetadataDocument(nodeDocument, nodeArchiveStreamResult);
-            } catch (IOException ex) {
-                String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (TransformerException ex) {
-                String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (MetadataException ex) {
+            } catch (IOException | TransformerException | MetadataException ex) {
                 String errorMessage = "Error writing file for node " + currentNode.getArchiveURI();
                 throwWorkspaceExportException(errorMessage, ex);
             }           
@@ -187,18 +188,26 @@ public class GeneralNodeExporter implements NodeExporter {
                     // the file itself shouldn't have changed, otherwise it's a replaced node
         }
         
-        try {
-            parentArchiveLocalUri = archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI());
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
-            throwWorkspaceExportException(errorMessage, ex);
+//        try {
+//            parentArchiveLocalUri = archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI());
+//        } catch (URISyntaxException ex) {
+//            String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
+//            throwWorkspaceExportException(errorMessage, ex);
+//        }
+        
+        CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());
+        if(parentCorpusNode == null) {
+            String errorMessage = "Parent node not found in archive database for URI " + parentNode.getArchiveURI();
+            throwWorkspaceExportException(errorMessage, null);
         }
+        File parentNodeArchiveFile = nodeResolver.getLocalFile(parentCorpusNode);
+            
         
         ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(parentNode);
         String currentPathRelativeToParent = 
-                archiveFileLocationProvider.getChildPathRelativeToParent(parentArchiveLocalUri.getSchemeSpecificPart(), nodeArchivePath);
-            
-        updateReferenceInParent(currentNode, parentNode, parentArchiveLocalUri, referencingParentDocument, currentPathRelativeToParent);
+                archiveFileLocationProvider.getChildPathRelativeToParent(parentNodeArchiveFile, nodeArchiveFile);
+        
+        updateReferenceInParent(currentNode, parentNode, parentNodeArchiveFile, referencingParentDocument, currentPathRelativeToParent);
         
     }
     
@@ -211,10 +220,7 @@ public class GeneralNodeExporter implements NodeExporter {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 
-            } catch (IOException ex) {
-                String errorMessage = "Error getting Metadata Document for node " + node.getWorkspaceURL();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (MetadataException ex) {
+            } catch (IOException | MetadataException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + node.getWorkspaceURL();
                 throwWorkspaceExportException(errorMessage, ex);
             }
@@ -238,23 +244,17 @@ public class GeneralNodeExporter implements NodeExporter {
     }
     
     private void updateReferenceInParent(
-            WorkspaceNode currentNode, WorkspaceNode parentNode, URI parentArchiveLocalUri,
+            WorkspaceNode currentNode, WorkspaceNode parentNode, File parentArchiveLocalFile,
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getArchiveURI());
-            URL currentUrlRelativeToParent = new URL(parentArchiveLocalUri.toURL(), currentPathRelativeToParent);
+            URL currentUrlRelativeToParent = new URL(parentArchiveLocalFile.toURI().toURL(), currentPathRelativeToParent);
             currentReference.setLocation(currentUrlRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
             metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
             
-        } catch (IOException ex) {
-            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
-        } catch (MetadataException ex) {
-            String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
-        } catch (TransformerException ex) {
+        } catch (IOException | MetadataException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
             throwWorkspaceExportException(errorMessage, ex);
         }

@@ -45,11 +45,11 @@ public interface ArchiveFileLocationProvider {
      * Given a parent and a child path, gets the relative path
      * from the parent directory to the child file.
      * 
-     * @param parentNodePath path of the parent file
-     * @param childNodePath path of the child file
+     * @param parentNodeFile object corresponding to the parent file
+     * @param childNodeFile object corresponding to the child file
      * @return relative path between the parent directory and the child file
      */
-    public String getChildPathRelativeToParent(String parentNodePath, String childNodePath);
+    public String getChildPathRelativeToParent(File parentNodeFile, File childNodeFile);
     
     /**
      * Retrieves the given URI with the archive HTTPS Root prefix (if the URI
