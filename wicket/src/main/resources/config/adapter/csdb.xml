@@ -10,29 +10,37 @@
 
           profile="cmdi-adapter-csdb">
 
-    <context:annotation-config />
+<!--    <context:annotation-config />
     
-    <!-- CSDB factory for CorpusStructureAPI adapter -->
-    <bean id="csdbFactory" class="nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory">
+     CSDB Proxy 
+    <bean id="csdbImplFactory" class="nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory">
         <constructor-arg value="java:comp/env/jdbc/CSDB3" />
+    </bean>
+    <bean id="csdbProxy" class="nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBProxy" name="adapterCSDB" />
+    
+     Archive Objects Proxy 
+    <bean id="aoImplFactory" class="nl.mpi.archiving.corpusstructure.adapter.ArchiveObjectsDBImplFactory">
+        <constructor-arg value="java:comp/env/jdbc/CSDB3" />
+    </bean>
+    <bean id="aoProxy" class="nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBProxy" name="adapterAO" />
+    
+     CSDB factory for CorpusStructureAPI adapter 
+    <bean id="corpusStructureProviderFactory" class="nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory">
+        <constructor-arg ref="csdbProxy" />
+        <constructor-arg ref="aoProxy" />
         <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
     </bean>
-
-    <!-- Corpus structure provider created from factory -->
-    <bean id="corpusStructureProvider" factory-bean="csdbFactory" factory-method="createCorpusStructureProvider" />
-
-    <!-- Access info provider (also adapter) -->
-    <bean id="accessInfoProvider" factory-bean="csdbFactory" factory-method="createAccessInfoProvider" />
-
-    <!-- Node resolver that can do smart things with the 'node:xyz' URIs returned from the adapater corpus structure provider -->
-    <bean id="nodeResolver" factory-bean="csdbFactory" factory-method="createNodeResolver" />
-
-    <bean id="translator" class="nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter">
-        <constructor-arg ref="corpusStructureProvider" />
-        <constructor-arg value="https://lux16.mpi.nl/ds/TranslationService" />
-    </bean>
     
-    
-    
+     Corpus structure provider created from factory 
+    <bean id="corpusStructureProvider" factory-bean="corpusStructureProviderFactory" factory-method="createCorpusStructureProvider" />
+
+     Access info provider (also adapter) 
+    <bean id="accessInfoProvider" factory-bean="corpusStructureProviderFactory" factory-method="createAccessInfoProvider" />
+
+     Node resolver that can do smart things with the 'node:xyz' URIs returned from the adapater corpus structure provider 
+    <bean id="nodeResolver" factory-bean="corpusStructureProviderFactory" factory-method="createNodeResolver" />
+
+     File path translator, used by the node resolver 
+    <bean id="translator" factory-bean="corpusStructureProviderFactory" factory-method="createFilePathTranslator" />-->
     
 </beans>

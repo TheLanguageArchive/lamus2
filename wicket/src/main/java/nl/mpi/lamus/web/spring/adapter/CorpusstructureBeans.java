@@ -16,9 +16,20 @@
  */
 package nl.mpi.lamus.web.spring.adapter;
 
-//import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+import nl.mpi.archiving.corpusstructure.adapter.ArchiveObjectsDBImplFactory;
+import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
+import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory;
+import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBFactory;
+import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBProxy;
+import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBFactory;
+import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBProxy;
+import nl.mpi.archiving.corpusstructure.core.service.FilePathTranslator;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.corpusstructure.ArchiveObjectsDB;
+import nl.mpi.corpusstructure.CorpusStructureDB;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -31,18 +42,50 @@ import org.springframework.context.annotation.Profile;
 @Profile("cmdi-adapter-csdb")
 public class CorpusstructureBeans {
     
-//    @Bean
-//    public CorpusStructureAPIProviderFactory csdbFactory() {
-//        return new CorpusStructureAPIProviderFactory("java:comp/env/jdbc/CSDB");
-//    }
+    @Bean
+    public CorpusStructureDBFactory csdbImplFactory() {
+        return new CorpusStructureDBImplFactory("java:comp/env/jdbc/CSDB3");
+    }
     
-//    @Bean
-//    public CorpusStructureProvider csdb() {
-//        return csdbFactory().createCorpusStructureProvider();
-//    }
+    @Bean(name = "adapterCSDB")
+    @Qualifier("adapterCSDB")
+    public CorpusStructureDB csdbProxy() {
+        return new CorpusStructureDBProxy();
+    }
     
-//    @Bean
-//    public NodeResolver nodeResolver() {
-//        return csdbFactory().createNodeResolver();
-//    }
+    @Bean
+    public ArchiveObjectsDBFactory aoImplFactory() {
+        return new ArchiveObjectsDBImplFactory("java:comp/env/jdbc/CSDB3");
+    }
+    
+    @Bean(name = "adapterAO")
+    @Qualifier("adapterAO")
+    public ArchiveObjectsDB aoProxy() {
+        return new ArchiveObjectsDBProxy();
+    }
+    
+    @Bean
+    public CorpusStructureAPIProviderFactory corpusStructureProviderFactory() {
+        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), "https://lux16.mpi.nl/ds/TranslationService");
+    }
+    
+    @Bean
+    public CorpusStructureProvider corpusStructureProvider() {
+        return corpusStructureProviderFactory().createCorpusStructureProvider();
+    }
+    
+    @Bean
+    public AccessInfoProvider accessInfoProvider() {
+        return corpusStructureProviderFactory().createAccessInfoProvider();
+    }
+    
+    @Bean
+    public NodeResolver nodeResolver() {
+        return corpusStructureProviderFactory().createNodeResolver();
+    }
+    
+    @Bean
+    public FilePathTranslator translator() {
+        return corpusStructureProviderFactory().createFilePathTranslator();
+    }
 }
