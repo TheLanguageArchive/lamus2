@@ -18,12 +18,12 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
@@ -42,19 +42,21 @@ public class LamusVersioningHandler implements VersioningHandler {
     private static final Logger logger = LoggerFactory.getLogger(LamusVersioningHandler.class);
     
     private final ArchiveFileHelper archiveFileHelper;
-    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final HandleInfoRetriever handleInfoRetriever;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final NodeResolver nodeResolver;
     
     @Autowired
     public LamusVersioningHandler(ArchiveFileHelper fileHelper,
-        ArchiveFileLocationProvider fileLocationProvider,
-        HandleInfoRetriever handleInfoRetriever) {
+        HandleInfoRetriever handleInfoRetriever,
+        CorpusStructureProvider csProvider, NodeResolver resolver) {
         
         //TODO check constructor from the trashcan in the old lamus
         
         this.archiveFileHelper = fileHelper;
-        this.archiveFileLocationProvider = fileLocationProvider;
         this.handleInfoRetriever = handleInfoRetriever;
+        this.corpusStructureProvider = csProvider;
+        this.nodeResolver = resolver;
     }
 
     /**
@@ -85,24 +87,8 @@ public class LamusVersioningHandler implements VersioningHandler {
         //TODO consistency checks?
         
         
-//        File currentFile = archiveFileHelper.getArchiveLocationForNodeID(nodeToMove.getArchiveNodeID());
-        
-        URL localArchiveUrl;
-        try {
-            URI localArchiveUri = archiveFileLocationProvider.getUriWithLocalRoot(nodeToMove.getArchiveURL().toURI());
-            localArchiveUrl = localArchiveUri.toURL();
-        } catch (URISyntaxException ex) {
-//                String errorMessage = "Error getting new target URI for node " + currentNode.getArchiveURL();
-//                throwWorkspaceExportException(errorMessage, ex);
-            
-            logger.error("Problem retrieving archive location of node " + nodeToMove.getWorkspaceNodeID(), ex);
-            return null;
-        } catch (MalformedURLException ex) {
-            logger.error("Problem retrieving archive location of node " + nodeToMove.getWorkspaceNodeID(), ex);
-            return null;
-        }
-        
-        File currentFile = FileUtils.toFile(localArchiveUrl);
+        CorpusNode archiveNode = corpusStructureProvider.getNode(nodeToMove.getArchiveURI());
+        File currentFile = nodeResolver.getLocalFile(archiveNode);
         
         File targetDirectory = null;
         if(toDelete) {
@@ -117,7 +103,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
         
         File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(
-                targetDirectory, handleInfoRetriever.stripHandle(nodeToMove.getArchiveURI().toString()), nodeToMove.getArchiveURL());
+                targetDirectory, handleInfoRetriever.stripHandle(nodeToMove.getArchiveURI().toString()), currentFile);
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

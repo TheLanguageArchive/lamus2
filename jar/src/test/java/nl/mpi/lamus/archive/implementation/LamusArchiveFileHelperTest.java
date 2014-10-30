@@ -650,8 +650,9 @@ public class LamusArchiveFileHelperTest {
     public void getTargetFileForDeletedNode() throws MalformedURLException, URISyntaxException {
         
         final String testArchiveNodeUriStr = UUID.randomUUID().toString();
-        final URL testNodeArchiveURL = new URL("file:/lat/corpora/archive/node.cmdi");
-        final File testNodeFile = new File(testNodeArchiveURL.getPath());
+        final String testNodeArchivePath = "file:/lat/corpora/archive/node.cmdi";
+        final URL testNodeArchiveURL = new URL(testNodeArchivePath);
+        final File testNodeFile = new File(URI.create(testNodeArchivePath));
         final String fileBaseName = "node.cmdi";
         
         final String versionDirectoryName = "2013-05";
@@ -666,7 +667,7 @@ public class LamusArchiveFileHelperTest {
 //            oneOf(mockArchiveFileHelper).getFileBasename(testNodeFile.getPath()); will(returnValue(fileBaseName));
         }});
         
-        File result = testArchiveFileHelper.getTargetFileForReplacedOrDeletedNode(versionFullDirectory, testArchiveNodeUriStr, testNodeArchiveURL);
+        File result = testArchiveFileHelper.getTargetFileForReplacedOrDeletedNode(versionFullDirectory, testArchiveNodeUriStr, testNodeFile);
         
         assertEquals("Returned file name different from expected", expectedTargetFile, result);
     }

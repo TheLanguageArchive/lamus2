@@ -22,9 +22,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -59,8 +61,11 @@ public class LamusVersioningHandlerTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock ArchiveFileHelper mockArchiveFileHelper;
-    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock HandleInfoRetriever mockHandleInfoRetriever;
+    @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock NodeResolver mockNodeResolver;
+    
+    @Mock CorpusNode mockCorpusNode;
     
     private VersioningHandler versioningHandler;
     
@@ -78,7 +83,9 @@ public class LamusVersioningHandlerTest {
     @Before
     public void setUp() {
         
-        versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper, mockArchiveFileLocationProvider, mockHandleInfoRetriever);
+        versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper,
+                mockHandleInfoRetriever,
+                mockCorpusStructureProvider, mockNodeResolver);
     }
     
     @After
@@ -95,7 +102,6 @@ public class LamusVersioningHandlerTest {
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
         final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
-        final URL testNodeLocalArchiveURL = new URL("file:/lat/corpora/archive/somefolder/node.cmdi");
         
         final String fileBaseName = "node.cmdi";
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
@@ -110,18 +116,15 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(testNodeArchiveURL.toURI());
-                will(returnValue(testNodeLocalArchiveURL.toURI()));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(archiveFile));
             
-//            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
             oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
-            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, testNodeArchiveURL); will(returnValue(trashedFile));
-//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, trashedFile); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
         suppress(method(FileUtils.class, "moveFile", File.class, File.class));
         
         URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
@@ -138,7 +141,6 @@ public class LamusVersioningHandlerTest {
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
         final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
-        final URL testNodeLocalArchiveURL = new URL("file:/lat/corpora/archive/somefolder/node.cmdi");
         
         final String fileBaseName = "node.cmdi";
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
@@ -153,15 +155,13 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(testNodeArchiveURL.toURI());
-                will(returnValue(testNodeLocalArchiveURL.toURI()));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(archiveFile));
             
-//            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
             oneOf(mockArchiveFileHelper).getDirectoryForReplacedNode(workspaceID); will(returnValue(versioningDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(versioningDirectory); will(returnValue(Boolean.TRUE));
             oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
-            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, testNodeArchiveURL); will(returnValue(versioningFile));
-//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, versioningFile); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(versioningFile));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
@@ -181,7 +181,6 @@ public class LamusVersioningHandlerTest {
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
         final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
-        final URL testNodeLocalArchiveURL = new URL("file:/lat/corpora/archive/somefolder/node.cmdi");
 
         final String fileBaseName = "node.cmdi";
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
@@ -196,15 +195,13 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(testNodeArchiveURL.toURI());
-                will(returnValue(testNodeLocalArchiveURL.toURI()));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(archiveFile));
             
-//            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
             oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
-            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, testNodeArchiveURL); will(returnValue(trashedFile));
-//            oneOf(mockArchiveFileHelper).moveFileToTargetLocation(archiveFile, trashedFile); will(returnValue(Boolean.FALSE));
+            oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
@@ -224,23 +221,19 @@ public class LamusVersioningHandlerTest {
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
         final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
-        final URL testNodeLocalArchiveURL = new URL("file:/lat/corpora/archive/somefolder/node.cmdi");
         
         final String fileBaseName = "node.something";
-        final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
         final File trashedDirectory = new File("/lat/corpora/trashcan/2013-05/10");
-        final File trashedFile = new File(trashedDirectory, fileNameBuilder.toString());
         
         final WorkspaceNode testNode = getTestNode(workspaceID, testNodeWsURL, testNodeFullArchiveURI, testNodeArchiveURL);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(testNodeArchiveURL.toURI());
-                will(returnValue(testNodeLocalArchiveURL.toURI()));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(archiveFile));
             
-//            oneOf(mockArchiveFileHelper).getArchiveLocationForNodeID(testArchiveNodeID); will(returnValue(archiveFile));
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.FALSE));
         }});

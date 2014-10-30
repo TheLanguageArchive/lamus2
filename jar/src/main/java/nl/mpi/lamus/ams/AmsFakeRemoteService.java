@@ -29,6 +29,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lat.ams.AmsLicense;
+import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
 import nl.mpi.lat.ams.export.RecalcTriggerService;
 import nl.mpi.lat.ams.model.License;
@@ -39,7 +40,6 @@ import nl.mpi.lat.auth.principal.LatUser;
 import nl.mpi.lat.auth.principal.PrincipalService;
 import nl.mpi.lat.fabric.FabricService;
 import nl.mpi.lat.fabric.NodeID;
-import nl.mpi.latimpl.fabric.NodeIDImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,12 +83,10 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         
         List<AmsLicense> amsLicenses = new ArrayList<>();
         
-        int nodeIdNum = Integer.parseInt(nodeid);
-        
-        NodeID mpiNodeId = new NodeIDImpl(nodeIdNum);
+        NodeID mpiNodeId = fabricService.newNodeID(NodeIdUtils.TONODEID(Integer.parseInt(nodeid)));
         List<License> licenses = licenseService.getLicenses(mpiNodeId);
         for (License license : licenses) {
-            AmsLicense amsLicense = new AmsLicense();
+            AmsLicense amsLicense = AmsLicenseFactory.getNewAmsLicense();
             try {
                 BeanUtils.copyProperties(amsLicense, license);
                 amsLicense.setLinkToLicense(licenseService.getLicenseLink(license));
@@ -114,10 +112,8 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         for(Map.Entry<URI, URI> entry : replacementEntries) {
             
             try {
-//                String oldNodeStringID = temporary.getStringNodeIdForVersionedURI(entry.getKey());
                 CorpusNode oldNode = corpusStructureProvider.getNode(entry.getKey());
                 String oldNodeStringID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(oldNode)));
-//                String newNodeStringID = temporary.getStringNodeIdForURI(entry.getValue().toString());
                 CorpusNode newNode = corpusStructureProvider.getNode(entry.getValue());
                 String newNodeStringID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(newNode)));
             
@@ -143,7 +139,6 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         // converting the URI collection into a set of node IDs
         Set<NodeID> targetNodeIDs = new HashSet<>();
         for(URI nodeURI : nodeURIs) {
-//            String nodeID = temporary.getStringNodeIdForURI(nodeURI.toString());
             CorpusNode node = corpusStructureProvider.getNode(nodeURI);
             String nodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(node)));
             targetNodeIDs.add(fabricService.newNodeID(nodeID));
@@ -160,7 +155,6 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         
         // converting the URI collection into a set of node IDs
         Set<NodeID> targetNodeIDs = new LinkedHashSet<>();
-//        String topNodeID = temporary.getStringNodeIdForURI(topNode.toString());
         CorpusNode topNode = corpusStructureProvider.getNode(topNodeURI);
         String topNodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(topNode)));
         targetNodeIDs.add(fabricService.newNodeID(topNodeID));
@@ -169,7 +163,6 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         
         Set<NodeID> versionedNodeIDs = new LinkedHashSet<>();
         for(URI currentNodeURI : versionedNodeURIs) {
-//            String nodeID = temporary.getStringNodeIdForVersionedURI(currentNode);
             CorpusNode currentNode = corpusStructureProvider.getNode(currentNodeURI);
             String currentNodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(currentNode)));
             versionedNodeIDs.add(fabricService.newNodeID(currentNodeID));
@@ -189,7 +182,6 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         // converting the URI collection into a set of node IDs
         Set<NodeID> targetNodeIDs = new HashSet<>();
         for(URI nodeURI : nodeURIs) {
-//            String nodeID = temporary.getStringNodeIdForVersionedURI(nodeURI);
             CorpusNode node = corpusStructureProvider.getNode(nodeURI);
             String nodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(node)));
             targetNodeIDs.add(fabricService.newNodeID(nodeID));

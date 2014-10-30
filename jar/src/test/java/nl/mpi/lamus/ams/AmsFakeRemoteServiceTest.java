@@ -28,6 +28,8 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lat.ams.AmsLicense;
+import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
 import nl.mpi.lat.ams.export.RecalcTriggerService;
 import nl.mpi.lat.ams.export.impl.ApacheAclExportSrv;
@@ -51,12 +53,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.junit.runner.RunWith;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.BeanUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author guisil
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({AmsLicenseFactory.class, BeanUtils.class})
 public class AmsFakeRemoteServiceTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -98,6 +109,8 @@ public class AmsFakeRemoteServiceTest {
     @Mock License mockLicense_1;
     @Mock License mockLicense_2;
     
+    @Mock AmsLicense mockAmsLicense;
+    
     
     private IAmsRemoteService amsFakeRemoteService;
     
@@ -138,28 +151,35 @@ public class AmsFakeRemoteServiceTest {
     @Test
     public void getLicenseAcceptance() {
         
-//        final String nodeID = "11";
-//        final String nodeMpiID = "MPI11#";
-//        
-//        final List<License> nodeLicenses = new ArrayList<>();
-//        nodeLicenses.add(mockLicense_1);
-//        nodeLicenses.add(mockLicense_2);
-//    
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockFabricService).newNodeID(nodeMpiID); will(returnValue(mockNodeID_1));
-//            oneOf(mockLicenseService).getLicenses(mockNodeID_1); will(returnValue(nodeLicenses));
-//            
-//            //loop - first iteration
-//            
-//            
-//            //loop - second iteration
-//        }});
-//        
-//        amsFakeRemoteService.getLicenseAcceptance(nodeID);
+        final String nodeID = "11";
+        final String nodeMpiID = "MPI11#";
         
+        final String license1_link = "http://link/to/license1";
+        final String license2_link = "https://link/to/license2";
         
-        fail("not tested yet");
+        final List<License> nodeLicenses = new ArrayList<>();
+        nodeLicenses.add(mockLicense_1);
+        
+        final List<AmsLicense> expectedAmsLicenses = new ArrayList<>();
+        expectedAmsLicenses.add(mockAmsLicense);
+    
+        context.checking(new Expectations() {{
+            
+            oneOf(mockFabricService).newNodeID(nodeMpiID); will(returnValue(mockNodeID_1));
+            oneOf(mockLicenseService).getLicenses(mockNodeID_1); will(returnValue(nodeLicenses));
+            
+            //loop - first iteration
+            oneOf(mockLicenseService).getLicenseLink(mockLicense_1); will(returnValue(license1_link));
+            oneOf(mockAmsLicense).setLinkToLicense(license1_link);
+            
+        }});
+        
+        stub(method(AmsLicenseFactory.class, "getNewAmsLicense")).toReturn(mockAmsLicense);
+        suppress(method(BeanUtils.class, "copyProperties", AmsLicense.class, License.class));
+        
+        List<AmsLicense> retrievedAmsLicenses = amsFakeRemoteService.getLicenseAcceptance(nodeID);
+        
+        assertEquals("List of AmsLicenses different from expected", expectedAmsLicenses, retrievedAmsLicenses);
     }
 
 

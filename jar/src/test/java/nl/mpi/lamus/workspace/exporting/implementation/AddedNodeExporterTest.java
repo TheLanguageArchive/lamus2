@@ -27,6 +27,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -77,9 +79,10 @@ public class AddedNodeExporterTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
-
     @Mock HandleManager mockHandleManager;
     @Mock MetadataApiBridge mockMetadataApiBridge;
+    @Mock CorpusStructureProvider mockCorpusStructureProvider;
+    @Mock NodeResolver mockNodeResolver;
     
     // initially had these mock objects as CMDIDocument,
     // but the expectations were not being properly matched after the cast (to ReferencingMetadataObject) was made in the code to be tested
@@ -118,7 +121,8 @@ public class AddedNodeExporterTest {
     public void setUp() {
         addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
                 mockMetadataAPI, mockWorkspaceDao, mockWorkspaceTreeExporter,
-                mockHandleManager, mockMetadataApiBridge);
+                mockHandleManager, mockMetadataApiBridge,
+                mockCorpusStructureProvider, mockNodeResolver);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -131,11 +135,8 @@ public class AddedNodeExporterTest {
     }
 
     
-    /**
-     * Test of exportNode method, of class AddedNodeExporter.
-     */
     @Test
-    public void exportUploadedResourceNode()
+    public void exportUploadedResourceNodeWithParentInArchive()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException {
         
         final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
@@ -155,11 +156,10 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
-        final String nodeFormat = currentNode.getFormat();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().toString();
-        final File parentNodeArchiveFile = new File(URI.create(parentNodeArchivePath));
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -169,7 +169,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
         
@@ -196,7 +199,69 @@ public class AddedNodeExporterTest {
         addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
     }
     
-    
+    @Test
+    public void exportUploadedResourceNodeWithParentNOTInArchive() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException {
+        
+        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
+
+        final WorkspaceNode currentNode = getCurrentResourceNode();
+        final WorkspaceNode parentNode = getParentNode();
+        
+        final boolean isFileMetadata = Boolean.FALSE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
+        final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
+        final WorkspaceNodeType nodeType = currentNode.getType();
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
+        final String nodeFormat = currentNode.getFormat();
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        
+        final String childPathRelativeToParent = "child/" + nodeWsFilename;
+        final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
+        
+        
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
+        
+        checkParentPathRetrieval(Boolean.FALSE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkExploreInvocations(isFileMetadata, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
+        
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        
+        checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
+        
+        checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveURL, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, null);
+        
+//        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
+                
+        
+        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+    }
     
     @Test
     public void exportUploadedMetadataNode()
@@ -219,11 +284,10 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
-        final String nodeFormat = currentNode.getFormat();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().toString();
-        final File parentNodeArchiveFile = new File(URI.create(parentNodeArchivePath));
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -235,7 +299,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
         
@@ -293,7 +360,8 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
                 
         final String expectedErrorMessage = "Error getting new file for node " + nodeWsURL;
         final IOException expectedException = new IOException("some exception message");
@@ -301,7 +369,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
             addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
@@ -323,14 +394,14 @@ public class AddedNodeExporterTest {
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
         final String nodeWsPath = nodeWsURL.getPath();
-        final File nodeWsFile = new File(nodeWsURL.getPath());
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/child/" + nodeWsFilename);
         final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         
         final String expectedErrorMessage = "Error getting Metadata Document for node " + nodeWsURL;
         final MetadataException expectedException = new MetadataException("some exception message");
@@ -338,7 +409,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
         
@@ -374,14 +448,18 @@ public class AddedNodeExporterTest {
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", testWorkspace.getWorkspaceID(), null);
         
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, expectedException);
 
@@ -415,9 +493,8 @@ public class AddedNodeExporterTest {
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().getSchemeSpecificPart();
-        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
-        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         
         final String expectedErrorMessage = "Error assigning new handle for node " + nodeWsURL;
         final HandleException expectedException = new HandleException(HandleException.INVALID_VALUE, "some exception message");
@@ -425,7 +502,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
         
@@ -471,8 +551,8 @@ public class AddedNodeExporterTest {
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
-        final String parentNodeArchivePath = parentNodeArchiveURL.toURI().toString();
-        final File parentNodeArchiveFile = new File(URI.create(parentNodeArchivePath));
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
         final URL parentNodeWsURL = parentNode.getWorkspaceURL();
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
@@ -487,7 +567,10 @@ public class AddedNodeExporterTest {
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
-        checkFirstInvocations(parentNodeArchiveURL, nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        
+        checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null);
         
@@ -526,16 +609,34 @@ public class AddedNodeExporterTest {
         }});
     }
     
+    private void checkParentPathRetrieval(boolean parentExistsInArchive,
+            final URI parentArchiveURI, final File parentArchiveLocalFile,
+            final URL parentArchiveURL) throws URISyntaxException {
+        
+        if(parentExistsInArchive) {
+            context.checking(new Expectations() {{
+                oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
+                oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
+                oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentArchiveLocalFile));
+            }});
+        } else {
+            context.checking(new Expectations() {{
+                oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
+                oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(null));
+                
+                oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveURL));
+                oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(parentArchiveURL.toURI());
+                    will(returnValue(parentArchiveURL.toURI()));
+            }});
+        }
+    }
     
     private void checkFirstInvocations(
-            final URL parentNodeArchiveURL, final URL nodeWsURL, final WorkspaceNodeType nodeType,
+            final URL nodeWsURL, final WorkspaceNodeType nodeType,
             final String nodeWsFilename, final File nextAvailableFile,
             final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException, URISyntaxException {
         
         context.checking(new Expectations() {{
-            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
-            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(parentNodeArchiveURL.toURI());
-                will(returnValue(parentNodeArchiveURL.toURI())); //in this case the url would already be local, so no changes happen
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
         }});

@@ -29,11 +29,8 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -92,45 +89,25 @@ public class UnlinkedNodeExporterTest {
     //TODO SIMILAR TO DeleteNodeExporterTest FOR NOW
     
     @Test
-    public void exportNodeWithArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+    public void exportNodeWithArchiveURI() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
-        final int testWorkspaceNodeID = 10;
-        final String testBaseName = "node.txt";
-        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        final URL testNodeArchiveURL = testNodeOriginURL;
+        final int nodeWsID = 10;
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
-        final String testNodeDisplayValue = "node";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-        final String testNodeFormat = "text/plain";
-        final URI testNodeSchemaLocation = new URI("http://some.location");
-
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
+        final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
+        final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
+        final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
         
-//        final StringBuilder testNodeVersionFileNameBuilder = new StringBuilder().append("v").append(testArchiveNodeID).append("__.").append(testBaseName);
-        
-        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
             
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
-            
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(returnValue(mockCorpusNode));
-            
-//            oneOf(mockCorpusstructureWriter).deleteNode(mockCorpusNode);
-            
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//            oneOf(mockSearchClientBridge).removeNode(testNodeArchiveURI);
-            
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockWorkspaceNode).setArchiveURL(nodeVersionArchiveURL);
         }});
         
         //TODO Handle external nodes (those can't be deleted, just unlinked)
@@ -149,7 +126,7 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportNodeWithoutArchiveURL() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+    public void exportNodeWithoutArchiveURI() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
 
@@ -159,7 +136,7 @@ public class UnlinkedNodeExporterTest {
             exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(null));
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
         }});
         
         

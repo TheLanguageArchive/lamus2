@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.handle.util.HandleManager;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class responsible for exporting nodes that were replaced
- * (should be moved to the versioining folder) or deleted
+ * (should be moved to the versionining folder) or deleted
  * (should be moved to the trash can) and have
  * their record in the database updated accordingly.
  * @see NodeExporter
@@ -109,7 +108,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             return;
         }
         
-        if(currentNode.getArchiveURL() == null) { //Assuming that if archiveURL is null, so is archiveURI
+        if(currentNode.getArchiveURI() == null) {
             
             logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the workspace previously; will be skipped and eventually deleted with the workspace folder");
             // if there is no archiveURL, the node was never in the archive, so it can actually be deleted;
@@ -123,18 +122,6 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);
-        
-        
-//        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
-//        
-//            WorkspaceNode newerVersion;
-//            try {
-//                newerVersion = this.workspaceDao.getNewerVersionOfNode(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID());
-//            } catch (WorkspaceNodeNotFoundException ex) {
-//                String errorMessage = "Error getting newer version of node " + currentNode.getWorkspaceNodeID() + " from workspace " + workspace.getWorkspaceID();
-//                throwWorkspaceExportException(errorMessage, ex);
-//            }    
-//        }
         
         
         //TODO TAKE CARE OF NEW NODES THAT WERE REPLACED
@@ -178,13 +165,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 
                 //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
                 
-            } catch (HandleException ex) {
-                String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (IOException ex) {
-                String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (URISyntaxException ex) {
+            } catch (HandleException | IOException | URISyntaxException ex) {
                 String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             }
@@ -195,11 +176,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             if(currentNode.isMetadata()) {
                 try {
                     metadataApiBridge.removeSelfHandleAndSaveDocument(currentNode.getArchiveURL());
-                } catch (IOException ex) {
-                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
-                } catch (TransformerException ex) {
-                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
-                } catch (MetadataException ex) {
+                } catch (IOException | TransformerException | MetadataException ex) {
                     logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
                 }
             }
@@ -218,13 +195,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 
                 //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
                 
-            } catch (HandleException ex) {
-                String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (IOException ex) {
-                String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
-            } catch (URISyntaxException ex) {
+            } catch (HandleException | IOException | URISyntaxException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(errorMessage, ex);
             }
