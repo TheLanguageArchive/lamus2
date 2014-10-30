@@ -20,12 +20,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-//import nl.mpi.annot.search.lib.SearchClient;
-//import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -33,9 +30,7 @@ import org.springframework.context.annotation.Profile;
  * @author guisil
  */
 @Configuration
-//@ComponentScan("nl.mpi.lamus")
 @Profile(value = {"cmdi-adapter-csdb"})
-@ImportResource("classpath:/config/adapter/csdb.xml")
 public class JndiDatabaseBeans {
     
     /**
@@ -48,15 +43,4 @@ public class JndiDatabaseBeans {
         Context ctx = new InitialContext();
         return (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
     }
-
-//    @Bean
-//    public VersioningAPI versioningAPI() {
-//        return new VersioningAPI("java:comp/env/jdbc/CSDB", "", "");
-//    }
-
-//    @Bean
-//    public SearchClient searchClient() {
-//        //TODO INITIALIZE SearchClient bean
-//        return null;
-//    }
 }
