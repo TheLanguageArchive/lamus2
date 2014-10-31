@@ -13,17 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.ams;
+package nl.mpi.lamus.ams.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lat.ams.IAmsRemoteService;
@@ -95,7 +92,7 @@ public class LamusAmsServiceBridgeTest {
         
         final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
         
-        final Set<URI> recalculationTargetURIs = new HashSet<>();
+        final Collection<URI> recalculationTargetURIs = new ArrayList<>();
         recalculationTargetURIs.add(workspaceRootNodeURI);
         
         context.checking(new Expectations() {{
@@ -109,7 +106,10 @@ public class LamusAmsServiceBridgeTest {
     @Test
     public void triggerAccessRightsRecalculationWithVersionedNodes() throws URISyntaxException {
         
-        final URI topNode = new URI(UUID.randomUUID().toString());
+        final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
+        
+        final Collection<URI> recalculationTargets = new ArrayList<>();
+        recalculationTargets.add(workspaceRootNodeURI);
         
         final Collection<WorkspaceNodeReplacement> nodeReplacementsList = new ArrayList<>();
         nodeReplacementsList.add(mockNodeReplacement_1);
@@ -118,50 +118,21 @@ public class LamusAmsServiceBridgeTest {
         final URI oldNodeURI_1 = new URI(UUID.randomUUID().toString());
         final URI oldNodeURI_2 = new URI(UUID.randomUUID().toString());
         
-        final Set<URI> versionedNodes = new LinkedHashSet<>();
+        final Collection<URI> versionedNodes = new ArrayList<>();
         versionedNodes.add(oldNodeURI_1);
         versionedNodes.add(oldNodeURI_2);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockNodeReplacement_1).getOldNodeURI(); will(returnValue(oldNodeURI_1));
-            oneOf(mockNodeReplacement_2).getOldNodeURI(); will(returnValue(oldNodeURI_2));
-            
-            oneOf(mockAmsRemoteService).triggerRightsRecalculationWithVersionedNodes(topNode, versionedNodes);
-        }});
-        
-        amsServiceBridge.triggerAccessRightsRecalculationWithVersionedNodes(topNode, nodeReplacementsList);
-    }
-    
-    @Test
-    public void triggerAccessRightsRecalculationForVersionedNodes() throws URISyntaxException {
-        
-        final URI topNode = new URI(UUID.randomUUID().toString());
-        
-        final Set<URI> recalculationTargetURIs = new HashSet<>();
-        recalculationTargetURIs.add(topNode);
-        
-        final Collection<WorkspaceNodeReplacement> nodeReplacementsList = new ArrayList<>();
-        nodeReplacementsList.add(mockNodeReplacement_1);
-        nodeReplacementsList.add(mockNodeReplacement_2);
-        
-        final URI oldNodeURI_1 = new URI(UUID.randomUUID().toString());
-        final URI oldNodeURI_2 = new URI(UUID.randomUUID().toString());
-        
-        final Set<URI> versionedNodes = new HashSet<>();
-        versionedNodes.add(oldNodeURI_1);
-        versionedNodes.add(oldNodeURI_2);
-        
-        context.checking(new Expectations() {{
+            oneOf(mockAmsRemoteService).triggerRightsRecalculation(recalculationTargets, Boolean.TRUE, Boolean.TRUE);
             
             oneOf(mockNodeReplacement_1).getOldNodeURI(); will(returnValue(oldNodeURI_1));
             oneOf(mockNodeReplacement_2).getOldNodeURI(); will(returnValue(oldNodeURI_2));
             
-            oneOf(mockAmsRemoteService).triggerRightsRecalculationForVersionedNodes(versionedNodes, Boolean.TRUE, Boolean.FALSE);
-            oneOf(mockAmsRemoteService).triggerRightsRecalculation(recalculationTargetURIs, Boolean.FALSE, Boolean.TRUE);
+            oneOf(mockAmsRemoteService).triggerRightsRecalculation(versionedNodes, Boolean.TRUE, Boolean.TRUE);
         }});
         
-        amsServiceBridge.triggerAccessRightsRecalculationForVersionedNodes(nodeReplacementsList, topNode);
+        amsServiceBridge.triggerAccessRightsRecalculationWithVersionedNodes(workspaceRootNodeURI, nodeReplacementsList);
     }
     
     @Test

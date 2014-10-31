@@ -57,17 +57,6 @@ public interface AmsServiceBridge extends Serializable {
     public void triggerAccessRightsRecalculationWithVersionedNodes(URI topNode, Collection<WorkspaceNodeReplacement> nodeReplacements);
     
     /**
-     * Triggers the recalculation of the resource access rights for the versioned nodes,
-     * propagate them to the Apache htaccess file and signal the webserver.
-     * In this case, the database transcription will be triggered for all nodes first,
-     * and only afterwards the htaccess file will be transcribed.
-     * 
-     * @param nodeReplacements Collection of node replacements
-     * @param topNode Top node for the recalculation
-     */
-    public void triggerAccessRightsRecalculationForVersionedNodes(Collection<WorkspaceNodeReplacement> nodeReplacements, URI topNode);
-    
-    /**
      * Triggers the node replacements in AMS, specifically copying and setting
      * the appropriate rules for the replaced nodes and their new versions.
      * 

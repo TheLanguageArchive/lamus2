@@ -79,7 +79,7 @@ public class LamusJsonTransformationHandlerTest {
         URI secondNewNodeURI = new URI(UUID.randomUUID().toString());
         WorkspaceNodeReplacement secondNodeReplacement = new LamusWorkspaceNodeReplacement(secondOldNodeURI, secondNewNodeURI);
         
-        Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<>();
         nodeReplacementCollection.add(firstNodeReplacement);
         nodeReplacementCollection.add(secondNodeReplacement);
 
@@ -111,7 +111,7 @@ public class LamusJsonTransformationHandlerTest {
         String secondReplacementStatus = "oK";
         WorkspaceNodeReplacement secondNodeReplacement = new LamusWorkspaceNodeReplacement(secondOldNodeURI, secondNewNodeURI, secondReplacementStatus.toUpperCase());
         
-        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<>();
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         expectedNodeReplacementCollection.add(secondNodeReplacement);
 
@@ -150,7 +150,7 @@ public class LamusJsonTransformationHandlerTest {
         String firstReplacementStatus = "Ok";
         WorkspaceNodeReplacement firstNodeReplacement = new LamusWorkspaceNodeReplacement(firstOldNodeURI, firstNewNodeURI, firstReplacementStatus.toUpperCase());
         
-        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<>();
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
@@ -186,7 +186,7 @@ public class LamusJsonTransformationHandlerTest {
         String secondReplacementError = "reference is invalid for ArchiveObjectDaoImpl";
         WorkspaceNodeReplacement secondNodeReplacement = new LamusWorkspaceNodeReplacement(secondOldNodeURI, secondNewNodeURI, secondReplacementStatus.toUpperCase(), secondReplacementError);
         
-        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        Collection<WorkspaceNodeReplacement> expectedNodeReplacementCollection = new ArrayList<>();
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         expectedNodeReplacementCollection.add(secondNodeReplacement);
 
@@ -226,13 +226,10 @@ public class LamusJsonTransformationHandlerTest {
         URI crawlerRootUri = new URI("hdl:" + UUID.randomUUID().toString());
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder crawlerStartObjectBuilder = Json.createObjectBuilder();
-        
-        crawlerStartObjectBuilder
+
+        mainObjectBuilder
                 .add("id", crawlerId)
                 .add("root", crawlerRootUri.toString());
-        
-        mainObjectBuilder.add("crawlerStart", crawlerStartObjectBuilder);
         
         JsonObject crawlerStartObject = mainObjectBuilder.build();
         
@@ -259,7 +256,6 @@ public class LamusJsonTransformationHandlerTest {
         long runtime = 10000;
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder detailedCrawlerStateObjectBuilder = Json.createObjectBuilder();
         JsonObjectBuilder stateObjectBuilder = Json.createObjectBuilder();
         
         stateObjectBuilder
@@ -276,8 +272,7 @@ public class LamusJsonTransformationHandlerTest {
                 .add("ended", ended)
                 .add("runtime", runtime);
         
-        detailedCrawlerStateObjectBuilder.add("state", stateObjectBuilder);
-        mainObjectBuilder.add("detailedCrawlerState", detailedCrawlerStateObjectBuilder);
+        mainObjectBuilder.add("state", stateObjectBuilder);
         
         JsonObject detailedCrawlerStateObject = mainObjectBuilder.build();
         

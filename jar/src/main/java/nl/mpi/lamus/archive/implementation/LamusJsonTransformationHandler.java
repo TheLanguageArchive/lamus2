@@ -71,7 +71,7 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     @Override
     public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject jsonObject) throws URISyntaxException {
         
-        Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<WorkspaceNodeReplacement>();
+        Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<>();
         
         JsonObject created = jsonObject.getJsonObject("created");
         
@@ -103,9 +103,7 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     @Override
     public String getCrawlerIdFromJsonObject(JsonObject jsonObject) {
         
-        JsonObject startCrawlObject = jsonObject.getJsonObject("crawlerStart");
-        
-        return startCrawlObject.getString("id");
+        return jsonObject.getString("id");
     }
 
     /**
@@ -114,10 +112,9 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     @Override
     public String getCrawlerStateFromJsonObject(JsonObject crawlerStateJsonObject) {
         
-        JsonObject detailedCrawlerStateObject = crawlerStateJsonObject.getJsonObject("detailedCrawlerState");
-        JsonObject stateObject = detailedCrawlerStateObject.getJsonObject("state");
+        JsonObject detailedCrawlerStateObject = crawlerStateJsonObject.getJsonObject("state");
         
-        return stateObject.getString("state");
+        return detailedCrawlerStateObject.getString("state");
     }
     
     

@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.ams;
+package nl.mpi.lamus.ams.implementation;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,18 +33,15 @@ import nl.mpi.corpusstructure.NodeIdUtils;
 import nl.mpi.lat.ams.AmsLicense;
 import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
-import nl.mpi.lat.ams.export.RecalcTriggerService;
 import nl.mpi.lat.ams.model.License;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-import nl.mpi.lat.auth.authorization.export.AuthorizationExportService;
 import nl.mpi.lat.auth.principal.LatUser;
 import nl.mpi.lat.auth.principal.PrincipalService;
 import nl.mpi.lat.fabric.FabricService;
 import nl.mpi.lat.fabric.NodeID;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,23 +59,14 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
     private FabricService fabricService;
     @Autowired
     private AdvAuthorizationService authorizationService;
-    @Autowired
-    @Qualifier("integratedExportSrv")
-    private AuthorizationExportService integratedExportService;
-    @Autowired
-    @Qualifier("cachedCorpusDbExportSrv")
-    private AuthorizationExportService cachedCorpusDbExportService;
-    @Autowired
-    @Qualifier("webserverExportSrv")
-    private AuthorizationExportService webserverExportService;
-    @Autowired
-    private RecalcTriggerService recalcTriggerService;
 
     @Autowired
     private CorpusStructureProvider corpusStructureProvider;
     @Autowired
     private NodeResolver nodeResolver;
-
+    @Autowired
+    private AmsFakeRemoteServiceHelper remoteServiceHelper;
+    
     
     @Override
     public List<AmsLicense> getLicenseAcceptance(String nodeid) {
@@ -133,76 +123,22 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
     @Override
     public void triggerRightsRecalculation(Collection<URI> nodeURIs, boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription) {
         
-        // selecting one of the available authorization export services
-        AuthorizationExportService selectedExportService = selectExportService(triggerCorpusStructureTranscription, triggerWebServerTranscription);
-        
-        // converting the URI collection into a set of node IDs
-        Set<NodeID> targetNodeIDs = new HashSet<>();
-        for(URI nodeURI : nodeURIs) {
-            CorpusNode node = corpusStructureProvider.getNode(nodeURI);
-            String nodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(node)));
-            targetNodeIDs.add(fabricService.newNodeID(nodeID));
-        }
-        
+        // converting the URI collection into a string with appended node IDs
+        String targetNodeIDs = remoteServiceHelper.getTargetNodeIDsAsString(nodeURIs);
         
         //TODO force recalculation?
-        
-        recalcTriggerService.triggerRecalculation(selectedExportService, targetNodeIDs, false);
-    }
-
-    @Override
-    public void triggerRightsRecalculationWithVersionedNodes(URI topNodeURI, Collection<URI> versionedNodeURIs) {
-        
-        // converting the URI collection into a set of node IDs
-        Set<NodeID> targetNodeIDs = new LinkedHashSet<>();
-        CorpusNode topNode = corpusStructureProvider.getNode(topNodeURI);
-        String topNodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(topNode)));
-        targetNodeIDs.add(fabricService.newNodeID(topNodeID));
-        
-        recalcTriggerService.triggerRecalculation(integratedExportService, targetNodeIDs, false);
-        
-        Set<NodeID> versionedNodeIDs = new LinkedHashSet<>();
-        for(URI currentNodeURI : versionedNodeURIs) {
-            CorpusNode currentNode = corpusStructureProvider.getNode(currentNodeURI);
-            String currentNodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(currentNode)));
-            versionedNodeIDs.add(fabricService.newNodeID(currentNodeID));
+        try {
+            URL urlToTriggerRecalc = remoteServiceHelper.getRecalcUrl(triggerCorpusStructureTranscription, triggerWebServerTranscription, targetNodeIDs);
+            remoteServiceHelper.sendCallToAccessRightsManagementSystem(urlToTriggerRecalc);
+        } catch (UnsupportedEncodingException | MalformedURLException ex) {
+            throw new RuntimeException("Error constructing AMS recalculation URL", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Error invoking AMS rights recalculation", ex);
         }
-        
-        //TODO force recalculation?
-        
-        recalcTriggerService.triggerRecalculation(integratedExportService, versionedNodeIDs, false);
-    }
-
-    @Override
-    public void triggerRightsRecalculationForVersionedNodes(Collection<URI> nodeURIs, boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription) {
-        
-        // selecting one of the available authorization export services
-        AuthorizationExportService selectedExportService = selectExportService(triggerCorpusStructureTranscription, triggerWebServerTranscription);
-        
-        // converting the URI collection into a set of node IDs
-        Set<NodeID> targetNodeIDs = new HashSet<>();
-        for(URI nodeURI : nodeURIs) {
-            CorpusNode node = corpusStructureProvider.getNode(nodeURI);
-            String nodeID = NodeIdUtils.TONODEID(Integer.parseInt(nodeResolver.getId(node)));
-            targetNodeIDs.add(fabricService.newNodeID(nodeID));
-        }
-        
-        //TODO force recalculation?
-        
-        recalcTriggerService.triggerRecalculation(selectedExportService, targetNodeIDs, false);
     }
     
-    private AuthorizationExportService selectExportService(boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription) {
-        
-        if(triggerCorpusStructureTranscription && triggerWebServerTranscription) {
-            return integratedExportService;
-        } else if(triggerCorpusStructureTranscription) {
-            return cachedCorpusDbExportService;
-        } else if(triggerWebServerTranscription) {
-            return webserverExportService;
-        } else {
-            throw new IllegalArgumentException("Both 'triggerCorpusStructureTranscription' and 'triggerWebServerTranscription' are false. At least one should be true.");
-        }
-    }
+    
+    
+    
     
 }

@@ -1,13 +1,11 @@
-package nl.mpi.lamus.ams;
+package nl.mpi.lamus.ams.implementation;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
+import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lat.ams.IAmsRemoteService;
 import org.slf4j.Logger;
@@ -69,7 +67,7 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
         
         logger.debug("Triggering access rights recalculation for node {}", topNode);
         
-        Set<URI> targetURIs = new HashSet<>();
+        Collection<URI> targetURIs = new ArrayList<>();
         targetURIs.add(topNode);
         
         amsRemoteService.triggerRightsRecalculation(targetURIs, true, true);
@@ -83,33 +81,16 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
         
         logger.debug("Triggering access rights recalculation for top node and versioned nodes");
         
-        Set<URI> versionedNodes = new LinkedHashSet<>();
+        triggerAccessRightsRecalculation(topNode);
+        
+        Collection<URI> versionedNodes = new ArrayList<>();
         for(WorkspaceNodeReplacement replacement : nodeReplacements) {
             versionedNodes.add(replacement.getOldNodeURI());
         }
         
-        amsRemoteService.triggerRightsRecalculationWithVersionedNodes(topNode, versionedNodes);
-    }
-
-    /**
-     * @see AmsServiceBridge#triggerAccessRightsRecalculationForVersionedNodes(java.util.Collection, java.net.URI)
-     */
-    @Override
-    public void triggerAccessRightsRecalculationForVersionedNodes(Collection<WorkspaceNodeReplacement> nodeReplacements, URI topNode) {
         
-        logger.debug("Triggering access rights recalculation for versioned nodes");
-        
-        Set<URI> versionedNodes = new HashSet<>();
-        for(WorkspaceNodeReplacement replacement : nodeReplacements) {
-            versionedNodes.add(replacement.getOldNodeURI());
-        }
-        
-        amsRemoteService.triggerRightsRecalculationForVersionedNodes(versionedNodes, true, false);
-        
-        Set<URI> targetURIs = new HashSet<>();
-        targetURIs.add(topNode);
-        
-        amsRemoteService.triggerRightsRecalculation(targetURIs, false, true);
+        //TODO for the versioned nodes, do it like this? or separate the recalculations (CSDB and Apache)?
+        amsRemoteService.triggerRightsRecalculation(versionedNodes, true, true);
     }
 
     /**

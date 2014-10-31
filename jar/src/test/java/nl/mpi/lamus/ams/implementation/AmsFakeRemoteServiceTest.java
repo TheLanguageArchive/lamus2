@@ -14,13 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.ams;
+package nl.mpi.lamus.ams.implementation;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,10 +34,6 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lat.ams.AmsLicense;
 import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
-import nl.mpi.lat.ams.export.RecalcTriggerService;
-import nl.mpi.lat.ams.export.impl.ApacheAclExportSrv;
-import nl.mpi.lat.ams.export.impl.CachedCorpusDbExportSrv;
-import nl.mpi.lat.ams.export.impl.IntegratedAuthExportSrv;
 import nl.mpi.lat.ams.model.License;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
@@ -78,13 +77,10 @@ public class AmsFakeRemoteServiceTest {
     @Mock PrincipalService mockPrincipalService;
     @Mock FabricService mockFabricService;
     @Mock AdvAuthorizationService mockAuthorizationService;
-    @Mock IntegratedAuthExportSrv mockIntegratedExportService;
-    @Mock CachedCorpusDbExportSrv mockCachedCorpusDbExportService;
-    @Mock ApacheAclExportSrv mockWebserverExportService;
-    @Mock RecalcTriggerService mockRecalcTriggerService;
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
+    @Mock AmsFakeRemoteServiceHelper mockRemoteServiceHelper;
     
     @Mock LatUser mockLatUser;
     @Mock CorpusNode mockOldNode_1;
@@ -134,13 +130,10 @@ public class AmsFakeRemoteServiceTest {
         ReflectionTestUtils.setField(amsFakeRemoteService, "principalService", mockPrincipalService);
         ReflectionTestUtils.setField(amsFakeRemoteService, "fabricService", mockFabricService);
         ReflectionTestUtils.setField(amsFakeRemoteService, "authorizationService", mockAuthorizationService);
-        ReflectionTestUtils.setField(amsFakeRemoteService, "integratedExportService", mockIntegratedExportService);
-        ReflectionTestUtils.setField(amsFakeRemoteService, "cachedCorpusDbExportService", mockCachedCorpusDbExportService);
-        ReflectionTestUtils.setField(amsFakeRemoteService, "webserverExportService", mockWebserverExportService);
-        ReflectionTestUtils.setField(amsFakeRemoteService, "recalcTriggerService", mockRecalcTriggerService);
         
         ReflectionTestUtils.setField(amsFakeRemoteService, "corpusStructureProvider", mockCorpusStructureProvider);
         ReflectionTestUtils.setField(amsFakeRemoteService, "nodeResolver", mockNodeResolver);
+        ReflectionTestUtils.setField(amsFakeRemoteService, "remoteServiceHelper", mockRemoteServiceHelper);
     }
     
     @After
@@ -253,190 +246,153 @@ public class AmsFakeRemoteServiceTest {
     }
 
     @Test
-    public void triggerRightsRecalculationIntegratedService() {
+    public void triggerRightsRecalculation() throws UnsupportedEncodingException, MalformedURLException, IOException {
 
         final Collection<URI> targetURIs = new ArrayList<>();
         final URI nodeURI_1 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_1 = "11";
         final String nodeMpiID_1 = "MPI11#";
         targetURIs.add(nodeURI_1);
         final URI nodeURI_2 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_2 = "12";
         final String nodeMpiID_2 = "MPI12#";
         targetURIs.add(nodeURI_2);
         
-        final Set<NodeID> targetNodeIDs = new HashSet<>();
-        targetNodeIDs.add(mockNodeID_1);
-        targetNodeIDs.add(mockNodeID_2);
+        final StringBuilder targetNodeIDs = new StringBuilder();
+        targetNodeIDs.append(nodeMpiID_1);
+        targetNodeIDs.append(nodeMpiID_2);
+        
+        final URL recalcUrl = new URL("http://some/url/recalc/bla/bla");
+        
+        final boolean triggerCsTranscription = Boolean.TRUE;
+        final boolean triggerWsTranscription = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
-            //loop - first iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_1); will(returnValue(mockNode_1));
-            oneOf(mockNodeResolver).getId(mockNode_1); will(returnValue(nodeID_1));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_1); will(returnValue(mockNodeID_1));
+            oneOf(mockRemoteServiceHelper).getTargetNodeIDsAsString(targetURIs);
+                will(returnValue(targetNodeIDs.toString()));
+            oneOf(mockRemoteServiceHelper).getRecalcUrl(triggerCsTranscription, triggerWsTranscription, targetNodeIDs.toString());
+                will(returnValue(recalcUrl));
+            oneOf(mockRemoteServiceHelper).sendCallToAccessRightsManagementSystem(recalcUrl);
             
-            //loop - second iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_2); will(returnValue(mockNode_2));
-            oneOf(mockNodeResolver).getId(mockNode_2); will(returnValue(nodeID_2));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_2); will(returnValue(mockNodeID_2));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockIntegratedExportService, targetNodeIDs, false);
         }});
         
-        amsFakeRemoteService.triggerRightsRecalculation(targetURIs, true, true);
+        amsFakeRemoteService.triggerRightsRecalculation(targetURIs, triggerCsTranscription, triggerWsTranscription);
     }
     
     @Test
-    public void triggerRightsRecalculationCachedService() {
+    public void triggerRightsRecalculationUnsupportedEncodingException() throws UnsupportedEncodingException, MalformedURLException {
         
         final Collection<URI> targetURIs = new ArrayList<>();
         final URI nodeURI_1 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_1 = "11";
         final String nodeMpiID_1 = "MPI11#";
         targetURIs.add(nodeURI_1);
         final URI nodeURI_2 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_2 = "12";
         final String nodeMpiID_2 = "MPI12#";
         targetURIs.add(nodeURI_2);
         
-        final Set<NodeID> targetNodeIDs = new HashSet<>();
-        targetNodeIDs.add(mockNodeID_1);
-        targetNodeIDs.add(mockNodeID_2);
+        final StringBuilder targetNodeIDs = new StringBuilder();
+        targetNodeIDs.append(nodeMpiID_1);
+        targetNodeIDs.append(nodeMpiID_2);
+        
+        final UnsupportedEncodingException expectedCause = new UnsupportedEncodingException();
+        final String expectedMessage = "Error constructing AMS recalculation URL";
+        
+        final boolean triggerCsTranscription = Boolean.TRUE;
+        final boolean triggerWsTranscription = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
-            //loop - first iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_1); will(returnValue(mockNode_1));
-            oneOf(mockNodeResolver).getId(mockNode_1); will(returnValue(nodeID_1));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_1); will(returnValue(mockNodeID_1));
-            
-            //loop - second iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_2); will(returnValue(mockNode_2));
-            oneOf(mockNodeResolver).getId(mockNode_2); will(returnValue(nodeID_2));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_2); will(returnValue(mockNodeID_2));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockCachedCorpusDbExportService, targetNodeIDs, false);
+            oneOf(mockRemoteServiceHelper).getTargetNodeIDsAsString(targetURIs);
+                will(returnValue(targetNodeIDs.toString()));
+            oneOf(mockRemoteServiceHelper).getRecalcUrl(triggerCsTranscription, triggerWsTranscription, targetNodeIDs.toString());
+                will(throwException(expectedCause));
         }});
         
-        amsFakeRemoteService.triggerRightsRecalculation(targetURIs, true, false);
+        try {
+            amsFakeRemoteService.triggerRightsRecalculation(targetURIs, triggerCsTranscription, triggerWsTranscription);
+            fail("should have thrown exception");
+        } catch(RuntimeException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
     }
     
     @Test
-    public void triggerRightsRecalculationApacheService() {
+    public void triggerRightsRecalculationMalformedURLException() throws UnsupportedEncodingException, MalformedURLException {
         
         final Collection<URI> targetURIs = new ArrayList<>();
         final URI nodeURI_1 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_1 = "11";
         final String nodeMpiID_1 = "MPI11#";
         targetURIs.add(nodeURI_1);
         final URI nodeURI_2 = URI.create(UUID.randomUUID().toString());
-        final String nodeID_2 = "12";
         final String nodeMpiID_2 = "MPI12#";
         targetURIs.add(nodeURI_2);
         
-        final Set<NodeID> targetNodeIDs = new HashSet<>();
-        targetNodeIDs.add(mockNodeID_1);
-        targetNodeIDs.add(mockNodeID_2);
+        final StringBuilder targetNodeIDs = new StringBuilder();
+        targetNodeIDs.append(nodeMpiID_1);
+        targetNodeIDs.append(nodeMpiID_2);
+        
+        final MalformedURLException expectedCause = new MalformedURLException();
+        final String expectedMessage = "Error constructing AMS recalculation URL";
+        
+        final boolean triggerCsTranscription = Boolean.TRUE;
+        final boolean triggerWsTranscription = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
-            //loop - first iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_1); will(returnValue(mockNode_1));
-            oneOf(mockNodeResolver).getId(mockNode_1); will(returnValue(nodeID_1));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_1); will(returnValue(mockNodeID_1));
-            
-            //loop - second iteration
-            oneOf(mockCorpusStructureProvider).getNode(nodeURI_2); will(returnValue(mockNode_2));
-            oneOf(mockNodeResolver).getId(mockNode_2); will(returnValue(nodeID_2));
-            oneOf(mockFabricService).newNodeID(nodeMpiID_2); will(returnValue(mockNodeID_2));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockWebserverExportService, targetNodeIDs, false);
+            oneOf(mockRemoteServiceHelper).getTargetNodeIDsAsString(targetURIs);
+                will(returnValue(targetNodeIDs.toString()));
+            oneOf(mockRemoteServiceHelper).getRecalcUrl(triggerCsTranscription, triggerWsTranscription, targetNodeIDs.toString());
+                will(throwException(expectedCause));
         }});
         
-        amsFakeRemoteService.triggerRightsRecalculation(targetURIs, false, true);
+        try {
+            amsFakeRemoteService.triggerRightsRecalculation(targetURIs, triggerCsTranscription, triggerWsTranscription);
+            fail("should have thrown exception");
+        } catch(RuntimeException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
     }
-
+    
     @Test
-    public void triggerRightsRecalculationWithVersionedNodes() {
-
-        final URI targetURI = URI.create(UUID.randomUUID().toString());
-        final String targetID = "11";
-        final String targetMpiID = "MPI11#";
-        final Collection<URI> versionedNodeURIs = new ArrayList<>();
-        final URI versionedURI_1 = URI.create(UUID.randomUUID().toString());
-        final String versionedID_1 = "12";
-        final String versionedMpiID_1 = "MPI12#";
-        final URI versionedURI_2 = URI.create(UUID.randomUUID().toString());
-        final String versionedID_2 = "13";
-        final String versionedMpiID_2 = "MPI13#";
-        versionedNodeURIs.add(versionedURI_1);
-        versionedNodeURIs.add(versionedURI_2);
+    public void triggerRightsRecalculationIOException() throws UnsupportedEncodingException, MalformedURLException, IOException {
         
-        final Set<NodeID> targetNodeIDs = new HashSet<>();
-        targetNodeIDs.add(mockNodeID_1);
+        final Collection<URI> targetURIs = new ArrayList<>();
+        final URI nodeURI_1 = URI.create(UUID.randomUUID().toString());
+        final String nodeMpiID_1 = "MPI11#";
+        targetURIs.add(nodeURI_1);
+        final URI nodeURI_2 = URI.create(UUID.randomUUID().toString());
+        final String nodeMpiID_2 = "MPI12#";
+        targetURIs.add(nodeURI_2);
         
-        final Set<NodeID> versionedTargetNodeIDs = new HashSet<>();
-        versionedTargetNodeIDs.add(mockVersionedNodeID_1);
-        versionedTargetNodeIDs.add(mockVersionedNodeID_2);
+        final StringBuilder targetNodeIDs = new StringBuilder();
+        targetNodeIDs.append(nodeMpiID_1);
+        targetNodeIDs.append(nodeMpiID_2);
+        
+        final URL recalcUrl = new URL("http://some/url/recalc/bla/bla");
+        
+        final IOException expectedCause = new IOException();
+        final String expectedMessage = "Error invoking AMS rights recalculation";
+        
+        final boolean triggerCsTranscription = Boolean.TRUE;
+        final boolean triggerWsTranscription = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
-            oneOf(mockCorpusStructureProvider).getNode(targetURI); will(returnValue(mockNode_1));
-            oneOf(mockNodeResolver).getId(mockNode_1); will(returnValue(targetID));
-            oneOf(mockFabricService).newNodeID(targetMpiID); will(returnValue(mockNodeID_1));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockIntegratedExportService, targetNodeIDs, false);
-            
-            //loop - first iteration
-            oneOf(mockCorpusStructureProvider).getNode(versionedURI_1); will(returnValue(mockVersionedNode_1));
-            oneOf(mockNodeResolver).getId(mockVersionedNode_1); will(returnValue(versionedID_1));
-            oneOf(mockFabricService).newNodeID(versionedMpiID_1); will(returnValue(mockVersionedNodeID_1));
-            
-            //loop - second iteration
-            oneOf(mockCorpusStructureProvider).getNode(versionedURI_2); will(returnValue(mockVersionedNode_2));
-            oneOf(mockNodeResolver).getId(mockVersionedNode_2); will(returnValue(versionedID_2));
-            oneOf(mockFabricService).newNodeID(versionedMpiID_2); will(returnValue(mockVersionedNodeID_2));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockIntegratedExportService, versionedTargetNodeIDs, false);
+            oneOf(mockRemoteServiceHelper).getTargetNodeIDsAsString(targetURIs);
+                will(returnValue(targetNodeIDs.toString()));
+            oneOf(mockRemoteServiceHelper).getRecalcUrl(triggerCsTranscription, triggerWsTranscription, targetNodeIDs.toString());
+                will(returnValue(recalcUrl));
+            oneOf(mockRemoteServiceHelper).sendCallToAccessRightsManagementSystem(recalcUrl);
+                will(throwException(expectedCause));
         }});
         
-        
-        amsFakeRemoteService.triggerRightsRecalculationWithVersionedNodes(targetURI, versionedNodeURIs);
-    }
-
-    @Test
-    public void testTriggerRightsRecalculationForVersionedNodes() {
-        
-        final Collection<URI> versionedNodeURIs = new ArrayList<>();
-        final URI versionedURI_1 = URI.create(UUID.randomUUID().toString());
-        final String versionedID_1 = "12";
-        final String versionedMpiID_1 = "MPI12#";
-        final URI versionedURI_2 = URI.create(UUID.randomUUID().toString());
-        final String versionedID_2 = "13";
-        final String versionedMpiID_2 = "MPI13#";
-        versionedNodeURIs.add(versionedURI_1);
-        versionedNodeURIs.add(versionedURI_2);
-        
-        final Set<NodeID> versionedTargetNodeIDs = new HashSet<>();
-        versionedTargetNodeIDs.add(mockVersionedNodeID_1);
-        versionedTargetNodeIDs.add(mockVersionedNodeID_2);
-        
-        context.checking(new Expectations() {{
-            
-            //loop - first iteration
-            oneOf(mockCorpusStructureProvider).getNode(versionedURI_1); will(returnValue(mockVersionedNode_1));
-            oneOf(mockNodeResolver).getId(mockVersionedNode_1); will(returnValue(versionedID_1));
-            oneOf(mockFabricService).newNodeID(versionedMpiID_1); will(returnValue(mockVersionedNodeID_1));
-            
-            //loop - second iteration
-            oneOf(mockCorpusStructureProvider).getNode(versionedURI_2); will(returnValue(mockVersionedNode_2));
-            oneOf(mockNodeResolver).getId(mockVersionedNode_2); will(returnValue(versionedID_2));
-            oneOf(mockFabricService).newNodeID(versionedMpiID_2); will(returnValue(mockVersionedNodeID_2));
-            
-            oneOf(mockRecalcTriggerService).triggerRecalculation(mockIntegratedExportService, versionedTargetNodeIDs, false);
-        }});
-        
-        amsFakeRemoteService.triggerRightsRecalculationForVersionedNodes(versionedNodeURIs, true, true);
+        try {
+            amsFakeRemoteService.triggerRightsRecalculation(targetURIs, triggerCsTranscription, triggerWsTranscription);
+            fail("should have thrown exception");
+        } catch(RuntimeException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
     }
 }

@@ -17,6 +17,7 @@ package nl.mpi.lamus.spring;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +129,7 @@ public class LamusProperties implements ServletContextAware {
         
         //TODO Check the validity of the string (with regular expressions, for instance)
         
-        Map<String, String> mapToReturn = new HashMap<String, String>();
+        Map<String, String> mapToReturn = new HashMap<>();
         
         String[] foldersAndConfigFilesArray = customTypecheckerFoldersAndConfigFiles.split(";");
         for(String foldersAndConfigFile : foldersAndConfigFilesArray) {
@@ -317,11 +318,43 @@ public class LamusProperties implements ServletContextAware {
         
         String[] usernames = mUsers.split(",");
         if(usernames.length > 0) {
-            for(String username : usernames) {
-                collectionToReturn.add(username);
-            }
+            collectionToReturn.addAll(Arrays.asList(usernames));
         }
         
         return collectionToReturn;
     }
+    
+    //AMS2
+    
+    @Bean
+    @Qualifier("authBaseUrl")
+    public String authBaseUrl() {
+        return servletContext.getInitParameter("nl.mpi.auth.baseurl");
+    }
+    
+    @Bean
+    @Qualifier("authRecalcUrl")
+    public String authRecalcUrl() {
+        return servletContext.getInitParameter("nl.mpi.auth.recalc.url");
+    }
+    
+    @Bean
+    @Qualifier("authRecalcCsdbUrl")
+    public String authRecalcCsdbUrl() {
+        return servletContext.getInitParameter("nl.mpi.auth.recalc_csdb.url");
+    }
+    
+    @Bean
+    @Qualifier("authRecalcWebserverUrl")
+    public String authRecalcWebserverUrl() {
+        return servletContext.getInitParameter("nl.mpi.auth.recalc_webserver.url");
+    }
+    
+    @Bean
+    @Qualifier("authRecalcParam")
+    public String authRecalcParam() {
+        return servletContext.getInitParameter("nl.mpi.auth.recalc.param");
+    }
+    
+    
 }
