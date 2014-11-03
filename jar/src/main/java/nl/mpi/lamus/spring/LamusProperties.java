@@ -329,7 +329,7 @@ public class LamusProperties implements ServletContextAware {
     @Bean
     @Qualifier("authBaseUrl")
     public String authBaseUrl() {
-        return servletContext.getInitParameter("nl.mpi.auth.baseurl");
+        return servletContext.getInitParameter("nl.mpi.auth.cmdi.baseurl");
     }
     
     @Bean

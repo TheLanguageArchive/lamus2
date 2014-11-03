@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.net.URI;
 import java.util.Collection;
 import javax.annotation.Resource;
+import nl.mpi.archiving.corpusstructure.adapter.AdapterUtils;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
@@ -94,12 +95,12 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             throw new IllegalArgumentException("Selected node should be Metadata: " + archiveNodeURI);
             
         }
-        
-        //TODO replaced the usage of AMS Bridge (and the associated service because it wasn't working properly due to some hibernate lazy loading issues of the users...)
-        //TODO should use some service instead (maybe provided by the corpus structure)
+
+        String nodeID = nodeResolver.getId(node);
+        URI nodeID_URI = AdapterUtils.toNodeUri(Integer.parseInt(nodeID));
         
         logger.debug("Ensuring that node '{}' is accessible to user {}", archiveNodeURI, userID);
-        ensureWriteAccessToNode(userID, archiveNodeURI);
+        ensureWriteAccessToNode(userID, nodeID_URI);
         
         //TODO Should it take into account the "sessions" folders, where write access is always true?
         
@@ -118,9 +119,11 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         for(CorpusNode descendant : descendants) {
             if(descendant.isOnSite()) {
                 
-                URI descendantPid = nodeResolver.getPID(descendant);
+                String descendantID = nodeResolver.getId(descendant);
+                URI descendantID_URI = AdapterUtils.toNodeUri(Integer.parseInt(descendantID));
+                ensureWriteAccessToNode(userID, descendantID_URI);
                 
-                ensureWriteAccessToNode(userID, descendantPid);
+                URI descendantPid = nodeResolver.getPID(descendant);
                 ensureNodeIsNotLocked(descendantPid);
             }
         }
