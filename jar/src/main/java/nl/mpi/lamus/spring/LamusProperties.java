@@ -357,4 +357,11 @@ public class LamusProperties implements ServletContextAware {
     }
     
     
+    // Filesystem permissions adjustment
+    
+    @Bean
+    @Qualifier("permissionConfigFile")
+    public File permissionConfigFile() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.permissionConfigFile_CMDI"));
+    }
 }

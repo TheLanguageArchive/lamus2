@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
-import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
+import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.VersionCreationException;
@@ -70,10 +70,10 @@ public class WorkspaceExportRunnerTest {
     
     @Mock Workspace mockWorkspace;
     @Mock WorkspaceDao mockWorkspaceDao;
-//    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock NodeExporterFactory mockNodeExporterFactory;
     @Mock UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
+    @Mock PermissionAdjuster mockPermissionAdjuster;
     
     @Mock NodeExporter mockNodeExporter;
     
@@ -97,7 +97,7 @@ public class WorkspaceExportRunnerTest {
         workspaceExportRunner = new WorkspaceExportRunner(
                 mockWorkspaceDao, mockNodeExporterFactory,
                 mockUnlinkedAndDeletedNodesExportHandler,
-                mockCorpusStructureServiceBridge);
+                mockCorpusStructureServiceBridge, mockPermissionAdjuster);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -116,19 +116,19 @@ public class WorkspaceExportRunnerTest {
         
         
         
-        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<>();
         
-        final int testChildWorkspaceNodeID = 10;
-        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
-        final URL testChildArchiveURL = testChildOriginURL;
+        final int wsNodeID = 10;
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL originURL = new URL("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURL;
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         workspaceNodes.add(testNode);
         
@@ -161,11 +161,15 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(returnValue(crawlerID));
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspace).setCrawlerID(crawlerID);
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
                 then(exporting.is("finished"));
         }});
         
@@ -222,19 +226,19 @@ public class WorkspaceExportRunnerTest {
         
         final int workspaceID = 1;
         
-        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<>();
         
-        final int testChildWorkspaceNodeID = 10;
-        final URI testChildArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL testChildWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL testChildOriginURL = new URL("http://some.url/someName.cmdi");
-        final URL testChildArchiveURL = testChildOriginURL;
+        final int wsNodeID = 10;
+        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URL originURL = new URL("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURL;
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, testChildWsURL, testChildArchiveURI, testChildArchiveURL, testChildOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
+        final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
         
         workspaceNodes.add(testNode);
         
@@ -260,7 +264,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(testChildArchiveURI); will(throwException(expectedCause));
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));
                 then(exporting.is("finished"));
         }});
         

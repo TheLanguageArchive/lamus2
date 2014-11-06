@@ -153,12 +153,17 @@ public class AddedNodeExporter implements NodeExporter {
     private File retrieveParentArchiveLocation(WorkspaceNode parentNode) throws WorkspaceExportException {
         
         File parentArchiveFile = null;
-        CorpusNode parentArchiveNode = corpusStructureProvider.getNode(parentNode.getArchiveURI());
-        if(parentArchiveNode != null) {
-            parentArchiveFile = nodeResolver.getLocalFile(parentArchiveNode);
-        } else {
+        
+        if(parentNode.getArchiveURI() != null) {
+                            
+            CorpusNode parentArchiveNode = corpusStructureProvider.getNode(parentNode.getArchiveURI());
+            if(parentArchiveNode != null) {
+                parentArchiveFile = nodeResolver.getLocalFile(parentArchiveNode);
+            }
+        }
+        
+        if(parentArchiveFile == null) {
             try {
-                //TODO MUDAR COMO NO OUTRO EXPORTER
                 parentArchiveFile = new File(archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI()));
             } catch (URISyntaxException ex) {
                 String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();

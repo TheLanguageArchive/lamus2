@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
+import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -42,6 +43,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private final NodeExporterFactory nodeExporterFactory;
     private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
+    private final PermissionAdjuster permissionAdjuster;
     
     private Workspace workspace;
 //    private boolean keepUnlinkedFiles;
@@ -49,11 +51,12 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
             UnlinkedAndDeletedNodesExportHandler dnExportHandler,
-            CorpusStructureServiceBridge csServiceBridge) {
+            CorpusStructureServiceBridge csServiceBridge, PermissionAdjuster permAdjuster) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
         this.unlinkedAndDeletedNodesExportHandler = dnExportHandler;
         this.corpusStructureServiceBridge = csServiceBridge;
+        this.permissionAdjuster = permAdjuster;
     }
     
     /**
@@ -136,12 +139,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         
 
         //TODO fix permissions
-        
-        //TODO call AMS recalculation
-        
-        
-        //update user/request information and send email
-
+        permissionAdjuster.adjustPermissions(workspace.getWorkspaceID());
         
         
         return Boolean.TRUE;

@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
@@ -113,18 +114,23 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), null);
         }
 
-        URL childURL = nodeResolver.getUrl(childCorpusNode);
-        if(childURL == null) {
+        File childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
+        if(childLocalFile == null) {
             String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
 
-        File childFile = nodeResolver.getLocalFile(childCorpusNode);
+        URL childURL;
+        try {
+            childURL = childLocalFile.toURI().toURL();
+        } catch (MalformedURLException ex) {
+            throw new UnsupportedOperationException("exception not handled yet");
+        }
 
         String childMimetype = referenceFromParent.getMimetype();
 
-        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childFile)) {
+        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childLocalFile)) {
             
             TypecheckedResults typecheckedResults = null;    
             InputStream childInputStream = null;
@@ -132,7 +138,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
                 childInputStream = nodeResolver.getInputStream(childCorpusNode);
                 
-                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childInputStream, childFile.getName());
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childInputStream, childLocalFile.getName());
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
@@ -143,7 +149,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
                 IOUtils.closeQuietly(childInputStream);
             }
             
-            nodeDataRetriever.verifyTypecheckedResults(childFile, referenceFromParent, typecheckedResults);
+            nodeDataRetriever.verifyTypecheckedResults(childLocalFile, referenceFromParent, typecheckedResults);
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
         //TODO needsProtection?

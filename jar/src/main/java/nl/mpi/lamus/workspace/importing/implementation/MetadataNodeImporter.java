@@ -130,6 +130,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         MetadataDocument childDocument = null;
         CorpusNode childCorpusNode = null;
+        File childLocalFile = null;
         try {
             
             childCorpusNode = corpusStructureProvider.getNode(childArchiveURI);
@@ -139,11 +140,18 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
                 throwWorkspaceImportException(errorMessage, null);
             }
             
-//            childArchiveURL = nodeResolver.getUrl(childCorpusNode);
-            URI childArchiveUrlUri = nodeResolver.getUrl(childCorpusNode, OutputFormat.CMDI);
-            childArchiveURL = childArchiveUrlUri.toURL();
+            
             childName = childCorpusNode.getName();
             childOnSite = childCorpusNode.isOnSite();
+            
+            if(childOnSite) {
+                childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
+                childArchiveURL = childLocalFile.toURI().toURL();
+            } else {
+                URI childArchiveUrlUri = nodeResolver.getUrl(childCorpusNode, OutputFormat.CMDI);
+                childArchiveURL = childArchiveUrlUri.toURL();
+            }
+            
             
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
@@ -163,8 +171,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         }
         
         try {
-            File archiveFile = nodeResolver.getLocalFile(childCorpusNode);
-            this.workspaceFileImporter.importMetadataFileToWorkspace(archiveFile, childNode, childDocument);
+            this.workspaceFileImporter.importMetadataFileToWorkspace(childLocalFile, childNode, childDocument);
             
             if(referenceFromParent != null) {
                 referenceFromParent.setLocation(childNode.getWorkspaceURL());

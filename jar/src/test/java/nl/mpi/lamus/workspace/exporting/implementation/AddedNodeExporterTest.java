@@ -143,7 +143,7 @@ public class AddedNodeExporterTest {
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
 
         final WorkspaceNode currentNode = getCurrentResourceNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.FALSE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -206,7 +206,7 @@ public class AddedNodeExporterTest {
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
 
         final WorkspaceNode currentNode = getCurrentResourceNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.FALSE);
         
         final boolean isFileMetadata = Boolean.FALSE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -271,7 +271,7 @@ public class AddedNodeExporterTest {
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -350,7 +350,7 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final URL nodeWsURL = currentNode.getWorkspaceURL();
         final String nodeWsPath = nodeWsURL.getPath();
@@ -389,7 +389,7 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -437,7 +437,7 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -479,7 +479,7 @@ public class AddedNodeExporterTest {
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -536,7 +536,7 @@ public class AddedNodeExporterTest {
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
-        final WorkspaceNode parentNode = getParentNode();
+        final WorkspaceNode parentNode = getParentNode(Boolean.TRUE);
         
         final boolean isFileMetadata = Boolean.TRUE;
         final URL nodeWsURL = currentNode.getWorkspaceURL();
@@ -615,14 +615,14 @@ public class AddedNodeExporterTest {
         
         if(parentExistsInArchive) {
             context.checking(new Expectations() {{
-                oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
+                exactly(2).of(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
                 oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
                 oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentArchiveLocalFile));
             }});
         } else {
             context.checking(new Expectations() {{
                 oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
-                oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(null));
+//                oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(null));
                 
                 oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveURL));
                 oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(parentArchiveURL.toURI());
@@ -828,7 +828,7 @@ public class AddedNodeExporterTest {
     
     
     
-    private WorkspaceNode getParentNode() throws MalformedURLException, URISyntaxException {
+    private WorkspaceNode getParentNode(boolean isInArchive) throws MalformedURLException, URISyntaxException {
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "parentNode";
@@ -836,7 +836,12 @@ public class AddedNodeExporterTest {
         final URL parentNodeWsURL = new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + File.separator + parentFilename);
         final URL parentNodeOriginURL = new URL("file:/archive/root/" + parentFilename);
         final URL parentNodeArchiveURL = parentNodeOriginURL;
-        final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI parentNodeArchiveURI;
+        if(isInArchive) {
+            parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        } else {
+            parentNodeArchiveURI = null;
+        }
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final String parentNodeFormat = "text/x-cmdi+xml";

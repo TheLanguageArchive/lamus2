@@ -19,7 +19,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -115,7 +114,7 @@ public class GeneralNodeExporter implements NodeExporter {
             if(corpusNode == null) {
                 String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
                 throwWorkspaceExportException(errorMessage, null);
-            }
+        }
             
             File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
             
@@ -201,7 +200,7 @@ public class GeneralNodeExporter implements NodeExporter {
             throwWorkspaceExportException(errorMessage, null);
         }
         File parentNodeArchiveFile = nodeResolver.getLocalFile(parentCorpusNode);
-            
+        
         
         ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(parentNode);
         String currentPathRelativeToParent = 

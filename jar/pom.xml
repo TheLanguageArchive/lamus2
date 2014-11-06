@@ -345,6 +345,17 @@
             <scope>provided</scope>
         </dependency>
         
+        <dependency>
+            <groupId>nl.mpi.jnatools</groupId>
+            <artifactId>jna</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.mpi.jnatools</groupId>
+            <artifactId>jnaChmodChgrp</artifactId>
+            <version>1.2</version>
+        </dependency>
+        
     </dependencies>
 
     <build>

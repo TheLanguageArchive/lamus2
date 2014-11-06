@@ -1,0 +1,7 @@
+# Example permissions config file for LAMUS 2
+# Syntax: Path-With-Wildcards Octal-Mode User-Ignored Group
+# Note: More specific rules overrule more generic rules.
+/archive/path/test/*.*  644 someuser somegroup
+/archive/path/test/photo_test/*.* 640 someuser somegroup
+/archive/path/test/photo_test/*.cmdi 644 someuser somegroup
+/archive/path/test/lamus_test/*.* 644 someuser someothergroup
