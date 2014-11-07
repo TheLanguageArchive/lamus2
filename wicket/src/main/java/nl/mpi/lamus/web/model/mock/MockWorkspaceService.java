@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -30,7 +29,7 @@ import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.apache.commons.fileupload.FileItem;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +209,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     }
 
     @Override
-    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
+    public Collection<UploadProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
