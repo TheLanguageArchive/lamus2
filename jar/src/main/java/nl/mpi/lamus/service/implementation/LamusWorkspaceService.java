@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -42,6 +41,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -328,7 +328,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#processUploadedFiles(java.lang.String, int, java.util.Collection)
      */
     @Override
-    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
+    public Collection<UploadProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
             throws IOException, TypeCheckerException, WorkspaceException {
         
         logger.debug("Triggered processing of uploaded files; userID: " + userID + "; workspaceID: " + workspaceID);

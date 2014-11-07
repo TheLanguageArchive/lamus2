@@ -18,7 +18,7 @@ package nl.mpi.lamus.workspace.upload;
 
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
@@ -38,10 +38,9 @@ public interface WorkspaceUploadReferenceHandler {
      * @param nodesToCheck Collection of uploaded nodes which are going to be checked for links between themselves
      * @param currentNode Node whose references need to be matched
      * @param currentDocument MetadataDocument corresponding to the current node
-     * @param failedLinks Collection containing the references which have been matched but failed to be linked
+     * @return Collection containing the links that were supposed to be made, but failed
      */
-    public void matchReferencesWithNodes(
+    public Collection<UploadProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
-            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
-            Collection<Reference> failedLinks);
+            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument);
 }

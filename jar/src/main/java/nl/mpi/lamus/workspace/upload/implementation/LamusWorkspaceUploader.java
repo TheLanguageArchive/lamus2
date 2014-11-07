@@ -24,8 +24,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -144,11 +142,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
      * @see WorkspaceUploader#processUploadedFiles(int, java.util.Collection)
      */
     @Override
-    public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+    public Collection<UploadProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
             throws IOException, TypeCheckerException, WorkspaceException {
         
-        // map containing the files that for some reason are not sucessfully processed, along with the reason for it
-        Map<File, String> failedFiles = new HashMap<>();
+        //collection containing all the upload problems
+        Collection<UploadProblem> allUploadProblems = new ArrayList<>();
+        
+        // collection containing the files that for some reason are not sucessfully processed, along with the reason for it
+        Collection<UploadProblem> failedFiles = new ArrayList<>();
         
         // collection containing the nodes that were eventually uploaded, to be used later for checking eventual links between them
         Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
@@ -172,7 +173,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             } catch (MalformedURLException ex) {
                 String errorMessage = "Error retrieving URL from file " + currentFile.getPath();
                 logger.error(errorMessage, ex);
-                failedFiles.put(currentFile, errorMessage);
+                failedFiles.add(new FileUploadProblem(currentFile, errorMessage, ex));
                 continue;
             }
             
@@ -197,7 +198,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             if(!isArchivable) {
                 String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;
                 logger.error(errorMessage);
-                failedFiles.put(currentFile, errorMessage);
+                failedFiles.add(new FileUploadProblem(currentFile, errorMessage, null));
                 
                 //remove unarchivable file after adding it to the collection of failed uploads
                 FileUtils.forceDelete(currentFile);
@@ -224,17 +225,12 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         //Searching for links among the uploaded files
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
+        Collection<UploadProblem> failedLinks = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
         
+        allUploadProblems.addAll(failedFiles);
+        allUploadProblems.addAll(failedLinks);
         
-        //TODO DO SOMETHING WITH NODES/REFERENCES THAT CANNOT BE LINKED...
-        //TODO DO SOMETHING WITH NODES/REFERENCES THAT CANNOT BE LINKED...
-        //TODO DO SOMETHING WITH NODES/REFERENCES THAT CANNOT BE LINKED...
-        
-        
-        
-        
-        return failedFiles;
+        return allUploadProblems;
     }
 
 }

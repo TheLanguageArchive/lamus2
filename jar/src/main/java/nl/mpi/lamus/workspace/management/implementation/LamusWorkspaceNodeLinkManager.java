@@ -119,10 +119,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
-        } catch (IOException ex) {
-            String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (MetadataException ex) {
+        } catch (IOException | MetadataException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
@@ -157,13 +154,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
             this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
                 
-        } catch (MetadataException ex) {
-            String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (IOException ex) {
-            String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (TransformerException ex) {
+        } catch (MetadataException | IOException | TransformerException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
@@ -198,10 +189,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         MetadataDocument tempParentDocument = null;
         try {
             tempParentDocument = this.metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
-        } catch (IOException ex) {
-            String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (MetadataException ex) {
+        } catch (IOException | MetadataException ex) {
             String errorMessage = "Error retrieving metadata document for node " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
@@ -229,13 +217,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
             this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
                 
-        } catch (MetadataException ex) {
-            String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (IOException ex) {
-            String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, workspaceID, ex);
-        } catch (TransformerException ex) {
+        } catch (MetadataException | IOException | TransformerException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
@@ -328,16 +310,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             workspaceDao.updateNodeArchiveUri(childNode);
             workspaceDao.updateNodeArchiveUrl(childNode);
             
-        } catch (IOException ex) {
-            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
-        } catch (MetadataException ex) {
-            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
-        } catch (URISyntaxException ex) {
-            String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
-            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
-        } catch (TransformerException ex) {
+        } catch (IOException | MetadataException | URISyntaxException | TransformerException ex) {
             String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         }

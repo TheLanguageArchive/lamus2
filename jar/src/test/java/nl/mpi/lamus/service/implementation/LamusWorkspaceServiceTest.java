@@ -27,7 +27,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
@@ -50,6 +49,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -84,7 +84,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
     @Mock private InputStream mockInputStream;
     @Mock private Collection<File> mockUploadedFiles;
-    @Mock private Map<File, String> mockFailedUploads;
+    @Mock private Collection<UploadProblem> mockFailedUploads;
 
     
     public LamusWorkspaceServiceTest() {
@@ -915,7 +915,7 @@ public class LamusWorkspaceServiceTest {
                 will(returnValue(mockFailedUploads));
         }});
         
-        Map<File, String> result = service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+        Collection<UploadProblem> result = service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
         
         assertEquals("Resulting map different from expected", mockFailedUploads, result);
     }

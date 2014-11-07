@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
@@ -78,14 +78,15 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     
     /**
      * @see WorkspaceUploadReferenceHandler#matchReferencesWithNodes(
-     *          int, java.util.Collection, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.List, java.util.Map)
+     *      int, java.util.Collection, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *      nl.mpi.metadata.api.model.ReferencingMetadataDocument)
      */
     @Override
-    public void matchReferencesWithNodes(
+    public Collection<UploadProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
-            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
-            Collection<Reference> failedLinks) {
+            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument) {
+        
+        Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         List<Reference> references = currentDocument.getDocumentReferences();
         
@@ -93,7 +94,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             
             URL refLocalURL = ref.getLocation();
             URI refURI = ref.getURI();
-            WorkspaceNode matchedNode = null;
+            WorkspaceNode matchedNode;
 
             if(refLocalURL != null) {
                 
@@ -143,11 +144,21 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
 
             if(matchedNode != null) {
                 
-                try {
-                    workspaceNodeLinkManager.linkNodesOnlyInDb(currentNode, matchedNode);
-                } catch (WorkspaceException ex) {
-                    logger.error("Error linking nodes " + currentNode.getWorkspaceNodeID() + " and " + matchedNode.getWorkspaceNodeID() + " in workspace " + workspaceID, ex);
-                    failedLinks.add(ref);
+                Collection<WorkspaceNode> alreadyLinkedParents = workspaceDao.getParentWorkspaceNodes(matchedNode.getWorkspaceNodeID());
+                
+                if(alreadyLinkedParents.isEmpty()) {
+                    try {
+                        workspaceNodeLinkManager.linkNodesOnlyInDb(currentNode, matchedNode);
+                    } catch (WorkspaceException ex) {
+                        String message = "Error linking nodes " + currentNode.getWorkspaceNodeID() + " and " + matchedNode.getWorkspaceNodeID() + " in workspace " + workspaceID;
+                        logger.error(message, ex);
+                        failedLinks.add(new LinkUploadProblem(currentNode, matchedNode, message, ex));
+                    }
+                } else {
+                    //Multiple parents NOT allowed - won't be linked
+                    String message = "Matched node (ID " + matchedNode.getWorkspaceNodeID() + ") cannot be linked to parent node (ID " + currentNode.getWorkspaceNodeID() + ") because it already has a parent. Multiple parents are not allowed.";
+                    logger.error(message, null);
+                    failedLinks.add(new LinkUploadProblem(currentNode, matchedNode, message, null));
                 }
                 
             } else {
@@ -157,18 +168,16 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
                     metadataAPI.writeMetadataDocument(currentDocument, documentStreamResult);
                     
-                    //TODO LEAVE SOME MESSAGE HERE
+                    String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched";
+                    failedLinks.add(new MatchUploadProblem(currentNode, ref, message, null));
                     
-                } catch (MetadataException ex) {
-                    logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
-                } catch (IOException ex) {
-                    logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
-                } catch (TransformerException ex) {
+                } catch (MetadataException | IOException | TransformerException ex) {
                     logger.error("Error removing reference '" + refURI + "' from node " + currentNode.getWorkspaceNodeID(), ex);
                 }
             }
             
         }
+        return failedLinks;
     }
     
     
@@ -186,9 +195,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             metadataAPI.writeMetadataDocument(document, documentStreamResult);
         } catch (IOException ex) {
             logger.error("Error clearing the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
-        } catch (TransformerException ex) {
-            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
-        } catch (MetadataException ex) {
+        } catch (TransformerException | MetadataException ex) {
             logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID(), ex);
         }
     }
@@ -206,11 +213,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             File documentFile = new File(document.getFileLocation().getPath());
             StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
             metadataAPI.writeMetadataDocument(document, documentStreamResult);
-        } catch (IOException ex) {
-            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
-        } catch (TransformerException ex) {
-            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
-        } catch (MetadataException ex) {
+        } catch (IOException | TransformerException | MetadataException ex) {
             logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
         }
     }

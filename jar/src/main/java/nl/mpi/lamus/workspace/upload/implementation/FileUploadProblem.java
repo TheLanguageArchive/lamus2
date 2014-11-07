@@ -14,25 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload;
+package nl.mpi.lamus.workspace.upload.implementation;
 
-import java.util.Collection;
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import java.io.File;
 
 /**
- * Provides some helping functionality to the file upload procedure.
- * 
+ *
  * @author guisil
  */
-public interface WorkspaceUploadHelper {
+public class FileUploadProblem extends UploadProblem {
     
-    /**
-     * Checks if there are links among the nodes in the given collection
-     * and adds them in the database.
-     * @param workspaceID ID of the workspace
-     * @param nodesToCheck Collection of nodes to be checked
-     * @return collection containing eventual problems with the links
-     */
-    public Collection<UploadProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck);
+    private File problematicFile;
+    
+    public FileUploadProblem(File problematicFile, String errorMessage, Exception exception) {
+        super(errorMessage, exception);
+        this.problematicFile = problematicFile;
+    }
+    
+    public File getProblematicFile() {
+        return problematicFile;
+    }
 }

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Map;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 
 /**
  * Provides functionality to upload files into the workspace,
@@ -55,8 +56,8 @@ public interface WorkspaceUploader {
      * typechecks and checking for links between them and the existing tree.
      * @param workspaceID ID of the workspace
      * @param uploadedFiles Collection of previously uploaded files
-     * @return Map containing the files which could not be successfully uploaded and the reason for each
+     * @return collection containing objects which describe eventual upload problems
      */
-    public Map<File, String> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+    public Collection<UploadProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
             throws IOException, TypeCheckerException, WorkspaceException;
 }

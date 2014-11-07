@@ -25,7 +25,6 @@ import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +55,9 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
      * @see WorkspaceUploadHelper#assureLinksInWorkspace(int, java.util.Collection)
      */
     @Override
-    public void assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
+    public Collection<UploadProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
+        Collection<UploadProblem> allFailedLinks = new ArrayList<>();
         
         for(WorkspaceNode node : nodesToCheck) {
             
@@ -65,13 +65,10 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
                 continue;
             }
             
-            MetadataDocument document = null;
+            MetadataDocument document;
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
-            } catch (IOException ex) {
-                logger.error("Document could not be loaded for " + node.getWorkspaceURL(), ex);
-                continue;
-            } catch (MetadataException ex) {
+            } catch (IOException | MetadataException ex) {
                 logger.error("Document could not be loaded for " + node.getWorkspaceURL(), ex);
                 continue;
             }
@@ -81,25 +78,12 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             }
             
             ReferencingMetadataDocument referencingDocument = (ReferencingMetadataDocument) document;
-            Collection<Reference> failedLinks = new ArrayList<Reference>();
             
-            workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, node, referencingDocument, failedLinks);
+            Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, node, referencingDocument);
             
-            if(!failedLinks.isEmpty()) {
-                
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                logger.error("Some of the uploaded nodes could not be properly linked");
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-                //TODO SHOW ERROR
-            }
+            allFailedLinks.addAll(failedLinks);
         }
+        return allFailedLinks;
     }
     
 }

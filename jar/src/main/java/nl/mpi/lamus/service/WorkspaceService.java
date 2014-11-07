@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -34,6 +33,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 
 /**
  *
@@ -208,9 +208,9 @@ public interface WorkspaceService extends Serializable {
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
      * @param uploadedFiles Files previously uploaded
-     * @return Map containing the files which could not be successfully uploaded and the reason for each
+     * @return collection containing the eventual problems which occurred with the uploaded files
      */
-    public Map<File, String> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
+    public Collection<UploadProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
             throws IOException, TypeCheckerException, WorkspaceException;
     
     /**

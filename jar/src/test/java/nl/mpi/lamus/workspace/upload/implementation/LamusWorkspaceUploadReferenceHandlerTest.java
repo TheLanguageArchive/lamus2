@@ -122,14 +122,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -151,11 +151,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in the DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
         assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
     }
@@ -173,14 +176,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -200,13 +203,80 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).setArchiveURI(firstRefURI);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockSecondNode);
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in the DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
         assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+    }
+    
+    @Test
+    public void matchOneReference_WithLocalUrl_WithHandle_MultipleParents() throws MalformedURLException, WorkspaceException, URISyntaxException, IOException, TransformerException, MetadataException {
+        
+        final int workspaceID = 10;
+        final int firstNodeID = 101;
+        final int secondNodeID = 102;
+        
+        final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URL firstRefLocalUrl = new URL("file://absolute/path/to/resource.txt");
+        
+        final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
+        final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        final List<Reference> references = new ArrayList<>();
+        references.add(mockFirstReference);
+        
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
+        existingParents.add(mockThirdNode);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataDocument).getDocumentReferences(); will(returnValue(references));
+            
+            //loop over references
+            //first reference contains a localURI
+            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUrl));
+            oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            
+            //matches second node
+            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUrl.toString());
+                will(returnValue(mockSecondNode));
+
+            //URI is a handle, so URI in DB should be updated
+            oneOf(mockMetadataApiHandleUtil).isHandleUri(firstRefURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockSecondNode).setArchiveURI(firstRefURI);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockSecondNode);
+                
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
+            //a parent already exists, so do not link - MULTIPLE PARENTS NOT ALLOWED IN THE UPLOAD
+            
+            //logger
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockFirstNode).getWorkspaceNodeID(); will(returnValue(firstNodeID));
+        }});
+        
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
+        
+        assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
+        
+        UploadProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof LinkUploadProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkUploadProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkUploadProblem) problem).getChildNode());
+        
+        //TODO ASSERT ERROR MESSAGE
     }
     
     @Test
@@ -222,14 +292,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -253,14 +323,16 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
                 
-                
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in the DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
 
     @Test
@@ -277,14 +349,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -313,13 +385,16 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getArchiveURI(); will(returnValue(firstRefURI));
             oneOf(mockHandleMatcher).areHandlesEquivalent(firstRefURI, firstRefURI); will(returnValue(Boolean.TRUE));
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in the DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
     
     @Test
@@ -337,14 +412,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -376,19 +451,24 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).setArchiveURI(firstRefURI);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockSecondNode);
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
     
     @Test
     public void matchOneReference_WithoutLocalUrl_WithUri() throws URISyntaxException, WorkspaceException, MalformedURLException, IOException, TransformerException, MetadataException {
         
         final int workspaceID = 10;
+        final int firstNodeID = 101;
+        final int secondNodeID = 102;
         
         //URI is not a handle
         final URI firstRefURI = new URI("parent/child.txt");
@@ -398,14 +478,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -430,31 +510,36 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
     
     @Test
     public void matchOneReference_WithoutLocalUrl_WithExternalUri() throws URISyntaxException, WorkspaceException {
         
         final int workspaceID = 10;
+        final int firstNodeID = 101;
+        final int externalNodeID = 102;
         
         //URI is not a handle
         final URI firstRefURI = new URI("http://some/external/folder/file.txt");
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -473,13 +558,16 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspaceID, firstRefURI);
                 will(returnValue(mockExternalNode));
                 
+            //check if the matched node already has parents
+            oneOf(mockExternalNode).getWorkspaceNodeID(); will(returnValue(externalNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(externalNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockExternalNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
     
     @Test
@@ -496,14 +584,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -534,6 +622,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getArchiveURI(); will(returnValue(firstRefURI));
             oneOf(mockHandleMatcher).areHandlesEquivalent(firstRefURI, firstRefURI); will(returnValue(Boolean.TRUE));
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode); will(throwException(expectedException));
             //for logging
@@ -541,17 +632,24 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertFalse("Map of failed links should not be empty", failedLinks.isEmpty());
-        assertTrue("Map of failed links should contain entry containing firstNode (parent) and firstReference (child)",
-                failedLinks.contains(mockFirstReference));
+        assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
+        
+        UploadProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof LinkUploadProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkUploadProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkUploadProblem) problem).getChildNode());
     }
     
     @Test
     public void matchTwoReferences_WithoutLocalUrl() throws URISyntaxException, WorkspaceException, MalformedURLException, IOException, TransformerException, MetadataException {
 
         final int workspaceID = 10;
+        final int firstNodeID = 101;
+        final int secondNodeID = 102;
+        final int thirdNodeID = 103;
         
         //first URI is a handle
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
@@ -566,16 +664,17 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         nodesToCheck.add(mockThirdNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
         references.add(mockSecondReference);
         
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
+        final Collection<WorkspaceNode> existingSecondNodeParents = new ArrayList<>();
+        final Collection<WorkspaceNode> existingThirdNodeParents = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -604,6 +703,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getArchiveURI(); will(returnValue(firstRefURI));
             oneOf(mockHandleMatcher).areHandlesEquivalent(firstRefURI, firstRefURI); will(returnValue(Boolean.TRUE));
                 
+            //check if the matched node already has parents
+            oneOf(mockSecondNode).getWorkspaceNodeID(); will(returnValue(secondNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(secondNodeID); will(returnValue(existingSecondNodeParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockSecondNode);
             
@@ -628,13 +730,16 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
             
+            //check if the matched node already has parents
+            oneOf(mockThirdNode).getWorkspaceNodeID(); will(returnValue(thirdNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(thirdNodeID); will(returnValue(existingThirdNodeParents));
             //link parent node with node that matches the reference, ONLY in DB
             oneOf(mockWorkspaceNodeLinkManager).linkNodesOnlyInDb(mockFirstNode, mockThirdNode);
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
     
     @Test
@@ -645,6 +750,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 // what else?
         
         final int workspaceID = 10;
+        final int firstNodeID = 101;
         
         //URI is not a handle
         final URI firstRefURI = new URI("parent/child.txt");
@@ -652,14 +758,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
-        
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
         
         context.checking(new Expectations() {{
             
@@ -683,11 +787,21 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+            
+            //logger / message
+            oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            oneOf(mockFirstNode).getWorkspaceNodeID(); will(returnValue(firstNodeID));
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
+        
+        UploadProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchUploadProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchUploadProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchUploadProblem) problem).getChildReference());
     }
     
     @Test
@@ -707,14 +821,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
-        
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
         
         context.checking(new Expectations() {{
             
@@ -735,11 +847,21 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
+            
+            //logger / message
+            oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            oneOf(mockFirstNode).getWorkspaceNodeID(); will(returnValue(firstNodeID));
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
+        
+        UploadProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchUploadProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchUploadProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchUploadProblem) problem).getChildReference());
     }
     
     @Test
@@ -755,14 +877,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         //URI is not a handle
         final URI firstRefURI = new URI("parent/child.txt");
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final List<Reference> references = new ArrayList<Reference>();
+        final List<Reference> references = new ArrayList<>();
         references.add(mockFirstReference);
-        
-        Collection<Reference> failedLinks = new ArrayList<Reference>();
         
         final MetadataException expectedException = new MetadataException("some exception message");
         
@@ -790,8 +910,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockFirstNode).getWorkspaceNodeID(); will(returnValue(firstNodeID));
         }});
         
-        workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, failedLinks);
+        Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument);
         
-        assertTrue("Map of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
     }
 }

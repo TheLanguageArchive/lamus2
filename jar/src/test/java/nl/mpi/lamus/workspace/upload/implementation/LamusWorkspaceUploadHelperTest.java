@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -73,6 +74,8 @@ public class LamusWorkspaceUploadHelperTest {
     @Mock File mockChildFile;
     
     @Mock CorpusNode mockCorpusNode;
+    
+    @Mock UploadProblem mockUploadProblem;
     
     public LamusWorkspaceUploadHelperTest() {
     }
@@ -105,9 +108,11 @@ public class LamusWorkspaceUploadHelperTest {
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -121,11 +126,13 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
-                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
         }});
         
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.isEmpty());
     }
     
     @Test
@@ -142,9 +149,11 @@ public class LamusWorkspaceUploadHelperTest {
         final URI childFileURI = childFile.toURI();
         final URL childFileURL = childFileURI.toURL();
 
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -160,11 +169,57 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
-                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
         }});
         
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.isEmpty());
+    }
+    
+    @Test
+    public void assureLinksPidMetadataReference_FailedLink() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
+        
+        final int workspaceID = 1;
+        
+        final String parentFilename = "parent.cmdi";
+        final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
+        final URL parentFileURL = parentFileURI.toURL();
+        
+        final String childFilename = "child.cmdi";
+        final File childFile = new File("/workspaces/" + workspaceID + "/upload/" + FilenameUtils.getBaseName(parentFilename) + File.separator + childFilename);
+        final URI childFileURI = childFile.toURI();
+        final URL childFileURL = childFileURI.toURL();
+
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockChildNode);
+        nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        failedLinks.add(mockUploadProblem);
+        
+        context.checking(new Expectations() {{
+            
+            // loop
+            
+            // first iteration - metadata, so continues in this iteration
+            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(childFileURL); will(returnValue(mockChildDocument));
+            
+            // second iteration - metadata, so continues in this iteration
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
+        }});
+        
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.containsAll(failedLinks));
     }
     
     @Test
@@ -178,9 +233,11 @@ public class LamusWorkspaceUploadHelperTest {
         final URI parentFileURI = new URI(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
 
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -194,11 +251,13 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
-                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
         }});
         
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.isEmpty());
     }
     
     @Test
@@ -211,9 +270,11 @@ public class LamusWorkspaceUploadHelperTest {
         final String parentFilename = "parent.cmdi";
         final URL parentFileURL = new URL(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
 
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -227,11 +288,13 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
-                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
         }});
         
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.isEmpty());
     }
     
     @Test
@@ -243,9 +306,11 @@ public class LamusWorkspaceUploadHelperTest {
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
         
-        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -259,11 +324,13 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));            
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(
-                    with(equal(workspaceID)), with(same(nodesToCheck)), with(same(mockParentNode)), with(same(mockParentDocument)), with(any(Collection.class)));
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument);
+                will(returnValue(failedLinks));
         }});
         
-        workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        
+        assertTrue("Result different from expected", result.isEmpty());
     }
     
     

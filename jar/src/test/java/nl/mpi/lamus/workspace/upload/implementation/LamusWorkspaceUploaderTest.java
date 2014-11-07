@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -100,6 +99,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock File mockFile1;
     @Mock File mockFile2;
     
+    @Mock UploadProblem mockUploadProblem;
     
     private WorkspaceUploader uploader;
     
@@ -453,6 +453,8 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
@@ -483,15 +485,16 @@ public class LamusWorkspaceUploaderTest {
             
             //check links
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
         }});
         
         stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Map<File, String> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
-        assertNotNull("Map of file with a failed upload should not be null", result);
-        assertTrue("Map of file with a failed upload should be empty", result.isEmpty());
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.isEmpty());
     }
     
     @Test
@@ -526,6 +529,8 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
@@ -558,15 +563,16 @@ public class LamusWorkspaceUploaderTest {
             
             //check links
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
         }});
         
         stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Map<File, String> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
-        assertNotNull("Map of file with a failed upload should not be null", result);
-        assertTrue("Map of file with a failed upload should be empty", result.isEmpty());
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.isEmpty());
     }
     
     @Test
@@ -613,7 +619,9 @@ public class LamusWorkspaceUploaderTest {
         uploadedNodes.add(uploadedNode1);
         uploadedNodes.add(uploadedNode2);
         
-        //only one file in the collection, so only one loop cycle
+        //two files in the collection, so two loop cycles
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -665,15 +673,128 @@ public class LamusWorkspaceUploaderTest {
             
             //check links
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
         }});
         
         stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Map<File, String> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
-        assertNotNull("Map of file with a failed upload should not be null", result);
-        assertTrue("Map of file with a failed upload should be empty", result.isEmpty());
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void processTwoUploadedFiles_LinkingFailed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
+        
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final String filename1 = "someFile.txt";
+        final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
+        final URI uploadedFileURI1 = uploadedFile1.toURI();
+        final URL uploadedFileURL1 = uploadedFileURI1.toURL();
+        final WorkspaceNodeType fileType1 = WorkspaceNodeType.RESOURCE;
+        final String fileMimetype1 = "text/plain";
+        
+        final String filename2 = "someOtherFile.jpg";
+        final File uploadedFile2 = new File(workspaceUploadDirectory, filename2);
+        final URI uploadedFileURI2 = uploadedFile2.toURI();
+        final URL uploadedFileURL2 = uploadedFileURI2.toURL();
+        final WorkspaceNodeType fileType2 = WorkspaceNodeType.RESOURCE;
+        final String fileMimetype2 = "image/jpeg";
+        
+        final WorkspaceNode uploadedNode1 = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode1.setName(filename1);
+        uploadedNode1.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
+        uploadedNode1.setType(fileType1);
+        uploadedNode1.setFormat(fileMimetype1);
+        uploadedNode1.setWorkspaceURL(uploadedFileURL1);
+        
+        final WorkspaceNode uploadedNode2 = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode2.setName(filename2);
+        uploadedNode2.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
+        uploadedNode2.setType(fileType2);
+        uploadedNode2.setFormat(fileMimetype2);
+        uploadedNode2.setWorkspaceURL(uploadedFileURL2);
+        
+        final Collection<File> uploadedFiles = new ArrayList<>();
+        uploadedFiles.add(mockFile1);
+        uploadedFiles.add(mockFile2);
+        
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
+        uploadedNodes.add(uploadedNode1);
+        uploadedNodes.add(uploadedNode2);
+        
+        //two files in the collection, so two loop cycles
+        
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        failedLinks.add(mockUploadProblem);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveURL));
+            
+            //first loop cycle
+
+            oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI1));
+            oneOf(mockFile1).getName(); will(returnValue(filename1));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename1);
+                will(returnValue(mockTypecheckedResults));
+            oneOf(mockFileInputStream).close();
+            
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+                will(returnValue(Boolean.TRUE));
+            oneOf(mockFile1).getName(); will(returnValue(filename1));
+                
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype1));
+                
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
+                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, WorkspaceNodeStatus.NODE_UPLOADED);
+                will(returnValue(uploadedNode1));
+
+            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode1);
+            
+            //second loop cycle
+
+            oneOf(mockFile2).toURI(); will(returnValue(uploadedFileURI2));
+            oneOf(mockFile2).getName(); will(returnValue(filename2));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename2);
+                will(returnValue(mockTypecheckedResults));
+            oneOf(mockFileInputStream).close();
+            
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+                will(returnValue(Boolean.TRUE));
+            oneOf(mockFile2).getName(); will(returnValue(filename2));
+                
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype2));
+                
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
+                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, WorkspaceNodeStatus.NODE_UPLOADED);
+                will(returnValue(uploadedNode2));
+
+            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode2);
+            
+            
+            //check links
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
+        }});
+        
+        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
+        suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
+        
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertFalse("Collection with failed uploads should not be empty", result.isEmpty());
+        assertTrue("Collection with failed uploads different from expected", result.containsAll(failedLinks));
     }
     
     @Test
@@ -760,6 +881,8 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
+        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
@@ -776,17 +899,22 @@ public class LamusWorkspaceUploaderTest {
             
             //still calls method to process links
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
         }});
         
         stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Map<File, String> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
-        assertNotNull("Map of file with a failed upload should not be null", result);
-        assertTrue("Map of file with a failed upload should be empty", result.size() == 1);
-        assertTrue("File added to the map of failed files is different from expected", result.containsKey(mockFile1));
-        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, result.get(mockFile1));
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.size() == 1);
+        
+        UploadProblem problem = result.iterator().next();
+        
+        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
     }
     
     @Test
@@ -849,11 +977,15 @@ public class LamusWorkspaceUploaderTest {
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
-        Map<File, String> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
-        assertNotNull("Map of file with a failed upload should not be null", result);
-        assertTrue("Map of file with a failed upload should be empty", result.size() == 1);
-        assertTrue("File added to the map of failed files is different from expected", result.containsKey(mockFile1));
-        assertTrue("Reason for failure of file upload is different from expected", result.get(mockFile1).contains(partExpectedErrorMessage));
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.size() == 1);
+
+        UploadProblem problem = result.iterator().next();
+        
+        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", partExpectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
     }
 }
