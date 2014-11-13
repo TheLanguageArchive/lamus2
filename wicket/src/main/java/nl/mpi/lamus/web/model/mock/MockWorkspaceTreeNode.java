@@ -45,6 +45,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     private URL archiveURL;
     private URL originURL;
     private WorkspaceNodeStatus status;
+    private boolean isProtected;
     private String format;
 
     private List<WorkspaceTreeNode> children= Collections.emptyList();
@@ -206,6 +207,16 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     @Override
     public void setFormat(String format) {
         this.format = format;
+    }
+    
+    @Override
+    public boolean isProtected() {
+        return this.isProtected;
+    }
+    
+    @Override
+    public void setProtected(boolean isProtected) {
+        this.isProtected = isProtected;
     }
 
     @Override

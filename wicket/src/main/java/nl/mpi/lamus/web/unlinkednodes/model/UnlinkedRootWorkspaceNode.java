@@ -36,20 +36,20 @@ public class UnlinkedRootWorkspaceNode extends UnlinkedWorkspaceNode {
     }
     
     public UnlinkedRootWorkspaceNode(int workspaceID, WorkspaceDao dao) {
-        super(-1, workspaceID, null, "UnlinkedRootNode", "", WorkspaceNodeType.UNKNOWN, null, null, null, null, WorkspaceNodeStatus.NODE_CREATED,"", null, dao);
+        super(-1, workspaceID, null, "UnlinkedRootNode", "", WorkspaceNodeType.UNKNOWN, null, null, null, null, WorkspaceNodeStatus.NODE_CREATED, false, "", null, dao);
     }
     
     @Override
     public List<WorkspaceTreeNode> getChildren() {
         Collection<WorkspaceNode> children = this.workspaceDao.getUnlinkedNodes(this.getWorkspaceID());
-	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<WorkspaceTreeNode>(children.size());
+	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<>(children.size());
 	for (WorkspaceNode child : children) {
 	    UnlinkedWorkspaceNode treeNode = new UnlinkedWorkspaceNode(
 		    child.getWorkspaceNodeID(), child.getWorkspaceID(),
 		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
 		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
 		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
-		    child.getFormat(), this, this.workspaceDao);
+		    child.isProtected(), child.getFormat(), this, this.workspaceDao);
 	    childrenTreeNodes.add(treeNode);
 	}
 	return childrenTreeNodes;

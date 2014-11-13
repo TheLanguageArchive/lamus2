@@ -38,11 +38,12 @@ public class UnlinkedWorkspaceNode extends LamusWorkspaceTreeNode {
     public UnlinkedWorkspaceNode(int workspaceNodeID, int workspaceID,
 	    URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
 	    URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
-	    WorkspaceNodeStatus status, String format,
+	    WorkspaceNodeStatus status, boolean isProtected, String format,
 	    WorkspaceTreeNode parent, WorkspaceDao dao) {
         
         super(workspaceNodeID, workspaceID, profileSchemaURI, name, title, type,
-                workspaceURL, archiveURI, archiveURL, originURL, status, format, parent, dao);
+                workspaceURL, archiveURI, archiveURL, originURL, status,
+                isProtected, format, parent, dao);
     }
     
     public UnlinkedWorkspaceNode(WorkspaceNode node, WorkspaceTreeNode parent, WorkspaceDao dao) {
