@@ -164,7 +164,11 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    throwWorkspaceImportException(errorMessage, ioex);
         }
         
-        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
+        boolean childToBeProtected = false;
+        
+        if(!childArchiveURI.equals(ws.getTopNodeArchiveURI())) { //if child is not the top node of the workspace it can be protected
+            childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
+        }
         
         WorkspaceNode childNode =
                 workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);

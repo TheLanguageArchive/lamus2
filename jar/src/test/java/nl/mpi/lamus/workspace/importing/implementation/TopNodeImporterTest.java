@@ -113,8 +113,8 @@ public class TopNodeImporterTest {
     @Test
     public void importTopNode_withMultipleParents() {
         
-        //TODO SHOULD NOT BE POSSIBLE TO CREATE A WORKSPACE IN A NODE THAT CAN'T BE CHANGED
-            // OR DOES IT REALLY MAKE A DIFFERENCE??
+        //TODO In the case of starting a workspace in a node with multiple parents
+            // it should not be protected and can therefore be changed (with restrictions, as any workspace top node)
         
         
         fail("not tested yet");
