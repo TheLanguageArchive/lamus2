@@ -109,14 +109,4 @@ public class TopNodeImporterTest {
         
         topNodeImporter.importNode(mockWorkspace, nodeArchiveURI);
     }
-
-    @Test
-    public void importTopNode_withMultipleParents() {
-        
-        //TODO In the case of starting a workspace in a node with multiple parents
-            // it should not be protected and can therefore be changed (with restrictions, as any workspace top node)
-        
-        
-        fail("not tested yet");
-    }
 }
