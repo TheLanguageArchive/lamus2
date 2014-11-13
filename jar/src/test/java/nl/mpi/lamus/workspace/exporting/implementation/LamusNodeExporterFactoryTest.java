@@ -109,7 +109,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -138,7 +138,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -169,7 +169,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -200,7 +200,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_CREATED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -231,7 +231,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -262,7 +262,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_EXTERNAL_DELETED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_EXTERNAL_DELETED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -293,7 +293,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_REPLACED, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_REPLACED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -324,7 +324,7 @@ public class LamusNodeExporterFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             

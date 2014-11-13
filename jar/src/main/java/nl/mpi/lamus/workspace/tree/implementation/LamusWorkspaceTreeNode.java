@@ -47,12 +47,12 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID,
 	    URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
 	    URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
-	    WorkspaceNodeStatus status, String format,
+	    WorkspaceNodeStatus status, boolean isProtected, String format,
 	    WorkspaceTreeNode parent, WorkspaceDao dao) {
 
 	super(workspaceNodeID, workspaceID, profileSchemaURI,
 		name, title, type, workspaceURL, archiveURI, archiveURL, originURL,
-		status, format);
+		status, isProtected, format);
 
 	if (dao == null) {
 	    throw new IllegalArgumentException("The WorkspaceService object should not be null.");
@@ -67,7 +67,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 	super(node.getWorkspaceNodeID(), node.getWorkspaceID(),
 		node.getProfileSchemaURI(), node.getName(), node.getTitle(), node.getType(),
 		node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURL(),
-		node.getStatus(), node.getFormat());
+		node.getStatus(), node.isProtected(), node.getFormat());
 
 	if (dao == null) {
 	    throw new IllegalArgumentException("The WorkspaceDao object should not be null.");
@@ -112,14 +112,14 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
     @Override
     public List<WorkspaceTreeNode> getChildren() {
 	Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
-	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<WorkspaceTreeNode>(children.size());
+	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<>(children.size());
 	for (WorkspaceNode child : children) {
 	    WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
 		    child.getWorkspaceNodeID(), child.getWorkspaceID(),
 		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
 		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
 		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
-		    child.getFormat(), this, this.workspaceDao);
+		    child.isProtected(), child.getFormat(), this, this.workspaceDao);
 	    childrenTreeNodes.add(treeNode);
 	}
 	return childrenTreeNodes;

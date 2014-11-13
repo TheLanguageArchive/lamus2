@@ -75,6 +75,10 @@ public interface WorkspaceNode extends Serializable {
     
     public void setStatus(WorkspaceNodeStatus status);
     
+    public boolean isProtected();
+    
+    public void setProtected(boolean isProtected);
+    
     public String getFormat();
     
     public void setFormat(String format);

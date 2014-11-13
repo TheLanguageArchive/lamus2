@@ -50,10 +50,12 @@ public interface WorkspaceNodeFactory {
      * @param document MetadataDocument object corresponding to the file
      * @param name Name of the node
      * @param onSite true if node is on site (in the local archive)
+     * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceMetadataNode(
-            int workspaceID, URI archiveNodeURI, URL archiveNodeURL, MetadataDocument document, String name, boolean onSite);
+            int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            MetadataDocument document, String name, boolean onSite, boolean isProtected);
 
     /**
      * Creates a resource WorkspaceNode with the given values.
@@ -65,10 +67,11 @@ public interface WorkspaceNodeFactory {
      * @param mimetype Mimetype of the file
      * @param name name of the node
      * @param onSite true if node is on site (in the local archive)
+     * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name, boolean onSite);
+            Reference resourceReference, String mimetype, String name, boolean onSite, boolean isProtected);
 
     /**
      * Creates a WorkspaceNode with the given values.
@@ -79,10 +82,11 @@ public interface WorkspaceNodeFactory {
      * @param workspaceURL URL of the file location in the workspace
      * @param mimetype Mimetype of the file
      * @param status Status of the node
+     * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
-            String mimetype, WorkspaceNodeStatus status);
+            String mimetype, WorkspaceNodeStatus status, boolean isProtected);
     
     /**
      * Creates an external WorkspaceNode with the given values

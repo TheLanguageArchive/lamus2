@@ -90,7 +90,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
 
         final int workspaceID = 1;
         
-        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
         final int firstNodeID = 10;
         final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -102,7 +102,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
-                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, firstNodeFormat);
+                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
         
         final int secondNodeID = 10;
         final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
@@ -114,7 +115,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
-                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
+                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
         
         unlinkedAndDeletedTopNodes.add(firstNode);
         unlinkedAndDeletedTopNodes.add(secondNode);
@@ -145,7 +147,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
 
         final int workspaceID = 1;
         
-        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
         final int firstNodeID = 10;
         final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -157,7 +159,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
-                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, firstNodeFormat);
+                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURL,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
         
         final int secondNodeID = 10;
         final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
@@ -169,7 +172,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
-                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, secondNodeFormat);
+                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURL,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
         
         unlinkedAndDeletedTopNodes.add(firstNode);
         unlinkedAndDeletedTopNodes.add(secondNode);

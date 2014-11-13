@@ -34,21 +34,6 @@ import nl.mpi.util.OurURL;
 public interface NodeDataRetriever {
     
     /**
-     * Retrieves the MetadataDocument object for the given archive node.
-     * @param nodeArchiveID ID of the node in the archive
-     * @return MetadataDocument object corresponding to the node
-     */
-//    public MetadataDocument getArchiveNodeMetadataDocument(int nodeArchiveID)
-//            throws IOException, MetadataException, UnknownNodeException;
-
-    /**
-     * Retrieves the URL of a resource, given its reference from the parent file
-     * @param resourceReference Reference to the resource, from the parent metadata file
-     * @return URL for the resource
-     */
-//    public OurURL getResourceURL(Reference resourceReference) throws MalformedURLException, UnknownNodeException;
-    
-    /**
      * Retrieves the archive URL (location) for the given URI (probably an archive handle)
      * @param nodeArchiveURI URI of the node in the archive
      * @return URL of the node in the archive
@@ -92,4 +77,10 @@ public interface NodeDataRetriever {
      * @return true if the previously checked resource is archivable, according to the configuration
      */
     public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message);
+    
+    /**
+     * @param archiveNodeUri URI of the node in the archive
+     * @return true if the given node should be protected from changes
+     */
+    public boolean isNodeToBeProtected(URI archiveNodeUri);
 }

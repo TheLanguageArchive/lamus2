@@ -844,11 +844,12 @@ public class AddedNodeExporterTest {
         }
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final boolean parentNodeProtected = Boolean.FALSE;
         final String parentNodeFormat = "text/x-cmdi+xml";
         final URI nodeSchemaLocation = new URI("http://some.location");
         
         return new LamusWorkspaceNode(parentNodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
-                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURL, parentNodeStatus, parentNodeFormat);
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURL, parentNodeStatus, parentNodeProtected, parentNodeFormat);
     }
     
     
@@ -870,8 +871,9 @@ public class AddedNodeExporterTest {
         
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         final URI nodeSchemaLocation = new URI("http://some.location");
+        final boolean nodeProtected = Boolean.FALSE;
         
         return new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
-                nodeName, "", type, nodeWsURL, null, null, nodeOriginURL, nodeStatus, format);
+                nodeName, "", type, nodeWsURL, null, null, nodeOriginURL, nodeStatus, nodeProtected, format);
     }
 }

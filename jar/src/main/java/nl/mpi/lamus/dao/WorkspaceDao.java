@@ -121,7 +121,8 @@ public interface WorkspaceDao {
     
     /**
      * Checks if the archive node with the given ID is locked
-     * (is part of any existing workspace)
+     * (is part of any existing workspace).
+     * Protected nodes don't count as locked.
      * @param archiveNodeURI URI of the archive node to be checked
      * @return true if the given archive node is locked
      */

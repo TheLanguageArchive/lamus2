@@ -82,7 +82,7 @@ public class NodeImporterFactoryBean implements FactoryBean<NodeImporter> {
             return new MetadataNodeImporter(
                     corpusStructureProvider, nodeResolver, workspaceDao,
                     metadataApi, metadataApiBridge, workspaceNodeLinkManager, workspaceFileImporter,
-                    workspaceNodeFactory, workspaceNodeExplorer);
+                    workspaceNodeFactory, workspaceNodeExplorer, nodeDataRetriever);
         }
     }
 

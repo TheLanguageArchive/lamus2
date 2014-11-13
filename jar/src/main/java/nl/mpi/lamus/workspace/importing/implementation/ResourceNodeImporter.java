@@ -152,10 +152,12 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             nodeDataRetriever.verifyTypecheckedResults(childLocalFile, referenceFromParent, typecheckedResults);
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
-        //TODO needsProtection?
+        
+        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
 
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace.getWorkspaceID(), childURI, childURL, referenceFromParent, childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite());
+                workspace.getWorkspaceID(), childURI, childURL, referenceFromParent,
+                childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite(), childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(

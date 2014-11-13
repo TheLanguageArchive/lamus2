@@ -63,11 +63,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     
     /**
      * @see WorkspaceNodeFactory#getNewWorkspaceMetadataNode(int, java.net.URI, java.net.URL,
-     *      nl.mpi.metadata.api.model.MetadataDocument, java.lang.String, boolean)
+     *      nl.mpi.metadata.api.model.MetadataDocument, java.lang.String, boolean, boolean)
      */
     @Override
     public WorkspaceNode getNewWorkspaceMetadataNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            MetadataDocument document, String name, boolean onSite) {
+            MetadataDocument document, String name, boolean onSite, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         
@@ -86,16 +86,18 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
         }
         
+        node.setProtected(isProtected);
+        
         return node;
     }
     
     /**
      * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL,
-     *      nl.mpi.metadata.api.model.Reference, java.lang.String, java.lang.String, boolean)
+     *      nl.mpi.metadata.api.model.Reference, java.lang.String, java.lang.String, boolean, boolean)
      */
     @Override
     public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name, boolean onSite) {
+            Reference resourceReference, String mimetype, String name, boolean onSite, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         
@@ -113,16 +115,17 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
         }
         
+        node.setProtected(isProtected);
         
         return node;
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
      */
     @Override
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
-        String mimetype, WorkspaceNodeStatus status) {
+        String mimetype, WorkspaceNodeStatus status, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
@@ -143,6 +146,8 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setArchiveURI(archiveURI);
         
         node.setStatus(status);
+        
+        node.setProtected(isProtected);
         
         return node;
     }
@@ -165,6 +170,8 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             node.setType(WorkspaceNodeType.RESOURCE);
         }
         node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        
+        node.setProtected(Boolean.FALSE);
         
         return node;
     }
@@ -198,6 +205,8 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             node.setType(WorkspaceNodeType.RESOURCE);
         }
         node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        
+        node.setProtected(Boolean.FALSE);
         
         return node;
    }

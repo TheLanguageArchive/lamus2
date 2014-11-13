@@ -110,6 +110,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "archive_url",
                     "origin_url",
                     "status",
+                    "protected",
                     "format");
         //TODO Inject table and column names
         
@@ -430,8 +431,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Checking if node " + archiveNodeURI + " is locked");
         
-        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_uri = :uri";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("uri", archiveNodeURI.toString());
+        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_uri = :uri AND protected = :not_protected";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("uri", archiveNodeURI.toString())
+                .addValue("not_protected", false);
         
         RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
             @Override
@@ -521,6 +524,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 .addValue("archive_url", archiveUrlStr)
                 .addValue("origin_url", originURLStr)
                 .addValue("status", statusStr)
+                .addValue("protected", node.isProtected())
                 .addValue("format", node.getFormat());
         Number newID = this.insertWorkspaceNode.executeAndReturnKey(parameters);
         node.setWorkspaceNodeID(newID.intValue());
@@ -1043,6 +1047,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     archiveURL,
                     originURL,
                     WorkspaceNodeStatus.valueOf(rs.getString("status")),
+                    rs.getBoolean("protected"),
                     rs.getString("format"));
             return workspaceNode;
         }

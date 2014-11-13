@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -202,5 +203,20 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         
         TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(urlToCheckInConfiguration);
         return this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
+    }
+    
+    /**
+     * @see NodeDataRetriever#isNodeToBeProtected(java.net.URI)
+     */
+    @Override
+    public boolean isNodeToBeProtected(URI archiveNodeUri) {
+        
+        List<URI> parents = corpusStructureProvider.getParentNodeURIs(archiveNodeUri);
+        
+        if(parents.size() > 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

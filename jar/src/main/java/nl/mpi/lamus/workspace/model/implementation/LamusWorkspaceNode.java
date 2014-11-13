@@ -40,6 +40,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     private URL archiveURL;
     private URL originURL;
     private WorkspaceNodeStatus status;
+    private boolean isProtected;
     private String format;
     
     public LamusWorkspaceNode() {
@@ -55,7 +56,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     public LamusWorkspaceNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
             URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
-            WorkspaceNodeStatus status, String format) {
+            WorkspaceNodeStatus status, boolean isProtected, String format) {
         
         this.workspaceNodeID = workspaceNodeID;
         this.workspaceID = workspaceID;
@@ -68,6 +69,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         this.archiveURL = archiveURL;
         this.originURL = originURL;
         this.status = status;
+        this.isProtected = isProtected;
         this.format = format;
     }
 
@@ -198,6 +200,16 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
 
     @Override
+    public boolean isProtected() {
+        return this.isProtected;
+    }
+    
+    @Override
+    public void setProtected(boolean isProtected) {
+        this.isProtected = isProtected;
+    }
+    
+    @Override
     public String getFormat() {
         return this.format;
     }
@@ -223,6 +235,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 .append(this.archiveURL)
                 .append(this.originURL)
                 .append(this.status)
+                .append(this.isProtected)
                 .append(this.format);
                 
         return hashCodeB.toHashCode();
@@ -252,6 +265,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 .append(this.archiveURL, other.getArchiveURL())
                 .append(this.originURL, other.getOriginURL())
                 .append(this.status, other.getStatus())
+                .append(this.isProtected, other.isProtected())
                 .append(this.format, other.getFormat());
         
         return equalsB.isEquals();
@@ -265,7 +279,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 ", Name: " + this.name + ", Title: " + this.title +
                 ", Type: " + this.type + ", Workspace URL: " + this.workspaceURL +
                 ", Archive URI: " + this.archiveURI + ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURL +
-                ", Status: " + this.status + ", Format: " + this.format;
+                ", Status: " + this.status + ", Protected: " + this.isProtected + ", Format: " + this.format;
         
         return stringResult;
     }

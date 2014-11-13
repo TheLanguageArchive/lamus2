@@ -61,7 +61,7 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
                         child.getProfileSchemaURI(), child.getName(), child.getTitle(),
                         child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
                         child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
-                        child.getFormat(), parentTreeNode, this.workspaceDao);
+                        child.isProtected(), child.getFormat(), parentTreeNode, this.workspaceDao);
         
         return treeNode;
     }

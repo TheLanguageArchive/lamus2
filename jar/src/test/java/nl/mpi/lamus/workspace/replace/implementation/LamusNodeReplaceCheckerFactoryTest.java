@@ -21,10 +21,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
-import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -34,7 +32,6 @@ import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
-import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -104,7 +101,7 @@ public class LamusNodeReplaceCheckerFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
         NodeReplaceChecker retrievedNodeReplacedManager = nodeReplaceManagerFactory.getReplaceCheckerForNode(node);
         
@@ -126,7 +123,7 @@ public class LamusNodeReplaceCheckerFactoryTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_VIRTUAL, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
         
         NodeReplaceChecker retrievedNodeReplacedManager = nodeReplaceManagerFactory.getReplaceCheckerForNode(node);
         

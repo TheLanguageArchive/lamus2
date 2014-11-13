@@ -16,12 +16,15 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
@@ -37,6 +40,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -62,6 +66,7 @@ public class TopNodeImporterTest {
     @Mock WorkspaceFileImporter mockFileImporter;
     @Mock WorkspaceNodeFactory mockNodeFactory;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
+    @Mock NodeDataRetriever mockNodeDataRetriever;
     
     @Mock Workspace mockWorkspace;
     
@@ -80,8 +85,9 @@ public class TopNodeImporterTest {
     @Before
     public void setUp() {
         
-        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver, mockWsDao, mockMetadataAPI,
-                mockMetadataApiBridge, mockNodeLinkManager, mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer);
+        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver,
+                mockWsDao, mockMetadataAPI, mockMetadataApiBridge, mockNodeLinkManager,
+                mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer, mockNodeDataRetriever);
         
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);
     }
@@ -90,11 +96,9 @@ public class TopNodeImporterTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of importNode method, of class TopNodeImporter.
-     */
+    
     @Test
-    public void testImportNode() throws Exception {
+    public void importTopNode() throws URISyntaxException, WorkspaceImportException {
         
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
         
@@ -106,16 +110,13 @@ public class TopNodeImporterTest {
         topNodeImporter.importNode(mockWorkspace, nodeArchiveURI);
     }
 
-    /**
-     * Test of setWorkspace method, of class TopNodeImporter.
-     */
-//    @Test
-//    public void testSetWorkspace() {
-//        
-//        context.checking(new Expectations() {{
-//            oneOf(mockMetadataNodeImporter).setWorkspace(mockWorkspace);
-//        }});
-//        
-//        topNodeImporter.setWorkspace(mockWorkspace);
-//    }
+    @Test
+    public void importTopNode_withMultipleParents() {
+        
+        //TODO SHOULD NOT BE POSSIBLE TO CREATE A WORKSPACE IN A NODE THAT CAN'T BE CHANGED
+            // OR DOES IT REALLY MAKE A DIFFERENCE??
+        
+        
+        fail("not tested yet");
+    }
 }

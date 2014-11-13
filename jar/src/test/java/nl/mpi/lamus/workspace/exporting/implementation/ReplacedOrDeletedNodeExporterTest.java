@@ -122,7 +122,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
 
         final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, testNodeFormat);
+                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, Boolean.FALSE, testNodeFormat);
         
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         

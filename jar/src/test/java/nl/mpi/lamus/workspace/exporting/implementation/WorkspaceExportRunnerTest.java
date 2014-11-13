@@ -113,11 +113,6 @@ public class WorkspaceExportRunnerTest {
             VersionCreationException, CrawlerInvocationException {
         
         final int workspaceID = 1;
-        
-        
-        
-        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<>();
-        
         final int wsNodeID = 10;
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -128,9 +123,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
-        
-        workspaceNodes.add(testNode);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -225,9 +218,6 @@ public class WorkspaceExportRunnerTest {
             VersionCreationException, CrawlerInvocationException {
         
         final int workspaceID = 1;
-        
-        final Collection<WorkspaceNode> workspaceNodes = new ArrayList<>();
-        
         final int wsNodeID = 10;
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
         final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -238,11 +228,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = new URI("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, testNodeFormat);
-        
-        workspaceNodes.add(testNode);
-        
-        final String crawlerID = UUID.randomUUID().toString();
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
         
         final CrawlerInvocationException expectedCause = new CrawlerInvocationException("some exception message", null);
         

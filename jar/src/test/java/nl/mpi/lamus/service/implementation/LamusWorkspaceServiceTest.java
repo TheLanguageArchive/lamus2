@@ -724,8 +724,11 @@ public class LamusWorkspaceServiceTest {
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
-        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL, archiveURI, archiveURL, originURL, status, format);
+        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
+                nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL,
+                archiveURI, archiveURL, originURL, status, isProtected, format);
         
         context.checking(new Expectations() {{
             
@@ -751,8 +754,11 @@ public class LamusWorkspaceServiceTest {
         URL archiveURL = null;
         URL originURL = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
-        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL, archiveURI, archiveURL, originURL, status, format);
+        final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
+                nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL,
+                archiveURI, archiveURL, originURL, status, isProtected, format);
         
         final WorkspaceNodeNotFoundException expectedException = new WorkspaceNodeNotFoundException("some exception message", -1, nodeID, null);
         
@@ -774,7 +780,9 @@ public class LamusWorkspaceServiceTest {
         
         final int nodeID = 1;
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<>();
-        final WorkspaceNode childNode = new LamusWorkspaceNode(2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null, null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, "jpeg");
+        final WorkspaceNode childNode = new LamusWorkspaceNode(
+                2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null,
+                null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, "jpeg");
         expectedChildNodes.add(childNode);
         
         context.checking(new Expectations() {{

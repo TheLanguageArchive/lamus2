@@ -32,39 +32,53 @@ import org.springframework.stereotype.Component;
 public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
 
     private final List<WsTreeNodesAction> resourcesActions;;
-    
     private final List<WsTreeNodesAction> metadataActions;
+    private final List<WsTreeNodesAction> externalActions;
+    private final List<WsTreeNodesAction> protectedActions;
     
     //TODO actions with a different format?
     private final List<WsTreeNodesAction> multipleNodesActions;
     
     
     public LamusWsNodeActionsProvider() {
-        resourcesActions = new ArrayList<WsTreeNodesAction>();
+        resourcesActions = new ArrayList<>();
         resourcesActions.add(new DeleteNodesAction());
         resourcesActions.add(new UnlinkNodesAction());
         resourcesActions.add(new ReplaceNodesAction());
                 
-        metadataActions = new ArrayList<WsTreeNodesAction>();
+        metadataActions = new ArrayList<>();
         metadataActions.add(new DeleteNodesAction());
         metadataActions.add(new UnlinkNodesAction());
         metadataActions.add(new LinkNodesAction());
         metadataActions.add(new ReplaceNodesAction());
         
-        multipleNodesActions = new ArrayList<WsTreeNodesAction>();
+        externalActions = new ArrayList<>();
+        externalActions.add(new DeleteNodesAction());
+        externalActions.add(new UnlinkNodesAction());
+        externalActions.add(new ReplaceNodesAction());
+        
+        protectedActions = new ArrayList<>();
+        protectedActions.add(new UnlinkNodesAction());
+        
+        multipleNodesActions = new ArrayList<>();
     }
     
     @Override
     public List<WsTreeNodesAction> getActions(Collection<WorkspaceTreeNode> nodes) {
         
         if(nodes.isEmpty()) {
-            return new ArrayList<WsTreeNodesAction>();
+            return new ArrayList<>();
         } else if(nodes.size() == 1) {
-                if(!nodes.iterator().next().isMetadata()) {
-                    return this.resourcesActions;
-                } else {
-                    return this.metadataActions;
-                }
+            WorkspaceTreeNode next = nodes.iterator().next();
+            if(next.isProtected()) {
+                return this.protectedActions;
+            } else if(next.isExternal()) {
+                return this.externalActions;
+            } else if(!next.isMetadata()) {
+                return this.resourcesActions;
+            } else {
+                return this.metadataActions;
+            }
         } else {
         
             //TODO multiple node actions

@@ -253,9 +253,10 @@ public class LamusVersioningHandlerTest {
         final String nodeName = "some_name";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final boolean nodeProtected = Boolean.FALSE;
         final String nodeFormat = "";
         
         return new LamusWorkspaceNode(wsNodeID, wsID, nodeSchemaURI,
-                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, nodeStatus, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, nodeStatus, nodeProtected, nodeFormat);
     }
 }

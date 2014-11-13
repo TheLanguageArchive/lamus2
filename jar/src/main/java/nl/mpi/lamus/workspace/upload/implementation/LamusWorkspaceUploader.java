@@ -133,7 +133,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
         this.workspaceDao.addWorkspaceNode(uploadedNode);
     }
@@ -217,7 +217,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);
             

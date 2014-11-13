@@ -30,6 +30,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
@@ -61,6 +62,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private final WorkspaceFileImporter workspaceFileImporter;
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceNodeExplorer workspaceNodeExplorer;
+    private final NodeDataRetriever nodeDataRetriever;
 
     private Workspace workspace = null;
     
@@ -69,7 +71,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             NodeResolver nodeResolver, WorkspaceDao wsDao,
             MetadataAPI mAPI, MetadataApiBridge mApiBridge,
 	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
-            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer) {
+            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer,
+            NodeDataRetriever nodeDataRetriever) {
 
 	this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
@@ -80,6 +83,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         this.workspaceFileImporter = fileImporter;
 	this.workspaceNodeFactory = nodeFactory;
 	this.workspaceNodeExplorer = workspaceNodeExplorer;
+        this.nodeDataRetriever = nodeDataRetriever;
     }
 
     /**
@@ -160,13 +164,15 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	    throwWorkspaceImportException(errorMessage, ioex);
         }
         
+        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
+        
         WorkspaceNode childNode =
-                workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite);
+                workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
         workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, referenceFromParent);
         
-        if(childNode.isExternal()) {
+        if(childNode.isExternal() || childNode.isProtected()) {
             return;
         }
         

@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
@@ -83,7 +85,7 @@ public class LamusNodeDataRetrieverTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
-    private NodeDataRetriever testNodeDataRetriever;
+    private NodeDataRetriever nodeDataRetriever;
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
@@ -116,7 +118,7 @@ public class LamusNodeDataRetrieverTest {
     
     @Before
     public void setUp() {
-        testNodeDataRetriever = new LamusNodeDataRetriever(
+        nodeDataRetriever = new LamusNodeDataRetriever(
                 mockCorpusStructureProvider, mockNodeResolver,
                 mockFileTypeHandler, mockTypecheckerConfiguration, mockArchiveFileHelper);
     }
@@ -138,7 +140,7 @@ public class LamusNodeDataRetrieverTest {
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(expectedURL));
         }});
         
-        URL retrievedURL = testNodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
+        URL retrievedURL = nodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
         
         assertEquals("Retrieved URL different from expected", expectedURL, retrievedURL);
     }
@@ -155,7 +157,7 @@ public class LamusNodeDataRetrieverTest {
         }});
         
         try {
-            testNodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
+            nodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
             fail("should have thrown exception");
         } catch(NodeNotFoundException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
@@ -175,7 +177,7 @@ public class LamusNodeDataRetrieverTest {
             oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(false));
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertTrue("Result should be true", result);
     }
     
@@ -214,7 +216,7 @@ public class LamusNodeDataRetrieverTest {
             oneOf(mockFileTypeHandler).setValues(resourceMimetype);
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertFalse("Result should be false", result);
     }
     
@@ -234,7 +236,7 @@ public class LamusNodeDataRetrieverTest {
             exactly(2).of(mockFile).length(); will(returnValue(fileLength));
         }});
         
-        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
         assertTrue("Result should be true", result);
     }
     
@@ -251,7 +253,7 @@ public class LamusNodeDataRetrieverTest {
             oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
         }});
         
-        TypecheckedResults results = testNodeDataRetriever.triggerResourceFileCheck(resourceOurURL);
+        TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(resourceOurURL);
         assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
     }
     
@@ -266,7 +268,7 @@ public class LamusNodeDataRetrieverTest {
             oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
         }});
         
-        TypecheckedResults results = testNodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+        TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
         assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
     }
 
@@ -283,7 +285,7 @@ public class LamusNodeDataRetrieverTest {
         }});
         
         try {
-            testNodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+            nodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
             fail("An exception should have been thrown");
         } catch(TypeCheckerException ex) {
             assertEquals("Exception thrown different from expected", expectedException, ex);
@@ -306,7 +308,7 @@ public class LamusNodeDataRetrieverTest {
                 will(returnValue(Boolean.TRUE));
         }});
         
-        boolean result = testNodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
         
         assertTrue("Result should be true", result);
     }
@@ -326,7 +328,47 @@ public class LamusNodeDataRetrieverTest {
                 will(returnValue(Boolean.FALSE));
         }});
         
-        boolean result = testNodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void nodeIsToBeProtected() throws URISyntaxException {
+        
+        final URI nodeUri = new URI(UUID.randomUUID().toString());
+        
+        final URI parentUri_1 = new URI(UUID.randomUUID().toString());
+        final URI parentUri_2 = new URI(UUID.randomUUID().toString());
+        final List<URI> parents = new ArrayList<>();
+        parents.add(parentUri_1);
+        parents.add(parentUri_2);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getParentNodeURIs(nodeUri);
+                will(returnValue(parents));
+        }});
+        
+        boolean result = nodeDataRetriever.isNodeToBeProtected(nodeUri);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void nodeIsNotToBeProtected() throws URISyntaxException {
+        
+        final URI nodeUri = new URI(UUID.randomUUID().toString());
+        
+        final URI parentUri_1 = new URI(UUID.randomUUID().toString());
+        final List<URI> parents = new ArrayList<>();
+        parents.add(parentUri_1);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getParentNodeURIs(nodeUri);
+                will(returnValue(parents));
+        }});
+        
+        boolean result = nodeDataRetriever.isNodeToBeProtected(nodeUri);
         
         assertFalse("Result should be false", result);
     }

@@ -199,7 +199,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(null));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
@@ -477,7 +477,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
@@ -555,7 +555,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(uploadedFileArchiveURI));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
@@ -645,7 +645,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype1));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode1));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode1);
@@ -665,7 +665,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype2));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode2));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode2);
@@ -756,7 +756,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype1));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode1));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode1);
@@ -776,7 +776,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype2));
                 
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, WorkspaceNodeStatus.NODE_UPLOADED);
+                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode2));
 
             oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode2);

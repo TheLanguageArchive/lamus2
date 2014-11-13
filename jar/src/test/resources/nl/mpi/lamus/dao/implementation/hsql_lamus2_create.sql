@@ -27,7 +27,7 @@ CREATE TABLE node (
         archive_url varchar(255),
         origin_url varchar(255),
         status varchar(255) NOT NULL,
-        pid varchar(255),
+        protected boolean NOT NULL,
         format varchar(255),
         PRIMARY KEY (workspace_node_id));
 
