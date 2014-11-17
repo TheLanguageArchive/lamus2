@@ -141,6 +141,7 @@ public class GeneralNodeExporterTest {
         final URL nodeArchiveURL = new URL(nodeArchivePath);
         final String nodeArchiveLocalPath = "file:/archive/location/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -153,6 +154,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(-1, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveURL.toURI()));
@@ -222,6 +225,7 @@ public class GeneralNodeExporterTest {
 //        final URL nodeArchiveLocalURL = new URL("file:/archive/location/child/" + nodeFilename);
         final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         final String nodePathRelativeToParent = "child/" + nodeFilename;
         final URL nodeUrlRelativeToParent = new URL(parentNodeArchiveLocalURL, nodePathRelativeToParent);
@@ -233,6 +237,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveLocalURL.toURI()));
@@ -341,6 +347,7 @@ public class GeneralNodeExporterTest {
 //        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
 //        final URL nodeArchiveLocalURL = new URL(nodeArchiveLocalPath);
 //        final File nodeArchiveLocalFile = new File(nodeArchiveLocalPath);
+        final boolean isNodeProtected = Boolean.FALSE;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -351,6 +358,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveLocalURL.toURI()));
@@ -378,6 +387,41 @@ public class GeneralNodeExporterTest {
     
     //TODO TEST WHEN NODE RESOLVER RETURNS NULL
     
+    
+    @Test
+    public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+        
+        final int parentNodeWsID = 1;
+        final String parentNodeName = "parentNode";
+        final String metadataExtension = "cmdi";
+        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        
+        final int nodeWsID = 10;
+        final String nodeName = "someNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final String nodeArchivePath = "https:/archive/location/" + nodeFilename;
+        final URL nodeArchiveURL = new URL(nodeArchivePath);
+//        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
+//        final URL nodeArchiveLocalURL = new URL(nodeArchiveLocalPath);
+//        final File nodeArchiveLocalFile = new File(nodeArchiveLocalPath);
+        final boolean isNodeProtected = Boolean.TRUE;
+        
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
+            //logger
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+        }});
+        
+        generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+    }
     
     
     
@@ -424,6 +468,7 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
         final URL nodeArchiveLocalURL = new URL(nodeArchiveLocalPath);
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -435,6 +480,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveLocalURL.toURI()));
@@ -485,6 +532,7 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
         final URL nodeArchiveLocalURL = new URL(nodeArchiveLocalPath);
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -496,6 +544,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveLocalURL.toURI()));
@@ -544,6 +594,7 @@ public class GeneralNodeExporterTest {
         final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
         final String nodeArchiveLocalPath = "file:/archive/location/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -555,6 +606,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveURL.toURI()));
@@ -627,6 +680,7 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
         final URL nodeArchiveLocalURL = new URL(nodeArchiveLocalPath);
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
         
         final String nodePathRelativeToParent = "child/" + nodeFilename;
         final URL nodeUrlRelativeToParent = new URL(parentNodeArchiveLocalURL, nodePathRelativeToParent);
@@ -638,6 +692,8 @@ public class GeneralNodeExporterTest {
         checkLoggerInvocations(parentNodeWsID, nodeWsID);
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
 //            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
 //            oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(nodeArchiveURL.toURI()); will(returnValue(nodeArchiveLocalURL.toURI()));

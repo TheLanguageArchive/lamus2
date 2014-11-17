@@ -105,6 +105,11 @@ public class GeneralNodeExporter implements NodeExporter {
         logger.debug("Exporting previously existing node to archive; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: "
                 + (parentNode != null ? parentNode.getWorkspaceNodeID() : -1) + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         
+        if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
+            logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
+            return;
+        }
+        
         URI parentArchiveLocalUri = null;
 //        String nodeArchivePath = null;
 //        try {

@@ -78,9 +78,14 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         if(currentNode.getArchiveURI() == null) {
             
-            logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the workspace previously; will be skipped and eventually deleted with the workspace folder");
+            logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the archive previously; will be skipped and eventually deleted with the workspace folder");
             // if there is no archiveURI, the node was never in the archive, so it can actually be deleted;
             // to make it easier, that node can simply be skipped and eventually will be deleted together with the whole workspace folder
+            return;
+        }
+        
+        if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
+            logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
             return;
         }
 

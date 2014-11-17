@@ -98,6 +98,7 @@ public class UnlinkedNodeExporterTest {
         final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
         final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
         
+        final boolean isNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
@@ -105,6 +106,8 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockWorkspaceNode).setArchiveURL(nodeVersionArchiveURL);
@@ -139,6 +142,36 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
         }});
         
+        
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
+        
+    }
+    
+    @Test
+    public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+        
+        final int nodeWsID = 10;
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
+        
+        final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
+        final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
+        final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        
+        final boolean isNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+            
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+        }});
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)

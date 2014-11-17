@@ -108,21 +108,10 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void exportDeletedResourceNodeWithArchiveURI() throws MalformedURLException, URISyntaxException, WorkspaceExportException, HandleException, IOException {
         
         final int testWorkspaceNodeID = 10;
-        final String testBaseName = "node.txt";
-        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        final URL testNodeArchiveURL = testNodeOriginURL;
-        
-        final String testNodeDisplayValue = "node";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.RESOURCE; //TODO change this
-        final String testNodeFormat = "text/plain";
-        final URI testNodeSchemaLocation = new URI("http://some.location");
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
-
-        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, testNodeStatus, Boolean.FALSE, testNodeFormat);
+        final boolean isNodeProtected = Boolean.FALSE;
         
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
@@ -134,6 +123,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
@@ -173,7 +164,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
-        
+        final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
         
         context.checking(new Expectations() {{
@@ -184,6 +175,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -258,14 +251,39 @@ public class ReplacedOrDeletedNodeExporterTest {
     }
     
     @Test
+    public void exportProtectedNode() throws WorkspaceExportException, URISyntaxException {
+     
+        final int testWorkspaceNodeID = 10;
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final boolean isNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+
+            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            //logger
+            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+        }});
+        
+        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        
+    }
+    
+    @Test
     public void exportReplacedResourceNodeWithArchiveURI() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
-        
+        final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
@@ -279,6 +297,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
@@ -317,9 +337,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
-        
+        final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.cmdi");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.cmdi";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
@@ -333,6 +352,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
@@ -379,7 +400,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_CREATED;
-        
+        final boolean isNodeProtected = Boolean.FALSE;
         final String expectedExceptionMessage = "This exporter only supports deleted or replaced nodes. Current node status: " + testNodeStatus.toString();
         
         context.checking(new Expectations() {{
@@ -390,6 +411,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
@@ -413,9 +436,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
-
+        final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         final HandleException expectedExceptionCause = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
@@ -429,6 +451,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
@@ -462,9 +486,8 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
-        
+        final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
@@ -483,6 +506,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
