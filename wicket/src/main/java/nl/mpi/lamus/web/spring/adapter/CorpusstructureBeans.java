@@ -23,6 +23,8 @@ import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.proxy.ArchiveObjectsDBProxy;
 import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.proxy.CorpusStructureDBProxy;
+import nl.mpi.archiving.corpusstructure.core.handle.HandleResolver;
+import nl.mpi.archiving.corpusstructure.core.handle.HttpHandleResolver;
 import nl.mpi.archiving.corpusstructure.core.service.FilePathTranslator;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
@@ -65,8 +67,13 @@ public class CorpusstructureBeans {
     }
     
     @Bean
+    public HandleResolver handleResolver() {
+        return new HttpHandleResolver();
+    }
+    
+    @Bean
     public CorpusStructureAPIProviderFactory corpusStructureProviderFactory() {
-        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), "https://lux16.mpi.nl/ds/TranslationService");
+        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), handleResolver(), "https://lux16.mpi.nl/ds/TranslationService");
     }
     
     @Bean
