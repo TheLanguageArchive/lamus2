@@ -17,8 +17,7 @@
 package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
@@ -48,7 +47,7 @@ public class WsNodeActionButton extends Button {
             String id, Collection<WorkspaceTreeNode> selectedTreeNodes,
             Collection<WorkspaceTreeNode> selectedChildNodes,
             WsTreeNodesAction action, WorkspaceService wsService) {
-        super(id, new Model<String>(action.getName()));
+        super(id, new Model<>(action.getName()));
         this.selectedTreeNodes = selectedTreeNodes;
         this.selectedChildNodes = selectedChildNodes;
         this.action = action;
@@ -69,13 +68,7 @@ public class WsNodeActionButton extends Button {
             //tell the unlinked nodes panel to clear the selected nodes
             send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
             
-        } catch(WorkspaceNotFoundException ex) {
-            Session.get().error(ex.getMessage());
-        } catch(WorkspaceAccessException ex) {
-            Session.get().error(ex.getMessage());
-        } catch(WorkspaceException ex) {
-            Session.get().error(ex.getMessage());
-        } catch(IllegalArgumentException ex) {
+        } catch(WorkspaceException | IllegalArgumentException | ProtectedNodeException ex) {
             Session.get().error(ex.getMessage());
         }
         

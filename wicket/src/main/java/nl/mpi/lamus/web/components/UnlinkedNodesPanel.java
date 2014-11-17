@@ -21,9 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
@@ -76,7 +75,7 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     public UnlinkedNodesPanel(String id, IModel<Workspace> model, UnlinkedNodesModelProvider provider, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
         
-        checked = new ArrayList<WorkspaceTreeNode>();
+        checked = new ArrayList<>();
         
         unlinkedNodesTree = createTree("unlinkedNodesTableTree", provider, new WorkspaceTreeNodeExpansionModel());
         unlinkedNodesTree.setOutputMarkupPlaceholderTag(true);
@@ -97,7 +96,7 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
             protected Component newContentComponent(String id, IModel<WorkspaceTreeNode> model) {
                 
                 if(model.getObject().getParent() != null) {
-                    return new Folder<WorkspaceTreeNode>(id, unlinkedNodesTree, model);
+                    return new Folder<>(id, unlinkedNodesTree, model);
                 } else {
                     return new CheckedFolder<WorkspaceTreeNode>(id, unlinkedNodesTree, model) {
 
@@ -130,7 +129,7 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
 
             @Override
             protected Item<WorkspaceTreeNode> newRowItem(String id, int index, IModel<WorkspaceTreeNode> model) {
-                return new OddEvenItem<WorkspaceTreeNode>(id, index, model);
+                return new OddEvenItem<>(id, index, model);
             }
         };
 
@@ -140,7 +139,7 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     
     private List<IColumn<WorkspaceTreeNode, String>> createColumns() {
         
-        List<IColumn<WorkspaceTreeNode, String>> columns = new ArrayList<IColumn<WorkspaceTreeNode, String>>();
+        List<IColumn<WorkspaceTreeNode, String>> columns = new ArrayList<>();
         
         columns.add(new TreeColumn<WorkspaceTreeNode, String>(Model.of(getLocalizer().getString("unlinked_nodes_table_column_node", this))));
 
@@ -162,18 +161,14 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
                             //TODO Add confirmation dialog
                             workspaceService.deleteNode(LamusSession.get().getUserId(), getModelObject());
 
-                        } catch (WorkspaceNotFoundException ex) {
-                            error(ex.getMessage());
-                        } catch (WorkspaceAccessException ex) {
-                            error(ex.getMessage());
-                        } catch (WorkspaceException ex) {
+                        } catch (WorkspaceException | ProtectedNodeException ex) {
                             error(ex.getMessage());
                         }
                     }
                     
                 };
                 deleteLink.setBody(Model.of(getLocalizer().getString("unlinked_nodes_table_column_remove_button", UnlinkedNodesPanel.this)));
-                deleteLink.add(AttributeModifier.append("class", new Model<String>("tableActionLink")));
+                deleteLink.add(AttributeModifier.append("class", new Model<>("tableActionLink")));
                 cellItem.add(deleteLink);
             }
         });
@@ -188,7 +183,7 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     
     
     public void clearSelectedUnlinkedNodes() {
-        checked = new ArrayList<WorkspaceTreeNode>();
+        checked = new ArrayList<>();
     }
     
     
