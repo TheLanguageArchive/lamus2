@@ -17,10 +17,13 @@
 package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
@@ -41,6 +44,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -97,7 +101,7 @@ public class MetadataNodeReplaceCheckerTest {
 
     
     @Test
-    public void decideReplaceActionsNotLinked() throws URISyntaxException, MalformedURLException {
+    public void decideReplaceActionsNotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
         
         final int oldNodeID = 100;
         final int newNodeID = 200;
@@ -114,10 +118,11 @@ public class MetadataNodeReplaceCheckerTest {
             //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
             
             
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
+            
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
             
-            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
             
         }});
@@ -129,13 +134,17 @@ public class MetadataNodeReplaceCheckerTest {
     public void decideReplaceActions_ProtectedNode() {
         
         // if a protected node is found in the tree (a descendant of the top node to replace),
-        // the replacement should go ahead, but only an unlink action should be allowed over a protected node, it should never be deleted
+        // the replacement should not go ahead
         
+        final int workspaceID = 10;
         final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
         final int newNodeID = 200;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        final String expectedExceptionMessage = "Cannot proceed with replacement because old node (ID = " + oldNodeID + ") is protected (WS ID = " + workspaceID + ").";
         
         context.checking(new Expectations() {{
             
@@ -146,13 +155,20 @@ public class MetadataNodeReplaceCheckerTest {
             //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
             
             
-            oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
-            oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
-            
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            exactly(2).of(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
         }});
         
-        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", oldNodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
     }
 }

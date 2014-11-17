@@ -21,6 +21,7 @@ import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -57,10 +58,17 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
      * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean, java.util.List)
      */
     @Override
-    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions) {
+    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions)
+            throws ProtectedNodeException {
         
         logger.debug("Deciding which actions should take place to perform the replacement of resource node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
 
+        // if the node to replace is protected, the replace action should not go ahead
+        if(oldNode.isProtected()) {
+            String message = "Cannot proceed with replacement because old node (ID = " + oldNode.getWorkspaceNodeID() + ") is protected (WS ID = " + oldNode.getWorkspaceID() + ").";
+            throw new ProtectedNodeException(message, oldNode.getArchiveURI(), oldNode.getWorkspaceID());
+        }
+        
         if(oldNode.getWorkspaceNodeID() == newNode.getWorkspaceNodeID()) {
             logger.debug("Old Node and New Node are the same.");
             return;

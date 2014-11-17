@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -51,7 +52,8 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
      * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean, java.util.List)
      */
     @Override
-    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions) {
+    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions)
+            throws ProtectedNodeException {
         
         logger.debug("Deciding which actions should take place to perform the replacement of metadata node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
         
@@ -82,7 +84,13 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         //TODO CHECK IF ALL LINKS IN METADATA ARE IN THE DB? (SHOULD BE, OF COURSE), BUT I WOULD PREFER TO ONLY RELY ON ONE OF THESE THINGS...
         
         //TODO FOR EACH CHILD (OLD NODE) CALL THE APPROPRIATE REPLACE CHECKER...
+
         
+        // if the node to replace is protected, the replace action should not go ahead
+        if(oldNode.isProtected()) {
+            String message = "Cannot proceed with replacement because old node (ID = " + oldNode.getWorkspaceNodeID() + ") is protected (WS ID = " + oldNode.getWorkspaceID() + ").";
+            throw new ProtectedNodeException(message, oldNode.getArchiveURI(), oldNode.getWorkspaceID());
+        }
         
         
         replaceActionManager.addActionToList(replaceActionFactory.getReplaceAction(oldNode, parentNode, newNode, newNodeAlreadyLinked), actions);
@@ -90,13 +98,7 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         
         //TODO CHECK CIRCULAR LINKS
         
-        
-        // if the node to replace is protected, the replace action is added to the list anyway
-        // but the exploring of the child nodes is skipped (protected nodes don't have their children imported)
-        
-        if(!oldNode.isProtected()) {
-            nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
-        }
+        nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
     }
     
 }

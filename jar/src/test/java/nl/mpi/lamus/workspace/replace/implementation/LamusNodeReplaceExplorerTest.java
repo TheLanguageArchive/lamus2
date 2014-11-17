@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
@@ -118,15 +119,15 @@ public class LamusNodeReplaceExplorerTest {
 
     
     @Test
-    public void exploreReplace_WithoutChildren() {
+    public void exploreReplace_WithoutChildren() throws ProtectedNodeException {
         
-        final List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        final List<NodeReplaceAction> actions = new ArrayList<>();
         
         final int oldNodeId = 10;
         final int newNodeId = 20;
         
-        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<WorkspaceNode>();
-        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<>();
+        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<>();
         
         // getting children of old and new node
         context.checking(new Expectations() {{
@@ -150,16 +151,16 @@ public class LamusNodeReplaceExplorerTest {
 //    }
     
     @Test
-    public void exploreReplace_OnlyNewNodeHasChildren() throws URISyntaxException, IOException, MetadataException, TransformerException {
+    public void exploreReplace_OnlyNewNodeHasChildren() throws URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
-        final List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        final List<NodeReplaceAction> actions = new ArrayList<>();
         
         final int oldNodeId = 10;
         final int newNodeId = 20;
         
-        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<>();
         
-        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<>();
         newNodeChildren.add(mockNewNodeFirstChild);
         
         // getting children of old and new node
@@ -191,9 +192,9 @@ public class LamusNodeReplaceExplorerTest {
     }
     
     @Test
-    public void exploreReplace_WithChild_Resource_NotMatching() throws URISyntaxException, MalformedURLException, IOException, MetadataException, TransformerException {
+    public void exploreReplace_WithChild_Resource_NotMatching() throws URISyntaxException, MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
-        final List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        final List<NodeReplaceAction> actions = new ArrayList<>();
         
         final int oldNodeId = 10;
         final int newNodeId = 20;
@@ -202,10 +203,10 @@ public class LamusNodeReplaceExplorerTest {
         final URI oldNodeFirstChildHandle = new URI(UUID.randomUUID().toString());
         final URI newNodeFirstChildHandle = new URI(UUID.randomUUID().toString());
         
-        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<>();
         oldNodeChildren.add(mockOldNodeFirstChild);
         
-        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<>();
         newNodeChildren.add(mockNewNodeFirstChild);
         
         // getting children of old and new node
@@ -244,9 +245,9 @@ public class LamusNodeReplaceExplorerTest {
     }
     
     @Test
-    public void exploreReplace_WithChild_Resource_Matching() throws URISyntaxException {
+    public void exploreReplace_WithChild_Resource_Matching() throws URISyntaxException, ProtectedNodeException {
 
-        final List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        final List<NodeReplaceAction> actions = new ArrayList<>();
         
         final int oldNodeId = 10;
         final int newNodeId = 20;
@@ -255,10 +256,10 @@ public class LamusNodeReplaceExplorerTest {
         final URI oldNodeFirstChildHandle = new URI(UUID.randomUUID().toString());
         final URI newNodeFirstChildHandle = oldNodeFirstChildHandle;
         
-        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<>();
         oldNodeChildren.add(mockOldNodeFirstChild);
         
-        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<>();
         newNodeChildren.add(mockNewNodeFirstChild);
         
         // getting children of old and new node
@@ -286,5 +287,58 @@ public class LamusNodeReplaceExplorerTest {
         
         
         nodeReplaceExplorer.exploreReplace(mockOldNode, mockNewNode, actions);
+    }
+    
+    @Test
+    public void exploreReplace_WithChild_Resource_Matching_ProtectedNode() throws URISyntaxException, ProtectedNodeException {
+
+        final List<NodeReplaceAction> actions = new ArrayList<>();
+        
+        final int workspaceID = 1;
+        final int oldNodeId = 10;
+        final int newNodeId = 20;
+        
+        // handles match
+        final URI oldNodeFirstChildHandle = new URI(UUID.randomUUID().toString());
+        final URI newNodeFirstChildHandle = oldNodeFirstChildHandle;
+        
+        final Collection<WorkspaceNode> oldNodeChildren = new ArrayList<>();
+        oldNodeChildren.add(mockOldNodeFirstChild);
+        
+        final Collection<WorkspaceNode> newNodeChildren = new ArrayList<>();
+        newNodeChildren.add(mockNewNodeFirstChild);
+        
+        final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", oldNodeFirstChildHandle, workspaceID);
+        
+        // getting children of old and new node
+        context.checking(new Expectations() {{
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(oldNodeId); will(returnValue(oldNodeChildren));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(newNodeId); will(returnValue(newNodeChildren));
+        }});
+        
+        // traverse children of old node and look for a match among the children of the new node
+            // in this case there is only one child in each
+        context.checking(new Expectations() {{
+            oneOf(mockOldNodeFirstChild).getArchiveURI(); will(returnValue(oldNodeFirstChildHandle));
+            // for loop - children of new node
+            oneOf(mockNewNodeFirstChild).getArchiveURI(); will(returnValue(newNodeFirstChildHandle));
+        }});
+        
+        // get NodeReplaceChecker for current child and call it, passing also the matching new node
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeReplaceCheckerFactory).getReplaceCheckerForNode(mockOldNodeFirstChild); will(returnValue(mockResourceNodeReplaceChecker));
+            oneOf(mockResourceNodeReplaceChecker).decideReplaceActions(mockOldNodeFirstChild, mockNewNodeFirstChild, mockNewNode, Boolean.TRUE, actions);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeReplaceExplorer.exploreReplace(mockOldNode, mockNewNode, actions);
+            fail("should have thrown exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
 }

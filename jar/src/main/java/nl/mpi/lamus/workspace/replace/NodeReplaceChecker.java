@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.replace;
 
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -38,5 +39,6 @@ public interface NodeReplaceChecker {
      * @param newNodeAlreadyLinked true if the new node is already linked to the parent
      * @param actions list of actions
      */
-    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions);
+    public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions)
+            throws ProtectedNodeException;
 }

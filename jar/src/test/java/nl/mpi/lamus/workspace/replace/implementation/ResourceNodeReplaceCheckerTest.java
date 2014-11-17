@@ -28,6 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -48,6 +49,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -106,7 +108,7 @@ public class ResourceNodeReplaceCheckerTest {
 
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithoutChange_NotLinked() throws URISyntaxException, MalformedURLException {
+    public void decideReplaceActionsOldNodeInArchive_WithoutChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -125,13 +127,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
-        
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -155,16 +159,13 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldCorpusNode).getFileInfo(); will(returnValue(mockOldCorpusNodeFileInfo));
             oneOf(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
             oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockOldCorpusNodeFileInfo, newNodeWorkspaceFile); will(returnValue(Boolean.FALSE));
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithoutChange_AlreadyLinked() throws URISyntaxException, MalformedURLException {
+    public void decideReplaceActionsOldNodeInArchive_WithoutChange_AlreadyLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -183,12 +184,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.TRUE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -219,16 +223,13 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
             oneOf(mockReplaceActionFactory).getLinkAction(mockOldNode, mockParentNode); will(returnValue(mockLinkAction));
             oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithChange_NotLinked() throws URISyntaxException, MalformedURLException {
+    public void decideReplaceActionsOldNodeInArchive_WithChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -247,12 +248,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -278,16 +282,13 @@ public class ResourceNodeReplaceCheckerTest {
             
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException {
+    public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -300,12 +301,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -323,16 +327,13 @@ public class ResourceNodeReplaceCheckerTest {
             
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException {
+    public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -351,12 +352,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "image/jpeg";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -372,16 +376,13 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
             oneOf(mockReplaceActionFactory).getLinkAction(mockNewNode, mockParentNode); will(returnValue(mockLinkAction));
             oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException {
+    public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -396,12 +397,15 @@ public class ResourceNodeReplaceCheckerTest {
         final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
@@ -414,26 +418,70 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
             oneOf(mockReplaceActionFactory).getLinkAction(mockNewNode, mockParentNode); will(returnValue(mockLinkAction));
             oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
-            
-            //TODO MULTIPLE PARENTS???
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActionsNodesAreTheSame() {
+    public void decideReplaceActionsOldNodeProtected() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final int newNodeID = 200;
+        
+        final URL oldNodeArchiveRemoteURL = new URL("http://external/location/file.txt");
+        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
+        
+        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/someotherfile.txt");
+        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
+        
+        final String newNodeFormat = "text/plain";
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        final String expectedExceptionMessage = "Cannot proceed with replacement because old node (ID = " + oldNodeID + ") is protected (WS ID = " + workspaceID + ").";
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            exactly(2).of(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));            
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", oldNodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceActionsNodesAreTheSame() throws ProtectedNodeException {
         
         final int nodeID = 100;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
