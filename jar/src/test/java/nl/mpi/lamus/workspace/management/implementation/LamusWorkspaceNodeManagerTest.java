@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
@@ -36,8 +37,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -82,15 +83,19 @@ public class LamusWorkspaceNodeManagerTest {
     }
 
     @Test
-    public void deleteNodeWithArchiveUriWithoutChildren() throws WorkspaceException, URISyntaxException {
+    public void deleteNodeWithArchiveUriWithoutChildren() throws WorkspaceException, URISyntaxException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int nodeID = 101;
         final boolean isExternal = Boolean.FALSE;
+        final boolean isProtected = Boolean.FALSE;
         
-        final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> childNodes = new ArrayList<>();
         
         context.checking(new Expectations() {{
+            
+            //node not protected - delete recursively
+            oneOf(mockNode).isProtected(); will(returnValue(isProtected));
             
             //no children
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
@@ -108,25 +113,31 @@ public class LamusWorkspaceNodeManagerTest {
     }
     
     @Test
-    public void deleteNodeWitOneChild() throws WorkspaceException {
+    public void deleteNodeWitOneChild() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int nodeID = 101;
         final boolean isNodeExternal = Boolean.FALSE;
+        final boolean isNodeProtected = Boolean.FALSE;
         final int childNodeID = 102;
         final boolean isChildNodeExternal = Boolean.FALSE;
+        final boolean isChildNodeProtected = Boolean.FALSE;
         
-        
-        final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> childNodes = new ArrayList<>();
         childNodes.add(mockOneChildNode);
-        final Collection<WorkspaceNode> childChildNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> childChildNodes = new ArrayList<>();
         
         context.checking(new Expectations() {{
+            
+            //node not protected - delete recursively
+            oneOf(mockNode).isProtected(); will(returnValue(isNodeProtected));
             
             //one child
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeID); will(returnValue(childNodes));
-            
+
+            //child not protected - delete recursively
+            oneOf(mockOneChildNode).isProtected(); will(returnValue(isChildNodeProtected));
             //recursive call
             //no children
             oneOf(mockOneChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
@@ -151,41 +162,53 @@ public class LamusWorkspaceNodeManagerTest {
     }
     
     @Test
-    public void deleteNodeWitChildrenWithChildren() throws WorkspaceException {
+    public void deleteNodeWithChildren() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final int nodeID = 101;
         final boolean isNodeExternal = Boolean.FALSE;
+        final boolean isNodeProtected = Boolean.FALSE;
         final int oneChildNodeID = 102;
         final boolean isOneChildExternal = Boolean.FALSE;
+        final boolean isOneChildProtected = Boolean.FALSE;
         final int anotherChildNodeID = 103;
         final boolean isAnotherChildExternal = Boolean.FALSE;
+        final boolean isAnotherChildProtected = Boolean.FALSE;
         final int oneChildOneChildNodeID = 104;
         final boolean isOneChildOneChildExternal = Boolean.FALSE;
+        final boolean isOneChildOneChildProtected = Boolean.FALSE;
         final int oneChildAnotherChildNodeID = 105;
         final boolean isOneChildAnotherChildExternal = Boolean.FALSE;
+        final boolean isOneChildAnotherChildProtected = Boolean.FALSE;
         
-        final Collection<WorkspaceNode> childNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> childNodes = new ArrayList<>();
         childNodes.add(mockOneChildNode);
         childNodes.add(mockAnotherChildNode);
-        final Collection<WorkspaceNode> oneChildChildNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oneChildChildNodes = new ArrayList<>();
         oneChildChildNodes.add(mockOneChildOneChildNode);
         oneChildChildNodes.add(mockOneChildAnotherChildNode);
-        final Collection<WorkspaceNode> oneChildOneChildChildNodes = new ArrayList<WorkspaceNode>();
-        final Collection<WorkspaceNode> oneChildAnotherChildChildNodes = new ArrayList<WorkspaceNode>();
-        final Collection<WorkspaceNode> anotherChildChildNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> oneChildOneChildChildNodes = new ArrayList<>();
+        final Collection<WorkspaceNode> oneChildAnotherChildChildNodes = new ArrayList<>();
+        final Collection<WorkspaceNode> anotherChildChildNodes = new ArrayList<>();
         
         context.checking(new Expectations() {{
+            
+            //node not protected - delete recursively
+            oneOf(mockNode).isProtected(); will(returnValue(isNodeProtected));
             
             //two children
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeID); will(returnValue(childNodes));
             
+            //first child not protected - delete recursively
+            oneOf(mockOneChildNode).isProtected(); will(returnValue(isOneChildProtected));
             //recursive call - first child
             //two children
             oneOf(mockOneChildNode).getWorkspaceNodeID(); will(returnValue(oneChildNodeID));
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(oneChildNodeID); will(returnValue(oneChildChildNodes));
             
+            //first child - first child not protected - delete recursively
+            oneOf(mockOneChildOneChildNode).isProtected(); will(returnValue(isOneChildOneChildProtected));
             //another recursive call - first child - first child
             //no children
             oneOf(mockOneChildOneChildNode).getWorkspaceNodeID(); will(returnValue(oneChildOneChildNodeID));
@@ -197,6 +220,8 @@ public class LamusWorkspaceNodeManagerTest {
             oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildOneChildNodeID, isOneChildOneChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildOneChildNode);
             
+            //first child - second child not protected - delete recursively
+            oneOf(mockOneChildAnotherChildNode).isProtected(); will(returnValue(isOneChildAnotherChildProtected));
             //another recursive call - first child - second child
             //no children
             oneOf(mockOneChildAnotherChildNode).getWorkspaceNodeID(); will(returnValue(oneChildAnotherChildNodeID));
@@ -215,6 +240,8 @@ public class LamusWorkspaceNodeManagerTest {
             oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, oneChildNodeID, isOneChildExternal);
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildNode);
             
+            //second child not protected - delete recursively
+            oneOf(mockAnotherChildNode).isProtected(); will(returnValue(isAnotherChildProtected));
             //recursive call - second child
             //no children
             oneOf(mockAnotherChildNode).getWorkspaceNodeID(); will(returnValue(anotherChildNodeID));
@@ -227,6 +254,78 @@ public class LamusWorkspaceNodeManagerTest {
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockAnotherChildNode);
 
             //back to the top node, which will be marked as deleted too
+            oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockNode).isExternal(); will(returnValue(isNodeExternal));
+            oneOf(mockWorkspaceDao).setWorkspaceNodeAsDeleted(workspaceID, nodeID, isNodeExternal);
+            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
+        }});
+        
+        workspaceNodeManager.deleteNodesRecursively(mockNode);
+    }
+    
+    @Test
+    public void deleteNode_DoNotAllowDeletionOfProtectedNode() throws WorkspaceException {
+        
+        // if the node is protected, it shouldn't be possible to delete it
+        
+        final int workspaceID = 10;
+        final int nodeID = 101;
+        final URI nodeURI = URI.create(UUID.randomUUID().toString());
+        final boolean isNodeProtected = Boolean.TRUE;
+        
+        final String expectedExceptionMessage = "Cannot proceed with deleting because the node (ID = " + nodeID + ") is protected (WS ID = " + workspaceID + ").";
+        
+        context.checking(new Expectations() {{
+            
+            //node protected - do not allow deletion to proceed
+            oneOf(mockNode).isProtected(); will(returnValue(isNodeProtected));
+            
+            //log
+            oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            exactly(2).of(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeURI));
+        }});
+        
+        try {
+            workspaceNodeManager.deleteNodesRecursively(mockNode);
+            fail("should have thrown exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", nodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
+    public void deleteNode_ProtectedChildNodes() throws WorkspaceException, ProtectedNodeException {
+        
+        // if the node has protected children, deletion should be allowed, but making sure that the protected children would just be unlinked, not deleted
+        
+        final int workspaceID = 10;
+        final int nodeID = 101;
+        final boolean isNodeExternal = Boolean.FALSE;
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isOneChildNodeProtected = Boolean.TRUE;
+        
+        final Collection<WorkspaceNode> childNodes = new ArrayList<>();
+        childNodes.add(mockOneChildNode);
+        
+        context.checking(new Expectations() {{
+            
+            //node not protected - delete recursively
+            oneOf(mockNode).isProtected(); will(returnValue(isNodeProtected));
+            
+            //one child
+            oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeID); will(returnValue(childNodes));
+            
+            //child protected - only unlink instead of recursively delete
+            oneOf(mockOneChildNode).isProtected(); will(returnValue(isOneChildNodeProtected));
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodes(mockNode, mockOneChildNode);
+            
+            //top node marked as deleted
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockNode).isExternal(); will(returnValue(isNodeExternal));

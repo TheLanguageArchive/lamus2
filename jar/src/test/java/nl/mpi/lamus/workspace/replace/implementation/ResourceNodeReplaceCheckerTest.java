@@ -47,7 +47,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 
 /**
@@ -98,7 +97,7 @@ public class ResourceNodeReplaceCheckerTest {
         nodeReplaceChecker = new ResourceNodeReplaceChecker(
                 mockCorpusStructureProvider, mockArchiveFileHelper,
                 mockReplaceActionManager, mockReplaceActionFactory);
-        actions = new ArrayList<NodeReplaceAction>();
+        actions = new ArrayList<>();
     }
     
     @After

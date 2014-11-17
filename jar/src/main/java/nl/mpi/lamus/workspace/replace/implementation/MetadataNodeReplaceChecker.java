@@ -90,7 +90,13 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         
         //TODO CHECK CIRCULAR LINKS
         
-        nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
+        
+        // if the node to replace is protected, the replace action is added to the list anyway
+        // but the exploring of the child nodes is skipped (protected nodes don't have their children imported)
+        
+        if(!oldNode.isProtected()) {
+            nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
+        }
     }
     
 }

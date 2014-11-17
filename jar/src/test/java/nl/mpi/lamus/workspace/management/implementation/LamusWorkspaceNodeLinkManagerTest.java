@@ -27,6 +27,7 @@ import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -215,7 +216,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
 
     @Test
     public void linkNodesMetadataLocal()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -225,9 +226,16 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -263,7 +271,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesResourceLocal()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -275,9 +283,16 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -314,7 +329,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesResourceFromArchive()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -326,9 +341,16 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -365,7 +387,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesExternal()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -376,9 +398,16 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -416,8 +445,72 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
+    public void linkNodes_DoNotCreateMultipleParents() throws WorkspaceException, ProtectedNodeException {
+        
+        // if a child node already has parents, do not allow linking it to another parent (avoid creation of paralel structures)
+        
+        final int workspaceID = 1;
+        final int childNodeID = 3;
+        
+        final Collection<WorkspaceNode> existingParentNodes = new ArrayList<>();
+        existingParentNodes.add(mockOtherParentNode);
+        
+        final String expectedExceptionMessage = "Child node (ID = " + childNodeID + ") already has a parent. Cannot be linked again.";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(existingParentNodes));
+            
+            //log
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+        }});
+        
+        try {
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
+    public void linkNodes_DoNotLinkProtectedParent() throws WorkspaceException, URISyntaxException {
+        
+        // if the parent is protected, it should not be allowed to have more children linked to it
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URI parentNodeURI = new URI(UUID.randomUUID().toString());
+        
+        final String expectedExceptionMessage = "Cannot proceed with linking because parent node (ID = " + parentNodeID + ") is protected (WS ID = " + workspaceID + ").";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.TRUE));
+            //log
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(parentNodeURI));
+        }});
+        
+        try {
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", parentNodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
     public void linkNodesGetMetadataThrowsIOException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -425,12 +518,19 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error retrieving metadata document for node " + parentNodeID;
         final IOException expectedException = new IOException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -454,7 +554,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesGetMetadataThrowsMetadataException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -462,12 +562,19 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error retrieving metadata document for node " + parentNodeID;
         final MetadataException expectedException = new MetadataException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -492,7 +599,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesParentNotReferencingDocument()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -500,11 +607,18 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error retrieving referencing document for node " + parentNodeID;
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -528,7 +642,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesMetadataException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -538,12 +652,19 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error creating reference in document with node ID " + parentNodeID;
         final MetadataException expectedException = new MetadataException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -574,7 +695,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesIOException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -584,12 +705,19 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error creating reference in document with node ID " + parentNodeID;
         final IOException expectedException = new IOException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -627,7 +755,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesTransformerException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -637,12 +765,19 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         final String expectedErrorMessage = "Error creating reference in document with node ID " + parentNodeID;
         final TransformerException expectedException = new TransformerException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -710,7 +845,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     
     @Test
-    public void unlinkNodesWithLocationWithHandle() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkNodesWithLocationWithHandle() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -721,6 +856,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -754,7 +891,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesWithoutLocationWithHandle() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkNodesWithoutLocationWithHandle() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -766,6 +903,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -800,7 +939,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesWithoutLocationWithUri() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+    public void unlinkNodesWithoutLocationWithUri() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -812,6 +951,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -844,7 +985,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkExternalNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkExternalNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -856,6 +997,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -889,7 +1032,37 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesGetMetadataThrowsIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodes_DoNotAllowUnlinkingFromProtectedParent() throws WorkspaceException, URISyntaxException {
+        
+        // if the parent node is protected, unlinking its children should not be allowed
+        // if the child (or any other descendant) is protected, unlinking will proceed (this won't be checked)
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URI parentNodeURI = new URI(UUID.randomUUID().toString());
+        final String expectedExceptionMessage = "Cannot proceed with unlinking because parent node (ID = " + parentNodeID + ") is protected (WS ID = " + workspaceID + ").";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.TRUE));
+            //log
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(parentNodeURI));
+        }});
+        
+        try {
+            nodeLinkManager.unlinkNodes(mockParentNode, mockChildNode);
+            fail("should have thrown an exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", parentNodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
+    public void unlinkNodesGetMetadataThrowsIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -904,6 +1077,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
@@ -925,7 +1100,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesGetMetadataThrowsMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodesGetMetadataThrowsMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -940,6 +1115,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
@@ -961,7 +1138,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesParentNotReferencingDocument() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+    public void unlinkNodesParentNotReferencingDocument() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -974,6 +1151,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -996,7 +1175,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkNodesMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1011,6 +1190,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -1037,7 +1218,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkNodesIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1053,6 +1234,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
@@ -1086,7 +1269,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesTransformerException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException {
+    public void unlinkNodesTransformerException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1102,6 +1285,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
@@ -1135,7 +1320,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodeWithLocationWithOneParent() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+    public void unlinkNodeWithLocationWithOneParent() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1144,7 +1329,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         
-        final Collection<WorkspaceNode> parentNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> parentNodes = new ArrayList<>();
         parentNodes.add(mockParentNode);
         
         context.checking(new Expectations() {{
@@ -1189,7 +1374,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodeWithLocationWithSeveralParents() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+    public void unlinkNodeWithLocationWithSeveralParents() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1204,7 +1389,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         
-        final Collection<WorkspaceNode> parentNodes = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> parentNodes = new ArrayList<>();
         parentNodes.add(mockParentNode);
         parentNodes.add(mockOtherParentNode);
         
@@ -1278,7 +1463,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void replaceResourceNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+    public void replaceResourceNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
      
         final int workspaceID = 1;
         final int parentNodeID = 2;
@@ -1296,6 +1481,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
         
 //        checkUnlinkNodeExpectations(workspaceID, childURL, parentURL, childURI, parentNodeID, childNodeID);
         
@@ -1309,6 +1496,9 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(newChildNodeID); will(returnValue(emptyParentNodes));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -1339,6 +1529,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             //logger
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
@@ -1382,7 +1574,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void replaceResourceNode_NewNodeAlreadyLinked() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException {
+    public void replaceResourceNode_NewNodeAlreadyLinked() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
      
         final int workspaceID = 1;
         final int parentNodeID = 2;

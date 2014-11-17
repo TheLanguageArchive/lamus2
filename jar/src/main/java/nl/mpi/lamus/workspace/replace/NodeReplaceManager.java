@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.replace;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -34,5 +35,5 @@ public interface NodeReplaceManager {
      * @param newNode new version of the node (or top node of tree)
      * @param parentNode parent node
      */
-    public void replaceTree(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode) throws WorkspaceException;
+    public void replaceTree(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode) throws WorkspaceException, ProtectedNodeException;
 }

@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
@@ -33,5 +34,5 @@ public interface WorkspaceNodeManager {
      * 
      * @param rootNodeToDelete node to delete, along with its descendants
      */
-    public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException;
+    public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException, ProtectedNodeException;
 }

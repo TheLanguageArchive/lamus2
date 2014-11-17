@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.util.ArrayList;
-import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -32,7 +32,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 
 /**
@@ -77,7 +76,7 @@ public class LamusNodeReplaceManagerTest {
 
     
     @Test
-    public void replace() throws WorkspaceException {
+    public void replace() throws WorkspaceException, ProtectedNodeException {
         
         context.checking(new Expectations() {{
             

@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.replace.action;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 
@@ -31,5 +32,5 @@ public interface ReplaceActionExecutor {
      * 
      * @param action action to execute
      */
-    public void execute(NodeReplaceAction action) throws WorkspaceException;
+    public void execute(NodeReplaceAction action) throws WorkspaceException, ProtectedNodeException;
 }

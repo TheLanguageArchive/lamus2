@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -143,7 +144,7 @@ public interface WorkspaceService extends Serializable {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
      * Unlinks two nodes in a workspace.
@@ -152,7 +153,7 @@ public interface WorkspaceService extends Serializable {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
      * Deletes a node in the workspace.
@@ -160,7 +161,7 @@ public interface WorkspaceService extends Serializable {
      * @param node WorkspaceNode object corresponding to the node that should be deleted
      */
     public void deleteNode(String userID, WorkspaceNode node)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
      * Replaces a tree by a new version of that same tree.
@@ -173,7 +174,7 @@ public interface WorkspaceService extends Serializable {
      * @param parentNode parent node of the node to replace
      */
     public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
      * Uploads the given files into the workspace.

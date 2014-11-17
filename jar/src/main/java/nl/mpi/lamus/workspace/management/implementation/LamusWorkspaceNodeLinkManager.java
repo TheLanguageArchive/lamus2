@@ -23,6 +23,7 @@ import java.util.Collection;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -108,9 +109,20 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      * @see WorkspaceNodeLinkManager#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException {
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException, ProtectedNodeException {
         
         int workspaceID = parentNode.getWorkspaceID();
+        
+        if(parentNode.isProtected()) {
+            String message = "Cannot proceed with linking because parent node (ID = " + parentNode.getWorkspaceNodeID() + ") is protected (WS ID = " + workspaceID + ").";
+            throw new ProtectedNodeException(message, parentNode.getArchiveURI(), workspaceID);
+        }
+        
+        Collection<WorkspaceNode> existingParents = workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
+        if(!existingParents.isEmpty()) {
+            String message = "Child node (ID = " + childNode.getWorkspaceNodeID() + ") already has a parent. Cannot be linked again.";
+            throw new WorkspaceException(message, workspaceID, null);
+        }
         
         logger.debug("Linking nodes; workspaceID: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
@@ -180,9 +192,25 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      */
     @Override
     public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceException {
+            throws WorkspaceException, ProtectedNodeException {
+        
+        unlinkNodes(parentNode, childNode, true);
+    }
+    
+    /**
+     * Similar to the other unlinkNodes method, but including a boolean
+     * to indicate if protected nodes should be checked or not
+     */
+    private void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, boolean checkProtectedNode)
+            throws WorkspaceException, ProtectedNodeException {
         
         int workspaceID = parentNode.getWorkspaceID();
+        
+        if(checkProtectedNode && parentNode.isProtected()) {
+            String message = "Cannot proceed with unlinking because parent node (ID = " + parentNode.getWorkspaceNodeID() + ") is protected (WS ID = " + workspaceID + ").";
+            logger.error(message);
+            throw new ProtectedNodeException(message, parentNode.getArchiveURI(), workspaceID);
+        }
         
         logger.debug("Unlinking nodes: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
@@ -230,7 +258,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      */
     @Override
     public void unlinkNodeFromAllParents(WorkspaceNode childNode)
-            throws WorkspaceException {
+            throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Unlinking node from all parents; workspaceID: " + childNode.getWorkspaceID() + "; nodeID: " + childNode.getWorkspaceNodeID());
         
@@ -238,7 +266,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 this.workspaceDao.getParentWorkspaceNodes(childNode.getWorkspaceNodeID());
         
         for(WorkspaceNode parent : parentNodes) {
-            this.unlinkNodes(parent, childNode);
+            this.unlinkNodes(parent, childNode, false);
         }
     }
     
@@ -247,7 +275,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
      */
     @Override
     public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode,
-            WorkspaceNode newNode, boolean isNewNodeAlreadyLinked) throws WorkspaceException {
+            WorkspaceNode newNode, boolean isNewNodeAlreadyLinked) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Replacing nodes; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() +
                 "; oldNodeID: " + oldNode.getWorkspaceNodeID() + "; newNodeID: " + newNode.getWorkspaceNodeID() +
@@ -255,7 +283,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         if(!isNewNodeAlreadyLinked) {
             
-            unlinkNodes(parentNode, oldNode);
+            unlinkNodes(parentNode, oldNode, false);
             linkNodes(parentNode, newNode);
         }
         

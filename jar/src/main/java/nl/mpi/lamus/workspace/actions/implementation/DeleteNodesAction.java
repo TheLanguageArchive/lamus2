@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -49,7 +50,7 @@ public class DeleteNodesAction extends WsTreeNodesAction {
      * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService)
      */
     @Override
-    public void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         if(wsService == null) {
             throw new IllegalArgumentException("WorkspaceService should have been set");

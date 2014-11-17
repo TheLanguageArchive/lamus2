@@ -29,6 +29,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.implementation.LamusAmsServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -540,7 +541,8 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to link the uploaded node to the top node of the workspace")
-    public void thatUserChoosesToLinkTheUploadedNodeIntoTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void thatUserChoosesToLinkTheUploadedNodeIntoTheWorkspaceTree()
+            throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.uploadedFileParentNode = wsTopNode;
@@ -549,7 +551,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to unlink a $type node from the workspace tree")
-    public void thatUserChoosesToUnlinkANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void thatUserChoosesToUnlinkANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.unlinkedParentNode = wsTopNode;
@@ -563,7 +565,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to delete a $type node from the workspace tree")
-    public void thatUserChoosesToDeleteANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void thatUserChoosesToDeleteANodeFromTheWorkspaceTree() throws WorkspaceNodeNotFoundException, WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         WorkspaceNode wsTopNode = this.workspaceDao.getWorkspaceTopNode(this.createdWorkspaceID);
         this.deletedWsNodeParent = wsTopNode;

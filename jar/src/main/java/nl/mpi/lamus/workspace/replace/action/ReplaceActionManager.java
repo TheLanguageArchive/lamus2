@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.replace.action;
 
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 
@@ -38,5 +39,5 @@ public interface ReplaceActionManager {
      * Applies the given list of actions.
      * @param list list of actions
      */
-    public void applyActions(List<NodeReplaceAction> list) throws WorkspaceException;
+    public void applyActions(List<NodeReplaceAction> list) throws WorkspaceException, ProtectedNodeException;
 }

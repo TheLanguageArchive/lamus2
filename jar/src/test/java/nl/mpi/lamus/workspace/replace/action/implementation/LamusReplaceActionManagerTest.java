@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.replace.action.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionExecutor;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
@@ -101,9 +102,9 @@ public class LamusReplaceActionManagerTest {
     }
     
     @Test
-    public void applyActionsSuccessful() throws WorkspaceException {
+    public void applyActionsSuccessful() throws WorkspaceException, ProtectedNodeException {
         
-        List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        List<NodeReplaceAction> actions = new ArrayList<>();
         actions.add(mockAction1);
         actions.add(mockAction2);
         actions.add(mockAction3);
@@ -119,9 +120,9 @@ public class LamusReplaceActionManagerTest {
     }
     
     @Test
-    public void applyActionsUnsuccessful() throws WorkspaceException {
+    public void applyActionsUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
-        List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        List<NodeReplaceAction> actions = new ArrayList<>();
         actions.add(mockAction1);
         actions.add(mockAction2);
         actions.add(mockAction3);

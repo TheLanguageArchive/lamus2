@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.replace.action.implementation;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
@@ -50,7 +51,7 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
      * @see ReplaceActionExecutor#execute(nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction)
      */
     @Override
-    public void execute(NodeReplaceAction action) throws WorkspaceException {
+    public void execute(NodeReplaceAction action) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Executing action: " + action.toString());
 
@@ -69,7 +70,7 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         }
     }
     
-    private void executeReplaceAction(ReplaceNodeReplaceAction action) throws WorkspaceException {
+    private void executeReplaceAction(ReplaceNodeReplaceAction action) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Executing Replace Action: " + action.toString());
 
@@ -80,7 +81,7 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         workspaceNodeLinkManager.replaceNode(action.getParentNode(), action.getAffectedNode(), action.getNewNode(), action.isAlreadyLinked());
     }
     
-    private void executeDeleteAction(DeleteNodeReplaceAction action) throws WorkspaceException {
+    private void executeDeleteAction(DeleteNodeReplaceAction action) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Executing Delete Action: " + action.toString());
 
@@ -88,14 +89,14 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         
     }
     
-    private void executeUnlinkAction(UnlinkNodeReplaceAction action) throws WorkspaceException {
+    private void executeUnlinkAction(UnlinkNodeReplaceAction action) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Executing Unlink Action: " + action.toString());
 
         workspaceNodeLinkManager.unlinkNodes(action.getParentNode(), action.getAffectedNode());
     }
     
-    private void executeLinkAction(LinkNodeReplaceAction action) throws WorkspaceException {
+    private void executeLinkAction(LinkNodeReplaceAction action) throws WorkspaceException, ProtectedNodeException {
         
         logger.debug("Executing Link Action: " + action.toString());
 

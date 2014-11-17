@@ -60,7 +60,6 @@ public class MetadataNodeReplaceCheckerTest {
     @Mock WorkspaceNode mockNewNode;
     @Mock WorkspaceNode mockParentNode;
     @Mock CorpusNode mockOldCorpusNode;
-//    @Mock FileInfo mockOldCorpusNodeFileInfo;
     
     @Mock UnlinkNodeReplaceAction mockUnlinkAction;
     @Mock DeleteNodeReplaceAction mockDeleteAction;
@@ -89,7 +88,7 @@ public class MetadataNodeReplaceCheckerTest {
         nodeReplaceChecker = new MetadataNodeReplaceChecker(
                 mockReplaceActionManager, mockReplaceActionFactory,
                 mockNodeReplaceExplorer);
-        actions = new ArrayList<NodeReplaceAction>();
+        actions = new ArrayList<>();
     }
     
     @After
@@ -104,6 +103,7 @@ public class MetadataNodeReplaceCheckerTest {
         final int newNodeID = 200;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
@@ -117,9 +117,39 @@ public class MetadataNodeReplaceCheckerTest {
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
             
-            //TODO MULTIPLE PARENTS???
-            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
+            
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceActions_ProtectedNode() {
+        
+        // if a protected node is found in the tree (a descendant of the top node to replace),
+        // the replacement should go ahead, but only an unlink action should be allowed over a protected node, it should never be deleted
+        
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
+            
+            
+            oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
         }});
         

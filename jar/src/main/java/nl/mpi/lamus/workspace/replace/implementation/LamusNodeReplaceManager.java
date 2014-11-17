@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -49,9 +50,9 @@ public class LamusNodeReplaceManager implements NodeReplaceManager {
      * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void replaceTree(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode) throws WorkspaceException {
+    public void replaceTree(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode) throws WorkspaceException, ProtectedNodeException {
         
-        List<NodeReplaceAction> actions = new ArrayList<NodeReplaceAction>();
+        List<NodeReplaceAction> actions = new ArrayList<>();
         NodeReplaceChecker replaceChecker = nodeReplaceCheckerFactory.getReplaceCheckerForNode(oldNode);
         replaceChecker.decideReplaceActions(oldNode, newNode, parentNode, false, actions);
         

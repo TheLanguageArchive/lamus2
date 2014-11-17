@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.replace.action.implementation;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
@@ -81,7 +82,7 @@ public class LamusReplaceActionExecutorTest {
 
     
     @Test
-    public void executeLinkActionSuccessful() throws WorkspaceException {
+    public void executeLinkActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
         context.checking(new Expectations() {{
             
@@ -95,7 +96,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeLinkActionUnsuccessful() throws WorkspaceException {
+    public void executeLinkActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
@@ -118,7 +119,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeUnlinkActionSuccessful() throws WorkspaceException {
+    public void executeUnlinkActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
         context.checking(new Expectations() {{
             
@@ -132,7 +133,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeUnlinkActionUnsuccessful() throws WorkspaceException {
+    public void executeUnlinkActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
@@ -155,7 +156,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeDeleteActionSuccessful() throws WorkspaceException {
+    public void executeDeleteActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
         context.checking(new Expectations() {{
             
@@ -168,7 +169,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeDeleteActionUnsuccessful() throws WorkspaceException {
+    public void executeDeleteActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
@@ -189,7 +190,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeReplaceActionSuccessful() throws WorkspaceException {
+    public void executeReplaceActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final boolean isAlreadyLinked = Boolean.FALSE;
         
@@ -207,7 +208,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeReplaceActionUnsuccessful() throws WorkspaceException {
+    public void executeReplaceActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final boolean isAlreadyLinked = Boolean.FALSE;
@@ -233,7 +234,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeRemoveArchiveUriActionSuccessful() throws WorkspaceException {
+    public void executeRemoveArchiveUriActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
         context.checking(new Expectations() {{
             
@@ -247,7 +248,7 @@ public class LamusReplaceActionExecutorTest {
     }
     
     @Test
-    public void executeRemoveArchiveUriActionUnsuccessful() throws WorkspaceException {
+    public void executeRemoveArchiveUriActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);

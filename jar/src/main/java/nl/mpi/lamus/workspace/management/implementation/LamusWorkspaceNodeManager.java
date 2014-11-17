@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
@@ -44,12 +45,26 @@ public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
     }
     
     @Override
-    public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException {
+    public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException, ProtectedNodeException {
+        
+        if(rootNodeToDelete.isProtected()) {
+            String message = "Cannot proceed with deleting because the node (ID = " + rootNodeToDelete.getWorkspaceNodeID() + ") is protected (WS ID = " + rootNodeToDelete.getWorkspaceID() + ").";
+            throw new ProtectedNodeException(message, rootNodeToDelete.getArchiveURI(), rootNodeToDelete.getWorkspaceID());
+        }
+        
+        deleteNodesRecursively(rootNodeToDelete, true);
+    }
+    
+    private void deleteNodesRecursively(WorkspaceNode rootNodeToDelete, boolean isFirstRoot) throws WorkspaceException, ProtectedNodeException {
         
         Collection<WorkspaceNode> children = workspaceDao.getChildWorkspaceNodes(rootNodeToDelete.getWorkspaceNodeID());
         
         for(WorkspaceNode child : children) {
-            deleteNodesRecursively(child);
+            if(child.isProtected()) {
+                workspaceNodeLinkManager.unlinkNodes(rootNodeToDelete, child);
+            } else {
+                deleteNodesRecursively(child, false);
+            }
         }
         
         workspaceDao.setWorkspaceNodeAsDeleted(

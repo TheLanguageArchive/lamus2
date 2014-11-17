@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -85,7 +86,7 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         String expectedExceptionMessage = "Action for deleting nodes requires at least one tree node; currently null";
         
@@ -98,9 +99,9 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         
         String expectedExceptionMessage = "Action for deleting nodes requires at least one tree node; currently selected " + selectedTreeNodes.size();
         
@@ -115,9 +116,9 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         
         String expectedExceptionMessage = "WorkspaceService should have been set";
@@ -133,9 +134,9 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         
         context.checking(new Expectations() {{
@@ -149,9 +150,9 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         selectedTreeNodes.add(mockTreeNodeTwo);
         
@@ -167,10 +168,10 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
@@ -191,10 +192,10 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
@@ -215,10 +216,10 @@ public class DeleteNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockTreeNodeOne);
         
         final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);

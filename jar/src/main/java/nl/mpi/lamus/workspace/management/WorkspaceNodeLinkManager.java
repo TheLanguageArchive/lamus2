@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.management;
 
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -45,7 +46,7 @@ public interface WorkspaceNodeLinkManager {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceException;
+            throws WorkspaceException, ProtectedNodeException;
     
     /**
      * Links, only in the workspace DB, two nodes.
@@ -63,14 +64,14 @@ public interface WorkspaceNodeLinkManager {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void unlinkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceException;
+            throws WorkspaceException, ProtectedNodeException;
     
     /**
      * Unlinks, in the workspace, a node from all its parent nodes.
      * @param childNode WorkspaceNode object corresponding to the node to be unlinked
      */
     public void unlinkNodeFromAllParents(WorkspaceNode childNode)
-            throws WorkspaceException;
+            throws WorkspaceException, ProtectedNodeException;
     
     /**
      * Replaces, in the workspace, a node by a newer version.
@@ -83,7 +84,7 @@ public interface WorkspaceNodeLinkManager {
      */
     public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode,
             WorkspaceNode newNode, boolean isNewNodeAlreadyLinked)
-            throws WorkspaceException;
+            throws WorkspaceException, ProtectedNodeException;
     
     /**
      * Removes the Archive URI from the given child node, including

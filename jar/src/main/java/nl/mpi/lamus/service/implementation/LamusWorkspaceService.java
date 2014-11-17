@@ -25,6 +25,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -236,7 +237,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void linkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         logger.debug("Triggered node linking; userID: " + userID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
@@ -250,7 +251,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void unlinkNodes(String userID, WorkspaceNode parentNode, WorkspaceNode childNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         logger.debug("Triggered node unlinking; userID: " + userID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
         
@@ -264,7 +265,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void deleteNode(String userID, WorkspaceNode node)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         logger.debug("Triggered node deletion; userID: " + userID + "; nodeID: " + node.getWorkspaceNodeID());
         
@@ -278,7 +279,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         logger.debug("Triggered tree replacement; userID: " + userID + "; oldNodeID: " + oldTreeTopNode.getWorkspaceNodeID() + "; newNodeID: " + newTreeTopNode.getWorkspaceNodeID());
         

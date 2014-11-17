@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.actions;
 
 import java.util.Collection;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -43,7 +44,8 @@ public abstract class WsTreeNodesAction implements WsNodesAction {
      * @param userID ID of the user to execute the action
      * @param wsService WorkspaceService to be used to execute the actions
      */
-    public abstract void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException;
+    public abstract void execute(String userID, WorkspaceService wsService)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
      * Sets the collection of nodes to be used in the action as selected nodes

@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -85,9 +86,9 @@ public class ReplaceNodeActionTest {
     }
 
     @Test
-    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         String expectedExceptionMessage = "Action for replacing nodes requires exactly one tree node; currently null";
         
@@ -102,9 +103,9 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeWithNullUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
         String expectedExceptionMessage = "Action for replacing nodes requires exactly one selected unlinked node; currently null";
         
@@ -119,10 +120,10 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         String expectedExceptionMessage = "Action for replacing nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size();
         
@@ -138,11 +139,11 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeWithEmptyUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithEmptyUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         String expectedExceptionMessage = "Action for replacing nodes requires exactly one selected unlinked node; currently selected " + selectedUnlinkedNodes.size();
         
         replaceNodesAction.setSelectedTreeNodes(selectedTreeNodes);
@@ -157,11 +158,11 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeWithMultipleUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithMultipleUnlinkedNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         selectedUnlinkedNodes.add(mockOtherChildNode);
         String expectedExceptionMessage = "Action for replacing nodes requires exactly one selected unlinked node; currently selected " + selectedUnlinkedNodes.size();
@@ -178,11 +179,11 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         String expectedExceptionMessage = "WorkspaceService should have been set";
         
@@ -198,11 +199,11 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void execute() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void execute() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         
         context.checking(new Expectations() {{
@@ -217,12 +218,12 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
@@ -245,12 +246,12 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
@@ -273,12 +274,12 @@ public class ReplaceNodeActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockOldChildNode);
-        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
         selectedUnlinkedNodes.add(mockNewChildNode);
         
         final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);

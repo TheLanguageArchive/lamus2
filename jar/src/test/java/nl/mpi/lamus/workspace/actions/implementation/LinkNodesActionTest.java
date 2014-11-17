@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -84,9 +85,9 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         String expectedExceptionMessage = "Action for linking nodes requires exactly one tree node; currently null";
         
@@ -101,9 +102,9 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeWithNullChildNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullChildNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
         String expectedExceptionMessage = "Action for linking nodes requires at least one selected child node; currently null";
         
@@ -118,10 +119,10 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithEmptyTreeNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         String expectedExceptionMessage = "Action for linking nodes requires exactly one tree node; currently selected " + selectedTreeNodes.size();
         
@@ -137,11 +138,11 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeWithEmptyChildNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithEmptyChildNodeCollection() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         String expectedExceptionMessage = "Action for linking nodes requires at least one selected child node";
         
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
@@ -156,11 +157,11 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeWithNullService() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         String expectedExceptionMessage = "WorkspaceService should have been set";
         
@@ -176,11 +177,11 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeOneAction() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         
         context.checking(new Expectations() {{
@@ -194,11 +195,11 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeTwoActions() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         selectedChildNodes.add(mockChildNodeTwo);
         
@@ -214,12 +215,12 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException(userID, workspaceID, null);
@@ -241,12 +242,12 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceAccessException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException(userID, workspaceID, null);
@@ -268,12 +269,12 @@ public class LinkNodesActionTest {
     }
     
     @Test
-    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void executeActionWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
 
         final int workspaceID = 10;
-        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedTreeNodes = new ArrayList<>();
         selectedTreeNodes.add(mockParentNode);
-        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<WorkspaceTreeNode>();
+        Collection<WorkspaceTreeNode> selectedChildNodes = new ArrayList<>();
         selectedChildNodes.add(mockChildNodeOne);
         
         final WorkspaceException expectedException = new WorkspaceException(userID, workspaceID, null);
