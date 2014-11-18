@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -75,7 +76,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     }};
     
     
-    private List<WsTreeNodesAction> expectedActionsList = new ArrayList<WsTreeNodesAction>();
+    private List<WsTreeNodesAction> expectedActionsList = new ArrayList<>();
 
     private boolean refreshStuffCalled = false;
     
@@ -100,7 +101,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         
-        treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<WorkspaceTreeNode>(selectedNodes)) {
+        treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<>(selectedNodes)) {
 
             @Override
             public void refreshTreeAndPanels() {
@@ -148,7 +149,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     
     @Test
     @DirtiesContext
-    public void clickButton() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+    public void clickButton() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         ListView<WsTreeNodesAction> nodesActionList = (ListView<WsTreeNodesAction>) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
         Iterator<Component> listItems = nodesActionList.iterator();
