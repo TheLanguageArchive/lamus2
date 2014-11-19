@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.workspace.tree;
 
 import javax.swing.ImageIcon;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreeNodeIconProvider;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
@@ -29,11 +30,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvider<WorkspaceTreeNode> {
-
-    
-    private final static ImageIcon externalIcon = new ImageIcon(WorkspaceTreeNodeIconProvider.class.getResource("al_circle_black.png"));
-    private final static ImageIcon protectedIcon = new ImageIcon(WorkspaceTreeNodeIconProvider.class.getResource("al_circle_red.png"));
-
     
     @Override
     public ResourceReference getNodeIcon(WorkspaceTreeNode contentNode) {
@@ -44,8 +40,13 @@ public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvide
         if(contentNode.isProtected()) {
             return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "al_circle_red.png");
         }
+        if(contentNode.isMetadata()) {
+            return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "clarin.png");
+        }
+        if(WorkspaceNodeType.RESOURCE.equals(contentNode.getType())) {
+            return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "file.gif");
+        }
         
-        return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "file.gif");
+        return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "unknown.png");
     }
-    
 }
