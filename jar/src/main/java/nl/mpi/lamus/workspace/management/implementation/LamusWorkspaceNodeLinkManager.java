@@ -277,8 +277,13 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     public void replaceNode(WorkspaceNode parentNode, WorkspaceNode oldNode,
             WorkspaceNode newNode, boolean isNewNodeAlreadyLinked) throws WorkspaceException, ProtectedNodeException {
         
-        logger.debug("Replacing nodes; workspaceID: " + parentNode.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() +
-                "; oldNodeID: " + oldNode.getWorkspaceNodeID() + "; newNodeID: " + newNode.getWorkspaceNodeID() +
+        String workspaceID = "" + oldNode.getWorkspaceID();
+        String parentID = parentNode != null ? "" + parentNode.getWorkspaceNodeID() : "null";
+        String oldNodeID = "" + oldNode.getWorkspaceNodeID();
+        String newNodeID = "" + newNode.getWorkspaceNodeID();
+        
+        logger.debug("Replacing nodes; workspaceID: " + workspaceID + "; parentNodeID: " + parentID +
+                "; oldNodeID: " + oldNodeID + "; newNodeID: " + newNodeID +
                 "; isNewNodeAlreadyLinked: " + isNewNodeAlreadyLinked);
         
         if(!isNewNodeAlreadyLinked) {

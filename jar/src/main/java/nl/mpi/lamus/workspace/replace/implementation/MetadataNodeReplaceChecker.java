@@ -85,6 +85,12 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         
         //TODO FOR EACH CHILD (OLD NODE) CALL THE APPROPRIATE REPLACE CHECKER...
 
+        // if the node to replace is the top node of the workspace, the replace action should not go ahead
+        if(parentNode == null) {
+            String message = "Cannot proceed with replacement because replacing the top node of the workspace is not allowed";
+            throw new ProtectedNodeException(message, oldNode.getArchiveURI(), oldNode.getWorkspaceID());
+        }
+        
         
         // if the node to replace is protected, the replace action should not go ahead
         if(oldNode.isProtected()) {

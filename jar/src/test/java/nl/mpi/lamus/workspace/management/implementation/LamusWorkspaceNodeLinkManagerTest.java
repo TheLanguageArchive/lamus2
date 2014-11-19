@@ -1528,7 +1528,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         // link new node
         context.checking(new Expectations() {{
             
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
@@ -1597,7 +1597,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));

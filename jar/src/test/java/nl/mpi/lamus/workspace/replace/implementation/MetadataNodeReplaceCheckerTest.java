@@ -156,7 +156,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            //logger
+            //exception
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             exactly(2).of(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
@@ -164,6 +164,42 @@ public class MetadataNodeReplaceCheckerTest {
         
         try {
             nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(ProtectedNodeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", oldNodeURI, ex.getNodeURI());
+            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceActions_TopNode() {
+        
+        // NOT allowing the replacement of the workspace top node
+        //TODO Change this, but will require changes in other places as well
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final int newNodeID = 200;
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        final String expectedExceptionMessage = "Cannot proceed with replacement because replacing the top node of the workspace is not allowed";
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            //exception
+            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
             fail("should have thrown exception");
         } catch(ProtectedNodeException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());

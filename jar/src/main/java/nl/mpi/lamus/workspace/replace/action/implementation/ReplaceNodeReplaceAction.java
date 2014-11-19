@@ -124,8 +124,10 @@ public class ReplaceNodeReplaceAction extends NodeReplaceAction {
                 .append("Action type: ").append(getClass()).append("; ")
                 .append(super.toString()).append("; ")
                 .append("New node: ").append(newNode.getWorkspaceNodeID()).append("; ")
-                .append("Already linked: ").append(alreadyLinked).append("; ")
-                .append("Parent node: ").append(parentNode.getWorkspaceNodeID());
+                .append("Already linked: ").append(alreadyLinked).append("; ");
+        if(parentNode != null) {
+            builder.append("Parent node: ").append(parentNode.getWorkspaceNodeID());
+        }
         return builder.toString();
     }
 }
