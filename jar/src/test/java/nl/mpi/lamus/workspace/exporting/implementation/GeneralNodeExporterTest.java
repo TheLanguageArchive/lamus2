@@ -55,6 +55,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -104,11 +105,14 @@ public class GeneralNodeExporterTest {
         workspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
-        
-        generalNodeExporter = new GeneralNodeExporter(mockMetadataAPI, mockWorkspaceFileHandler,
-                mockWorkspaceTreeExporter, mockCorpusStructureProvider, mockNodeResolver,
-                mockArchiveFileLocationProvider);
-        generalNodeExporter.setWorkspace(workspace);
+
+        generalNodeExporter = new GeneralNodeExporter();
+        ReflectionTestUtils.setField(generalNodeExporter, "metadataAPI", mockMetadataAPI);
+        ReflectionTestUtils.setField(generalNodeExporter, "workspaceFileHandler", mockWorkspaceFileHandler);
+        ReflectionTestUtils.setField(generalNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
+        ReflectionTestUtils.setField(generalNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(generalNodeExporter, "nodeResolver", mockNodeResolver);
+        ReflectionTestUtils.setField(generalNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
     }
     
     @After
@@ -183,7 +187,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
         }});
         
-        generalNodeExporter.exportNode(null, mockChildWsNode);
+        generalNodeExporter.exportNode(workspace, null, mockChildWsNode);
     }
     
     @Test
@@ -268,7 +272,7 @@ public class GeneralNodeExporterTest {
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
                 parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, nodeUrlRelativeToParent, null);
         
-        generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
     }
     
     
@@ -376,7 +380,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -420,15 +424,13 @@ public class GeneralNodeExporterTest {
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
         }});
         
-        generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
     }
     
     
     
     @Test
     public void exportNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
-        
-        generalNodeExporter.setWorkspace(null);
         
         final String metadataExtension = "cmdi";
         
@@ -443,7 +445,7 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
         try {
-            generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            generalNodeExporter.exportNode(null, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -507,7 +509,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -570,7 +572,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -637,7 +639,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -711,7 +713,7 @@ public class GeneralNodeExporterTest {
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
                 parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, nodeUrlRelativeToParent, null);
         
-        generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
     }
     
     

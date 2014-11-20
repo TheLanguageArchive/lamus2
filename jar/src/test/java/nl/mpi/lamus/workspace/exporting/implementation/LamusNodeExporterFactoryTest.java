@@ -39,6 +39,7 @@ import nl.mpi.metadata.api.MetadataAPI;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -54,13 +55,20 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 public class LamusNodeExporterFactoryTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock WorkspaceDao mockWorkspaceDao;
+    
+    @Mock AddedNodeExporter mockAddedNodeExporter;
+    @Mock ReplacedOrDeletedNodeExporter mockReplacedOrDeletedNodeExporter;
+    @Mock GeneralNodeExporter mockGeneralNodeExporter;
+    @Mock UnlinkedNodeExporter mockUnlinkedNodeExporter;
     
     @Mock Workspace mockWorkspace;
     @Mock Collection<WorkspaceNode> mockParentNodes;
@@ -89,6 +97,10 @@ public class LamusNodeExporterFactoryTest {
         
         exporterFactory = new LamusNodeExporterFactory();
         ReflectionTestUtils.setField(exporterFactory, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(exporterFactory, "addedNodeExporter", mockAddedNodeExporter);
+        ReflectionTestUtils.setField(exporterFactory, "replacedOrDeletedNodeExporter", mockReplacedOrDeletedNodeExporter);
+        ReflectionTestUtils.setField(exporterFactory, "generalNodeExporter", mockGeneralNodeExporter);
+        ReflectionTestUtils.setField(exporterFactory, "unlinkedNodeExporter", mockUnlinkedNodeExporter);
     }
     
     @After
@@ -120,7 +132,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof GeneralNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockGeneralNodeExporter, retrievedExporter);
     }
     
     @Test
@@ -151,7 +163,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof UnlinkedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockUnlinkedNodeExporter, retrievedExporter);
     }
 
     @Test
@@ -182,7 +194,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof AddedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockAddedNodeExporter, retrievedExporter);
     }
     
     @Test
@@ -213,7 +225,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof AddedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockAddedNodeExporter, retrievedExporter);
     }
 
     @Test
@@ -244,7 +256,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof ReplacedOrDeletedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockReplacedOrDeletedNodeExporter, retrievedExporter);
     }
     
     @Test
@@ -275,7 +287,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof ReplacedOrDeletedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockReplacedOrDeletedNodeExporter, retrievedExporter);
     }
     
     @Test
@@ -306,7 +318,7 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof ReplacedOrDeletedNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockReplacedOrDeletedNodeExporter, retrievedExporter);
     }
     
     @Test
@@ -337,6 +349,6 @@ public class LamusNodeExporterFactoryTest {
         
         assertNotNull(retrievedExporter);
         assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof GeneralNodeExporter);
-        assertEquals("Workspace set in exporter is different from expected", mockWorkspace, retrievedExporter.getWorkspace());
+        assertEquals("Retrieved node exporter different from expected", mockGeneralNodeExporter, retrievedExporter);
     }
 }

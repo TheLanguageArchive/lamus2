@@ -63,6 +63,7 @@ import org.junit.Test;
 import org.junit.Rule;
 import static org.jmock.Expectations.returnValue;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -119,15 +120,21 @@ public class AddedNodeExporterTest {
     
     @Before
     public void setUp() {
-        addedNodeExporter = new AddedNodeExporter(mockArchiveFileLocationProvider, mockWorkspaceFileHandler,
-                mockMetadataAPI, mockWorkspaceDao, mockWorkspaceTreeExporter,
-                mockHandleManager, mockMetadataApiBridge,
-                mockCorpusStructureProvider, mockNodeResolver);
+        
+        addedNodeExporter = new AddedNodeExporter();
+        ReflectionTestUtils.setField(addedNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
+        ReflectionTestUtils.setField(addedNodeExporter, "workspaceFileHandler", mockWorkspaceFileHandler);
+        ReflectionTestUtils.setField(addedNodeExporter, "metadataAPI", mockMetadataAPI);
+        ReflectionTestUtils.setField(addedNodeExporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(addedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
+        ReflectionTestUtils.setField(addedNodeExporter, "handleManager", mockHandleManager);
+        ReflectionTestUtils.setField(addedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
+        ReflectionTestUtils.setField(addedNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(addedNodeExporter, "nodeResolver", mockNodeResolver);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
-        addedNodeExporter.setWorkspace(testWorkspace);
     }
     
     @After
@@ -196,7 +203,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
-        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
     }
     
     @Test
@@ -260,7 +267,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
-        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
     }
     
     @Test
@@ -326,17 +333,15 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
         
         
-        addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
     }
     
     @Test
     public void exportNodeNullWorkspace()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
-        addedNodeExporter.setWorkspace(null);
-        
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(null, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -375,7 +380,7 @@ public class AddedNodeExporterTest {
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -423,7 +428,7 @@ public class AddedNodeExporterTest {
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, expectedException);
         
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -464,7 +469,7 @@ public class AddedNodeExporterTest {
         checkExploreInvocations(isFileMetadata, expectedException);
 
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -519,7 +524,7 @@ public class AddedNodeExporterTest {
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, expectedException);
         
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -592,7 +597,7 @@ public class AddedNodeExporterTest {
                 nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, expectedException);
         
         try {
-            addedNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());

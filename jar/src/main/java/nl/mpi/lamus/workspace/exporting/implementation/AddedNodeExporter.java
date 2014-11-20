@@ -46,6 +46,8 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Class responsible for exporting nodes that were newly added
@@ -54,58 +56,36 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class AddedNodeExporter implements NodeExporter {
     
     private static final Logger logger = LoggerFactory.getLogger(AddedNodeExporter.class);
 
-    private final ArchiveFileLocationProvider archiveFileLocationProvider;
-    private final WorkspaceFileHandler workspaceFileHandler;
-    private final MetadataAPI metadataAPI;
-    private final WorkspaceDao workspaceDao;
-    private final WorkspaceTreeExporter workspaceTreeExporter;
-    private final HandleManager handleManager;
-    private final MetadataApiBridge metadataApiBridge;
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final NodeResolver nodeResolver;
+    @Autowired
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
+    @Autowired
+    private WorkspaceFileHandler workspaceFileHandler;
+    @Autowired
+    private MetadataAPI metadataAPI;
+    @Autowired
+    private WorkspaceDao workspaceDao;
+    @Autowired
+    private WorkspaceTreeExporter workspaceTreeExporter;
+    @Autowired
+    private HandleManager handleManager;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    @Autowired
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private NodeResolver nodeResolver;
     
-    private Workspace workspace;
-    
-    public AddedNodeExporter(ArchiveFileLocationProvider aflProvider, WorkspaceFileHandler wsFileHandler,
-            MetadataAPI mdAPI, WorkspaceDao wsDao, WorkspaceTreeExporter wsTreeExporter,
-            HandleManager handleManager, MetadataApiBridge mdApiBridge,
-            CorpusStructureProvider csProvider, NodeResolver resolver) {
-        this.archiveFileLocationProvider = aflProvider;
-        this.workspaceFileHandler = wsFileHandler;
-        this.metadataAPI = mdAPI;
-        this.workspaceDao = wsDao;
-        this.workspaceTreeExporter = wsTreeExporter;
-        this.handleManager = handleManager;
-        this.metadataApiBridge = mdApiBridge;
-        this.corpusStructureProvider = csProvider;
-        this.nodeResolver = resolver;
-    }
-    
-    /**
-     * @see NodeExporter#getWorkspace()
-     */
-    @Override
-    public Workspace getWorkspace() {
-        return this.workspace;
-    }
-    
-    /**
-     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
-     */
-    @Override
-    public void setWorkspace(Workspace workspace) {
-        this.workspace = workspace;
-    }
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode)
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -114,35 +94,37 @@ public class AddedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
-        logger.debug("Exporting added node to archive; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
+        int workspaceID = workspace.getWorkspaceID();
         
-        File parentArchiveFile = retrieveParentArchiveLocation(parentNode);
+        logger.debug("Exporting added node to archive; workspaceID: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
+        
+        File parentArchiveFile = retrieveParentArchiveLocation(workspaceID, parentNode);
         
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
         
-        File nextAvailableFile = retrieveAndUpdateNewArchivePath(currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
+        File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
         
         if(currentNode.isMetadata()) {
             workspaceTreeExporter.explore(workspace, currentNode);
         }
         
-        MetadataDocument currentDocument = retrieveMetadataDocument(currentNode);
+        MetadataDocument currentDocument = retrieveMetadataDocument(workspaceID, currentNode);
         
         File currentNodeWorkspaceFile = new File(currentNode.getWorkspaceURL().getPath());
         
-        assignAndUpdateNewHandle(currentNode);
+        assignAndUpdateNewHandle(workspaceID, currentNode);
         
         if(currentNode.isMetadata()) {
-            updateSelfHandle(currentNode, currentDocument);
+            updateSelfHandle(workspaceID, currentNode, currentDocument);
         }
         
-        moveFileIntoArchive(currentNode, nextAvailableFile, currentDocument, currentNodeWorkspaceFile);
+        moveFileIntoArchive(workspaceID, currentNode, nextAvailableFile, currentDocument, currentNodeWorkspaceFile);
         
-        ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(parentNode);
+        ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(workspaceID, parentNode);
         
         String currentPathRelativeToParent = archiveFileLocationProvider.getChildPathRelativeToParent(parentArchiveFile, nextAvailableFile);
             
-        updateReferenceInParent(currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
+        updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
         
         //TODO is this necessary?
 //        if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
@@ -150,7 +132,7 @@ public class AddedNodeExporter implements NodeExporter {
 //        }
     }
     
-    private File retrieveParentArchiveLocation(WorkspaceNode parentNode) throws WorkspaceExportException {
+    private File retrieveParentArchiveLocation(int workspaceID, WorkspaceNode parentNode) throws WorkspaceExportException {
         
         File parentArchiveFile = null;
         
@@ -167,13 +149,13 @@ public class AddedNodeExporter implements NodeExporter {
                 parentArchiveFile = new File(archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI()));
             } catch (URISyntaxException ex) {
                 String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
         }
         return parentArchiveFile;
     }
     
-    private File retrieveAndUpdateNewArchivePath(WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath) throws WorkspaceExportException {
+    private File retrieveAndUpdateNewArchivePath(int workspaceID, WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath) throws WorkspaceExportException {
         
         File nextAvailableFile = null;
         URL newNodeArchiveURL = null;
@@ -184,10 +166,10 @@ public class AddedNodeExporter implements NodeExporter {
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {
             String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         } catch (IOException ex) {
             String errorMessage = "Error getting new file for node " + currentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
         currentNode.setArchiveURL(newNodeArchiveURL);
         workspaceDao.updateNodeArchiveUrl(currentNode); //TODO Is it worth it to update this in the database?
@@ -195,7 +177,7 @@ public class AddedNodeExporter implements NodeExporter {
         return nextAvailableFile;
     }
     
-    private MetadataDocument retrieveMetadataDocument(WorkspaceNode node) throws WorkspaceExportException {
+    private MetadataDocument retrieveMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
         
         MetadataDocument document = null;
         
@@ -205,28 +187,28 @@ public class AddedNodeExporter implements NodeExporter {
                 
             } catch (IOException | MetadataException ex) {
                 String errorMessage = "Error getting Metadata Document for node " + node.getWorkspaceURL();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
         }
         
         return document;
     }
     
-    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(WorkspaceNode node) throws WorkspaceExportException {
+    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
         
-        MetadataDocument document = retrieveMetadataDocument(node);
+        MetadataDocument document = retrieveMetadataDocument(workspaceID, node);
         ReferencingMetadataDocument referencingParentDocument = null;
         if(document instanceof ReferencingMetadataDocument) {
             referencingParentDocument = (ReferencingMetadataDocument) document;
         } else {
             String errorMessage = "Error retrieving child reference in file " + node.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, null);
+            throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
         
         return referencingParentDocument;
     }
     
-    private void moveFileIntoArchive(WorkspaceNode currentNode, File nextAvailableFile, MetadataDocument currentDocument, File currentNodeWorkspaceFile) throws WorkspaceExportException {
+    private void moveFileIntoArchive(int workspaceID, WorkspaceNode currentNode, File nextAvailableFile, MetadataDocument currentDocument, File currentNodeWorkspaceFile) throws WorkspaceExportException {
         
         //TODO THIS IS NOT EXACTLY MOVING AT THE MOMENT...
         
@@ -239,11 +221,11 @@ public class AddedNodeExporter implements NodeExporter {
             }
         } catch (IOException | TransformerException | MetadataException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
     
-    private void updateSelfHandle(WorkspaceNode node, MetadataDocument document) throws WorkspaceExportException {
+    private void updateSelfHandle(int workspaceID, WorkspaceNode node, MetadataDocument document) throws WorkspaceExportException {
         
         //create self link in header, either if it is already there (will be replaced) or not (will be added)
         try {
@@ -251,11 +233,11 @@ public class AddedNodeExporter implements NodeExporter {
             document.putHeaderInformation(newInfo);
         } catch (MetadataException | URISyntaxException ex) {
             String errorMessage = "Error updating header information for node " + node.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
     
-    private void updateReferenceInParent(
+    private void updateReferenceInParent(int workspaceID,
             WorkspaceNode currentNode, WorkspaceNode parentNode,
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
@@ -269,11 +251,11 @@ public class AddedNodeExporter implements NodeExporter {
             
         } catch (IOException | MetadataException | URISyntaxException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
     
-    private void assignAndUpdateNewHandle(WorkspaceNode currentNode) throws WorkspaceExportException {
+    private void assignAndUpdateNewHandle(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
         try {
             
@@ -284,12 +266,12 @@ public class AddedNodeExporter implements NodeExporter {
             workspaceDao.updateNodeArchiveUri(currentNode);
         } catch (URISyntaxException | HandleException | IOException ex) {
             String errorMessage = "Error assigning new handle for node " + currentNode.getWorkspaceURL();
-            throwWorkspaceExportException(errorMessage, ex);
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
     
-    private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {
+    private void throwWorkspaceExportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceExportException {
         logger.error(errorMessage, cause);
-        throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), cause);
+        throw new WorkspaceExportException(errorMessage, workspaceID, cause);
     }
 }

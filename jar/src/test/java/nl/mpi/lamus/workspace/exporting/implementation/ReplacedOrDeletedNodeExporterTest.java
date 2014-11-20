@@ -38,10 +38,8 @@ import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -53,6 +51,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -88,15 +87,18 @@ public class ReplacedOrDeletedNodeExporterTest {
     
     @Before
     public void setUp() {
-        replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter(
-                mockVersioningHandler, mockWorkspaceDao,
-                mockHandleManager, mockArchiveFileLocationProvider,
-                mockWorkspaceTreeExporter, mockMetadataApiBridge);
+        
+        replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter();
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "versioningHandler", mockVersioningHandler);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "handleManager", mockHandleManager);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
-        replacedOrDeletedNodeExporter.setWorkspace(testWorkspace);
     }
     
     @After
@@ -153,7 +155,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -208,7 +210,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -226,7 +228,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
     }
     
     @Test
@@ -246,7 +248,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -272,7 +274,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -327,7 +329,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -384,7 +386,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
     }
     
     //TODO EXCEPTIONS...
@@ -422,7 +424,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
             fail("should have thrown an exception");
         } catch(IllegalStateException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -469,7 +471,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -529,7 +531,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -589,10 +591,8 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
-        replacedOrDeletedNodeExporter.setWorkspace(null);
-        
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, mockWorkspaceNode);
+            replacedOrDeletedNodeExporter.exportNode(null, null, mockWorkspaceNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";

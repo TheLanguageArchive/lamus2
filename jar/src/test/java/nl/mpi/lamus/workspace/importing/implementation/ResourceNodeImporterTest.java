@@ -59,6 +59,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -86,7 +87,6 @@ public class ResourceNodeImporterTest {
     }};
     
     private NodeImporter nodeImporter;
-    private NodeImporter nodeImporterWithoutWorkspace;
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
@@ -125,10 +125,15 @@ public class ResourceNodeImporterTest {
         testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "");
-        nodeImporter = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
-                mockMetadataApiBridge, mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
-        nodeImporterWithoutWorkspace = new ResourceNodeImporter(mockCorpusStructureProvider, mockNodeResolver, mockWorkspaceDao,
-                mockMetadataApiBridge, mockNodeDataRetriever, mockWorkspaceNodeFactory, mockWorkspaceNodeLinkFactory);
+        
+        nodeImporter = new ResourceNodeImporter();
+        ReflectionTestUtils.setField(nodeImporter, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(nodeImporter, "nodeResolver", mockNodeResolver);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(nodeImporter, "metadataApiBridge", mockMetadataApiBridge);
+        ReflectionTestUtils.setField(nodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceNodeFactory", mockWorkspaceNodeFactory);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceNodeLinkFactory", mockWorkspaceNodeLinkFactory);
     }
     
     @After
@@ -580,7 +585,7 @@ public class ResourceNodeImporterTest {
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
         try {
-            nodeImporterWithoutWorkspace.importNode(null, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
+            nodeImporter.importNode(null, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
             fail("Should have thrown exception");
         } catch(IllegalArgumentException ex) {
             String expectedErrorMessage = "ResourceNodeImporter.importNode: workspace not set";

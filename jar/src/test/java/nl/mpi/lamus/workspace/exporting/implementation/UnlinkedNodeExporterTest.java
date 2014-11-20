@@ -41,6 +41,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -73,12 +74,12 @@ public class UnlinkedNodeExporterTest {
     @Before
     public void setUp() {
         
-        unlinkedNodeExporter = new UnlinkedNodeExporter(mockVersioningHandler);
+        unlinkedNodeExporter = new UnlinkedNodeExporter();
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "versioningHandler", mockVersioningHandler);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
-        unlinkedNodeExporter.setWorkspace(testWorkspace);
     }
     
     @After
@@ -124,7 +125,7 @@ public class UnlinkedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
+        unlinkedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -145,7 +146,7 @@ public class UnlinkedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
+        unlinkedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -175,7 +176,7 @@ public class UnlinkedNodeExporterTest {
         
         
         //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
+        unlinkedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode);
         
     }
     
@@ -229,10 +230,8 @@ public class UnlinkedNodeExporterTest {
     @Test
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
-        unlinkedNodeExporter.setWorkspace(null);
-        
         try {
-            unlinkedNodeExporter.exportNode(null, mockWorkspaceNode);
+            unlinkedNodeExporter.exportNode(null, null, mockWorkspaceNode);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";

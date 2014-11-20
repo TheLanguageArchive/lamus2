@@ -62,8 +62,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
         
         for(WorkspaceNode unlinkedOrDeletedNode : unlinkedAndDeletedTopNodes) {
             NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode);
-            nodeExporter.exportNode(null, unlinkedOrDeletedNode);
+            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode);
         }
     }
-    
 }

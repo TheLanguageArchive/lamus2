@@ -38,14 +38,11 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceTreeExporter.class);
     
+    @Autowired
     private WorkspaceDao workspaceDao;
+    @Autowired
     private NodeExporterFactory nodeExporterFactory;
     
-    @Autowired
-    public LamusWorkspaceTreeExporter(WorkspaceDao wsDao, NodeExporterFactory exporterFactory) {
-        this.workspaceDao = wsDao;
-        this.nodeExporterFactory = exporterFactory;
-    }
     
     /**
      * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
@@ -62,9 +59,8 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
             
             if(!child.isExternal()) {
                 NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child);
-                childNodeExporter.exportNode(node, child);
+                childNodeExporter.exportNode(workspace, node, child);
             }
         }
     }
-    
 }

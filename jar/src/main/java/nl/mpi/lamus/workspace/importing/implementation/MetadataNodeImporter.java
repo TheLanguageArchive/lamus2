@@ -42,6 +42,7 @@ import nl.mpi.metadata.api.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Node importer specific for metadata files.
@@ -49,59 +50,49 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 
     private static final Logger logger = LoggerFactory.getLogger(MetadataNodeImporter.class);
     
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final NodeResolver nodeResolver;
-    private final WorkspaceDao workspaceDao;
-    private final MetadataAPI metadataAPI;
-    private final MetadataApiBridge metadataApiBridge;
-    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private final WorkspaceFileImporter workspaceFileImporter;
-    private final WorkspaceNodeFactory workspaceNodeFactory;
-    private final WorkspaceNodeExplorer workspaceNodeExplorer;
-    private final NodeDataRetriever nodeDataRetriever;
-
-    private Workspace workspace = null;
-    
     @Autowired
-    public MetadataNodeImporter(CorpusStructureProvider csProvider,
-            NodeResolver nodeResolver, WorkspaceDao wsDao,
-            MetadataAPI mAPI, MetadataApiBridge mApiBridge,
-	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
-            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer,
-            NodeDataRetriever nodeDataRetriever) {
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private NodeResolver nodeResolver;
+    @Autowired
+    private WorkspaceDao workspaceDao;
+    @Autowired
+    private MetadataAPI metadataAPI;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    @Autowired
+    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    @Autowired
+    private WorkspaceFileImporter workspaceFileImporter;
+    @Autowired
+    private WorkspaceNodeFactory workspaceNodeFactory;
+    @Autowired
+    private WorkspaceNodeExplorer workspaceNodeExplorer;
+    @Autowired
+    private NodeDataRetriever nodeDataRetriever;
 
-	this.corpusStructureProvider = csProvider;
-        this.nodeResolver = nodeResolver;
-	this.workspaceDao = wsDao;
-	this.metadataAPI = mAPI;
-        this.metadataApiBridge = mApiBridge;
-        this.workspaceNodeLinkManager = nodeLinkManager;
-        this.workspaceFileImporter = fileImporter;
-	this.workspaceNodeFactory = nodeFactory;
-	this.workspaceNodeExplorer = workspaceNodeExplorer;
-        this.nodeDataRetriever = nodeDataRetriever;
-    }
-
+    
     /**
      * @see NodeImporter#importNode(
      *      nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
      *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference)
      */
     @Override
-    public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference referenceFromParent) throws WorkspaceImportException {
 
-        workspace = ws;
-        
 	if (workspace == null) {
 	    String errorMessage = "Workspace not set";
 	    logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
 	}
+        
+        int workspaceID = workspace.getWorkspaceID();
         
 	//TODO if not onsite: create external node
 	//TODO setURID
@@ -117,7 +108,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         //TODO another way of doing this?
         if(referenceFromParent == null) { // top node
-            childArchiveURI = ws.getTopNodeArchiveURI();
+            childArchiveURI = workspace.getTopNodeArchiveURI();
         } else {
             if(referenceFromParent instanceof HandleCarrier) {
                 childArchiveURI = ((HandleCarrier) referenceFromParent).getHandle();
@@ -126,14 +117,14 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             }
         }
         
-        logger.debug("Importing node into new workspace; workspaceID: " + workspace.getWorkspaceID() + "; nodeURI: " + childArchiveURI);
+        logger.debug("Importing node into new workspace; workspaceID: " + workspaceID + "; nodeURI: " + childArchiveURI);
         
         URL childArchiveURL = null;
         String childName = null;
         boolean childOnSite = true;
         
         MetadataDocument childDocument = null;
-        CorpusNode childCorpusNode = null;
+        CorpusNode childCorpusNode;
         File childLocalFile = null;
         try {
             
@@ -141,9 +132,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             
             if(childCorpusNode == null) {
                 String errorMessage = "Error getting information for node " + childArchiveURI;
-                throwWorkspaceImportException(errorMessage, null);
+                throwWorkspaceImportException(workspaceID, errorMessage, null);
             }
-            
             
             childName = childCorpusNode.getName();
             childOnSite = childCorpusNode.isOnSite();
@@ -156,22 +146,21 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
                 childArchiveURL = childArchiveUrlUri.toURL();
             }
             
-            
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
         } catch (IOException | MetadataException ioex) {
 	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
-	    throwWorkspaceImportException(errorMessage, ioex);
+	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
         
         boolean childToBeProtected = false;
         
-        if(!childArchiveURI.equals(ws.getTopNodeArchiveURI())) { //if child is not the top node of the workspace it can be protected
+        if(!childArchiveURI.equals(workspace.getTopNodeArchiveURI())) { //if child is not the top node of the workspace it can be protected
             childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
         }
         
         WorkspaceNode childNode =
-                workspaceNodeFactory.getNewWorkspaceMetadataNode(workspace.getWorkspaceID(), childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);
+                workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
         workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, referenceFromParent);
@@ -190,20 +179,20 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             
 	} catch (MalformedURLException muex) {
             String errorMessage = "Failed to set URL for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, muex);
+		    + " in workspace " + workspaceID;
+	    throwWorkspaceImportException(workspaceID, errorMessage, muex);
         } catch (IOException ioex) {
             String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, ioex);
+		    + " in workspace " + workspaceID;
+	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         } catch (TransformerException trex) {
             String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, trex);
+		    + " in workspace " + workspaceID;
+	    throwWorkspaceImportException(workspaceID, errorMessage, trex);
         } catch (MetadataException mdex) {
             String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, mdex);
+		    + " in workspace " + workspaceID;
+	    throwWorkspaceImportException(workspaceID, errorMessage, mdex);
         }
 
 	//TODO change the referenced URL in the parent document
@@ -220,8 +209,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 	}
     }
     
-    private void throwWorkspaceImportException(String errorMessage, Exception cause) throws WorkspaceImportException {
+    private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {
         logger.error(errorMessage, cause);
-        throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), cause);
+        throw new WorkspaceImportException(errorMessage, workspaceID, cause);
     }
 }

@@ -16,18 +16,9 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
-import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.metadata.api.MetadataAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,20 +34,11 @@ public class TopNodeImporter {
     
     private static final Logger logger = LoggerFactory.getLogger(TopNodeImporter.class);
     
+    @Autowired
     private NodeDataRetriever nodeDataRetriever;
+    @Autowired
     private MetadataNodeImporter metadataNodeImporter;
     
-    @Autowired
-    public TopNodeImporter(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            WorkspaceDao wsDao, MetadataAPI mAPI, MetadataApiBridge mApiBridge,
-	    WorkspaceNodeLinkManager nodeLinkManager, WorkspaceFileImporter fileImporter,
-            WorkspaceNodeFactory nodeFactory, WorkspaceNodeExplorer workspaceNodeExplorer,
-            NodeDataRetriever nodeDataRetriever) {
-
-        this.nodeDataRetriever = nodeDataRetriever;
-	metadataNodeImporter = new MetadataNodeImporter(csProvider, nodeResolver, wsDao,
-                mAPI, mApiBridge, nodeLinkManager, fileImporter, nodeFactory, workspaceNodeExplorer, nodeDataRetriever);
-    }
     
     /**
      * Imports the top node into the workspace, by invoking the correct importer
@@ -66,8 +48,6 @@ public class TopNodeImporter {
      * @param childNodeArchiveURI archive URI of the current node
      */
     public void importNode(Workspace workspace, URI childNodeArchiveURI) throws WorkspaceImportException {
-        
-        
         
         logger.debug("Importing top node of workspace; nodeURI: " + childNodeArchiveURI);
         

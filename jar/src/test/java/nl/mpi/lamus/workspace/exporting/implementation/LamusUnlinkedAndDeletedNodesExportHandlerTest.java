@@ -135,7 +135,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(null, deletedNode);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode);
             }});
         }
     
@@ -194,7 +194,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(null, deletedNode);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode);
                     will(throwException(expectedException));
             }});
             

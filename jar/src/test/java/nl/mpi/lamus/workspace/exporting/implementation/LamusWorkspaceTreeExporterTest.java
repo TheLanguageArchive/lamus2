@@ -43,6 +43,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -74,7 +75,9 @@ public class LamusWorkspaceTreeExporterTest {
     @Before
     public void setUp() {
         
-        workspaceTreeExporter = new LamusWorkspaceTreeExporter(mockWorkspaceDao, mockNodeExporterFactory);
+        workspaceTreeExporter = new LamusWorkspaceTreeExporter();
+        ReflectionTestUtils.setField(workspaceTreeExporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(workspaceTreeExporter, "nodeExporterFactory", mockNodeExporterFactory);
     }
     
     @After
@@ -108,7 +111,7 @@ public class LamusWorkspaceTreeExporterTest {
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
                 childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, childNodeFormat);
         
-        final Collection<WorkspaceNode> children = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
         
         context.checking(new Expectations() {{
@@ -120,7 +123,7 @@ public class LamusWorkspaceTreeExporterTest {
             
             //TODO FOR EACH CHILD NODE, GET THE PROPER EXPORTER AND CALL IT
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(node, childNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode);
             
         }});
         
@@ -152,7 +155,7 @@ public class LamusWorkspaceTreeExporterTest {
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
                 childNodeName, "", childNodeType, childWsURL, null, null, childOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, childNodeFormat);
         
-        final Collection<WorkspaceNode> children = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
@@ -166,7 +169,7 @@ public class LamusWorkspaceTreeExporterTest {
             
             //TODO FOR EACH CHILD NODE, GET THE PROPER EXPORTER AND CALL IT
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(node, childNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode);
                 will(throwException(expectedException));
             
         }});
@@ -211,7 +214,7 @@ public class LamusWorkspaceTreeExporterTest {
         final WorkspaceNode externalNode = new LamusWorkspaceNode(externalWorkspaceNodeID, workspaceID, schemaLocation,
                 externalNodeName, "", externalNodeType, null, null, null, childOriginURL, WorkspaceNodeStatus.NODE_EXTERNAL, Boolean.FALSE, externalNodeFormat);
         
-        final Collection<WorkspaceNode> children = new ArrayList<WorkspaceNode>();
+        final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
         children.add(externalNode);
         
@@ -221,11 +224,11 @@ public class LamusWorkspaceTreeExporterTest {
             
             //TODO FOR EACH CHILD NODE, GET THE PROPER EXPORTER AND CALL IT
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(node, childNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode);
             
             // should leave the loop for the second node because it's external and therefore doesn't require exporting
             never(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            never(mockNodeExporter).exportNode(node, childNode);
+            never(mockNodeExporter).exportNode(mockWorkspace, node, childNode);
         }});
         
         workspaceTreeExporter.explore(mockWorkspace, node);

@@ -124,7 +124,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 //        workspaceTreeExporter.explore(topNode);
         
         NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
-        topNodeExporter.exportNode(null, topNode);
+        topNodeExporter.exportNode(workspace, null, topNode);
         
         //TODO Export unlinked and deleted nodes...
         this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace);

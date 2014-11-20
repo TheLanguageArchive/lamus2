@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -148,7 +147,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(null, testNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode);
                 when(exporting.isNot("finished"));
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
@@ -244,7 +243,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(null, testNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode);
                 when(exporting.isNot("finished"));
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);

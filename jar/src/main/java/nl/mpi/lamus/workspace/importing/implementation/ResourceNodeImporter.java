@@ -44,6 +44,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Node importer specific for resource files.
@@ -51,35 +52,26 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceNodeImporter.class);
     
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final NodeResolver nodeResolver;
-    private final WorkspaceDao workspaceDao;
-    private final MetadataApiBridge metadataApiBridge;
-    private final NodeDataRetriever nodeDataRetriever;
-    
-    private final WorkspaceNodeFactory workspaceNodeFactory;
-    private final WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
-    
-    private Workspace workspace = null;
-    
     @Autowired
-    public ResourceNodeImporter(CorpusStructureProvider csProvider,
-            NodeResolver nodeResolver, WorkspaceDao wsDao, MetadataApiBridge mdApiBridge,
-            NodeDataRetriever nodeDataRetriever , WorkspaceNodeFactory wsNodeFactory,
-            WorkspaceNodeLinkFactory wsNodeLinkFactory) {
-        this.corpusStructureProvider = csProvider;
-        this.nodeResolver = nodeResolver;
-        this.workspaceDao = wsDao;
-        this.metadataApiBridge = mdApiBridge;
-        this.workspaceNodeFactory = wsNodeFactory;
-        this.workspaceNodeLinkFactory = wsNodeLinkFactory;
-        this.nodeDataRetriever = nodeDataRetriever;
-    }
-    
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private NodeResolver nodeResolver;
+    @Autowired
+    private WorkspaceDao workspaceDao;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    @Autowired
+    private NodeDataRetriever nodeDataRetriever;
+    @Autowired
+    private WorkspaceNodeFactory workspaceNodeFactory;
+    @Autowired
+    private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
+
     
     /**
      * @see NodeImporter#importNode(
@@ -87,16 +79,16 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
      *      nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference)
      */
     @Override
-    public void importNode(Workspace ws, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
+    public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
             Reference referenceFromParent) throws WorkspaceImportException {
-        
-        workspace = ws;
         
         if(workspace == null) {
             String errorMessage = "ResourceNodeImporter.importNode: workspace not set";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
+        
+        int workspaceID = workspace.getWorkspaceID();
    
         URI childURI = null;
         if(referenceFromParent instanceof HandleCarrier) {
@@ -111,7 +103,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         if(childCorpusNode == null) {
             String errorMessage = "ResourceNodeImporter.importNode: error getting node " + childURI;
             logger.error(errorMessage);
-            throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), null);
+            throw new WorkspaceImportException(errorMessage, workspaceID, null);
         }
 
         File childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
@@ -142,7 +134,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
-                throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), tcex);
+                throw new WorkspaceImportException(errorMessage, workspaceID, tcex);
             } catch (IOException ex) {
                 throw new UnsupportedOperationException("not handled yet");
             } finally {
@@ -156,7 +148,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
 
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspace.getWorkspaceID(), childURI, childURL, referenceFromParent,
+                workspaceID, childURI, childURL, referenceFromParent,
                 childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite(), childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
@@ -173,13 +165,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
         } catch (IOException | TransformerException | MetadataException ioex) {
             String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
-		    + " in workspace " + workspace.getWorkspaceID();
-	    throwWorkspaceImportException(errorMessage, ioex);
+		    + " in workspace " + workspaceID;
+	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
     }
     
-    private void throwWorkspaceImportException(String errorMessage, Exception cause) throws WorkspaceImportException {
+    private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {
         logger.error(errorMessage, cause);
-        throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), cause);
+        throw new WorkspaceImportException(errorMessage, workspaceID, cause);
     }
 }

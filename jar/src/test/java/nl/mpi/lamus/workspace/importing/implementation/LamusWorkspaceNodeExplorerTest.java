@@ -18,10 +18,10 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
+import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -30,13 +30,13 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
-import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -49,8 +49,7 @@ public class LamusWorkspaceNodeExplorerTest {
     }};
     private WorkspaceNodeExplorer nodeExplorer;
     @Mock private WorkspaceDao mockWorkspaceDao;
-    @Mock private NodeImporterFactoryBean mockNodeImporterFactoryBean;
-    @Mock private ArchiveFileHelper mockArchiveFileHelper;
+    @Mock private NodeImporterAssigner mockNodeImporterAssigner;
     @Mock private NodeImporter mockNodeImporter;
     @Mock private WorkspaceNode mockNodeToExplore;
     @Mock private ReferencingMetadataDocument mockNodeDocument;
@@ -72,7 +71,9 @@ public class LamusWorkspaceNodeExplorerTest {
     
     @Before
     public void setUp() {
-        nodeExplorer = new LamusWorkspaceNodeExplorer(mockWorkspaceDao, mockNodeImporterFactoryBean, mockArchiveFileHelper);
+        nodeExplorer = new LamusWorkspaceNodeExplorer();
+        ReflectionTestUtils.setField(nodeExplorer, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(nodeExplorer, "nodeImporterAssigner", mockNodeImporterAssigner);
     }
     
     @After
@@ -94,15 +95,9 @@ public class LamusWorkspaceNodeExplorerTest {
         final URI resourceLinkHandle = new URI("hdl:3492/2933");
         resourceLink.setHandle(resourceLinkHandle);
         
-        final Collection<Reference> testLinks = new ArrayList<Reference>();
+        final Collection<Reference> testLinks = new ArrayList<>();
         testLinks.add(metadataLink);
         testLinks.add(resourceLink);
-        
-        final OurURL metadataURL = new OurURL("https://testURL.mpi.nl/test.cmdi");
-        final OurURL resourceURL = new OurURL("http://testURL.mpi.nl/test.jpg");
-        final OurURL[] urls = new OurURL[testLinks.size()];
-        urls[0] = metadataURL;
-        urls[1] = resourceURL;
         
         context.checking(new Expectations() {{
             
@@ -113,18 +108,15 @@ public class LamusWorkspaceNodeExplorerTest {
             int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
                 
-                oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
-                oneOf(mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
+                oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(returnValue(mockNodeImporter));
                 oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
                 
                 current++;
             }
             
         }});
-
         
         nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
-        
     }
     
 //    @Test
@@ -186,17 +178,11 @@ public class LamusWorkspaceNodeExplorerTest {
         final URI resourceLinkHandle = new URI("hdl:3492/2933");
         resourceLink.setHandle(resourceLinkHandle);
         
-        final Collection<Reference> testLinks = new ArrayList<Reference>();
+        final Collection<Reference> testLinks = new ArrayList<>();
         testLinks.add(metadataLink);
         testLinks.add(resourceLink);
         
-        final OurURL metadataURL = new OurURL("https://testURL.mpi.nl/test.cmdi");
-        final OurURL resourceURL = new OurURL("http://testURL.mpi.nl/test.jpg");
-        final OurURL[] urls = new OurURL[testLinks.size()];
-        urls[0] = metadataURL;
-        urls[1] = resourceURL;
-        
-        final Exception expectedException = new Exception("some exception message");
+        final IllegalArgumentException expectedException = new IllegalArgumentException("some exception message");
         
         context.checking(new Expectations() {{
             
@@ -206,8 +192,7 @@ public class LamusWorkspaceNodeExplorerTest {
             
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
 
-                oneOf(mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
-                oneOf(mockNodeImporterFactoryBean).getObject(); will(throwException(expectedException));
+                oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(throwException(expectedException));
                 
                 oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 
@@ -225,6 +210,5 @@ public class LamusWorkspaceNodeExplorerTest {
             assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
             assertEquals("Cause different from expected", expectedException, ex.getCause());
         }
-        
     }
 }

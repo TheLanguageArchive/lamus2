@@ -36,6 +36,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.metadata.api.MetadataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Class responsible for exporting nodes that were replaced
@@ -46,53 +48,30 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
+@Component
 public class ReplacedOrDeletedNodeExporter implements NodeExporter {
 
     private final static Logger logger = LoggerFactory.getLogger(ReplacedOrDeletedNodeExporter.class);
-    
-    private final VersioningHandler versioningHandler;
-    private final WorkspaceDao workspaceDao;
-    private final HandleManager handleManager;
-    private final ArchiveFileLocationProvider archiveFileLocationProvider;
-    private final WorkspaceTreeExporter workspaceTreeExporter;
-    private final MetadataApiBridge metadataApiBridge;
-    
-    private Workspace workspace;
-    
-    public ReplacedOrDeletedNodeExporter(VersioningHandler versioningHandler,
-            WorkspaceDao wsDao, HandleManager handleManager,
-            ArchiveFileLocationProvider locationProvider,
-            WorkspaceTreeExporter wsTreeExporter, MetadataApiBridge mdApiBridge) {
 
-        this.versioningHandler = versioningHandler;
-        this.workspaceDao = wsDao;
-        this.handleManager = handleManager;
-        this.archiveFileLocationProvider = locationProvider;
-        this.workspaceTreeExporter = wsTreeExporter;
-        this.metadataApiBridge = mdApiBridge;
-    }
+    @Autowired
+    private VersioningHandler versioningHandler;
+    @Autowired
+    private WorkspaceDao workspaceDao;
+    @Autowired
+    private HandleManager handleManager;
+    @Autowired
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
+    @Autowired
+    private WorkspaceTreeExporter workspaceTreeExporter;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
     
-    /**
-     * @see NodeExporter#getWorkspace()
-     */
-    @Override
-    public Workspace getWorkspace() {
-        return this.workspace;
-    }
-    
-    /**
-     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
-     */
-    @Override
-    public void setWorkspace(Workspace workspace) {
-        this.workspace = workspace;
-    }
 
     /**
      * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
 
         if (workspace == null) {
 	    String errorMessage = "Workspace not set";
@@ -100,7 +79,9 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
-        logger.debug("Exporting deleted or replaced node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
+        int workspaceID = workspace.getWorkspaceID();
+        
+        logger.debug("Exporting deleted or replaced node to archive; workspaceID: " + workspaceID + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         
         if(currentNode.isExternal()) { // Nothing to do here. If an external node was removed, just let it go when the workspace is also removed.
             
@@ -135,7 +116,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         //TODO is this necessary?
 //        searchClientBridge.removeNode(currentNode.getArchiveURI());
         
-        updateHandleLocation(currentNode);
+        updateHandleLocation(workspaceID, currentNode);
         
     }
     
@@ -161,7 +142,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         }
     }
     
-    private void updateHandleLocation(WorkspaceNode currentNode) throws WorkspaceExportException {
+    private void updateHandleLocation(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
         if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
             try {
@@ -171,7 +152,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 
             } catch (HandleException | IOException | URISyntaxException ex) {
                 String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
             
             currentNode.setArchiveURI(null);
@@ -191,7 +172,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                  newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
             } catch (URISyntaxException ex) {
                 String errorMessage = "Error getting new target URI for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
             try {
                 handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
@@ -201,14 +182,14 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 
             } catch (HandleException | IOException | URISyntaxException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(errorMessage, ex);
+                throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
             
         }
     }
     
-    private void throwWorkspaceExportException(String errorMessage, Exception cause) throws WorkspaceExportException {
+    private void throwWorkspaceExportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceExportException {
         logger.error(errorMessage, cause);
-        throw new WorkspaceExportException(errorMessage, workspace.getWorkspaceID(), cause);
+        throw new WorkspaceExportException(errorMessage, workspaceID, cause);
     }
 }

@@ -40,7 +40,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
-import static org.junit.Assert.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -85,10 +84,8 @@ public class TopNodeImporterTest {
     @Before
     public void setUp() {
         
-        topNodeImporter = new TopNodeImporter(mockCsProvider, mockNodeResolver,
-                mockWsDao, mockMetadataAPI, mockMetadataApiBridge, mockNodeLinkManager,
-                mockFileImporter, mockNodeFactory, mockWorkspaceNodeExplorer, mockNodeDataRetriever);
-        
+        topNodeImporter = new TopNodeImporter();
+        ReflectionTestUtils.setField(topNodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);
     }
     

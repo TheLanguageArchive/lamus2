@@ -27,23 +27,12 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 public interface NodeExporter {
     
     /**
-     * Gets the workspace to which the exporter is associated
-     * @return Workspace object
-     */
-    public Workspace getWorkspace();
-    
-    /**
-     * Sets the workspace to which the exporter is associated
-     * @param workspace Workspace object
-     */
-    public void setWorkspace(Workspace workspace);
-    
-    /**
      * Exports the given node from the workspace to the archive
+     * @param workspace Workspace currently being exported
      * @param parentNode Parent of the node to export
      * @param currentNode Node to export
      */
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode)
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode)
             throws WorkspaceExportException;
     
 }

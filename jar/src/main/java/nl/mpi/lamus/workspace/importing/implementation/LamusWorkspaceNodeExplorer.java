@@ -16,10 +16,10 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.util.Collection;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
+import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -40,18 +40,12 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeExplorer.class);
     
-    private final WorkspaceDao workspaceDao;
-    private final NodeImporterFactoryBean nodeImporterFactoryBean;
-    private final ArchiveFileHelper archiveFileHelper;
-    
     @Autowired
-    public LamusWorkspaceNodeExplorer(WorkspaceDao wsDao,
-        NodeImporterFactoryBean nodeImporterFactoryBean, ArchiveFileHelper aFileHelper) {
-        this.workspaceDao = wsDao;
-        this.nodeImporterFactoryBean = nodeImporterFactoryBean;
-        this.archiveFileHelper = aFileHelper;
-    }
+    private WorkspaceDao workspaceDao;
+    @Autowired
+    private NodeImporterAssigner nodeImporterAssigner;
 
+    
     /**
      * @see WorkspaceNodeExplorer#explore(
      *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
@@ -71,10 +65,9 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             
             //TODO check if it is Metadata or Resource node
             
-            nodeImporterFactoryBean.setNodeImporterTypeForReference(currentLink);
             NodeImporter linkImporterToUse = null;
             try {
-                linkImporterToUse = nodeImporterFactoryBean.getObject();
+                linkImporterToUse = nodeImporterAssigner.getImporterForReference(currentLink);
             } catch (Exception ex) {
                 String errorMessage = "Error getting file importer";
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), ex);
@@ -83,5 +76,4 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             linkImporterToUse.importNode(workspace, nodeToExplore, nodeDocument, currentLink);
         }
     }
-    
 }

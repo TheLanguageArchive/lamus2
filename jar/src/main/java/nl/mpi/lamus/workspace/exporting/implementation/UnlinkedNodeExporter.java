@@ -24,45 +24,27 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author guisil
  */
+@Component
 public class UnlinkedNodeExporter implements NodeExporter{
     
     private static final Logger logger = LoggerFactory.getLogger(UnlinkedNodeExporter.class);
 
-    private final VersioningHandler versioningHandler;
+    @Autowired
+    private VersioningHandler versioningHandler;
     
-    private Workspace workspace;
-    
-    public UnlinkedNodeExporter(VersioningHandler versioningHandler) {
-
-        this.versioningHandler = versioningHandler;
-    }
-    
-    /**
-     * @see NodeExporter#getWorkspace()
-     */
-    @Override
-    public Workspace getWorkspace() {
-        return this.workspace;
-    }
 
     /**
-     * @see NodeExporter#setWorkspace(nl.mpi.lamus.workspace.model.Workspace)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public void setWorkspace(Workspace workspace) {
-        this.workspace = workspace;
-    }
-
-    /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
-     */
-    @Override
-    public void exportNode(WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
 
         //TODO FOR NOW SIMILAR TO DeletedNodeExporter, but will have to be changed
             // when new functionality is added regarding unlinked nodes

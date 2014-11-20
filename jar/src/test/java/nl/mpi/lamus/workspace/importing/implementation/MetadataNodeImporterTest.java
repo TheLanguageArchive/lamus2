@@ -54,6 +54,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 
 
@@ -114,12 +115,18 @@ public class MetadataNodeImporterTest {
         testWorkspace = new LamusWorkspace(workspaceID, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.INITIALISING, "Workspace initialising", "");
-        nodeImporter = new MetadataNodeImporter(
-                mockCorpusStructureProvider, mockNodeResolver,
-                mockWorkspaceDao, mockMetadataAPI, mockMetadataApiBridge,
-                mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
-                mockWorkspaceNodeFactory, mockWorkspaceNodeExplorer,
-                mockNodeDataRetriever);
+
+        nodeImporter = new MetadataNodeImporter();
+        ReflectionTestUtils.setField(nodeImporter, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(nodeImporter, "nodeResolver", mockNodeResolver);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(nodeImporter, "metadataAPI", mockMetadataAPI);
+        ReflectionTestUtils.setField(nodeImporter, "metadataApiBridge", mockMetadataApiBridge);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceNodeLinkManager", mockWorkspaceNodeLinkManager);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceFileImporter", mockWorkspaceFileImporter);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceNodeFactory", mockWorkspaceNodeFactory);
+        ReflectionTestUtils.setField(nodeImporter, "workspaceNodeExplorer", mockWorkspaceNodeExplorer);
+        ReflectionTestUtils.setField(nodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
     }
     
     @After
@@ -129,15 +136,9 @@ public class MetadataNodeImporterTest {
 
     @Test
     public void importNodeWithNullWorkspace() throws URISyntaxException, WorkspaceImportException {
-        NodeImporter testNodeImporter = new MetadataNodeImporter(
-                mockCorpusStructureProvider, mockNodeResolver,
-                mockWorkspaceDao, mockMetadataAPI, mockMetadataApiBridge,
-                mockWorkspaceNodeLinkManager, mockWorkspaceFileImporter,
-                mockWorkspaceNodeFactory, mockWorkspaceNodeExplorer,
-                mockNodeDataRetriever);
         
         try {
-            testNodeImporter.importNode(null, null, null, null);
+            nodeImporter.importNode(null, null, null, null);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
