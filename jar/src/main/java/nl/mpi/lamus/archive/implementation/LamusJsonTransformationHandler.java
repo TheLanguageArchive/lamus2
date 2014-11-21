@@ -48,19 +48,17 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     public JsonObject createJsonObjectFromNodeReplacementCollection(Collection<WorkspaceNodeReplacement> nodeReplacementCollection) {
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder createObjectBuilder = Json.createObjectBuilder();
         JsonArrayBuilder versionsArrayBuilder = Json.createArrayBuilder();
         
         for(WorkspaceNodeReplacement nodeReplacement : nodeReplacementCollection) {
             
             versionsArrayBuilder.add(
                     Json.createObjectBuilder()
-                        .add("from", nodeReplacement.getOldNodeURI().toString())
-                        .add("to", nodeReplacement.getNewNodeURI().toString()));
+                        .add("fromId", nodeReplacement.getOldNodeURI().toString())
+                        .add("toId", nodeReplacement.getNewNodeURI().toString()));
         }
         
-        createObjectBuilder.add("versions", versionsArrayBuilder);
-        mainObjectBuilder.add("create", createObjectBuilder);
+        mainObjectBuilder.add("list", versionsArrayBuilder);
         
         return mainObjectBuilder.build();
     }
@@ -73,11 +71,9 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         
         Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<>();
         
-        JsonObject created = jsonObject.getJsonObject("created");
-        
         JsonArray versionsArray = null;
         try {
-            versionsArray = created.getJsonArray("versions");
+            versionsArray = jsonObject.getJsonArray("list");
         } catch(ClassCastException ex) {
             logger.debug("'versions' is not a JsonArray, will try to cast to JsonObject");
         }
@@ -89,9 +85,9 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
                 nodeReplacementCollection.add(currentReplacement);
             }
         } else {
-            JsonObject versionsObject = created.getJsonObject("versions");
-            WorkspaceNodeReplacement replacement = getNodeReplacementFromJsonObject(versionsObject);
-            nodeReplacementCollection.add(replacement);
+            
+            //TODO THROW EXCEPTION?
+            throw new UnsupportedOperationException("not implemented yet");
         }
         
         return nodeReplacementCollection;
@@ -122,8 +118,8 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         
         WorkspaceNodeReplacement replacementToReturn;
         
-        URI oldNodeURI = new URI(innerObject.getString("from"));
-        URI newNodeURI = new URI(innerObject.getString("to"));
+        URI oldNodeURI = new URI(innerObject.getString("fromId"));
+        URI newNodeURI = new URI(innerObject.getString("toId"));
         String status = innerObject.getString("status").toUpperCase();
         if("OK".equals(status)) {
             replacementToReturn = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status);

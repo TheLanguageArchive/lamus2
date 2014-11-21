@@ -16,11 +16,15 @@
  */
 package nl.mpi.lamus.ams.implementation;
 
+import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +32,8 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.util.implementation.MockableURL;
+import org.hibernate.engine.jdbc.ReaderInputStream;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
@@ -58,6 +64,9 @@ public class AmsFakeRemoteServiceHelperTest {
     @Mock CorpusNode mockCorpusNode_1;
     @Mock CorpusNode mockCorpusNode_2;
     @Mock CorpusNode mockCorpusNode_3;
+    
+    @Mock MockableURL mockUrl;
+    @Mock HttpURLConnection mockUrlConnection;
     
     private String authBaseUrl = "http://server/ams-cmdi";
     private String authRecalcUrl = "recalc/page";
@@ -165,9 +174,9 @@ public class AmsFakeRemoteServiceHelperTest {
     public void getRecalcUrl_onlyCsdb() throws UnsupportedEncodingException, MalformedURLException {
         
         final String targetNodeIDs = "MPI11#,MPI12#";
-        final URL expectedUrl = new URL(authBaseUrl + "/" + authRecalcCsdbUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8"));
+        final MockableURL expectedUrl = new MockableURL(new URL(authBaseUrl + "/" + authRecalcCsdbUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8")));
         
-        URL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.TRUE, Boolean.FALSE, targetNodeIDs);
+        MockableURL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.TRUE, Boolean.FALSE, targetNodeIDs);
         
         assertEquals("URL different from expected", expectedUrl, result);
     }
@@ -176,9 +185,9 @@ public class AmsFakeRemoteServiceHelperTest {
     public void getRecalcUrl_onlyWebserver() throws UnsupportedEncodingException, MalformedURLException {
         
         final String targetNodeIDs = "MPI11#,MPI12#";
-        final URL expectedUrl = new URL(authBaseUrl + "/" + authRecalcWebserverUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8"));
+        final MockableURL expectedUrl = new MockableURL(new URL(authBaseUrl + "/" + authRecalcWebserverUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8")));
         
-        URL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.FALSE, Boolean.TRUE, targetNodeIDs);
+        MockableURL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.FALSE, Boolean.TRUE, targetNodeIDs);
         
         assertEquals("URL different from expected", expectedUrl, result);
     }
@@ -187,15 +196,32 @@ public class AmsFakeRemoteServiceHelperTest {
     public void getRecalcUrl_complete() throws UnsupportedEncodingException, MalformedURLException {
         
         final String targetNodeIDs = "MPI11#,MPI12#";
-        final URL expectedUrl = new URL(authBaseUrl + "/" + authRecalcUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8"));
+        final MockableURL expectedUrl = new MockableURL(new URL(authBaseUrl + "/" + authRecalcUrl + "?" + authRecalcParam + "=" + URLEncoder.encode(targetNodeIDs, "UTF-8")));
         
-        URL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.TRUE, Boolean.TRUE, targetNodeIDs);
+        MockableURL result = amsFakeRemoteServiceHelper.getRecalcUrl(Boolean.TRUE, Boolean.TRUE, targetNodeIDs);
         
         assertEquals("URL different from expected", expectedUrl, result);
     }
 
     @Test
-    public void testSendCallToAccessRightsManagementSystem() throws Exception {
-        fail("not tested yet");
+    public void sendCallToAccessRightsManagementSystem() throws Exception {
+        
+        final String expectedString = "some text to read and test the method and bla bla bla";
+        final StringReader reader = new StringReader(expectedString);
+        final InputStream fakeInputStream = new ReaderInputStream(reader);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockUrl).openConnection(); will(returnValue(mockUrlConnection));
+            oneOf(mockUrlConnection).setDoInput(Boolean.TRUE);
+            oneOf(mockUrlConnection).setDoOutput(Boolean.FALSE);
+            oneOf(mockUrlConnection).setUseCaches(Boolean.FALSE);
+            oneOf(mockUrlConnection).setRequestProperty("Content-Type", "text");
+            oneOf(mockUrlConnection).getInputStream(); will(returnValue(fakeInputStream));
+            
+            oneOf(mockUrlConnection).disconnect();
+        }});
+        
+        amsFakeRemoteServiceHelper.sendCallToAccessRightsManagementSystem(mockUrl);
     }
 }

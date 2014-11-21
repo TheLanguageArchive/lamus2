@@ -31,6 +31,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.util.implementation.MockableURL;
 import nl.mpi.lat.ams.AmsLicense;
 import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
@@ -260,7 +261,7 @@ public class AmsFakeRemoteServiceTest {
         targetNodeIDs.append(nodeMpiID_1);
         targetNodeIDs.append(nodeMpiID_2);
         
-        final URL recalcUrl = new URL("http://some/url/recalc/bla/bla");
+        final MockableURL recalcUrl = new MockableURL(new URL("http://some/url/recalc/bla/bla"));
         
         final boolean triggerCsTranscription = Boolean.TRUE;
         final boolean triggerWsTranscription = Boolean.TRUE;
@@ -369,7 +370,7 @@ public class AmsFakeRemoteServiceTest {
         targetNodeIDs.append(nodeMpiID_1);
         targetNodeIDs.append(nodeMpiID_2);
         
-        final URL recalcUrl = new URL("http://some/url/recalc/bla/bla");
+        final MockableURL recalcUrl = new MockableURL(new URL("http://some/url/recalc/bla/bla"));
         
         final IOException expectedCause = new IOException();
         final String expectedMessage = "Error invoking AMS rights recalculation";

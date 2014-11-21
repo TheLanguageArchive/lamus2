@@ -32,6 +32,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.lamus.util.implementation.MockableURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,7 @@ public class AmsFakeRemoteServiceHelper {
         return targetNodeIDs.toString();
     }
     
-    public URL getRecalcUrl(boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription, String targetNodeIDs)
+    public MockableURL getRecalcUrl(boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription, String targetNodeIDs)
             throws UnsupportedEncodingException, MalformedURLException {
         
         StringBuilder urlToReturn = new StringBuilder();
@@ -102,10 +103,10 @@ public class AmsFakeRemoteServiceHelper {
         
         urlToReturn.append("?").append(authRecalcParam).append("=");
         urlToReturn.append(URLEncoder.encode(targetNodeIDs, "UTF-8"));
-        return new URL(urlToReturn.toString());
+        return new MockableURL(new URL(urlToReturn.toString()));
     }
     
-    public void sendCallToAccessRightsManagementSystem(URL amsUrl)
+    public void sendCallToAccessRightsManagementSystem(MockableURL amsUrl)
             throws IOException {
         
         logger.info("ams2 recalculation called by " + amsUrl);
@@ -117,12 +118,15 @@ public class AmsFakeRemoteServiceHelper {
         servletConnection.setRequestProperty("Content-Type", "text");
         InputStream instr = servletConnection.getInputStream();
         StringBuilder reply;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(instr))) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(instr));
+        try {
             reply = new StringBuilder("ams2 recalculation call replied:\n");
             String line;
             while((line = reader.readLine()) != null) {
                 reply.append(line);
             }
+        } finally {
+            reader.close();
         }
         if (servletConnection instanceof HttpURLConnection)
             ((HttpURLConnection)servletConnection).disconnect();

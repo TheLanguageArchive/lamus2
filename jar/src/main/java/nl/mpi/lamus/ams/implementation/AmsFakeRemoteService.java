@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +29,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.NodeIdUtils;
+import nl.mpi.lamus.util.implementation.MockableURL;
 import nl.mpi.lat.ams.AmsLicense;
 import nl.mpi.lat.ams.AmsLicenseFactory;
 import nl.mpi.lat.ams.IAmsRemoteService;
@@ -128,7 +128,7 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
         
         //TODO force recalculation?
         try {
-            URL urlToTriggerRecalc = remoteServiceHelper.getRecalcUrl(triggerCorpusStructureTranscription, triggerWebServerTranscription, targetNodeIDs);
+            MockableURL urlToTriggerRecalc = remoteServiceHelper.getRecalcUrl(triggerCorpusStructureTranscription, triggerWebServerTranscription, targetNodeIDs);
             remoteServiceHelper.sendCallToAccessRightsManagementSystem(urlToTriggerRecalc);
         } catch (UnsupportedEncodingException | MalformedURLException ex) {
             throw new RuntimeException("Error constructing AMS recalculation URL", ex);

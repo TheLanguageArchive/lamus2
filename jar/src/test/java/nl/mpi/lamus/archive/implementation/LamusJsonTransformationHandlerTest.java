@@ -87,15 +87,13 @@ public class LamusJsonTransformationHandlerTest {
         JsonObject resultJsonObject = jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacementCollection);
         
         assertNotNull("Retrieved json object should not be null", resultJsonObject);
-        assertNotNull("'create' json object should not be null", resultJsonObject.getJsonObject("create"));
-        JsonObject createJsonObject = resultJsonObject.getJsonObject("create");
-        assertNotNull("'versions' json array should not be null", createJsonObject.getJsonArray("versions"));
-        JsonArray versionsJsonArray = createJsonObject.getJsonArray("versions");
+        assertNotNull("'list' json array should not be null", resultJsonObject.getJsonArray("list"));
+        JsonArray versionsJsonArray = resultJsonObject.getJsonArray("list");
         assertFalse("'versions' json array should not be empty", versionsJsonArray.isEmpty());
-        assertEquals("first json object in array has different 'from' value than expected", firstOldNodeURI.toString(), versionsJsonArray.getJsonObject(0).getString("from"));
-        assertEquals("first json object in array has different 'to' value than expected", firstNewNodeURI.toString(), versionsJsonArray.getJsonObject(0).getString("to"));
-        assertEquals("second json object in array has different 'from' value than expected", secondOldNodeURI.toString(), versionsJsonArray.getJsonObject(1).getString("from"));
-        assertEquals("second json object in array has different 'to' value than expected", secondNewNodeURI.toString(), versionsJsonArray.getJsonObject(1).getString("to"));
+        assertEquals("first json object in array has different 'fromId' value than expected", firstOldNodeURI.toString(), versionsJsonArray.getJsonObject(0).getString("fromId"));
+        assertEquals("first json object in array has different 'toId' value than expected", firstNewNodeURI.toString(), versionsJsonArray.getJsonObject(0).getString("toId"));
+        assertEquals("second json object in array has different 'fromId' value than expected", secondOldNodeURI.toString(), versionsJsonArray.getJsonObject(1).getString("fromId"));
+        assertEquals("second json object in array has different 'toId' value than expected", secondNewNodeURI.toString(), versionsJsonArray.getJsonObject(1).getString("toId"));
     }
     
     @Test
@@ -117,22 +115,20 @@ public class LamusJsonTransformationHandlerTest {
 
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder createObjectBuilder = Json.createObjectBuilder();
         JsonArrayBuilder versionsArrayBuilder = Json.createArrayBuilder();
 
         versionsArrayBuilder.add(
                 Json.createObjectBuilder()
-                    .add("from", firstOldNodeURI.toString())
-                    .add("to", firstNewNodeURI.toString())
+                    .add("fromId", firstOldNodeURI.toString())
+                    .add("toId", firstNewNodeURI.toString())
                     .add("status", firstReplacementStatus));
         versionsArrayBuilder.add(
                 Json.createObjectBuilder()
-                    .add("from", secondOldNodeURI.toString())
-                    .add("to", secondNewNodeURI.toString())
+                    .add("fromId", secondOldNodeURI.toString())
+                    .add("toId", secondNewNodeURI.toString())
                     .add("status", secondReplacementStatus));
         
-        createObjectBuilder.add("versions", versionsArrayBuilder);
-        mainObjectBuilder.add("created", createObjectBuilder);
+        mainObjectBuilder.add("list", versionsArrayBuilder);
         
         JsonObject createdObject = mainObjectBuilder.build();
         
@@ -154,14 +150,15 @@ public class LamusJsonTransformationHandlerTest {
         expectedNodeReplacementCollection.add(firstNodeReplacement);
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder createObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder versionsObjectBuilder = Json.createObjectBuilder()
-                .add("from", firstOldNodeURI.toString())
-                .add("to", firstNewNodeURI.toString())
-                .add("status", firstReplacementStatus);
+        JsonArrayBuilder versionsArrayBuilder = Json.createArrayBuilder();
+
+        versionsArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("fromId", firstOldNodeURI.toString())
+                    .add("toId", firstNewNodeURI.toString())
+                    .add("status", firstReplacementStatus));
         
-        createObjectBuilder.add("versions", versionsObjectBuilder);
-        mainObjectBuilder.add("created", createObjectBuilder);
+        mainObjectBuilder.add("list", versionsArrayBuilder);
         
         JsonObject createdObject = mainObjectBuilder.build();
         
@@ -172,7 +169,7 @@ public class LamusJsonTransformationHandlerTest {
     }
     
     @Test
-    public void createNodeReplacementCollectoinFromJsonObjectStatusFailed() throws URISyntaxException {
+    public void createNodeReplacementCollectionFromJsonObjectStatusFailed() throws URISyntaxException {
         
         URI firstOldNodeURI = new URI(UUID.randomUUID().toString());
         URI firstNewNodeURI = new URI(UUID.randomUUID().toString());
@@ -192,24 +189,22 @@ public class LamusJsonTransformationHandlerTest {
 
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder createObjectBuilder = Json.createObjectBuilder();
         JsonArrayBuilder versionsArrayBuilder = Json.createArrayBuilder();
 
         versionsArrayBuilder.add(
                 Json.createObjectBuilder()
-                    .add("from", firstOldNodeURI.toString())
-                    .add("to", firstNewNodeURI.toString())
+                    .add("fromId", firstOldNodeURI.toString())
+                    .add("toId", firstNewNodeURI.toString())
                     .add("status", firstReplacementStatus)
                     .add("error", firstReplacementError));
         versionsArrayBuilder.add(
                 Json.createObjectBuilder()
-                    .add("from", secondOldNodeURI.toString())
-                    .add("to", secondNewNodeURI.toString())
+                    .add("fromId", secondOldNodeURI.toString())
+                    .add("toId", secondNewNodeURI.toString())
                     .add("status", secondReplacementStatus)
                     .add("error", secondReplacementError));
         
-        createObjectBuilder.add("versions", versionsArrayBuilder);
-        mainObjectBuilder.add("created", createObjectBuilder);
+        mainObjectBuilder.add("list", versionsArrayBuilder);
         
         JsonObject createdObject = mainObjectBuilder.build();
         
@@ -217,6 +212,12 @@ public class LamusJsonTransformationHandlerTest {
         Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
         
         assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
+    }
+    
+    @Test
+    public void createNodeReplacementCollectionFromJsonObject_NullList() {
+        //TODO worth testing?
+        fail("not tested yet");
     }
     
     @Test

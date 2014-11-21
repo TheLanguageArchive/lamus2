@@ -79,6 +79,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         JsonObject requestJsonObject =
                 jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacements);
         
+        logger.debug("JSON objects to pass to the version creating service were successfully generated");
+        
         JsonObject responseJsonObject;
         try {
             responseJsonObject =
@@ -93,6 +95,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
             throw new VersionCreationException(errorMessage, ex);
         }
         
+        logger.debug("Version creation service was called and a response JSON object was retrieved");
+        
         Collection<WorkspaceNodeReplacement> responseNodeReplacements;
         try {
             
@@ -103,6 +107,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
             logger.error(errorMessage, ex);
             throw new VersionCreationException(errorMessage, ex);
         }
+        
+        logger.debug("JSON object containing the response was parsed");
         
         for(WorkspaceNodeReplacement replacement : responseNodeReplacements) {
             logger.debug("Retrieving result of replacement. Old node: " + replacement.getOldNodeURI().toString() + " ; New node: " + replacement.getNewNodeURI().toString());

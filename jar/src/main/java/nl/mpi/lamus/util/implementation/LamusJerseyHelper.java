@@ -25,6 +25,8 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import nl.mpi.lamus.util.JerseyHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusJerseyHelper implements JerseyHelper {
+    
+    private static final Logger logger = LoggerFactory.getLogger(JerseyHelper.class);
 
     /**
      * @see JerseyHelper#postRequestCreateVersions(javax.json.JsonObject, java.lang.String, java.lang.String[])
@@ -45,8 +49,6 @@ public class LamusJerseyHelper implements JerseyHelper {
         Invocation.Builder invocationBuilder = finalTarget.request(MediaType.APPLICATION_JSON);
         
         Entity<JsonObject> jsonObjectEntity = Entity.entity(requestJsonObject, MediaType.APPLICATION_JSON);
-        
-//        invocationBuilder.accept(MediaType.APPLICATION_JSON)
         
         JsonObject responseJsonObject = invocationBuilder.post(jsonObjectEntity, JsonObject.class);
         
