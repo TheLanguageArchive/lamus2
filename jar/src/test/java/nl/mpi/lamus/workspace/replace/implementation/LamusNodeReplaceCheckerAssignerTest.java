@@ -21,19 +21,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
-import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
-import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
-import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
-import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
+import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -47,19 +43,18 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
-public class LamusNodeReplaceCheckerFactoryTest {
+public class LamusNodeReplaceCheckerAssignerTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     
-    @Mock CorpusStructureProvider mockCorpusStructureProvider;
-    @Mock ArchiveFileHelper mockArchiveFileHelper;
-    @Mock ReplaceActionManager mockReplaceActionManager;
-    @Mock ReplaceActionFactory mockReplaceActionFactory;
-    @Mock NodeReplaceExplorer mockNodeReplaceExplorer;
+    @Mock MetadataNodeReplaceChecker mockMetadataNodeReplaceChecker;
+    @Mock ResourceNodeReplaceChecker mockResourceNodeReplaceChecker;
     
-    private NodeReplaceCheckerFactory nodeReplaceManagerFactory;
+    private NodeReplaceCheckerAssigner nodeReplaceCheckerAssigner;
     
-    public LamusNodeReplaceCheckerFactoryTest() {
+    public LamusNodeReplaceCheckerAssignerTest() {
     }
     
     @BeforeClass
@@ -73,13 +68,10 @@ public class LamusNodeReplaceCheckerFactoryTest {
     @Before
     public void setUp() {
         
-        nodeReplaceManagerFactory = new LamusNodeReplaceCheckerFactory();
+        nodeReplaceCheckerAssigner = new LamusNodeReplaceCheckerAssigner();
         
-        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "corpusStructureProvider", mockCorpusStructureProvider);
-        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "archiveFileHelper", mockArchiveFileHelper);
-        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "replaceActionManager", mockReplaceActionManager);
-        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "replaceActionFactory", mockReplaceActionFactory);
-        ReflectionTestUtils.setField(nodeReplaceManagerFactory, "nodeReplaceExplorer", mockNodeReplaceExplorer);
+        ReflectionTestUtils.setField(nodeReplaceCheckerAssigner, "metadataNodeReplaceChecker", mockMetadataNodeReplaceChecker);
+        ReflectionTestUtils.setField(nodeReplaceCheckerAssigner, "resourceNodeReplaceChecker", mockResourceNodeReplaceChecker);
     }
     
     @After
@@ -88,7 +80,7 @@ public class LamusNodeReplaceCheckerFactoryTest {
 
 
     @Test
-    public void getReplaceManagerForMetadataNode() throws MalformedURLException, URISyntaxException {
+    public void getReplaceCheckerForMetadataNode() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
@@ -103,14 +95,15 @@ public class LamusNodeReplaceCheckerFactoryTest {
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
-        NodeReplaceChecker retrievedNodeReplacedManager = nodeReplaceManagerFactory.getReplaceCheckerForNode(node);
+        NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         
-        assertNotNull(retrievedNodeReplacedManager);
-        assertTrue("Retrieved node replace manager has a different type from expected", retrievedNodeReplacedManager instanceof MetadataNodeReplaceChecker);
+        assertNotNull(retrievedNodeReplacedChecker);
+        assertTrue("Retrieved node replace checker has a different type from expected", retrievedNodeReplacedChecker instanceof MetadataNodeReplaceChecker);
+        assertEquals("Retrieved node replace checker different from expected", mockMetadataNodeReplaceChecker, retrievedNodeReplacedChecker);
     }
     
     @Test
-    public void getReplaceManagerForResourceNode() throws MalformedURLException, URISyntaxException {
+    public void getReplaceCheckerForResourceNode() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
@@ -125,9 +118,10 @@ public class LamusNodeReplaceCheckerFactoryTest {
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
         
-        NodeReplaceChecker retrievedNodeReplacedManager = nodeReplaceManagerFactory.getReplaceCheckerForNode(node);
+        NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         
-        assertNotNull(retrievedNodeReplacedManager);
-        assertTrue("Retrieved node replace manager has a different type from expected", retrievedNodeReplacedManager instanceof ResourceNodeReplaceChecker);
+        assertNotNull(retrievedNodeReplacedChecker);
+        assertTrue("Retrieved node replace checker has a different type from expected", retrievedNodeReplacedChecker instanceof ResourceNodeReplaceChecker);
+        assertEquals("Retrieved node replace checker different from expected", mockResourceNodeReplaceChecker, retrievedNodeReplacedChecker);
     }
 }

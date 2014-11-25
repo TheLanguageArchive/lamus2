@@ -90,7 +90,7 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     
     private void finaliseWorkspace(Workspace workspace, boolean crawlerWasSuccessful) {
         
-        logger.debug("Finalising workspace " + workspace.getWorkspaceID());
+        logger.debug("Finalising workspace " + workspace.getWorkspaceID() + (crawlerWasSuccessful ? " (successful)" : " (failed)"));
         
         boolean versioningWasSuccessful = Boolean.TRUE;
         

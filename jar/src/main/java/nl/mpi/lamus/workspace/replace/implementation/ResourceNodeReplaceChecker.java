@@ -29,30 +29,28 @@ import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of NodeReplaceChecker for resource nodes.
  * 
  * @author guisil
  */
+@Component
 public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
     
     private static final Logger logger = LoggerFactory.getLogger(ResourceNodeReplaceChecker.class);
 
-    private final CorpusStructureProvider corpusStructureProvider;
-    private final ArchiveFileHelper archiveFileHelper;
-    private final ReplaceActionManager replaceActionManager;
-    private final ReplaceActionFactory replaceActionFactory;
+    @Autowired
+    private CorpusStructureProvider corpusStructureProvider;
+    @Autowired
+    private ArchiveFileHelper archiveFileHelper;
+    @Autowired
+    private ReplaceActionManager replaceActionManager;
+    @Autowired
+    private ReplaceActionFactory replaceActionFactory;
     
-    public ResourceNodeReplaceChecker(CorpusStructureProvider csProvider,
-            ArchiveFileHelper aFileHelper, ReplaceActionManager actionManager,
-            ReplaceActionFactory actionFactory) {
-        
-        corpusStructureProvider = csProvider;
-        archiveFileHelper = aFileHelper;
-        replaceActionManager = actionManager;
-        replaceActionFactory = actionFactory;
-    }
     
     /**
      * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean, java.util.List)

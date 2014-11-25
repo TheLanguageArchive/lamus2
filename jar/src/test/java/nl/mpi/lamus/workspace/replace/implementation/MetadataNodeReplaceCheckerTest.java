@@ -45,6 +45,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -89,9 +90,11 @@ public class MetadataNodeReplaceCheckerTest {
     @Before
     public void setUp() {
         
-        nodeReplaceChecker = new MetadataNodeReplaceChecker(
-                mockReplaceActionManager, mockReplaceActionFactory,
-                mockNodeReplaceExplorer);
+        nodeReplaceChecker = new MetadataNodeReplaceChecker();
+        ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionManager", mockReplaceActionManager);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionFactory", mockReplaceActionFactory);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "nodeReplaceExplorer", mockNodeReplaceExplorer);
+        
         actions = new ArrayList<>();
     }
     

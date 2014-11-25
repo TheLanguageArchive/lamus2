@@ -23,7 +23,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
-import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
@@ -44,13 +44,13 @@ public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
     private static final Logger logger = LoggerFactory.getLogger(LamusNodeReplaceExplorer.class);
     
     private final WorkspaceDao workspaceDao;
-    private final NodeReplaceCheckerFactory nodeReplaceCheckerFactory;
+    private final NodeReplaceCheckerAssigner nodeReplaceCheckerFactory;
     private final ReplaceActionFactory replaceActionFactory;
     private final ReplaceActionManager replaceActionManager;
     
     @Autowired
     public LamusNodeReplaceExplorer(WorkspaceDao wsDao,
-            NodeReplaceCheckerFactory replaceCheckerFactory,
+            NodeReplaceCheckerAssigner replaceCheckerFactory,
             ReplaceActionFactory actionFactory, ReplaceActionManager actionManager) {
         workspaceDao = wsDao;
         nodeReplaceCheckerFactory = replaceCheckerFactory;

@@ -30,7 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import nl.mpi.lamus.workspace.replace.NodeReplaceExplorer;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
@@ -64,7 +64,7 @@ public class LamusNodeReplaceExplorerTest {
     }};
     
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock NodeReplaceCheckerFactory mockNodeReplaceCheckerFactory;
+    @Mock NodeReplaceCheckerAssigner mockNodeReplaceCheckerFactory;
     @Mock ReplaceActionFactory mockReplaceActionFactory;
     @Mock ReplaceActionManager mockReplaceActionManager;
     

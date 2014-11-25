@@ -23,7 +23,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceManager;
-import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusNodeReplaceManager implements NodeReplaceManager {
 
-    private NodeReplaceCheckerFactory nodeReplaceCheckerFactory;
+    private NodeReplaceCheckerAssigner nodeReplaceCheckerFactory;
     private ReplaceActionManager replaceActionManager;
     
     @Autowired
-    public LamusNodeReplaceManager(NodeReplaceCheckerFactory nodeReplaceManagerFactory, ReplaceActionManager replaceActionManager) {
+    public LamusNodeReplaceManager(NodeReplaceCheckerAssigner nodeReplaceManagerFactory, ReplaceActionManager replaceActionManager) {
         this.nodeReplaceCheckerFactory = nodeReplaceManagerFactory;
         this.replaceActionManager = replaceActionManager;
     }

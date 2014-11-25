@@ -135,7 +135,7 @@ public class LamusJsonTransformationHandlerTest {
         
         Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
         
-        assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
+        assertEquals("NodeReplacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
     }
     
     @Test
@@ -165,7 +165,7 @@ public class LamusJsonTransformationHandlerTest {
         
         Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
         
-        assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
+        assertEquals("NodeReplacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
     }
     
     @Test
@@ -211,13 +211,18 @@ public class LamusJsonTransformationHandlerTest {
         
         Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
         
-        assertEquals("Node replacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
+        assertEquals("NodeReplacement collection different from expected", expectedNodeReplacementCollection, resultNodeReplacementCollection);
     }
     
     @Test
-    public void createNodeReplacementCollectionFromJsonObject_NullList() {
-        //TODO worth testing?
-        fail("not tested yet");
+    public void createNodeReplacementCollectionFromJsonObject_NullList() throws URISyntaxException {
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonObject createdObject = mainObjectBuilder.build();
+        
+        Collection<WorkspaceNodeReplacement> resultNodeReplacementCollection = jsonTransformationHandler.createNodeReplacementCollectionFromJsonObject(createdObject);
+        
+        assertTrue("NodeReplacement collection should be empty", resultNodeReplacementCollection.isEmpty());
     }
     
     @Test

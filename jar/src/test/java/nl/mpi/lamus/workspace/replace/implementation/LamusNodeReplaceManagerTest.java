@@ -21,7 +21,7 @@ import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
-import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerFactory;
+import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import org.jmock.Expectations;
@@ -42,7 +42,7 @@ public class LamusNodeReplaceManagerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
-    @Mock NodeReplaceCheckerFactory mockNodeReplaceCheckerFactory;
+    @Mock NodeReplaceCheckerAssigner mockNodeReplaceCheckerFactory;
     @Mock ReplaceActionManager mockReplaceActionManager;
     
     @Mock NodeReplaceChecker mockNodeReplaceChecker;

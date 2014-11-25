@@ -50,6 +50,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
 import static org.junit.Assert.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -96,9 +97,12 @@ public class ResourceNodeReplaceCheckerTest {
     @Before
     public void setUp() {
         
-        nodeReplaceChecker = new ResourceNodeReplaceChecker(
-                mockCorpusStructureProvider, mockArchiveFileHelper,
-                mockReplaceActionManager, mockReplaceActionFactory);
+        nodeReplaceChecker = new ResourceNodeReplaceChecker();
+        ReflectionTestUtils.setField(nodeReplaceChecker, "corpusStructureProvider", mockCorpusStructureProvider);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "archiveFileHelper", mockArchiveFileHelper);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionManager", mockReplaceActionManager);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionFactory", mockReplaceActionFactory);
+        
         actions = new ArrayList<>();
     }
     

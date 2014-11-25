@@ -26,27 +26,26 @@ import nl.mpi.lamus.workspace.replace.action.ReplaceActionFactory;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of NodeReplaceChecker for metadata nodes.
  * 
  * @author guisil
  */
+@Component
 public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceNodeReplaceChecker.class);
 
-    private final ReplaceActionManager replaceActionManager;
-    private final ReplaceActionFactory replaceActionFactory;
-    private final NodeReplaceExplorer nodeReplaceExplorer;
+    @Autowired
+    private ReplaceActionManager replaceActionManager;
+    @Autowired
+    private ReplaceActionFactory replaceActionFactory;
+    @Autowired
+    private NodeReplaceExplorer nodeReplaceExplorer;
     
-    public MetadataNodeReplaceChecker(ReplaceActionManager actionManager,
-            ReplaceActionFactory actionFactory, NodeReplaceExplorer replaceExplorer) {
-        
-        replaceActionManager = actionManager;
-        replaceActionFactory = actionFactory;
-        nodeReplaceExplorer = replaceExplorer;
-    }
     
     /**
      * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean, java.util.List)

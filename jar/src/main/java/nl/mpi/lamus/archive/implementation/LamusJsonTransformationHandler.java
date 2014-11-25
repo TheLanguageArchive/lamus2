@@ -75,19 +75,18 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         try {
             versionsArray = jsonObject.getJsonArray("list");
         } catch(ClassCastException ex) {
-            logger.debug("'versions' is not a JsonArray, will try to cast to JsonObject");
+            logger.debug("'versions' is not a JsonArray, will try to cast to JsonObject", ex);
         }
         
         if(versionsArray != null) {
+            logger.info("Creating NodeReplacement collection from received JSON array with size " + versionsArray.size());
             for(int i = 0; i < versionsArray.size(); i++) {
                 JsonObject currentObject = versionsArray.getJsonObject(i);
                 WorkspaceNodeReplacement currentReplacement = getNodeReplacementFromJsonObject(currentObject);
                 nodeReplacementCollection.add(currentReplacement);
             }
         } else {
-            
-            //TODO THROW EXCEPTION?
-            throw new UnsupportedOperationException("not implemented yet");
+            logger.warn("A JSON array could not be retrieved from the received JSON object. Will return empty collection of NoreReplacement.");
         }
         
         return nodeReplacementCollection;

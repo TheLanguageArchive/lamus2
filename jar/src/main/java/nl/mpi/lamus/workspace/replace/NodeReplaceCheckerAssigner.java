@@ -19,11 +19,11 @@ package nl.mpi.lamus.workspace.replace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
- * Factory for NodeReplaceChecker.
+ * Assigner for NodeReplaceChecker.
  * 
  * @author guisil
  */
-public interface NodeReplaceCheckerFactory {
+public interface NodeReplaceCheckerAssigner {
     
     /**
      * Returns the NodeReplaceChecker of the appropriate type for the given node

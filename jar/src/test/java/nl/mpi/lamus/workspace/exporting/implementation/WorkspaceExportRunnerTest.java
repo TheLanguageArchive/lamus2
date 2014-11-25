@@ -126,15 +126,6 @@ public class WorkspaceExportRunnerTest {
         
         final String crawlerID = UUID.randomUUID().toString();
         
-        //1.0 synchronise files in the workspace with the lamus database
-            // NOT necessary in the new lamus... every action in the workspace should be immediately reflected in the database
-
-        //2.0 consistency checks: status of amsbridge, corpusstructure database, lamus database, creation (if needed) of the orphans directory
-            // MOSTLY NOT necessary - some of these checks should already be made before the call
-
-        //2.9 get the default prefix (path) for sessions
-            //TODO NOW
-        
         final States exporting = context.states("exporting");
         
         context.checking(new Expectations() {{
@@ -152,7 +143,7 @@ public class WorkspaceExportRunnerTest {
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
-                
+            
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspace).setCrawlerID(crawlerID);
@@ -164,43 +155,6 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
                 then(exporting.is("finished"));
         }});
-        
-        // update message according to what's being done?
-        
-        //3.0 send removed files (deleted) to the trashcan (SetIngestLocations.trashDeletedFiles)
-            //TODO LATER (after basic mini-lamus)
-
-        //3.4 version links (first time) - move replaced files which don't get a version (equivalent to corpus???) to a place where they will be overwritten
-            //TODO LATER (after basic mini-lamus)
-        
-        //3.3 rename replaced virtual resources, to avoid name clashes later (?)
-            //TODO LATER (after basic mini-lamus)
-
-        //3.2 determine archive urls for nodes that weren't in the archive and update those in the lamus db
-            //TODO NOW
-        
-        //4 update links in the metadata files, so that they point to the right location when in the archive
-            // NOW
-        
-        
-        
-        
-        
-        //5.1 close all imdi files (remove them from cache) in the workspace and save them - NEEDED ?
-        //5.2 copy the files into the archive and update urls in the csdb where needed
-        //5.3 allocate urids (handles) and ao entries for all new nodes to enter the archive
-        //5.4 version links (second time) - linking between new and old versions of updated resources
-        //5.5 unlink all children of unlinked/free nodes in order to make them free too (???)
-        //5.6 clean up free nodes (?)
-        
-        //6.1 clean up workspace database
-        //6.2 call archive crawler, update csdb
-         // fetch top node id and adjust unix permissions
-         // set access rights to the top node for nobody and call ams2 recalculation
-         // update status and message
-        
-        //7 update user, ingest request information and send email
-        
         
         boolean result = executeRunner();
         
@@ -248,7 +202,7 @@ public class WorkspaceExportRunnerTest {
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
                 when(exporting.isNot("finished"));
-                
+            
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));
                 then(exporting.is("finished"));
         }});
