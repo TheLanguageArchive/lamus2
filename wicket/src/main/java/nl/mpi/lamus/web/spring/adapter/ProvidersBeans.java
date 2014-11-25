@@ -16,7 +16,7 @@
  */
 package nl.mpi.lamus.web.spring.adapter;
 
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProviderFactory;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.archiving.tree.corpusstructure.CorpusStructureTreeModelProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,12 +34,12 @@ import org.springframework.context.annotation.Scope;
 public class ProvidersBeans {
     
     @Autowired
-    private CorpusStructureProviderFactory csdbFactory;
+    private CorpusStructureProvider corpusStructureProvider;
     
     @Bean
     @Scope("prototype")
     @Qualifier("createWorkspaceTreeProvider")
     public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() {
-        return new CorpusStructureTreeModelProvider(csdbFactory);
+        return new CorpusStructureTreeModelProvider(corpusStructureProvider);
     }
 }

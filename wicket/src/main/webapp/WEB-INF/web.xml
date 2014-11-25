@@ -165,6 +165,20 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>-->
     
+    <!-- Order matters, put the data source connection filter first! -->
+    <filter>
+        <filter-name>springDataSourceConnectionFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <description>Filter responsible for managing the datasource connection, 
+            i.e. opening and closing database connection at the right time in 
+            the request lifetime
+        </description>
+    </filter>
+    <filter-mapping>
+        <filter-name>springDataSourceConnectionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
     <filter>
 	<filter-name>wicket.lamus2</filter-name>
 	<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
