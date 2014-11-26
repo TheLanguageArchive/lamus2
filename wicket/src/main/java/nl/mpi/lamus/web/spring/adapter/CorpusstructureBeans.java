@@ -20,12 +20,15 @@ import nl.mpi.archiving.corpusstructure.adapter.ArchiveObjectsDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.NodeUriUtils;
+import nl.mpi.archiving.corpusstructure.adapter.VersioningAPIImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.servlet.ThreadLocalCSDBContainer;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBProxy;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.CSDBContainer;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.CorpusStructureDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.CorpusStructureDBProxy;
+import nl.mpi.archiving.corpusstructure.adapter.db.proxy.VersioningAPIFactory;
+import nl.mpi.archiving.corpusstructure.adapter.db.proxy.VersioningAPIProxy;
 import nl.mpi.archiving.corpusstructure.adapter.servlet.CSDBConnectionFilter;
 import nl.mpi.archiving.corpusstructure.core.handle.HandleResolver;
 import nl.mpi.archiving.corpusstructure.core.handle.HttpHandleResolver;
@@ -35,6 +38,7 @@ import nl.mpi.archiving.corpusstructure.provider.AccessInfoProvider;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.CorpusStructureDB;
+import nl.mpi.versioning.manager.VersioningAPI;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +59,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CSDBContainer csdbContainer() {
-        return new ThreadLocalCSDBContainer(csdbImplFactory(), aoImplFactory());
+        return new ThreadLocalCSDBContainer(csdbImplFactory(), aoImplFactory(), versioningApiFactory());
     }
     
     @Bean(name = "adapterCSDB")
@@ -76,6 +80,16 @@ public class CorpusstructureBeans {
     }
     
     @Bean
+    public VersioningAPIFactory versioningApiFactory() {
+        return new VersioningAPIImplFactory("java:comp/env/jdbc/CSDB3");
+    }
+    
+    @Bean
+    public VersioningAPI versioningProxy() {
+        return new VersioningAPIProxy(csdbContainer());
+    }
+    
+    @Bean
     public HandleResolver handleResolver() {
         return new HttpHandleResolver();
     }
@@ -87,7 +101,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CorpusStructureAPIProviderFactory corpusStructureProviderFactory() {
-        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), handleResolver(), nodeUriUtils(), "https://lux16.mpi.nl/ds/TranslationService");
+        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), versioningProxy(), handleResolver(), nodeUriUtils(), "https://lux16.mpi.nl/ds/TranslationService");
     }
     
     @Bean
