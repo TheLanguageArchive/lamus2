@@ -122,7 +122,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         String childMimetype = referenceFromParent.getMimetype();
 
-        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childLocalFile)) {
+        if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childLocalFile, childCorpusNode)) {
             
             TypecheckedResults typecheckedResults = null;    
             InputStream childInputStream = null;

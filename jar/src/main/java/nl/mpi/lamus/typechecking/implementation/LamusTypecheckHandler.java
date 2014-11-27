@@ -31,44 +31,35 @@ import org.springframework.stereotype.Component;
 public class LamusTypecheckHandler implements TypecheckHandler {
     
     private FileType typechecker;
-    private String typecheckResult;
-    private String typecheckJudgementMessage;
     
     @Autowired
     public LamusTypecheckHandler(FileType typechecker) {
         this.typechecker = typechecker;
     }
 
+    
     /**
      * @see TypecheckHandler#typecheck(java.io.InputStream, java.lang.String)
      */
     @Override
-    public void typecheck(InputStream iStream, String filename) throws IOException {
-        typecheckResult = typechecker.checkStream( iStream, filename.toLowerCase() );
+    public String typecheck(InputStream iStream, String filename) throws IOException {
+        return typechecker.checkStream( iStream, filename.toLowerCase() );
     }
     
     /**
-     * @see TypecheckHandler#isFileArchivable()
+     * @see TypecheckHandler#isFileArchivable(java.lang.String)
      */
     @Override
-    public boolean isFileArchivable() {
+    public boolean isFileArchivable(String typecheckResult) {
         return FileType.resultToBoolean(typecheckResult);
     }
     
     /**
-     * @see TypecheckHandler#getTypecheckResult()
+     * @see TypecheckHandler#getTypecheckJudgement(java.lang.String)
      */
     @Override
-    public String getTypecheckResult() {
-        return this.typecheckResult;
-    }
-    
-    /**
-     * @see TypecheckHandler#getTypecheckJudgement()
-     */
-    @Override
-    public TypecheckerJudgement getTypecheckJudgement() {
-        typecheckJudgementMessage = FileType.resultToJudgement(typecheckResult);
+    public TypecheckerJudgement getTypecheckJudgement(String typecheckResult) {
+        String typecheckJudgementMessage = FileType.resultToJudgement(typecheckResult);
         
         if(typecheckJudgementMessage.startsWith("GOOD")) {
             return TypecheckerJudgement.ARCHIVABLE_LONGTERM;
@@ -83,7 +74,7 @@ public class LamusTypecheckHandler implements TypecheckHandler {
      * @see TypecheckHandler#getTypecheckMimetype()
      */
     @Override
-    public String getTypecheckMimetype() {
+    public String getTypecheckMimetype(String typecheckResult) {
         return FileType.resultToMPIType(typecheckResult);
     }
 }

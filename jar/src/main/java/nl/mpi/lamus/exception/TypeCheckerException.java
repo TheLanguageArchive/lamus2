@@ -15,13 +15,22 @@
  */
 package nl.mpi.lamus.exception;
 
+import nl.mpi.lamus.typechecking.TypecheckedResults;
+
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 public class TypeCheckerException extends Exception {
     
-    public TypeCheckerException(String message, Throwable cause) {
+    private TypecheckedResults typecheckedResults;
+    
+    public TypeCheckerException(TypecheckedResults results, String message, Throwable cause) {
         super(message, cause);
+        typecheckedResults = results;
+    }
+    
+    public TypecheckedResults getTypecheckedResults() {
+        return typecheckedResults;
     }
 }

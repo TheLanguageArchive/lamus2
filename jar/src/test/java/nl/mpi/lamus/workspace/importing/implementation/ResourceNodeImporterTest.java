@@ -32,6 +32,8 @@ import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.typechecking.TypecheckerJudgement;
+import nl.mpi.lamus.typechecking.implementation.LamusTypecheckedResults;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
@@ -184,7 +186,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
 
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
@@ -262,7 +264,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithoutHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
@@ -344,7 +346,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
@@ -435,7 +437,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
@@ -526,7 +528,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
@@ -684,7 +686,8 @@ public class ResourceNodeImporterTest {
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
                 "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
-        final TypeCheckerException expectedException = new TypeCheckerException("some exception message", null);
+        final TypecheckedResults typecheckedResults = new LamusTypecheckedResults(childNodeMimetype, "some analysis", TypecheckerJudgement.UNARCHIVABLE);
+        final TypeCheckerException expectedException = new TypeCheckerException(typecheckedResults, "some exception message", null);
         
         context.checking(new Expectations() {{
             
@@ -695,7 +698,7 @@ public class ResourceNodeImporterTest {
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
-            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile);
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
             
             oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));

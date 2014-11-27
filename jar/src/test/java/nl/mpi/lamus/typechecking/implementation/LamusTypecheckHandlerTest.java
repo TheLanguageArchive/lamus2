@@ -25,7 +25,6 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -68,16 +67,16 @@ public class LamusTypecheckHandlerTest {
     public void testTypecheck() throws Exception {
         
         final String fileName = "someFile.txt";
-        final String result = "true something";
+        final String expectedResult = "true something";
         
         context.checking(new Expectations() {{
             
-            oneOf(mockTypechecker).checkStream(mockInputStream, fileName.toLowerCase()); will(returnValue(result));
+            oneOf(mockTypechecker).checkStream(mockInputStream, fileName.toLowerCase()); will(returnValue(expectedResult));
         }});
         
-        typecheckHandler.typecheck(mockInputStream, fileName);
+        String retrivedResult = typecheckHandler.typecheck(mockInputStream, fileName);
         
-        assertEquals("Stored result is different from expected", result, typecheckHandler.getTypecheckResult());
+        assertEquals("Retrieved result is different from expected", expectedResult, retrivedResult);
     }
 
     /**
@@ -90,10 +89,10 @@ public class LamusTypecheckHandlerTest {
     @Test
     public void isFileArchivableResultTrue() {
         
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "true something");
+        String typecheckResult = "true something";
         
-        boolean result = typecheckHandler.isFileArchivable();
-        assertTrue(result);
+        boolean result = typecheckHandler.isFileArchivable(typecheckResult);
+        assertTrue("Result should be true", result);
     }
     
     /**
@@ -106,10 +105,10 @@ public class LamusTypecheckHandlerTest {
     @Test
     public void isFileArchivableResultFalse() {
         
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "something else");
+        String typecheckResult = "something else";
         
-        boolean result = typecheckHandler.isFileArchivable();
-        assertFalse(result);
+        boolean result = typecheckHandler.isFileArchivable(typecheckResult);
+        assertFalse("Result should be false", result);
     }
     
     /**
@@ -122,23 +121,10 @@ public class LamusTypecheckHandlerTest {
     @Test
     public void isFileArchivableResultNull() {
         
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", null);
+        String typecheckResult = null;
         
-        boolean result = typecheckHandler.isFileArchivable();
-        assertFalse(result);
-    }
-
-    /**
-     * Test of getTypecheckResult method, of class LamusTypecheckHandler.
-     */
-    @Test
-    public void testGetTypecheckResult() {
-        
-        String expectedResult = "some test result";
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", expectedResult);
-        
-        String retrievedResult = typecheckHandler.getTypecheckResult();
-        assertEquals("Typecheck result different from expected", expectedResult, retrievedResult);
+        boolean result = typecheckHandler.isFileArchivable(typecheckResult);
+        assertFalse("Result should be false", result);
     }
 
     /**
@@ -152,9 +138,9 @@ public class LamusTypecheckHandlerTest {
     public void getTypecheckJudgementLongTerm() {
         
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "true GOOD something");
+        String typecheckResult = "true GOOD something";
         
-        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement();
+        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement(typecheckResult);
         assertEquals("Typecheck judgement different from expected", expectedJudgement, retrievedJudgement);
     }
     
@@ -169,9 +155,9 @@ public class LamusTypecheckHandlerTest {
     public void getTypecheckJudgementShortTerm() {
         
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "true OKAYFORAWHILE something");
+        String typecheckResult = "true OKAYFORAWHILE something";
         
-        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement();
+        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement(typecheckResult);
         assertEquals("Typecheck judgement different from expected", expectedJudgement, retrievedJudgement);
     }
 
@@ -186,9 +172,9 @@ public class LamusTypecheckHandlerTest {
     public void getTypecheckJudgementUnarchivable() {
         
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.UNARCHIVABLE;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "false BAD something");
+        String typecheckResult = "false BAD something";
         
-        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement();
+        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement(typecheckResult);
         assertEquals("Typecheck judgement different from expected", expectedJudgement, retrievedJudgement);
     }
     
@@ -203,9 +189,9 @@ public class LamusTypecheckHandlerTest {
     public void getTypecheckJudgementBadResultString() {
         
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.UNARCHIVABLE;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", "false BADMALFORMEDRESULTSTRING something");
+        String typecheckResult = "false BADMALFORMEDRESULTSTRING something";
         
-        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement();
+        TypecheckerJudgement retrievedJudgement = typecheckHandler.getTypecheckJudgement(typecheckResult);
         assertEquals("Typecheck judgement different from expected", expectedJudgement, retrievedJudgement);
     }
 
@@ -220,10 +206,9 @@ public class LamusTypecheckHandlerTest {
     public void testGetTypecheckMimetype() {
 
         String expectedMimetype = "text/plain";
-        String result = "true GOOD " + expectedMimetype;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", result);
+        String typecheckResult = "true GOOD " + expectedMimetype;
         
-        String retrievedMimetype = typecheckHandler.getTypecheckMimetype();
+        String retrievedMimetype = typecheckHandler.getTypecheckMimetype(typecheckResult);
         assertEquals("Mimetype is different from expected", expectedMimetype, retrievedMimetype);
     }
     
@@ -238,10 +223,9 @@ public class LamusTypecheckHandlerTest {
     public void getTypecheckMimetypeResultTrue() {
 
         String expectedMimetype = "text/plain";
-        String result = "true GOOD " + expectedMimetype;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", result);
+        String typecheckResult = "true GOOD " + expectedMimetype;
         
-        String retrievedMimetype = typecheckHandler.getTypecheckMimetype();
+        String retrievedMimetype = typecheckHandler.getTypecheckMimetype(typecheckResult);
         assertEquals("Mimetype is different from expected", expectedMimetype, retrievedMimetype);
     }
     
@@ -255,10 +239,9 @@ public class LamusTypecheckHandlerTest {
     @Test
     public void getTypecheckMimetypeResultFalse() {
 
-        String result = "false BAD something";
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", result);
+        String typecheckResult = "false BAD something";
         
-        String retrievedMimetype = typecheckHandler.getTypecheckMimetype();
+        String retrievedMimetype = typecheckHandler.getTypecheckMimetype(typecheckResult);
         assertEquals("Mimetype is different from expected", null, retrievedMimetype);
     }
     
@@ -272,10 +255,9 @@ public class LamusTypecheckHandlerTest {
     @Test
     public void getTypecheckMimetypeResultNull() {
 
-        String result = null;
-        ReflectionTestUtils.setField(typecheckHandler, "typecheckResult", result);
+        String typecheckResult = null;
         
-        String retrievedMimetype = typecheckHandler.getTypecheckMimetype();
+        String retrievedMimetype = typecheckHandler.getTypecheckMimetype(typecheckResult);
         assertEquals("Mimetype is different from expected", null, retrievedMimetype);
     }
 }

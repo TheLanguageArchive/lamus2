@@ -41,6 +41,7 @@ import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -86,6 +87,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private InputStream mockInputStream;
     @Mock private Collection<File> mockUploadedFiles;
     @Mock private Collection<UploadProblem> mockFailedUploads;
+    @Mock private TypecheckedResults mockTypecheckedResults;
 
     
     public LamusWorkspaceServiceTest() {
@@ -873,8 +875,8 @@ public class LamusWorkspaceServiceTest {
         
         final int workspaceID = 1;
         final String userID = "testUser";
-        final String filename = "someFile.cmdi";
-        final TypeCheckerException typeCheckerException = new TypeCheckerException("some error message", null);
+        final String filename = "someFile.bla";
+        final TypeCheckerException typeCheckerException = new TypeCheckerException(mockTypecheckedResults, "some error message", null);
         
         context.checking(new Expectations() {{
             
@@ -955,7 +957,7 @@ public class LamusWorkspaceServiceTest {
         
         final int workspaceID = 1;
         final String userID = "testUser";
-        final TypeCheckerException typeCheckerException = new TypeCheckerException("some error message", new IOException("some cause"));
+        final TypeCheckerException typeCheckerException = new TypeCheckerException(mockTypecheckedResults, "some error message", new IOException("some cause"));
         
         context.checking(new Expectations() {{
             

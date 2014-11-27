@@ -17,6 +17,8 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @see TypecheckedResults
@@ -43,11 +45,22 @@ public class LamusTypecheckedResults implements TypecheckedResults {
         return checkedMimetype;
     }
     
+    @Override
+    public String getCompleteAnalysis() {
+        return analysis;
+    }
+    
     /**
      * @see TypecheckedResults#getAnalysis()
      */
     @Override
     public String getAnalysis() {
+        if (analysis.startsWith("true ")) {
+            return analysis.substring(5);
+        }
+        if (analysis.startsWith("false ")) {
+            return analysis.substring(6);
+        }
         return analysis;
     }
 
@@ -68,5 +81,46 @@ public class LamusTypecheckedResults implements TypecheckedResults {
             return true;
         }
         return false;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .append(this.checkedMimetype)
+                .append(this.analysis)
+                .append(this.typecheckerJudgement);
+        
+        return hashCodeB.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof LamusTypecheckedResults)) {
+            return false;
+        }
+        LamusTypecheckedResults other = (LamusTypecheckedResults) obj;
+        
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .append(this.checkedMimetype, other.getCheckedMimetype())
+                .append(this.analysis, other.getCompleteAnalysis())
+                .append(this.typecheckerJudgement, other.getTypecheckerJudgement());
+        
+        return equalsB.isEquals();
+    }
+    
+    @Override
+    public String toString() {
+        
+        String stringResult = "Checked mimetype: " + this.checkedMimetype + ", Analysis: " + this.analysis +
+                ", Typechecker Judgement: " + this.typecheckerJudgement;
+        
+        return stringResult;
     }
 }

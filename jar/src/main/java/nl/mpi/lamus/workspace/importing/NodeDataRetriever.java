@@ -19,11 +19,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.util.OurURL;
 
 /**
  * Helper interface that provides methods for retrieving information
@@ -44,16 +44,11 @@ public interface NodeDataRetriever {
      * Decides if a resource should be typechecked (depending on its location and size).
      * @param resourceReference Reference to the resource, from the parent metadata file
      * @param resourceFile File object referring to the actual location of the resource
+     * @param resourceNode CorpusNode object referring to the resource in the corpus structure database
+     * @param alreadyInArchive true if file already in archive
      * @return true if resource should be typechecked
      */
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile);
-    
-    /**
-     * Invokes typechecking for the given resource.
-     * @param resourceURL URL of the resource
-     * @return results of the typechecker
-     */
-    public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException;
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile, CorpusNode resourceNode);
     
     /**
      * Invokes typechecking for the given resource.
@@ -64,19 +59,27 @@ public interface NodeDataRetriever {
     public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
     
     /**
+     * Retrieves results for files in which typechecking won't be triggered.
+     * @param resourceReference
+     * @return 
+     */
+    public TypecheckedResults triggerNoFileCheck(Reference resourceReference);
+    
+    /**
      * Verifies the results of the typechecker.
      * @param resourceFile File object referring to the resource
      * @param resourceReference Reference to the resource, from the parent metadata file
-     * @param typecheckedResults Object containing the result of the typechecker
+     * @param typecheckedResults Object containing the result of the typecheck
      */
     public void verifyTypecheckedResults(File resourceFile, Reference resourceReference, TypecheckedResults typecheckedResults);
     
     /**
+     * @param typecheckedResults Object containing the result of the typecheck
      * @param urlToCheckInConfiguration URL of the archive branch for which the configuration has to be checked (top node of the workspace)
      * @param message Message from the typechecker
      * @return true if the previously checked resource is archivable, according to the configuration
      */
-    public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message);
+    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, URL urlToCheckInConfiguration, StringBuilder message);
     
     /**
      * @param archiveNodeUri URI of the node in the archive

@@ -27,6 +27,12 @@ public interface TypecheckedResults {
     public String getCheckedMimetype();
     
     /**
+     * @return String containing the analysis of the checked resource,
+     * including the beginning of the string (true or false)
+     */
+    public String getCompleteAnalysis();
+    
+    /**
      * @return String containing the analysis of the checked resource
      */
     public String getAnalysis();

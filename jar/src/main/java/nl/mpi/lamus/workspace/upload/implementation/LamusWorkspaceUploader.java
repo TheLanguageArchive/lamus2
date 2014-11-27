@@ -116,11 +116,11 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 //        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
 
         StringBuilder message = new StringBuilder();
-        boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(topNodeArchiveURL, message);
+        boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);
         
         if(!isArchivable) {
             logger.error("File [" + filename + "] not archivable: " + message);
-            throw new TypeCheckerException(message.toString(), null);
+            throw new TypeCheckerException(typecheckedResults, message.toString(), null);
         }
 
         FileUtils.copyInputStreamToFile(inputStreamToCheck, uploadedFile);
@@ -193,7 +193,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
             
             StringBuilder message = new StringBuilder();
-            boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(topNodeArchiveURL, message);
+            boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);
             
             if(!isArchivable) {
                 String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;

@@ -191,7 +191,7 @@ public class LamusWorkspaceUploaderTest {
 //            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
 //                will(returnValue(Boolean.TRUE));
               
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
                 
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
@@ -248,7 +248,7 @@ public class LamusWorkspaceUploaderTest {
 //            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
 //                will(returnValue(Boolean.FALSE));
                 
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
         }});
         
@@ -298,7 +298,7 @@ public class LamusWorkspaceUploaderTest {
 //            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
 //                will(returnValue(Boolean.TRUE));
                 
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
         }});
         
@@ -470,7 +470,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
                 
@@ -546,7 +546,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
@@ -638,7 +638,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
                 
@@ -658,7 +658,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
                 
@@ -749,7 +749,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
                 
@@ -769,7 +769,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
                 
@@ -964,7 +964,7 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             

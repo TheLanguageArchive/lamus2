@@ -32,7 +32,6 @@ import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.util.OurURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,75 +78,40 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
     
     /**
-     * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, java.io.File)
+     * @see NodeDataRetriever#shouldResourceBeTypechecked(nl.mpi.metadata.api.model.Reference, java.io.File, nl.mpi.archiving.corpusstructure.core.CorpusNode)
      */
     @Override
-    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile) {
+    public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile, CorpusNode resourceNode) {
         
         // if not onsite, don't use typechecker
         boolean performTypeCheck = true;
-//        if(!archiveFileHelper.isUrlLocal(resourceOurURL)) {
-//            
-//            //TODO is this call supposed to be like this?
-//            fileTypeHandler.setValues(resourceReference.getMimetype());
-//            
-//            //TODO change URID for the link in the file that is copied
-////            childLink.setURID("NONE"); // flag resource as not on site
-//            
-//            performTypeCheck = false;
-//        } else {
-//                File resFile = new File(resourceOurURL.getPath());
-                //TODO check if file is larger than the checker limit
-                    // if so, do not typecheck
-                if (archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resourceFile)) { // length==0 if !exists, no error
-                    
-                    // skip checks for big files if from archive
-                    if(archiveFileHelper.isFileInOrphansDirectory(resourceFile)) {
-                        // really skip checks: no orphan either
-                        performTypeCheck = false;
-                        logger.debug("ResourceNodeImporter.importNode: Type specified in link " + resourceReference.getMimetype() +
-                            " trusted without checks for big (" + resourceFile.length() + " bytes) file from archive: " + resourceFile);
-                        
-                        //TODO is this call supposed to be like this?
-                        fileTypeHandler.setValues(resourceReference.getMimetype());
-                    } else {
-                        // will take a while, so log that we did not get stuck
-                        if (resourceFile.length() > (1024*1024)) { // can differ from recheckLimit
-                            logger.debug("ResourceNodeImporter.importNode: Check for 'big' orphan (" +
-                                    resourceFile.length() + " bytes) may take some time: " + resourceFile);
-                        // small orphans are always checked, but without logging
-                        }
-                    }
-                } // else not too big, just check again
+        
+        if(resourceNode != null && !resourceNode.isOnSite()) {
+            
+            performTypeCheck = false;
+            logger.info("LamusNodeDataRetriever: node points to non-local object according to DB ("
+                    + resourceNode.getNodeURI() + "); will not be checked");
+            
+        } else if(resourceNode != null && archiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(resourceFile)) { //only avoid re-checking already archived files if they're too large
+
+            performTypeCheck = false;
+            logger.info("LamusNodeDataRetriever: node (" + resourceNode.getNodeURI() + ") already archived too large ("
+                 + resourceFile.length() + " bytes); will not re-check");
                 
-//            }
-//        }
+        } else if(resourceNode == null) {
+
+            performTypeCheck = true;
+            
+            // will take a while, so log that we did not get stuck
+            if (resourceFile.length() > (1024*1024)) { // can differ from recheckLimit
+                logger.info("LamusNodeDataRetriever: Check for large file (" +
+                        resourceFile.length() + " bytes) may take some time: " + resourceFile);
+            }
+        }
+        
+        //if already archived and not too large, check anyway - default value
         
         return performTypeCheck;
-    }
-    
-    //TODO review this method
-    
-    /**
-     * @see NodeDataRetriever#triggerResourceFileCheck(nl.mpi.util.OurURL)
-     */
-    @Override
-    public TypecheckedResults triggerResourceFileCheck(OurURL resourceURL) throws TypeCheckerException {
-        
-        String resourceFileName = archiveFileHelper.getFileBasename(resourceURL.toString());
-        
-        //TODO get file type using typechecker
-
-        fileTypeHandler.checkType(resourceURL, resourceFileName,/* childType,*/ null);
-        
-        //TODO what to pass as node type?
-        //TODO use mimetype from CMDI?
-            // - this would cause the typechecker not to be executed, since the mimetype is known
-                // but anyway these files are already in the archive, so is it really needed to perform a type check?
-            
-        //TODO etc...        
-        
-        return fileTypeHandler.getTypecheckedResults();
     }
     
     /**
@@ -156,11 +120,16 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     @Override
     public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException {
         
-        fileTypeHandler.checkType(resourceInputStream, resourceFilename, null);
-        
-        return fileTypeHandler.getTypecheckedResults();
+        return fileTypeHandler.checkType(resourceInputStream, resourceFilename);
     }
-    
+
+    /**
+     * @see NodeDataRetriever#triggerNoFileCheck(nl.mpi.metadata.api.model.Reference)
+     */
+    @Override
+    public TypecheckedResults triggerNoFileCheck(Reference resourceReference) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     //TODO TEST this method
     
@@ -179,17 +148,17 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
             logger.warn("ResourceNodeImporter.importNode: Unrecognized file contents, assuming format " + resourceReferenceMimetype +
                     " as specified in metadata file for file: " + resourceFile.getAbsolutePath());
             logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
-                    fileTypeHandler.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
+                    typecheckedResults.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
         } else if(!resourceCheckedMimetype.equals(resourceReferenceMimetype)) {
             //TODO do stuff... WARN
             if (resourceReferenceMimetype != null) {
                 logger.warn("ResourceNodeImporter.importNode: Metadata file claimed format " + resourceReferenceMimetype + " but contents are " +
-                    fileTypeHandler.getMimetype() + " for file: " + resourceFile.getAbsolutePath());
+                    typecheckedResults.getCheckedMimetype() + " for file: " + resourceFile.getAbsolutePath());
 
                 //TODO if "un", WARN
                 if (resourceReferenceMimetype.startsWith("Un")) {
                     logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
-                        fileTypeHandler.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
+                        typecheckedResults.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
                 }
             }
         }
@@ -199,10 +168,10 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
      * @see NodeDataRetriever#isCheckedResourceArchivable(java.net.URL, java.lang.StringBuilder)
      */
     @Override
-    public boolean isCheckedResourceArchivable(URL urlToCheckInConfiguration, StringBuilder message) {
+    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, URL urlToCheckInConfiguration, StringBuilder message) {
         
         TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(urlToCheckInConfiguration);
-        return this.fileTypeHandler.isCheckedResourceArchivable(acceptableJudgement, message);
+        return this.fileTypeHandler.isCheckedResourceArchivable(typecheckedResults, acceptableJudgement, message);
     }
     
     /**

@@ -40,7 +40,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
-import nl.mpi.util.OurURL;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -135,7 +134,6 @@ public class LamusNodeDataRetrieverTest {
         final URL expectedURL = new URL("file:/somewhere/in/the/archive/node.cmdi");
         
         context.checking(new Expectations() {{
-            
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(expectedURL));
         }});
@@ -152,7 +150,6 @@ public class LamusNodeDataRetrieverTest {
         final String expectedMessage = "Archive node not found: " + nodeArchiveURI;
         
         context.checking(new Expectations() {{
-            
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(null));
         }});
         
@@ -166,95 +163,73 @@ public class LamusNodeDataRetrieverTest {
     }
     
     @Test
-    public void resourceToBeTypechecked() throws MalformedURLException {
+    public void resource_NotArchived_Large() {
         
-//        final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
-//        final File resourceFile = new File(resourceURL.getPath());
+        final long fileLength = 1024 * 1024 + 1;
         
         context.checking(new Expectations() {{
-            
-//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(false));
+            exactly(2).of(mockFile).length(); will(returnValue(fileLength));
         }});
         
-        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile, null);
         assertTrue("Result should be true", result);
     }
     
-//    @Test
-//    public void resourceNotOnSite() throws MalformedURLException {
-//        
-//        final OurURL resourceURL = new OurURL("http://some.uri/filename.txt");
-//        final String resourceMimetype = "text/plain";
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(false));
-//            oneOf(mockReferenceWithHandle).getMimetype(); will(returnValue(resourceMimetype));
-//            oneOf(mockFileTypeHandler).setValues(resourceMimetype);
-//        }});
-//        
-//        boolean result = testNodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, resourceURL);
-//        assertFalse("Result should be false", result);
-//    }
+    @Test
+    public void resource_NotArchived_Small() {
+        
+        final long fileLength = 1024 * 1024 - 1;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockFile).length(); will(returnValue(fileLength));
+        }});
+        
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile, null);
+        assertTrue("Result should be true", result);
+    }
     
     @Test
-    public void resourceOverSizeLimitInOrphansDirectory() throws MalformedURLException {
+    public void resource_Archived_UnderSizeLimit() throws MalformedURLException {
         
-        final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
-        final File resourceFile = new File(resourceURL.getPath());
-        final String resourceMimetype = "text/plain";
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(Boolean.FALSE));
+        }});
+        
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile, mockCorpusNode);
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void resource_Archived_OnSite_OverSizeLimit() throws MalformedURLException {
+        
+        final URI resourceURI = URI.create(UUID.randomUUID().toString());
         final long fileLength = Long.MAX_VALUE;
         
         context.checking(new Expectations() {{
-            
-//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(mockFile); will(returnValue(true));
-            exactly(2).of(mockReferenceWithHandle).getMimetype(); will(returnValue(resourceMimetype));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(Boolean.TRUE));
+            oneOf(mockCorpusNode).getNodeURI(); will(returnValue(resourceURI));
             oneOf(mockFile).length(); will(returnValue(fileLength));
-            oneOf(mockFileTypeHandler).setValues(resourceMimetype);
         }});
         
-        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile, mockCorpusNode);
         assertFalse("Result should be false", result);
     }
     
     @Test
-    public void resourceOverSizeLimitNotInOrphansDirectory() throws MalformedURLException {
+    public void resource_Archived_NotOnSite() {
         
-        final OurURL resourceURL = new OurURL("file:/some.uri/filename.txt");
-        final File resourceFile = new File(resourceURL.getPath());
-        final String resourceMimetype = "text/plain";
-        final long fileLength = Long.MAX_VALUE;
+        final URI resourceURI = URI.create(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            
-//            oneOf(mockArchiveFileHelper).isUrlLocal(resourceURL); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileSizeAboveTypeReCheckSizeLimit(mockFile); will(returnValue(true));
-            oneOf(mockArchiveFileHelper).isFileInOrphansDirectory(mockFile); will(returnValue(false));
-            exactly(2).of(mockFile).length(); will(returnValue(fileLength));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.FALSE));
+            //logger
+            oneOf(mockCorpusNode).getNodeURI(); will(returnValue(resourceURI));
         }});
         
-        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile);
-        assertTrue("Result should be true", result);
-    }
-    
-    @Test
-    public void testTriggerResourceFileCheck() throws MalformedURLException, TypeCheckerException {
-        
-        final OurURL resourceOurURL = new OurURL("file:/some.file.txt");
-        final String fileBaseName = "some.file.txt";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockArchiveFileHelper).getFileBasename(resourceOurURL.toString()); will(returnValue(fileBaseName));
-            oneOf(mockFileTypeHandler).checkType(resourceOurURL, fileBaseName, null);
-            oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
-        }});
-        
-        TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(resourceOurURL);
-        assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
+        boolean result = nodeDataRetriever.shouldResourceBeTypechecked(mockReferenceWithHandle, mockFile, mockCorpusNode);
+        assertFalse("Result should be false", result);
     }
     
     @Test
@@ -264,8 +239,7 @@ public class LamusNodeDataRetrieverTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename, null);
-            oneOf(mockFileTypeHandler).getTypecheckedResults(); will(returnValue(mockTypecheckedResults));
+            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename); will(returnValue(mockTypecheckedResults));
         }});
         
         TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
@@ -276,11 +250,11 @@ public class LamusNodeDataRetrieverTest {
     public void testTriggerFileStreamCheckThrowsException() throws TypeCheckerException {
         
         final String filename = "file.txt";
-        final TypeCheckerException expectedException = new TypeCheckerException("some error message", new IOException("some cause"));
+        final TypeCheckerException expectedException = new TypeCheckerException(mockTypecheckedResults, "some error message", new IOException("some cause"));
         
         context.checking(new Expectations() {{
             
-            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename, null);
+            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename);
                 will(throwException(expectedException));
         }});
         
@@ -301,14 +275,13 @@ public class LamusNodeDataRetrieverTest {
         final URL topWsArchiveURL = new URL("http://someServer/location");
         
         context.checking(new Expectations() {{
-            
             oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
                 will(returnValue(acceptableJudgement));
-            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(acceptableJudgement, message);
+            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(mockTypecheckedResults, acceptableJudgement, message);
                 will(returnValue(Boolean.TRUE));
         }});
         
-        boolean result = nodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveURL, message);
         
         assertTrue("Result should be true", result);
     }
@@ -321,14 +294,13 @@ public class LamusNodeDataRetrieverTest {
         final URL topWsArchiveURL = new URL("http://someServer/location");
         
         context.checking(new Expectations() {{
-            
             oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
                 will(returnValue(acceptableJudgement));
-            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(acceptableJudgement, message);
+            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(mockTypecheckedResults, acceptableJudgement, message);
                 will(returnValue(Boolean.FALSE));
         }});
         
-        boolean result = nodeDataRetriever.isCheckedResourceArchivable(topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveURL, message);
         
         assertFalse("Result should be false", result);
     }

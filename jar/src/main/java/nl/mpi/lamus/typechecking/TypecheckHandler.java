@@ -28,30 +28,30 @@ public interface TypecheckHandler {
      * Passes a stream to the typechecker and fills in the result.
      * @param iStream input stream of the file to check
      * @param filename name of the file to check
+     * @return typecheck result
      * @throws IOException if some issue happens with the typechecker
      */
-    public void typecheck(InputStream iStream, String filename) throws IOException;
+    public String typecheck(InputStream iStream, String filename) throws IOException;
     
     /**
      * Checks if, given the typechecker result, the file is archivable.
+     * @param typecheckResult result from which to retrieve the mimetype
      * @return true if the file is considered archivable
      */
-    public boolean isFileArchivable();
-    
-    /**
-     * @return the most recent type check result
-     */
-    public String getTypecheckResult();
+    public boolean isFileArchivable(String typecheckResult);
     
     /**
      * Gets the message returned by the typechecker for the most recent result
      * and converts it into the corresponding TypecheckerJudgement value.
+     * @param typecheckResult result from which to retrieve the mimetype
      * @return the judgement of the typechecker for the most recent result
      */
-    public TypecheckerJudgement getTypecheckJudgement();
+    public TypecheckerJudgement getTypecheckJudgement(String typecheckResult);
     
     /**
+     * Retrieves the mimetype corresponding to the given typecheck result.
+     * @param typecheckResult result from which to retrieve the mimetype
      * @return the file format corresponding to the most recent result
      */
-    public String getTypecheckMimetype();
+    public String getTypecheckMimetype(String typecheckResult);
 }
