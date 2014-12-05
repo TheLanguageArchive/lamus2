@@ -18,8 +18,8 @@
             <Name>testingProfile_allowed</Name>
          </CollectionInfo>
          <License>
-            <DistributionType/>
-            <LicenseName/>
+            <DistributionType>public</DistributionType>
+            <LicenseName>licenseless</LicenseName>
             <LicenseURL/>
          </License>
       </collection>

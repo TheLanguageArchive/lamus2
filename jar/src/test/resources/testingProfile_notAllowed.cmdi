@@ -16,26 +16,27 @@
    <Components>
       <ComicBook>
          <Title>testingProfile_notAllowed</Title>
-         <PublicationYear/>
-         <NumberOfPages/>
-         <NumberOfChapters/>
+         <PublicationYear>2000</PublicationYear>
+         <NumberOfPages>2</NumberOfPages>
+         <NumberOfChapters>75</NumberOfChapters>
          <dc-publisher>
-            <publisher/>
+            <publisher>Sher Li Pub</publisher>
          </dc-publisher>
          <Language>
-            <LanguageName/>
+            <LanguageName xml:lang="eng">English</LanguageName>
             <ISO639>
-               <iso-639-3-code/>
+               <iso-639-3-code>eng</iso-639-3-code>
             </ISO639>
          </Language>
          <Format>
-            <ColorPrinting/>
+            <ColorPrinting>true</ColorPrinting>
          </Format>
+         
          <Author>
-            <Name/>
-            <BirthYear/>
+            <Name>Ruud Gullit</Name>
+            <BirthYear>1532</BirthYear>
             <Country>
-               <Code/>
+               <Code>NL</Code>
             </Country>
          </Author>
       </ComicBook>
