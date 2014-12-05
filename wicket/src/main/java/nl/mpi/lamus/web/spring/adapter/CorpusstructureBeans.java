@@ -39,6 +39,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.corpusstructure.ArchiveObjectsDB;
 import nl.mpi.corpusstructure.CorpusStructureDB;
 import nl.mpi.versioning.manager.VersioningAPI;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +52,10 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("cmdi-adapter-csdb")
 public class CorpusstructureBeans {
+    
+    @Autowired
+    @Qualifier("translationServiceLocation")
+    private String translationServiceLocation;
     
     @Bean
     public CorpusStructureDBFactory csdbImplFactory() {
@@ -101,7 +106,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CorpusStructureAPIProviderFactory corpusStructureProviderFactory() {
-        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), versioningProxy(), handleResolver(), nodeUriUtils(), "https://lux16.mpi.nl/ds/TranslationService");
+        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), versioningProxy(), handleResolver(), nodeUriUtils(), translationServiceLocation);
     }
     
     @Bean
