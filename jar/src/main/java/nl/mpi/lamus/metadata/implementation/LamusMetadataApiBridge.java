@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.metadata.implementation;
 
+import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 /**
  * @see MetadataApiBridge
@@ -66,10 +68,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         MetadataDocument document;
         try {
             document = metadataAPI.getMetadataDocument(fileURL);
-        } catch (IOException ex) {
-            logger.warn("Error retrieving metadata document for URL " + fileURL, ex);
-            return null;
-        } catch (MetadataException ex) {
+        } catch (IOException | MetadataException ex) {
             logger.warn("Error retrieving metadata document for URL " + fileURL, ex);
             return null;
         }
@@ -125,5 +124,30 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(targetURL));
         metadataAPI.writeMetadataDocument(document, documentStreamResult);
     }
-    
+
+    /**
+     * @see MetadataApiBridge#isMetadataFileValid(java.net.URL)
+     */
+    @Override
+    public boolean isMetadataFileValid(URL fileURL) {
+        
+        logger.debug("Validating metadata file [" + fileURL + "]");
+        
+        MetadataDocument document;
+        try {
+            document = metadataAPI.getMetadataDocument(fileURL);
+        } catch (IOException | MetadataException ex) {
+            logger.info("Error getting document from file [" + fileURL + "]", ex);
+            return false;
+        }
+        
+        try {
+            metadataAPI.validateMetadataDocument(document, new DefaultErrorHandler());
+        } catch(SAXException ex) {
+            logger.info("Validation error in file [" + fileURL + "]", ex);
+            return false;
+        }
+        
+        return true;
+    }
 }

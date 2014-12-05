@@ -59,13 +59,6 @@ public interface NodeDataRetriever {
     public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
     
     /**
-     * Retrieves results for files in which typechecking won't be triggered.
-     * @param resourceReference
-     * @return 
-     */
-    public TypecheckedResults triggerNoFileCheck(Reference resourceReference);
-    
-    /**
      * Verifies the results of the typechecker.
      * @param resourceFile File object referring to the resource
      * @param resourceReference Reference to the resource, from the parent metadata file

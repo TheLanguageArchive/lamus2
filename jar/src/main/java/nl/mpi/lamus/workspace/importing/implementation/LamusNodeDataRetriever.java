@@ -122,14 +122,6 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         
         return fileTypeHandler.checkType(resourceInputStream, resourceFilename);
     }
-
-    /**
-     * @see NodeDataRetriever#triggerNoFileCheck(nl.mpi.metadata.api.model.Reference)
-     */
-    @Override
-    public TypecheckedResults triggerNoFileCheck(Reference resourceReference) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
     //TODO TEST this method
     

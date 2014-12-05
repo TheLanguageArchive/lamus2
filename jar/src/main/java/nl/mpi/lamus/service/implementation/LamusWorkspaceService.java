@@ -24,6 +24,7 @@ import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -318,7 +319,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, WorkspaceException {
+            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException {
         
         logger.debug("Triggered file upload into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
             

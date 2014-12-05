@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Map;
+import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
@@ -48,7 +48,7 @@ public interface WorkspaceUploader {
      * @param filename name of the file to upload
      */
     public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, WorkspaceException;
+            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
 
     
     /**

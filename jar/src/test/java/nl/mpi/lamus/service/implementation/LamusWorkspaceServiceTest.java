@@ -31,6 +31,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -834,7 +835,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException, WorkspaceException {
+    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -849,7 +850,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException, WorkspaceException {
+    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -871,7 +872,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException, WorkspaceException {
+    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
@@ -893,7 +894,29 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspaceThrowsWorkspaceException() throws IOException, TypeCheckerException, WorkspaceException {
+    public void uploadFileIntoWorkspaceThrowsMetadataCheckerException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.bla";
+        final InvalidMetadataException metadataCheckerException = new InvalidMetadataException("some error message", null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(throwException(metadataCheckerException));
+        }});
+        
+        try {
+            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+            fail("An exception should have been thrown");
+        } catch(InvalidMetadataException ex) {
+            assertEquals("Exception thrown different from expected", metadataCheckerException, ex);
+        }
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspaceThrowsWorkspaceException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
         
         final int workspaceID = 1;
         final String userID = "testUser";

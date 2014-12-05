@@ -364,4 +364,13 @@ public class LamusProperties implements ServletContextAware {
     public File permissionConfigFile() {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.permissionConfigFile_CMDI"));
     }
+    
+    
+    // Metadata checker
+    
+    @Bean
+    @Qualifier("schematronFile")
+    public File schematronFile() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronValidationFile"));
+    }
 }

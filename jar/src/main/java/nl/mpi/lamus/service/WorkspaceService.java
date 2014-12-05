@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -201,7 +202,7 @@ public interface WorkspaceService extends Serializable {
      * @param filename name of the file to upload
      */
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, WorkspaceException;
+            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
     
     /**
      * After the files are uploaded, process the files by performing

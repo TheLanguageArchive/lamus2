@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -35,6 +36,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.typechecking.MetadataChecker;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.apache.commons.io.FileUtils;
@@ -52,18 +54,19 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploader.class);
 
-    private NodeDataRetriever nodeDataRetriever;
-    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
-    private WorkspaceNodeFactory workspaceNodeFactory;
-    private WorkspaceDao workspaceDao;
-    private WorkspaceUploadHelper workspaceUploadHelper;
-    private MetadataApiBridge metadataApiBridge;
+    private final NodeDataRetriever nodeDataRetriever;
+    private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
+    private final WorkspaceNodeFactory workspaceNodeFactory;
+    private final WorkspaceDao workspaceDao;
+    private final WorkspaceUploadHelper workspaceUploadHelper;
+    private final MetadataApiBridge metadataApiBridge;
+    private final MetadataChecker metadataChecker;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
-        MetadataApiBridge mdApiBridge) {
+        MetadataApiBridge mdApiBridge, MetadataChecker mdChecker) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -71,6 +74,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceDao = wsDao;
         this.workspaceUploadHelper = wsUploadHelper;
         this.metadataApiBridge = mdApiBridge;
+        this.metadataChecker = mdChecker;
     }
 
     /**
@@ -83,7 +87,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     
     @Override
     public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStreamToCheck, String filename)
-            throws IOException, TypeCheckerException, WorkspaceException {
+            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
@@ -121,6 +125,30 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         if(!isArchivable) {
             logger.error("File [" + filename + "] not archivable: " + message);
             throw new TypeCheckerException(typecheckedResults, message.toString(), null);
+        }
+        
+        if(uploadedFileURL.toString().endsWith("cmdi")) {
+           
+            if(!metadataApiBridge.isMetadataFileValid(uploadedFileURL)) {
+                String errorMessage = "Metadata file [" + filename + "] is invalid";
+                logger.error(errorMessage);
+                throw new InvalidMetadataException(errorMessage, null);
+            }
+            
+            boolean profileAllowed;
+            try {
+                profileAllowed = metadataChecker.isProfileAllowed(uploadedFile);
+            } catch (Exception ex) {
+                String errorMessage = "Error checking profile of metadata file [" + filename + "].";
+                logger.error(errorMessage);
+                throw new InvalidMetadataException(errorMessage, ex);
+            }
+
+            if(!profileAllowed) {
+                String errorMessage = "Profile of metadata file [" + filename + "] not allowed.";
+                logger.error(errorMessage);
+                throw new InvalidMetadataException(errorMessage, null);
+            }
         }
 
         FileUtils.copyInputStreamToFile(inputStreamToCheck, uploadedFile);
@@ -197,23 +225,42 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             if(!isArchivable) {
                 String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;
-                logger.error(errorMessage);
-                failedFiles.add(new FileUploadProblem(currentFile, errorMessage, null));
-                
-                //remove unarchivable file after adding it to the collection of failed uploads
-                FileUtils.forceDelete(currentFile);
-                
+                failUploadForFile(currentFile, errorMessage, failedFiles);
                 continue;
             } else {
                 String debugMessage = "File [" + currentFile.getName() + "] archivable: " + message;
                 logger.debug(debugMessage);
             }
             
+            if(uploadedFileURL.toString().endsWith("cmdi")) {
+
+                if(!metadataApiBridge.isMetadataFileValid(uploadedFileURL)) {
+                    String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
+                    failUploadForFile(currentFile, errorMessage, failedFiles);
+                    continue;
+                }
+                
+                try {
+                    if(!metadataChecker.isProfileAllowed(currentFile)) {
+                        String errorMessage = "Profile of metadata file [" + currentFile.getName() + "] not allowed.";
+                        failUploadForFile(currentFile, errorMessage, failedFiles);
+                        continue;
+                    } else {
+                        String debugMessage = "Profile of metadata file [" + currentFile.getName() + "] allowed.";
+                        logger.debug(debugMessage);
+                    }
+                } catch (Exception ex) {
+                    throw new UnsupportedOperationException("not handled yet", ex);
+                }
+                
+                
+            }
+            
             String nodeMimetype = typecheckedResults.getCheckedMimetype();
             
             URI archiveURI = null;
             if(uploadedFileURL.toString().endsWith("cmdi")) {
-                archiveURI = metadataApiBridge.getSelfHandleFromFile(uploadedFileURL);
+                archiveURI = metadataApiBridge.getSelfHandleFromFile(uploadedFileURL);   
             }
             
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
@@ -233,4 +280,12 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         return allUploadProblems;
     }
 
+    
+    private void failUploadForFile(File file, String errorMessage, Collection<UploadProblem> failedFiles) throws IOException {
+        logger.error(errorMessage);
+        failedFiles.add(new FileUploadProblem(file, errorMessage, null));
+        
+        //remove unarchivable file after adding it to the collection of failed uploads
+        FileUtils.forceDelete(file);
+    }
 }

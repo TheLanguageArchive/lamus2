@@ -62,4 +62,11 @@ public interface MetadataApiBridge {
      */
     public void saveMetadataDocument(MetadataDocument document, URL targetURL)
             throws IOException, TransformerException, MetadataException;
+    
+    /**
+     * Validates the given metadata file.
+     * @param fileURL URL of the file to check
+     * @return true if the file is valid
+     */
+    public boolean isMetadataFileValid(URL fileURL);
 }
