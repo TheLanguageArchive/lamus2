@@ -356,6 +356,13 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.auth.recalc.param");
     }
     
+    // Translation Service
+    
+    @Bean
+    @Qualifier("translationServiceLocation")
+    public String translationServiceLocation() {
+        return servletContext.getInitParameter("nl.mpi.lamus.translation_service.location");
+    }
     
     // Filesystem permissions adjustment
     
