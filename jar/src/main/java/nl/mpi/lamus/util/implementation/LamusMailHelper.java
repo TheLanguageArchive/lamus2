@@ -38,18 +38,23 @@ public class LamusMailHelper implements MailHelper {
 
     private String mailServer;
     private String mailFromAddress;
+    private String mailBccAddress;
     
     @Autowired
-    public LamusMailHelper(@Qualifier("mailServer") String mailServer, @Qualifier("mailFromAddress") String mailFromAddress) {
+    public LamusMailHelper(
+            @Qualifier("mailServer") String mailServer,
+            @Qualifier("mailFromAddress") String mailFromAddress,
+            @Qualifier("mailBccAddress") String mailBccAddress) {
         this.mailServer = mailServer;
         this.mailFromAddress = mailFromAddress;
+        this.mailBccAddress = mailBccAddress;
     }
     
     /**
-     * @see MailHelper#getMailMessage(java.lang.String, java.lang.String, java.lang.String)
+     * @see MailHelper#getMailMessage(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
-    public Message getMailMessage(String toAddress, String subject, String text) {
+    public Message getMailMessage(String toAddress, String subject, String text, boolean addBcc) {
         Properties properties = new Properties();
         properties.put("mail.smtp.host", mailServer);
         properties.put("mail.from", mailFromAddress);
@@ -60,6 +65,7 @@ public class LamusMailHelper implements MailHelper {
         try {
             message.setFrom(new InternetAddress(mailFromAddress));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddress));
+            message.addRecipient(Message.RecipientType.BCC, new InternetAddress(mailBccAddress));
             message.setSubject(subject);
             message.setSentDate(Calendar.getInstance().getTime());
             message.setText(text);

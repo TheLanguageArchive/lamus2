@@ -31,9 +31,10 @@ public interface MailHelper {
      * @param toAddress Email address to which the message should be sent
      * @param subject Subject of the email message
      * @param text Content of the email message
+     * @param addBcc true if bcc to the corpus manager should be added - in case some problem happened
      * @return Created email message
      */
-    public Message getMailMessage(String toAddress, String subject, String text);
+    public Message getMailMessage(String toAddress, String subject, String text, boolean addBcc);
     
     /**
      * Sends the given email message.

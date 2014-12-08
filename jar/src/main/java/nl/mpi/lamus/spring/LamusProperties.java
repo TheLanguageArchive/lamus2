@@ -309,6 +309,12 @@ public class LamusProperties implements ServletContextAware {
     }
     
     @Bean
+    @Qualifier("mailBccAddress")
+    public String mailBccAddress() {
+        return servletContext.getInitParameter("nl.mpi.lamus.mailAddress");
+    }
+    
+    @Bean
     @Qualifier("managerUsers")
     public Collection<String> managerUsers() {
         

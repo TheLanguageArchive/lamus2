@@ -50,24 +50,27 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
         
         String subject;
         String text;
+        boolean addBcc = false;
         
         if(!crawlerWasSuccessful) {
             subject = "Workspace - Failure";
             text = "Workspace " + workspace.getWorkspaceID() + " was submitted.\n"
                     + "Data was moved into the archive but there were problems updating the database.\n"
                     + "Please contact the corpus management team.";
+            addBcc = true;
         } else if(!versioningWasSuccessful) {
             subject = "Workspace - Failure";
             text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
                     + "Data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
                     + "Please contact the corpus management team.";
+            addBcc = true;
         } else {
             subject = "Workspace - Success";
             text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
                     + "Data was moved into the archive and the database was updated.";
         }
         
-        Message mailMessage = mailHelper.getMailMessage(toAddress, subject, text);
+        Message mailMessage = mailHelper.getMailMessage(toAddress, subject, text, addBcc);
         
         mailHelper.sendMailMessage(mailMessage);
     }

@@ -83,6 +83,7 @@ public class LamusWorkspaceMailerTest {
         final String subject = "Workspace - Success";
         final String text = "Workspace " + workspaceID + " was successfully submitted.\n"
                 + "Data was moved into the archive and the database was updated.";
+        final boolean addBcc = Boolean.FALSE;
 
         context.checking(new Expectations() {{
             
@@ -90,7 +91,7 @@ public class LamusWorkspaceMailerTest {
             oneOf(mockAmsBridge).getMailAddress(userID); will(returnValue(emailAddress));
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text); will(returnValue(mockMessage));
+            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text, addBcc); will(returnValue(mockMessage));
             oneOf(mockMailHelper).sendMailMessage(mockMessage);
         }});
         
@@ -108,6 +109,7 @@ public class LamusWorkspaceMailerTest {
         final String text = "Workspace " + workspaceID + " was submitted.\n"
                 + "Data was moved into the archive but there were problems updating the database.\n"
                 + "Please contact the corpus management team.";
+        final boolean addBcc = Boolean.TRUE;
 
         context.checking(new Expectations() {{
             
@@ -115,7 +117,7 @@ public class LamusWorkspaceMailerTest {
             oneOf(mockAmsBridge).getMailAddress(userID); will(returnValue(emailAddress));
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text); will(returnValue(mockMessage));
+            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text, addBcc); will(returnValue(mockMessage));
             oneOf(mockMailHelper).sendMailMessage(mockMessage);
         }});
         
@@ -133,6 +135,7 @@ public class LamusWorkspaceMailerTest {
         final String text = "Workspace " + workspaceID + " was successfully submitted.\n"
                     + "Data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
                     + "Please contact the corpus management team.";
+        final boolean addBcc = Boolean.TRUE;
 
         context.checking(new Expectations() {{
             
@@ -140,7 +143,7 @@ public class LamusWorkspaceMailerTest {
             oneOf(mockAmsBridge).getMailAddress(userID); will(returnValue(emailAddress));
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text); will(returnValue(mockMessage));
+            oneOf(mockMailHelper).getMailMessage(emailAddress, subject, text, addBcc); will(returnValue(mockMessage));
             oneOf(mockMailHelper).sendMailMessage(mockMessage);
         }});
         
