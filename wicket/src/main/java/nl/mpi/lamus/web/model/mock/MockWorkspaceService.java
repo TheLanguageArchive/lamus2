@@ -17,11 +17,13 @@
 package nl.mpi.lamus.web.model.mock;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -226,6 +228,11 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     @Override
     public void replaceTree(String userID, WorkspaceNode oldTreeTopNode, WorkspaceNode newTreeTopNode, WorkspaceNode parentNode)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

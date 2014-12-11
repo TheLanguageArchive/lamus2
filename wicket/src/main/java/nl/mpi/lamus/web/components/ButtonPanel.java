@@ -26,7 +26,8 @@ import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -65,17 +66,13 @@ public final class ButtonPanel extends Panel {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
 
-            final Button submitWorkspaceButton = new Button("submitWorkspaceButton") {
+            final IndicatingAjaxButton submitWorkspaceButton = new IndicatingAjaxButton("submitWorkspaceButton") {
 
                 @Override
-                public void onSubmit() {
+                protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                     try {
                         workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
-                    } catch (WorkspaceNotFoundException ex) {
-                        Session.get().error(ex.getMessage());
-                    } catch (WorkspaceAccessException ex) {
-                        Session.get().error(ex.getMessage());
-                    } catch (WorkspaceExportException ex) {
+                    } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
                         Session.get().error(ex.getMessage());
                     }
                     
@@ -86,6 +83,7 @@ public final class ButtonPanel extends Panel {
                     
                     
                     setResponsePage(pagesProvider.getIndexPage());
+
                 }
             };
             submitWorkspaceButton.add(new AttributeModifier("onclick",
@@ -93,17 +91,13 @@ public final class ButtonPanel extends Panel {
                     + " they will be deleted. Are you sure you want to proceed?'))return false;"));
             add(submitWorkspaceButton);
             
-            final Button deleteWorkspaceButton = new Button("deleteWorkspaceButton") {
-                
+            final IndicatingAjaxButton deleteWorkspaceButton = new IndicatingAjaxButton("deleteWorkspaceButton") {
+
                 @Override
-                public void onSubmit() {
+                protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                     try {
                         workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
-                    } catch (WorkspaceNotFoundException ex) {
-                        Session.get().error(ex.getMessage());
-                    } catch (WorkspaceAccessException ex) {
-                        Session.get().error(ex.getMessage());
-                    } catch (IOException ex) {
+                    } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
                         Session.get().error(ex.getMessage());
                     }
                     setResponsePage(pagesProvider.getIndexPage());

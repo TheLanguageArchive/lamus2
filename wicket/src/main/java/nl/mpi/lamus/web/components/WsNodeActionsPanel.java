@@ -49,7 +49,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
 
     public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
 	super(id, model);
-	form = new Form<Collection<WorkspaceTreeNode>>("wsNodeActionsForm", model);
+	form = new Form<>("wsNodeActionsForm", model);
         
         //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
@@ -89,7 +89,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
                     
                 };
                 
-                nodeActionButton.add(AttributeModifier.append("class", new Model<String>(getIconNameForNodeAction(li.getModelObject()))));
+                nodeActionButton.add(AttributeModifier.append("class", new Model<>(getIconNameForNodeAction(li.getModelObject()))));
                 nodeActionButton.add(new Label("nodeActionLabel", getLocalizer().getString(nodeActionButton.getModelObject(), this)));
                 
                 li.add(nodeActionButton);

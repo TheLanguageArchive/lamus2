@@ -56,11 +56,11 @@ public class LinkNodesPanel extends FeedbackPanelAwarePanel {
         unlinkedNodesPanel =
                 new UnlinkedNodesPanel(
                     "unlinkedNodesPanel",
-                    new Model<Workspace>(currentWorkspace), providerFactory.createTreeModelProvider(workspaceService, currentWs.getWorkspaceID()),
+                    new Model<>(currentWorkspace), providerFactory.createTreeModelProvider(workspaceService, currentWs.getWorkspaceID()),
                     feedbackPanel);
         add(unlinkedNodesPanel);
 
-        externalNodesPanel = new ExternalNodesPanel("externalNodesPanel", new Model<Workspace>(currentWorkspace), feedbackPanel) {
+        externalNodesPanel = new ExternalNodesPanel("externalNodesPanel", new Model<>(currentWorkspace), feedbackPanel) {
 
             @Override
             public void addComponentToTarget(AjaxRequestTarget target) {

@@ -28,8 +28,9 @@ import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListChoice;
@@ -75,47 +76,43 @@ public class SelectWorkspacePage extends LamusPage {
     private Form createNodeIdForm(String id) {
 
         Workspace defaultSelectedWs = null;
-        List<Workspace> myWSList = new ArrayList<Workspace>(workspaceService.listUserWorkspaces(currentUserId));
+        List<Workspace> myWSList = new ArrayList<>(workspaceService.listUserWorkspaces(currentUserId));
         if(!myWSList.isEmpty()) {
             defaultSelectedWs = myWSList.iterator().next();
         }
         IModel<Workspace> workspaceModel = new WorkspaceModel(defaultSelectedWs);
         
-        ListChoice<Workspace> listWorkspaces = new ListChoice<Workspace>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
+        ListChoice<Workspace> listWorkspaces = new ListChoice<>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
         listWorkspaces.setMaxRows(5);
         listWorkspaces.setNullValid(false);
         listWorkspaces.setRequired(true);
-        final Form<Workspace> form = new Form<Workspace>(id, workspaceModel);
+        final Form<Workspace> openWsForm = new Form<>(id, workspaceModel);
 
-        Button submitButton = new Button("openWorkspace") {
+        IndicatingAjaxButton submitButton = new IndicatingAjaxButton("openWorkspace") {
 
             @Override
-            public void onSubmit() {
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 try {
                     if(form.getModelObject() != null) {
-                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, form.getModelObject().getWorkspaceID());
+                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, openWsForm.getModelObject().getWorkspaceID());
                         setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
                     } else {
                         //TODO MESSAGE IN FEEDBACK PANEL?
                     }
-                } catch (WorkspaceNotFoundException ex) {
-                    Session.get().error(ex.getMessage());
-                } catch (WorkspaceAccessException ex) {
-                    Session.get().error(ex.getMessage());
-                } catch (IOException ex) {
+                } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
                     Session.get().error(ex.getMessage());
                 }
             }
         };
-        form.add(submitButton);
-        form.add(listWorkspaces);
+        openWsForm.add(submitButton);
+        openWsForm.add(listWorkspaces);
 
         // Put details/submit form in container for refresh through AJAX 
         final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
-        formContainer.add(form);
+        formContainer.add(openWsForm);
         // Add container to page
         add(formContainer);
-        return form;
+        return openWsForm;
 
     }
 }

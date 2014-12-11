@@ -28,12 +28,12 @@ import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
+import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.extensions.markup.html.tabs.TabbedPanel;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
@@ -50,6 +50,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
+    @Mock private UnlinkedNodesModelProviderFactory mockUnlinkedNodesModelProviderFactory;
     
     @Mock private WsNodeActionsProvider mockTreeNodeActionsProviderBean;
     
@@ -92,6 +93,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesModelProviderFactory);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         

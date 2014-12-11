@@ -32,6 +32,7 @@ import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -59,7 +60,7 @@ public class CreateWorkspacePage extends LamusPage {
     
     // Page components
     private final Form nodeIdForm;
-    private Button createWorkspaceButton;
+    private IndicatingAjaxButton createWorkspaceButton;
     private Button addTopNodeButton;
     private Label warningMessage;
     private Model<String> warningMessageModel;
@@ -120,7 +121,7 @@ public class CreateWorkspacePage extends LamusPage {
                             addTopNodeButton.setEnabled(false);
                         }
                     }
-                    nodeIdForm.setModel(new CompoundPropertyModel<CorpusNode>(node));
+                    nodeIdForm.setModel(new CompoundPropertyModel<>(node));
                 }
                 if (target != null) {
                     // Ajax, refresh nodeIdForm
@@ -143,37 +144,34 @@ public class CreateWorkspacePage extends LamusPage {
      * @return created form
      */
     private Form createNodeIdForm(final String id) {
-	final Form<CorpusNode> form = new Form<CorpusNode>(id);
-	form.add(new Label("name"));
-	form.add(new Label("nodeURI"));
-        form.add(new Label("type"));
+	final Form<CorpusNode> createWsForm = new Form<>(id);
+	createWsForm.add(new Label("name"));
+	createWsForm.add(new Label("nodeURI"));
+        createWsForm.add(new Label("type"));
 
-	createWorkspaceButton = new Button("createWorkspace") {
-	    @Override
-	    public void onSubmit() {
+	createWorkspaceButton = new IndicatingAjaxButton("createWorkspace") {
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 final String currentUserId = LamusSession.get().getUserId();
-		final URI selectedNodeURI = form.getModelObject().getNodeURI();
+		final URI selectedNodeURI = createWsForm.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-                } catch (NodeNotFoundException ex) {
-                    Session.get().error(ex.getMessage());
-                } catch (NodeAccessException ex) {
-                    Session.get().error(ex.getMessage());
-                } catch (WorkspaceImportException ex) {
+                } catch (NodeNotFoundException | NodeAccessException | WorkspaceImportException ex) {
                     Session.get().error(ex.getMessage());
                 }
-	    }
+            }
 	};
         createWorkspaceButton.setEnabled(false);
-	form.add(createWorkspaceButton);
+	createWsForm.add(createWorkspaceButton);
         
         warningMessageModel = Model.of("Please select a metadata node as top node of the workspace");
         
         warningMessage = new Label("warning_message", warningMessageModel);
         warningMessage.setVisible(false);
-        form.add(warningMessage);
+        createWsForm.add(warningMessage);
 
         
         addTopNodeButton = new Button("addTopNode") {
@@ -189,11 +187,11 @@ public class CreateWorkspacePage extends LamusPage {
         addTopNodeButton.setVisible(false);
                 
         
-        form.add(addTopNodeButton);
+        createWsForm.add(addTopNodeButton);
         
         
-        add(form);
+        add(createWsForm);
 
-	return form;
+	return createWsForm;
     }
 }

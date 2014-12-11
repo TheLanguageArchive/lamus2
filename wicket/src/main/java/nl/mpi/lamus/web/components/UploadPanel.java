@@ -17,15 +17,12 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.MissingResourceException;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
@@ -134,31 +131,14 @@ public class UploadPanel extends Panel {
                     if(newFile.getName().endsWith(".zip")) {
                     
                         try {
-                        
-                            byte[] buffer = new byte[1024];
-
                             InputStream newInputStream = upload.getInputStream();
                             try (ZipInputStream zipInputStream = new ZipInputStream(newInputStream)) {
-                                ZipEntry nextEntry = zipInputStream.getNextEntry();
-                                while(nextEntry != null) {
-                                    File entryFile = new File(uploadDirectory, nextEntry.getName());
-                                    if(nextEntry.isDirectory()) {
-                                        entryFile.mkdirs();
-                                        nextEntry = zipInputStream.getNextEntry();
-                                        continue;
-                                    }
-                                    try (OutputStream outputStream = new FileOutputStream(entryFile)) {
-                                        int len;
-                                        while((len = zipInputStream.read(buffer)) > 0) {
-                                            outputStream.write(buffer, 0, len);
-                                        }
-                                    }
-                                    nextEntry = zipInputStream.getNextEntry();
-                                    copiedFiles.add(entryFile);
-                                }
+                                
+                                Collection<File> tempCopiedFiles =
+                                        workspaceService.uploadZipFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), zipInputStream, newFile.getName());
+                                copiedFiles.addAll(tempCopiedFiles);
                             }
 
-//                            UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + upload.getClientFileName());
                         } catch(IOException ex) {
                             UploadPanel.this.error(ex.getMessage());
                         }
@@ -174,7 +154,6 @@ public class UploadPanel extends Panel {
                             //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
                             copiedFiles.add(newFile);
 
-//                            UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + upload.getClientFileName());
                         } catch (IOException | MissingResourceException e) {
                             throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);
                         }
@@ -183,10 +162,6 @@ public class UploadPanel extends Panel {
                 
                 try {
                     Collection<UploadProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
-                    
-//                    for(File failedFile : uploadProblems.keySet()) {
-//                        UploadPanel.this.error(uploadProblems.get(failedFile));
-//                    }
                     
                     for(UploadProblem problem : uploadProblems) {
                         
@@ -222,9 +197,16 @@ public class UploadPanel extends Panel {
                         throw new IllegalStateException();
                     }
                     
+                    //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
+                    
                     
                     if(uploadProblems.isEmpty()) {
-                        UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this));
+                        UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
+                        
+                        
+                        
+                        //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
+                        
                     }
                     
                 } catch (IOException | WorkspaceException | TypeCheckerException ex) {

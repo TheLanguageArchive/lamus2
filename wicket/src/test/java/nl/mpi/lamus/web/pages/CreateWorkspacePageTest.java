@@ -35,8 +35,8 @@ import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.util.tester.FormTester;
@@ -131,7 +131,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("nodeIdForm:nodeURI");
         getTester().assertLabel("nodeIdForm:nodeURI", ""); //TODO test when node selection changes
         
-        getTester().assertComponent("nodeIdForm:createWorkspace", Button.class);
+        getTester().assertComponent("nodeIdForm:createWorkspace", IndicatingAjaxButton.class);
         getTester().assertDisabled("nodeIdForm:createWorkspace"); //initially disabled
         
         
@@ -188,7 +188,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         mockArchiveRootNode.setName(mockArchiveRootNodeName);
         mockArchiveRootNode.setNodeURI(mockArchiveRootNodeURI);
 
-        List<LinkedCorpusNode> children = new ArrayList<LinkedCorpusNode>();
+        List<LinkedCorpusNode> children = new ArrayList<>();
 
         MockCorpusNode child1 = new MockCorpusNode();
         child1.setParent(mockArchiveRootNode);
