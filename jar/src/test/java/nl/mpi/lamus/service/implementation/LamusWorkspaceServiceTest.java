@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -89,6 +90,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private Collection<File> mockUploadedFiles;
     @Mock private Collection<UploadProblem> mockFailedUploads;
     @Mock private TypecheckedResults mockTypecheckedResults;
+    @Mock private ZipInputStream mockZipInputStream;
 
     
     public LamusWorkspaceServiceTest() {
@@ -934,6 +936,47 @@ public class LamusWorkspaceServiceTest {
             fail("An exception should have been thrown");
         } catch(WorkspaceException ex) {
             assertEquals("Exception thrown different from expected", workspaceException, ex);
+        }
+    }
+    
+    @Test
+    public void uploadZipFileIntoWorkspace() throws IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+                will(returnValue(mockUploadedFiles));
+        }});
+        
+        Collection<File> result = service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
+        
+        assertEquals("Result different from expected", mockUploadedFiles, result);
+    }
+    
+    @Test
+    public void uploadZipFileIntoWorkspace_throwsException() throws IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final String filename = "someFile.cmdi";
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+             service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
+             fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
         }
     }
     

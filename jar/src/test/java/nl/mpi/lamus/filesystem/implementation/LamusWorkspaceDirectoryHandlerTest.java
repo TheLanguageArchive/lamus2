@@ -17,6 +17,8 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import javax.annotation.Resource;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -27,7 +29,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,7 +48,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 public class LamusWorkspaceDirectoryHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
-    @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Autowired
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
@@ -59,6 +59,10 @@ public class LamusWorkspaceDirectoryHandlerTest {
     @Autowired
     @Qualifier("workspaceUploadDirectoryName")
     private String workspaceUploadDirectoryName;
+    
+    @Resource
+    @Qualifier("disallowedFolderNamesWorkspace")
+    private Collection<String> disallowedFolderNamesWorkspace;
     
     public LamusWorkspaceDirectoryHandlerTest() {
     }
@@ -271,5 +275,87 @@ public class LamusWorkspaceDirectoryHandlerTest {
 
         assertFalse("Workspace upload directory shouldn't have been created,"
                 + " since there should be no permissions for that.", workspaceUploadDirectory.exists());
+    }
+    
+    @Test
+    public void createDirectoryInWorkspace_Allowed() throws IOException {
+        
+        int workspaceID = 1;
+        String intendedDirectoryName = "someDirectory/";
+        
+        File workspaceDirectory = createTestWorkspaceDirectory(workspaceID);
+        File uploadDirectory = createTestWorkspaceUploadDirectory(workspaceDirectory);
+        File expectedDirectory = new File(uploadDirectory, intendedDirectoryName);
+        
+        this.workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, intendedDirectoryName);
+        
+        assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
+    }
+    
+    //TODO The following tests were commented out until it's known if folder names in the workspace have to be restricted or not
+    
+//    @Test
+//    public void createDirectoryInWorkspace_NotAllowed_AlternativeStillDoesntExist() throws IOException {
+//        
+//        int workspaceID = 1;
+//        String intendedDirectoryName = "temp/";
+//        String alternativeDirectoryName = "temp_1";
+//        
+//        File workspaceDirectory = createTestWorkspaceDirectory(workspaceID);
+//        File uploadDirectory = createTestWorkspaceUploadDirectory(workspaceDirectory);
+//        File expectedDirectory = new File(uploadDirectory, alternativeDirectoryName);
+//        
+//        this.workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, intendedDirectoryName);
+//        
+//        assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
+//    }
+//    
+//    @Test
+//    public void createDirectoryInWorkspace_NotAllowed_AlternativeAlreadyExists() throws IOException {
+//        
+//        int workspaceID = 1;
+//        String intendedDirectoryName = "temp/";
+//        String alternativeDirectoryName = "temp_1";
+//        String secondAlternativeDirectoryName = "temp_2";
+//        
+//        File workspaceDirectory = createTestWorkspaceDirectory(workspaceID);
+//        File uploadDirectory = createTestWorkspaceUploadDirectory(workspaceDirectory);
+//        File alternativeDirectory = createTestDirectoryInUploadDirectory(uploadDirectory, alternativeDirectoryName);
+//        File expectedDirectory = new File(uploadDirectory, secondAlternativeDirectoryName);
+//        
+//        this.workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, intendedDirectoryName);
+//        
+//        assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
+//    }
+    
+    
+    private File createTestWorkspaceDirectory(int workspaceID) {
+        File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        boolean isDirectoryCreated = workspaceDirectory.mkdirs();
+        
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Workspace directory wasn't created.", workspaceDirectory.exists());
+        
+        return workspaceDirectory;
+    }
+    
+    private File createTestWorkspaceUploadDirectory(File workspaceDirectory) {
+        File uploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        boolean isDirectoryCreated = uploadDirectory.mkdirs();
+        
+        assertTrue("Upload directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Upload directory wasn't created.", uploadDirectory.exists());
+        
+        return uploadDirectory;
+    }
+    
+    private File createTestDirectoryInUploadDirectory(File uploadDirectory, String directoryName) {
+        File testDirectory = new File(uploadDirectory, directoryName);
+        boolean isDirectoryCreated = testDirectory.mkdirs();
+        
+        assertTrue("Test directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Test directory wasn't created.", testDirectory.exists());
+        
+        return testDirectory;
     }
 }

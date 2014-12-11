@@ -760,7 +760,7 @@ public class GeneralNodeExporterTest {
 //            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
 //            oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
 //            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveURL));
-            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent);
+            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent.toURI());
             
             
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));

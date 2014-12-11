@@ -16,7 +16,9 @@
 package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -187,6 +189,25 @@ public class LamusWorkspaceFileHandlerTest {
         assertEquals(expectedNodeFile, retrievedFile);
     }
 
+    @Test
+    public void copyInputStreamToTargetFile() throws MalformedURLException, IOException, URISyntaxException {
+        
+        String nodeFilename = "someNode.cmdi";
+        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        Workspace testWorkspace = createTestWorkspace();
+        final File baseDirectory = createTestBaseDirectory();
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
+        
+        File originFile = new File(testNode.getWorkspaceURL().getPath());
+        InputStream originInputStream = new FileInputStream(originFile);
+        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        
+        workspaceFileHandler.copyInputStreamToTargetFile(originInputStream, destinationFile);
+        
+        assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
+    }
+    
     
     private Workspace createTestWorkspace() {
         Workspace workspace = new LamusWorkspace("someUser", 0L, 10000000L);

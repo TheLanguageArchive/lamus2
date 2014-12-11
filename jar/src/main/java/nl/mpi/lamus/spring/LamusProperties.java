@@ -136,12 +136,9 @@ public class LamusProperties implements ServletContextAware {
             String[] foldersAndConfigFileSeparated = foldersAndConfigFile.split("=");
             if(foldersAndConfigFileSeparated.length == 2) {
                 String configFileValue = foldersAndConfigFileSeparated[1];
-//                File configFile = new File(configFileValue);
                 String[] foldersKey = foldersAndConfigFileSeparated[0].split(",");
                 if(foldersKey.length > 0) {
                     for(String folderKey : foldersKey) {
-//                        File folder = new File(folderKey);
-//                        mapToReturn.put(folder, configFile);
                         mapToReturn.put(folderKey, configFileValue);
                     }
                 }
@@ -149,6 +146,34 @@ public class LamusProperties implements ServletContextAware {
         }
         
         return mapToReturn;
+    }
+    
+    @Value("${disallowed_folder_names_workspace}")
+    private String disallowedFolderNamesWorkspace;
+    @Bean
+    @Qualifier("disallowedFolderNamesWorkspace")
+    public Collection<String> disallowedFolderNamesWorkspace() {
+        return splitStringIntoCollectionOfStrings(disallowedFolderNamesWorkspace);
+    }
+    
+    @Value("${disallowed_folder_names_archive}")
+    private String disallowedFolderNamesArchive;
+    @Bean
+    @Qualifier("disallowedFolderNamesArchive")
+    public Collection<String> disallowedFolderNamesArchive() {
+        return splitStringIntoCollectionOfStrings(disallowedFolderNamesArchive);
+    }
+    
+    private Collection<String> splitStringIntoCollectionOfStrings(String stringToSplit) {
+        Collection<String> collectionOfStrings = new ArrayList<>();
+        
+        String[] stringsArray = disallowedFolderNamesWorkspace.split(",");
+        for(String string : stringsArray) {
+            if(!string.isEmpty()) {
+                collectionOfStrings.add(string);
+            }
+        }
+        return collectionOfStrings;
     }
 
     

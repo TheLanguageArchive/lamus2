@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -92,13 +91,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         
         for(Reference ref : references) {
             
-            URL refLocalURL = ref.getLocation();
+            URI refLocalURI = ref.getLocation();
             URI refURI = ref.getURI();
             WorkspaceNode matchedNode;
 
-            if(refLocalURL != null) {
+            if(refLocalURI != null) {
                 
-                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURL.toString());
+                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
                 
                 if(matchedNode != null) {
                     if(refURI != null && !refURI.toString().isEmpty() && metadataApiHandleUtil.isHandleUri(refURI)) {
@@ -121,8 +120,11 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
                 
                 if(matchedNode != null) {
-                
-                    updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL(), matchedNode);
+                    try {
+                        updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                    } catch (URISyntaxException ex) {
+                        logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
+                    }
                     
                     //set handle in DB
                     if(!handleMatcher.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
@@ -136,7 +138,11 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
                 
                 if(matchedNode != null) {
-                    updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL(), matchedNode);
+                    try {
+                        updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                    } catch (URISyntaxException ex) {
+                        logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
+                    }
                 } else {
                     matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
                 }
@@ -183,11 +189,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     
     private void clearReferenceUri(ReferencingMetadataDocument document, Reference ref, WorkspaceNode referencedNode) {
         
-        try {
-            ref.setURI(new URI(""));
-        } catch (URISyntaxException ex) {
-           throw new UnsupportedOperationException("not handled yet");
-        }
+        ref.setURI(URI.create(""));
         
         try {
             File documentFile = new File(document.getFileLocation().getPath());
@@ -201,7 +203,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     }
     
     
-    private void updateLocalUrl(ReferencingMetadataDocument document, Reference ref, URL newLocation, WorkspaceNode referencedNode) {
+    private void updateLocalUrl(ReferencingMetadataDocument document, Reference ref, URI newLocation, WorkspaceNode referencedNode) {
         
         StringBuilder message = new StringBuilder();
         

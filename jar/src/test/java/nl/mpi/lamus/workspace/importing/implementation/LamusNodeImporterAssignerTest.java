@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.metadata.api.model.Reference;
@@ -124,12 +123,12 @@ public class LamusNodeImporterAssignerTest {
         }
 
         @Override
-        public URL getLocation() {
+        public URI getLocation() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
-        public void setLocation(URL url) {
+        public void setLocation(URI uri) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 

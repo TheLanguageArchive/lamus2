@@ -19,6 +19,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -234,12 +235,12 @@ public class GeneralNodeExporter implements NodeExporter {
         
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getArchiveURI());
-            URL currentUrlRelativeToParent = new URL(parentArchiveLocalFile.toURI().toURL(), currentPathRelativeToParent);
+            URI currentUrlRelativeToParent = new URL(parentArchiveLocalFile.toURI().toURL(), currentPathRelativeToParent).toURI();
             currentReference.setLocation(currentUrlRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
             metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
             
-        } catch (IOException | MetadataException | TransformerException ex) {
+        } catch (URISyntaxException | IOException | MetadataException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }

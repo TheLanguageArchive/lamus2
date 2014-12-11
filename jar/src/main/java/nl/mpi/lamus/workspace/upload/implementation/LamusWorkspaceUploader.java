@@ -24,6 +24,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.InvalidMetadataException;
@@ -31,6 +33,7 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -56,6 +59,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 
     private final NodeDataRetriever nodeDataRetriever;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
+    private final WorkspaceFileHandler workspaceFileHandler;
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceUploadHelper workspaceUploadHelper;
@@ -64,12 +68,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
-        WorkspaceDirectoryHandler wsDirHandler, WorkspaceNodeFactory wsNodeFactory,
+        WorkspaceDirectoryHandler wsDirHandler, WorkspaceFileHandler wsFileHandler,
+        WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
         MetadataApiBridge mdApiBridge, MetadataChecker mdChecker) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
+        this.workspaceFileHandler = wsFileHandler;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.workspaceUploadHelper = wsUploadHelper;
@@ -164,6 +170,59 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
         this.workspaceDao.addWorkspaceNode(uploadedNode);
+    }
+
+    /**
+     * @see WorkspaceUploader#uploadZipFileIntoWorkspace(int, java.util.zip.ZipInputStream)
+     */
+    @Override
+    public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
+            throws IOException {
+        
+        File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+        //TODO code to restrict names of created folders has been commented out.
+            // If it turns out that folders in workspaces also need to be restricted, this should be uncommented and other changes made accordingly.
+            // Not only the folders should be renamed if necessary, but also the paths of its children.
+            // Also the links in metadata files become incorrect after this, so they should be changed as well, or just completely reject the files and instruct the user to change the folder names before uploading.
+        
+//        Map<String, String> changedDirectoryNames = new HashMap<>();
+        
+        Collection<File> copiedFiles = new ArrayList<>();
+        
+        ZipEntry nextEntry = zipInputStream.getNextEntry();
+        while(nextEntry != null) {
+            
+            File entryFile = new File(workspaceUploadDirectory, nextEntry.getName());
+            if(nextEntry.isDirectory()) {
+             
+                File createdDirectory = workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, nextEntry.getName());
+                
+//                if(!createdDirectory.getName().equals(entryFile.getName())) {
+//                    changedDirectoryNames.put(entryFile.getName(), createdDirectory.getName());
+//                }
+                
+                nextEntry = zipInputStream.getNextEntry();
+                continue;
+            }
+            
+            File changedEntryFile = entryFile;
+//            for(String changedName : changedDirectoryNames.keySet()) {
+//                if(entryFile.getPath().contains(changedName)) {
+//                    String newName = entryFile.getPath().replace(changedName, changedDirectoryNames.get(changedName));
+//                    changedEntryFile = new File(newName);
+//                    
+//                }
+//            }
+            
+            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, changedEntryFile);
+            
+            nextEntry = zipInputStream.getNextEntry();
+            copiedFiles.add(changedEntryFile);
+
+        }
+        
+        return copiedFiles;
     }
 
     /**

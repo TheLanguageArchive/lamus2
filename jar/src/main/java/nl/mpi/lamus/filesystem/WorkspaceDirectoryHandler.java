@@ -49,9 +49,31 @@ public interface WorkspaceDirectoryHandler {
      */
     public boolean workspaceDirectoryExists(Workspace workspace);
     
+    /**
+     * Retrieves the directory for the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return File object corresponding to the workspace directory
+     */
     public File getDirectoryForWorkspace(int workspaceID);
-    
+
+    /**
+     * Retrieves the upload directory for the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return File object corresponding to the upload directory for the workspace
+     */
     public File getUploadDirectoryForWorkspace(int workspaceID);
     
+    /**
+     * Creates upload directory for the given workspace
+     * @param workspaceID ID of the workspace
+     */
     public void createUploadDirectoryForWorkspace(int workspaceID) throws IOException;
+    
+    /**
+     * Creates directory inside the given workspace
+     * @param workspaceID ID of the workspace
+     * @param directoryName name of the directory to create
+     * @return File object corresponding to the directory
+     */
+    public File createDirectoryInWorkspace(int workspaceID, String directoryName) throws IOException;
 }

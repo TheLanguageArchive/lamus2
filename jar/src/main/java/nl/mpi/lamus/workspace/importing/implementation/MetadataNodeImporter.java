@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import javax.xml.transform.TransformerException;
@@ -173,7 +174,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             this.workspaceFileImporter.importMetadataFileToWorkspace(childLocalFile, childNode, childDocument);
             
             if(referenceFromParent != null) {
-                referenceFromParent.setLocation(childNode.getWorkspaceURL());
+                referenceFromParent.setLocation(childNode.getWorkspaceURL().toURI());
                 metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
             }
             
@@ -193,6 +194,10 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
 		    + " in workspace " + workspaceID;
 	    throwWorkspaceImportException(workspaceID, errorMessage, mdex);
+        } catch (URISyntaxException usex) {
+            String errorMessage = "Failed to set location for node " + childNode.getArchiveURI()
+                    + " in workspace " + workspaceID;
+            throwWorkspaceImportException(workspaceID, errorMessage, usex);
         }
 
 	//TODO change the referenced URL in the parent document

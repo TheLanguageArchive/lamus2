@@ -362,6 +362,7 @@ public class MetadataNodeImporterTest {
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URI testChildWsURI = testChildWsURL.toURI();
         final URI testChildArchiveURI = new URI("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -402,7 +403,7 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
             
-            oneOf(mockMetadataResourceProxy).setLocation(testChildWsURL);
+            oneOf(mockMetadataResourceProxy).setLocation(testChildWsURI);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceList));
@@ -426,6 +427,7 @@ public class MetadataNodeImporterTest {
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URI testChildWsURI = testChildWsURL.toURI();
         final URI testChildArchiveURI = new URI("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -466,7 +468,7 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
             
-            oneOf(mockMetadataResourceProxy).setLocation(testChildWsURL);
+            oneOf(mockMetadataResourceProxy).setLocation(testChildWsURI);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
@@ -487,6 +489,7 @@ public class MetadataNodeImporterTest {
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
+        final URI testChildWsURI = testChildWsURL.toURI();
         final URI testChildArchiveURI = new URI("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = testChildArchiveURL.toURI();
@@ -527,7 +530,7 @@ public class MetadataNodeImporterTest {
             
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
             
-            oneOf(mockReferenceWithoutHandle).setLocation(testChildWsURL);
+            oneOf(mockReferenceWithoutHandle).setLocation(testChildWsURI);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         

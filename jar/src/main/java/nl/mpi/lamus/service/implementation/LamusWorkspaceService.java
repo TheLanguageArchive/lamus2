@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -324,6 +325,18 @@ public class LamusWorkspaceService implements WorkspaceService {
         logger.debug("Triggered file upload into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
             
         this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
+    }
+
+    /**
+     * @see WorkspaceService#uploadZipFileIntoWorkspace(java.lang.String, int, java.util.zip.ZipInputStream, java.lang.String)
+     */
+    @Override
+    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
+            throws IOException {
+        
+        logger.debug("Triggered upload of zip file into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
+        
+        return this.workspaceUploader.uploadZipFileIntoWorkspace(workspaceID, zipInputStream);
     }
     
     /**

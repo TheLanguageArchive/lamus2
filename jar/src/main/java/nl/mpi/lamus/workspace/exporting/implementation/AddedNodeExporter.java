@@ -242,9 +242,9 @@ public class AddedNodeExporter implements NodeExporter {
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {    
-            Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL());
+            Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL().toURI());
             currentReference.setURI(handleManager.prepareHandleWithHdlPrefix(currentNode.getArchiveURI()));
-            URL currentUrlRelativeToParent = new URL(parentNode.getArchiveURL(), currentPathRelativeToParent);
+            URI currentUrlRelativeToParent = new URL(parentNode.getArchiveURL(), currentPathRelativeToParent).toURI();
             currentReference.setLocation(currentUrlRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
             metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);

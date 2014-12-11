@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -203,6 +204,18 @@ public interface WorkspaceService extends Serializable {
      */
     public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
             throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
+    
+    /**
+     * Given a ZipInputStream and filename, uploads the zip content into the workspace,
+     * in case it's archivable.
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @param zipInputStream ZipInputStream to be uploaded
+     * @param filename name of the file to upload
+     * @return Collection containing the copied files
+     */
+    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
+            throws IOException;
     
     /**
      * After the files are uploaded, process the files by performing

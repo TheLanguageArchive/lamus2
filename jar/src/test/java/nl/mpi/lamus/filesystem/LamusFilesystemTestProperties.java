@@ -17,6 +17,8 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.junit.rules.TemporaryFolder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -44,5 +46,16 @@ public class LamusFilesystemTestProperties {
     @Qualifier("workspaceUploadDirectoryName")
     public String workspaceUploadDirectoryName() {
         return "upload";
+    }
+    
+    @Bean
+    @Qualifier("disallowedFolderNamesWorkspace")
+    public Collection<String> disallowedFolderNamesWorkspace() {
+        Collection<String> folderNames = new ArrayList<>();
+        folderNames.add("^tmp$");
+        folderNames.add("^temp$");
+        folderNames.add("^DesktopFolderDB$");
+        folderNames.add("^\\w+\\.svn$");
+        return folderNames;
     }
 }

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.zip.ZipInputStream;
 import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
@@ -50,6 +51,15 @@ public interface WorkspaceUploader {
     public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
             throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
 
+    /**
+     * Given a ZipInputStream and the filename, this method uploads its content
+     * and triggers typecheck on the contained files.
+     * @param workspaceID ID of the workspace
+     * @param zipInputStream ZipInputStream to upload
+     * @return Collection containing copied files
+     */
+    public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
+            throws IOException;
     
     /**
      * After the files are uploaded, process the files by performing

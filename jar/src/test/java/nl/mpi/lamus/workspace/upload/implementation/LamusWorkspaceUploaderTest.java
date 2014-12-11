@@ -27,6 +27,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.InvalidMetadataException;
@@ -36,6 +38,7 @@ import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -85,6 +88,7 @@ public class LamusWorkspaceUploaderTest {
     
     @Mock NodeDataRetriever mockNodeDataRetriever;
     @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
+    @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceUploadHelper mockWorkspaceUploadHelper;
@@ -98,6 +102,10 @@ public class LamusWorkspaceUploaderTest {
     @Mock File mockWorkspaceTopNodeFile;
     @Mock WorkspaceNode mockWorkspaceTopNode;
     @Mock TypecheckedResults mockTypecheckedResults;
+    
+    @Mock ZipInputStream mockZipInputStream;
+    @Mock ZipEntry mockFirstZipEntry;
+    @Mock ZipEntry mockSecondZipEntry;
     
     @Mock File mockFile1;
     @Mock File mockFile2;
@@ -124,7 +132,8 @@ public class LamusWorkspaceUploaderTest {
     @Before
     public void setUp() {
         uploader = new LamusWorkspaceUploader(mockNodeDataRetriever,
-                mockWorkspaceDirectoryHandler, mockWorkspaceNodeFactory,
+                mockWorkspaceDirectoryHandler, mockWorkspaceFileHandler,
+                mockWorkspaceNodeFactory,
                 mockWorkspaceDao, mockWorkspaceUploadHelper,
                 mockMetadataApiBridge, mockMetadataChecker);
     }
@@ -645,6 +654,170 @@ public class LamusWorkspaceUploaderTest {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
             assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
             assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void uploadZipFile_IsDirectory() throws IOException {
+        
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        final String firstEntryName = "directory";
+        
+        final Collection<File> expectedCopiedFiles = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+        }});
+        
+        Collection<File> result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+        
+        assertEquals("Result different from expected", expectedCopiedFiles, result);
+    }
+    
+    @Test
+    public void uploadZipFile_IsNotDirectory() throws IOException {
+        
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        final String firstEntryName = "file.cmdi";
+        final File firstEntryFile = new File(workspaceUploadDirectory, firstEntryName);
+        
+        final Collection<File> expectedCopiedFiles = new ArrayList<>();
+        expectedCopiedFiles.add(firstEntryFile);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+        }});
+        
+        Collection<File> result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+        
+        assertEquals("Result different from expected", expectedCopiedFiles, result);
+    }
+    
+    @Test
+    public void uploadZipFile_DirectoryAndFile() throws IOException {
+        
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        final String firstEntryName = "directory/";
+        final File createdDirectory = new File(workspaceUploadDirectory, firstEntryName);
+        final String secondEntryName = "directory/file.cmdi";
+        final File createdFile = new File(workspaceUploadDirectory, secondEntryName);
+        
+        final Collection<File> expectedCopiedFiles = new ArrayList<>();
+        expectedCopiedFiles.add(createdFile);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
+
+            // second loop iteration
+            
+            oneOf(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+        }});
+        
+        Collection<File> result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+        
+        assertEquals("Result different from expected", expectedCopiedFiles, result);
+    }
+    
+    //TODO Following test was commented out until it's known if folder names in the workspace have to be restricted or not
+    
+//    @Test
+//    public void uploadZipFile_DirectoryAndFile_DirectoryNameHadToBeChanged() throws IOException {
+//        
+//        final int workspaceID = 1;
+//        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+//        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+//        
+//        final String firstEntryName = "temp/";
+//        final String changedFirstEntryName = "temp_1/";
+//        final File createdDirectory = new File(workspaceUploadDirectory, changedFirstEntryName);
+//        final String secondEntryName = "temp/file.cmdi";
+//        final String changedSecondEntryName = "temp_1/file.cmdi";
+//        final File createdFile = new File(workspaceUploadDirectory, changedSecondEntryName);
+//        
+//        final Collection<File> expectedCopiedFiles = new ArrayList<>();
+//        expectedCopiedFiles.add(createdFile);
+//        
+//        context.checking(new Expectations() {{
+//            
+//            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+//            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+//            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+//            
+//            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+//            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
+//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
+//
+//            // second loop iteration
+//            
+//            oneOf(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+//            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+//            
+//            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
+//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+//        }});
+//        
+//        Collection<File> result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+//        
+//        assertEquals("Result different from expected", expectedCopiedFiles, result);
+//    }
+    
+    @Test
+    public void uploadZipFile_ThrowsException() throws IOException {
+        
+        final int workspaceID = 1;
+        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(throwException(expectedException));
+        }});
+        
+        try {
+            uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
         }
     }
     

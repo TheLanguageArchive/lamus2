@@ -16,7 +16,10 @@
 package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -75,4 +78,20 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         return workspaceNodeFile;
     }
 
+    /**
+     * @see WorkspaceFileHandler#copyInputStreamToTargetFile(java.io.InputStream, java.io.File)
+     */
+    @Override
+    public void copyInputStreamToTargetFile(InputStream inputStream, File targetFile)
+            throws IOException {
+        
+        byte[] buffer = new byte[1024];
+        
+        try (OutputStream outputStream = new FileOutputStream(targetFile)) {
+            int len;
+            while((len = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, len);
+            }
+        }
+    }
 }

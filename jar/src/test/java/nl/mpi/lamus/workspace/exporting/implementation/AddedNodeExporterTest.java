@@ -791,13 +791,13 @@ public class AddedNodeExporterTest {
                 will(returnValue(childPathRelativeToParent));
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-            oneOf(mockParentCmdiDocument).getDocumentReferenceByLocation(nodeWsURL);
+            oneOf(mockParentCmdiDocument).getDocumentReferenceByLocation(nodeWsURL.toURI());
                 will(returnValue(mockResourceProxy));
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
             oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
             oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
-            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent);
+            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent.toURI());
             
             
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));

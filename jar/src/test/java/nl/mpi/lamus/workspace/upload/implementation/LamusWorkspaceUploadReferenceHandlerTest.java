@@ -117,7 +117,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final int secondNodeID = 102;
         
         final URI firstRefURI = new URI("");
-        final URL firstRefLocalUrl = new URL("file://absolute/path/to/resource.txt");
+        final URI firstRefLocalUri = new URI("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -137,11 +137,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             
             //loop over references
             //first reference contains a localURI
-            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUrl));
+            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUri));
             oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
             
             //matches second node
-            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUrl.toString());
+            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUri.toString());
                 will(returnValue(mockSecondNode));
 
             //empty URI, so it will be set with the value of the location URL
@@ -171,7 +171,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final int secondNodeID = 102;
         
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final URL firstRefLocalUrl = new URL("file://absolute/path/to/resource.txt");
+        final URI firstRefLocalUri = new URI("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -191,11 +191,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             
             //loop over references
             //first reference contains a localURI
-            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUrl));
+            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUri));
             oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
             
             //matches second node
-            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUrl.toString());
+            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUri.toString());
                 will(returnValue(mockSecondNode));
 
             //URI is a handle, so URI in DB should be updated
@@ -223,7 +223,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final int secondNodeID = 102;
         
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final URL firstRefLocalUrl = new URL("file://absolute/path/to/resource.txt");
+        final URI firstRefLocalUri = new URI("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -244,11 +244,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             
             //loop over references
             //first reference contains a localURI
-            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUrl));
+            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUri));
             oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
             
             //matches second node
-            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUrl.toString());
+            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUri.toString());
                 will(returnValue(mockSecondNode));
 
             //URI is a handle, so URI in DB should be updated
@@ -286,8 +286,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final int firstNodeID = 101;
         final int secondNodeID = 102;
         
-        final URL firstRefLocalUrl = new URL("file://absolute/path/to/resource.txt");
-        final URI firstRefURI = firstRefLocalUrl.toURI();
+        final URI firstRefLocalUri = new URI("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -307,15 +306,15 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             
             //loop over references
             //first reference contains a localURI
-            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUrl));
-            oneOf(mockFirstReference).getURI(); will(returnValue(firstRefURI));
+            oneOf(mockFirstReference).getLocation(); will(returnValue(firstRefLocalUri));
+            oneOf(mockFirstReference).getURI(); will(returnValue(firstRefLocalUri));
             
             //matches second node
-            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUrl.toString());
+            oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUri.toString());
                 will(returnValue(mockSecondNode));
 
             //URI is not a handle, so it should be cleared (since the local URL is already present in the localURI attribute)
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(firstRefURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockMetadataApiHandleUtil).isHandleUri(firstRefLocalUri); will(returnValue(Boolean.FALSE));
             
 //            exactly(2).of(mockFirstReference).getURI(); will(returnValue(firstRefURI));
             oneOf(mockFirstReference).setURI(new URI(""));
@@ -345,6 +344,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
         
         final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -375,7 +375,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeURL));
             
             oneOf(mockFirstReference).getLocation(); will(returnValue(null));
-            oneOf(mockFirstReference).setLocation(secondNodeURL);
+            oneOf(mockFirstReference).setLocation(secondNodeURI);
 
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
@@ -408,6 +408,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
         
         final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -438,7 +439,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeURL));
             
             oneOf(mockFirstReference).getLocation(); will(returnValue(null));
-            oneOf(mockFirstReference).setLocation(secondNodeURL);
+            oneOf(mockFirstReference).setLocation(secondNodeURI);
 
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
@@ -474,6 +475,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstRefURI = new URI("parent/child.txt");
         
         final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -505,7 +507,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeURL));
 
             oneOf(mockFirstReference).getLocation(); will(returnValue(null));
-            oneOf(mockFirstReference).setLocation(secondNodeURL);
+            oneOf(mockFirstReference).setLocation(secondNodeURI);
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
@@ -580,6 +582,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI firstRefURI = new URI("hdl:" + UUID.randomUUID().toString());
         
         final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URI firstDocumentLocation = new URI("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
@@ -612,7 +615,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeURL));
             
             oneOf(mockFirstReference).getLocation(); will(returnValue(null));
-            oneOf(mockFirstReference).setLocation(secondNodeURL);
+            oneOf(mockFirstReference).setLocation(secondNodeURI);
 
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
@@ -657,6 +660,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final URI secondRefURI = new URI("parent/child.txt");
         
         final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URL thirdNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/anotherChild.txt");
         final URI thirdNodeURI = thirdNodeURL.toURI();
@@ -693,7 +697,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeURL));
             
             oneOf(mockFirstReference).getLocation(); will(returnValue(null));
-            oneOf(mockFirstReference).setLocation(secondNodeURL);
+            oneOf(mockFirstReference).setLocation(secondNodeURI);
 
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
@@ -725,7 +729,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 //            exactly(2).of(mockSecondReference).getURI(); will(returnValue(null));
 //            oneOf(mockSecondReference).setURI(new URI(""));
             oneOf(mockSecondReference).getLocation(); will(returnValue(null));
-            oneOf(mockSecondReference).setLocation(thirdNodeURL);
+            oneOf(mockSecondReference).setLocation(thirdNodeURI);
             oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(firstDocumentLocation));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(firstDocumentLocationFile); will(returnValue(mockStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockMetadataDocument, mockStreamResult);
