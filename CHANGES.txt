@@ -1,3 +1,7 @@
+lamus2-1.1.0 (2014-12-12)
+
+    First release adapted for the CMDI / hybrid archive.
+
 lamus2-1.1-SNAPSHOT (2014-09-24)
 
     Changes:
