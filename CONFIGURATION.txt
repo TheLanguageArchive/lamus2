@@ -5,7 +5,7 @@ LAMUS2 CONFIGURATION
 
 1.1.    JNDI Resources
 
-Lamus2 needs the 'corpusstructure2' and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
+Lamus2 needs the 'corpusstructure3', "ams2cmdi" and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
 
     <Resource
             name="jdbc/CSDB2"
@@ -16,6 +16,22 @@ Lamus2 needs the 'corpusstructure2' and 'lamus2' databases for direct access, so
             username="dummy"
             password="password"
             maxActive="20"
+            maxIdle="5"
+            maxWait="4000"
+            removeAbandoned="true"
+            removeAbandonedTimeout="300"
+            logAbandoned="true"
+    />
+
+    <Resource
+            name="jdbc/AMS2-CMDI-DB"
+            auth="Container"
+            type="javax.sql.DataSource"
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://localhost:5432/ams2cmdi"
+            username="webuser"
+            password="start1a"
+            maxActive="10"
             maxIdle="5"
             maxWait="4000"
             removeAbandoned="true"
@@ -106,6 +122,11 @@ The other necessary properties should be defined as parameters in the web contex
                    value="lamus@mpi.nl"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.mailAddress"
+                   value="corpman@mpi.nl"
+                   description="the LAMUS will send messages to"         
+                   override="false"/>
+
 
         <Parameter name="nl.mpi.lamus.manager.users"
                    value="corpman@mpi.nl"
@@ -166,8 +187,22 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Sub path for the crawler details service"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.translation_service.location"
+                   value="https://lux16.mpi.nl/ds/TranslationService"
+                   description="Location of the translation service"
+                   override="false"/>
 
-2.  Filters
+        <Parameter name="nl.mpi.lamus.schematronValidationFile"
+                   value="/lat/tomcat-corpman/conf/cmdi_schematron.sch"
+                   description="Path to a schematron file to be used in Lamus for CMDI validation"
+                   override="false"/>
+
+2. Schematron configuration
+
+In order to perform the validation of allowed profiles being introduced into the archive, a schematron is used.
+A schematron file is included in the configuration folder of tomcat-corpman (/lat/tomcat-corpman/conf/cmdi_schematron.sch). This schematron file needs an extra file which contains the list of allowed CMDI profiles (/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml).
+
+3.  Filters
 
 When building the application, a parameter is passed, indicating the server for which it is being compiled. This loads a few more properties from the filter file regarding the given server.
 So, whenever the a new server is used to deploy the application, a new filter file should be created.
@@ -177,9 +212,9 @@ shhaa.li=https://lux16.mpi.nl/Shibboleth.sso/Login
 shhaa.lo=https://lux16.mpi.nl/Shibboleth.sso/Logout
 
 
-3.  Frameworks
+4.  Frameworks
 
-3.1.    Spring
+4.1.    Spring
 
 Lamus2 uses Spring mostly for dependency injection.
 The chosen approach was the Java based configuration. So there are a few classes containing some bean definitions (usually under a package with "spring" in the name - for instance the class "LamusBeans"), but most of the beans are automatically created using annotations in the corresponding classes ("@Service" or "@Component"), while they are loaded into the depending classes using other annotations ("@Autowired" and "@Resource", for instance).
@@ -194,18 +229,18 @@ In the server, a couple of parameters are also defined for this purpose. These a
 
 There are a few profiles mentioned throughout the code, but the most important are:
 
+    - cmdi-adapter-csdb (now used instead of "production", for the latest hybrid archive situation)
     - production
     - testing
 
 The remaining ones are used in less common situations or are still being developed:
 
-    - cmdi-adapter-csdb
     - demoserver
     - mock
     - acceptance
 
 
-3.2.    Hibernate/JPA
+4.2.    Hibernate/JPA
 
 The JPA configuration is necessary in order to use the corpus structure API. More specifically, Lamus2 uses Hibernate to interact with it.
 This configuration is located in the 'wicket' project (war file), under "src/main/resources". In the war package, it's located in "WEB-INF/classes/META-INF/persistence.xml".
@@ -228,7 +263,7 @@ At the moment it looks like this:
     </persistence-unit>
 </persistence>
 
-3.3.    Wicket
+4.3.    Wicket
 
 This parameter is defined in "jkc#lamus2.xml" and indicates in which Wicket setting the application is being run.
 
