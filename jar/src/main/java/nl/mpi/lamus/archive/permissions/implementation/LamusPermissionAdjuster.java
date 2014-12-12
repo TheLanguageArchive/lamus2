@@ -71,7 +71,7 @@ public class LamusPermissionAdjuster implements PermissionAdjuster {
             } // skip remote files
             n++;
             
-            File nodeFile = null;
+            File nodeFile;
             try {
                 nodeFile = new File(node.getArchiveURL().toURI());
             } catch (URISyntaxException ex) {
