@@ -24,12 +24,12 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -39,7 +39,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 
-public final class ButtonPanel extends Panel {
+public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
 // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
@@ -48,13 +48,13 @@ public final class ButtonPanel extends Panel {
     private LamusWicketPagesProvider pagesProvider;
     
     
-    public ButtonPanel(String id, IModel<Workspace> model) {
-        super(id, model);
+    public ButtonPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
+        super(id, model, feedbackPanel);
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
     
-    public ButtonPanel(String id, Workspace workspace) {
-        this(id, new WorkspaceModel(workspace));
+    public ButtonPanel(String id, Workspace workspace, FeedbackPanel feedbackPanel) {
+        this(id, new WorkspaceModel(workspace), feedbackPanel);
     }
 
     
@@ -66,10 +66,15 @@ public final class ButtonPanel extends Panel {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
 
-            final IndicatingAjaxButton submitWorkspaceButton = new IndicatingAjaxButton("submitWorkspaceButton") {
+            final String submitConfirmationMessage = "If there are unlinked nodes in the workspace,"
+                     + "they will be deleted. Are you sure you want to proceed?";
+            final Button submitWorkspaceButton = new ConfirmationAjaxButton("submitWorkspaceButton", submitConfirmationMessage) {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                    
+                    target.add(getFeedbackPanel());
+                    
                     try {
                         workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
                     } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
@@ -77,21 +82,17 @@ public final class ButtonPanel extends Panel {
                     }
                     
                     
-                    //TODO SHOW SUCCESS MESSAGE
-                    //TODO SHOW SUCCESS MESSAGE
-                    //TODO SHOW SUCCESS MESSAGE
-                    
+                    Session.get().info("Workspace successfully submitted");
                     
                     setResponsePage(pagesProvider.getIndexPage());
 
                 }
             };
-            submitWorkspaceButton.add(new AttributeModifier("onclick",
-                    "if(!confirm('If there are unlinked nodes in the workspace,"
-                    + " they will be deleted. Are you sure you want to proceed?'))return false;"));
+            
             add(submitWorkspaceButton);
             
-            final IndicatingAjaxButton deleteWorkspaceButton = new IndicatingAjaxButton("deleteWorkspaceButton") {
+            final String deleteConfirmationMessage = "Are you sure you want to proceed with the deletion of the workspace?";
+            final IndicatingAjaxButton deleteWorkspaceButton = new ConfirmationAjaxButton("deleteWorkspaceButton", deleteConfirmationMessage) {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -103,7 +104,7 @@ public final class ButtonPanel extends Panel {
                     setResponsePage(pagesProvider.getIndexPage());
                 }
             };
-            deleteWorkspaceButton.add(new AttributeModifier("onclick", "if(!confirm('are you sure?'))return false;"));
+            
             add(deleteWorkspaceButton);
         }
     }

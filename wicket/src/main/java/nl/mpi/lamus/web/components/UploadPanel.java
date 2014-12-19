@@ -34,11 +34,13 @@ import nl.mpi.lamus.workspace.upload.implementation.FileUploadProblem;
 import nl.mpi.lamus.workspace.upload.implementation.LinkUploadProblem;
 import nl.mpi.lamus.workspace.upload.implementation.MatchUploadProblem;
 import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -49,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author guisil
  */
-public class UploadPanel extends Panel {
+public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
     
     private static final Logger log = LoggerFactory.getLogger(UploadPanel.class);
 
@@ -66,9 +68,9 @@ public class UploadPanel extends Panel {
      *
      * @param parameters Page parameters
      */
-    public UploadPanel(String id, IModel<Workspace> model) {
+    public UploadPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         
-        super(id, model);
+        super(id, model, feedbackPanel);
         
         this.model = model;
 
@@ -105,115 +107,116 @@ public class UploadPanel extends Panel {
 
             // Set maximum size to 100K for demo purposes
             //setMaxSize(Bytes.kilobytes(100));
-        }
+            
+            
+            add(new IndicatingAjaxButton("uploadButton", this) {
+                @Override
+                protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                    target.add(getFeedbackPanel());
+                    final List<FileUpload> uploads = fileUploadField.getFileUploads();
+                    if (uploads != null) {
 
-        /**
-         * @see org.apache.wicket.markup.html.form.Form#onSubmit()
-         */
-        @Override
-        protected void onSubmit() {
-            final List<FileUpload> uploads = fileUploadField.getFileUploads();
-            if (uploads != null) {
-                
-                File uploadDirectory = workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID());
-                
-                Collection<File> copiedFiles = new ArrayList<>();
-                
-                for (FileUpload upload : uploads) {
-                    // Create a new file
-                    File newFile = new File(uploadDirectory, upload.getClientFileName());
-                    
-                    if(newFile.isDirectory()) {
-                        continue;
-                    }
-                    
-                    //TODO a better way of deciding this? typechecker?
-                    if(newFile.getName().endsWith(".zip")) {
-                    
-                        try {
-                            InputStream newInputStream = upload.getInputStream();
-                            try (ZipInputStream zipInputStream = new ZipInputStream(newInputStream)) {
-                                
-                                Collection<File> tempCopiedFiles =
-                                        workspaceService.uploadZipFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), zipInputStream, newFile.getName());
-                                copiedFiles.addAll(tempCopiedFiles);
+                        File uploadDirectory = workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID());
+
+                        Collection<File> copiedFiles = new ArrayList<>();
+
+                        for (FileUpload upload : uploads) {
+                            // Create a new file
+                            File newFile = new File(uploadDirectory, upload.getClientFileName());
+
+                            if (newFile.isDirectory()) {
+                                continue;
                             }
 
-                        } catch(IOException ex) {
+                            //TODO a better way of deciding this? typechecker?
+                            if (newFile.getName().endsWith(".zip")) {
+
+                                try {
+                                    InputStream newInputStream = upload.getInputStream();
+                                    try (ZipInputStream zipInputStream = new ZipInputStream(newInputStream)) {
+
+                                        Collection<File> tempCopiedFiles =
+                                                workspaceService.uploadZipFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), zipInputStream, newFile.getName());
+                                        copiedFiles.addAll(tempCopiedFiles);
+                                    }
+
+                                } catch (IOException ex) {
+                                    UploadPanel.this.error(ex.getMessage());
+                                }
+                            } else {
+
+                                try {
+                                    //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
+
+                                    // Save to new file
+                                    newFile.createNewFile();
+                                    upload.writeTo(newFile);
+
+                                    //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
+                                    copiedFiles.add(newFile);
+
+                                } catch (IOException | MissingResourceException e) {
+                                    throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);
+                                }
+                            }
+                        }
+
+                        try {
+                            Collection<UploadProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
+
+                            for (UploadProblem problem : uploadProblems) {
+
+                                if (problem instanceof FileUploadProblem) {
+
+                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+
+
+                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
+
+                                    continue;
+                                }
+                                if (problem instanceof LinkUploadProblem) {
+
+                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+
+
+                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
+
+                                    continue;
+                                }
+                                if (problem instanceof MatchUploadProblem) {
+
+                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+
+
+                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
+
+                                    continue;
+                                }
+
+                                //TODO COMPLETE EXCEPTION
+                                throw new IllegalStateException();
+                            }
+
+                            //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
+
+
+                            if (uploadProblems.isEmpty()) {
+                                UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
+
+
+
+                                //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
+
+                            }
+
+                        } catch (IOException | WorkspaceException | TypeCheckerException ex) {
                             UploadPanel.this.error(ex.getMessage());
                         }
-                    } else {
-                    
-                        try {
-                            //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
 
-                            // Save to new file
-                            newFile.createNewFile();
-                            upload.writeTo(newFile);
-
-                            //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
-                            copiedFiles.add(newFile);
-
-                        } catch (IOException | MissingResourceException e) {
-                            throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);
-                        }
                     }
                 }
-                
-                try {
-                    Collection<UploadProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
-                    
-                    for(UploadProblem problem : uploadProblems) {
-                        
-                        if(problem instanceof FileUploadProblem) {
-                            
-                            UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-                            
-                            
-                            //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-                            
-                            continue;
-                        }
-                        if(problem instanceof LinkUploadProblem) {
-                            
-                            UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-                            
-                            
-                            //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-                            
-                            continue;
-                        }
-                        if(problem instanceof MatchUploadProblem) {
-                            
-                            UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-                            
-                            
-                            //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-                            
-                            continue;
-                        }
-                        
-                        //TODO COMPLETE EXCEPTION
-                        throw new IllegalStateException();
-                    }
-                    
-                    //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
-                    
-                    
-                    if(uploadProblems.isEmpty()) {
-                        UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
-                        
-                        
-                        
-                        //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
-                        
-                    }
-                    
-                } catch (IOException | WorkspaceException | TypeCheckerException ex) {
-                    UploadPanel.this.error(ex.getMessage());
-                }
-                
-            }
+            });
         }
     }
 }

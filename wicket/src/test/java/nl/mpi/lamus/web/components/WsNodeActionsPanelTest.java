@@ -31,6 +31,8 @@ import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.service.WorkspaceTreeService;
+import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.ReplaceNodesAction;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -39,6 +41,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.util.CollectionModel;
 import org.apache.wicket.util.tester.FormTester;
 import org.junit.Test;
@@ -56,13 +59,17 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
 
     private WsNodeActionsPanel treeNodeActionsPanel;
     
-    @Mock WorkspaceService mockWorkspaceServiceBean;
+    @Mock WorkspaceTreeService mockWorkspaceServiceBean;
     @Mock WsNodeActionsProvider mockTreeNodeActionsProviderBean;
+    
+    @Mock UnlinkedNodesModelProviderFactory mockUnlinkedNodesProviderFactory;
     
     @Mock private DeleteNodesAction mockDeleteAction;
     @Mock private UnlinkNodesAction mockUnlinkAction;
     @Mock private LinkNodesAction mockLinkAction;
     @Mock private ReplaceNodesAction mockReplaceAction;
+    
+    private FeedbackPanel feedbackPanel;
     
     private int mockWorkspaceID = 1;
     private MockWorkspaceTreeNode mockWorkspaceNode = new MockWorkspaceTreeNode() {{
@@ -98,10 +105,15 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         when(mockReplaceAction.getName()).thenReturn("replace_node_action");
         
 
-        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesProviderFactory);
         
-        treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<>(selectedNodes)) {
+        feedbackPanel = new FeedbackPanel("feedbackPanel") {{
+            setOutputMarkupId(true);
+        }};
+        
+        treeNodeActionsPanel = new WsNodeActionsPanel("wsNodeActionsPanel", new CollectionModel<>(selectedNodes), feedbackPanel) {
 
             @Override
             public void refreshTreeAndPanels() {

@@ -31,7 +31,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author guisil
  */
-public class LinkNodesPanel extends FeedbackPanelAwarePanel {
+public class LinkNodesPanel extends FeedbackPanelAwarePanel<WorkspaceTreeNode> {
     
     @SpringBean
     protected WorkspaceTreeService workspaceService;

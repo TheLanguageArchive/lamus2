@@ -27,6 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
@@ -56,6 +57,8 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
 //    @Mock private InputStream mockFileInputStream;
     
 //    private File mockFileToUpload;
+    
+    @Mock private FeedbackPanel mockFeedbackPanel;
     
     private String mockFilename = "someimage.jpg";
     
@@ -119,7 +122,7 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
 //        mockFileUploads.add(mockFileUpload);
         
         
-        uploadPanel = new UploadPanel("uploadPanel", new WorkspaceModel(mockWorkspace));
+        uploadPanel = new UploadPanel("uploadPanel", new WorkspaceModel(mockWorkspace), mockFeedbackPanel);
         getTester().startComponentInPage(uploadPanel);
     }
 

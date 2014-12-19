@@ -29,6 +29,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 
 /**
@@ -41,19 +42,23 @@ public class WsNodeActionButton extends Button {
     private final Collection<WorkspaceTreeNode> selectedTreeNodes;
     private Collection<WorkspaceTreeNode> selectedChildNodes;
     private final WsTreeNodesAction action;
-    private WorkspaceService workspaceService;
+    private final WorkspaceService workspaceService;
+    
+    private final FeedbackPanel feedbackPanel;
     
     public WsNodeActionButton(
             String id, Collection<WorkspaceTreeNode> selectedTreeNodes,
             Collection<WorkspaceTreeNode> selectedChildNodes,
-            WsTreeNodesAction action, WorkspaceService wsService) {
+            WsTreeNodesAction action, WorkspaceService wsService, FeedbackPanel feedbackPanel) {
         super(id, new Model<>(action.getName()));
         this.selectedTreeNodes = selectedTreeNodes;
         this.selectedChildNodes = selectedChildNodes;
         this.action = action;
         this.workspaceService = wsService;
+        
+        this.feedbackPanel = feedbackPanel;
     }
-    
+
     @Override
     public void onSubmit() {
         

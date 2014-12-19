@@ -30,6 +30,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.util.tester.FormTester;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -54,6 +55,8 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     //TODO request storage
     @Mock private IndexPage mockIndexPage;
+    
+    @Mock private FeedbackPanel mockFeedbackPanel;
     
     
     TemporaryFolder testFolder = new TemporaryFolder();
@@ -85,7 +88,7 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         
-        buttonPanel = new ButtonPanel("buttonpanel", mockWorkspace);
+        buttonPanel = new ButtonPanel("buttonpanel", mockWorkspace, mockFeedbackPanel);
         getTester().startComponentInPage(buttonPanel);
     }
 

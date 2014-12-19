@@ -36,6 +36,7 @@ import org.junit.Before;
 public abstract class AbstractLamusWicketTest {
     
     protected static final String BEAN_NAME_WORKSPACE_SERVICE = "workspaceService";
+    protected static final String BEAN_NAME_WORKSPACE_TREE_SERVICE = "workspaceTreeService";
     protected static final String BEAN_NAME_SESSION_FACTORY = "sessionFactory";
     protected static final String BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY = "workspaceTreeProviderFactory";
     protected static final String BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY = "unlinkedNodesProviderFactory";

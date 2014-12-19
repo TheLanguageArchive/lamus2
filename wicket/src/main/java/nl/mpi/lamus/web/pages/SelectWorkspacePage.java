@@ -31,6 +31,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListChoice;
@@ -88,10 +89,13 @@ public class SelectWorkspacePage extends LamusPage {
         listWorkspaces.setRequired(true);
         final Form<Workspace> openWsForm = new Form<>(id, workspaceModel);
 
-        IndicatingAjaxButton submitButton = new IndicatingAjaxButton("openWorkspace") {
+        Button submitButton = new IndicatingAjaxButton("openWorkspace") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                
+                target.add(getFeedbackPanel());
+                
                 try {
                     if(form.getModelObject() != null) {
                         Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, openWsForm.getModelObject().getWorkspaceID());

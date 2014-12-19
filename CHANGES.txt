@@ -1,3 +1,13 @@
+lamus2-1.1.1
+
+    Changes:
+        - CS2: Updated the version of the CS2 libraries.
+    Fixes:
+        - INDICATING BUTTONS: Fixed some issues with the ajax indicating buttons,
+          including the confirmation dialogs, which had to be done in a different
+          way for the ajax version of the buttons, and also the update of the
+          feedback panel.
+
 lamus2-1.1.0 (2014-12-12)
 
     First release adapted for the CMDI / hybrid archive.

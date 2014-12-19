@@ -20,7 +20,9 @@ import nl.mpi.archiving.corpusstructure.adapter.ArchiveObjectsDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureAPIProviderFactory;
 import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.NodeUriUtils;
+import nl.mpi.archiving.corpusstructure.adapter.TranslationService;
 import nl.mpi.archiving.corpusstructure.adapter.VersioningAPIImplFactory;
+import nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter;
 import nl.mpi.archiving.corpusstructure.adapter.servlet.ThreadLocalCSDBContainer;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBProxy;
@@ -106,7 +108,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CorpusStructureAPIProviderFactory corpusStructureProviderFactory() {
-        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), versioningProxy(), handleResolver(), nodeUriUtils(), translationServiceLocation);
+        return new CorpusStructureAPIProviderFactory(csdbProxy(), aoProxy(), versioningProxy(), filePathTranslator(), nodeUriUtils(), translationServiceLocation);
     }
     
     @Bean
@@ -125,8 +127,13 @@ public class CorpusstructureBeans {
     }
     
     @Bean
-    public FilePathTranslator translator() {
-        return corpusStructureProviderFactory().createFilePathTranslator();
+    public TranslationService translationService() {
+        return new TranslationService(aoProxy(), translationServiceLocation);
+    }
+    
+    @Bean
+    public FilePathTranslator filePathTranslator() {
+        return new FilePathTranslatorAdapter(aoProxy(), translationService(), handleResolver());
     }
     
     @Bean

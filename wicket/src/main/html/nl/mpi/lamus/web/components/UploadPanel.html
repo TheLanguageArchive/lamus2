@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         than to only be able to select directories (only applicable to Google Chrome) -->
                         <input wicket:id="fileInput" type="file" multiple="multiple" directory=""/>
                     </p>
-                    <input type="submit" wicket:message="value:upload_panel_submit_button" />
+                    <input wicket:id="uploadButton" type="submit" wicket:message="value:upload_panel_submit_button" />
                     <span wicket:id="progress">[[upload progressbar]]</span>
                 </fieldset>
             </form>

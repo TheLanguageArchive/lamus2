@@ -60,7 +60,7 @@ public class CreateWorkspacePage extends LamusPage {
     
     // Page components
     private final Form nodeIdForm;
-    private IndicatingAjaxButton createWorkspaceButton;
+    private Button createWorkspaceButton;
     private Button addTopNodeButton;
     private Label warningMessage;
     private Model<String> warningMessageModel;
@@ -153,6 +153,9 @@ public class CreateWorkspacePage extends LamusPage {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                
+                target.add(getFeedbackPanel());
+
                 final String currentUserId = LamusSession.get().getUserId();
 		final URI selectedNodeURI = createWsForm.getModelObject().getNodeURI();
 		// Request a new workspace with workspace service
@@ -174,10 +177,11 @@ public class CreateWorkspacePage extends LamusPage {
         createWsForm.add(warningMessage);
 
         
-        addTopNodeButton = new Button("addTopNode") {
+        addTopNodeButton = new IndicatingAjaxButton("addTopNode") {
+
             @Override
-            public void onSubmit() {
-                super.onSubmit(); //To change body of generated methods, choose Tools | Templates.
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form); //To change body of generated methods, choose Tools | Templates.
             }
         };
         addTopNodeButton.setEnabled(false);

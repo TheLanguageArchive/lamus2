@@ -86,12 +86,14 @@ public class WorkspacePage extends LamusPage {
 	this.model = model;
 
 	wsTreePanel = createWorkspaceTreePanel("workspaceTree");
+        wsTreePanel.setOutputMarkupId(true);
 	add(wsTreePanel);
-	add(new ButtonPanel("buttonPanel", model));
+	add(new ButtonPanel("buttonPanel", model, getFeedbackPanel()));
 
 	wsNodeActionsPanel =
                 new WsNodeActionsPanel("wsNodeActionsPanel",
-                new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes())) {
+                new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes()),
+                getFeedbackPanel()) {
 	    @Override
 	    public void refreshTreeAndPanels() {
 		WorkspacePage.this.refreshTreeAndPanels();
@@ -126,7 +128,7 @@ public class WorkspacePage extends LamusPage {
         tabs.add(new AbstractTab(new Model<>(getLocalizer().getString("upload_files_tab_panel", this))) {
             @Override
             public WebMarkupContainer getPanel(String panelId) {
-                return new UploadPanel(panelId, model);
+                return new UploadPanel(panelId, model, getFeedbackPanel());
             }
         });
         add(new TabbedPanel("workspaceTabs", tabs));
@@ -223,7 +225,7 @@ public class WorkspacePage extends LamusPage {
     
     private IModel<WorkspaceTreeNode> getSelectedNodesModel(WorkspaceTreeNode selectedNode) {
         
-        IModel<WorkspaceTreeNode> nodeInfoModel = null;
+        IModel<WorkspaceTreeNode> nodeInfoModel;
         if(selectedNode != null) {
             nodeInfoModel = new CompoundPropertyModel<>(selectedNode);
         } else {

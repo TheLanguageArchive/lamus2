@@ -28,7 +28,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -37,7 +37,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  *
  * @author guisil
  */
-public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNode>> {
+public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<WorkspaceTreeNode>> {
 
     @SpringBean
     private WsNodeActionsProvider nodeActionsProvider;
@@ -47,8 +47,8 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
     
     private Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
 
-    public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model) {
-	super(id, model);
+    public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model, FeedbackPanel feedbackPanel) {
+	super(id, model, feedbackPanel);
 	form = new Form<>("wsNodeActionsForm", model);
         
         //TODO should this also be part of the services?
@@ -75,7 +75,7 @@ public class WsNodeActionsPanel extends GenericPanel<Collection<WorkspaceTreeNod
                 
                 Button nodeActionButton = new WsNodeActionButton(
                         "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes, li.getModelObject(),
-                        WsNodeActionsPanel.this.workspaceService) {
+                        WsNodeActionsPanel.this.workspaceService, getFeedbackPanel()) {
 
                     @Override
                     public void refreshStuff() {
