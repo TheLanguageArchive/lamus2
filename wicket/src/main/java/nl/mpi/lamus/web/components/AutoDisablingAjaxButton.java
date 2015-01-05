@@ -16,21 +16,35 @@
  */
 package nl.mpi.lamus.web.components;
 
-import org.apache.wicket.ajax.attributes.AjaxCallListener;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.model.IModel;
 
 /**
- * Extension of AutoDisablingAjaxButton which includes a confirmation dialog.
+ * Extension of IndicatingAjaxButton which
+ * discards any call once there is an active request running.
+ * This prevents multiple requests to be triggered by
+ * accidentally clicking the button more than once.
  * @author guisil
  */
-public class ConfirmationAjaxButton extends AutoDisablingAjaxButton {
+public class AutoDisablingAjaxButton extends IndicatingAjaxButton {
     
-    private final String text;
-    
-    public ConfirmationAjaxButton(String id, String text) {
+    public AutoDisablingAjaxButton(String id) {
         super(id);
-        this.text = text;
+    }
+    
+    public AutoDisablingAjaxButton(String id, Form<?> form) {
+        super(id, form);
+    }
+    
+    public AutoDisablingAjaxButton(String id, IModel<String> model) {
+        super(id, model);
+    }
+    
+    public AutoDisablingAjaxButton(String id, IModel<String> model, Form<?> form) {
+        super(id, model, form);
     }
 
     /**
@@ -41,8 +55,6 @@ public class ConfirmationAjaxButton extends AutoDisablingAjaxButton {
         
         super.updateAjaxAttributes(attributes);
         
-        AjaxCallListener ajaxCallListener = new AjaxCallListener();
-        ajaxCallListener.onPrecondition("return confirm('" + text + "');");
-        attributes.getAjaxCallListeners().add(ajaxCallListener);
+        attributes.setChannel(new AjaxChannel("autodisable", AjaxChannel.Type.ACTIVE));
     }
 }

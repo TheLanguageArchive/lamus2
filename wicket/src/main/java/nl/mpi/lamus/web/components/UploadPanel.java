@@ -35,7 +35,6 @@ import nl.mpi.lamus.workspace.upload.implementation.LinkUploadProblem;
 import nl.mpi.lamus.workspace.upload.implementation.MatchUploadProblem;
 import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -109,7 +108,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
             //setMaxSize(Bytes.kilobytes(100));
             
             
-            add(new IndicatingAjaxButton("uploadButton", this) {
+            add(new AutoDisablingAjaxButton("uploadButton", this) {
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                     target.add(getFeedbackPanel());

@@ -28,6 +28,7 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.web.components.AutoDisablingAjaxButton;
 import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Session;
@@ -149,7 +150,7 @@ public class CreateWorkspacePage extends LamusPage {
 	createWsForm.add(new Label("nodeURI"));
         createWsForm.add(new Label("type"));
 
-	createWorkspaceButton = new IndicatingAjaxButton("createWorkspace") {
+	createWorkspaceButton = new AutoDisablingAjaxButton("createWorkspace") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
