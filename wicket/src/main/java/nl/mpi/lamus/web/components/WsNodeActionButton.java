@@ -26,10 +26,10 @@ import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.Model;
 
 /**
@@ -37,31 +37,27 @@ import org.apache.wicket.model.Model;
  * 
  * @author guisil
  */
-public class WsNodeActionButton extends Button {
+public class WsNodeActionButton extends AutoDisablingAjaxButton {
     
     private final Collection<WorkspaceTreeNode> selectedTreeNodes;
     private Collection<WorkspaceTreeNode> selectedChildNodes;
     private final WsTreeNodesAction action;
     private final WorkspaceService workspaceService;
     
-    private final FeedbackPanel feedbackPanel;
-    
     public WsNodeActionButton(
             String id, Collection<WorkspaceTreeNode> selectedTreeNodes,
             Collection<WorkspaceTreeNode> selectedChildNodes,
-            WsTreeNodesAction action, WorkspaceService wsService, FeedbackPanel feedbackPanel) {
+            WsTreeNodesAction action, WorkspaceService wsService) {
         super(id, new Model<>(action.getName()));
         this.selectedTreeNodes = selectedTreeNodes;
         this.selectedChildNodes = selectedChildNodes;
         this.action = action;
         this.workspaceService = wsService;
-        
-        this.feedbackPanel = feedbackPanel;
     }
 
     @Override
-    public void onSubmit() {
-        
+    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+    
         final String currentUserId = LamusSession.get().getUserId();
         try {
             
@@ -77,10 +73,12 @@ public class WsNodeActionButton extends Button {
             Session.get().error(ex.getMessage());
         }
         
+        target.add(getPage().get("workspaceTree"));
+        target.add(getPage().get("workspaceTabs"));
+//        target.add(getPage().get("wsNodeActionsPanel"));
+        
         refreshStuff();
     }
-	
-    
     public void refreshStuff() {
         
     }

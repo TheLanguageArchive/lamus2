@@ -75,7 +75,7 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                 
                 Button nodeActionButton = new WsNodeActionButton(
                         "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes, li.getModelObject(),
-                        WsNodeActionsPanel.this.workspaceService, getFeedbackPanel()) {
+                        WsNodeActionsPanel.this.workspaceService) {
 
                     @Override
                     public void refreshStuff() {

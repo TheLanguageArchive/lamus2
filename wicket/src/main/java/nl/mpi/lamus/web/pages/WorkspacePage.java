@@ -131,7 +131,9 @@ public class WorkspacePage extends LamusPage {
                 return new UploadPanel(panelId, model, getFeedbackPanel());
             }
         });
-        add(new TabbedPanel("workspaceTabs", tabs));
+        TabbedPanel tabbedPanel = new TabbedPanel("workspaceTabs", tabs);
+        tabbedPanel.setOutputMarkupId(true);
+        add(tabbedPanel);
     }
 
     /**
@@ -240,9 +242,6 @@ public class WorkspacePage extends LamusPage {
         //TODO some other way of updating the tree?
         wsTreePanel.getTree().invalidateAll();
         
-        if(linkNodesPanel != null) {
-            linkNodesPanel.render();
-        }
     }
     
     protected void refreshSelectedUnlinkedNodes() {
