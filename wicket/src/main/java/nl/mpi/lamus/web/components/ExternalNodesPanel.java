@@ -85,6 +85,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     void onAddItem(AjaxRequestTarget target) {
         linkVisible = true;
         addComponentToTarget(target);
+        target.add(this);
     }
 
     void onCancelItem(AjaxRequestTarget target) {
@@ -107,7 +108,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
 
             setOutputMarkupId(true);
 
-            externalUrlField = new TextField<String>("externalUrl", Model.of(""));
+            externalUrlField = new TextField<>("externalUrl", Model.of(""));
             externalUrlField.add(new UrlValidator());
             add(externalUrlField);
 
@@ -133,9 +134,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
 
                         workspaceService.addNode(LamusSession.get().getUserId(), externalNode);
 
-                    } catch (WorkspaceNotFoundException ex) {
-                        error(ex.getMessage());
-                    } catch (WorkspaceAccessException ex) {
+                    } catch (WorkspaceNotFoundException | WorkspaceAccessException ex) {
                         error(ex.getMessage());
                     }
 
