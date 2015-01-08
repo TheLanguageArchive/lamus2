@@ -16,10 +16,15 @@
 package nl.mpi.lamus.service.implementation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.ProtectedNodeException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -73,7 +78,7 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
     public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID) {
         
         List<WorkspaceNode> nodes = super.listUnlinkedNodes(userID, workspaceID);
-        List<WorkspaceTreeNode> treeNodes = new ArrayList<WorkspaceTreeNode>();
+        List<WorkspaceTreeNode> treeNodes = new ArrayList<>();
         
         for(WorkspaceNode node : nodes) {
             
@@ -82,5 +87,17 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
         }
         
         return treeNodes;
+    }
+
+    /**
+     * @see WorkspaceTreeService#deleteTreeNodes(java.lang.String, java.util.Collection)
+     */
+    @Override
+    public void deleteTreeNodes(String userID, Collection<WorkspaceTreeNode> nodesToDelete)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
+        
+        for(WorkspaceTreeNode node : nodesToDelete) {
+            deleteNode(userID, node);
+        }
     }
 }

@@ -15,8 +15,13 @@
  */
 package nl.mpi.lamus.service;
 
+import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -46,4 +51,13 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * @return list of unlinked nodes
      */
     public List<WorkspaceTreeNode> listUnlinkedTreeNodes(String userID, int workspaceID);
+    
+    /**
+     * Deletes the given collection of nodes.
+     * 
+     * @param userID ID of the user
+     * @param nodes Collection of nodes to delete
+     */
+    public void deleteTreeNodes(String userID, Collection<WorkspaceTreeNode> nodes)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
 }
