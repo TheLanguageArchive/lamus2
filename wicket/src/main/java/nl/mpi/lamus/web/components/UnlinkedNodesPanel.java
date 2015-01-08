@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
@@ -34,6 +34,8 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -46,7 +48,7 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.TableTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.CheckedFolder;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
 import org.apache.wicket.extensions.markup.html.repeater.tree.table.TreeColumn;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
@@ -65,15 +67,19 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     public static final PackageResourceReference DELETE_IMAGE_RESOURCE_REFERENCE = new PackageResourceReference(LamusPage.class, "delete.gif");
     
     @SpringBean
-    private WorkspaceService workspaceService;
+    private WorkspaceTreeService workspaceService;
     
     private AbstractTree<WorkspaceTreeNode> unlinkedNodesTree;
     
     private Collection<WorkspaceTreeNode> checked;
     
+    private UnlinkedNodesModelProvider unlinkedNodesProvider;
+    
     
     public UnlinkedNodesPanel(String id, IModel<Workspace> model, UnlinkedNodesModelProvider provider, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
+        
+        unlinkedNodesProvider = provider;
         
         checked = new ArrayList<>();
         
@@ -81,6 +87,25 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         unlinkedNodesTree.setOutputMarkupPlaceholderTag(true);
         
         add(unlinkedNodesTree);
+        
+        add(new AutoDisablingAjaxLink("delete_all_link") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                target.add(UnlinkedNodesPanel.this);
+                deleteAllUnlinkedNodes();
+            }
+
+        });
+        add(new AutoDisablingAjaxLink("delete_selected_link") {
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                target.add(UnlinkedNodesPanel.this);
+                deleteSelectedUnlinkedNodes();
+            }
+
+        });
         
         setOutputMarkupId(true);
     }
@@ -152,15 +177,22 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
             @Override
             public void populateItem(Item<ICellPopulator<WorkspaceTreeNode>> cellItem, String componentId, IModel<WorkspaceTreeNode> model) {
                 
-                Link<WorkspaceTreeNode> deleteLink =new Link<WorkspaceTreeNode>(componentId, model) {
+                if(model.getObject().getParent() != null) {
+                    cellItem.add(new Label(componentId).setVisible(false));
+                    return;
+                }
+                
+                AjaxLink<WorkspaceTreeNode> deleteLink =new AutoDisablingAjaxLink<WorkspaceTreeNode>(componentId, model) {
 
                     @Override
-                    public void onClick() {
+                    public void onClick(AjaxRequestTarget target) {
                         
                         try {
                             //TODO Add confirmation dialog
                             workspaceService.deleteNode(LamusSession.get().getUserId(), getModelObject());
 
+                            target.add(UnlinkedNodesPanel.this);
+                            
                         } catch (WorkspaceException | ProtectedNodeException ex) {
                             error(ex.getMessage());
                         }
@@ -205,6 +237,25 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         
         send(this, Broadcast.BUBBLE, new SelectedUnlinkedNodesWrapper(checked));
     }
+    
+    
+    private void deleteAllUnlinkedNodes() {
+        List<WorkspaceTreeNode> unlinkedNodes = workspaceService.listUnlinkedTreeNodes(LamusSession.get().getUserId(), getModelObject().getWorkspaceID());
+        try {
+            workspaceService.deleteTreeNodes(LamusSession.get().getUserId(), unlinkedNodes);
+        } catch (WorkspaceException | ProtectedNodeException ex) {
+            error(ex.getMessage());
+        }
+    }
+    
+    private void deleteSelectedUnlinkedNodes() {
+        try {
+            workspaceService.deleteTreeNodes(LamusSession.get().getUserId(), checked);
+        } catch (WorkspaceException | ProtectedNodeException ex) {
+            error(ex.getMessage());
+        }
+    }
+    
 
     @Override
     public void onEvent(IEvent<?> event) {
