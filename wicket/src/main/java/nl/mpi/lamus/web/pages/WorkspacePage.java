@@ -30,6 +30,7 @@ import nl.mpi.lamus.web.components.LinkNodesPanel;
 import nl.mpi.lamus.web.components.UploadPanel;
 import nl.mpi.lamus.web.components.WorkspaceInfoPanel;
 import nl.mpi.lamus.web.components.WsNodeActionsPanel;
+import nl.mpi.lamus.web.model.ClearSelectedTreeNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
@@ -77,6 +78,8 @@ public class WorkspacePage extends LamusPage {
     
     
     private Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
+    
+    private LinkedTreeModelProvider workspaceTreeProvider;
     
     
     //TODO Make it possible to have multiple selection
@@ -149,7 +152,7 @@ public class WorkspacePage extends LamusPage {
         } catch (WorkspaceNodeNotFoundException ex) {
             Session.get().error(ex.getMessage());
         }
-        LinkedTreeModelProvider workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(rootNode);
+        workspaceTreeProvider = this.workspaceTreeProviderFactory.createTreeModelProvider(rootNode);
 
 	ArchiveTreePanel treePanel = new ArchiveTreePanel(id, workspaceTreeProvider, treeIconProvider);
         
@@ -178,7 +181,6 @@ public class WorkspacePage extends LamusPage {
 		if (target != null) {
                     
                     if(wsInfoPanel != null) {
-//                        target.add(wsInfoPanel);
                         target.add(wsInfoPanel.getNodeInfoPanel());
                     }
                     
@@ -260,6 +262,15 @@ public class WorkspacePage extends LamusPage {
         if(event.getPayload() instanceof ClearSelectedUnlinkedNodes) {
             selectedUnlinkedNodes = new ArrayList<>();
             send(linkNodesPanel, Broadcast.BREADTH, event.getPayload());
+        }
+        
+        if(event.getPayload() instanceof ClearSelectedTreeNodes) {
+
+            for(Object node : wsTreePanel.getTree().getTreeState().getSelectedNodes()) {
+                wsTreePanel.getTree().getTreeState().selectNode(node, false);
+            }
+            
+            wsNodeActionsPanel.setModelObject(new ArrayList<WorkspaceTreeNode>());
         }
     }
 }

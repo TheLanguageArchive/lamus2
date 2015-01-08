@@ -18,11 +18,24 @@ package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.exception.ProtectedNodeException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.model.ClearSelectedTreeNodes;
+import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
+import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.ReplaceNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -74,7 +87,7 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
             protected void populateItem(ListItem<WsTreeNodesAction> li) {
                 
                 Button nodeActionButton = new WsNodeActionButton(
-                        "nodeActionButton", WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes, li.getModelObject(),
+                        "nodeActionButton", li.getModelObject(),
                         WsNodeActionsPanel.this.workspaceService) {
 
                     @Override
@@ -86,7 +99,35 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                     public void refreshSelectedUnlinkedNodes() {
                         WsNodeActionsPanel.this.refreshSelectedUnlinkedNodes();
                     }
-                    
+
+                    @Override
+                    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                        
+                        final String currentUserId = LamusSession.get().getUserId();
+                        try {
+
+                            setActionParameters(WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes);
+
+                            if(getAction() instanceof UnlinkNodesAction || getAction() instanceof DeleteNodesAction || getAction() instanceof ReplaceNodesAction) {
+                                //tell the page to clear the selected nodes from the tree
+                                send(this, Broadcast.BUBBLE, new ClearSelectedTreeNodes());
+                            }
+
+                            executeAction(currentUserId);
+
+                            //tell the unlinked nodes panel to clear the selected unlinked nodes
+                            send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
+
+                        } catch(WorkspaceException | IllegalArgumentException | ProtectedNodeException ex) {
+                            Session.get().error(ex.getMessage());
+                        }
+
+                        target.add(WsNodeActionsPanel.this.getPage().get("workspaceTree"));
+                        target.add(WsNodeActionsPanel.this.getPage().get("workspaceTabs"));
+                        target.add(WsNodeActionsPanel.this);
+
+                        refreshStuff();
+                    }
                 };
                 
                 nodeActionButton.add(AttributeModifier.append("class", new Model<>(getIconNameForNodeAction(li.getModelObject()))));
@@ -125,5 +166,14 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
         }
         
         return "";
+    }
+    
+    
+    @Override
+    public void onEvent(IEvent<?> event) {
+        
+        if(event.getPayload() instanceof SelectedUnlinkedNodesWrapper) {
+            setSelectedUnlinkedNodes(((SelectedUnlinkedNodesWrapper) event.getPayload()).getSelectedUnlinkedNodes());
+        }
     }
 }

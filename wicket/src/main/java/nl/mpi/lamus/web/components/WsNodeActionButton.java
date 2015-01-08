@@ -18,18 +18,12 @@ package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
 import nl.mpi.lamus.exception.ProtectedNodeException;
+import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
-import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.Model;
 
 /**
@@ -39,46 +33,16 @@ import org.apache.wicket.model.Model;
  */
 public class WsNodeActionButton extends AutoDisablingAjaxButton {
     
-    private final Collection<WorkspaceTreeNode> selectedTreeNodes;
-    private Collection<WorkspaceTreeNode> selectedChildNodes;
     private final WsTreeNodesAction action;
     private final WorkspaceService workspaceService;
     
     public WsNodeActionButton(
-            String id, Collection<WorkspaceTreeNode> selectedTreeNodes,
-            Collection<WorkspaceTreeNode> selectedChildNodes,
-            WsTreeNodesAction action, WorkspaceService wsService) {
+            String id, WsTreeNodesAction action, WorkspaceService wsService) {
         super(id, new Model<>(action.getName()));
-        this.selectedTreeNodes = selectedTreeNodes;
-        this.selectedChildNodes = selectedChildNodes;
         this.action = action;
         this.workspaceService = wsService;
     }
 
-    @Override
-    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-    
-        final String currentUserId = LamusSession.get().getUserId();
-        try {
-            
-            this.action.setSelectedTreeNodes(selectedTreeNodes);
-            this.action.setSelectedUnlinkedNodes(selectedChildNodes);
-            
-            this.action.execute(currentUserId, workspaceService);
-            
-            //tell the unlinked nodes panel to clear the selected nodes
-            send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
-            
-        } catch(WorkspaceException | IllegalArgumentException | ProtectedNodeException ex) {
-            Session.get().error(ex.getMessage());
-        }
-        
-        target.add(getPage().get("workspaceTree"));
-        target.add(getPage().get("workspaceTabs"));
-//        target.add(getPage().get("wsNodeActionsPanel"));
-        
-        refreshStuff();
-    }
     public void refreshStuff() {
         
     }
@@ -87,12 +51,17 @@ public class WsNodeActionButton extends AutoDisablingAjaxButton {
         
     }
 
-    @Override
-    public void onEvent(IEvent<?> event) {
-        
-        if(event.getPayload() instanceof SelectedUnlinkedNodesWrapper) {
-            this.selectedChildNodes = ((SelectedUnlinkedNodesWrapper) event.getPayload()).getSelectedUnlinkedNodes();
-        }
+    public WsTreeNodesAction getAction() {
+        return action;
+    }
+    
+    public void setActionParameters(Collection<WorkspaceTreeNode> selectedTreeNodes, Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
+        action.setSelectedTreeNodes(selectedTreeNodes);
+        action.setSelectedUnlinkedNodes(selectedUnlinkedNodes);
+    }
+    
+    public void executeAction(String currentUserId) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
+        action.execute(currentUserId, workspaceService);
     }
     
 }
