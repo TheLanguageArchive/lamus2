@@ -41,8 +41,8 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.extensions.ajax.markup.html.tabs.AjaxTabbedPanel;
 import org.apache.wicket.extensions.markup.html.tabs.AbstractTab;
-import org.apache.wicket.extensions.markup.html.tabs.TabbedPanel;
 import org.apache.wicket.extensions.markup.html.tree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -134,7 +134,7 @@ public class WorkspacePage extends LamusPage {
                 return new UploadPanel(panelId, model, getFeedbackPanel());
             }
         });
-        TabbedPanel tabbedPanel = new TabbedPanel("workspaceTabs", tabs);
+        AjaxTabbedPanel tabbedPanel = new AjaxTabbedPanel("workspaceTabs", tabs);
         tabbedPanel.setOutputMarkupId(true);
         add(tabbedPanel);
     }
