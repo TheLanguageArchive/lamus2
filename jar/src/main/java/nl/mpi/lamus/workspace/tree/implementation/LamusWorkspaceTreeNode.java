@@ -58,8 +58,8 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 	    throw new IllegalArgumentException("The WorkspaceService object should not be null.");
 	}
 
-	this.parentTreeNode = parent;
-	this.workspaceDao = dao;
+	parentTreeNode = parent;
+	workspaceDao = dao;
     }
 
     public LamusWorkspaceTreeNode(WorkspaceNode node, WorkspaceTreeNode parent, WorkspaceDao dao) {
@@ -73,8 +73,8 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 	    throw new IllegalArgumentException("The WorkspaceDao object should not be null.");
 	}
 
-	this.parentTreeNode = parent;
-	this.workspaceDao = dao;
+	parentTreeNode = parent;
+	workspaceDao = dao;
     }
 
     /**
@@ -82,7 +82,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public WorkspaceTreeNode getChild(int index) {
-	return this.getChildren().get(index);
+	return getChildren().get(index);
     }
 
     /**
@@ -90,7 +90,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public int getChildCount() {
-	return this.getChildren().size();
+	return getChildren().size();
     }
 
     /**
@@ -98,7 +98,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public int getIndexOfChild(LinkedTreeNode child) {
-	return this.getChildren().indexOf(child);
+	return getChildren().indexOf(child);
     }
 
     /**
@@ -106,12 +106,15 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
      */
     @Override
     public WorkspaceTreeNode getParent() {
-	return this.parentTreeNode;
+	return parentTreeNode;
     }
 
+    /**
+     * @see WorkspaceTreeNode#getChildren()
+     */
     @Override
     public List<WorkspaceTreeNode> getChildren() {
-	Collection<WorkspaceNode> children = this.workspaceDao.getChildWorkspaceNodes(this.getWorkspaceNodeID());
+	Collection<WorkspaceNode> children = workspaceDao.getChildWorkspaceNodes(getWorkspaceNodeID());
 	List<WorkspaceTreeNode> childrenTreeNodes = new ArrayList<>(children.size());
 	for (WorkspaceNode child : children) {
 	    WorkspaceTreeNode treeNode = new LamusWorkspaceTreeNode(
@@ -119,10 +122,20 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
 		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
 		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
-		    child.isProtected(), child.getFormat(), this, this.workspaceDao);
+		    child.isProtected(), child.getFormat(), this, workspaceDao);
 	    childrenTreeNodes.add(treeNode);
 	}
 	return childrenTreeNodes;
+    }
+
+    /**
+     * @see WorkspaceTreeNode#isTopNodeOfWorkspace()
+     */
+    @Override
+    public boolean isTopNodeOfWorkspace() {
+        
+        int topNodeID = workspaceDao.getWorkspaceTopNodeID(getWorkspaceID());
+        return getWorkspaceNodeID() == topNodeID;
     }
 
     @Override
@@ -130,7 +143,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 
 	HashCodeBuilder hashCodeB = new HashCodeBuilder()
 		.appendSuper(super.hashCode())
-		.append(this.parentTreeNode);
+		.append(parentTreeNode);
 
 	return hashCodeB.toHashCode();
     }
@@ -149,7 +162,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 
 	EqualsBuilder equalsB = new EqualsBuilder()
 		.appendSuper(super.equals(obj))
-		.append(this.parentTreeNode, other.getParent());
+		.append(parentTreeNode, other.getParent());
 
 	return equalsB.isEquals();
     }

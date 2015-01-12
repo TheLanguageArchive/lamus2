@@ -605,6 +605,30 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return topWorkspaceNode;
     }
+
+    /**
+     * @see WorkspaceDao#getWorkspaceTopNodeID(int)
+     */
+    @Override
+    public int getWorkspaceTopNodeID(int workspaceID) {
+        
+        logger.debug("Retrieving top node ID of workspace with ID: " + workspaceID);
+        
+        String queryWorkspaceNodeSql = "SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        int topWorkspaceNodeID = -1;
+        try {
+            topWorkspaceNodeID = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, Integer.class);
+        } catch(EmptyResultDataAccessException ex) {
+            String errorMessage = "Top node for workspace with ID " + workspaceID + " does not exist in the database";
+            logger.error(errorMessage, ex);
+        }
+        
+        logger.info("Top node for workspace with ID " + workspaceID + " retrieved from the database");
+        
+        return topWorkspaceNodeID;
+    }
     
     /**
      * @see WorkspaceDao#getNodesForWorkspace(int)

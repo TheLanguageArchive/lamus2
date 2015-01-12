@@ -48,6 +48,7 @@ public class LamusWsNodeActionsProviderTest {
     @Mock WorkspaceTreeNode mockWorkspaceNodeMetadataOne;
     @Mock WorkspaceTreeNode mockWorkspaceNodeExternal;
     @Mock WorkspaceTreeNode mockWorkspaceNodeProtected;
+    @Mock WorkspaceTreeNode mockWorkspaceTopNode;
     
     private WsNodeActionsProvider wsNodeActionsProvider;
     
@@ -55,6 +56,7 @@ public class LamusWsNodeActionsProviderTest {
     private List<WsTreeNodesAction> expectedMetadataNodeActions;
     private List<WsTreeNodesAction> expectedExternalNodeActions;
     private List<WsTreeNodesAction> expectedProtectedNodeActions;
+    private List<WsTreeNodesAction> expectedTopNodeActions;
 
     private List<WsTreeNodesAction> expectedMultipleNodesActions;
     
@@ -98,6 +100,10 @@ public class LamusWsNodeActionsProviderTest {
         expectedProtectedNodeActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "protectedActions", expectedProtectedNodeActions);
         
+        expectedTopNodeActions = new ArrayList<>();
+        expectedTopNodeActions.add(new LinkNodesAction());
+        ReflectionTestUtils.setField(wsNodeActionsProvider, "topNodeActions", expectedTopNodeActions);
+        
         expectedMultipleNodesActions = new ArrayList<>();
         ReflectionTestUtils.setField(wsNodeActionsProvider, "multipleNodesActions", expectedMultipleNodesActions);
     }
@@ -118,12 +124,13 @@ public class LamusWsNodeActionsProviderTest {
     }
     
     @Test
-    public void getActionsOneResource() {
+    public void getActionsSingleResourceNode() {
         
         Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
         nodes.add(mockWorkspaceNodeResourceOne);
         
         context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeResourceOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isExternal(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isMetadata(); will(returnValue(Boolean.FALSE));
@@ -135,12 +142,13 @@ public class LamusWsNodeActionsProviderTest {
     }
     
     @Test
-    public void getActionsOneMetadata() {
+    public void getActionsSingleMetadataNode() {
         
         Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
         nodes.add(mockWorkspaceNodeMetadataOne);
         
         context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeMetadataOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isExternal(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isMetadata(); will(returnValue(Boolean.TRUE));
@@ -152,12 +160,13 @@ public class LamusWsNodeActionsProviderTest {
     }
     
     @Test
-    public void getActionsOneExternal() {
+    public void getActionsSingleExternalNode() {
         
         Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
         nodes.add(mockWorkspaceNodeExternal);
         
         context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeExternal).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeExternal).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeExternal).isExternal(); will(returnValue(Boolean.TRUE));
         }});
@@ -168,18 +177,34 @@ public class LamusWsNodeActionsProviderTest {
     }
     
     @Test
-    public void getActionsOneProtected() {
+    public void getActionsSingleProtectedNode() {
         
         Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
         nodes.add(mockWorkspaceNodeProtected);
         
         context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeProtected).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeProtected).isProtected(); will(returnValue(Boolean.TRUE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
         
         assertEquals("Retrieved node actions different from expected", expectedProtectedNodeActions, retrievedNodeActions);
+    }
+    
+    @Test
+    public void getActionsSingleTopNode() {
+        
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
+        nodes.add(mockWorkspaceTopNode);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceTopNode).isTopNodeOfWorkspace(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
+        
+        assertEquals("Retrieved node actions different from expected", expectedTopNodeActions, retrievedNodeActions);
     }
     
     //TODO Other types

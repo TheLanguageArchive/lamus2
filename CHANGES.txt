@@ -1,5 +1,10 @@
 lamus2-1.1.1
 
+    Additions:
+        - REMOVE UNLINKED NODES: Added the option of removing all or the selected
+          unlinked nodes from the unlinked nodes table.
+        - TOP NODE ACTIONS: Restricted the possible actions on the top node.
+
     Changes:
         - CS2: Updated the version of the CS2 libraries.
     Fixes:
@@ -7,6 +12,8 @@ lamus2-1.1.1
           including the confirmation dialogs, which had to be done in a different
           way for the ajax version of the buttons, and also the update of the
           feedback panel.
+        - UI AJAX: Fixed several issues regarding the UI, like clicking of buttons
+          in succession or refreshing different panels after some click.
 
 lamus2-1.1.0 (2014-12-12)
 

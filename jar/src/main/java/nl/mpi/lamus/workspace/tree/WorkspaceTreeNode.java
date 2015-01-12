@@ -59,4 +59,9 @@ public interface WorkspaceTreeNode extends LinkedTreeNode, WorkspaceNode {
      * @return children of the node
      */
     public List<WorkspaceTreeNode> getChildren();
+    
+    /**
+     * @return true if this is the top node of the workspace
+     */
+    public boolean isTopNodeOfWorkspace();
 }

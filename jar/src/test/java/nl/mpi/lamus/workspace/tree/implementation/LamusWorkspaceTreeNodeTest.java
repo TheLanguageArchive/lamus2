@@ -32,7 +32,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.*;
 
 /**
@@ -78,7 +78,7 @@ public class LamusWorkspaceTreeNodeTest {
                 null, mockWorkspaceDao);
         
         URI nodeURI = new URI(UUID.randomUUID().toString());
-        treeNode = new LamusWorkspaceTreeNode(1, 10, new URI("file:/some.uri"),
+        treeNode = new LamusWorkspaceTreeNode(10, 1, new URI("file:/some.uri"),
                 "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/some/fake1.url"), nodeURI, new URL("file:/some/fake3.url"), new URL("file:/some/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
@@ -88,12 +88,12 @@ public class LamusWorkspaceTreeNodeTest {
         treeNodeChildren = new ArrayList<>();
         
         URI child1URI = new URI(UUID.randomUUID().toString());
-        child1 = new LamusWorkspaceNode(1, 20, new URI("file:/child1.uri"),
+        child1 = new LamusWorkspaceNode(20, 1, new URI("file:/child1.uri"),
                 "child1Name", "child1 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child1/fake1.url"), child1URI, new URL("file:/some/fake3.url"), new URL("file:/child1/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown");
         nodeChildren.add(child1);
-        childTreeNode1 = new LamusWorkspaceTreeNode(1, 20, new URI("file:/child1.uri"),
+        childTreeNode1 = new LamusWorkspaceTreeNode(20, 1, new URI("file:/child1.uri"),
                 "child1Name", "child1 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child1/fake1.url"), child1URI, new URL("file:/some/fake3.url"), new URL("file:/child1/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
@@ -101,12 +101,12 @@ public class LamusWorkspaceTreeNodeTest {
         treeNodeChildren.add(childTreeNode1);
         
         URI child2URI = new URI(UUID.randomUUID().toString());
-        child2 = new LamusWorkspaceNode(1, 21, new URI("file:/child2.uri"),
+        child2 = new LamusWorkspaceNode(21, 1, new URI("file:/child2.uri"),
                 "child2Name", "child2 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child2/fake1.url"), child2URI, new URL("file:/some/fake3.url"), new URL("file:/child2/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown");
         nodeChildren.add(child2);
-        childTreeNode2 = new LamusWorkspaceTreeNode(1, 21, new URI("file:/child2.uri"),
+        childTreeNode2 = new LamusWorkspaceTreeNode(21, 1, new URI("file:/child2.uri"),
                 "child2Name", "child2 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child2/fake1.url"), child2URI, new URL("file:/some/fake3.url"), new URL("file:/child2/fake3.url"),
                 WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
@@ -118,11 +118,9 @@ public class LamusWorkspaceTreeNodeTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of getChild method, of class LamusWorkspaceTreeNode.
-     */
+    
     @Test
-    public void testGetChild() {
+    public void getChild() {
         
         int index = 0;
         
@@ -134,20 +132,10 @@ public class LamusWorkspaceTreeNodeTest {
         WorkspaceTreeNode retrievedChild = treeNode.getChild(index);
         
         assertEquals("Retrieved child tree node different from expected", treeNodeChildren.get(index), retrievedChild);
-        
-//        context.checking(new Expectations() {{
-//            
-//            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
-//        }});
-//        
-//        treeNode.getChild(index);
     }
 
-    /**
-     * Test of getChildCount method, of class LamusWorkspaceTreeNode.
-     */
     @Test
-    public void testGetChildCount() {
+    public void getChildCount() {
         
         context.checking(new Expectations() {{
             
@@ -157,20 +145,10 @@ public class LamusWorkspaceTreeNodeTest {
         int childCount = treeNode.getChildCount();
         
         assertEquals("Child count different from expected", treeNodeChildren.size(), childCount);
-        
-//        context.checking(new Expectations() {{
-//            
-//            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
-//        }});
-//        
-//        treeNode.getChildCount();
     }
 
-    /**
-     * Test of getIndexOfChild method, of class LamusWorkspaceTreeNode.
-     */
     @Test
-    public void testGetIndexOfChild() {
+    public void getIndexOfChild() {
         
         int index = 1;
         
@@ -182,23 +160,52 @@ public class LamusWorkspaceTreeNodeTest {
         int retrievedIndex = treeNode.getIndexOfChild(childTreeNode2);
         
         assertEquals("Retrieved index different from expected", index, retrievedIndex);
-        
-//        context.checking(new Expectations() {{
-//            
-//            never(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID());
-//        }});
-//        
-//        treeNode.getIndexOfChild(childTreeNode2);
     }
 
-    /**
-     * Test of getParent method, of class LamusWorkspaceTreeNode.
-     */
     @Test
-    public void testGetParent() {
+    public void getParent() {
         
         WorkspaceTreeNode retrievedTreeParent = treeNode.getParent();
         
         assertEquals("Retrieved parent tree nodes different from expected", parentTreeNode, retrievedTreeParent);
+    }
+    
+    @Test
+    public void getChildren() {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(treeNode.getWorkspaceNodeID()); will(returnValue(nodeChildren));
+        }});
+        
+        List<WorkspaceTreeNode> retrievedChildren = treeNode.getChildren();
+        
+        assertEquals("Retrieved list of children different from expected", treeNodeChildren, retrievedChildren);
+    }
+    
+    @Test
+    public void isTopNodeOfWorkspace() {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNodeID(parentTreeNode.getWorkspaceID()); will(returnValue(parentTreeNode.getWorkspaceNodeID()));
+        }});
+        
+        boolean result = parentTreeNode.isTopNodeOfWorkspace();
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void isNotTopNodeOfWorkspace() {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNodeID(treeNode.getWorkspaceID()); will(returnValue(parentTreeNode.getWorkspaceNodeID()));
+        }});
+        
+        boolean result = treeNode.isTopNodeOfWorkspace();
+        
+        assertFalse("Result should be false", result);
     }
 }

@@ -35,6 +35,7 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
     private final List<WsTreeNodesAction> metadataActions;
     private final List<WsTreeNodesAction> externalActions;
     private final List<WsTreeNodesAction> protectedActions;
+    private final List<WsTreeNodesAction> topNodeActions;
     
     //TODO actions with a different format?
     private final List<WsTreeNodesAction> multipleNodesActions;
@@ -60,6 +61,10 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         protectedActions = new ArrayList<>();
         protectedActions.add(new UnlinkNodesAction());
         
+        //TODO Replace should also be supported in the future
+        topNodeActions = new ArrayList<>();
+        topNodeActions.add(new LinkNodesAction());
+        
         multipleNodesActions = new ArrayList<>();
     }
     
@@ -70,19 +75,22 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
             return new ArrayList<>();
         } else if(nodes.size() == 1) {
             WorkspaceTreeNode next = nodes.iterator().next();
-            if(next.isProtected()) {
-                return this.protectedActions;
+            
+            if(next.isTopNodeOfWorkspace()) {
+                return topNodeActions;
+            } else if(next.isProtected()) {
+                return protectedActions;
             } else if(next.isExternal()) {
-                return this.externalActions;
+                return externalActions;
             } else if(!next.isMetadata()) {
-                return this.resourcesActions;
+                return resourcesActions;
             } else {
-                return this.metadataActions;
+                return metadataActions;
             }
         } else {
         
             //TODO multiple node actions
-            return this.multipleNodesActions;
+            return multipleNodesActions;
         }
     }
     

@@ -83,7 +83,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Configuration
-//    @ComponentScan("nl.mpi.lamus.dao")
     static class TransactionManagerConfig {
         
         @Autowired
@@ -1191,7 +1190,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL testURL = new URL("file:/archive/folder/test.cmdi");
         WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
         testWorkspace.setTopNodeID(testNode.getWorkspaceNodeID());
-//        testWorkspace.setTopNodeArchiveID(testNode.getArchiveNodeID());
         testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
         
@@ -1209,8 +1207,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URI testURI = new URI(UUID.randomUUID().toString());
         URL testURL = new URL("file:/archive/folder/test.cmdi");
         WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
-//        testWorkspace.setTopNodeID(testNode.getWorkspaceNodeID());
-//        testWorkspace.setTopNodeArchiveID(testNode.getArchiveNodeID());
         testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
         setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
         
@@ -1224,6 +1220,21 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
             assertEquals("Node ID should not be known", -1, ex.getWorkspaceNodeID());
             assertTrue("Cause has a different type from expected", ex.getCause() instanceof EmptyResultDataAccessException);
         }
+    }
+    
+    @Test
+    public void getWorkspaceTopNodeID() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = new URI(UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
+        
+        int retrievedNodeID = this.workspaceDao.getWorkspaceTopNodeID(testWorkspace.getWorkspaceID());
+        
+        assertEquals("Retrieved node ID different from expected", testNode.getWorkspaceNodeID(), retrievedNodeID);
     }
     
     @Test

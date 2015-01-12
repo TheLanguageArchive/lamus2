@@ -203,6 +203,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
+     * @see WorkspaceDao#getWorkspaceTopNodeID(int)
+     */
+    @Override
+    public int getWorkspaceTopNodeID(int workspaceID) {
+        return this.getWorkspaceDao().getWorkspaceTopNodeID(workspaceID);
+    }
+    
+    /**
      * @see WorkspaceDao#getNodesForWorkspace(int)
      */
     @Override

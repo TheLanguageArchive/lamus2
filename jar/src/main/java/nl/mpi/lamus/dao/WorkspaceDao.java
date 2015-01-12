@@ -171,6 +171,14 @@ public interface WorkspaceDao {
             throws WorkspaceNodeNotFoundException;
     
     /**
+     * Retrieves the ID of the top node of the given workspace.
+     * 
+     * @param workspaceID ID of the workspace
+     * @return ID of the top node of the workspace
+     */
+    public int getWorkspaceTopNodeID(int workspaceID);
+    
+    /**
      * Retrieves a collection containing all the nodes
      * of the workspace with the given ID.
      * 

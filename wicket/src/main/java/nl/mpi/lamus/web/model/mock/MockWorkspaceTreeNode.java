@@ -74,6 +74,11 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
         return parent;
     }
     
+    @Override
+    public boolean isTopNodeOfWorkspace() {
+        return parent == null;
+    }
+    
     public void setParent(WorkspaceTreeNode parent) {
         this.parent = parent;
     }
