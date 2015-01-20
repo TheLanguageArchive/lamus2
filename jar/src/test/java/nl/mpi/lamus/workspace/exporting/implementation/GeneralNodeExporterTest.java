@@ -232,7 +232,6 @@ public class GeneralNodeExporterTest {
         final boolean isNodeProtected = Boolean.FALSE;
         
         final String nodePathRelativeToParent = "child/" + nodeFilename;
-        final URL nodeUrlRelativeToParent = new URL(parentNodeArchiveLocalURL, nodePathRelativeToParent);
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -270,7 +269,7 @@ public class GeneralNodeExporterTest {
         }});
         
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
-                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, nodeUrlRelativeToParent, null);
+                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
         generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
     }
@@ -685,7 +684,6 @@ public class GeneralNodeExporterTest {
         final boolean isNodeProtected = Boolean.FALSE;
         
         final String nodePathRelativeToParent = "child/" + nodeFilename;
-        final URL nodeUrlRelativeToParent = new URL(parentNodeArchiveLocalURL, nodePathRelativeToParent);
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -711,7 +709,7 @@ public class GeneralNodeExporterTest {
         }});
         
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
-                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, nodeUrlRelativeToParent, null);
+                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
         generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode);
     }
@@ -731,10 +729,12 @@ public class GeneralNodeExporterTest {
     private void checkParentReferenceUpdateInvocations(
             final URI childArchiveURI, final URI parentArchiveURI, final URL parentWsURL, final File parentWsFile,
             final File parentArchiveLocalFile, final File childArchiveLocalFile,
-            final String childPathRelativeToParent, final URL childUrlRelativeToParent,
+            final String childPathRelativeToParent,
             final Exception expectedException) throws IOException, MetadataException, TransformerException, URISyntaxException {
         
 //        final File parentArchiveLocalFile = new File(new URI(parentArchiveLocalPath));
+        
+        final URI childUriRelativeToParent = URI.create(childPathRelativeToParent);
         
         context.checking(new Expectations() {{
             
@@ -760,7 +760,7 @@ public class GeneralNodeExporterTest {
 //            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
 //            oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
 //            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveURL));
-            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent.toURI());
+            oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             
             
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));

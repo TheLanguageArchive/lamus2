@@ -19,8 +19,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
@@ -193,7 +191,7 @@ public class GeneralNodeExporter implements NodeExporter {
         String currentPathRelativeToParent = 
                 archiveFileLocationProvider.getChildPathRelativeToParent(parentNodeArchiveFile, nodeArchiveFile);
         
-        updateReferenceInParent(workspaceID, currentNode, parentNode, parentNodeArchiveFile, referencingParentDocument, currentPathRelativeToParent);
+        updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
         
     }
     
@@ -229,18 +227,17 @@ public class GeneralNodeExporter implements NodeExporter {
         return referencingParentDocument;
     }
     
-    private void updateReferenceInParent(int workspaceID,
-            WorkspaceNode currentNode, WorkspaceNode parentNode, File parentArchiveLocalFile,
+    private void updateReferenceInParent(int workspaceID, WorkspaceNode currentNode, WorkspaceNode parentNode,
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getArchiveURI());
-            URI currentUrlRelativeToParent = new URL(parentArchiveLocalFile.toURI().toURL(), currentPathRelativeToParent).toURI();
-            currentReference.setLocation(currentUrlRelativeToParent);
+            URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
+            currentReference.setLocation(currentUriRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
             metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
             
-        } catch (URISyntaxException | IOException | MetadataException | TransformerException ex) {
+        } catch (IOException | MetadataException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }

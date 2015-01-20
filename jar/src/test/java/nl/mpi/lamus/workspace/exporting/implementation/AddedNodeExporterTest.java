@@ -171,7 +171,6 @@ public class AddedNodeExporterTest {
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
-        final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
         
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
@@ -197,8 +196,8 @@ public class AddedNodeExporterTest {
         checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
-                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveURL, parentNodeArchiveFile,
-                nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, null);
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, null);
         
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
@@ -235,7 +234,6 @@ public class AddedNodeExporterTest {
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
-        final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
         
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
@@ -261,8 +259,8 @@ public class AddedNodeExporterTest {
         checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
-                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveURL, parentNodeArchiveFile,
-                nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, null);
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, null);
         
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
@@ -299,7 +297,6 @@ public class AddedNodeExporterTest {
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
-        final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
         
         final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
         
@@ -327,8 +324,8 @@ public class AddedNodeExporterTest {
         checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
-                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveURL, parentNodeArchiveFile,
-                nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, null);
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, null);
         
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
         
@@ -562,7 +559,6 @@ public class AddedNodeExporterTest {
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
-        final URL childUrlRelativeToParent = new URL(parentNodeArchiveURL, childPathRelativeToParent);
         
         final String expectedErrorMessage = "Error writing file (updating child reference) for node " + parentNodeWsURL;
         final TransformerException expectedException = new TransformerException("some exception message");
@@ -593,8 +589,8 @@ public class AddedNodeExporterTest {
         checkFileMoveInvocations(isFileMetadata, nodeWsFile, nextAvailableFile);
         
         checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
-                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveURL, parentNodeArchiveFile,
-                nextAvailableFile, childPathRelativeToParent, childUrlRelativeToParent, expectedException);
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, expectedException);
         
         try {
             addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode);
@@ -776,9 +772,11 @@ public class AddedNodeExporterTest {
     
     private void checkParentReferenceUpdateInvocations(
             final URL nodeWsURL, final URI nodeNewArchiveHandle, final URI preparedNewArchiveHandle,
-            final URL parentNodeWsURL, final File parentNodeWsFile, final URL parentNodeArchiveURL, final File parentNodeArchiveFile,
-            final File nextAvailableFile, final String childPathRelativeToParent, final URL childUrlRelativeToParent,
+            final URL parentNodeWsURL, final File parentNodeWsFile, final File parentNodeArchiveFile,
+            final File nextAvailableFile, final String childPathRelativeToParent,
             final Exception expectedException) throws IOException, MetadataException, TransformerException, URISyntaxException {
+        
+        final URI childUriRelativeToParent = URI.create(childPathRelativeToParent);
         
         context.checking(new Expectations() {{
             
@@ -796,8 +794,7 @@ public class AddedNodeExporterTest {
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
             oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
-            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentNodeArchiveURL));
-            oneOf(mockResourceProxy).setLocation(childUrlRelativeToParent.toURI());
+            oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             
             
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
