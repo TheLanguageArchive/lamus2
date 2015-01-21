@@ -76,10 +76,13 @@ public class SelectWorkspacePage extends LamusPage {
      */
     private Form createNodeIdForm(String id) {
 
+        boolean showPanel = true;
         Workspace defaultSelectedWs = null;
         List<Workspace> myWSList = new ArrayList<>(workspaceService.listUserWorkspaces(currentUserId));
         if(!myWSList.isEmpty()) {
             defaultSelectedWs = myWSList.iterator().next();
+        } else {
+            showPanel = false;
         }
         IModel<Workspace> workspaceModel = new WorkspaceModel(defaultSelectedWs);
         
@@ -114,6 +117,12 @@ public class SelectWorkspacePage extends LamusPage {
         // Put details/submit form in container for refresh through AJAX 
         final MarkupContainer formContainer = new WebMarkupContainer("formContainer");
         formContainer.add(openWsForm);
+        
+        if(!showPanel) {
+            formContainer.setVisible(false);
+            Session.get().info(getLocalizer().getString("select_workspace_no_open_workspaces", this));
+        }
+        
         // Add container to page
         add(formContainer);
         return openWsForm;

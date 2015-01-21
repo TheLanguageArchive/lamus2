@@ -10,6 +10,9 @@ lamus2-1.1.1
 
     Changes:
         - CS2: Updated the version of the CS2 libraries.
+        - OPEN WORKSPACES: If the user has no open workspaces, the list shown
+          when "Select Workspace" is clicked becomes invisible and a message
+          directs the user to the "Create Workspace" option.
     Fixes:
         - INDICATING BUTTONS: Fixed some issues with the ajax indicating buttons,
           including the confirmation dialogs, which had to be done in a different
