@@ -45,6 +45,7 @@ public class LamusWsNodeActionsProviderTest {
     
     @Mock WorkspaceService mockWorkspaceService;
     @Mock WorkspaceTreeNode mockWorkspaceNodeResourceOne;
+    @Mock WorkspaceTreeNode mockWorkspaceNodeResourceTwo;
     @Mock WorkspaceTreeNode mockWorkspaceNodeMetadataOne;
     @Mock WorkspaceTreeNode mockWorkspaceNodeExternal;
     @Mock WorkspaceTreeNode mockWorkspaceNodeProtected;
@@ -57,8 +58,9 @@ public class LamusWsNodeActionsProviderTest {
     private List<WsTreeNodesAction> expectedExternalNodeActions;
     private List<WsTreeNodesAction> expectedProtectedNodeActions;
     private List<WsTreeNodesAction> expectedTopNodeActions;
-
     private List<WsTreeNodesAction> expectedMultipleNodesActions;
+    
+    private List<WsTreeNodesAction> expectedEmptyActions;
     
     
     public LamusWsNodeActionsProviderTest() {
@@ -105,7 +107,12 @@ public class LamusWsNodeActionsProviderTest {
         ReflectionTestUtils.setField(wsNodeActionsProvider, "topNodeActions", expectedTopNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<>();
+        expectedMultipleNodesActions.add(new DeleteNodesAction());
+        expectedMultipleNodesActions.add(new UnlinkNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "multipleNodesActions", expectedMultipleNodesActions);
+        
+        expectedEmptyActions = new ArrayList<>();
+        ReflectionTestUtils.setField(wsNodeActionsProvider, "emptyActions", expectedEmptyActions);
     }
     
     @After
@@ -207,5 +214,36 @@ public class LamusWsNodeActionsProviderTest {
         assertEquals("Retrieved node actions different from expected", expectedTopNodeActions, retrievedNodeActions);
     }
     
-    //TODO Other types
+    @Test
+    public void getActionsMultipleNodes() {
+        
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
+        nodes.add(mockWorkspaceNodeResourceOne);
+        nodes.add(mockWorkspaceNodeResourceTwo);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeResourceOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceNodeResourceTwo).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
+        }});
+        
+        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
+        
+        assertEquals("Retrieved node actions different from expected", expectedMultipleNodesActions, retrievedNodeActions);
+    }
+    
+    @Test
+    public void getActionsMultipleNodes_OneIsTopNode() {
+        
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
+        nodes.add(mockWorkspaceTopNode);
+        nodes.add(mockWorkspaceNodeResourceTwo);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceTopNode).isTopNodeOfWorkspace(); will(returnValue(Boolean.TRUE));
+        }});
+        
+        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
+        
+        assertEquals("Retrieved node actions different from expected", expectedEmptyActions, retrievedNodeActions);
+    }
 }

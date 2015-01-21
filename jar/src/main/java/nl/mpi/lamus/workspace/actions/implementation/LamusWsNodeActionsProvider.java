@@ -36,9 +36,9 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
     private final List<WsTreeNodesAction> externalActions;
     private final List<WsTreeNodesAction> protectedActions;
     private final List<WsTreeNodesAction> topNodeActions;
-    
-    //TODO actions with a different format?
     private final List<WsTreeNodesAction> multipleNodesActions;
+    
+    private final List<WsTreeNodesAction> emptyActions;
     
     
     public LamusWsNodeActionsProvider() {
@@ -66,6 +66,10 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         topNodeActions.add(new LinkNodesAction());
         
         multipleNodesActions = new ArrayList<>();
+        multipleNodesActions.add(new DeleteNodesAction());
+        multipleNodesActions.add(new UnlinkNodesAction());
+        
+        emptyActions = new ArrayList<>();
     }
     
     @Override
@@ -88,8 +92,13 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
                 return metadataActions;
             }
         } else {
-        
-            //TODO multiple node actions
+            
+            for(WorkspaceTreeNode node : nodes) {
+                if(node.isTopNodeOfWorkspace()) {
+                    return emptyActions;
+                }
+            }
+            
             return multipleNodesActions;
         }
     }
