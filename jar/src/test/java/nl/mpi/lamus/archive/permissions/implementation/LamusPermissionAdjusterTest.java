@@ -108,14 +108,14 @@ public class LamusPermissionAdjusterTest {
             
             //loop - first iteration
             oneOf(mockNode1).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockNode1).getArchiveURL(); will(returnValue(localURL_Node1));
+            exactly(2).of(mockNode1).getArchiveURL(); will(returnValue(localURL_Node1));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_Node1); will(returnValue(mockCurrentPermissions1));
             oneOf(mockPermissionAdjusterHelper).getDesiredPermissionsForPath(localPath_Node1); will(returnValue(mockDesiredPermissions1));
             oneOf(mockPermissionAdjusterHelper).checkAndRepairFile(localPath_Node1, mockCurrentPermissions1, mockDesiredPermissions1); will(returnValue(Boolean.TRUE));
             
             //loop - second iteration
             oneOf(mockNode2).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockNode2).getArchiveURL(); will(returnValue(localURL_Node2));
+            exactly(2).of(mockNode2).getArchiveURL(); will(returnValue(localURL_Node2));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_Node2); will(returnValue(mockCurrentPermissions2));
             oneOf(mockPermissionAdjusterHelper).getDesiredPermissionsForPath(localPath_Node2); will(returnValue(mockDesiredPermissions2));
             oneOf(mockPermissionAdjusterHelper).checkAndRepairFile(localPath_Node2, mockCurrentPermissions2, mockDesiredPermissions2);
@@ -150,10 +150,33 @@ public class LamusPermissionAdjusterTest {
             
             //loop - second iteration
             oneOf(mockNode2).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockNode2).getArchiveURL(); will(returnValue(localURL_Node2));
+            exactly(2).of(mockNode2).getArchiveURL(); will(returnValue(localURL_Node2));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_Node2); will(returnValue(mockCurrentPermissions2));
             oneOf(mockPermissionAdjusterHelper).getDesiredPermissionsForPath(localPath_Node2); will(returnValue(mockDesiredPermissions2));
             oneOf(mockPermissionAdjusterHelper).checkAndRepairFile(localPath_Node2, mockCurrentPermissions2, mockDesiredPermissions2);
+        }});
+        
+        permissionAdjuster.adjustPermissions(workspaceID);
+    }
+    
+    @Test
+    public void adjustPermissions_nodeUploadedAndDeleted() throws URISyntaxException, FileNotFoundException, IOException {
+        
+        final int workspaceID = 11;
+        
+        final Collection<WorkspaceNode> allNodes = new ArrayList<>();
+        allNodes.add(mockNode1);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockPermissionAdjusterHelper).loadConfiguredPermissions();
+            
+            oneOf(mockWorkspaceDao).getNodesForWorkspace(workspaceID); will(returnValue(allNodes));
+            
+            //loop - first iteration
+            oneOf(mockNode1).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNode1).getArchiveURL(); will(returnValue(null));
+            //node was uploaded and deleted, so it never got an archive URL
         }});
         
         permissionAdjuster.adjustPermissions(workspaceID);

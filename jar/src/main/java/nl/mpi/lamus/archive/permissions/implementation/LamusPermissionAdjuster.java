@@ -71,6 +71,10 @@ public class LamusPermissionAdjuster implements PermissionAdjuster {
             } // skip remote files
             n++;
             
+            if(node.getArchiveURL() == null) { //node that was never in the archive and won't be (uploaded and deleted)
+                continue;
+            }
+            
             File nodeFile;
             try {
                 nodeFile = new File(node.getArchiveURL().toURI());
