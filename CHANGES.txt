@@ -20,6 +20,9 @@ lamus2-1.1.1
           feedback panel.
         - UI AJAX: Fixed several issues regarding the UI, like clicking of buttons
           in succession or refreshing different panels after some click.
+        - PERMISSION ADJUSTER: Fixed issue with files which were uploaded and
+          deleted in the same workspace (never having an archive URL and causing
+          problems when adjusting permissions).
 
 lamus2-1.1.0 (2014-12-12)
 
