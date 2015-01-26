@@ -19,6 +19,11 @@ package nl.mpi.lamus.workspace.upload.implementation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.transform.TransformerException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
@@ -42,12 +47,14 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadHelper.class);
     
     private MetadataAPI metadataAPI;
+    private MetadataApiBridge metadataApiBridge;
     private WorkspaceUploadReferenceHandler workspaceUploadReferenceHandler;
     
     @Autowired
-    public LamusWorkspaceUploadHelper(MetadataAPI mdAPI,
+    public LamusWorkspaceUploadHelper(MetadataAPI mdAPI, MetadataApiBridge mdApiBridge,
             WorkspaceUploadReferenceHandler wsUploadReferenceHandler) {
         this.metadataAPI = mdAPI;
+        this.metadataApiBridge = mdApiBridge;
         this.workspaceUploadReferenceHandler = wsUploadReferenceHandler;
     }
 
@@ -58,6 +65,7 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     public Collection<UploadProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
         Collection<UploadProblem> allFailedLinks = new ArrayList<>();
+        Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         for(WorkspaceNode node : nodesToCheck) {
             
@@ -79,10 +87,26 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             
             ReferencingMetadataDocument referencingDocument = (ReferencingMetadataDocument) document;
             
-            Collection<UploadProblem> failedLinks = workspaceUploadReferenceHandler.matchReferencesWithNodes(workspaceID, nodesToCheck, node, referencingDocument);
+            Collection<UploadProblem> failedLinks =
+                    workspaceUploadReferenceHandler.matchReferencesWithNodes(
+                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithExternalSelfHandles);
             
             allFailedLinks.addAll(failedLinks);
         }
+        
+        //remove external self-handles, if any
+        Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithExternalSelfHandles.entrySet();
+        if(!entries.isEmpty()) {
+            for(Map.Entry<MetadataDocument, WorkspaceNode> entry : entries) {
+                try {
+                    metadataApiBridge.removeSelfHandleAndSaveDocument(entry.getKey(), entry.getValue().getWorkspaceURL());
+                } catch (IOException | TransformerException | MetadataException ex) {
+                    logger.error("Invalid self-handle could not be removed from document " + entry.getValue().getWorkspaceURL(), ex);
+                    continue;
+                }
+            }
+        }
+        
         return allFailedLinks;
     }
     

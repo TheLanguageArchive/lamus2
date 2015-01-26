@@ -254,12 +254,6 @@ public class LamusProperties implements ServletContextAware {
     }
     
     @Bean
-    @Qualifier("handleProxy")
-    public String handleProxy() {
-        return servletContext.getInitParameter("nl.mpi.lamus.handle.proxy");
-    }
-    
-    @Bean
     @Qualifier("handleAdminKeyFile")
     public String handleAdminKeyFile() {
         return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_key_file");

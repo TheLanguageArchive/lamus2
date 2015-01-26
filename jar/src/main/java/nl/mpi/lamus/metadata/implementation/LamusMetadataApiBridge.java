@@ -72,6 +72,18 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             logger.warn("Error retrieving metadata document for URL " + fileURL, ex);
             return null;
         }
+        
+        return getSelfHandleFromDocument(document);
+    }
+
+    /**
+     * @see MetadataApiBridge#getSelfHandleFromDocument(nl.mpi.metadata.api.model.MetadataDocument)
+     */
+    @Override
+    public URI getSelfHandleFromDocument(MetadataDocument document) {
+        
+        logger.debug("Retrieving self handle from document: " + document.getFileLocation());
+        
         HeaderInfo selfLink = document.getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
         if(selfLink == null) {
             return null;
@@ -94,14 +106,22 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         logger.debug("Removing self handle from metadata file '{}'", fileURL);
         
         MetadataDocument document = metadataAPI.getMetadataDocument(fileURL);
-        
+
+        removeSelfHandleAndSaveDocument(document, fileURL);
+    }
+
+    /**
+     * @see MetadataApiBridge#removeSelfHandleAndSaveDocument(nl.mpi.metadata.api.model.MetadataDocument, java.net.URL)
+     */
+    @Override
+    public void removeSelfHandleAndSaveDocument(MetadataDocument document, URL targetLocation) throws IOException, TransformerException, MetadataException {
+       
         if(document instanceof HandleCarrier) {
-            
             HandleCarrier documentWithHandle = (HandleCarrier) document;
             documentWithHandle.setHandle(null);
-            saveMetadataDocument((MetadataDocument) documentWithHandle, fileURL);
+            saveMetadataDocument((MetadataDocument) documentWithHandle, targetLocation);
         } else {
-            logger.debug("Document in '{}' doesn't contain a self handle", fileURL);
+            logger.debug("Document in '{}' doesn't contain a self handle", targetLocation);
         }
     }
 

@@ -17,8 +17,10 @@
 package nl.mpi.lamus.workspace.upload;
 
 import java.util.Collection;
+import java.util.Map;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
 /**
@@ -38,9 +40,12 @@ public interface WorkspaceUploadReferenceHandler {
      * @param nodesToCheck Collection of uploaded nodes which are going to be checked for links between themselves
      * @param currentNode Node whose references need to be matched
      * @param currentDocument MetadataDocument corresponding to the current node
+     * @param documentsWithExternalSelfHandles map to which the current document will be added,
+     * if it contains an external self-handle (which will need to be removed later)
      * @return Collection containing the links that were supposed to be made, but failed
      */
     public Collection<UploadProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
-            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument);
+            WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
+            Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles);
 }

@@ -98,7 +98,7 @@ public class LamusMetadataApiBridgeTest {
 
     
     @Test
-    public void getSelfHandleFromUploadedFile() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
+    public void getSelfHandleFromFile() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
         
         final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
         final URI expectedHandle = new URI(UUID.randomUUID().toString());
@@ -108,6 +108,7 @@ public class LamusMetadataApiBridgeTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
                 will(returnValue(mockMetadataDocument));
+            oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
             oneOf(mockMetadataDocument).getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
                 will(returnValue(selfLink));
         }});
@@ -120,7 +121,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getNullSelfHandleFromUploadedFile() throws MalformedURLException, IOException, MetadataException {
+    public void getNullSelfHandleFromFile() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
         
         final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
         
@@ -128,6 +129,7 @@ public class LamusMetadataApiBridgeTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
                 will(returnValue(mockMetadataDocument));
+            oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
             oneOf(mockMetadataDocument).getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
                 will(returnValue(null));
         }});
@@ -139,7 +141,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getSelfHandleFromUploadedFileThrowsIOException() throws MalformedURLException, IOException, MetadataException, MalformedURLException {
+    public void getSelfHandleFromFileThrowsIOException() throws MalformedURLException, IOException, MetadataException, MalformedURLException {
         
         final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
         
@@ -157,7 +159,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getSelfHandleFromUploadedFileThrowsMetadataException() throws MalformedURLException, IOException, MetadataException {
+    public void getSelfHandleFromFileThrowsMetadataException() throws MalformedURLException, IOException, MetadataException {
         
         final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
         
@@ -175,7 +177,7 @@ public class LamusMetadataApiBridgeTest {
     }
 
     @Test
-    public void getSelfHandleFromUploadedFileThrowsUriException() throws MalformedURLException, IOException, MetadataException {
+    public void getSelfHandleFromFileThrowsUriException() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
         
         final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
         final String invalidUriHandle = " ";
@@ -185,11 +187,51 @@ public class LamusMetadataApiBridgeTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
                 will(returnValue(mockMetadataDocument));
+            oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
             oneOf(mockMetadataDocument).getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
                 will(returnValue(selfLink));
         }});
         
         URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromFile(fileURL);
+        
+        assertNull("Retrieved handle should be null", retrievedHandle);
+    }
+    
+    @Test
+    public void getSelfHandleFromDocument() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
+        
+        final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
+        final URI expectedHandle = new URI(UUID.randomUUID().toString());
+        final HeaderInfo selfLink = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, expectedHandle.toString());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
+            oneOf(mockMetadataDocument).getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
+                will(returnValue(selfLink));
+        }});
+        
+        
+        URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromDocument(mockMetadataDocument);
+        
+        assertNotNull("Retrieved handle should not be null", retrievedHandle);
+        assertEquals("Retrieved handle different from expected", expectedHandle, retrievedHandle);
+    }
+    
+    @Test
+    public void getNullSelfHandleFromDocument() throws MalformedURLException, IOException, MetadataException, URISyntaxException {
+        
+        final URL fileURL = new URL("file:/workspaces/upload/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
+            oneOf(mockMetadataDocument).getHeaderInformation(CMDIConstants.CMD_HEADER_MD_SELF_LINK);
+                will(returnValue(null));
+        }});
+        
+        
+        URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromDocument(mockMetadataDocument);
         
         assertNull("Retrieved handle should be null", retrievedHandle);
     }
@@ -296,6 +338,24 @@ public class LamusMetadataApiBridgeTest {
         } catch(MetadataException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
         }
+    }
+    
+    @Test
+    public void removeSelfHandleFromDocument() throws MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final URL fileURL = new URL("file:/workspace/folder/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCmdiDocument).setHandle(null);
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(mockCmdiDocument, fileURL);
     }
     
     @Test

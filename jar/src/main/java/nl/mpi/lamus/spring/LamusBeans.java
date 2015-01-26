@@ -49,9 +49,6 @@ public class LamusBeans {
     @Qualifier("handlePrefix")
     private String handlePrefix;
     @Autowired
-    @Qualifier("handleProxy")
-    private String handleProxy;
-    @Autowired
     @Qualifier("handleAdminKeyFile")
     private String handleAdminKeyFilePath;
     @Autowired
@@ -98,7 +95,7 @@ public class LamusBeans {
     
     @Bean
     public HandleInfoRetriever handleInfoRetriever() {
-        return new HandleInfoRetrieverImpl(handlePrefix, handleProxy);
+        return new HandleInfoRetrieverImpl(handlePrefix);
     }
     
     @Bean
