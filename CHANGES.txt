@@ -1,4 +1,4 @@
-lamus2-1.1.1
+lamus2-1.2
 
     Additions:
         - REMOVE UNLINKED NODES: Added the option of removing all or the selected
@@ -7,6 +7,8 @@ lamus2-1.1.1
         - MULTIPLE NODES ACTIONS: When multiple nodes are selected, it is now
           possible to delete or unlink them (unless one of the selected nodes
           is the top node of the workspace, in which case no actions are allowed).
+        - EXTERNAL HANDLES: If there are external handles included in uploaded
+          files, they are now dealt with accordingly.
 
     Changes:
         - CS2: Updated the version of the CS2 libraries.
