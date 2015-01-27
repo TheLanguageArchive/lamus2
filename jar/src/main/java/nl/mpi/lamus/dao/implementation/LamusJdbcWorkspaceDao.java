@@ -505,8 +505,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
             archiveUrlStr = node.getArchiveURL().toString();
         }
         String originURLStr = null;
-        if(node.getOriginURL() != null) {
-            originURLStr = node.getOriginURL().toString();
+        if(node.getOriginURI() != null) {
+            originURLStr = node.getOriginURI().toString();
         }
         String statusStr = null;
         if(node.getStatus() != null) {
@@ -1049,14 +1049,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     logger.warn("Archive URL is malformed; null used instead", ex);
                 }
             }
-            String originURLStr = rs.getString("origin_url");
-            URL originURL = null;
-            if(originURLStr != null) {
-                try {
-                    originURL = new URL(originURLStr);
-                } catch (MalformedURLException ex) {
-                    logger.warn("Origin URL is malformed; null used instead", ex);
-                }
+            String originURIStr = rs.getString("origin_url");
+            URI originURI = null;
+            if(originURIStr != null) {
+                originURI = URI.create(originURIStr);
             }
 
             WorkspaceNode workspaceNode = new LamusWorkspaceNode(
@@ -1069,7 +1065,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     workspaceURL,
                     archiveURI,
                     archiveURL,
-                    originURL,
+                    originURI,
                     WorkspaceNodeStatus.valueOf(rs.getString("status")),
                     rs.getBoolean("protected"),
                     rs.getString("format"));

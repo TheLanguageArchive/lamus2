@@ -257,6 +257,6 @@ public class LamusVersioningHandlerTest {
         final String nodeFormat = "";
         
         return new LamusWorkspaceNode(wsNodeID, wsID, nodeSchemaURI,
-                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL, nodeStatus, nodeProtected, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeArchiveURI, nodeArchiveURL, nodeArchiveURL.toURI(), nodeStatus, nodeProtected, nodeFormat);
     }
 }

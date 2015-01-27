@@ -41,7 +41,7 @@ public class LamusWorkspaceNodeTest {
     private URL workspaceNodeURL;
     private URI archiveNodeURI;
     private URL archiveNodeURL;
-    private URL originNodeURL;
+    private URI originNodeURI;
     private WorkspaceNodeStatus workspaceNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
     private boolean workspaceNodeIsProtected = Boolean.FALSE;
     private String workspaceNodeFormat = "someFormat";
@@ -60,11 +60,11 @@ public class LamusWorkspaceNodeTest {
     @Before
     public void setUp() throws URISyntaxException, MalformedURLException {
         
-        this.profileSchemaURI = new URI("http://some.uri/file.xsd");
+        this.profileSchemaURI = URI.create("http://some.uri/file.xsd");
         this.workspaceNodeURL = new URL("file:/workspace/some.uri/file.cmdi");
-        this.archiveNodeURI = new URI(UUID.randomUUID().toString());
+        this.archiveNodeURI = URI.create(UUID.randomUUID().toString());
         this.archiveNodeURL = new URL("file:/archive/some.url/file.cmdi");
-        this.originNodeURL = this.archiveNodeURL;
+        this.originNodeURI = this.archiveNodeURL.toURI();
     }
     
     @After
@@ -81,7 +81,7 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertEquals("Value for 'workspaceNodeID' is not the expected one.", this.workspaceNodeID, testNode.getWorkspaceNodeID());
@@ -92,7 +92,7 @@ public class LamusWorkspaceNodeTest {
         assertEquals("Value for 'type' is not the expected one.", this.workspaceNodeType, testNode.getType());
         assertEquals("Value for 'workspaceURL' is not the expected one.", this.workspaceNodeURL, testNode.getWorkspaceURL());
         assertEquals("Value for 'archiveURI' is not the expected one.", this.archiveNodeURI, testNode.getArchiveURI());
-        assertEquals("Value for 'originURL' is not the expected one.", this.originNodeURL, testNode.getOriginURL());
+        assertEquals("Value for 'originURL' is not the expected one.", this.originNodeURI, testNode.getOriginURI());
         assertEquals("Value for 'status' is not the expected one.", this.workspaceNodeStatus, testNode.getStatus());
         assertEquals("Value for 'protected' is not the expected one.", this.workspaceNodeIsProtected, testNode.isProtected());
         assertEquals("Value for 'format' is not the expected one.", this.workspaceNodeFormat, testNode.getFormat());
@@ -110,14 +110,14 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         WorkspaceNode testWorkspaceNode2 = new LamusWorkspaceNode(
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertEquals("Workspace objects are not equal.", testWorkspaceNode1, testWorkspaceNode2);
@@ -130,14 +130,14 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         WorkspaceNode testWorkspaceNode2 = new LamusWorkspaceNode(
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertEquals("Workspace objects don't have the same hashcode.", testWorkspaceNode1.hashCode(), testWorkspaceNode2.hashCode());
@@ -154,14 +154,14 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         WorkspaceNode testWorkspaceNode2 = new LamusWorkspaceNode(
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, differentURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertFalse("Workspace objects should not be equal.", testWorkspaceNode1.equals(testWorkspaceNode2));
@@ -175,14 +175,14 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         WorkspaceNode testWorkspaceNode2 = new LamusWorkspaceNode(
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, differentURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertFalse("Workspace objects should not have the same hashcode.", testWorkspaceNode1.hashCode() == testWorkspaceNode2.hashCode());
@@ -195,14 +195,14 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         WorkspaceNode testWorkspaceNode2 = new SomeOtherWorkspaceNode(
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         
         assertFalse("Workspace objects should not be equal.", testWorkspaceNode1.equals(testWorkspaceNode2));
@@ -215,7 +215,7 @@ public class LamusWorkspaceNodeTest {
                 this.workspaceNodeID, this.workspaceID,
                 this.profileSchemaURI, this.workspaceNodeName, this.workspaceNodeTitle,
                 this.workspaceNodeType, this.workspaceNodeURL, this.archiveNodeURI,
-                this.archiveNodeURL, this.originNodeURL, this.workspaceNodeStatus,
+                this.archiveNodeURL, this.originNodeURI, this.workspaceNodeStatus,
                 this.workspaceNodeIsProtected, this.workspaceNodeFormat);
         String expectedString = "Workspace Node ID: " + testWorkspaceNode.getWorkspaceNodeID()
                 + ", Workspace ID: " + testWorkspaceNode.getWorkspaceID()
@@ -226,7 +226,7 @@ public class LamusWorkspaceNodeTest {
                 + ", Workspace URL: " + testWorkspaceNode.getWorkspaceURL()
                 + ", Archive URI: " + testWorkspaceNode.getArchiveURI()
                 + ", Archive URL: " + testWorkspaceNode.getArchiveURL()
-                + ", Origin URL: " + testWorkspaceNode.getOriginURL()
+                + ", Origin URL: " + testWorkspaceNode.getOriginURI()
                 + ", Status: " + testWorkspaceNode.getStatus()
                 + ", Protected: " + testWorkspaceNode.isProtected()
                 + ", Format: " + testWorkspaceNode.getFormat();
@@ -248,7 +248,7 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     private URL workspaceURL;
     private URI archiveURI;
     private URL archiveURL;
-    private URL originURL;
+    private URI originURI;
     private WorkspaceNodeStatus status;
     private boolean isProtected;
     private String format;
@@ -259,7 +259,7 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     
     public SomeOtherWorkspaceNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-            URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+            URL workspaceURL, URI archiveURI, URL archiveURL, URI originURI,
             WorkspaceNodeStatus status, boolean isProtected, String format) {
         
         this.workspaceNodeID = workspaceNodeID;
@@ -271,7 +271,7 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
         this.workspaceURL = workspaceURL;
         this.archiveURI = archiveURI;
         this.archiveURL = archiveURL;
-        this.originURL = originURL;
+        this.originURI = originURI;
         this.status = status;
         this.isProtected = isProtected;
         this.format = format;
@@ -373,13 +373,13 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     }
 
     @Override
-    public URL getOriginURL() {
-        return this.originURL;
+    public URI getOriginURI() {
+        return this.originURI;
     }
     
     @Override
-    public void setOriginURL(URL originURL) {
-        this.originURL = originURL;
+    public void setOriginURI(URI originURI) {
+        this.originURI = originURI;
     }
 
     @Override

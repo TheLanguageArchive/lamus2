@@ -78,23 +78,24 @@ public interface WorkspaceNodeFactory {
      * 
      * @param workspaceID ID of the workspace to which the node should be connected
      * @param archiveURI URI (handle) from the archive, if the node comes from there
-     * @param originURL URL of the original file location (mostly for uploaded files)
+     * @param originURI URI of the original file location (mostly for uploaded files)
      * @param workspaceURL URL of the file location in the workspace
      * @param mimetype Mimetype of the file
      * @param status Status of the node
      * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URI originURI, URL workspaceURL,
             String mimetype, WorkspaceNodeStatus status, boolean isProtected);
     
     /**
      * Creates an external WorkspaceNode with the given values
      * 
      * @param workpaceID ID of the workspace to which the node should be connected
+     * @param originURI URI referencing the file
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL);
+    public WorkspaceNode getNewExternalNode(int workpaceID, URI originURI);
     
     /**
      * Creates an external WorkspaceNode which is a pointer to an archive node.

@@ -728,13 +728,13 @@ public class LamusWorkspaceServiceTest {
         URL wsURL = null;
         URI archiveURI = null;
         URL archiveURL = null;
-        URL originURL = null;
+        URI originURI = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
                 nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL,
-                archiveURI, archiveURL, originURL, status, isProtected, format);
+                archiveURI, archiveURL, originURI, status, isProtected, format);
         
         context.checking(new Expectations() {{
             
@@ -758,13 +758,13 @@ public class LamusWorkspaceServiceTest {
         URL wsURL = null;
         URI archiveURI = null;
         URL archiveURL = null;
-        URL originURL = null;
+        URI originURI = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
                 nodeID, workspaceID, profileSchemaURI, name, title, type, wsURL,
-                archiveURI, archiveURL, originURL, status, isProtected, format);
+                archiveURI, archiveURL, originURI, status, isProtected, format);
         
         final WorkspaceNodeNotFoundException expectedException = new WorkspaceNodeNotFoundException("some exception message", -1, nodeID, null);
         

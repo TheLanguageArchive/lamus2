@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import javax.xml.transform.TransformerException;
@@ -145,36 +144,35 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithHandle()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
-        final URL childOriginURL = childOriginURI.toURL();
-        final URL childArchiveURL = childOriginURL;
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childProtected, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
@@ -224,35 +222,34 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeWithoutHandle()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final String childFilename = "childname.txt";
         final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
-        final URL childOriginURL = childOriginURI.toURL();
-        final URL childArchiveURL = childOriginURL;
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childOriginURI, childArchiveURL, childOriginURL, childStatus, childProtected, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childOriginURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         context.checking(new Expectations() {{
@@ -302,36 +299,35 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeThrowsIOException()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
-        final URL childOriginURL = childOriginURI.toURL();
-        final URL childArchiveURL = childOriginURL;
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childProtected, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         final IOException expectedException =
@@ -393,36 +389,35 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeThrowsTransformerException()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
-        final URL childOriginURL = childOriginURI.toURL();
-        final URL childArchiveURL = childOriginURL;
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childProtected, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         final TransformerException expectedException =
@@ -484,36 +479,35 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void importResourceNodeThrowsMetadataException()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
 
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
         final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
-        final URL childOriginURL = childOriginURI.toURL();
-        final URL childArchiveURL = childOriginURL;
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURL, childStatus, childProtected, childNodeMimetype);
+                childNodeName, "", childNodeType, childWsURL, childURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
         final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
         
         final MetadataException expectedException =
@@ -574,17 +568,17 @@ public class ResourceNodeImporterTest {
     }
     
     @Test
-    public void workspaceWasNotSet() throws URISyntaxException, MalformedURLException, WorkspaceImportException {
+    public void workspaceWasNotSet() throws MalformedURLException, WorkspaceImportException {
         
         final int parentWorkspaceNodeID = 1;
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
 
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
         try {
             nodeImporter.importNode(null, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
@@ -598,19 +592,19 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void nodeFileNull()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
         context.checking(new Expectations() {{
             
@@ -635,19 +629,19 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void nodeIsNotFound()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException {
 
         final int parentWorkspaceNodeID = 1;
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
         context.checking(new Expectations() {{
             
@@ -669,22 +663,22 @@ public class ResourceNodeImporterTest {
     
     @Test
     public void typecheckerExceptionThrown()
-            throws URISyntaxException, MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException {
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException {
 
         final int parentWorkspaceNodeID = 1;
         final String childNodeMimetype = "text/plain";
-        final URI childNodeSchemaLocation = new URI("file:/some.location");
-        final URI childURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
 
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
         
         final TypecheckedResults typecheckedResults = new LamusTypecheckedResults(childNodeMimetype, "some analysis", TypecheckerJudgement.UNARCHIVABLE);
         final TypeCheckerException expectedException = new TypeCheckerException(typecheckedResults, "some exception message", null);

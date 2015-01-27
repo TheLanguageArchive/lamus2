@@ -369,7 +369,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             } else if(node.getWorkspaceURL() != null) {
                 nodeURI = node.getWorkspaceURL().toURI();
             } else { //in case of a newly added external node, this is the only available location
-                nodeURI = node.getOriginURL().toURI();
+                nodeURI = node.getOriginURI();
             }
         } catch(URISyntaxException ex) {
             String errorMessage = "Error getting URI of the node " + node.getWorkspaceNodeID();

@@ -146,7 +146,7 @@ public class AddedNodeExporterTest {
     public void exportUploadedResourceNodeWithParentInArchive()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException {
         
-        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
 
         final WorkspaceNode currentNode = getCurrentResourceNode();
@@ -208,7 +208,7 @@ public class AddedNodeExporterTest {
     @Test
     public void exportUploadedResourceNodeWithParentNOTInArchive() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException {
         
-        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
 
         final WorkspaceNode currentNode = getCurrentResourceNode();
@@ -272,7 +272,7 @@ public class AddedNodeExporterTest {
     public void exportUploadedMetadataNode()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
-        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString().toUpperCase());
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
@@ -477,7 +477,7 @@ public class AddedNodeExporterTest {
     public void exportNodeThrowsHandleException()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
-        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString());
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
@@ -534,7 +534,7 @@ public class AddedNodeExporterTest {
     public void exportNodeThrowsTransformerException()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
         
-        final URI nodeNewArchiveHandle = new URI(UUID.randomUUID().toString().toUpperCase());
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
         
         final WorkspaceNode currentNode = getCurrentMetadataNode();
@@ -836,8 +836,8 @@ public class AddedNodeExporterTest {
         final String parentNodeName = "parentNode";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
         final URL parentNodeWsURL = new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + File.separator + parentFilename);
-        final URL parentNodeOriginURL = new URL("file:/archive/root/" + parentFilename);
-        final URL parentNodeArchiveURL = parentNodeOriginURL;
+        final URI parentNodeOriginURI = URI.create("file:/archive/root/" + parentFilename);
+        final URL parentNodeArchiveURL = parentNodeOriginURI.toURL();
         final URI parentNodeArchiveURI;
         if(isInArchive) {
             parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
@@ -851,7 +851,7 @@ public class AddedNodeExporterTest {
         final URI nodeSchemaLocation = new URI("http://some.location");
         
         return new LamusWorkspaceNode(parentNodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
-                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURL, parentNodeStatus, parentNodeProtected, parentNodeFormat);
+                parentNodeName, "", parentNodeType, parentNodeWsURL, parentNodeArchiveURI, parentNodeArchiveURL, parentNodeOriginURI, parentNodeStatus, parentNodeProtected, parentNodeFormat);
     }
     
     
@@ -869,13 +869,13 @@ public class AddedNodeExporterTest {
         final String nodeName = "Node";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + fileExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + "/" + nodeFilename);
-        final URL nodeOriginURL = new URL("file:/localdirectory/" + nodeFilename);
+        final URI nodeOriginURI = URI.create("file:/localdirectory/" + nodeFilename);
         
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
         final URI nodeSchemaLocation = new URI("http://some.location");
         final boolean nodeProtected = Boolean.FALSE;
         
         return new LamusWorkspaceNode(nodeWsID, testWorkspace.getWorkspaceID(), nodeSchemaLocation,
-                nodeName, "", type, nodeWsURL, null, null, nodeOriginURL, nodeStatus, nodeProtected, format);
+                nodeName, "", type, nodeWsURL, null, null, nodeOriginURI, nodeStatus, nodeProtected, format);
     }
 }

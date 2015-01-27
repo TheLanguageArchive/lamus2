@@ -48,7 +48,7 @@ public class UnlinkedRootWorkspaceNode extends UnlinkedWorkspaceNode {
 		    child.getWorkspaceNodeID(), child.getWorkspaceID(),
 		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
 		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
-		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
+		    child.getArchiveURL(), child.getOriginURI(), child.getStatus(),
 		    child.isProtected(), child.getFormat(), this, this.workspaceDao);
 	    childrenTreeNodes.add(treeNode);
 	}

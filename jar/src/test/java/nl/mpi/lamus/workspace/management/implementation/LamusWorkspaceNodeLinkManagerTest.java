@@ -141,7 +141,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
 
     @Test
-    public void linkNodesWithReference() throws URISyntaxException {
+    public void linkNodesWithReference() {
         
         final int workspaceID = 1;
         final int parentNodeID = 1;
@@ -166,10 +166,10 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
 
     @Test
-    public void linkNodesWithReferenceWithNullParentNodeAndChildLink() throws URISyntaxException, MalformedURLException {
+    public void linkNodesWithReferenceWithNullParentNodeAndChildLink() throws MalformedURLException {
         
         final int childNodeID = 2;
-        final URI childNodeURI = new URI(UUID.randomUUID().toString());
+        final URI childNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final URL childNodeURL = new URL("file:/archive/somewhere/node.cmdi");
         final int workspaceID = 1;
         
@@ -195,12 +195,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
   
     @Test
-    public void linkNodesWithReferenceWithNullParentNode() throws URISyntaxException, MalformedURLException {
+    public void linkNodesWithReferenceWithNullParentNode() {
         
-        final int childNodeID = 2;
-        final URI childNodeURI = new URI(UUID.randomUUID().toString());
-        final URL childNodeURL = new URL("file:/archive/somewhere/node.cmdi");
-        final int workspaceID = 1;
         final String expectedExceptionMessage = "Unable to create link (parent node: " + null + "; child link: " + mockChildReference;
         
         try {
@@ -331,14 +327,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesResourceFromArchive()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+            throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 3;
-        final URL childURL = new URL("file:/archive/path/child.txt");
-        final URI childURI = new URI(UUID.randomUUID().toString());
+        final URI childURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String childMimetype = "text/plain";
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
@@ -389,14 +384,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesExternal()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+            throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 3;
-        final URL childURL = new URL("http:/remote/folder/child.txt");
-        final URI childURI = childURL.toURI();
+        final URI childURI = URI.create("http:/remote/folder/child.txt");
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
         final String childStringType = childWsType.toString();
         
@@ -422,7 +416,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
-            oneOf(mockChildNode).getOriginURL(); will(returnValue(childURL));
+            oneOf(mockChildNode).getOriginURI(); will(returnValue(childURI));
             oneOf(mockChildNode).getType(); will(returnValue(childWsType));
             oneOf(mockChildNode).getFormat(); will(returnValue(null));
             oneOf(mockParentDocument).createDocumentResourceReference(childURI, null, childStringType, null);
@@ -488,7 +482,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
-        final URI parentNodeURI = new URI(UUID.randomUUID().toString());
+        final URI parentNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         final String expectedExceptionMessage = "Cannot proceed with linking because parent node (ID = " + parentNodeID + ") is protected (WS ID = " + workspaceID + ").";
         
@@ -512,13 +506,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesGetMetadataThrowsIOException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+            throws MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -556,13 +549,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesGetMetadataThrowsMetadataException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+            throws MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -601,13 +593,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     @Test
     public void linkNodesParentNotReferencingDocument()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+            throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -821,13 +812,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     //TODO URISyntaxException
     
     @Test
-    public void linkNodesOnlyInDb() throws MalformedURLException, URISyntaxException, WorkspaceException {
+    public void linkNodesOnlyInDb() throws MalformedURLException, WorkspaceException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
-        final URI childURI = childURL.toURI();
                 
         context.checking(new Expectations() {{
             
@@ -905,7 +895,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 3;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
             
@@ -1037,14 +1027,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkExternalNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
+    public void unlinkExternalNode() throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 3;
-        final URL childURL = new URL("http://external/path/child.cmdi");
-        final URI childURI = childURL.toURI();
+        final URI childURI = URI.create("http://external/path/child.cmdi");
         
         context.checking(new Expectations() {{
             
@@ -1062,7 +1051,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(null));
-            oneOf(mockChildNode).getOriginURL(); will(returnValue(childURL));
+            oneOf(mockChildNode).getOriginURI(); will(returnValue(childURI));
             oneOf(mockParentDocument).getDocumentReferenceByURI(childURI); will(returnValue(mockChildReference));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReference); will(returnValue(mockChildReference));
             
@@ -1083,14 +1072,14 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodes_DoNotAllowUnlinkingFromProtectedParent() throws WorkspaceException, URISyntaxException {
+    public void unlinkNodes_DoNotAllowUnlinkingFromProtectedParent() throws WorkspaceException {
         
         // if the parent node is protected, unlinking its children should not be allowed
         // if the child (or any other descendant) is protected, unlinking will proceed (this won't be checked)
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
-        final URI parentNodeURI = new URI(UUID.randomUUID().toString());
+        final URI parentNodeURI = URI.create(UUID.randomUUID().toString());
         final String expectedExceptionMessage = "Cannot proceed with unlinking because parent node (ID = " + parentNodeID + ") is protected (WS ID = " + workspaceID + ").";
         
         context.checking(new Expectations() {{
@@ -1113,13 +1102,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesGetMetadataThrowsIOException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+    public void unlinkNodesGetMetadataThrowsIOException() throws MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         
         final String expectedErrorMessage = "Error retrieving metadata document for node " + parentNodeID;
         final IOException expectedException = new IOException("some exception message");
@@ -1151,13 +1139,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesGetMetadataThrowsMetadataException() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+    public void unlinkNodesGetMetadataThrowsMetadataException() throws MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         
         final String expectedErrorMessage = "Error retrieving metadata document for node " + parentNodeID;
         final MetadataException expectedException = new MetadataException("some exception message");
@@ -1189,13 +1176,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void unlinkNodesParentNotReferencingDocument() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+    public void unlinkNodesParentNotReferencingDocument() throws MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
         
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         
         final String expectedErrorMessage = "Error retrieving referencing document for node " + parentNodeID;
         
@@ -1624,24 +1610,12 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void replaceResourceNode_NewNodeAlreadyLinked() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+    public void replaceResourceNode_NewNodeAlreadyLinked() throws WorkspaceException, ProtectedNodeException {
      
         final int workspaceID = 1;
         final int parentNodeID = 2;
-        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
-        
         final int oldChildNodeID = 3;
-        final URL oldChildURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
-        final URI oldChildURI = oldChildURL.toURI();
-        
         final int newChildNodeID = 20;
-        final URL newChildURL = new URL("file:/lamus/workspace/" + workspaceID + "/another_child.txt");
-        final URI newChildURI = newChildURL.toURI();
-        
-        final String childMimetype = "text/plain";
-        final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE;
-        final String childStringType = childWsType.toString();
-        
         
         //replace node in DB (create new version and set old node as replaced)
         context.checking(new Expectations() {{
@@ -1668,7 +1642,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 2;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         final URI childURI = childURL.toURI();
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create(UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
             
@@ -1711,7 +1685,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 2;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
             
@@ -1755,7 +1729,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void removeArchiveUri_MetadataException_GetParentDocument() throws MalformedURLException, IOException, MetadataException, WorkspaceException, URISyntaxException {
+    public void removeArchiveUri_MetadataException_GetParentDocument() throws MalformedURLException, IOException, MetadataException, WorkspaceException {
         
         final int workspaceID = 1;
         
@@ -1764,7 +1738,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int childID = 200;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         final MetadataException expectedCause = new MetadataException("some exception message");
         String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
@@ -1807,7 +1781,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childID = 200;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         final URI childURI = childURL.toURI();
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         final IOException expectedCause = new IOException("some exception message");
         String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
@@ -1859,7 +1833,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childID = 200;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
-        final URI childArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI childArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         final TransformerException expectedCause = new TransformerException("some exception message");
         String expectedMessage = "Error when trying to remove URI of node " + childID + ", referenced in node " + parentID;
@@ -1911,14 +1885,11 @@ public class LamusWorkspaceNodeLinkManagerTest {
     }
     
     @Test
-    public void removeArchiveUri_nullArchiveUri() throws MalformedURLException, URISyntaxException, WorkspaceException {
+    public void removeArchiveUri_nullArchiveUri() throws WorkspaceException {
         
         final int workspaceID = 1;
         final int parentNodeID = 1;
-        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
         final int childNodeID = 2;
-        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
-        final URI childURI = childURL.toURI();
         
         context.checking(new Expectations() {{
             

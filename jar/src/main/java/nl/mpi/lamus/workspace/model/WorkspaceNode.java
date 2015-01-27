@@ -63,9 +63,9 @@ public interface WorkspaceNode extends Serializable {
     
     public void setArchiveURL(URL archiveURL);
     
-    public URL getOriginURL();
+    public URI getOriginURI();
     
-    public void setOriginURL(URL originURL);
+    public void setOriginURI(URI originURI);
     
     public WorkspaceNodeStatus getStatus();
     

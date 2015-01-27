@@ -106,6 +106,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             URI refLocalURI = ref.getLocation();
             URI refURI = ref.getURI();
             WorkspaceNode matchedNode;
+            boolean externalNode = false;
 
             if(refLocalURI != null) {
                 
@@ -121,35 +122,43 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     
                 }
                 
-            } else if(metadataApiHandleUtil.isHandleUri(refURI)) {
-                matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
-                
-                if(matchedNode != null) {
-                    try {
-                        updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
-                    } catch (URISyntaxException ex) {
-                        logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
+            } else {
+                if(metadataApiHandleUtil.isHandleUri(refURI)) {
+                    matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
+
+                    if(matchedNode != null) {
+                        try {
+                            updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                        } catch (URISyntaxException ex) {
+                            logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
+                        }
+
+                        //set handle in DB
+                        if(!handleManager.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
+                            matchedNode.setArchiveURI(refURI);
+                            workspaceDao.updateNodeArchiveUri(matchedNode);
+                        }
                     }
-                    
-                    //set handle in DB
-                    if(!handleManager.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
-                        matchedNode.setArchiveURI(refURI);
-                        workspaceDao.updateNodeArchiveUri(matchedNode);
+                
+                } else {
+
+                    matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
+
+                    if(matchedNode != null) {
+                        try {
+                            updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                        } catch (URISyntaxException ex) {
+                            logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
+                        }
                     }
                 }
                 
-            } else {
-
-                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
-                
-                if(matchedNode != null) {
-                    try {
-                        updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
-                    } catch (URISyntaxException ex) {
-                        logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
-                    }
-                } else {
+                //check if it's an external reference
+                if(matchedNode == null) {
                     matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
+                    if(matchedNode != null) {
+                        externalNode = true;
+                    }
                 }
             }
 
@@ -172,10 +181,12 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     failedLinks.add(new LinkUploadProblem(currentNode, matchedNode, message, null));
                 }
                 
-                // check if ref is handle, and if is external... if so, remove it
-                if(metadataApiHandleUtil.isHandleUri(refURI)) {
-                    if(!handleManager.isHandlePrefixKnown(refURI)) { // external handle
-                        clearReferenceUri(currentDocument, ref, currentNode);
+                if(!externalNode) {
+                    // check if ref is handle, and if is external... if so, remove it
+                    if(metadataApiHandleUtil.isHandleUri(refURI)) {
+                        if(!handleManager.isHandlePrefixKnown(refURI)) { // external handle
+                            clearReferenceUri(currentDocument, ref, currentNode);
+                        }
                     }
                 }
             } else {

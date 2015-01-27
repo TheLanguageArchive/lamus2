@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.UUID;
@@ -107,22 +106,22 @@ public class WorkspaceExportRunnerTest {
 
     @Test
     public void callExporterForGeneralNodeWithoutVersions()
-            throws MalformedURLException, URISyntaxException, InterruptedException,
+            throws MalformedURLException, InterruptedException,
             ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,
             VersionCreationException, CrawlerInvocationException {
         
         final int workspaceID = 1;
         final int wsNodeID = 10;
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
         final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL originURL = new URL("http://some.url/someName.cmdi");
-        final URL archiveNodeURL = originURL;
+        final URI originURI = URI.create("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURI.toURL();
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -166,22 +165,22 @@ public class WorkspaceExportRunnerTest {
     
     @Test
     public void callExporterForGeneralNodeWithoutVersions_CrawlerInvocationException()
-            throws MalformedURLException, URISyntaxException, InterruptedException,
+            throws MalformedURLException, InterruptedException,
             ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,
             VersionCreationException, CrawlerInvocationException {
         
         final int workspaceID = 1;
         final int wsNodeID = 10;
-        final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
+        final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
         final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL originURL = new URL("http://some.url/someName.cmdi");
-        final URL archiveNodeURL = originURL;
+        final URI originURI = URI.create("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURI.toURL();
         final String testDisplayValue = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
         
         final CrawlerInvocationException expectedCause = new CrawlerInvocationException("some exception message", null);
         

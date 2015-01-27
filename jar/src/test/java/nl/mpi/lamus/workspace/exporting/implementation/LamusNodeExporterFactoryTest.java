@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
@@ -108,20 +107,20 @@ public class LamusNodeExporterFactoryTest {
     }
 
     @Test
-    public void getNodeExporterForTopNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForTopNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -136,21 +135,21 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
-    public void getNodeExporterForUnlinkedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForUnlinkedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -167,21 +166,21 @@ public class LamusNodeExporterFactoryTest {
     }
 
     @Test
-    public void getNodeExporterForUploadedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForUploadedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -198,21 +197,21 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
-    public void getNodeExporterForCreatedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForCreatedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -229,21 +228,21 @@ public class LamusNodeExporterFactoryTest {
     }
 
     @Test
-    public void getNodeExporterForDeletedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForDeletedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_DELETED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -260,21 +259,21 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
-    public void getNodeExporterForExternalDeletedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForExternalDeletedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_EXTERNAL_DELETED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_EXTERNAL_DELETED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -291,21 +290,21 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
-    public void getNodeExporterForReplacedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForReplacedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_REPLACED, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_REPLACED, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -322,21 +321,21 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
-    public void getNodeExporterForChangedNode() throws MalformedURLException, URISyntaxException {
+    public void getNodeExporterForChangedNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             

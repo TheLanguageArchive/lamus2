@@ -98,7 +98,7 @@ public class LamusWorkspaceTreeServiceTest {
         URL wsURL = null;
         URI archiveURI = null;
         URL archiveURL = null;
-        URL originURL = null;
+        URI originURI = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
@@ -106,7 +106,7 @@ public class LamusWorkspaceTreeServiceTest {
         final WorkspaceNode node = new LamusWorkspaceNode(
                 nodeID, workspaceID, profileSchemaURI,
                 name, title, type, wsURL, archiveURI,
-                archiveURL, originURL, status, isProtected, format);
+                archiveURL, originURI, status, isProtected, format);
         
         final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
                 node, null, mockWorkspaceDao);
@@ -141,7 +141,7 @@ public class LamusWorkspaceTreeServiceTest {
         URL wsURL = null;
         URI archiveURI = null;
         URL archiveURL = null;
-        URL originURL = null;
+        URI originURI = null;
         WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
@@ -149,12 +149,12 @@ public class LamusWorkspaceTreeServiceTest {
         final WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(
                 parentNodeID, workspaceID, profileSchemaURI,
                 parentName, parentTitle, type, wsURL, archiveURI,
-                archiveURL, originURL, status, isProtected, format, null, mockWorkspaceDao);
+                archiveURL, originURI, status, isProtected, format, null, mockWorkspaceDao);
         
         final WorkspaceNode node = new LamusWorkspaceNode(
                 nodeID, workspaceID, profileSchemaURI,
                 name, title, type, wsURL, archiveURI,
-                archiveURL, originURL, status, isProtected, format);
+                archiveURL, originURI, status, isProtected, format);
         
         final WorkspaceTreeNode treeNodeToRetrieve = new LamusWorkspaceTreeNode(
                 node, parentTreeNode, mockWorkspaceDao);

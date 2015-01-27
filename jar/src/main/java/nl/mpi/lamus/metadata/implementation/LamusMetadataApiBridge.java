@@ -103,8 +103,6 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public void removeSelfHandleAndSaveDocument(URL fileURL) throws IOException, TransformerException, MetadataException {
         
-        logger.debug("Removing self handle from metadata file '{}'", fileURL);
-        
         MetadataDocument document = metadataAPI.getMetadataDocument(fileURL);
 
         removeSelfHandleAndSaveDocument(document, fileURL);
@@ -116,6 +114,8 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public void removeSelfHandleAndSaveDocument(MetadataDocument document, URL targetLocation) throws IOException, TransformerException, MetadataException {
        
+        logger.debug("Removing self handle from metadata document '{}'", targetLocation);
+        
         if(document instanceof HandleCarrier) {
             HandleCarrier documentWithHandle = (HandleCarrier) document;
             documentWithHandle.setHandle(null);

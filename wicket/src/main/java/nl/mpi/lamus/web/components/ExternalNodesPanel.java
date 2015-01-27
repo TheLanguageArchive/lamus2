@@ -17,6 +17,8 @@
 package nl.mpi.lamus.web.components;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -120,16 +122,16 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
                     target.add(getFeedbackPanel());
 
                     String enteredString = AddExternalNodeForm.this.externalUrlField.getModelObject();
-                    URL enteredUrl;
+                    URI enteredUri;
                     try {
-                        enteredUrl = new URL(enteredString);
-                    } catch (MalformedURLException ex) {
-                        error(getLocalizer().getString("external_nodes_panel_invalid_url_message", this));
+                        enteredUri = new URI(enteredString);
+                    } catch (URISyntaxException ex) {
+                        error(getLocalizer().getString("external_nodes_panel_invalid_uri_message", this));
                         return;
                     }
                     WorkspaceNode externalNode =
                         workspaceNodeFactory.getNewExternalNode(
-                            model.getObject().getWorkspaceID(), enteredUrl);
+                            model.getObject().getWorkspaceID(), enteredUri);
                     try {
 
                         workspaceService.addNode(LamusSession.get().getUserId(), externalNode);

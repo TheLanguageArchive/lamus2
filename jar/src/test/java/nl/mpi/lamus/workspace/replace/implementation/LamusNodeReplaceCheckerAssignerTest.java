@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -80,20 +79,20 @@ public class LamusNodeReplaceCheckerAssignerTest {
 
 
     @Test
-    public void getReplaceCheckerForMetadataNode() throws MalformedURLException, URISyntaxException {
+    public void getReplaceCheckerForMetadataNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.cmdi");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
         NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         
@@ -103,20 +102,20 @@ public class LamusNodeReplaceCheckerAssignerTest {
     }
     
     @Test
-    public void getReplaceCheckerForResourceNode() throws MalformedURLException, URISyntaxException {
+    public void getReplaceCheckerForResourceNode() throws MalformedURLException {
         
         final int workspaceID = 1;
         final int topNodeID = 1;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.txt");
-        final URL nodeOriginURL = new URL("file:/some.url/someName.txt");
-        final URL nodeArchiveURL = nodeOriginURL;
-        final URI nodeURI = new URI(UUID.randomUUID().toString());
+        final URI nodeOriginURI = URI.create("file:/some.url/someName.txt");
+        final URL nodeArchiveURL = nodeOriginURI.toURL();
+        final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
         final String nodeFormat = "";
-        final URI nodeSchemaLocation = new URI("http://some.location");
+        final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURL, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
         
         NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         

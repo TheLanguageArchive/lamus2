@@ -153,19 +153,19 @@ public class MetadataNodeImporterTest {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testSchemaLocation = URI.create("http://some.location");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         testWorkspace.setTopNodeArchiveURI(testChildURI);
         
@@ -206,19 +206,19 @@ public class MetadataNodeImporterTest {
 
         final int testChildWorkspaceNodeID = 10;
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testSchemaLocation = URI.create("http://some.location");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         testWorkspace.setTopNodeArchiveURI(testChildURI);
         
@@ -253,9 +253,9 @@ public class MetadataNodeImporterTest {
     public void importNodeMetadataDocumentThrowsIOException() throws MalformedURLException, URISyntaxException,
         IOException, MetadataException {
 
-        final URI testChildURI = new URI("http://some.url/node.something");
+        final URI testChildURI = URI.create("http://some.url/node.something");
         final URL testChildURL = testChildURI.toURL();
-        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final boolean testChildOnSite = Boolean.TRUE;
         
@@ -290,9 +290,9 @@ public class MetadataNodeImporterTest {
     public void importNodeMetadataDocumentThrowsMetadataException() throws MalformedURLException, URISyntaxException,
         IOException, MetadataException {
 
-        final URI testChildURI = new URI("http://some.url/node.something");
+        final URI testChildURI = URI.create("http://some.url/node.something");
         final URL testChildURL = testChildURI.toURL();
-        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final boolean testChildOnSite = Boolean.TRUE;
         
@@ -327,7 +327,7 @@ public class MetadataNodeImporterTest {
     public void importNodeMetadataDocumentCantFindNode() throws MalformedURLException, URISyntaxException,
         IOException, MetadataException {
 
-        final URI testURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         
         testWorkspace.setTopNodeArchiveURI(testURI);
         
@@ -355,29 +355,29 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildWsURI = testChildWsURL.toURI();
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
                 
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -420,29 +420,29 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildWsURI = testChildWsURL.toURI();
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -482,29 +482,29 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildWsURI = testChildWsURL.toURI();
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = testChildArchiveURL.toURI();
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -544,28 +544,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = testChildArchiveURL.toURI();
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
         final boolean testChildOnSite = Boolean.FALSE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -601,28 +601,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final URI testChildURI = testChildArchiveURL.toURI();
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.TRUE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         context.checking(new Expectations() {{
             
@@ -659,28 +659,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -730,28 +730,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -801,28 +801,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         
@@ -872,28 +872,28 @@ public class MetadataNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int testChildWorkspaceNodeID = 10;
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
-        final URL parentOriginURL = new URL("file:/some.uri/filename.cmdi");
-        final URL parentArchiveURL = parentOriginURL;
-        final URI parentURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
-        final URI testChildArchiveURI = new URI("file:/some.url/node.something");
+        final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = new URI("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
-        final URI testSchemaLocation = new URI("http://some.location");
+        final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.NODE_ISCOPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURL, parentStatus, parentProtected, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
         final WorkspaceNode testChildNode = new LamusWorkspaceNode(testChildWorkspaceNodeID, testWorkspace.getWorkspaceID(), testSchemaLocation,
-                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL, testChildStatus, testChildProtected, testNodeFormat);
+                testChildName, "", testNodeType, testChildWsURL, testChildURI, testChildArchiveURL, testChildArchiveURL.toURI(), testChildStatus, testChildProtected, testNodeFormat);
         
         final Reference testChildReference = new MetadataResourceProxy("childID", testChildURI, "cmdi");
         

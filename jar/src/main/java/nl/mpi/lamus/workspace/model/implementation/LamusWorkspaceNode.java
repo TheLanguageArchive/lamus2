@@ -38,7 +38,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     private URL workspaceURL;
     private URI archiveURI;
     private URL archiveURL;
-    private URL originURL;
+    private URI originURI;
     private WorkspaceNodeStatus status;
     private boolean isProtected;
     private String format;
@@ -55,7 +55,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     
     public LamusWorkspaceNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-            URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+            URL workspaceURL, URI archiveURI, URL archiveURL, URI originURI,
             WorkspaceNodeStatus status, boolean isProtected, String format) {
         
         this.workspaceNodeID = workspaceNodeID;
@@ -67,7 +67,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         this.workspaceURL = workspaceURL;
         this.archiveURI = archiveURI;
         this.archiveURL = archiveURL;
-        this.originURL = originURL;
+        this.originURI = originURI;
         this.status = status;
         this.isProtected = isProtected;
         this.format = format;
@@ -169,13 +169,13 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
 
     @Override
-    public URL getOriginURL() {
-        return this.originURL;
+    public URI getOriginURI() {
+        return this.originURI;
     }
     
     @Override
-    public void setOriginURL(URL originURL) {
-        this.originURL = originURL;
+    public void setOriginURI(URI originURI) {
+        this.originURI = originURI;
     }
 
     @Override
@@ -233,7 +233,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 .append(this.workspaceURL)
                 .append(this.archiveURI)
                 .append(this.archiveURL)
-                .append(this.originURL)
+                .append(this.originURI)
                 .append(this.status)
                 .append(this.isProtected)
                 .append(this.format);
@@ -263,7 +263,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 .append(this.workspaceURL, other.getWorkspaceURL())
                 .append(this.archiveURI, other.getArchiveURI())
                 .append(this.archiveURL, other.getArchiveURL())
-                .append(this.originURL, other.getOriginURL())
+                .append(this.originURI, other.getOriginURI())
                 .append(this.status, other.getStatus())
                 .append(this.isProtected, other.isProtected())
                 .append(this.format, other.getFormat());
@@ -278,7 +278,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 ", Profile Schema URI: " + this.profileSchemaURI +
                 ", Name: " + this.name + ", Title: " + this.title +
                 ", Type: " + this.type + ", Workspace URL: " + this.workspaceURL +
-                ", Archive URI: " + this.archiveURI + ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURL +
+                ", Archive URI: " + this.archiveURI + ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURI +
                 ", Status: " + this.status + ", Protected: " + this.isProtected + ", Format: " + this.format;
         
         return stringResult;

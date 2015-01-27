@@ -43,7 +43,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     private URL workspaceURL;
     private URI archiveURI;
     private URL archiveURL;
-    private URL originURL;
+    private URI originURI;
     private WorkspaceNodeStatus status;
     private boolean isProtected;
     private String format;
@@ -180,13 +180,13 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     }
 
     @Override
-    public URL getOriginURL() {
-        return originURL;
+    public URI getOriginURI() {
+        return originURI;
     }
     
     @Override
-    public void setOriginURL(URL originURL) {
-        this.originURL = originURL;
+    public void setOriginURI(URI originURI) {
+        this.originURI = originURI;
     }
 
     @Override

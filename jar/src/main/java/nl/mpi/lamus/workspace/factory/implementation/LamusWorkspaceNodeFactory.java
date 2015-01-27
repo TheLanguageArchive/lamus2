@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.factory.implementation;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
@@ -124,7 +125,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URL originURL, URL workspaceURL,
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URI originURI, URL workspaceURL,
         String mimetype, WorkspaceNodeStatus status, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
@@ -132,7 +133,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         node.setName(displayValue);
         node.setTitle(displayValue);
-        node.setOriginURL(originURL);
+        node.setOriginURI(originURI);
         node.setWorkspaceURL(workspaceURL);
         node.setFormat(mimetype);
         
@@ -156,19 +157,20 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
      * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URL)
      */
     @Override
-    public WorkspaceNode getNewExternalNode(int workpaceID, URL originURL) {
+    public WorkspaceNode getNewExternalNode(int workpaceID, URI originURI) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workpaceID);
-        String displayValue = FilenameUtils.getName(originURL.getPath());
+        String displayValue = FilenameUtils.getName(originURI.getSchemeSpecificPart());
         node.setName(displayValue);
         node.setTitle(displayValue);
-        node.setOriginURL(originURL);
-        if(originURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
-            node.setType(WorkspaceNodeType.METADATA);
-        } else {
-            node.setType(WorkspaceNodeType.RESOURCE);
-        }
+        node.setOriginURI(originURI);
+//        if(originURI.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
+//            node.setType(WorkspaceNodeType.METADATA);
+//        } else {
+//            node.setType(WorkspaceNodeType.RESOURCE);
+//        }
+        node.setType(WorkspaceNodeType.UNKNOWN);
         node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
         
         node.setProtected(Boolean.FALSE);
@@ -198,7 +200,11 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         }
         
         node.setArchiveURL(archiveURL);
-        node.setOriginURL(archiveURL);
+        try {
+            node.setOriginURI(archiveURL.toURI());
+        } catch (URISyntaxException ex) {
+            logger.warn("URL (" + archiveURL + ") couldn't be converted to URI. OriginURI not set.");
+        }
         if(archiveURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
             node.setType(WorkspaceNodeType.METADATA);
         } else {

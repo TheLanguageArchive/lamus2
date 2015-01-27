@@ -46,12 +46,12 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 
     public LamusWorkspaceTreeNode(int workspaceNodeID, int workspaceID,
 	    URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
-	    URL workspaceURL, URI archiveURI, URL archiveURL, URL originURL,
+	    URL workspaceURL, URI archiveURI, URL archiveURL, URI originURI,
 	    WorkspaceNodeStatus status, boolean isProtected, String format,
 	    WorkspaceTreeNode parent, WorkspaceDao dao) {
 
 	super(workspaceNodeID, workspaceID, profileSchemaURI,
-		name, title, type, workspaceURL, archiveURI, archiveURL, originURL,
+		name, title, type, workspaceURL, archiveURI, archiveURL, originURI,
 		status, isProtected, format);
 
 	if (dao == null) {
@@ -66,7 +66,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 
 	super(node.getWorkspaceNodeID(), node.getWorkspaceID(),
 		node.getProfileSchemaURI(), node.getName(), node.getTitle(), node.getType(),
-		node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURL(),
+		node.getWorkspaceURL(), node.getArchiveURI(), node.getArchiveURL(), node.getOriginURI(),
 		node.getStatus(), node.isProtected(), node.getFormat());
 
 	if (dao == null) {
@@ -121,7 +121,7 @@ public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements Worksp
 		    child.getWorkspaceNodeID(), child.getWorkspaceID(),
 		    child.getProfileSchemaURI(), child.getName(), child.getTitle(),
 		    child.getType(), child.getWorkspaceURL(), child.getArchiveURI(),
-		    child.getArchiveURL(), child.getOriginURL(), child.getStatus(),
+		    child.getArchiveURL(), child.getOriginURI(), child.getStatus(),
 		    child.isProtected(), child.getFormat(), this, workspaceDao);
 	    childrenTreeNodes.add(treeNode);
 	}
