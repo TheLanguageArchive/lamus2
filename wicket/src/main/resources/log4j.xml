@@ -22,16 +22,16 @@
 	<level value="info" />
     </logger>
     <logger name="nl.mpi.archiving.tree.corpusstructure">
-	<level value="debug" />
+	<level value="info" />
     </logger>
     
     <!-- MPI LIBRARIES -->
     <logger name="nl.mpi.corpusstructure">
-	<level value="debug" />
+	<level value="info" />
     </logger>
     
     <logger name="nl.mpi.metadata">
-        <level value="debug" />
+        <level value="info" />
     </logger>
     
     <logger name="nl.mpi.util">
@@ -40,7 +40,7 @@
     
     <!-- CRAWLER -->
     <logger name="nl.mpi.archiving.corpusstructure.tools.crawler">
-        <level value="debug" />
+        <level value="info" />
     </logger>
     
     <!-- LAMUS -->
