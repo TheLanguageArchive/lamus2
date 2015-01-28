@@ -73,7 +73,8 @@ public class LamusMetadataCheckerTest {
     @Test
     public void profileIsAllowed() throws Exception {
         
-        final File fileToCheck = new File(getClass().getClassLoader().getResource("testingProfile_allowed.cmdi").getFile());
+        final File fileToCheck =
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("testingProfile_allowed.cmdi").getFile()));
         
         boolean result = metadataChecker.isProfileAllowed(fileToCheck);
         
@@ -83,7 +84,8 @@ public class LamusMetadataCheckerTest {
     @Test
     public void profileIsAllowed_WithoutMdProfile() throws Exception {
         
-        final File fileToCheck = new File(getClass().getClassLoader().getResource("testingProfile_allowed_noMdProfileElement.cmdi").getFile());
+        final File fileToCheck =
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("testingProfile_allowed_noMdProfileElement.cmdi").getFile()));
         
         boolean result = metadataChecker.isProfileAllowed(fileToCheck);
         
@@ -93,7 +95,8 @@ public class LamusMetadataCheckerTest {
     @Test
     public void profileIsNotAllowed() throws Exception {
         
-        final File fileToCheck = new File(getClass().getClassLoader().getResource("testingProfile_notAllowed.cmdi").getFile());
+        final File fileToCheck =
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("testingProfile_notAllowed.cmdi").getFile()));
         
         boolean result = metadataChecker.isProfileAllowed(fileToCheck);
         
@@ -104,7 +107,8 @@ public class LamusMetadataCheckerTest {
     public void invalidSchematron() throws Exception {
         
         ReflectionTestUtils.setField(metadataChecker, "schematronFile", mockSchematronFile);
-        final File fileToCheck = new File(getClass().getClassLoader().getResource("testingProfile_allowed.cmdi").getFile());
+        final File fileToCheck =
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("testingProfile_allowed.cmdi").getFile()));
         
         context.checking(new Expectations() {{
             allowing(mockSchematronFile);
