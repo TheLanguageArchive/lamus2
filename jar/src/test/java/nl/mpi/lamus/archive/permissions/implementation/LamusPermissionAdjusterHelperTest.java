@@ -19,6 +19,7 @@ package nl.mpi.lamus.archive.permissions.implementation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.TreeMap;
 import mpi.jnatools.jnaChmodChgrp;
 import nl.mpi.lamus.archive.permissions.PermissionAdjusterHelper;
@@ -60,7 +61,8 @@ public class LamusPermissionAdjusterHelperTest {
     public void setUp() {
         permissionAdjusterHelper = new LamusPermissionAdjusterHelper();
         
-        ReflectionTestUtils.setField(permissionAdjusterHelper, "permissionConfigFile", new File(getClass().getClassLoader().getResource("mockPermissionConfigFile").getFile()));
+        ReflectionTestUtils.setField(permissionAdjusterHelper, "permissionConfigFile",
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("mockPermissionConfigFile").getFile())));
     }
     
     @After

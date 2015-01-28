@@ -17,6 +17,7 @@
 package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.File;
+import java.net.URLDecoder;
 import nl.mpi.lamus.typechecking.MetadataChecker;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -60,7 +61,8 @@ public class LamusMetadataCheckerTest {
     @Before
     public void setUp() {
         metadataChecker = new LamusMetadataChecker();
-        ReflectionTestUtils.setField(metadataChecker, "schematronFile", new File(getClass().getClassLoader().getResource("cmdi_schematron.sch").getFile()));
+        ReflectionTestUtils.setField(metadataChecker, "schematronFile",
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_schematron.sch").getFile())));
     }
     
     @After
