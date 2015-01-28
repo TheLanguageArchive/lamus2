@@ -16,7 +16,6 @@
 package nl.mpi.lamus.workspace.importing;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
@@ -52,11 +51,11 @@ public interface NodeDataRetriever {
     
     /**
      * Invokes typechecking for the given resource.
-     * @param resourceInputStream InputStream of the resource
+     * @param resourceFileUrl URL of the resource
      * @param resourceFilename Filename of the resource
      * @return results of the typechecker
      */
-    public TypecheckedResults triggerResourceFileCheck(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
+    public TypecheckedResults triggerResourceFileCheck(URL resourceFileUrl, String resourceFilename) throws TypeCheckerException;
     
     /**
      * Verifies the results of the typechecker.

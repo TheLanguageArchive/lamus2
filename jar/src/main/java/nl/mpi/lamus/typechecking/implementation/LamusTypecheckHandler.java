@@ -17,6 +17,8 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
@@ -30,11 +32,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusTypecheckHandler implements TypecheckHandler {
     
-    private FileType typechecker;
+    private final FileType typechecker;
+    // Deep typechecking is the default
+    private final DeepFileType deepTypechecker;
     
     @Autowired
-    public LamusTypecheckHandler(FileType typechecker) {
+    public LamusTypecheckHandler(FileType typechecker, DeepFileType deepTypechecker) {
         this.typechecker = typechecker;
+        this.deepTypechecker = deepTypechecker;
     }
 
     
@@ -43,7 +48,15 @@ public class LamusTypecheckHandler implements TypecheckHandler {
      */
     @Override
     public String typecheck(InputStream iStream, String filename) throws IOException {
-        return typechecker.checkStream( iStream, filename.toLowerCase() );
+        return typechecker.checkStream(iStream, filename.toLowerCase());
+    }
+
+    /**
+     * @see TypecheckHandler#deepTypecheck(java.net.URL, java.lang.String)
+     */
+    @Override
+    public String deepTypecheck(URL fileUrl, String filename) throws IOException {
+        return deepTypechecker.checkURL(fileUrl, filename);
     }
     
     /**

@@ -18,6 +18,7 @@ package nl.mpi.lamus.typechecking.implementation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
@@ -73,7 +74,8 @@ public class LamusFileTypeHandlerTest {
     @Test
     public void checkType() throws MalformedURLException, TypeCheckerException, IOException {
         
-        final String testFileName = "someFilename.txt";
+        final String testFilename = "someFilename.txt";
+        final URL testFileUrl = new URL("file:/some/location/" + testFilename);
         final String expectedMimetype = "text/plain";
         final String expectedAnalysis = "okay (content, name)";
         final String testCheckResult = "true ARCHIVABLE text/plain";
@@ -82,12 +84,12 @@ public class LamusFileTypeHandlerTest {
         final TypecheckedResults expectedTypecheckedResults = new LamusTypecheckedResults(expectedMimetype, expectedAnalysis, expectedJudgement);
         
         context.checking(new Expectations() {{
-            oneOf(mockTypecheckHandler).typecheck(mockInputStream, testFileName.toLowerCase()); will(returnValue(testCheckResult));
+            oneOf(mockTypecheckHandler).deepTypecheck(testFileUrl, testFilename); will(returnValue(testCheckResult));
             oneOf(mockTypecheckHandler).getTypecheckMimetype(testCheckResult); will(returnValue(expectedMimetype));
             oneOf(mockTypecheckHandler).getTypecheckJudgement(testCheckResult); will(returnValue(expectedJudgement));
         }});
         
-        TypecheckedResults retrievedTypecheckedResults = fileTypeHandler.checkType(mockInputStream, testFileName);
+        TypecheckedResults retrievedTypecheckedResults = fileTypeHandler.checkType(testFileUrl, testFilename);
         
         assertEquals("TypecheckedResults different from expected", expectedTypecheckedResults, retrievedTypecheckedResults);
     }
@@ -97,6 +99,7 @@ public class LamusFileTypeHandlerTest {
     public void checkTypeBadResult() throws MalformedURLException, TypeCheckerException, IOException {
         
         final String testFileName = "somefilename.jjj";
+        final URL testFileUrl = new URL("file:/some/location/" + testFileName);
         final String expectedMimetype = "Unknown";
         final String expectedAnalysis = "false outrageous file";
         final String testCheckResult = expectedAnalysis;
@@ -105,12 +108,12 @@ public class LamusFileTypeHandlerTest {
         final TypecheckedResults expectedTypecheckedResults = new LamusTypecheckedResults(expectedMimetype, expectedAnalysis, expectedJudgement);
         
         context.checking(new Expectations() {{
-            oneOf(mockTypecheckHandler).typecheck(mockInputStream, testFileName.toLowerCase()); will(returnValue(testCheckResult));
+            oneOf(mockTypecheckHandler).deepTypecheck(testFileUrl, testFileName); will(returnValue(testCheckResult));
             oneOf(mockTypecheckHandler).getTypecheckMimetype(testCheckResult); will(returnValue(null));
             oneOf(mockTypecheckHandler).getTypecheckJudgement(testCheckResult); will(returnValue(expectedJudgement));
         }});
         
-        TypecheckedResults retrievedTypecheckedResults = fileTypeHandler.checkType(mockInputStream, testFileName);
+        TypecheckedResults retrievedTypecheckedResults = fileTypeHandler.checkType(testFileUrl, testFileName);
         
         assertEquals("TypecheckedResults different from expected", expectedTypecheckedResults, retrievedTypecheckedResults);
     }
@@ -119,6 +122,7 @@ public class LamusFileTypeHandlerTest {
     public void checkTypeIOException() throws IOException, TypeCheckerException {
         
         final String testFileName = "somefilename.jjj";
+        final URL testFileUrl = new URL("file:/some/location/" + testFileName);
         final String expectedMimetype = "Unknown";
         final String exceptionMessage = "some extremely frightening error message";
         final String expectedAnalysis = "Read error for " + testFileName + " - " + exceptionMessage;
@@ -129,11 +133,11 @@ public class LamusFileTypeHandlerTest {
         final TypecheckedResults expectedTypecheckedResults = new LamusTypecheckedResults(expectedMimetype, expectedAnalysis, null);
         
         context.checking(new Expectations() {{
-            oneOf(mockTypecheckHandler).typecheck(mockInputStream, testFileName.toLowerCase()); will(throwException(firstException));
+            oneOf(mockTypecheckHandler).deepTypecheck(testFileUrl, testFileName); will(throwException(firstException));
         }});
         
         try {
-            fileTypeHandler.checkType(mockInputStream, testFileName);
+            fileTypeHandler.checkType(testFileUrl, testFileName);
         } catch(TypeCheckerException ex) {
             assertEquals("Exception message different from expected", expectedMainExceptionMessage, ex.getMessage());
             assertEquals("Exception TypecheckedResults different from expected", expectedTypecheckedResults, ex.getTypecheckedResults());

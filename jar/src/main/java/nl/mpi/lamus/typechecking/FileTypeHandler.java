@@ -15,7 +15,7 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import java.io.InputStream;
+import java.net.URL;
 import nl.mpi.lamus.exception.TypeCheckerException;
 
 /**
@@ -25,17 +25,14 @@ import nl.mpi.lamus.exception.TypeCheckerException;
  */
 public interface FileTypeHandler {
     
-    //TODO to be based on the 'ResourceConVoc' class from the old Lamus
-    //TODO WS types and link types must be adjusted for CMDI
-    
     /**
      * Given a filename and its input stream, performs a typecheck
      * and retrieves the result.
-     * @param resourceInputStream InputStream of the resource
+     * @param resourceFileUrl URL of the resource
      * @param resourceFilename Filename of the resource
      * @return TypecheckedResults object representing the result of the check
      */
-    public TypecheckedResults checkType(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException;
+    public TypecheckedResults checkType(URL resourceFileUrl, String resourceFilename) throws TypeCheckerException;
     
     /**
      * Checks if the resource is archivable by comparing a given acceptable judgement

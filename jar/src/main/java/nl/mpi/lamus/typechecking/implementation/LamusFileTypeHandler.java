@@ -16,7 +16,7 @@
 package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 import nl.mpi.lamus.typechecking.FileTypeHandler;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -47,18 +47,17 @@ public class LamusFileTypeHandler implements FileTypeHandler {
 
     
     /**
-     * @see FileTypeHandler#checkType(java.io.InputStream, java.lang.String, java.lang.String)
+     * @see FileTypeHandler#checkType(java.net.URL, java.lang.String)
      */
     @Override
-    public TypecheckedResults checkType(InputStream resourceInputStream, String resourceFilename) throws TypeCheckerException {
+    public TypecheckedResults checkType(URL resourceFileUrl, String resourceFilename) throws TypeCheckerException {
         
         String checkedMimetype;
         String checkedAnalysis;
         String typecheckStringResult = null;
         
         try {
-
-            typecheckStringResult = typecheckHandler.typecheck(resourceInputStream, resourceFilename.toLowerCase());
+            typecheckStringResult = typecheckHandler.deepTypecheck(resourceFileUrl, resourceFilename);
             checkedMimetype = typecheckHandler.getTypecheckMimetype(typecheckStringResult);
 
             if (checkedMimetype == null) {

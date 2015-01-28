@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,11 +30,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
-import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -49,7 +46,6 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.MetadataChecker;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import nl.mpi.util.OurURL;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
@@ -156,505 +152,6 @@ public class LamusWorkspaceUploaderTest {
         File result = uploader.getWorkspaceUploadDirectory(workspaceID);
         
         assertEquals("Retrieved file different from expected", workspaceUploadDirectory, result);
-    }
-    
-    @Test
-    public void uploadFile_IsArchivable_ProfileIsAllowed()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                InvalidMetadataException,
-                Exception {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/x-cmdi+xml";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.TRUE));
-              
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataChecker).isProfileAllowed(mockUploadedFile); will(returnValue(Boolean.TRUE));
-                
-            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
-            
-            oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(null));
-                
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL, fileMimetype, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
-                will(returnValue(uploadedNode));
-
-            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
-
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
-        
-        uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-    }
-    
-    @Test
-    public void uploadFile_IsNotArchivable()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.FALSE));
-                
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.FALSE));
-        }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(TypeCheckerException ex) {
-            assertNotNull(ex);
-        }
-    }
-    
-    @Test
-    public void uploadFile_MetadataFileNotValid()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                Exception {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/x-cmdi+xml";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        final String expectedExceptionMessage = "Metadata file [" + filename + "] is invalid";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.TRUE));
-              
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.FALSE));
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("should have thrown exception");
-        } catch(InvalidMetadataException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
-    }
-    
-    @Test
-    public void uploadFile_ProfileNotAllowed()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                Exception {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/x-cmdi+xml";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        final String expectedExceptionMessage = "Profile of metadata file [" + filename + "] not allowed.";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.TRUE));
-              
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
-
-            oneOf(mockMetadataChecker).isProfileAllowed(mockUploadedFile); will(returnValue(Boolean.FALSE));
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("should have thrown exception");
-        } catch(InvalidMetadataException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
-    }
-    
-    @Test
-    public void uploadFile_MetadataCheckerThrowsException()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                Exception {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/x-cmdi+xml";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        final String expectedExceptionMessage = "Error checking profile of metadata file [" + filename + "].";
-        final Exception expectedCause = new Exception();
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.TRUE));
-              
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
-
-            oneOf(mockMetadataChecker).isProfileAllowed(mockUploadedFile); will(throwException(expectedCause));
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("should have thrown exception");
-        } catch(InvalidMetadataException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
-        }
-    }
-    
-    @Test
-    public void uploadFileCopyFails()
-            throws URISyntaxException, MalformedURLException, IOException,
-                TypeCheckerException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                InvalidMetadataException,
-                Exception {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final IOException ioException = new IOException("some error message");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
-                
-//            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(mockWorkspaceTopNodeFile);
-//                will(returnValue(acceptableJudgement));
-//            oneOf(mockFileTypeHandler).isCheckedResourceArchivable(with(same(acceptableJudgement)), with(any(StringBuilder.class)));
-//                will(returnValue(Boolean.TRUE));
-                
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
-                will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
-            
-            oneOf(mockMetadataChecker).isProfileAllowed(mockUploadedFile); will(returnValue(Boolean.TRUE));
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockWorkspaceTopNodeFile);
-        stub(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class)).toThrow(ioException);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(IOException ex) {
-            assertEquals("Exception thrown different from expected", ioException, ex);
-        }
-    }
-    
-    @Test
-    public void uploadFileUrlException()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final String uploadedFilePath = uploadedFile.getPath();
-        final URI uriWhichIsNotUrl = new URI("node:0");
-        
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/plain";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        final String expectedErrorMessage = "Error retrieving URL from file " + uploadedFile.getPath();
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uriWhichIsNotUrl));
-            
-            oneOf(mockUploadedFile).getPath(); will(returnValue(uploadedFilePath));
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("should have thrown exception");
-        } catch(WorkspaceException ex) {
-            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
-            assertTrue("Cause has different type from expected", ex.getCause() instanceof MalformedURLException);
-        }
-    }
-    
-    @Test
-    public void uploadFileUnknownNodeException()
-            throws TypeCheckerException, URISyntaxException, MalformedURLException,
-                IOException, WorkspaceNodeNotFoundException, WorkspaceException,
-                NodeNotFoundException,
-                InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String filename = "someFile.cmdi";
-        final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
-        final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
-        final File uploadedFile = new File(workspaceUploadDirectory, filename);
-        final URI uploadedFileURI = uploadedFile.toURI();
-        final URL uploadedFileURL = uploadedFileURI.toURL();
-        final OurURL uploadedFileOurURL = new OurURL(uploadedFileURL);
-        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
-        final String fileMimetype = "text/plain";
-        
-        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
-        uploadedNode.setName(filename);
-        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
-        uploadedNode.setType(fileType);
-        uploadedNode.setFormat(fileMimetype);
-        uploadedNode.setWorkspaceURL(uploadedFileURL);
-        
-        final String expectedErrorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-        final NodeNotFoundException expectedException = new NodeNotFoundException(workspaceTopNodeArchiveURI, "some exception message");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-                
-            oneOf(mockUploadedFile).toURI(); will(returnValue(uploadedFileURI));
-            
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, filename);
-                will(returnValue(mockTypecheckedResults));
-            
-            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
-            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(throwException(expectedException));
-
-        }});
-        
-        stub(method(FileUtils.class, "getFile", File.class, String.class)).toReturn(mockUploadedFile);
-        
-        try {
-            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-            fail("should have thrown exception");
-        } catch(WorkspaceException ex) {
-            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
-            assertEquals("Cause different from expected", expectedException, ex.getCause());
-        }
     }
     
     @Test
@@ -864,7 +361,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
             oneOf(mockFile1).getName(); will(returnValue(filename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -886,7 +383,6 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(failedLinks));
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
         Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -940,7 +436,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
             oneOf(mockFile1).getName(); will(returnValue(filename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -969,7 +465,6 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(failedLinks));
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
         Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1022,7 +517,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
             oneOf(mockFile1).getName(); will(returnValue(filename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1039,7 +534,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
@@ -1099,7 +593,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
             oneOf(mockFile1).getName(); will(returnValue(filename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1114,7 +608,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
@@ -1189,7 +682,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI1));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename1);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL1, filename1);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1209,7 +702,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile2).toURI(); will(returnValue(uploadedFileURI2));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename2);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL2, filename2);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1231,7 +724,6 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(failedLinks));
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
         Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1300,7 +792,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI1));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename1);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL1, filename1);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1320,7 +812,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile2).toURI(); will(returnValue(uploadedFileURI2));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename2);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL2, filename2);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1342,7 +834,6 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(failedLinks));
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
         Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1515,7 +1006,7 @@ public class LamusWorkspaceUploaderTest {
 
             oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
             oneOf(mockFile1).getName(); will(returnValue(filename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockFileInputStream, filename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             oneOf(mockFileInputStream).close();
             
@@ -1528,7 +1019,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
         }});
         
-        stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         

@@ -17,6 +17,7 @@ package nl.mpi.lamus.typechecking;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Interface that provides a bridge to interact with the typechecker.
@@ -32,6 +33,17 @@ public interface TypecheckHandler {
      * @throws IOException if some issue happens with the typechecker
      */
     public String typecheck(InputStream iStream, String filename) throws IOException;
+    
+    /**
+     * Passes a stream to the typechecker and fills in the result of a deep typecheck.
+     * 
+     * @param fileUrl actual location of the file to check, 
+     * should be file: URL for faster check, often is a workspace URL 
+     * @param filename
+     * @return intended name of the file to check, 
+     * has to have right file name extension, often != fileUrl 
+     */
+    public String deepTypecheck(URL fileUrl, String filename) throws IOException;
     
     /**
      * Checks if, given the typechecker result, the file is archivable.

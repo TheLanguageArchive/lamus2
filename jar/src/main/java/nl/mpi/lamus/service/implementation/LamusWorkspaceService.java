@@ -17,7 +17,6 @@ package nl.mpi.lamus.service.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -291,40 +289,11 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
 
     /**
-     * @see WorkspaceService#uploadFilesIntoWorkspace(java.lang.String, int, java.util.Collection)
-     */
-//    @Override
-//    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems) {
-//        
-//        if(!this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID)) {
-//            
-//            //TODO Inform the user of the reason why the files can't be uploaded
-//            //TODO Throw an exception instead?
-//            logger.error("Cannot upload files to workspace with ID " + workspaceID);
-//        } else {
-//        
-//            this.workspaceUploader.uploadFiles(workspaceID, fileItems);
-//        }
-//    }
-
-    /**
      * @see WorkspaceService#getWorkspaceUploadDirectory(int)
      */
     @Override
     public File getWorkspaceUploadDirectory(int workspaceID) {
         return this.workspaceUploader.getWorkspaceUploadDirectory(workspaceID);
-    }
-
-    /**
-     * @see WorkspaceService#uploadFileIntoWorkspace(java.lang.String, int, java.io.InputStream, java.lang.String)
-     */
-    @Override
-    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException {
-        
-        logger.debug("Triggered file upload into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
-            
-        this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
     }
 
     /**

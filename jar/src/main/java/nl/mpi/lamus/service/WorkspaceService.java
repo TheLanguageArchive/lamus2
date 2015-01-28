@@ -17,14 +17,12 @@ package nl.mpi.lamus.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -179,31 +177,11 @@ public interface WorkspaceService extends Serializable {
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
-     * Uploads the given files into the workspace.
-     * 
-     * @param userID ID of the user
-     * @param workspaceID ID of the workspace
-     * @param fileItems Files to be uploaded
-     */
-//    public void uploadFilesIntoWorkspace(String userID, int workspaceID, Collection<FileItem> fileItems);
-    
-    /**
      * Returns the upload directory for the given workspace.
      * @param workspaceID ID of the workspace
      * @return Upload directory
      */
     public File getWorkspaceUploadDirectory(int workspaceID);
-    
-    /**
-     * Given an InputStream and filename, upload the file into the workspace,
-     * in case it's archivable.
-     * @param userID ID of the user
-     * @param workspaceID ID of the workspace
-     * @param inputStream InputStream to be uploaded
-     * @param filename name of the file to upload
-     */
-    public void uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
     
     /**
      * Given a ZipInputStream and filename, uploads the zip content into the workspace,

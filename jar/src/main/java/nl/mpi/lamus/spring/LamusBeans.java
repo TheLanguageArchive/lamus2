@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.handle.util.HandleManager;
@@ -81,8 +82,13 @@ public class LamusBeans {
     }
     
     @Bean
-    public FileType typeChecker() {
+    public FileType typechecker() {
         return new FileType();
+    }
+    
+    @Bean
+    public DeepFileType deepTypechecker() {
+        return new DeepFileType();
     }
     
     

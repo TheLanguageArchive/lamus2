@@ -18,7 +18,6 @@ package nl.mpi.lamus.workspace.upload.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -28,7 +27,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -89,87 +87,6 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     @Override
     public File getWorkspaceUploadDirectory(int workspaceID) {
         return this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
-    }
-    
-    @Override
-    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStreamToCheck, String filename)
-            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException {
-        
-        File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
-        
-        File uploadedFile = FileUtils.getFile(workspaceUploadDirectory, filename);
-        URL uploadedFileURL;
-        try {
-            uploadedFileURL = uploadedFile.toURI().toURL();
-        } catch (MalformedURLException ex) {
-            String errorMessage = "Error retrieving URL from file " + uploadedFile.getPath();
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
-        }
-        
-        TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(inputStreamToCheck, filename);
-        
-        WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
-        URL topNodeArchiveURL;
-        try {
-            topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
-        } catch (NodeNotFoundException ex) {
-            String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
-            logger.error(errorMessage, ex);
-            throw new WorkspaceException(errorMessage, workspaceID, ex);
-        }
-            
-        //TODO get this in some other way
-            // the server in the URL should be replaced by the actual folder
-                // or there should be a different way of specifying the folders with special typechecker configurations
-//        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
-//        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
-
-        StringBuilder message = new StringBuilder();
-        boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);
-        
-        if(!isArchivable) {
-            logger.error("File [" + filename + "] not archivable: " + message);
-            throw new TypeCheckerException(typecheckedResults, message.toString(), null);
-        }
-        
-        if(uploadedFileURL.toString().endsWith("cmdi")) {
-           
-            if(!metadataApiBridge.isMetadataFileValid(uploadedFileURL)) {
-                String errorMessage = "Metadata file [" + filename + "] is invalid";
-                logger.error(errorMessage);
-                throw new InvalidMetadataException(errorMessage, null);
-            }
-            
-            boolean profileAllowed;
-            try {
-                profileAllowed = metadataChecker.isProfileAllowed(uploadedFile);
-            } catch (Exception ex) {
-                String errorMessage = "Error checking profile of metadata file [" + filename + "].";
-                logger.error(errorMessage);
-                throw new InvalidMetadataException(errorMessage, ex);
-            }
-
-            if(!profileAllowed) {
-                String errorMessage = "Profile of metadata file [" + filename + "] not allowed.";
-                logger.error(errorMessage);
-                throw new InvalidMetadataException(errorMessage, null);
-            }
-        }
-
-        FileUtils.copyInputStreamToFile(inputStreamToCheck, uploadedFile);
-            
-        String nodeMimetype = typecheckedResults.getCheckedMimetype();
-        
-        URI archiveURI = null;
-        if(uploadedFileURL.toString().endsWith("cmdi")) {
-            archiveURI = metadataApiBridge.getSelfHandleFromFile(uploadedFileURL);
-        }
-        
-        WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
-        
-        this.workspaceDao.addWorkspaceNode(uploadedNode);
     }
 
     /**
@@ -264,20 +181,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 continue;
             }
             
-            TypecheckedResults typecheckedResults;
-            try (InputStream currentInputStream = FileUtils.openInputStream(currentFile)) {
-                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(currentInputStream, currentFile.getName());
-            }
-            
-            
-            
-            //TODO get this in some other way
-                // the server in the URL should be replaced by the actual folder
-                    // or there should be a different way of specifying the folders with special typechecker configurations
-//        File workspaceTopNodeFile = FileUtils.toFile(topNodeArchiveURL);
-//        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(workspaceTopNodeFile);
-
-        
+            TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileURL, currentFile.getName());
             
             StringBuilder message = new StringBuilder();
             boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);

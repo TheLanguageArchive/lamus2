@@ -32,7 +32,6 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchivePidHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -801,25 +800,6 @@ public class LamusWorkspaceServiceTest {
         assertEquals("Returned list of nodes is different from expected", expectedChildNodes, retrievedChildNodes);
     }
     
-//    @Test
-//    public void uploadFileIntoWorkspaceWithAccess() {
-//        
-//        final int workspaceID = 1;
-//        final String userID = "testUser";
-//        
-//        final Collection<FileItem> fileItems = new ArrayList<FileItem>();
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(returnValue(Boolean.TRUE));
-//            oneOf(mockWorkspaceUploader).uploadFiles(workspaceID, fileItems);
-//        }});
-//        
-//        service.uploadFilesIntoWorkspace(userID, workspaceID, fileItems);
-//    }
-    
-    //TODO uploadFileIntoWorkspaceWithoutAccess
-    
     @Test
     public void getWorkspaceUploadDirectory() {
         
@@ -834,109 +814,6 @@ public class LamusWorkspaceServiceTest {
         File result = service.getWorkspaceUploadDirectory(workspaceID);
         
         assertEquals("Retrieved directory different from expected", mockWorkspaceUploadDirectory, result);
-    }
-    
-    @Test
-    public void uploadFileIntoWorkspace() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final String filename = "someFile.cmdi";
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-        }});
-        
-        service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
-    }
-    
-    @Test
-    public void uploadFileIntoWorkspaceThrowsIOException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final String filename = "someFile.cmdi";
-        final IOException ioException = new IOException("some error message");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-                will(throwException(ioException));
-        }});
-        
-        try {
-            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(IOException ex) {
-            assertEquals("Exception thrown different frome expected", ioException, ex);
-        }
-    }
-    
-    @Test
-    public void uploadFileIntoWorkspaceThrowsTypeCheckerException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final String filename = "someFile.bla";
-        final TypeCheckerException typeCheckerException = new TypeCheckerException(mockTypecheckedResults, "some error message", null);
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-                will(throwException(typeCheckerException));
-        }});
-        
-        try {
-            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(TypeCheckerException ex) {
-            assertEquals("Exception thrown different from expected", typeCheckerException, ex);
-        }
-    }
-    
-    @Test
-    public void uploadFileIntoWorkspaceThrowsMetadataCheckerException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final String filename = "someFile.bla";
-        final InvalidMetadataException metadataCheckerException = new InvalidMetadataException("some error message", null);
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-                will(throwException(metadataCheckerException));
-        }});
-        
-        try {
-            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(InvalidMetadataException ex) {
-            assertEquals("Exception thrown different from expected", metadataCheckerException, ex);
-        }
-    }
-    
-    @Test
-    public void uploadFileIntoWorkspaceThrowsWorkspaceException() throws IOException, TypeCheckerException, WorkspaceException, InvalidMetadataException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final String filename = "someFile.cmdi";
-        final WorkspaceException workspaceException = new WorkspaceException("some error message", workspaceID, null);
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
-                will(throwException(workspaceException));
-        }});
-        
-        try {
-            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
-            fail("An exception should have been thrown");
-        } catch(WorkspaceException ex) {
-            assertEquals("Exception thrown different from expected", workspaceException, ex);
-        }
     }
     
     @Test

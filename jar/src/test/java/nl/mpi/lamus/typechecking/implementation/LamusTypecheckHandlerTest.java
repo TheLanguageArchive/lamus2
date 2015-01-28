@@ -15,7 +15,11 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
@@ -38,6 +42,7 @@ public class LamusTypecheckHandlerTest {
     
     private TypecheckHandler typecheckHandler;
     @Mock FileType mockTypechecker;
+    @Mock DeepFileType mockDeepTypechecker;
     @Mock InputStream mockInputStream;
     
     public LamusTypecheckHandlerTest() {
@@ -53,24 +58,21 @@ public class LamusTypecheckHandlerTest {
     
     @Before
     public void setUp() {
-        typecheckHandler = new LamusTypecheckHandler(mockTypechecker);
+        typecheckHandler = new LamusTypecheckHandler(mockTypechecker, mockDeepTypechecker);
     }
     
     @After
     public void tearDown() {
     }
 
-    /**
-     * Test of typecheck method, of class LamusTypecheckHandler.
-     */
+
     @Test
-    public void testTypecheck() throws Exception {
+    public void typecheck() throws Exception {
         
         final String fileName = "someFile.txt";
         final String expectedResult = "true something";
         
         context.checking(new Expectations() {{
-            
             oneOf(mockTypechecker).checkStream(mockInputStream, fileName.toLowerCase()); will(returnValue(expectedResult));
         }});
         
@@ -79,6 +81,22 @@ public class LamusTypecheckHandlerTest {
         assertEquals("Retrieved result is different from expected", expectedResult, retrivedResult);
     }
 
+    @Test
+    public void deepTypecheck() throws MalformedURLException, IOException {
+        
+        final URL fileURL = new URL("file:/some/location/someFile.txt");
+        final String filename = "someFile.txt";
+        final String expectedResult = "true something";
+        
+        context.checking(new Expectations() {{
+            oneOf(mockDeepTypechecker).checkURL(fileURL, filename); will(returnValue(expectedResult));
+        }});
+        
+        String retrievedResult = typecheckHandler.deepTypecheck(fileURL, filename);
+        
+        assertEquals("Retrieved result is different from expected", expectedResult, retrievedResult);
+    }
+    
     /**
      * Test of isFileArchivable method, of class LamusTypecheckHandler.
      * 

@@ -187,11 +187,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
 
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(returnValue(mockTypecheckedResults));
-            oneOf(mockInputStream).close();
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
@@ -264,11 +262,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(returnValue(mockTypecheckedResults));
-            oneOf(mockInputStream).close();
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithoutHandle, mockTypecheckedResults);
             
@@ -345,11 +341,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(returnValue(mockTypecheckedResults));
-            oneOf(mockInputStream).close();
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
@@ -435,11 +429,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(returnValue(mockTypecheckedResults));
-            oneOf(mockInputStream).close();
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
@@ -525,11 +517,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
                 
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(returnValue(mockTypecheckedResults));
-            oneOf(mockInputStream).close();
                 
             oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
             
@@ -671,6 +661,7 @@ public class ResourceNodeImporterTest {
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
         final String childFilename = "childname.txt";
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
+        final URL childArchiveURL = childOriginURI.toURL();
 
         final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
@@ -695,11 +686,9 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
                 will(returnValue(true));
             
-            oneOf(mockNodeResolver).getInputStream(mockCorpusNode); will(returnValue(mockInputStream));
             oneOf(mockFile).getName(); will(returnValue(childFilename));
-            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(mockInputStream, childFilename);
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
                 will(throwException(expectedException));
-            oneOf(mockInputStream).close();
         }});
         
         try {

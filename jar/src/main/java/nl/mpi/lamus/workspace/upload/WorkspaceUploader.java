@@ -18,10 +18,8 @@ package nl.mpi.lamus.workspace.upload;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.zip.ZipInputStream;
-import nl.mpi.lamus.exception.InvalidMetadataException;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
@@ -40,16 +38,6 @@ public interface WorkspaceUploader {
      * @return Upload directory
      */
     public File getWorkspaceUploadDirectory(int workspaceID);
-    
-    /**
-     * Given an InputStream and the filename, this method triggers a
-     * typecheck and uploads the file, if archivable.
-     * @param workspaceID ID of the workspace
-     * @param inputStream InputStream to upload
-     * @param filename name of the file to upload
-     */
-    public void uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
-            throws IOException, TypeCheckerException, InvalidMetadataException, WorkspaceException;
 
     /**
      * Given a ZipInputStream and the filename, this method uploads its content

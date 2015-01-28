@@ -233,33 +233,35 @@ public class LamusNodeDataRetrieverTest {
     }
     
     @Test
-    public void testTriggerFileStreamCheck() throws TypeCheckerException {
+    public void testTriggerFileStreamCheck() throws TypeCheckerException, MalformedURLException {
         
         final String filename = "file.txt";
+        final URL fileUrl = new URL("file:/some/location/" + filename);
         
         context.checking(new Expectations() {{
             
-            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename); will(returnValue(mockTypecheckedResults));
+            oneOf(mockFileTypeHandler).checkType(fileUrl, filename); will(returnValue(mockTypecheckedResults));
         }});
         
-        TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+        TypecheckedResults results = nodeDataRetriever.triggerResourceFileCheck(fileUrl, filename);
         assertEquals("Typechecked results different from expected", mockTypecheckedResults, results);
     }
 
     @Test
-    public void testTriggerFileStreamCheckThrowsException() throws TypeCheckerException {
+    public void testTriggerFileStreamCheckThrowsException() throws TypeCheckerException, MalformedURLException {
         
         final String filename = "file.txt";
+        final URL fileUrl = new URL("file:/some/location/" + filename);
         final TypeCheckerException expectedException = new TypeCheckerException(mockTypecheckedResults, "some error message", new IOException("some cause"));
         
         context.checking(new Expectations() {{
             
-            oneOf(mockFileTypeHandler).checkType(mockInputStream, filename);
+            oneOf(mockFileTypeHandler).checkType(fileUrl, filename);
                 will(throwException(expectedException));
         }});
         
         try {
-            nodeDataRetriever.triggerResourceFileCheck(mockInputStream, filename);
+            nodeDataRetriever.triggerResourceFileCheck(fileUrl, filename);
             fail("An exception should have been thrown");
         } catch(TypeCheckerException ex) {
             assertEquals("Exception thrown different from expected", expectedException, ex);

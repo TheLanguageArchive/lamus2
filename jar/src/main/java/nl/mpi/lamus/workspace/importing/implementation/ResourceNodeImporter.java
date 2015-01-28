@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -40,7 +39,6 @@ import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.model.ResourceReference;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,21 +122,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 
         if(nodeDataRetriever.shouldResourceBeTypechecked(referenceFromParent, childLocalFile, childCorpusNode)) {
             
-            TypecheckedResults typecheckedResults = null;    
-            InputStream childInputStream = null;
+            TypecheckedResults typecheckedResults = null;
             try {
-
-                childInputStream = nodeResolver.getInputStream(childCorpusNode);
-                
-                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childInputStream, childLocalFile.getName());
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childURL, childLocalFile.getName());
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
                 throw new WorkspaceImportException(errorMessage, workspaceID, tcex);
-            } catch (IOException ex) {
-                throw new UnsupportedOperationException("not handled yet");
-            } finally {
-                IOUtils.closeQuietly(childInputStream);
             }
             
             nodeDataRetriever.verifyTypecheckedResults(childLocalFile, referenceFromParent, typecheckedResults);
