@@ -1,4 +1,4 @@
-lamus2-1.2
+lamus2-1.2.0 (2015-01-29)
 
     Additions:
         - REMOVE UNLINKED NODES: Added the option of removing all or the selected
