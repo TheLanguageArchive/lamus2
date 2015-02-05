@@ -24,16 +24,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.zip.ZipInputStream;
-import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.upload.implementation.FileUploadProblem;
-import nl.mpi.lamus.workspace.upload.implementation.LinkUploadProblem;
-import nl.mpi.lamus.workspace.upload.implementation.MatchUploadProblem;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
@@ -159,22 +158,21 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                 }
                             }
                         }
+                        
+                        
+                        
+                        
+                        //TODO UNIFORMIZE EXCEPTIONS - ALL IMPORT EXCEPTIONS?
+                        
+                        
+                        
 
                         try {
-                            Collection<UploadProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
+                            Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
 
-                            for (UploadProblem problem : uploadProblems) {
+                            for (ImportProblem problem : uploadProblems) {
 
-                                if (problem instanceof FileUploadProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-                                if (problem instanceof LinkUploadProblem) {
+                                if (problem instanceof FileImportProblem) {
 
                                     UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
 
@@ -183,7 +181,16 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
 
                                     continue;
                                 }
-                                if (problem instanceof MatchUploadProblem) {
+                                if (problem instanceof LinkImportProblem) {
+
+                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+
+
+                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
+
+                                    continue;
+                                }
+                                if (problem instanceof MatchImportProblem) {
 
                                     UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
 
@@ -209,7 +216,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
 
                             }
 
-                        } catch (IOException | WorkspaceException | TypeCheckerException ex) {
+                        } catch (WorkspaceException ex) {
                             UploadPanel.this.error(ex.getMessage());
                         }
 

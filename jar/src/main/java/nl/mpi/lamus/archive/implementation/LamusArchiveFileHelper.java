@@ -50,12 +50,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Qualifier("maxDirectoryNameLength")
     private int maxDirectoryNameLength;
     @Autowired
-    @Qualifier("corpusDirectoryBaseName")
-    private String corpusDirectoryBaseName;
-    @Autowired
-    @Qualifier("orphansDirectoryBaseName")
-    private String orphansDirectoryBaseName;
-    @Autowired
     @Qualifier("typeRecheckSizeLimitInBytes")
     private long typeRecheckSizeLimitInBytes;
     
@@ -162,29 +156,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         return result;
 
     }
-
-    /**
-     * @see ArchiveFileHelper#getOrphansDirectory(java.net.URI)
-     */
-    @Override
-    public File getOrphansDirectory(URI topNodeURI) {
-        String topNodePath = topNodeURI.getPath();
-        int index=topNodePath.indexOf(File.separator + corpusDirectoryBaseName + File.separator);
-        File orphansFolder = null;
-        if(index > -1) {
-            orphansFolder = new File(topNodePath.substring(0, index + 1) + orphansDirectoryBaseName);
-        } else {
-            File temp=new File(topNodePath);
-            while((orphansFolder == null) && (temp != null)) {
-                File cs = new File (temp, corpusDirectoryBaseName);
-                if(cs.exists() && cs.isDirectory()) {
-                    orphansFolder = new File(temp, orphansDirectoryBaseName);
-                }
-                temp=temp.getParentFile();
-            }
-        }
-        return orphansFolder; 
-    }
     
     /**
      * @see ArchiveFileHelper#isFileSizeAboveTypeReCheckSizeLimit(java.io.File)
@@ -192,24 +163,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Override
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck) {
         if(fileToCheck.length() > typeRecheckSizeLimitInBytes) {
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * @see ArchiveFileHelper#isFileInOrphansDirectory(java.io.File)
-     */
-    @Override
-    public boolean isFileInOrphansDirectory(File fileToCheck) {
-        
-        //TODO This method should be more robust
-            // it should not only check if the file's path contains the directory name
-            // it should check if the path is actually the same as the complete path for the orphans of that workspace
-
-        
-        if (orphansDirectoryBaseName != null &&
-            fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryBaseName)) {
             return true;
         }
         return false;

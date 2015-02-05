@@ -17,8 +17,6 @@ package nl.mpi.lamus.archive;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.OurURL;
@@ -67,41 +65,11 @@ public interface ArchiveFileHelper {
     public String correctPathElement(String pathElement, String reason);
     
     /**
-     * finds the physical place of a directory in the archive
-     * where orphans (unlinked files) are/should be stored
-     * @param topNodeURL the archive-URL of the topNode of the workspace
-     * @return the directory where orphans are/should be stored (when it doesn't exist it is not created)
-     */
-    public File getOrphansDirectory(URI topNodeURI);
-    
-    /**
-     * 
-     * @return the name of the orphans directory
-     */
-//    public String getOrphansDirectoryName();
-    
-//    public String getRelativePath(String parent,String child);
-    
-//    public String getRelativePath(OurURL parent, OurURL child);
-    
-//    public OurURL makeNewOurURL(URL url);
-    
-//    public String fileExtensionToLowerCase(String name);
-    
-    /**
      * Checks if the given file's size is above the size limit of the typechecker
      * @param fileToCheck File to be checked
      * @return true if the file is larger than the typechecker size limit
      */
     public boolean isFileSizeAboveTypeReCheckSizeLimit(File fileToCheck);
-    
-    
-    /**
-     * Checks if the given file is located in the orphans directory
-     * @param fileToCheck File object to be checked
-     * @return true if file is located in the orphans directory
-     */
-    public boolean isFileInOrphansDirectory(File fileToCheck);
     
     /**
      * Checks if the given URL is our internal archive

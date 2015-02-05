@@ -31,7 +31,7 @@ import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,7 +206,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     }
 
     @Override
-    public Collection<UploadProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
+    public Collection<ImportProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

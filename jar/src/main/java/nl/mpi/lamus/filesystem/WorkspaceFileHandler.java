@@ -18,7 +18,9 @@ package nl.mpi.lamus.filesystem;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -61,4 +63,11 @@ public interface WorkspaceFileHandler {
      */
     public void copyInputStreamToTargetFile(InputStream inputStream, File targetFile)
             throws IOException;
+    
+    /**
+     * Gets the files from the orphan directory corresponding to the given workspace.
+     * @param workspace
+     * @return Collection of orphan files
+     */
+    public Collection<File> getFilesInOrphanDirectory(Workspace workspace);
 }

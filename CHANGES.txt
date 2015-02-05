@@ -1,3 +1,10 @@
+lamus2-1.3.0
+
+    Additions:
+        - SESSIONS FOLDER: Added support for the "sessions" folder, where files
+          can be copied to in order to have them automatically upload to a
+          new workspace under the corresponding top node.
+
 lamus2-1.2.0 (2015-01-29)
 
     Additions:

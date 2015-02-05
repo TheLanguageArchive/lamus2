@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.zip.ZipInputStream;
 import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 
 /**
  * Provides functionality to upload files into the workspace,
@@ -56,6 +56,6 @@ public interface WorkspaceUploader {
      * @param uploadedFiles Collection of previously uploaded files
      * @return collection containing objects which describe eventual upload problems
      */
-    public Collection<UploadProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, TypeCheckerException, WorkspaceException;
+    public Collection<ImportProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+            throws WorkspaceException;
 }

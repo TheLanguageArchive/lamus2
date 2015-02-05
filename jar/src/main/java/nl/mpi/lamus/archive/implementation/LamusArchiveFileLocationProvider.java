@@ -53,6 +53,14 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     private String dbLocalRoot;
     
     @Autowired
+    @Qualifier("metadataDirectoryName")
+    private String metadataDirectoryName;
+    @Autowired
+    @Qualifier("orphansDirectoryName")
+    private String orphansDirectoryName;
+    
+    
+    @Autowired
     public LamusArchiveFileLocationProvider(ArchiveFileHelper archiveFileHelper) {
         this.archiveFileHelper = archiveFileHelper;
     }
@@ -118,4 +126,45 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
         return location;
     }
     
+
+    /**
+     * @see ArchiveFileLocationProvider#getOrphansDirectory(java.net.URI)
+     */
+    @Override
+    public File getOrphansDirectory(URI topNodeLocation) {
+        String topNodePath = topNodeLocation.getPath();
+        int index=topNodePath.indexOf(File.separator + metadataDirectoryName + File.separator);
+        File orphansFolder = null;
+        if(index > -1) {
+            orphansFolder = new File(topNodePath.substring(0, index + 1) + orphansDirectoryName);
+        } else {
+            File temp=new File(topNodePath);
+            while((orphansFolder == null) && (temp != null)) {
+                File cs = new File (temp, metadataDirectoryName);
+                if(cs.exists() && cs.isDirectory()) {
+                    orphansFolder = new File(temp, orphansDirectoryName);
+                }
+                temp=temp.getParentFile();
+            }
+        }
+        return orphansFolder; 
+    }
+    
+    /**
+     * @see ArchiveFileLocationProvider#isFileInOrphansDirectory(java.io.File)
+     */
+    @Override
+    public boolean isFileInOrphansDirectory(File fileToCheck) {
+        
+        //TODO This method should be more robust
+            // it should not only check if the file's path contains the directory name
+            // it should check if the path is actually the same as the complete path for the orphans of that workspace
+
+        
+        if (orphansDirectoryName != null &&
+            fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryName)) {
+            return true;
+        }
+        return false;
+    }
 }

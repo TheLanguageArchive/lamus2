@@ -16,6 +16,9 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -87,12 +90,12 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
      * nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection) 
      */
     @Override
-    public Collection<UploadProblem> matchReferencesWithNodes(
+    public Collection<ImportProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
             Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles) {
         
-        Collection<UploadProblem> failedLinks = new ArrayList<>();
+        Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         //check if document has external self-handle
         if(!handleManager.isHandlePrefixKnown(metadataApiBridge.getSelfHandleFromDocument(currentDocument))) {
@@ -172,13 +175,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     } catch (WorkspaceException ex) {
                         String message = "Error linking nodes " + currentNode.getWorkspaceNodeID() + " and " + matchedNode.getWorkspaceNodeID() + " in workspace " + workspaceID;
                         logger.error(message, ex);
-                        failedLinks.add(new LinkUploadProblem(currentNode, matchedNode, message, ex));
+                        failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, ex));
                     }
                 } else {
                     //Multiple parents NOT allowed - won't be linked
                     String message = "Matched node (ID " + matchedNode.getWorkspaceNodeID() + ") cannot be linked to parent node (ID " + currentNode.getWorkspaceNodeID() + ") because it already has a parent. Multiple parents are not allowed.";
                     logger.error(message, null);
-                    failedLinks.add(new LinkUploadProblem(currentNode, matchedNode, message, null));
+                    failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, null));
                 }
                 
                 if(!externalNode) {
@@ -192,7 +195,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             } else {
                 removeReference(currentDocument, ref, currentNode);
                 String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched";
-                failedLinks.add(new MatchUploadProblem(currentNode, ref, message, null));
+                failedLinks.add(new MatchImportProblem(currentNode, ref, message, null));
             }
             
         }

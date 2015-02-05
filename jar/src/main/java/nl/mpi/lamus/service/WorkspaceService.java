@@ -34,7 +34,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 
 /**
  *
@@ -203,8 +203,8 @@ public interface WorkspaceService extends Serializable {
      * @param uploadedFiles Files previously uploaded
      * @return collection containing the eventual problems which occurred with the uploaded files
      */
-    public Collection<UploadProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, TypeCheckerException, WorkspaceException;
+    public Collection<ImportProblem> processUploadedFiles(String userID, int workspaceID, Collection<File> uploadedFiles)
+            throws WorkspaceException;
     
     /**
      * Lists the unlinked nodes of the given workspace.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload.implementation;
+package nl.mpi.lamus.workspace.importing;
 
-import java.io.File;
+import java.util.Collection;
+import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  *
  * @author guisil
  */
-public class FileUploadProblem extends UploadProblem {
+public interface OrphanNodesImportHandler {
     
-    private File problematicFile;
-    
-    public FileUploadProblem(File problematicFile, String errorMessage, Exception exception) {
-        super(errorMessage, exception);
-        this.problematicFile = problematicFile;
-    }
-    
-    public File getProblematicFile() {
-        return problematicFile;
-    }
+    public Collection<ImportProblem> exploreOrphanNodes(Workspace workspace)
+            throws WorkspaceException;
 }

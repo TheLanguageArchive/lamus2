@@ -19,7 +19,7 @@ package nl.mpi.lamus.workspace.upload;
 import java.util.Collection;
 import java.util.Map;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 
@@ -44,7 +44,7 @@ public interface WorkspaceUploadReferenceHandler {
      * if it contains an external self-handle (which will need to be removed later)
      * @return Collection containing the links that were supposed to be made, but failed
      */
-    public Collection<UploadProblem> matchReferencesWithNodes(
+    public Collection<ImportProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
             Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles);

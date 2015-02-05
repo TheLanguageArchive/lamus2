@@ -20,8 +20,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -44,6 +51,16 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
+    
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
+    private WorkspaceAccessChecker workspaceAccessChecker;
+    
+    @Autowired
+    public LamusWorkspaceFileHandler(ArchiveFileLocationProvider aflProvider, WorkspaceAccessChecker wsAccessChecker) {
+        archiveFileLocationProvider = aflProvider;
+        workspaceAccessChecker = wsAccessChecker;
+    }
+    
 
     /**
      * @see WorkspaceFileHandler#copyFile(java.io.File, java.io.File)
@@ -93,5 +110,42 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
                 outputStream.write(buffer, 0, len);
             }
         }
+    }
+
+    /**
+     * @see WorkspaceFileHandler#getFilesInOrphanDirectory(nl.mpi.lamus.workspace.model.Workspace)
+     */
+    @Override
+    public Collection<File> getFilesInOrphanDirectory(Workspace workspace) {
+        
+        
+        //TODO FILTER FILES IN SOME WAY??? MAYBE IGNORE SOME FILES WITH SPECIFIC NAMES?
+        
+        
+        File orphansDirectory;
+        try {
+            orphansDirectory = archiveFileLocationProvider.getOrphansDirectory(workspace.getTopNodeArchiveURL().toURI());
+        } catch (URISyntaxException ex) {
+            throw new UnsupportedOperationException("not handled yet");
+        }
+        
+        File[] allFiles = orphansDirectory.listFiles();
+        Collection<File> fileAvailableForWorkspace = new ArrayList<>();
+        
+        if(allFiles != null) {
+            for(int i = 0; i < allFiles.length; i++) {
+                File currentFile = allFiles[i];
+                try {
+                    if(currentFile.isFile()) {
+                        workspaceAccessChecker.ensureNodeIsNotLocked(currentFile.toURI());
+                        fileAvailableForWorkspace.add(currentFile);
+                    }
+                } catch (NodeAccessException ex) {
+                    //do nothing, let the loop continue
+                }
+            }
+        }
+        
+        return fileAvailableForWorkspace;
     }
 }

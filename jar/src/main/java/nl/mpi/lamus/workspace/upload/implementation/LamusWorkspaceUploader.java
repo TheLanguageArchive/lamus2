@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -146,14 +148,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
      * @see WorkspaceUploader#processUploadedFiles(int, java.util.Collection)
      */
     @Override
-    public Collection<UploadProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
-            throws IOException, TypeCheckerException, WorkspaceException {
+    public Collection<ImportProblem> processUploadedFiles(int workspaceID, Collection<File> uploadedFiles)
+            throws WorkspaceException {
         
         //collection containing all the upload problems
-        Collection<UploadProblem> allUploadProblems = new ArrayList<>();
+        Collection<ImportProblem> allUploadProblems = new ArrayList<>();
         
         // collection containing the files that for some reason are not sucessfully processed, along with the reason for it
-        Collection<UploadProblem> failedFiles = new ArrayList<>();
+        Collection<ImportProblem> failedFiles = new ArrayList<>();
         
         // collection containing the nodes that were eventually uploaded, to be used later for checking eventual links between them
         Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
@@ -177,11 +179,18 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             } catch (MalformedURLException ex) {
                 String errorMessage = "Error retrieving URL from file " + currentFile.getPath();
                 logger.error(errorMessage, ex);
-                failedFiles.add(new FileUploadProblem(currentFile, errorMessage, ex));
+                failedFiles.add(new FileImportProblem(currentFile, errorMessage, ex));
                 continue;
             }
             
-            TypecheckedResults typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileURL, currentFile.getName());
+            TypecheckedResults typecheckedResults = null;
+            try {
+                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileURL, currentFile.getName());
+            } catch(TypeCheckerException ex) {
+                String errorMessage = "Error while typechecking file [" + currentFile.getName() + "]";
+                failUploadForFile(currentFile, errorMessage, failedFiles);
+                continue;
+            }
             
             StringBuilder message = new StringBuilder();
             boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);
@@ -235,7 +244,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         //Searching for links among the uploaded files
-        Collection<UploadProblem> failedLinks = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
+        Collection<ImportProblem> failedLinks = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
         
         allUploadProblems.addAll(failedFiles);
         allUploadProblems.addAll(failedLinks);
@@ -244,11 +253,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     }
 
     
-    private void failUploadForFile(File file, String errorMessage, Collection<UploadProblem> failedFiles) throws IOException {
+    private void failUploadForFile(File file, String errorMessage, Collection<ImportProblem> failedFiles) {
         logger.error(errorMessage);
-        failedFiles.add(new FileUploadProblem(file, errorMessage, null));
-        
-        //remove unarchivable file after adding it to the collection of failed uploads
-        FileUtils.forceDelete(file);
+        failedFiles.add(new FileImportProblem(file, errorMessage, null));
+        try {
+            //remove unarchivable file after adding it to the collection of failed uploads
+            FileUtils.forceDelete(file);
+        } catch (IOException ex) {
+            logger.warn("Couldn't delete unarchivable file: " + ex.getMessage());
+        }
     }
 }

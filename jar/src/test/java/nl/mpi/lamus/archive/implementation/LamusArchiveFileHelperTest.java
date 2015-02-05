@@ -70,8 +70,6 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockWorkspaceFile;
     
     private final int maxDirectoryNameLength = 50;
-    private final String corpusDirectoryBaseName = "Corpusstructure";
-    private String orphansDirectoryBaseName = "sessions";
     private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
     private final String metadataDirectoryName = "Metadata";
@@ -95,8 +93,6 @@ public class LamusArchiveFileHelperTest {
     public void setUp() {
         testArchiveFileHelper = new LamusArchiveFileHelper();
         ReflectionTestUtils.setField(testArchiveFileHelper, "maxDirectoryNameLength", maxDirectoryNameLength);
-        ReflectionTestUtils.setField(testArchiveFileHelper, "corpusDirectoryBaseName", corpusDirectoryBaseName);
-        ReflectionTestUtils.setField(testArchiveFileHelper, "orphansDirectoryBaseName", orphansDirectoryBaseName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "typeRecheckSizeLimitInBytes", typeRecheckSizeLimitInBytes);
         
         ReflectionTestUtils.setField(testArchiveFileHelper, "metadataDirectoryName", metadataDirectoryName);
@@ -233,46 +229,6 @@ public class LamusArchiveFileHelperTest {
     }
 
     /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
-    @Test
-    public void getOrphansDirectoryWithCorpusDirectory() throws MalformedURLException {
-        
-        File pathPrefix = new File("/some/url/with/");
-        File corpusDirectoryFullPath = new File(pathPrefix, corpusDirectoryBaseName);
-        File fullPath = new File(corpusDirectoryFullPath, "blabla.cmdi");
-        
-        URI testURI = fullPath.toURI();
-        
-        File expectedOrphansDirectory = new File(pathPrefix, orphansDirectoryBaseName);
-        File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
-        
-        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
-    }
-    
-    /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
-    @Test
-    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
-        
-        String pathPrefix = "/some/url/with/";
-        File pathPrefixFile = testFolder.newFolder(pathPrefix);
-        File corpusFolder = testFolder.newFolder(pathPrefix + corpusDirectoryBaseName);
-        FileUtils.forceMkdir(corpusFolder);
-        assertTrue(corpusFolder.exists());
-
-        File fullFilePath = new File(pathPrefixFile, "metadata/blabla.cmdi");
-        
-        URI testURI = fullFilePath.toURI();
-        
-        File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryBaseName);
-        File retrievedOrphansDirectory = testArchiveFileHelper.getOrphansDirectory(testURI);
-        
-        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
-    }
-
-    /**
      * Test of isFileSizeAboveTypeReCheckSizeLimit method, of class LamusArchiveFileHelper.
      */
     @Test
@@ -300,22 +256,6 @@ public class LamusArchiveFileHelperTest {
         boolean isSizeAboveLimit = testArchiveFileHelper.isFileSizeAboveTypeReCheckSizeLimit(mockFile);
         
         assertFalse("Result should be false", isSizeAboveLimit);
-    }
-    
-    @Test
-    public void fileIsInOrphansDirectory() {
-        File testFile = new File("file:/bla/bla/sessions");
-        
-        boolean isFileInOrphansDirectory = testArchiveFileHelper.isFileInOrphansDirectory(testFile);
-        assertTrue("Result should be true", isFileInOrphansDirectory);
-    }
-    
-    @Test
-    public void fileIsNotInOrphansDirectory() {
-        File testFile = new File("file:/bla/bla/notthere");
-        
-        boolean isFileInOrphansDirectory = testArchiveFileHelper.isFileInOrphansDirectory(testFile);
-        assertFalse("Result should be false", isFileInOrphansDirectory);
     }
 
     @Test

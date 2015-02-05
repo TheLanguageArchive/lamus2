@@ -16,6 +16,9 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -152,7 +155,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                     workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -193,7 +196,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                     workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -233,7 +236,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
 
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -274,7 +277,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -282,10 +285,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
         
-        UploadProblem problem = failedLinks.iterator().next();
-        assertTrue("Upload problem different from expected", problem instanceof LinkUploadProblem);
-        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkUploadProblem) problem).getParentNode());
-        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkUploadProblem) problem).getChildNode());
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof LinkImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkImportProblem) problem).getChildNode());
         
         //TODO ASSERT ERROR MESSAGE
     }
@@ -321,7 +324,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -364,7 +367,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -408,7 +411,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
 
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -449,7 +452,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         matchedNodeCheckPrefixKnown(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE);
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -493,7 +496,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -528,7 +531,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, firstNodeID, null);
 
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -572,7 +575,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, expectedException);
 
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -580,10 +583,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
         
-        UploadProblem problem = failedLinks.iterator().next();
-        assertTrue("Upload problem different from expected", problem instanceof LinkUploadProblem);
-        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkUploadProblem) problem).getParentNode());
-        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkUploadProblem) problem).getChildNode());
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof LinkImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkImportProblem) problem).getChildNode());
     }
     
     @Test
@@ -638,7 +641,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockThirdNode, thirdNodeID, existingThirdNodeParents, mockFirstNode, firstNodeID, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -679,7 +682,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -687,10 +690,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
         
-        UploadProblem problem = failedLinks.iterator().next();
-        assertTrue("Upload problem different from expected", problem instanceof MatchUploadProblem);
-        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchUploadProblem) problem).getParentNode());
-        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchUploadProblem) problem).getChildReference());
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchImportProblem) problem).getChildReference());
     }
     
     @Test
@@ -725,7 +728,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -733,10 +736,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
         
-        UploadProblem problem = failedLinks.iterator().next();
-        assertTrue("Upload problem different from expected", problem instanceof MatchUploadProblem);
-        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchUploadProblem) problem).getParentNode());
-        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchUploadProblem) problem).getChildReference());
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchImportProblem) problem).getChildReference());
     }
     
     @Test
@@ -770,7 +773,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, null, null, mockFirstReference, firstRefURI, expectedException);
         
         
-        Collection<UploadProblem> failedLinks =
+        Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
                 workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
@@ -778,10 +781,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
         
-        UploadProblem problem = failedLinks.iterator().next();
-        assertTrue("Upload problem different from expected", problem instanceof MatchUploadProblem);
-        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchUploadProblem) problem).getParentNode());
-        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchUploadProblem) problem).getChildReference());
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchImportProblem) problem).getChildReference());
     }
     
     

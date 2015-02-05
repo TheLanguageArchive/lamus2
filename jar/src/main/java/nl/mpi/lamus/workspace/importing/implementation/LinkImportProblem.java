@@ -14,31 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload.implementation;
+package nl.mpi.lamus.workspace.importing.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.Reference;
 
 /**
  *
  * @author guisil
  */
-public class MatchUploadProblem extends UploadProblem {
+public class LinkImportProblem extends ImportProblem {
     
     private WorkspaceNode parentNode;
-    private Reference childReference;
+    private WorkspaceNode childNode;
     
-    public MatchUploadProblem(WorkspaceNode parentNode, Reference childReference, String errorMessage, Exception exception) {
+    public LinkImportProblem(WorkspaceNode parentNode, WorkspaceNode childNode, String errorMessage, Exception exception) {
         super(errorMessage, exception);
         this.parentNode = parentNode;
-        this.childReference = childReference;
+        this.childNode = childNode;
     }
     
     public WorkspaceNode getParentNode() {
         return parentNode;
     }
     
-    public Reference getChildReference() {
-        return childReference;
+    public WorkspaceNode getChildNode() {
+        return childNode;
     }
 }

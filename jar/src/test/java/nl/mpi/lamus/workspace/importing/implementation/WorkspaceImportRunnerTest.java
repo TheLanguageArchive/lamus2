@@ -17,6 +17,8 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -25,8 +27,10 @@ import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
+import nl.mpi.lamus.workspace.importing.OrphanNodesImportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataException;
+import org.hamcrest.core.IsNot;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;
@@ -51,6 +55,7 @@ public class WorkspaceImportRunnerTest {
     private WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceDao mockWorkspaceDao = context.mock(WorkspaceDao.class);
     private final TopNodeImporter mockTopNodeImporter = context.mock(TopNodeImporter.class);
+    private final OrphanNodesImportHandler mockOrphanNodesImportHandler = context.mock(OrphanNodesImportHandler.class);
     
     private final Workspace mockWorkspace = context.mock(Workspace.class);
     private final URI topNodeArchiveURI;
@@ -70,7 +75,7 @@ public class WorkspaceImportRunnerTest {
     
     @Before
     public void setUp() {
-        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockTopNodeImporter);
+        workspaceImportRunner = new WorkspaceImportRunner(mockWorkspaceDao, mockTopNodeImporter, mockOrphanNodesImportHandler);
         workspaceImportRunner.setWorkspace(mockWorkspace);
         workspaceImportRunner.setTopNodeArchiveURI(topNodeArchiveURI);
     }
@@ -84,6 +89,7 @@ public class WorkspaceImportRunnerTest {
     public void runsSuccessfully() throws Exception {
         
         final States importing = context.states("importing");
+        final Collection<ImportProblem> problems = new ArrayList<>();
         
         context.checking(new Expectations() {{
 
@@ -95,6 +101,8 @@ public class WorkspaceImportRunnerTest {
             oneOf(mockWorkspace).setStatusMessageInitialised();
                 when(importing.isNot("finished"));
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
+                when(importing.isNot("finished"));
+            oneOf(mockOrphanNodesImportHandler).exploreOrphanNodes(mockWorkspace); will(returnValue(problems));
                 then(importing.is("finished"));
         }});
         

@@ -431,7 +431,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Checking if node " + archiveNodeURI + " is locked");
         
-        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE archive_uri = :uri AND protected = :not_protected";
+        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE (archive_uri = :uri OR origin_url = :uri) AND protected = :not_protected";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("uri", archiveNodeURI.toString())
                 .addValue("not_protected", false);

@@ -163,6 +163,10 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
+                    
+                    
+                    //TODO CATCH ORPHANS EXCEPTION
+                    
                 } catch (NodeNotFoundException | NodeAccessException | WorkspaceImportException ex) {
                     Session.get().error(ex.getMessage());
                 }

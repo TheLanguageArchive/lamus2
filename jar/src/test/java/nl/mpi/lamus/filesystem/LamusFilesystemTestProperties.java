@@ -58,4 +58,16 @@ public class LamusFilesystemTestProperties {
         folderNames.add("^\\w+\\.svn$");
         return folderNames;
     }
+    
+    @Bean
+    @Qualifier("maxDirectoryNameLength")
+    public int maxDirectoryNameLength() {
+        return 100;
+    }
+    
+    @Bean
+    @Qualifier("typeRecheckSizeLimitInBytes")
+    public long typeRecheckSizeLimitInBytes() {
+        return 1000 * 1024 * 1024;
+    }
 }

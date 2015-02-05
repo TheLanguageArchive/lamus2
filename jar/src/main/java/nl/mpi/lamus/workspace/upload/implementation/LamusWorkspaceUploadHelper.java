@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,9 +63,9 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
      * @see WorkspaceUploadHelper#assureLinksInWorkspace(int, java.util.Collection)
      */
     @Override
-    public Collection<UploadProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
+    public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
-        Collection<UploadProblem> allFailedLinks = new ArrayList<>();
+        Collection<ImportProblem> allFailedLinks = new ArrayList<>();
         Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         for(WorkspaceNode node : nodesToCheck) {
@@ -87,7 +88,7 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             
             ReferencingMetadataDocument referencingDocument = (ReferencingMetadataDocument) document;
             
-            Collection<UploadProblem> failedLinks =
+            Collection<ImportProblem> failedLinks =
                     workspaceUploadReferenceHandler.matchReferencesWithNodes(
                     workspaceID, nodesToCheck, node, referencingDocument, documentsWithExternalSelfHandles);
             

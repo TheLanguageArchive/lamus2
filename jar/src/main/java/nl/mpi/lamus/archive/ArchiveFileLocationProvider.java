@@ -70,4 +70,19 @@ public interface ArchiveFileLocationProvider {
      * @return URI with the archive local Root prefix
      */
     public URI getUriWithLocalRoot(URI location) throws URISyntaxException;
+    
+    /**
+     * finds the physical place of a directory in the archive
+     * where orphans (unlinked files) are/should be stored
+     * @param topNodeURL the archive-URL of the topNode of the workspace
+     * @return the directory where orphans are/should be stored (when it doesn't exist it is not created)
+     */
+    public File getOrphansDirectory(URI topNodeLocation);
+    
+    /**
+     * Checks if the given file is located in the orphans directory
+     * @param fileToCheck File object to be checked
+     * @return true if file is located in the orphans directory
+     */
+    public boolean isFileInOrphansDirectory(File fileToCheck);
 }

@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -106,7 +108,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock File mockFile1;
     @Mock File mockFile2;
     
-    @Mock UploadProblem mockUploadProblem;
+    @Mock ImportProblem mockUploadProblem;
     
     private WorkspaceUploader uploader;
     
@@ -348,7 +350,7 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -385,7 +387,7 @@ public class LamusWorkspaceUploaderTest {
         
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.isEmpty());
@@ -423,7 +425,7 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -467,7 +469,7 @@ public class LamusWorkspaceUploaderTest {
         
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.isEmpty());
@@ -537,16 +539,16 @@ public class LamusWorkspaceUploaderTest {
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.size() == 1);
 
-        UploadProblem problem = result.iterator().next();
+        ImportProblem problem = result.iterator().next();
         
-        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
-        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
-        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
     }
     
     @Test
@@ -611,16 +613,16 @@ public class LamusWorkspaceUploaderTest {
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.size() == 1);
 
-        UploadProblem problem = result.iterator().next();
+        ImportProblem problem = result.iterator().next();
         
-        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
-        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
-        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
     }
     
     @Test
@@ -669,7 +671,7 @@ public class LamusWorkspaceUploaderTest {
         
         //two files in the collection, so two loop cycles
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -726,7 +728,7 @@ public class LamusWorkspaceUploaderTest {
         
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.isEmpty());
@@ -778,7 +780,7 @@ public class LamusWorkspaceUploaderTest {
         
         //two files in the collection, so two loop cycles
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         failedLinks.add(mockUploadProblem);
         
         context.checking(new Expectations() {{
@@ -836,7 +838,7 @@ public class LamusWorkspaceUploaderTest {
         
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertFalse("Collection with failed uploads should not be empty", result.isEmpty());
@@ -927,7 +929,7 @@ public class LamusWorkspaceUploaderTest {
         
         //only one file in the collection, so only one loop cycle
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         context.checking(new Expectations() {{
             
@@ -951,16 +953,16 @@ public class LamusWorkspaceUploaderTest {
         stub(method(FileUtils.class, "openInputStream", File.class)).toReturn(mockFileInputStream);
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.size() == 1);
         
-        UploadProblem problem = result.iterator().next();
+        ImportProblem problem = result.iterator().next();
         
-        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
-        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
-        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
     }
     
     @Test
@@ -1022,15 +1024,15 @@ public class LamusWorkspaceUploaderTest {
         suppress(method(FileUtils.class, "copyInputStreamToFile", InputStream.class, File.class));
         suppress(method(FileUtils.class, "forceDelete", File.class));
         
-        Collection<UploadProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
         
         assertNotNull("Collection with failed uploads should not be null", result);
         assertTrue("Collection with failed uploads should be empty", result.size() == 1);
 
-        UploadProblem problem = result.iterator().next();
+        ImportProblem problem = result.iterator().next();
         
-        assertTrue("Upload problem different from expected", problem instanceof FileUploadProblem);
-        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileUploadProblem) problem).getProblematicFile());
-        assertEquals("Reason for failure of file upload is different from expected", partExpectedErrorMessage, ((FileUploadProblem) problem).getErrorMessage());
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", partExpectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
     }
 }

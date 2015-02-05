@@ -23,11 +23,16 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.filesystem.implementation.LamusWorkspaceFileHandlerTest.LamusWorkspaceFileHandlerTestBeans;
+import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -47,26 +52,51 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
+@ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusWorkspaceFileHandlerTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
 @ActiveProfiles("testing")
 public class LamusWorkspaceFileHandlerTest {
+    
+    @Configuration
+    @ComponentScan(basePackages = {"nl.mpi.lamus.filesystem"})
+    @Profile("testing")
+    static class LamusWorkspaceFileHandlerTestBeans {
+        
+        @Bean
+        public ArchiveFileLocationProvider archiveFileLocationProvider() {
+            return mockArchiveFileLocationProvider;
+        }
+        
+        @Bean
+        public WorkspaceAccessChecker workspaceAccessChecker() {
+            return mockWorkspaceAccessChecker;
+        }
+    }
     
     private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
+    
+    @Mock static ArchiveFileLocationProvider mockArchiveFileLocationProvider;
+    @Mock static WorkspaceAccessChecker mockWorkspaceAccessChecker;
+    
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Autowired
@@ -79,6 +109,11 @@ public class LamusWorkspaceFileHandlerTest {
     
     @Mock private File mockArchiveFile;
     @Mock private WorkspaceNode mockWorkspaceNode;
+    @Mock private Workspace mockWorkspace;
+    @Mock private File mockOrphansDirectory;
+    @Mock private File mockOrphan1;
+    @Mock private File mockOrphan2;
+    @Mock private File mockInnerDirectory;
     
     public LamusWorkspaceFileHandlerTest() {
     }
@@ -94,6 +129,9 @@ public class LamusWorkspaceFileHandlerTest {
     @Before
     public void setUp() throws IOException {
         FileUtils.cleanDirectory(workspaceBaseDirectory);
+        
+        ReflectionTestUtils.setField(workspaceFileHandler, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
+        ReflectionTestUtils.setField(workspaceFileHandler, "workspaceAccessChecker", mockWorkspaceAccessChecker);
     }
     
     @After
@@ -206,6 +244,189 @@ public class LamusWorkspaceFileHandlerTest {
         workspaceFileHandler.copyInputStreamToTargetFile(originInputStream, destinationFile);
         
         assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_NoneLocked() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan1.cmdi");
+        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
+        
+        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        
+        final Collection<File> expectedFiles = new ArrayList<>();
+        expectedFiles.add(mockOrphan1);
+        expectedFiles.add(mockOrphan2);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
+            
+            //first iteration
+            oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan1).toURI(); will(returnValue(orphan1_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan1_Uri);
+            
+            //second iteration
+            oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertEquals("Retrieved collection different from expected", expectedFiles, retrivedFiles);
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_NoDirectory() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        final Collection<File> expectedFiles = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(null));
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertEquals("Retrieved collection different from expected", expectedFiles, retrivedFiles);
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_NoFiles() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        final File[] fileArray = new File[] { };
+        
+        final Collection<File> expectedFiles = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertEquals("Retrieved collection different from expected", expectedFiles, retrivedFiles);
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_InnerDirectory() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        //file is directory, so it shouldn't be added to the resulting list
+        
+        final File[] fileArray = new File[] { mockInnerDirectory };
+        
+        final Collection<File> expectedFiles = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
+            
+            //first iteration
+            oneOf(mockInnerDirectory).isFile(); will(returnValue(Boolean.FALSE)); //it's a directory, so it doesn't go further
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertEquals("Retrieved collection different from expected", expectedFiles, retrivedFiles);
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_OneLocked() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        final String orphan1Filename = "orphan1.cmdi";
+        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan1Filename);
+        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
+        
+        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        
+        final Collection<File> expectedFiles = new ArrayList<>();
+        expectedFiles.add(mockOrphan2);
+        
+        final NodeAccessException exceptionToThrow = new NodeAccessException(orphan1Filename, orphan1_Uri, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
+            
+            //first iteration
+            oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan1).toURI(); will(returnValue(orphan1_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan1_Uri); will(throwException(exceptionToThrow));
+            
+            //second iteration
+            oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertEquals("Retrieved collection different from expected", expectedFiles, retrivedFiles);
+    }
+    
+    @Test
+    public void getFilesInOrphanDirectory_BothLocked() throws MalformedURLException, URISyntaxException, NodeAccessException {
+        
+        final String nodeFilename = "someNode.cmdi";
+        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
+        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
+        
+        final String orphan1Filename = "orphan1.cmdi";
+        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan1Filename);
+        final String orphan2Filename = "orphan2.cmdi";
+        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan2Filename);
+        
+        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        
+        final NodeAccessException exceptionToThrow1 = new NodeAccessException(orphan1Filename, orphan1_Uri, null);
+        final NodeAccessException exceptionToThrow2 = new NodeAccessException(orphan2Filename, orphan2_Uri, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
+            
+            //first iteration
+            oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan1).toURI(); will(returnValue(orphan1_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan1_Uri); will(throwException(exceptionToThrow1));
+            
+            //second iteration
+            oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
+            oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
+            oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri); will(throwException(exceptionToThrow2));
+        }});
+        
+        Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
+        
+        assertTrue("Retrieved collection should be empty", retrivedFiles.isEmpty());
     }
     
     

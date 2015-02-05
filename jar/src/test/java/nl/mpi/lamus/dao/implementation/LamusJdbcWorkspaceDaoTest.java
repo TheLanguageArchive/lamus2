@@ -761,10 +761,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Retrieved list should be empty", retrievedList.isEmpty());
     }
 
-    /**
-     * Tests the method {@link JdbcWorkspaceDao#isNodeLocked(int)}
-     * by checking for a node ID that exists in the database (and is not protected)
-     */
     @Test
     public void nodeIsLocked() throws MalformedURLException, URISyntaxException {
         
@@ -780,10 +776,19 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Node should be locked (should exist in the database).", result);
     }
     
-    /**
-     * Tests the method {@link JdbcWorkspaceDao#isNodeLocked(int)}
-     * by checking for a node ID that exists in the database but is protected - therefore shouldn't be considered as locked
-     */
+    @Test
+    public void nodeIsLockedWithoutArchiveURI() throws MalformedURLException, URISyntaxException {
+        
+        URI uriToCheck = URI.create("file:/archive/folder/sessions/orphan.cmdi");
+        
+        Workspace testwWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        insertTestWorkspaceNodeWithUriIntoDB(testwWorkspace, null, null, uriToCheck, Boolean.TRUE, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
+        
+        boolean result = this.workspaceDao.isNodeLocked(uriToCheck);
+        
+        assertTrue("Node should be locked (should exist in the database)", result);
+    }
+    
     @Test
     public void nodeIsProtected_ThereforeNotLocked() throws MalformedURLException, URISyntaxException {
         
@@ -799,10 +804,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertFalse("Node shouldn't be locked (even though it exists in the database, it doens't count because it's protected).", result);
     }
     
-    /**
-     * Tests the method {@link JdbcWorkspaceDao#isNodeLocked(int)}
-     * by checking for a node ID that doesn't exist in the database
-     */
     @Test
     public void nodeIsNotLocked() throws MalformedURLException, URISyntaxException {
         
@@ -818,10 +819,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertFalse("Node should not be locked (should not exist in the database).", result);
     }
     
-    /**
-     * Tests the method {@link JdbcWorkspaceDao#isNodeLocked(int)}
-     * by checking for a node ID that doesn't exist in the database
-     */
     @Test
     public void nodeIsLockedMoreThanOnce() throws MalformedURLException, URISyntaxException {
         
@@ -839,10 +836,6 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertTrue("Node should be locked (should exist in the database).", result);
     }
-    
-    //TODO TESTS NODE LOCKED WITH ONLY URL, NOT PID...
-    
-    
     
     @Test
     public void getLockedNode() throws URISyntaxException, MalformedURLException {

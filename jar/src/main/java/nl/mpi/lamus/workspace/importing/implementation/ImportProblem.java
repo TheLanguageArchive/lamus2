@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.upload.implementation;
+package nl.mpi.lamus.workspace.importing.implementation;
 
 /**
  *
  * @author guisil
  */
-public class UploadProblem {
+public class ImportProblem {
     
     private String errorMessage;
     private Exception exception;
     
-    public UploadProblem(String errorMessage, Exception exception) {
+    public ImportProblem(String errorMessage, Exception exception) {
         this.errorMessage = errorMessage;
         this.exception = exception;
     }

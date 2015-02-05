@@ -104,22 +104,6 @@ public class LamusProperties implements ServletContextAware {
         return maxDirectoryNameLength;
     }
     
-    @Value("${corpus_directory_base_name}")
-    private String corpusDirectoryBaseName;
-    @Bean
-    @Qualifier("corpusDirectoryBaseName")
-    public String corpusDirectoryBaseName() {
-        return corpusDirectoryBaseName;
-    }
-    
-    @Value("${orphans_directory_base_name}")
-    private String orphansDirectoryBaseName;
-    @Bean
-    @Qualifier("orphansDirectoryBaseName")
-    public String orphansDirectoryBaseName() {
-        return orphansDirectoryBaseName;
-    }
-    
     
     @Value("${custom_typechecker_config_files_and_folders}")
     private String customTypecheckerFoldersAndConfigFiles;
@@ -213,6 +197,12 @@ public class LamusProperties implements ServletContextAware {
     @Qualifier("resourcesDirectoryName")
     public String resourcesDirectoryName() {
         return servletContext.getInitParameter("nl.mpi.lamus.resources_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("orphansDirectoryName")
+    public String orphansDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.orphans_directory_name");
     }
     
     @Bean

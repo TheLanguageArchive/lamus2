@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -80,7 +81,7 @@ public class LamusWorkspaceUploadHelperTest {
     
     @Mock CorpusNode mockCorpusNode;
     
-    @Mock UploadProblem mockUploadProblem;
+    @Mock ImportProblem mockUploadProblem;
     
     public LamusWorkspaceUploadHelperTest() {
     }
@@ -117,7 +118,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
@@ -136,7 +137,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -159,7 +160,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
@@ -180,7 +181,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -203,7 +204,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         failedLinks.add(mockUploadProblem);
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
@@ -225,7 +226,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.containsAll(failedLinks));
     }
@@ -248,7 +249,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         failedLinks.add(mockUploadProblem);
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
@@ -276,7 +277,7 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(mockParentDocument, parentFileURL);
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.containsAll(failedLinks));
     }
@@ -296,7 +297,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
@@ -315,7 +316,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -334,7 +335,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
@@ -353,7 +354,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -371,7 +372,7 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockChildNode);
         nodesToCheck.add(mockParentNode);
         
-        final Collection<UploadProblem> failedLinks = new ArrayList<>();
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
@@ -390,7 +391,7 @@ public class LamusWorkspaceUploadHelperTest {
                 will(returnValue(failedLinks));
         }});
         
-        Collection<UploadProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }

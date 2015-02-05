@@ -66,4 +66,19 @@ public interface WorkspaceAccessChecker extends Serializable {
      */
     public void ensureUserCanDeleteWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException;
+    
+    /**
+     * Checks if the given user has write access to the node with the given URI.
+     * @param userID ID of the user
+     * @param archiveNodeURI URI of the archive node
+     */
+    public void ensureWriteAccessToNode(String userID, URI archiveNodeURI)
+            throws NodeAccessException, NodeNotFoundException;
+    
+    /**
+     * Checks if the node with the given URI is locked in a workspace.
+     * @param nodeURI URI of the node
+     */
+    public void ensureNodeIsNotLocked(URI nodeURI)
+            throws NodeAccessException;
 }

@@ -16,10 +16,12 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.implementation.TopNodeImporter;
+import nl.mpi.lamus.workspace.importing.OrphanNodesImportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +40,18 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
     
     private final WorkspaceDao workspaceDao;
-    
     private final TopNodeImporter topNodeImporter;
+    private final OrphanNodesImportHandler orphanNodesImportHandler;
     
     private Workspace workspace = null;
     private URI topNodeArchiveURI = null;
     
     @Autowired
-    public WorkspaceImportRunner(WorkspaceDao workspaceDao, TopNodeImporter topNodeImporter) {
+    public WorkspaceImportRunner(WorkspaceDao workspaceDao,
+            TopNodeImporter topNodeImporter, OrphanNodesImportHandler orphanNodesImportHandler) {
         this.workspaceDao = workspaceDao;
         this.topNodeImporter = topNodeImporter;
+        this.orphanNodesImportHandler = orphanNodesImportHandler;
     }
     
     /**
@@ -72,7 +76,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
      * @return true if import is successful
      */
     @Override
-    public Boolean call() throws WorkspaceImportException {
+    public Boolean call() throws WorkspaceImportException, WorkspaceException {
         
         //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
         
@@ -95,6 +99,25 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
+        
+        
+        //TODO IMPORT ORPHANS FILES... 
+            // RETURN SOMETHING???
+        Collection<ImportProblem> orphanImportProblems = orphanNodesImportHandler.exploreOrphanNodes(workspace);
+        
+        //TODO CATCH EXCEPTION INSTEAD???
+        
+        
+        if(!orphanImportProblems.isEmpty()) {
+            //TODO WHAT?
+                // at least log something...
+            logger.warn("Some problems importing orphan files.");
+            
+            for(ImportProblem problem : orphanImportProblems) {
+                logger.warn("[Orphan Import Problem] " + problem.getErrorMessage());
+            }
+        }
+        
             
         //TODO When to return false?
         return true;

@@ -52,7 +52,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import nl.mpi.lamus.workspace.upload.implementation.UploadProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -87,7 +87,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
     @Mock private InputStream mockInputStream;
     @Mock private Collection<File> mockUploadedFiles;
-    @Mock private Collection<UploadProblem> mockFailedUploads;
+    @Mock private Collection<ImportProblem> mockFailedUploads;
     @Mock private TypecheckedResults mockTypecheckedResults;
     @Mock private ZipInputStream mockZipInputStream;
 
@@ -869,51 +869,9 @@ public class LamusWorkspaceServiceTest {
                 will(returnValue(mockFailedUploads));
         }});
         
-        Collection<UploadProblem> result = service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
+        Collection<ImportProblem> result = service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
         
         assertEquals("Resulting map different from expected", mockFailedUploads, result);
-    }
-    
-    @Test
-    public void processUploadedFilesThrowsIOException() throws IOException, WorkspaceException, TypeCheckerException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final IOException ioException = new IOException("some error message");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
-                will(throwException(ioException));
-        }});
-        
-        try {
-            service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
-            fail("should have thrown exception");
-        } catch(IOException ex) {
-            assertEquals("Exception different from expected", ioException, ex);
-        }
-    }
-    
-    @Test
-    public void processUploadedFilesThrowsTypeCheckerException() throws IOException, WorkspaceException, TypeCheckerException {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        final TypeCheckerException typeCheckerException = new TypeCheckerException(mockTypecheckedResults, "some error message", new IOException("some cause"));
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
-                will(throwException(typeCheckerException));
-        }});
-        
-        try {
-            service.processUploadedFiles(userID, workspaceID, mockUploadedFiles);
-            fail("should have thrown exception");
-        } catch(TypeCheckerException ex) {
-            assertEquals("Exception different from expected", typeCheckerException, ex);
-        }
     }
     
     @Test

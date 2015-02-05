@@ -159,6 +159,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("User " + userID + " has access to workspace " + workspaceID);
     }
 
+    /**
+     * @see WorkspaceAccessChecker#ensureUserCanDeleteWorkspace(java.lang.String, int)
+     */
     @Override
     public void ensureUserCanDeleteWorkspace(String userID, int workspaceID)
             throws WorkspaceNotFoundException, WorkspaceAccessException {
@@ -174,8 +177,11 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("User " + userID + " can delete workspace " + workspaceID);
     }
     
-    
-    private void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException, NodeNotFoundException {
+    /**
+     * @see WorkspaceAccessChecker#ensureWriteAccessToNode(java.lang.String, java.net.URI)
+     */
+    @Override
+    public void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException, NodeNotFoundException {
         if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
             NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
             logger.error(ex.getMessage(), ex);
@@ -183,7 +189,11 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         }
     }
     
-    private void ensureNodeIsNotLocked(URI archiveNodeURI) throws NodeAccessException {
+    /**
+     * @see WorkspaceAccessChecker#ensureNodeIsNotLocked(java.net.URI)
+     */
+    @Override
+    public void ensureNodeIsNotLocked(URI archiveNodeURI) throws NodeAccessException {
         if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
             Collection<WorkspaceNode> lockedNodes = workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
             int workspaceID = -1;

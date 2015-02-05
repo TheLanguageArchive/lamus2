@@ -17,12 +17,14 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -54,6 +56,9 @@ public class LamusArchiveFileLocationProviderTest {
     private final String dbHttpRoot = "http://some.server/archive/";
     private final String dbLocalRoot = "file:/some/loca/folder/archive/";
     
+    private final String metadataDirectoryName = "Metadata";
+    private String orphansDirectoryName = "sessions";
+    
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Mock ArchiveFileHelper mockArchiveFileHelper;
@@ -76,6 +81,9 @@ public class LamusArchiveFileLocationProviderTest {
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpsRoot", dbHttpsRoot);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpRoot", dbHttpRoot);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbLocalRoot", dbLocalRoot);
+        
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "metadataDirectoryName", metadataDirectoryName);
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "orphansDirectoryName", orphansDirectoryName);
     }
     
     @After
@@ -285,5 +293,61 @@ public class LamusArchiveFileLocationProviderTest {
         URI retrievedFile = archiveFileLocationProvider.getUriWithLocalRoot(initialLocation);
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
+    }
+
+    /**
+     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
+     */
+    @Test
+    public void getOrphansDirectoryWithMetadataDirectory() throws MalformedURLException {
+        
+        File pathPrefix = new File("/some/url/with/");
+        File metadataDirectoryFullPath = new File(pathPrefix, metadataDirectoryName);
+        File fullPath = new File(metadataDirectoryFullPath, "blabla.cmdi");
+        
+        URI testURI = fullPath.toURI();
+        
+        File expectedOrphansDirectory = new File(pathPrefix, orphansDirectoryName);
+        File retrievedOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(testURI);
+        
+        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+    }
+    
+    /**
+     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
+     */
+    @Test
+    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
+        
+        String pathPrefix = "/some/url/with/";
+        File pathPrefixFile = testFolder.newFolder(pathPrefix);
+        File metadataFolder = testFolder.newFolder(pathPrefix + metadataDirectoryName);
+        FileUtils.forceMkdir(metadataFolder);
+        assertTrue(metadataFolder.exists());
+
+        File fullFilePath = new File(pathPrefixFile, "blabla.cmdi");
+        
+        URI testURI = fullFilePath.toURI();
+        
+        File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryName);
+        File retrievedOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(testURI);
+        
+        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+    }
+    
+    @Test
+    public void fileIsInOrphansDirectory() {
+        File testFile = new File("file:/bla/bla/sessions");
+        
+        boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
+        assertTrue("Result should be true", isFileInOrphansDirectory);
+    }
+    
+    @Test
+    public void fileIsNotInOrphansDirectory() {
+        File testFile = new File("file:/bla/bla/notthere");
+        
+        boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
+        assertFalse("Result should be false", isFileInOrphansDirectory);
     }
 }

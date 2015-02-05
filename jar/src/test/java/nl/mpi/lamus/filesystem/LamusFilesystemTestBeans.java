@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Profile;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-@ComponentScan("nl.mpi.lamus.filesystem")
+@ComponentScan(basePackages = {"nl.mpi.lamus.filesystem"})
 @Profile("testing")
 public class LamusFilesystemTestBeans {
     

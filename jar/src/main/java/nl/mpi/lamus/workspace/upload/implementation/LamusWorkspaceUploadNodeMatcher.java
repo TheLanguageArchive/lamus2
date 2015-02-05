@@ -23,7 +23,7 @@ import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.implementation.HandleManagerImpl;
+import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -46,7 +46,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     
     private CorpusStructureProvider corpusStructureProvider;
     private NodeResolver nodeResolver;
-    private HandleManagerImpl handleManager;
+    private HandleManager handleManager;
     private WorkspaceNodeFactory workspaceNodeFactory;
     private WorkspaceDao workspaceDao;
     private HandleUtil metadataApiHandleUtil;
@@ -55,12 +55,12 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Autowired
     public LamusWorkspaceUploadNodeMatcher(
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            HandleManagerImpl handleMatcher,
+            HandleManager handleManager,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao,
             HandleUtil handleUtil) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
-        this.handleManager = handleMatcher;
+        this.handleManager = handleManager;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.metadataApiHandleUtil = handleUtil;
