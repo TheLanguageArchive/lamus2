@@ -126,6 +126,27 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 
     
     @Test
+    public void nodeWithoutReferences() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+        
+        final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        final List<Reference> references = new ArrayList<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        
+        initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
+        //no references, no loop
+        
+        Collection<ImportProblem> failedLinks =
+                workspaceUploadReferenceHandler.matchReferencesWithNodes(
+                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+        
+        assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
+    }
+    
+    
+    @Test
     public void matchOneReference_WithLocalUri_WithEmptyUri() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
@@ -147,6 +168,42 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
+        //loop over references
+        reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
+        //empty URI, so it will be set with the value of the location URL
+        clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
+        matchedNodeCheckPrefixKnown(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+        dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, firstNodeID, null);
+        
+        
+        Collection<ImportProblem> failedLinks =
+                workspaceUploadReferenceHandler.matchReferencesWithNodes(
+                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+        
+        assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
+        assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
+    }
+    
+    @Test
+    public void matchOneReference_WithLocalUri_WithEmptyUri_parentHasNoSelfHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+        
+        final URI firstRefURI = URI.create("");
+        final URI firstRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
+        
+        final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
+        final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        final List<Reference> references = new ArrayList<>();
+        references.add(mockFirstReference);
+        
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        
+        initialChecks(mockMetadataDocument, null, Boolean.TRUE, references);
         //loop over references
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
@@ -792,7 +849,10 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockDocument); will(returnValue(parentDocumentHandle));
-            oneOf(mockHandleManager).isHandlePrefixKnown(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
+
+            if(parentDocumentHandle != null) {           
+                oneOf(mockHandleManager).isHandlePrefixKnown(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
+            }
             
             oneOf(mockDocument).getDocumentReferences(); will(returnValue(references));
         }});

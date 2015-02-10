@@ -98,7 +98,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         //check if document has external self-handle
-        if(!handleManager.isHandlePrefixKnown(metadataApiBridge.getSelfHandleFromDocument(currentDocument))) {
+        URI currentSelfHandle = metadataApiBridge.getSelfHandleFromDocument(currentDocument);
+        if(currentSelfHandle != null && !handleManager.isHandlePrefixKnown(currentSelfHandle)) {
             documentsWithExternalSelfHandles.put(currentDocument, currentNode);
         }
         
