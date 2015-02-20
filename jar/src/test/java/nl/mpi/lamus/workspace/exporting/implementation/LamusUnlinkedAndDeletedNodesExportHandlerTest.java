@@ -89,6 +89,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
 
         final int workspaceID = 1;
         
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
         final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
         final int firstNodeID = 10;
@@ -134,17 +136,19 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles);
             }});
         }
     
-        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace);
+        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
     }
 
     @Test
     public void exploreDeletedTopNodesThrowsException() throws MalformedURLException, WorkspaceExportException {
 
         final int workspaceID = 1;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
@@ -193,7 +197,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles);
                     will(throwException(expectedException));
             }});
             
@@ -201,7 +205,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         }
     
         try {
-            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace);
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

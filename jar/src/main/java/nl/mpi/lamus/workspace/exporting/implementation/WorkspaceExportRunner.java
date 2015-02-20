@@ -46,7 +46,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private final PermissionAdjuster permissionAdjuster;
     
     private Workspace workspace;
-//    private boolean keepUnlinkedFiles;
+    private boolean keepUnlinkedFiles;
 
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
@@ -71,9 +71,9 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * Setter for the boolean that indicates if the unlinked files are to be kept
      * @param keepUnlinkedFiles true if unlinked files are to be kept
      */
-//    public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
-//        this.keepUnlinkedFiles = keepUnlinkedFiles;
-//    }
+    public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
+        this.keepUnlinkedFiles = keepUnlinkedFiles;
+    }
 
     /**
      * The export process is started in a separate thread.
@@ -124,10 +124,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 //        workspaceTreeExporter.explore(topNode);
         
         NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
-        topNodeExporter.exportNode(workspace, null, topNode);
+        topNodeExporter.exportNode(workspace, null, topNode, keepUnlinkedFiles);
         
         //TODO Export unlinked and deleted nodes...
-        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace);
+        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles);
         
         //TODO take care of unlinked nodes in the workspace...
         //TODO cleanup WS DB / filesystem

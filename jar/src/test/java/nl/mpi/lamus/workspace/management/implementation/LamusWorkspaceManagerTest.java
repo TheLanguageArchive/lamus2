@@ -505,7 +505,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
-//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -522,7 +522,7 @@ public class LamusWorkspaceManagerTest {
         }});
         
         
-        manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+        manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
     }
     
     @Test
@@ -532,6 +532,8 @@ public class LamusWorkspaceManagerTest {
         
         final int workspaceID = 1;
         
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
@@ -540,7 +542,7 @@ public class LamusWorkspaceManagerTest {
         }});
         
         try {
-            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch (WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -577,7 +579,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
-//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -594,7 +596,7 @@ public class LamusWorkspaceManagerTest {
         }});
         
         try {
-            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -633,7 +635,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
-//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -650,7 +652,7 @@ public class LamusWorkspaceManagerTest {
         }});
         
         try {
-            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -688,7 +690,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
-//            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(Boolean.TRUE);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -705,7 +707,7 @@ public class LamusWorkspaceManagerTest {
         }});
         
         try {
-            manager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());

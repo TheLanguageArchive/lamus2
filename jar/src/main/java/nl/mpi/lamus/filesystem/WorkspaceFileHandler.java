@@ -40,6 +40,15 @@ public interface WorkspaceFileHandler {
                 throws IOException;
     
     /**
+     * Moves the given file into the given location
+     * 
+     * @param originNodeFile
+     * @param targetNodeFile 
+     */
+    public void moveFile(File originNodeFile, File targetNodeFile)
+            throws IOException;
+    
+    /**
      * Gets a StreamResult object based on the given file.
      * 
      * @param nodeFile file with which to construct the StreamResult

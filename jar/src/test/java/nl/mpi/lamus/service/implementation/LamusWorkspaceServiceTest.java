@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
-import nl.mpi.lamus.archive.ArchivePidHelper;
+import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -71,7 +71,7 @@ public class LamusWorkspaceServiceTest {
     }};
     private WorkspaceService service;
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
-    @Mock private ArchivePidHelper mockArchivePidHelper;
+    @Mock private ArchiveHandleHelper mockArchiveHandleHelper;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;
@@ -106,7 +106,7 @@ public class LamusWorkspaceServiceTest {
     @Before
     public void setUp() {
         service = new LamusWorkspaceService(
-                mockNodeAccessChecker, mockArchivePidHelper,
+                mockNodeAccessChecker, mockArchiveHandleHelper,
                 mockWorkspaceManager, mockWorkspaceDao,
                 mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
                 mockWorkspaceNodeManager, mockNodeReplaceManager);
@@ -158,7 +158,7 @@ public class LamusWorkspaceServiceTest {
         final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI, "access problem");
         
         context.checking(new Expectations() {{
-            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI);
+            oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI);
                 will(throwException(expectedException));
         }});
         
@@ -180,7 +180,7 @@ public class LamusWorkspaceServiceTest {
         final NodeAccessException expectedException = new NodeAccessException("access problem", archiveNodeURI, null);
         
         context.checking(new Expectations() {{
-            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
                 will(throwException(expectedException));
         }});
@@ -204,7 +204,7 @@ public class LamusWorkspaceServiceTest {
         final WorkspaceImportException expectedException = new WorkspaceImportException("some problem", workspaceID, null);
         
         context.checking(new Expectations() {{
-            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
             oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(throwException(expectedException));
@@ -230,7 +230,7 @@ public class LamusWorkspaceServiceTest {
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
         
         context.checking(new Expectations() {{
-            oneOf(mockArchivePidHelper).getPidForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
             oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(returnValue(newWorkspace));
@@ -649,7 +649,7 @@ public class LamusWorkspaceServiceTest {
         }});
         
         try {
-            service.submitWorkspace(userID, workspaceID);
+            service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -670,7 +670,7 @@ public class LamusWorkspaceServiceTest {
         }});
         
         try {
-            service.submitWorkspace(userID, workspaceID);
+            service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -688,11 +688,11 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/); will(throwException(expectedException));
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(throwException(expectedException));
         }});
         
         try {
-            service.submitWorkspace(userID, workspaceID);
+            service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -708,10 +708,10 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles);
         }});
         
-        service.submitWorkspace(userID, workspaceID);
+        service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
     }
     
     

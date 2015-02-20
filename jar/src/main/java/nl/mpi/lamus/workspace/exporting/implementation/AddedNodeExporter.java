@@ -82,10 +82,10 @@ public class AddedNodeExporter implements NodeExporter {
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode)
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -105,7 +105,7 @@ public class AddedNodeExporter implements NodeExporter {
         File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
         
         if(currentNode.isMetadata()) {
-            workspaceTreeExporter.explore(workspace, currentNode);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
         }
         
         MetadataDocument currentDocument = retrieveMetadataDocument(workspaceID, currentNode);
@@ -210,14 +210,16 @@ public class AddedNodeExporter implements NodeExporter {
     
     private void moveFileIntoArchive(int workspaceID, WorkspaceNode currentNode, File nextAvailableFile, MetadataDocument currentDocument, File currentNodeWorkspaceFile) throws WorkspaceExportException {
         
-        //TODO THIS IS NOT EXACTLY MOVING AT THE MOMENT...
-        
         try {
-            if(currentNode.isMetadata()) {
-                StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
-                metadataAPI.writeMetadataDocument(currentDocument, targetStreamResult);
+            if(archiveFileLocationProvider.isFileInOrphansDirectory(currentNodeWorkspaceFile)) {
+                workspaceFileHandler.moveFile(currentNodeWorkspaceFile, nextAvailableFile);
             } else {
-                workspaceFileHandler.copyFile(currentNodeWorkspaceFile, nextAvailableFile);
+                if(currentNode.isMetadata()) {
+                    StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
+                    metadataAPI.writeMetadataDocument(currentDocument, targetStreamResult);
+                } else {
+                    workspaceFileHandler.copyFile(currentNodeWorkspaceFile, nextAvailableFile);
+                }
             }
         } catch (IOException | TransformerException | MetadataException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();

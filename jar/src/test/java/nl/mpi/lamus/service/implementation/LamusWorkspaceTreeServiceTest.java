@@ -17,7 +17,7 @@ package nl.mpi.lamus.service.implementation;
 
 import java.net.URI;
 import java.net.URL;
-import nl.mpi.lamus.archive.ArchivePidHelper;
+import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
@@ -52,7 +52,7 @@ public class LamusWorkspaceTreeServiceTest {
     
     private WorkspaceTreeService service;
     @Mock private WorkspaceAccessChecker mockNodeAccessChecker;
-    @Mock private ArchivePidHelper mockArchivePidHelper;
+    @Mock private ArchiveHandleHelper mockArchivePidHelper;
     @Mock private WorkspaceManager mockWorkspaceManager;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private WorkspaceUploader mockWorkspaceUploader;

@@ -68,10 +68,10 @@ public class GeneralNodeExporter implements NodeExporter {
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode)
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -89,40 +89,20 @@ public class GeneralNodeExporter implements NodeExporter {
             logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
             return;
         }
-        
-        URI parentArchiveLocalUri = null;
-//        String nodeArchivePath = null;
-//        try {
-//            nodeArchivePath = archiveFileLocationProvider.getUriWithLocalRoot(currentNode.getArchiveURL().toURI()).getSchemeSpecificPart();
             
-            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
-            if(corpusNode == null) {
-                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-                throwWorkspaceExportException(workspaceID, errorMessage, null);
+        CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
+        if(corpusNode == null) {
+            String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
+            throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
-            
-            File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
-            
-            
-//        } catch (URISyntaxException ex) {
-//            String errorMessage = "Error retrieving archive location of node " + currentNode.getArchiveURI();
-//            throwWorkspaceExportException(errorMessage, ex);
-//        }
+        
+        File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
         
         if(currentNode.isMetadata()) {
             
-            workspaceTreeExporter.explore(workspace, currentNode);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
             
             //TODO ensureChecksum - will this be done by the crawler??
-            
-//            CorpusNode corpusNode = this.corpusStructureProvider.getNode(currentNode.getArchiveURI());
-//            if(corpusNode == null) {
-//                String errorMessage = "Node not found in archive database for URI " + currentNode.getArchiveURI();
-//                throwWorkspaceExportException(errorMessage, null);
-//            }
-            
-//            String archiveChecksum = corpusNode.getFileInfo().getChecksum();
-//            String workspaceChecksum = Checksum.create(currentNode.getWorkspaceURL().getPath());
             
             //TODO should the checksum be created at some other point (when the node is actually changed, for instance)
                 // so it takes less time at this point?
@@ -132,13 +112,9 @@ public class GeneralNodeExporter implements NodeExporter {
                 // and not necessarily because of a real change
             //TODO Maybe there should be a better way of comparing the files
             
-//            if(workspaceChecksum.equals(archiveChecksum)) {
-            
             //ASSUME THAT METADATA ALWAYS CHANGES (due to the localURI attribute being edited during the import)
                 // SO THIS CANNOT BE CHECKED WITH FILESIZE OR CHECKSUM
-//            if(!archiveFileHelper.hasArchiveFileChanged(corpusNode.getFileInfo(), new File(currentNode.getWorkspaceURL().getPath()))) {
-//                return;
-//            }
+
             
             MetadataDocument nodeDocument = null;
             try {
@@ -147,10 +123,7 @@ public class GeneralNodeExporter implements NodeExporter {
                 String errorMessage = "Error getting Metadata Document for node " + currentNode.getArchiveURI();
                 throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
-
-//            File nodeWsFile = new File(currentNode.getWorkspaceURL().getPath());
-//            File nodeArchiveFile = new File(currentNode.getArchiveURL().getPath());
-//            File nodeArchiveFile = new File(nodeArchivePath);
+            
             StreamResult nodeArchiveStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nodeArchiveFile);
             
             try {
@@ -172,13 +145,6 @@ public class GeneralNodeExporter implements NodeExporter {
                     // the file itself shouldn't have changed, otherwise it's a replaced node
         }
         
-//        try {
-//            parentArchiveLocalUri = archiveFileLocationProvider.getUriWithLocalRoot(parentNode.getArchiveURL().toURI());
-//        } catch (URISyntaxException ex) {
-//            String errorMessage = "Error retrieving archive location of node " + parentNode.getArchiveURI();
-//            throwWorkspaceExportException(errorMessage, ex);
-//        }
-        
         CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());
         if(parentCorpusNode == null) {
             String errorMessage = "Parent node not found in archive database for URI " + parentNode.getArchiveURI();
@@ -192,7 +158,6 @@ public class GeneralNodeExporter implements NodeExporter {
                 archiveFileLocationProvider.getChildPathRelativeToParent(parentNodeArchiveFile, nodeArchiveFile);
         
         updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
-        
     }
     
     

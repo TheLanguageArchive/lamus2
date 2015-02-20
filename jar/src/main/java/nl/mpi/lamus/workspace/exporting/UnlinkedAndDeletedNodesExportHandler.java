@@ -27,7 +27,9 @@ public interface UnlinkedAndDeletedNodesExportHandler {
     
     /**
      * Triggers the export of all the unlinked and deleted nodes in the workspace
+     * @param workspace Workspace to explore
+     * @param keepUnlinkedFiles true if unlinked files (orphans) are to be kept for future use
      */
-    public void exploreUnlinkedAndDeletedNodes(Workspace workpace)
+    public void exploreUnlinkedAndDeletedNodes(Workspace workspace, boolean keepUnlinkedFiles)
             throws WorkspaceExportException;
 }

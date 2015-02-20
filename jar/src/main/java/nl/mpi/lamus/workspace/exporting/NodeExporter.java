@@ -31,8 +31,10 @@ public interface NodeExporter {
      * @param workspace Workspace currently being exported
      * @param parentNode Parent of the node to export
      * @param currentNode Node to export
+     * @param keepUnlinkedFiles true if unlinked files are to be kept for future use
+     *  (only used in the unlinked files exporter)
      */
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode)
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
             throws WorkspaceExportException;
     
 }

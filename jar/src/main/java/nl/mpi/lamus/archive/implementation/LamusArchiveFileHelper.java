@@ -17,8 +17,6 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -285,7 +283,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
      * @see ArchiveFileHelper#getTargetFileForReplacedOrDeletedNode(java.io.File, java.lang.String, java.io.File)
      */
     @Override
-    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, String archiveNodeUriStr, File archiveLocalFile ){
+    public File getTargetFileForReplacedOrDeletedNode(File baseDirectory, String archiveNodeUriStr, File archiveLocalFile ) {
         
         String fileBaseName = getFileBasename(archiveLocalFile.getPath());
         StringBuilder fileNameBuilder = new StringBuilder().append("v_").append(archiveNodeUriStr).append("__.").append(fileBaseName);

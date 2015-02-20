@@ -127,6 +127,10 @@ public class WorkspaceExportRunnerTest {
         
         final States exporting = context.states("exporting");
         
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
@@ -137,10 +141,10 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
@@ -186,6 +190,11 @@ public class WorkspaceExportRunnerTest {
         
         final States exporting = context.states("exporting");
         
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        
+        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
@@ -196,10 +205,10 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace);
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));

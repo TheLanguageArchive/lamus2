@@ -23,6 +23,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -39,7 +42,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -48,6 +51,7 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,15 +65,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.util.ReflectionTestUtils;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 /**
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusWorkspaceFileHandlerTestBeans.class},
         loader = AnnotationConfigContextLoader.class)
 @ActiveProfiles("testing")
+@PrepareForTest({FileUtils.class, Files.class})
 public class LamusWorkspaceFileHandlerTest {
     
     @Configuration
@@ -144,10 +154,9 @@ public class LamusWorkspaceFileHandlerTest {
 
     
     @Test
-    public void copyResourceFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
+    public void copyFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
@@ -162,7 +171,51 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void copyResourceFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+    public void copyFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+        
+        String nodeFilename = "someNode.cmdi";
+        Workspace testWorkspace = createTestWorkspace();
+        final File baseDirectory = createTestBaseDirectory();
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
+        
+        File originFile = new File(testNode.getWorkspaceURL().getPath());
+        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        
+        IOException expectedException = new IOException("some exception message");
+        
+        stub(method(FileUtils.class, "copyFile", File.class, File.class)).toThrow(expectedException);
+        
+        try {
+            workspaceFileHandler.copyFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+        
+        assertFalse("File shouldn't exist in its expected final location", destinationFile.exists());
+    }
+    
+    @Test
+    public void moveFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
+        
+        String nodeFilename = "someNode.cmdi";
+        Workspace testWorkspace = createTestWorkspace();
+        final File baseDirectory = createTestBaseDirectory();
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
+        
+        File originFile = new File(testNode.getWorkspaceURL().getPath());
+        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        
+        workspaceFileHandler.moveFile(originFile, destinationFile);
+        
+        assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
+        assertFalse("File shouldn't exist anymore in its original location", originFile.exists());
+    }
+    
+    @Test
+    public void moveFileSuccessfully_FileAlreadyExists() throws MalformedURLException, IOException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
         Workspace testWorkspace = createTestWorkspace();
@@ -174,18 +227,41 @@ public class LamusWorkspaceFileHandlerTest {
         File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
         
         destinationFile.createNewFile();
-        destinationFile.setReadOnly();
         
-        try {
-            workspaceFileHandler.copyFile(originFile, destinationFile);
-            fail("An exception should have been thrown");
-        } catch(IOException ex) {
-            assertTrue("Exception has different type than expected", ex instanceof IOException);
-            
-            //TODO Should mock the call to FileUtils.copyFile in order to properly compare the exception with an expected one
-        }
+        workspaceFileHandler.moveFile(originFile, destinationFile);
         
         assertTrue("File doesn't exist in its expected final location", destinationFile.exists());
+        assertFalse("File shouldn't exist anymore in its original location", originFile.exists());
+    }
+    
+    
+    //TODO stub of the Files.move method doesn't throw an exception even when using "toThrow"...
+    
+    @Test
+    public void moveFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+        
+        String nodeFilename = "someNode.cmdi";
+        Workspace testWorkspace = createTestWorkspace();
+        final File baseDirectory = createTestBaseDirectory();
+        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
+        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
+        
+        File originFile = new File(testNode.getWorkspaceURL().getPath());
+        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        
+        IOException expectedException = new IOException("some exception message");
+        
+        stub(method(Files.class, "move", Path.class, Path.class, CopyOption[].class)).toThrow(expectedException);
+        
+        try {
+            workspaceFileHandler.moveFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+        
+        assertFalse("File shouldn't exist in its expected final location", destinationFile.exists());
+        assertTrue("File should still exist in its original location", originFile.exists());
     }
     
     @Test
@@ -196,7 +272,6 @@ public class LamusWorkspaceFileHandlerTest {
         Workspace testWorkspace = createTestWorkspace();
         File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testWorkspaceNode = createTestMetadataWorkspaceNode(testWorkspace.getWorkspaceID(), nodeFilename);
         File testNodeFile = new File(workspaceDirectory, archiveNodeURL.getFile());
         
         StreamResult retrievedStreamResult = 
@@ -213,7 +288,6 @@ public class LamusWorkspaceFileHandlerTest {
         final String archiveNodePath = "file:/somewhere/in/the/archive/" + nodeFilename;
         
         File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-//        String nodeFilename = FilenameUtils.getName(testWorkspaceNode.getArchiveURL().toString());
         File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
         
         context.checking(new Expectations() {{
@@ -231,7 +305,6 @@ public class LamusWorkspaceFileHandlerTest {
     public void copyInputStreamToTargetFile() throws MalformedURLException, IOException, URISyntaxException {
         
         String nodeFilename = "someNode.cmdi";
-        URL archiveNodeURL = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         Workspace testWorkspace = createTestWorkspace();
         final File baseDirectory = createTestBaseDirectory();
         File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
@@ -256,7 +329,9 @@ public class LamusWorkspaceFileHandlerTest {
         final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan1.cmdi");
         final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
         
-        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        final Collection<File> fileCollection = new ArrayList<>();
+        fileCollection.add(mockOrphan1);
+        fileCollection.add(mockOrphan2);
         
         final Collection<File> expectedFiles = new ArrayList<>();
         expectedFiles.add(mockOrphan1);
@@ -265,7 +340,6 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -277,6 +351,8 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -295,8 +371,9 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(null));
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(null);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -310,15 +387,16 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final File[] fileArray = new File[] { };
+        final Collection<File> fileCollection = new ArrayList<>();
         
         final Collection<File> expectedFiles = new ArrayList<>();
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -334,18 +412,20 @@ public class LamusWorkspaceFileHandlerTest {
         
         //file is directory, so it shouldn't be added to the resulting list
         
-        final File[] fileArray = new File[] { mockInnerDirectory };
+        final Collection<File> fileCollection = new ArrayList<>();
+        fileCollection.add(mockInnerDirectory);
         
         final Collection<File> expectedFiles = new ArrayList<>();
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
             
             //first iteration
             oneOf(mockInnerDirectory).isFile(); will(returnValue(Boolean.FALSE)); //it's a directory, so it doesn't go further
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -363,7 +443,9 @@ public class LamusWorkspaceFileHandlerTest {
         final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan1Filename);
         final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
         
-        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        final Collection<File> fileCollection = new ArrayList<>();
+        fileCollection.add(mockOrphan1);
+        fileCollection.add(mockOrphan2);
         
         final Collection<File> expectedFiles = new ArrayList<>();
         expectedFiles.add(mockOrphan2);
@@ -373,7 +455,6 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -385,6 +466,8 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -403,7 +486,9 @@ public class LamusWorkspaceFileHandlerTest {
         final String orphan2Filename = "orphan2.cmdi";
         final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan2Filename);
         
-        final File[] fileArray = new File[] { mockOrphan1, mockOrphan2 };
+        final Collection<File> fileCollection = new ArrayList<>();
+        fileCollection.add(mockOrphan1);
+        fileCollection.add(mockOrphan2);
         
         final NodeAccessException exceptionToThrow1 = new NodeAccessException(orphan1Filename, orphan1_Uri, null);
         final NodeAccessException exceptionToThrow2 = new NodeAccessException(orphan2Filename, orphan2_Uri, null);
@@ -411,7 +496,6 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
-            oneOf(mockOrphansDirectory).listFiles(); will(returnValue(fileArray));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -423,6 +507,8 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri); will(throwException(exceptionToThrow2));
         }});
+        
+        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         

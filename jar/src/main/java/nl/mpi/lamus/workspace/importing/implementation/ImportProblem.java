@@ -17,7 +17,8 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 /**
- *
+ * Representation of problems that can happen during workspace import.
+ * 
  * @author guisil
  */
 public class ImportProblem {

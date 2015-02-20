@@ -487,7 +487,7 @@ public class WorkspaceSteps {
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
         
         //TODO more assertions missing?
-        this.workspaceService.submitWorkspace(this.currentUserID, this.createdWorkspaceID/*, keepUnlinkedFiles*/);
+        this.workspaceService.submitWorkspace(this.currentUserID, this.createdWorkspaceID, keepUnlinkedFiles);
         
 //        assertTrue("Result of the workspace submission should be true", result);
     }

@@ -56,8 +56,9 @@ public interface WorkspaceManager extends Serializable {
      * (copying the corresponding data back to the archive).
      * 
      * @param workspaceID ID of the workspace to submit
+     * @param keepUnlinkedFiles true if the unlinked files are to be kept for future use
      */
-    public void submitWorkspace(int workspaceID)
+    public void submitWorkspace(int workspaceID, boolean keepUnlinkedFiles)
             throws WorkspaceNotFoundException, WorkspaceExportException;
     
     /**

@@ -138,6 +138,7 @@ public interface ArchiveFileHelper {
     
     /**
      * Checks if target directory can be written to.
+     * If it doesn't exist, an attempt is made to create the directory (and and its ancestors, if needed).
      * @param targetDirectory
      * @return true if target directory can be written to
      */

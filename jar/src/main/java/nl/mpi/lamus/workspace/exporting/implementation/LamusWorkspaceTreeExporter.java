@@ -45,10 +45,10 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
     
     
     /**
-     * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void explore(Workspace workspace, WorkspaceNode node)
+    public void explore(Workspace workspace, WorkspaceNode node, boolean keepUnlinkedFiles)
             throws WorkspaceExportException {
         
         logger.debug("Exploring references in metadata node to export; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + node.getWorkspaceNodeID());
@@ -59,7 +59,7 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
             
             if(!child.isExternal()) {
                 NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child);
-                childNodeExporter.exportNode(workspace, node, child);
+                childNodeExporter.exportNode(workspace, node, child, keepUnlinkedFiles);
             }
         }
     }

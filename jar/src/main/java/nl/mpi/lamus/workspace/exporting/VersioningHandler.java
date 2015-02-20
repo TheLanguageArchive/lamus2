@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.exporting;
 
 import java.net.URL;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -41,4 +42,12 @@ public interface VersioningHandler {
      * @return URL of the node after being moved
      */
     public URL moveFileToVersioningFolder(WorkspaceNode nodeToMove);
+    
+    /**
+     * Moves the given node to the corresponding orphans folder.
+     * @param workspace Workspace to which the node belongs
+     * @param nodeToMove Node to be moved
+     * @return URL of the node after being moved
+     */
+    public URL moveFileToOrphansFolder(Workspace workspace, WorkspaceNode nodeToMove);
 }

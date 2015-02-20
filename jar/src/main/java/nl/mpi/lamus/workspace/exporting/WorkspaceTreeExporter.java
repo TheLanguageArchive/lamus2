@@ -33,8 +33,9 @@ public interface WorkspaceTreeExporter {
      * 
      * @param workspace Workspace being exported
      * @param node Node to be explored
+     * @param true if unlinked files are to be kept for future use
      */
-    public void explore(Workspace workspace, WorkspaceNode node)
+    public void explore(Workspace workspace, WorkspaceNode node, boolean keepUnlinkedFiles)
             throws WorkspaceExportException;
     
 }

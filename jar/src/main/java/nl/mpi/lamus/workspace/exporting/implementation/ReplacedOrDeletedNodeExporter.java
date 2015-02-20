@@ -24,6 +24,7 @@ import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -65,13 +66,15 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private WorkspaceTreeExporter workspaceTreeExporter;
     @Autowired
     private MetadataApiBridge metadataApiBridge;
+    @Autowired
+    private ArchiveHandleHelper archiveHandleHelper;
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles) throws WorkspaceExportException {
 
         if (workspace == null) {
 	    String errorMessage = "Workspace not set";
@@ -103,7 +106,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         }
         
         if(currentNode.isMetadata() && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
-            workspaceTreeExporter.explore(workspace, currentNode);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);
@@ -146,26 +149,10 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         
         if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
             try {
-                handleManager.deleteHandle(new URI(currentNode.getArchiveURI().getSchemeSpecificPart()));
-                
-                //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
-                
-            } catch (HandleException | IOException | URISyntaxException ex) {
-                String errorMessage = "Error deleting handle for node " + currentNode.getArchiveURL();
-                throwWorkspaceExportException(workspaceID, errorMessage, ex);
+                archiveHandleHelper.deleteArchiveHandle(currentNode, false);
+            } catch (HandleException | IOException | TransformerException | MetadataException ex) {
+                logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
             }
-            
-            currentNode.setArchiveURI(null);
-            workspaceDao.updateNodeArchiveUri(currentNode);
-            
-            if(currentNode.isMetadata()) {
-                try {
-                    metadataApiBridge.removeSelfHandleAndSaveDocument(currentNode.getArchiveURL());
-                } catch (IOException | TransformerException | MetadataException ex) {
-                    logger.warn("Couldn't remove self handle from node " + currentNode.getArchiveURL(), ex);
-                }
-            }
-            
         } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
             URI newTargetUri = null;
             try {

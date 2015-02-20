@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
-import nl.mpi.lamus.archive.ArchivePidHelper;
+import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -55,7 +55,7 @@ public class LamusWorkspaceService implements WorkspaceService {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceService.class);
 
     private final WorkspaceAccessChecker nodeAccessChecker;
-    private final ArchivePidHelper archivePidHelper;
+    private final ArchiveHandleHelper archiveHandleHelper;
     private final WorkspaceManager workspaceManager;
     protected final WorkspaceDao workspaceDao;
     private final WorkspaceUploader workspaceUploader;
@@ -63,12 +63,12 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceNodeManager workspaceNodeManager;
     private final LamusNodeReplaceManager nodeReplaceManager;
 
-    public LamusWorkspaceService(WorkspaceAccessChecker aChecker, ArchivePidHelper aPidHelper,
+    public LamusWorkspaceService(WorkspaceAccessChecker aChecker, ArchiveHandleHelper aHandleHelper,
             WorkspaceManager wsManager, WorkspaceDao wsDao, WorkspaceUploader wsUploader,
             WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager,
             LamusNodeReplaceManager topNodeReplaceManager) {
         this.nodeAccessChecker = aChecker;
-        this.archivePidHelper = aPidHelper;
+        this.archiveHandleHelper = aHandleHelper;
         this.workspaceManager = wsManager;
         this.workspaceDao = wsDao;
         this.workspaceUploader = wsUploader;
@@ -91,7 +91,7 @@ public class LamusWorkspaceService implements WorkspaceService {
             throw new IllegalArgumentException("Both userID and archiveNodeURI should not be null");
         }
         
-        URI archiveUriToUse = this.archivePidHelper.getPidForNode(archiveNodeURI);
+        URI archiveUriToUse = this.archiveHandleHelper.getArchiveHandleForNode(archiveNodeURI);
         if(archiveUriToUse == null) {
             archiveUriToUse = archiveNodeURI;
         }
@@ -119,10 +119,10 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
 
     /**
-     * @see WorkspaceService#submitWorkspace(String, int)
+     * @see WorkspaceService#submitWorkspace(java.lang.String, int, boolean)
      */
     @Override
-    public void submitWorkspace(String userID, int workspaceID/*, boolean keepUnlinkedFiles*/)
+    public void submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
         
         logger.debug("Triggered submission of workspace; userID " + userID + "; workspaceID: " + workspaceID);
@@ -132,7 +132,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         
-        this.workspaceManager.submitWorkspace(workspaceID/*, keepUnlinkedFiles*/);
+        this.workspaceManager.submitWorkspace(workspaceID, keepUnlinkedFiles);
     }
 
     /**

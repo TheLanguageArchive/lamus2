@@ -50,10 +50,10 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
     }
     
     /**
-     * @see UnlinkedAndDeletedNodesExportHandler#exploreUnlinkedAndDeletedNodes(nl.mpi.lamus.workspace.model.Workspace)
+     * @see UnlinkedAndDeletedNodesExportHandler#exploreUnlinkedAndDeletedNodes(nl.mpi.lamus.workspace.model.Workspace, boolean)
      */
     @Override
-    public void exploreUnlinkedAndDeletedNodes(Workspace workspace)
+    public void exploreUnlinkedAndDeletedNodes(Workspace workspace, boolean keepUnlinkedFiles)
             throws WorkspaceExportException {
         
         logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID());
@@ -62,7 +62,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
         
         for(WorkspaceNode unlinkedOrDeletedNode : unlinkedAndDeletedTopNodes) {
             NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode);
-            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode);
+            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode, keepUnlinkedFiles);
         }
     }
 }

@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -65,13 +66,15 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final WorkspaceUploadHelper workspaceUploadHelper;
     private final MetadataApiBridge metadataApiBridge;
     private final MetadataChecker metadataChecker;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceFileHandler wsFileHandler,
         WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
-        MetadataApiBridge mdApiBridge, MetadataChecker mdChecker) {
+        MetadataApiBridge mdApiBridge, MetadataChecker mdChecker,
+        ArchiveFileLocationProvider afLocationProvider) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -81,6 +84,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceUploadHelper = wsUploadHelper;
         this.metadataApiBridge = mdApiBridge;
         this.metadataChecker = mdChecker;
+        this.archiveFileLocationProvider = afLocationProvider;
     }
 
     /**
@@ -173,9 +177,11 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         
         for(File currentFile : uploadedFiles) {
             
-            URL uploadedFileURL;
+            URI uploadedFileUri;
+            URL uploadedFileUrl;
             try {
-                uploadedFileURL = currentFile.toURI().toURL();
+                uploadedFileUri = currentFile.toURI();
+                uploadedFileUrl = uploadedFileUri.toURL();
             } catch (MalformedURLException ex) {
                 String errorMessage = "Error retrieving URL from file " + currentFile.getPath();
                 logger.error(errorMessage, ex);
@@ -185,7 +191,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             TypecheckedResults typecheckedResults = null;
             try {
-                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileURL, currentFile.getName());
+                typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileUrl, currentFile.getName());
             } catch(TypeCheckerException ex) {
                 String errorMessage = "Error while typechecking file [" + currentFile.getName() + "]";
                 failUploadForFile(currentFile, errorMessage, failedFiles);
@@ -204,9 +210,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 logger.debug(debugMessage);
             }
             
-            if(uploadedFileURL.toString().endsWith("cmdi")) {
+            if(uploadedFileUrl.toString().endsWith("cmdi")) {
 
-                if(!metadataApiBridge.isMetadataFileValid(uploadedFileURL)) {
+                if(!metadataApiBridge.isMetadataFileValid(uploadedFileUrl)) {
                     String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
                     failUploadForFile(currentFile, errorMessage, failedFiles);
                     continue;
@@ -230,13 +236,17 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             String nodeMimetype = typecheckedResults.getCheckedMimetype();
             
-            URI archiveURI = null;
-            if(uploadedFileURL.toString().endsWith("cmdi")) {
-                archiveURI = metadataApiBridge.getSelfHandleFromFile(uploadedFileURL);   
+            URI archiveUri = null;
+            if(uploadedFileUrl.toString().endsWith("cmdi")) {
+                archiveUri = metadataApiBridge.getSelfHandleFromFile(uploadedFileUrl);   
+            }
+            URI originUri = null;
+            if(archiveFileLocationProvider.isFileInOrphansDirectory(currentFile)) {
+                originUri = uploadedFileUri;
             }
             
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveURI, null, uploadedFileURL, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
+                    workspaceID, archiveUri, originUri, uploadedFileUrl, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);
             

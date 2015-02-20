@@ -159,10 +159,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     }
 
     /**
-     * @see WorkspaceManager#submitWorkspace(int)
+     * @see WorkspaceManager#submitWorkspace(int, boolean)
      */
     @Override
-    public void submitWorkspace(int workspaceID/*, boolean keepUnlinkedFiles*/)
+    public void submitWorkspace(int workspaceID, boolean keepUnlinkedFiles)
             throws WorkspaceNotFoundException, WorkspaceExportException {
                 
         //TODO workspaceDao - get workspace from DB
@@ -174,7 +174,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
         workspaceExportRunner.setWorkspace(workspace);
-//        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?

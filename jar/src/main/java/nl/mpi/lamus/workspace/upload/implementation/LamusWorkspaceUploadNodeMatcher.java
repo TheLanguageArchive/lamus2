@@ -72,10 +72,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle) {
         
-        
-        
-//        File wsUploadDirectory = workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
-        
         for(WorkspaceNode innerNode : nodesToCheck) {
             
             if(innerNode.isMetadata()) {
@@ -90,23 +86,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
                     //TODO Or do something else?
                     continue;
                 }
-//            } else {
-//                
-//                // There is no self link in a resource, of course, and there is no information about the path either
-//                // Probably the best way is to find the resource in the archive and then try to match it with the path of one of the uploaded resources
-//
-//                // if the retrieved archive URL is null, we can't continue with this check
-//                // (the node wasn't found in the corpusstructure DB)
-//                if(referenceUrl == null) {
-//                    continue;
-//                }
-//                
-//                // use only the last part of the path to compare with the archive URL
-//                String shortenedWorkspaceFilePath = innerNode.getWorkspaceURL().toString().replace(wsUploadDirectory.toString(), "");
-//
-//                if(referenceUrl.toString().contains(shortenedWorkspaceFilePath)) { // URL matches
-//                    return innerNode;
-//                }
             }
         }
         

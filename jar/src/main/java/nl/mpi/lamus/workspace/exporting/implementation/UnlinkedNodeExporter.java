@@ -16,12 +16,18 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import javax.xml.transform.TransformerException;
+import net.handle.hdllib.HandleException;
+import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.metadata.api.MetadataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +44,15 @@ public class UnlinkedNodeExporter implements NodeExporter{
 
     @Autowired
     private VersioningHandler versioningHandler;
+    @Autowired
+    private ArchiveHandleHelper archiveHandleHelper;
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode) throws WorkspaceExportException {
+    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles) throws WorkspaceExportException {
 
         //TODO FOR NOW SIMILAR TO DeletedNodeExporter, but will have to be changed
             // when new functionality is added regarding unlinked nodes
@@ -58,28 +66,38 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         logger.debug("Exporting unlinked node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         
-        if(currentNode.getArchiveURI() == null) {
-            
-            logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the archive previously; will be skipped and eventually deleted with the workspace folder");
-            // if there is no archiveURI, the node was never in the archive, so it can actually be deleted;
-            // to make it easier, that node can simply be skipped and eventually will be deleted together with the whole workspace folder
-            return;
-        }
-        
         if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
             logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
             return;
         }
-
-        //TODO What to do with this URL? Update it and use to inform the crawler of the change?
         
-        URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
-        currentNode.setArchiveURL(trashedNodeArchiveURL);
+        
+        URI currentArchiveUri = currentNode.getArchiveURI();
+        
+        if(keepUnlinkedFiles) {
+            if(currentArchiveUri != null) {
+                try {
+                    archiveHandleHelper.deleteArchiveHandle(currentNode, Boolean.FALSE);
+                } catch (HandleException | IOException | TransformerException | MetadataException ex) {
+                    logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
+                }
+            }
+        } else {
+            
+            if(currentArchiveUri != null) {
+                
+                URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
+                currentNode.setArchiveURL(trashedNodeArchiveURL);
+            }
+            
+            logger.debug("Node " + currentNode.getWorkspaceNodeID() + " was not in the archive previously; will be skipped and eventually deleted with the workspace folder");
+            // if there is no archiveURI, the node was never in the archive, so it can actually be deleted;
+            // to make it easier, that node can simply be skipped and eventually will be deleted together with the whole workspace folder
+        }
         
         //TODO is this necessary?
 //        searchClientBridge.removeNode(currentNode.getArchiveURI());
         
         //TODO REMOVE LINK FROM PARENT (IF THERE IS ONE)
     }
-    
 }

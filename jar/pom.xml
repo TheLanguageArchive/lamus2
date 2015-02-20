@@ -66,37 +66,37 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-easymock</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-support</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4-rule</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-classloading-xstream</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         
@@ -107,7 +107,6 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- ANOTHER VERSION OF THE DRIVER????? -->
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -203,24 +202,18 @@
             <groupId>nl.mpi</groupId>
             <artifactId>mpi-util</artifactId>
             <version>1.2.4</version>
-<!--            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>-->
         </dependency>
         
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-provider</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.4</version>
         </dependency>
         
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.handle</groupId>

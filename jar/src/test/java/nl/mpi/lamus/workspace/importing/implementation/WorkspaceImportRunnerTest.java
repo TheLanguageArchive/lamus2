@@ -30,7 +30,6 @@ import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.OrphanNodesImportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.metadata.api.MetadataException;
-import org.hamcrest.core.IsNot;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;

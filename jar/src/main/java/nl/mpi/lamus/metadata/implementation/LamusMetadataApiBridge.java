@@ -168,6 +168,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             return false;
         }
         
+        logger.debug("Metadata file [" + fileURL + "] is valid");
         return true;
     }
 }

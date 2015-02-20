@@ -27,7 +27,9 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -61,11 +63,14 @@ public class LamusVersioningHandlerTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock ArchiveFileHelper mockArchiveFileHelper;
+    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock HandleInfoRetriever mockHandleInfoRetriever;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     
     @Mock CorpusNode mockCorpusNode;
+    @Mock Workspace mockWorkspace;
+    @Mock WorkspaceNode mockWorkspaceNode;
     
     private VersioningHandler versioningHandler;
     
@@ -83,9 +88,8 @@ public class LamusVersioningHandlerTest {
     @Before
     public void setUp() {
         
-        versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper,
-                mockHandleInfoRetriever,
-                mockCorpusStructureProvider, mockNodeResolver);
+        versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper, mockArchiveFileLocationProvider,
+                mockHandleInfoRetriever, mockCorpusStructureProvider, mockNodeResolver);
     }
     
     @After
@@ -97,13 +101,13 @@ public class LamusVersioningHandlerTest {
     public void moveFileToTrashCanSucceeds() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
-        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
         
         final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/" + fileBaseName);
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
@@ -136,13 +140,13 @@ public class LamusVersioningHandlerTest {
     public void moveFileToVersioningSucceeds() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
-        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
         
         final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/" + fileBaseName);
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
@@ -164,7 +168,6 @@ public class LamusVersioningHandlerTest {
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(versioningFile));
         }});
         
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
         suppress(method(FileUtils.class, "moveFile", File.class, File.class));
         
         URL result = versioningHandler.moveFileToVersioningFolder(testNode);
@@ -176,13 +179,13 @@ public class LamusVersioningHandlerTest {
     public void moveFileToTrashCanFailsTargetLocation() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
-        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
-
+        
         final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/" + fileBaseName);
         final StringBuilder fileNameBuilder = new StringBuilder().append("v").append(testNodeStrippedHandle).append("__.").append(fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
@@ -204,7 +207,6 @@ public class LamusVersioningHandlerTest {
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
         stub(method(FileUtils.class, "moveFile", File.class, File.class)).toThrow(expectedException);
         
         URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
@@ -216,13 +218,13 @@ public class LamusVersioningHandlerTest {
     public void moveFileToTrashCanFailsWriteTargetDirectory() throws MalformedURLException, URISyntaxException {
         
         final int workspaceID = 10;
-        final URL testNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
-        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/node.cmdi");
         
-        final String fileBaseName = "node.something";
+        final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final URL testNodeArchiveURL = new URL("http:/remote/folder/archive/somefolder/" + fileBaseName);
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File archiveFile = new File(archiveDirectory, fileBaseName);
         final File trashedDirectory = new File("/lat/corpora/trashcan/2013-05/10");
@@ -238,11 +240,94 @@ public class LamusVersioningHandlerTest {
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.FALSE));
         }});
         
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(archiveFile);
-        
         URL result = versioningHandler.moveFileToTrashCanFolder(testNode);
         
         assertNull("Result should be null", result);
+    }
+    
+    @Test
+    public void moveFileToOrphansFolder_WithArchiveURI() throws MalformedURLException, URISyntaxException {
+        
+        final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
+        final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
+        final String testNodeStrippedHandle = UUID.randomUUID().toString();
+        final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
+        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        
+        final String fileBaseName = "node.cmdi";
+        final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
+        final File fileToMove = new File(archiveDirectory, fileBaseName);
+        final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
+        
+        
+        final URL expectedURL = new File(orphansDirectory, fileBaseName).toURI().toURL();
+        
+        context.checking(new Expectations() {{
+            
+            exactly(2).of(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(fileToMove));
+            
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+        }});
+        
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        
+        URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+        
+        assertEquals("Result different from expected", expectedURL, result);
+    }
+    
+    @Test
+    public void moveFileToOrphansFolder_WithoutArchiveURI() throws MalformedURLException, URISyntaxException {
+        
+        final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
+        final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
+        
+        final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final File fileToMove = new File(testNodeWsURL.getPath());
+        final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
+        
+        final URL expectedURL = new File(orphansDirectory, fileBaseName).toURI().toURL();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+        }});
+        
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        
+        URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+        
+        assertEquals("Result different from expected", expectedURL, result);
+    }
+    
+    @Test
+    public void moveFileToOrphansFolder_WithoutArchiveURI_AlreadyInOrphansFolder() throws MalformedURLException, URISyntaxException {
+        
+        final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final File fileToMove = new File(testNodeWsURL.getPath());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.TRUE));
+        }});
+        
+        URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+        
+        assertEquals("Result different from expected", testNodeWsURL, result);
     }
     
     

@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.xml.transform.stream.StreamResult;
@@ -70,6 +72,16 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
                 throws IOException {
         
         FileUtils.copyFile(originNodeFile, targetNodeFile);
+    }
+
+    /**
+     * @see WorkspaceFileHandler#moveFile(java.io.File, java.io.File)
+     */
+    @Override
+    public void moveFile(File originNodeFile, File targetNodeFile)
+            throws IOException {
+        
+        Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
     
     /**
@@ -129,12 +141,11 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
             throw new UnsupportedOperationException("not handled yet");
         }
         
-        File[] allFiles = orphansDirectory.listFiles();
+        Collection<File> allFiles = FileUtils.listFiles(orphansDirectory, null, true);
         Collection<File> fileAvailableForWorkspace = new ArrayList<>();
         
         if(allFiles != null) {
-            for(int i = 0; i < allFiles.length; i++) {
-                File currentFile = allFiles[i];
+            for(File currentFile : allFiles) {
                 try {
                     if(currentFile.isFile()) {
                         workspaceAccessChecker.ensureNodeIsNotLocked(currentFile.toURI());

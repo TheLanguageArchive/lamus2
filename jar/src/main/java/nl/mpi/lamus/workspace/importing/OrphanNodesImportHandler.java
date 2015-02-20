@@ -22,11 +22,19 @@ import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
- *
+ * Handler of the import process of orphan nodes into the workspace.
+ * 
  * @author guisil
  */
 public interface OrphanNodesImportHandler {
     
+    /**
+     * Gets the orphan nodes available to the workspace and redirects them
+     * to the appropriate importer.
+     * @param workspace Workspace where to import the nodes
+     * @return Collection of problems importing these orphan nodes
+     * @throws WorkspaceException 
+     */
     public Collection<ImportProblem> exploreOrphanNodes(Workspace workspace)
             throws WorkspaceException;
 }
