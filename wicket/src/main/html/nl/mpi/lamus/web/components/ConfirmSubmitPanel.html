@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2015 Max Planck Institute for Psycholinguistics
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
+    <head>
+        <title>Submit Workspace</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <wicket:panel>
+            <form wicket:id="confirmSubmitForm">
+                <table summary="About" align="left"  border="0" cellspacing="2" cellpadding="2">
+                    <tr>
+                        <td align="left" valign="top" >
+                            <wicket:message key="submit_workspace_confirm"></wicket:message>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><input type="checkbox" wicket:id="checkbox" /><wicket:message key="submit_workspace_keep_unlinked_files"></wicket:message></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" wicket:id="yesButton" value="Yes" />
+                        </td>
+                        <td>
+                            <input type="button" wicket:id="noButton" value="No" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </wicket:panel>
+    </body>
+</html>

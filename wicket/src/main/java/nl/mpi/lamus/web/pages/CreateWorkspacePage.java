@@ -46,6 +46,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * Create a workspace by adding a tree and display frame on selected node
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author guisil
  */
 public class CreateWorkspacePage extends LamusPage {
 
@@ -163,10 +164,6 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-                    
-                    
-                    //TODO CATCH ORPHANS EXCEPTION
-                    
                 } catch (NodeNotFoundException | NodeAccessException | WorkspaceImportException ex) {
                     Session.get().error(ex.getMessage());
                 }

@@ -74,9 +74,10 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      *
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
+     * @param keepUnlinkedFiles true if user chooses to keep unlinked files for future use
      */
     @Override
-    public void submitWorkspace(String userID, int workspaceID) {
+    public void submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles) {
 	logger.info("call to submitWorkspace({}, {})", userID, workspaceID);
     }
 

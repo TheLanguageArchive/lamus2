@@ -36,6 +36,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * Reference page that contains common features
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author guisil
  */
 public class LamusPage extends WebPage {
 
@@ -71,21 +72,7 @@ public class LamusPage extends WebPage {
         homePageLink.add(new Image("home_image", new SharedResourceReference("homeImage")));
         add(homePageLink);
         
-        final ModalWindow modalAbout = new ModalWindow("modalAbout");
-        modalAbout.setContent(new AboutPanel(modalAbout.getContentId()));
-        modalAbout.setTitle("About LAMUS 2");
-        modalAbout.setCookieName("modal-about");
-        modalAbout.setCloseButtonCallback(new ModalWindow.CloseButtonCallback() {
-            @Override
-            public boolean onCloseButtonClicked(AjaxRequestTarget art) {
-                return true;
-            }
-        });
-        modalAbout.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
-            @Override
-            public void onClose(AjaxRequestTarget art) {
-            }
-        }));
+        final ModalWindow modalAbout = createAboutModalWindow();
         add(modalAbout);
         add(new AjaxLink<Void>("showModalAbout") {
             @Override
@@ -114,6 +101,29 @@ public class LamusPage extends WebPage {
     protected FeedbackPanel getFeedbackPanel() {
         return feedbackPanel;
     }
+    
+    
+    private ModalWindow createAboutModalWindow() {
+        
+        ModalWindow modalAbout = new ModalWindow("modalAbout");
+        modalAbout.setContent(new AboutPanel(modalAbout.getContentId()));
+        modalAbout.setTitle("About LAMUS 2");
+        modalAbout.setCookieName("modal-about");
+        modalAbout.setCloseButtonCallback(new ModalWindow.CloseButtonCallback() {
+            @Override
+            public boolean onCloseButtonClicked(AjaxRequestTarget art) {
+                return true;
+            }
+        });
+        modalAbout.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
+            @Override
+            public void onClose(AjaxRequestTarget art) {
+            }
+        }));
+        
+        return modalAbout;
+    }
+    
     
     private static class HeaderUsernameModel extends AbstractReadOnlyModel<String> {
 

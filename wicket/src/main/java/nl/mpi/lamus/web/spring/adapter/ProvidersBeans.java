@@ -40,6 +40,6 @@ public class ProvidersBeans {
     @Scope("prototype")
     @Qualifier("createWorkspaceTreeProvider")
     public CorpusStructureTreeModelProvider createWorkspaceTreeProvider() {
-        return new CorpusStructureTreeModelProvider(corpusStructureProvider);
+        return new CorpusStructureTreeModelProvider(corpusStructureProvider, corpusStructureProvider.getRootNodeURI());
     }
 }

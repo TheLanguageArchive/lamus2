@@ -42,6 +42,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * Page that displays list of workspaces that can be opened
  *
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author guisil
  */
 public class SelectWorkspacePage extends LamusPage {
 

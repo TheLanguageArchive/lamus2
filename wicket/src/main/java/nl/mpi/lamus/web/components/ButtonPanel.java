@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.components;
 
 import java.io.IOException;
+import java.io.Serializable;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -27,6 +28,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -37,19 +39,24 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * Button page that allows navigation
  * 
  * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author guisil
  */
 
 public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
-// Services to be injected
+
     @SpringBean
     private WorkspaceService workspaceService;
     
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
     
+    private ModalWindow modalConfirmSubmit;
+    private SubmitConfirmationOptions submitConfirmationOptions;
+    
     
     public ButtonPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
+        submitConfirmationOptions = new SubmitConfirmationOptions(false, false);
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
     
@@ -65,27 +72,17 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
-
-            final String submitConfirmationMessage = "If there are unlinked nodes in the workspace,"
-                     + "they will be deleted. Are you sure you want to proceed?";
-            final Button submitWorkspaceButton = new ConfirmationAjaxButton("submitWorkspaceButton", submitConfirmationMessage) {
+            
+            modalConfirmSubmit = createConfirmationModalWindow();
+            add(modalConfirmSubmit);
+            
+            final Button submitWorkspaceButton = new AutoDisablingAjaxButton("submitWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                    
-                    target.add(getFeedbackPanel());
-                    
-                    try {
-                        workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
-                    } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
-                        Session.get().error(ex.getMessage());
-                    }
-                    
-                    
-                    Session.get().info("Workspace successfully submitted");
-                    
-                    setResponsePage(pagesProvider.getIndexPage());
 
+                    target.add(getFeedbackPanel());
+                    modalConfirmSubmit.show(target);
                 }
             };
             
@@ -106,6 +103,70 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             };
             
             add(deleteWorkspaceButton);
+        }
+    }
+    
+    
+    private void onSubmitConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
+        try {
+            workspaceService.submitWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
+            Session.get().error(ex.getMessage());
+        }
+        
+        Session.get().info("Workspace successfully submitted");
+                    
+        setResponsePage(pagesProvider.getIndexPage());
+    }
+    
+    private void onSubmitCancel(AjaxRequestTarget target) {
+        // do nothing
+    }
+    
+    private ModalWindow createConfirmationModalWindow() {
+        
+        modalConfirmSubmit = new ModalWindow("modalConfirmSubmit");
+        modalConfirmSubmit.setContent(new ConfirmSubmitPanel(modalConfirmSubmit.getContentId(), modalConfirmSubmit, submitConfirmationOptions));
+        modalConfirmSubmit.setTitle("Submit Workspace");
+        modalConfirmSubmit.setCookieName("modal-confirm-submit");
+        modalConfirmSubmit.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
+            @Override
+            public void onClose(AjaxRequestTarget art) {
+                if (submitConfirmationOptions.isSubmitConfirmed()) {
+                    onSubmitConfirm(art, submitConfirmationOptions.isKeepUnlinkedFiles());
+                } else {
+                    onSubmitCancel(art);
+                }
+            }
+        }));
+        
+        return modalConfirmSubmit;
+    }
+    
+    
+    public class SubmitConfirmationOptions implements Serializable {
+        
+        private boolean submitConfirmed;
+        private boolean keepUnlinkedFiles;
+        
+        public SubmitConfirmationOptions(boolean submitConfirmed, boolean keepUnlinkedFiles) {
+            this.submitConfirmed = submitConfirmed;
+            this.keepUnlinkedFiles = keepUnlinkedFiles;
+        }
+        
+        
+        public boolean isSubmitConfirmed() {
+            return submitConfirmed;
+        }
+        public void setSubmitConfirmed(boolean submitConfirmed) {
+            this.submitConfirmed = submitConfirmed;
+        }
+        
+        public boolean isKeepUnlinkedFiles() {
+            return keepUnlinkedFiles;
+        }
+        public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
+            this.keepUnlinkedFiles = keepUnlinkedFiles;
         }
     }
 }

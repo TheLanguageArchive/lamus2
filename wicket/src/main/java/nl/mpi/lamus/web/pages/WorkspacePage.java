@@ -33,7 +33,6 @@ import nl.mpi.lamus.web.components.WsNodeActionsPanel;
 import nl.mpi.lamus.web.model.ClearSelectedTreeNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
-import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
@@ -54,6 +53,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author guisil
  */
 public class WorkspacePage extends LamusPage {
 
@@ -62,8 +62,6 @@ public class WorkspacePage extends LamusPage {
     protected WorkspaceTreeService workspaceTreeService;
     @SpringBean(name = "workspaceTreeProviderFactory")
     private WorkspaceTreeModelProviderFactory workspaceTreeProviderFactory;
-    @SpringBean(name = "unlinkedNodesProviderFactory")
-    private UnlinkedNodesModelProviderFactory unlinkedNodesProviderFactory;
     
     @SpringBean(required = false)
     private ArchiveTreeNodeIconProvider<WorkspaceTreeNode> treeIconProvider;
@@ -80,10 +78,8 @@ public class WorkspacePage extends LamusPage {
     private Collection<WorkspaceTreeNode> selectedUnlinkedNodes = new ArrayList<>();
     
     private LinkedTreeModelProvider workspaceTreeProvider;
-    
-    
-    //TODO Make it possible to have multiple selection
 
+    
     public WorkspacePage(final IModel<Workspace> model) {
 	super();
 	this.model = model;
@@ -240,10 +236,7 @@ public class WorkspacePage extends LamusPage {
     
     
     protected void refreshTreeAndPanels() {
-
-        //TODO some other way of updating the tree?
         wsTreePanel.getTree().invalidateAll();
-        
     }
     
     protected void refreshSelectedUnlinkedNodes() {
