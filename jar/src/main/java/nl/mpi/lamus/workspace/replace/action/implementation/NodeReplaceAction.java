@@ -76,6 +76,6 @@ public abstract class NodeReplaceAction {
      */
     @Override
     public String toString() {
-        return "Affected Node: " + affectedNode.getWorkspaceNodeID();
+        return "Affected Node: " + (affectedNode != null ? affectedNode.getWorkspaceNodeID() : "null");
     }
 }

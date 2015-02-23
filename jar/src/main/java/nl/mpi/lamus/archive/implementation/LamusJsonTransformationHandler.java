@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -119,7 +120,7 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         
         URI oldNodeURI = new URI(innerObject.getString("fromId"));
         URI newNodeURI = new URI(innerObject.getString("toId"));
-        String status = innerObject.getString("status").toUpperCase();
+        String status = innerObject.getString("status").toUpperCase(Locale.ENGLISH);
         if("OK".equals(status)) {
             replacementToReturn = new LamusWorkspaceNodeReplacement(oldNodeURI, newNodeURI, status);
         } else {

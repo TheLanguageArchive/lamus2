@@ -67,10 +67,10 @@ public class RemoveArchiveUriReplaceAction extends NodeReplaceAction{
         if (this == obj) {
                 return true;
         }
-        if (!(obj instanceof UnlinkNodeReplaceAction)) {
+        if (!(obj instanceof RemoveArchiveUriReplaceAction)) {
                 return false;
         }
-        UnlinkNodeReplaceAction other = (UnlinkNodeReplaceAction) obj;
+        RemoveArchiveUriReplaceAction other = (RemoveArchiveUriReplaceAction) obj;
 
         return new EqualsBuilder().
                 appendSuper(super.equals(other)).

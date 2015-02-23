@@ -24,7 +24,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public class WorkspaceTreeModelProvider extends LinkedTreeModelProvider implements Serializable {
+public class WorkspaceTreeModelProvider extends LinkedTreeModelProvider {
     
     public WorkspaceTreeModelProvider(WorkspaceTreeNode workspaceRootNode) {
         super(workspaceRootNode);

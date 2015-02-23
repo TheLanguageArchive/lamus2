@@ -78,7 +78,12 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     @Override
     public Boolean call() throws WorkspaceImportException, WorkspaceException {
         
-        //TODO DO NOT RUN IF WORKSPACE OR TOP NODE ID ARE NOT DEFINED
+        if(workspace == null) {
+            throw new IllegalStateException("Workspace not set");
+        }
+        if(topNodeArchiveURI == null) {
+            throw new IllegalStateException("Top node URI not set");
+        }
         
         try {
             //TODO create some other method that takes something else than a Reference

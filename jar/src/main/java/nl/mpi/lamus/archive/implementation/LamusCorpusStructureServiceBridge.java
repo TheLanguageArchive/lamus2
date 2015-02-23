@@ -19,6 +19,7 @@ package nl.mpi.lamus.archive.implementation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Locale;
 import javax.json.JsonObject;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
@@ -112,7 +113,7 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         
         for(WorkspaceNodeReplacement replacement : responseNodeReplacements) {
             logger.debug("Retrieving result of replacement. Old node: " + replacement.getOldNodeURI().toString() + " ; New node: " + replacement.getNewNodeURI().toString());
-            if(!"OK".equals(replacement.getReplacementStatus().toUpperCase())) {
+            if(!"OK".equals(replacement.getReplacementStatus().toUpperCase(Locale.ENGLISH))) {
                 String errorMessage = "Error during version creation. Status: " + replacement.getReplacementStatus() + "; error: " + replacement.getReplacementError();
                 logger.error(errorMessage);
                 throw new VersionCreationException(errorMessage, null);

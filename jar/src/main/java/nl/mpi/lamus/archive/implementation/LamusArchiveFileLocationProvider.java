@@ -162,7 +162,7 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
 
         
         if (orphansDirectoryName != null &&
-            fileToCheck.getAbsolutePath().toString().contains(orphansDirectoryName)) {
+            fileToCheck.getAbsolutePath().contains(orphansDirectoryName)) {
             return true;
         }
         return false;

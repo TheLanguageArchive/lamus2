@@ -73,7 +73,7 @@ public class LamusTypecheckHandlerTest {
         final String expectedResult = "true something";
         
         context.checking(new Expectations() {{
-            oneOf(mockTypechecker).checkStream(mockInputStream, fileName.toLowerCase()); will(returnValue(expectedResult));
+            oneOf(mockTypechecker).checkStream(mockInputStream, fileName); will(returnValue(expectedResult));
         }});
         
         String retrivedResult = typecheckHandler.typecheck(mockInputStream, fileName);

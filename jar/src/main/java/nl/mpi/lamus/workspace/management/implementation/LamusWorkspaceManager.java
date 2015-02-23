@@ -181,7 +181,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
         
-        Boolean isSuccessful = false;
+        Boolean isSuccessful;
         
         workspace = workspaceDao.getWorkspace(workspaceID);
         

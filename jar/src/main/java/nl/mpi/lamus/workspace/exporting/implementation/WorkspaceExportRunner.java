@@ -83,6 +83,10 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     @Override
     public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerInvocationException {
         
+        if(workspace == null) {
+            throw new IllegalStateException("Workspace not set");
+        }
+        
         //1. save imdi files - NOT NEEDED (?)
         //2. consistency checks - (?)
         //2.9 (?)

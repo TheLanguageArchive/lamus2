@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.management;
 
-import java.io.Serializable;
 import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -27,7 +26,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceAccessChecker extends Serializable {
+public interface WorkspaceAccessChecker {
 
     /**
      * Checks if a workspace can be created in the given node.

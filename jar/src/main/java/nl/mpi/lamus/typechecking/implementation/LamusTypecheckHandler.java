@@ -48,7 +48,7 @@ public class LamusTypecheckHandler implements TypecheckHandler {
      */
     @Override
     public String typecheck(InputStream iStream, String filename) throws IOException {
-        return typechecker.checkStream(iStream, filename.toLowerCase());
+        return typechecker.checkStream(iStream, filename);
     }
 
     /**

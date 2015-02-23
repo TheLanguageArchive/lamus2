@@ -1,6 +1,5 @@
 package nl.mpi.lamus.ams;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
@@ -10,7 +9,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
  * Partly adapted from the old LAMUS.
  * @author guisil
  */
-public interface AmsServiceBridge extends Serializable {
+public interface AmsServiceBridge {
 
     /**
      * provides the used-storage-space of the given user(uid) on the given archive node

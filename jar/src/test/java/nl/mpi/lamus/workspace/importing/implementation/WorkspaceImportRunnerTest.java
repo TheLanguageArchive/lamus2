@@ -85,6 +85,38 @@ public class WorkspaceImportRunnerTest {
 
 
     @Test
+    public void workspaceNotSet() throws InterruptedException {
+        
+        workspaceImportRunner.setWorkspace(null);
+        final String expectedMessage = "Workspace not set";
+        
+        try {
+            executeRunner();
+            fail("should have thrown an exception");
+        } catch(ExecutionException ex) {
+            //expected exception thrown
+            assertTrue("Exception cause different from expected", ex.getCause() instanceof IllegalStateException);
+            assertEquals("Exception message different from expected", expectedMessage, ex.getCause().getMessage());
+        }
+    }
+    
+    @Test
+    public void topNodeNotSet() throws InterruptedException {
+        
+        workspaceImportRunner.setTopNodeArchiveURI(null);
+        final String expectedMessage = "Top node URI not set";
+        
+        try {
+            executeRunner();
+            fail("should have thrown an exception");
+        } catch(ExecutionException ex) {
+            //expected exception thrown
+            assertTrue("Exception cause different from expected", ex.getCause() instanceof IllegalStateException);
+            assertEquals("Exception message different from expected", expectedMessage, ex.getCause().getMessage());
+        }
+    }
+    
+    @Test
     public void runsSuccessfully() throws Exception {
         
         final States importing = context.states("importing");

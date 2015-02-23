@@ -105,6 +105,22 @@ public class WorkspaceExportRunnerTest {
     
 
     @Test
+    public void callExporter_WorkspaceNotSet() throws InterruptedException, CrawlerInvocationException {
+        
+        workspaceExportRunner.setWorkspace(null);
+        final String expectedMessage = "Workspace not set";
+        
+        try {
+            executeRunner();
+            fail("should have thrown an exception");
+        } catch(ExecutionException ex) {
+            //expected exception thrown
+            assertTrue("Exception cause different from expected", ex.getCause() instanceof IllegalStateException);
+            assertEquals("Exception message different from expected", expectedMessage, ex.getCause().getMessage());
+        }
+    }
+    
+    @Test
     public void callExporterForGeneralNodeWithoutVersions()
             throws MalformedURLException, InterruptedException,
             ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,

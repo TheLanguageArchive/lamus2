@@ -17,7 +17,6 @@ package nl.mpi.lamus.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +27,6 @@ import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
-import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
@@ -40,7 +38,7 @@ import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
  *
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceService extends Serializable {
+public interface WorkspaceService {
     
     /**
      * Creates a workspace starting in a given archive node, for a given user.

@@ -16,7 +16,6 @@
 package nl.mpi.lamus.workspace.management;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -28,7 +27,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-public interface WorkspaceManager extends Serializable {
+public interface WorkspaceManager {
     
     /**
      * Triggers the creation of a workspace 

@@ -19,6 +19,8 @@ package nl.mpi.lamus.util.implementation;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  *
@@ -42,11 +44,27 @@ public class MockableURL {
 
     @Override
     public int hashCode() {
-        return url.hashCode();
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .append(this.url);
+        
+        return hashCodeB.toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return url.equals(((MockableURL)obj).getURL());
+    
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof MockableURL)) {
+            return false;
+        }
+        MockableURL other = (MockableURL) obj;
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .append(this.url, other.getURL());
+        
+        return equalsB.isEquals();
     }
 }
