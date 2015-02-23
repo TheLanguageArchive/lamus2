@@ -56,12 +56,20 @@ public class MockWorkspace implements Workspace {
 
     @Override
     public Date getEndDate() {
-	return endDate;
+	Date toReturn = null;
+        if(this.endDate != null) {
+            toReturn = (Date) this.endDate.clone();
+        }
+        return toReturn;
     }
 
     @Override
     public void setEndDate(Date endDate) {
-	this.endDate = endDate;
+	Date toSet = null;
+        if(endDate != null) {
+            toSet = (Date) endDate.clone();
+        }
+        this.endDate = toSet;
     }
 
     @Override
@@ -86,32 +94,56 @@ public class MockWorkspace implements Workspace {
 
     @Override
     public Date getSessionEndDate() {
-	return sessionEndDate;
+	Date toReturn = null;
+        if(this.sessionEndDate != null) {
+            toReturn = (Date) this.sessionEndDate.clone();
+        }
+        return toReturn;
     }
 
     @Override
     public void setSessionEndDate(Date sessionEndDate) {
-	this.sessionEndDate = sessionEndDate;
+	Date toSet = null;
+        if(sessionEndDate != null) {
+            toSet = (Date) sessionEndDate.clone();
+        }
+        this.sessionEndDate = toSet;
     }
 
     @Override
     public Date getSessionStartDate() {
-	return sessionStartDate;
+	Date toReturn = null;
+        if(this.sessionStartDate != null) {
+            toReturn = (Date) this.sessionStartDate.clone();
+        }
+        return toReturn;
     }
 
     @Override
     public void setSessionStartDate(Date sessionStartDate) {
-	this.sessionStartDate = sessionStartDate;
+	Date toSet = null;
+        if(sessionStartDate != null) {
+            toSet = (Date) sessionStartDate.clone();
+        }
+        this.sessionStartDate = toSet;
     }
 
     @Override
     public Date getStartDate() {
-	return startDate;
+	Date toReturn = null;
+        if(this.startDate != null) {
+            toReturn = (Date) this.startDate.clone();
+        }
+        return toReturn;
     }
 
     @Override
     public void setStartDate(Date startDate) {
-	this.startDate = startDate;
+	Date toSet = null;
+        if(startDate != null) {
+            toSet = (Date) startDate.clone();
+        }
+        this.startDate = toSet;
     }
 
     @Override

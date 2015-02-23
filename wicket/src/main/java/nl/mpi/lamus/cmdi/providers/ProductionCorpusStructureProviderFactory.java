@@ -32,8 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- *
- * COPY FROM THE METADATA BROWSER FOR TESTING PURPOSES...
+ * Factory for the corpusstructure provider.
+ * Copied from the Metadata browser.
+ * @author guisil
  */
 @Transactional
 public class ProductionCorpusStructureProviderFactory implements CorpusStructureProviderFactory, AccessInfoProviderFactory, Serializable {

@@ -160,8 +160,10 @@ public class WorkspacePage extends LamusPage {
                 WorkspaceTreeNode selectedNode = getSelectedNode(treePanel);
                 IModel<WorkspaceTreeNode> nodeInfoModel = getSelectedNodesModel(selectedNode);
                 
-                wsInfoPanel.setNodeInfoPanelModel(nodeInfoModel);
-        	
+                if(wsInfoPanel != null) {
+                    wsInfoPanel.setNodeInfoPanelModel(nodeInfoModel);
+                }
+                
                 wsNodeActionsPanel.setSelectedUnlinkedNodes(selectedUnlinkedNodes);
                 wsNodeActionsPanel.setModelObject(wsTreePanel.getSelectedNodes());
                 

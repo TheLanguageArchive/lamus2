@@ -127,11 +127,19 @@ public class MockCorpusNode implements LinkedCorpusNode, Serializable {
 
     @Override
     public Date getLastUpdate() {
-        return lastUpdate;
+        Date toReturn = null;
+        if(this.lastUpdate != null) {
+            toReturn = (Date) this.lastUpdate.clone();
+        }
+        return toReturn;
     }
     
     public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+        Date toSet = null;
+        if(lastUpdate != null) {
+            toSet = (Date) lastUpdate.clone();
+        }
+        this.lastUpdate = toSet;
     }
 
     @Override
