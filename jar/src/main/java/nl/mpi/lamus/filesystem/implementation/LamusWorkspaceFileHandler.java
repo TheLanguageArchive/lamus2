@@ -71,7 +71,7 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     public void copyFile(File originNodeFile, File targetNodeFile)
                 throws IOException {
         
-        FileUtils.copyFile(originNodeFile, targetNodeFile);
+        Files.copy(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**

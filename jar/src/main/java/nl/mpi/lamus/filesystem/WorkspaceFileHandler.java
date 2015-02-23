@@ -31,7 +31,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 public interface WorkspaceFileHandler {
 
     /**
-     * Copies the given resource file into the given location
+     * Copies the given resource file into the given location.
+     * If a file already exists in the target location, it will be replaced.
      * 
      * @param originNodeFile File object corresponding to the file origin
      * @param targetNodeFile File object corresponding to the target file
@@ -40,7 +41,8 @@ public interface WorkspaceFileHandler {
                 throws IOException;
     
     /**
-     * Moves the given file into the given location
+     * Moves the given file into the given location.
+     * If a file already exists in the target location, it will be replaced.
      * 
      * @param originNodeFile
      * @param targetNodeFile 

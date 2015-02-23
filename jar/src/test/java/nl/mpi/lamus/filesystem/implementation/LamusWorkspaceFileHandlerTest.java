@@ -116,6 +116,7 @@ public class LamusWorkspaceFileHandlerTest {
     private File workspaceBaseDirectory;
     
     private File tempDirectory;
+    private File anotherTempDirectory;
     
     @Mock private File mockArchiveFile;
     @Mock private WorkspaceNode mockWorkspaceNode;
@@ -150,20 +151,17 @@ public class LamusWorkspaceFileHandlerTest {
         if(tempDirectory != null) {
             FileUtils.cleanDirectory(tempDirectory);
         }
+        if(anotherTempDirectory != null) {
+            FileUtils.cleanDirectory(anotherTempDirectory);
+        }
     }
 
     
     @Test
     public void copyFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
         
-        String nodeFilename = "someNode.cmdi";
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
-        
-        File originFile = new File(testNode.getWorkspaceURL().getPath());
-        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        File originFile = createFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
         
         workspaceFileHandler.copyFile(originFile, destinationFile);
         
@@ -171,42 +169,60 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     @Test
-    public void copyFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+    public void copyFile_originFileDoesntExist() throws IOException {
         
-        String nodeFilename = "someNode.cmdi";
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
-        
-        File originFile = new File(testNode.getWorkspaceURL().getPath());
-        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
-        
-        IOException expectedException = new IOException("some exception message");
-        
-        stub(method(FileUtils.class, "copyFile", File.class, File.class)).toThrow(expectedException);
+        File originFile = doNotCreateFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
         
         try {
             workspaceFileHandler.copyFile(originFile, destinationFile);
             fail("An exception should have been thrown");
         } catch(IOException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+            //expected exception is thrown
         }
         
-        assertFalse("File shouldn't exist in its expected final location", destinationFile.exists());
+        assertFalse("File shouldn't exist in the origin location", originFile.exists());
+        assertFalse("File shouldn't exist in the destination location", destinationFile.exists());
+    }
+    
+    @Test
+    public void copyFile_targetDirectoryDoesntExist() throws IOException {
+        
+        File originFile = createFileToCopy();
+        File destinationFile = doNotCreateTargetDirectory_retrieveTargetFileLocation();
+        
+        try {
+            workspaceFileHandler.copyFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            //expected exception is thrown
+        }
+        
+        assertFalse("File shouldn't exist in the destination location", destinationFile.exists());
+    }
+    
+    @Test
+    public void copyFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+        
+        File originFile = createFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
+        anotherTempDirectory.setReadOnly();
+        
+        try {
+            workspaceFileHandler.copyFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            //expected exception is thrown
+        }
+        
+        assertFalse("File shouldn't exist in the destination location", destinationFile.exists());
     }
     
     @Test
     public void moveFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
         
-        String nodeFilename = "someNode.cmdi";
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
-        
-        File originFile = new File(testNode.getWorkspaceURL().getPath());
-        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
+        File originFile = createFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
         
         workspaceFileHandler.moveFile(originFile, destinationFile);
         
@@ -217,15 +233,8 @@ public class LamusWorkspaceFileHandlerTest {
     @Test
     public void moveFileSuccessfully_FileAlreadyExists() throws MalformedURLException, IOException, URISyntaxException {
         
-        String nodeFilename = "someNode.cmdi";
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
-        
-        File originFile = new File(testNode.getWorkspaceURL().getPath());
-        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
-        
+        File originFile = createFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
         destinationFile.createNewFile();
         
         workspaceFileHandler.moveFile(originFile, destinationFile);
@@ -234,30 +243,51 @@ public class LamusWorkspaceFileHandlerTest {
         assertFalse("File shouldn't exist anymore in its original location", originFile.exists());
     }
     
-    
-    //TODO stub of the Files.move method doesn't throw an exception even when using "toThrow"...
-    
     @Test
-    public void moveFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+    public void moveFile_originFileDoesntExist() throws IOException {
         
-        String nodeFilename = "someNode.cmdi";
-        Workspace testWorkspace = createTestWorkspace();
-        final File baseDirectory = createTestBaseDirectory();
-        File workspaceDirectory = createTestWorkspaceDirectory(baseDirectory, testWorkspace.getWorkspaceID());
-        WorkspaceNode testNode = createTestResourceWorkspaceNode(testWorkspace.getWorkspaceID(), workspaceDirectory, nodeFilename);
-        
-        File originFile = new File(testNode.getWorkspaceURL().getPath());
-        File destinationFile = new File(workspaceDirectory, "someRandomLocation.txt");
-        
-        IOException expectedException = new IOException("some exception message");
-        
-        stub(method(Files.class, "move", Path.class, Path.class, CopyOption[].class)).toThrow(expectedException);
+        File originFile = doNotCreateFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
         
         try {
             workspaceFileHandler.moveFile(originFile, destinationFile);
             fail("An exception should have been thrown");
         } catch(IOException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+            //expected exception is thrown
+        }
+        
+        assertFalse("File shouldn't exist in the origin location", originFile.exists());
+        assertFalse("File shouldn't exist in the destination location", destinationFile.exists());
+    }
+    
+    @Test
+    public void moveFile_targetDirectoryDoesntExist() throws IOException {
+        
+        File originFile = createFileToCopy();
+        File destinationFile = doNotCreateTargetDirectory_retrieveTargetFileLocation();
+        
+        try {
+            workspaceFileHandler.moveFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            //expected exception is thrown
+        }
+        
+        assertFalse("File shouldn't exist in the destination location", destinationFile.exists());
+    }
+    
+    @Test
+    public void moveFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+        
+        File originFile = createFileToCopy();
+        File destinationFile = createTargetDirectory_retrieveTargetFileLocation();
+        anotherTempDirectory.setReadOnly();
+        
+        try {
+            workspaceFileHandler.moveFile(originFile, destinationFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            //expected exception is thrown
         }
         
         assertFalse("File shouldn't exist in its expected final location", destinationFile.exists());
@@ -601,5 +631,29 @@ public class LamusWorkspaceFileHandlerTest {
         assertFalse("Temp file should not have been created.", tempFile.exists());
         
         return tempFile;
+    }
+    
+    private File createTargetDirectory_retrieveTargetFileLocation() {
+        anotherTempDirectory = testFolder.newFolder("another_temp_directory");
+        
+        assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
+        
+        File targetLocation = new File(anotherTempDirectory, "target_temp_file.txt");
+        
+        return targetLocation;
+    }
+    
+    private File doNotCreateTargetDirectory_retrieveTargetFileLocation() {
+        anotherTempDirectory = testFolder.newFolder("another_temp_directory");
+        
+        assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
+        
+        File targetDirectory = new File(anotherTempDirectory, "nonexistingfolder");
+        
+        assertFalse("Target directory should not have been created.", targetDirectory.exists());
+        
+        File targetLocation = new File(targetDirectory, "target_temp_file.txt");
+        
+        return targetLocation;
     }
 }
