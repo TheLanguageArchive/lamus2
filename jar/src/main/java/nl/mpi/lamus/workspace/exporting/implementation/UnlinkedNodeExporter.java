@@ -75,6 +75,9 @@ public class UnlinkedNodeExporter implements NodeExporter{
         URI currentArchiveUri = currentNode.getArchiveURI();
         
         if(keepUnlinkedFiles) {
+            
+            versioningHandler.moveFileToOrphansFolder(workspace, currentNode);
+            
             if(currentArchiveUri != null) {
                 try {
                     archiveHandleHelper.deleteArchiveHandle(currentNode, Boolean.FALSE);
