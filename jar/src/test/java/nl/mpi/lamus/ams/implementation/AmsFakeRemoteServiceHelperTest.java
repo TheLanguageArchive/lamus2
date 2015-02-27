@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +37,7 @@ import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -55,6 +55,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class AmsFakeRemoteServiceHelperTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     

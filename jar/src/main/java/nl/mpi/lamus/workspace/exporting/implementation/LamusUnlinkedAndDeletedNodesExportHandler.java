@@ -23,7 +23,9 @@ import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,19 +52,30 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
     }
     
     /**
-     * @see UnlinkedAndDeletedNodesExportHandler#exploreUnlinkedAndDeletedNodes(nl.mpi.lamus.workspace.model.Workspace, boolean)
+     * @see UnlinkedAndDeletedNodesExportHandler#exploreUnlinkedAndDeletedNodes(
+     *          nl.mpi.lamus.workspace.model.Workspace, boolean,
+     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public void exploreUnlinkedAndDeletedNodes(Workspace workspace, boolean keepUnlinkedFiles)
+    public void exploreUnlinkedAndDeletedNodes(
+        Workspace workspace, boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
-        logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID());
+        if(WorkspaceExportPhase.TREE_EXPORT.equals(exportPhase)) {
+            String errorMessage = "This stage of the export (handling unlinked and deleted nodes) should not be called during the tree export (current 'exportPhase': " + exportPhase.toString();
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID() +
+                "; submission mode: " + submissionType.toString() + "; export phase: " + exportPhase.toString());
         
         Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = this.workspaceDao.getUnlinkedAndDeletedTopNodes(workspace.getWorkspaceID());
         
         for(WorkspaceNode unlinkedOrDeletedNode : unlinkedAndDeletedTopNodes) {
-            NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode);
-            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode, keepUnlinkedFiles);
+            NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode, exportPhase);
+            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
     }
 }

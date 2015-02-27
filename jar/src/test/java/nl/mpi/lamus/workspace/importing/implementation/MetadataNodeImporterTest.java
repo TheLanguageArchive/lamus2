@@ -51,6 +51,7 @@ import static org.jmock.Expectations.returnValue;
 import static org.jmock.Expectations.throwException;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -65,6 +66,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class MetadataNodeImporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private NodeImporter nodeImporter;

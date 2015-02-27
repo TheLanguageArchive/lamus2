@@ -37,6 +37,7 @@ import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeReplaceAct
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,6 +55,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class MetadataNodeReplaceCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     

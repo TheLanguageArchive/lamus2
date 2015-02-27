@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.management.SortableWorkspaceDataProvider;
@@ -37,7 +38,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColu
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
-import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -63,9 +63,9 @@ public class ManageWorkspacesPage extends LamusPage {
     
     private List<IColumn<Workspace, String>> createColumns() {
         
-        List<IColumn<Workspace, String>> columns = new ArrayList<IColumn<Workspace, String>>();
+        List<IColumn<Workspace, String>> columns = new ArrayList<>();
 
-        columns.add(new AbstractColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_actions", this))) {
+        columns.add(new AbstractColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_actions", this))) {
             
             @Override
             public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId, IModel<Workspace> model) {
@@ -77,37 +77,33 @@ public class ManageWorkspacesPage extends LamusPage {
                         try {
                             //TODO Add confirmation dialog
                             
-                            workspaceService.deleteWorkspace(LamusSession.get().getUserId(), getModelObject().getWorkspaceID());
+                            workspaceService.deleteWorkspace(LamusSession.get().getUserId(), getModelObject().getWorkspaceID(), false);
                             
                             refreshDataView();
                             
-                        } catch (WorkspaceNotFoundException ex) {
-                            Session.get().error(ex.getMessage());
-                        } catch (WorkspaceAccessException ex) {
-                            Session.get().error(ex.getMessage());
-                        } catch (IOException ex) {
+                        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException | IOException ex) {
                             Session.get().error(ex.getMessage());
                         }
                     }
                     
                 };
                 deleteLink.setBody(Model.of(getLocalizer().getString("management_table_delete_button", ManageWorkspacesPage.this)));
-                deleteLink.add(AttributeModifier.append("class", new Model<String>("tableActionLink")));
+                deleteLink.add(AttributeModifier.append("class", new Model<>("tableActionLink")));
                 cellItem.add(deleteLink);
             }
         });
 
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID"/*, "workspaceID"*/));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_user_id", this)), "userID"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_start_date", this)), "startDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_end_date", this)), "endDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_session_end_date", this)), "sessionEndDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_used_storage", this)), "usedStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_max_storage", this)), "maxStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_status", this)), "status"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<String>(getLocalizer().getString("management_table_column_message", this)), "message"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID"/*, "workspaceID"*/));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_user_id", this)), "userID"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_start_date", this)), "startDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_end_date", this)), "endDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_end_date", this)), "sessionEndDate"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_used_storage", this)), "usedStorageSpace"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_max_storage", this)), "maxStorageSpace"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_status", this)), "status"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_message", this)), "message"));
         
         return columns;
     }
@@ -119,7 +115,7 @@ public class ManageWorkspacesPage extends LamusPage {
 
             @Override
             protected Item<Workspace> newRowItem(String id, int index, IModel<Workspace> model) {
-                return new OddEvenItem<Workspace>(id, index, model);
+                return new OddEvenItem<>(id, index, model);
             }
         };
         dataTable.setOutputMarkupId(true);

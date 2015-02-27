@@ -32,8 +32,10 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.metadata.api.MetadataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,16 +73,51 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     * @see NodeExporter#exportNode(
+     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles) throws WorkspaceExportException {
+    public void exportNode(
+        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            throws WorkspaceExportException {
 
         if (workspace == null) {
 	    String errorMessage = "Workspace not set";
 	    logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
 	}
+        
+        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
+                WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
+                WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting the tree, not for unlinked nodes";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+                WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+                WorkspaceExportPhase.TREE_EXPORT.equals(exportPhase)) {
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
         
         int workspaceID = workspace.getWorkspaceID();
         
@@ -106,15 +143,10 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         }
         
         if(currentNode.isMetadata() && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);
-        
-        
-        //TODO TAKE CARE OF NEW NODES THAT WERE REPLACED
-        //TODO ALSO NODES REPLACING NODES WHICH HAD REPLACED OTHER NODES AND SO ON...
-        // THESE SHOULD BE EVENTUALLY REMOVED FROM THE REPLACEMENTS TABLE SO THAT THEY DON'T GET ADDED TO THE CS DB
         
         //TODO is this necessary?
 //        searchClientBridge.removeNode(currentNode.getArchiveURI());

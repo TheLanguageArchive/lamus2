@@ -56,6 +56,7 @@ import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -67,6 +68,7 @@ import org.junit.*;
 public class LamusWorkspaceServiceTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private WorkspaceService service;
@@ -242,25 +244,27 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void deleteExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void deleteExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID);
+            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID, keepUnlinkedFiles);
         }});
         
-        service.deleteWorkspace(userID, workspaceID);
+        service.deleteWorkspace(userID, workspaceID, keepUnlinkedFiles);
     }
     
     @Test
-    public void deleteNonExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void deleteNonExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -270,7 +274,7 @@ public class LamusWorkspaceServiceTest {
         }});
         
         try {
-            service.deleteWorkspace(userID, workspaceID);
+            service.deleteWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -278,10 +282,11 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void deleteInaccessibleWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void deleteInaccessibleWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -291,7 +296,7 @@ public class LamusWorkspaceServiceTest {
         }});
         
         try {
-            service.deleteWorkspace(userID, workspaceID);
+            service.deleteWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -299,21 +304,45 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void deleteWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void deleteWorkspaceExportException() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
         final int workspaceID = 1;
         final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID, keepUnlinkedFiles); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.deleteWorkspace(userID, workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
+        
+        final int workspaceID = 1;
+        final String userID = "testUser";
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final IOException expectedException = new IOException("some exception message");
         
         context.checking(new Expectations() {{
             
             oneOf(mockNodeAccessChecker).ensureUserCanDeleteWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceManager).deleteWorkspace(workspaceID, keepUnlinkedFiles); will(throwException(expectedException));
         }});
         
         try {
-            service.deleteWorkspace(userID, workspaceID);
+            service.deleteWorkspace(userID, workspaceID, keepUnlinkedFiles);
             fail("should have thrown exception");
         } catch(IOException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

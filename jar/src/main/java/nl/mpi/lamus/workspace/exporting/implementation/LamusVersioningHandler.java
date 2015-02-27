@@ -145,7 +145,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         CorpusNode archiveNode = corpusStructureProvider.getNode(nodeToMove.getArchiveURI());
         File currentFile = nodeResolver.getLocalFile(archiveNode);
         
-        File targetDirectory = null;
+        File targetDirectory;
         if(toDelete) {
             targetDirectory = archiveFileHelper.getDirectoryForDeletedNode(nodeToMove.getWorkspaceID());
         } else { // node is replaced

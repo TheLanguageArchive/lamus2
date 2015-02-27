@@ -25,11 +25,11 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
@@ -50,13 +50,9 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
     
-    private ModalWindow modalConfirmSubmit;
-    private SubmitConfirmationOptions submitConfirmationOptions;
-    
     
     public ButtonPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
-        submitConfirmationOptions = new SubmitConfirmationOptions(false, false);
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
     
@@ -73,10 +69,12 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
             super(id, model);
             
-            modalConfirmSubmit = createConfirmationModalWindow();
+            final ModalWindow modalConfirmSubmit = createConfirmationModalWindow(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             add(modalConfirmSubmit);
+            final ModalWindow modalConfirmDelete = createConfirmationModalWindow(WorkspaceSubmissionType.DELETE_WORKSPACE);
+            add(modalConfirmDelete);
             
-            final Button submitWorkspaceButton = new AutoDisablingAjaxButton("submitWorkspaceButton") {
+            final IndicatingAjaxButton submitWorkspaceButton = new AutoDisablingAjaxButton("submitWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -88,17 +86,12 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             
             add(submitWorkspaceButton);
             
-            final String deleteConfirmationMessage = "Are you sure you want to proceed with the deletion of the workspace?";
-            final IndicatingAjaxButton deleteWorkspaceButton = new ConfirmationAjaxButton("deleteWorkspaceButton", deleteConfirmationMessage) {
+            final IndicatingAjaxButton deleteWorkspaceButton = new AutoDisablingAjaxButton("deleteWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                    try {
-                        workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID());
-                    } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
-                        Session.get().error(ex.getMessage());
-                    }
-                    setResponsePage(pagesProvider.getIndexPage());
+                    target.add(getFeedbackPanel());
+                    modalConfirmDelete.show(target);
                 }
             };
             
@@ -119,47 +112,91 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         setResponsePage(pagesProvider.getIndexPage());
     }
     
-    private void onSubmitCancel(AjaxRequestTarget target) {
+    private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
+        try {
+            workspaceService.deleteWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException | IOException ex) {
+            Session.get().error(ex.getMessage());
+        }
+        
+        Session.get().info("Workspace successfully deleted");
+        
+        setResponsePage(pagesProvider.getIndexPage());
+    }
+    
+    private void onCancel(AjaxRequestTarget target) {
         // do nothing
     }
     
-    private ModalWindow createConfirmationModalWindow() {
+    private ModalWindow createConfirmationModalWindow(WorkspaceSubmissionType submissionType) {
         
-        modalConfirmSubmit = new ModalWindow("modalConfirmSubmit");
-        modalConfirmSubmit.setContent(new ConfirmSubmitPanel(modalConfirmSubmit.getContentId(), modalConfirmSubmit, submitConfirmationOptions));
-        modalConfirmSubmit.setTitle("Submit Workspace");
-        modalConfirmSubmit.setCookieName("modal-confirm-submit");
-        modalConfirmSubmit.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
+        String id;
+        String title;
+        String cookieName;
+        String confirmationText;
+        if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
+            id = "modalConfirmSubmit";
+            title = "Submit Workspace";
+            cookieName = "modal-confirm-submit";
+            confirmationText = getLocalizer().getString("submit_workspace_confirm", this);
+        } else if (WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            id = "modalConfirmDelete";
+            title = "Delete Workspace";
+            cookieName = "modal-confirm-delete";
+            confirmationText = getLocalizer().getString("delete_workspace_confirm", this);
+        } else {
+            throw new UnsupportedOperationException("Submission type not supported");
+        }
+        
+        final ConfirmationOptions options = new ConfirmationOptions(false, true, submissionType, confirmationText);
+        
+        ModalWindow modalConfirm = new ModalWindow(id);
+        modalConfirm.setContent(new ConfirmPanel(modalConfirm.getContentId(), modalConfirm, options));
+        modalConfirm.setTitle(title);
+        modalConfirm.setCookieName(cookieName);
+        modalConfirm.setWindowClosedCallback((new ModalWindow.WindowClosedCallback() {
             @Override
             public void onClose(AjaxRequestTarget art) {
-                if (submitConfirmationOptions.isSubmitConfirmed()) {
-                    onSubmitConfirm(art, submitConfirmationOptions.isKeepUnlinkedFiles());
+                if (options.isConfirmed()) {
+                    if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(options.getWorkspaceSubmissionType())) {
+                        onSubmitConfirm(art, options.isKeepUnlinkedFiles());
+                    } else if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(options.getWorkspaceSubmissionType())) {
+                        onDeleteConfirm(art, options.isKeepUnlinkedFiles());
+                    } else {
+                        throw new UnsupportedOperationException("Confirmation type not supported");
+                    }
                 } else {
-                    onSubmitCancel(art);
+                    onCancel(art);
                 }
             }
         }));
         
-        return modalConfirmSubmit;
+        return modalConfirm;
     }
     
     
-    public class SubmitConfirmationOptions implements Serializable {
+    public class ConfirmationOptions implements Serializable {
         
-        private boolean submitConfirmed;
+        
+        private boolean confirmed;
         private boolean keepUnlinkedFiles;
+        private WorkspaceSubmissionType submissionType;
+        private String confirmationText;
         
-        public SubmitConfirmationOptions(boolean submitConfirmed, boolean keepUnlinkedFiles) {
-            this.submitConfirmed = submitConfirmed;
+        public ConfirmationOptions(boolean confirmed, boolean keepUnlinkedFiles,
+                WorkspaceSubmissionType type, String confirmationText) {
+            this.confirmed = confirmed;
             this.keepUnlinkedFiles = keepUnlinkedFiles;
+            this.submissionType = type;
+            this.confirmationText = confirmationText;
         }
         
         
-        public boolean isSubmitConfirmed() {
-            return submitConfirmed;
+        public boolean isConfirmed() {
+            return confirmed;
         }
-        public void setSubmitConfirmed(boolean submitConfirmed) {
-            this.submitConfirmed = submitConfirmed;
+        public void setConfirmed(boolean confirmed) {
+            this.confirmed = confirmed;
         }
         
         public boolean isKeepUnlinkedFiles() {
@@ -167,6 +204,14 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         }
         public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
             this.keepUnlinkedFiles = keepUnlinkedFiles;
+        }
+        
+        public WorkspaceSubmissionType getWorkspaceSubmissionType() {
+            return submissionType;
+        }
+        
+        public String getConfirmationText() {
+            return confirmationText;
         }
     }
 }

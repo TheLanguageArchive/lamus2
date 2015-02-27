@@ -34,6 +34,7 @@ import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,10 +149,39 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     }
     
     /**
-     * @see WorkspaceManager#deleteWorkspace(java.lang.String, int)
+     * @see WorkspaceManager#deleteWorkspace(int, boolean)
      */
     @Override
-    public void deleteWorkspace(int workspaceID) throws IOException {
+    public void deleteWorkspace(int workspaceID, boolean keepUnlinkedFiles)
+            throws WorkspaceNotFoundException, WorkspaceExportException, IOException {
+        
+        Workspace workspace = workspaceDao.getWorkspace(workspaceID);
+        
+        workspaceExportRunner.setWorkspace(workspace);
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        workspaceExportRunner.setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+        
+        Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
+        
+        Boolean isSuccessful;
+        
+        try {
+            isSuccessful = exportResult.get();
+        } catch(InterruptedException iex) {
+            String errorMessage = "Interruption in thread while deleting workspace " + workspaceID;
+            logger.error(errorMessage, iex);
+            throw new WorkspaceExportException(errorMessage, workspaceID, iex);
+        } catch(ExecutionException eex) {
+            String errorMessage = "Problem with thread execution while deleting workspace " + workspaceID;
+            logger.error(errorMessage, eex);
+            throw new WorkspaceExportException(errorMessage, workspaceID, eex);
+        }
+        
+        if(!isSuccessful) {
+            String errorMessage = "Workspace deletion failed for workspace " + workspaceID;
+            logger.error(errorMessage);
+            throw new WorkspaceExportException(errorMessage, workspaceID, null);
+        }
         
         workspaceDao.deleteWorkspace(workspaceID);
         
@@ -164,9 +194,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     @Override
     public void submitWorkspace(int workspaceID, boolean keepUnlinkedFiles)
             throws WorkspaceNotFoundException, WorkspaceExportException {
-                
-        //TODO workspaceDao - get workspace from DB
-        //TODO workspaceFactory (or something else) - set workspace as submitted
+        
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
         workspace.setStatus(WorkspaceStatus.SUBMITTED);
@@ -175,6 +203,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        workspaceExportRunner.setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
         
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?

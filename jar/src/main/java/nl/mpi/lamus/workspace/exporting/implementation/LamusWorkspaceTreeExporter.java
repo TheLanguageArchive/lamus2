@@ -23,7 +23,9 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +47,16 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
     
     
     /**
-     * @see WorkspaceTreeExporter#explore(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     * @see WorkspaceTreeExporter#explore(
+     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *          boolean, nl.mpi.lamus.workspace.model.WorkspaceSubmissionType,
+     *          nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public void explore(Workspace workspace, WorkspaceNode node, boolean keepUnlinkedFiles)
+    public void explore(
+        Workspace workspace, WorkspaceNode node,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         logger.debug("Exploring references in metadata node to export; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + node.getWorkspaceNodeID());
@@ -58,8 +66,8 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
         for(WorkspaceNode child : children) {
             
             if(!child.isExternal()) {
-                NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child);
-                childNodeExporter.exportNode(workspace, node, child, keepUnlinkedFiles);
+                NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child, exportPhase);
+                childNodeExporter.exportNode(workspace, node, child, keepUnlinkedFiles, submissionType, exportPhase);
             }
         }
     }

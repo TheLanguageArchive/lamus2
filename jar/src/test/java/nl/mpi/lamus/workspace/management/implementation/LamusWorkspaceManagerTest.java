@@ -38,10 +38,12 @@ import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -54,6 +56,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class LamusWorkspaceManagerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private WorkspaceManager manager;
@@ -350,37 +353,140 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void deleteWorkspaceSuccessfully() throws IOException {
+    public void deleteWorkspaceSuccessfully() throws WorkspaceNotFoundException, WorkspaceExportException, InterruptedException, ExecutionException, IOException {
         
         final int workspaceID = 1;
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
         }});
         
-        manager.deleteWorkspace(workspaceID);
+        
+        manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
     }
     
     @Test
-    public void deleteWorkspaceThrowsException() throws IOException {
+    public void deleteWorkspaceThrowsWorkspaceNotFoundException() throws WorkspaceNotFoundException, WorkspaceExportException, IOException {
         
         final int workspaceID = 1;
-        final String exceptionMessage = "some message";
-        final Exception expectedException = new IOException(exceptionMessage);
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
+        }});
+        
+        
+        try {
+            manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch (WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteWorkspaceThreadInterrupted() throws WorkspaceNotFoundException, InterruptedException, ExecutionException, IOException {
+        
+        final int workspaceID = 1;
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
+        final String expectedErrorMessage = "Interruption in thread while deleting workspace " + workspaceID;
+        final InterruptedException expectedException = new InterruptedException("some exception message");
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
-            oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
         }});
         
         try {
-            manager.deleteWorkspace(workspaceID);
+            manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void deleteWorkspaceExecutionException() throws WorkspaceNotFoundException, InterruptedException, ExecutionException, IOException {
+        
+        final int workspaceID = 1;
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
+        final String expectedErrorMessage = "Problem with thread execution while deleting workspace " + workspaceID;
+        final ExecutionException expectedException = new ExecutionException("some exception message", null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(throwException(expectedException));
+        }});
+        
+        try {
+            manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
             fail("should have thrown an exception");
-        } catch(IOException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void deleteWorkspaceFails() throws WorkspaceNotFoundException, InterruptedException, ExecutionException, IOException {
+        
+        final int workspaceID = 1;
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        
+        final String expectedErrorMessage = "Workspace deletion failed for workspace " + workspaceID;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
+        }});
+        
+        try {
+            manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertNull("Cause should be null", ex.getCause());
         }
     }
     
@@ -506,6 +612,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -580,6 +687,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -636,6 +744,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
@@ -691,6 +800,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));

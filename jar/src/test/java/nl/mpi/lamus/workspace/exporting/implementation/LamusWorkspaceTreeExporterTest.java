@@ -29,9 +29,11 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -84,7 +86,6 @@ public class LamusWorkspaceTreeExporterTest {
     public void tearDown() {
     }
 
-
     
     @Test
     public void explore() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
@@ -92,6 +93,8 @@ public class LamusWorkspaceTreeExporterTest {
         final int workspaceID = 1;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -124,12 +127,12 @@ public class LamusWorkspaceTreeExporterTest {
             
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles);
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles);
+        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -138,6 +141,8 @@ public class LamusWorkspaceTreeExporterTest {
         final int workspaceID = 1;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -172,14 +177,14 @@ public class LamusWorkspaceTreeExporterTest {
             
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles);
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
                 will(throwException(expectedException));
             
         }});
         
         try {
-            workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles);
+            workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -191,6 +196,8 @@ public class LamusWorkspaceTreeExporterTest {
         final int workspaceID = 1;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         final int workspaceNodeID = 10;
         final URL nodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
@@ -228,14 +235,14 @@ public class LamusWorkspaceTreeExporterTest {
             
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles);
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             // should leave the loop for the second node because it's external and therefore doesn't require exporting
-            never(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode); will(returnValue(mockNodeExporter));
-            never(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles);
+            never(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
+            never(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles);
+        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
     }
 }

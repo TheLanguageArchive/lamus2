@@ -16,10 +16,11 @@
  */
 package nl.mpi.lamus.web.components;
 
-import nl.mpi.lamus.web.components.ButtonPanel.SubmitConfirmationOptions;
+import nl.mpi.lamus.web.components.ButtonPanel.ConfirmationOptions;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -32,12 +33,14 @@ import org.apache.wicket.model.Model;
  * 
  * @author guisil
  */
-public class ConfirmSubmitPanel extends Panel {
+public class ConfirmPanel extends Panel {
     
-    public ConfirmSubmitPanel(String id, final ModalWindow modalWindow, final SubmitConfirmationOptions options) {
+    public ConfirmPanel(String id, final ModalWindow modalWindow, final ConfirmationOptions options) {
         super(id);
         
         Form confirmSubmitForm = new Form("confirmSubmitForm");
+        
+        confirmSubmitForm.add(new Label("confirmation_text", options.getConfirmationText()));
         
         CheckBox keepUnlinkedFilesCheckbox = new CheckBox("checkbox", Model.of(options.isKeepUnlinkedFiles())) {
 
@@ -64,7 +67,7 @@ public class ConfirmSubmitPanel extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form form) {
                 if (target != null) {
-                    options.setSubmitConfirmed(true);
+                    options.setConfirmed(true);
                     modalWindow.close(target);
                 }
             }
@@ -75,7 +78,7 @@ public class ConfirmSubmitPanel extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form form) {
                 if (target != null) {
-                    options.setSubmitConfirmed(false);
+                    options.setConfirmed(false);
                     modalWindow.close(target);
                 }
             }

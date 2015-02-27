@@ -16,6 +16,7 @@
 package nl.mpi.lamus.workspace.exporting;
 
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -28,9 +29,14 @@ public interface NodeExporterFactory {
     /**
      * Returns the NodeExporter of the appropriate type for the given node.
      * 
-     * @param node
-     * @return 
+     * @param workspace current workspace
+     * @param node node to be exporter
+     * @param exportPhase indicates whether the workspace export is currently in
+     * the first stage, in which the tree is exported, or in the second stage,
+     * in which the unlinked nodes are exported
+     * @return NodeExporter object of the appropriate subtype
      */
-    public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node);
+    public NodeExporter getNodeExporterForNode(Workspace workspace,
+            WorkspaceNode node, WorkspaceExportPhase exportPhase);
     
 }

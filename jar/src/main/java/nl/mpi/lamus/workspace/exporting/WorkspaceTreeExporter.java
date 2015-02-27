@@ -18,7 +18,9 @@ package nl.mpi.lamus.workspace.exporting;
 
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 
 /**
  * Class used to explore the workspace tree during the export process.
@@ -34,8 +36,16 @@ public interface WorkspaceTreeExporter {
      * @param workspace Workspace being exported
      * @param node Node to be explored
      * @param true if unlinked files are to be kept for future use
+     * @param submissionType indicates whether the method is being executed
+     * during a workspace submission or deletion
+     * @param exportPhase indicates whether the workspace export is currently in
+     * the first stage, in which the tree is exported, or in the second stage,
+     * in which the unlinked nodes are exported
      */
-    public void explore(Workspace workspace, WorkspaceNode node, boolean keepUnlinkedFiles)
+    public void explore(
+        Workspace workspace, WorkspaceNode node,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException;
     
 }

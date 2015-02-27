@@ -27,17 +27,20 @@ import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataDocumentException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -62,6 +65,7 @@ import org.xml.sax.SAXException;
 public class LamusMetadataApiBridgeTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
@@ -452,5 +456,17 @@ public class LamusMetadataApiBridgeTest {
         boolean result = lamusMetadataApiBridge.isMetadataFileValid(fileURL);
         
         assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void metadataValid_ActuallyReadFile() throws MalformedURLException {
+        
+        final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/orphanCollection.cmdi");
+        
+        MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null);
+        
+        boolean result = testMdApiBridge.isMetadataFileValid(metadataFileToCheck);
+        
+        assertTrue("Metadata file should be valid", result);
     }
 }

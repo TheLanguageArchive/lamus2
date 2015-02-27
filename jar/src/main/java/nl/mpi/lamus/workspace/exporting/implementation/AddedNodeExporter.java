@@ -36,7 +36,9 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -82,10 +84,16 @@ public class AddedNodeExporter implements NodeExporter {
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     * @see NodeExporter#exportNode(
+     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
+    public void exportNode(
+        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -93,6 +101,19 @@ public class AddedNodeExporter implements NodeExporter {
 	    logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
 	}
+        
+        if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            String errorMessage = "This exporter should only be used when submitting the workspace, not when deleting";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if(WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
+            String errorMessage = "This exporter should only be used when exporting the tree, not for unlinked nodes";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
         
         int workspaceID = workspace.getWorkspaceID();
         
@@ -105,7 +126,7 @@ public class AddedNodeExporter implements NodeExporter {
         File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
         
         if(currentNode.isMetadata()) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
         
         MetadataDocument currentDocument = retrieveMetadataDocument(workspaceID, currentNode);
@@ -242,7 +263,7 @@ public class AddedNodeExporter implements NodeExporter {
     private void updateReferenceInParent(int workspaceID, WorkspaceNode currentNode, WorkspaceNode parentNode,
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
-        try {    
+        try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL().toURI());
             currentReference.setURI(handleManager.prepareHandleWithHdlPrefix(currentNode.getArchiveURI()));
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);

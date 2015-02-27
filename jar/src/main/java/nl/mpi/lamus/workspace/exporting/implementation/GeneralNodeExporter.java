@@ -30,7 +30,9 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -68,10 +70,16 @@ public class GeneralNodeExporter implements NodeExporter {
     
 
     /**
-     * @see NodeExporter#exportNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     * @see NodeExporter#exportNode(
+     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
+    public void exportNode(
+        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -79,6 +87,19 @@ public class GeneralNodeExporter implements NodeExporter {
 	    logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
 	}
+        
+        if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            String errorMessage = "This exporter should only be used when submitting the workspace, not when deleting";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if(WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
+            String errorMessage = "This exporter should only be used when exporting the tree, not for unlinked nodes";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        
         
         int workspaceID = workspace.getWorkspaceID();
         
@@ -100,7 +121,7 @@ public class GeneralNodeExporter implements NodeExporter {
         
         if(currentNode.isMetadata()) {
             
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles);
+            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             //TODO ensureChecksum - will this be done by the crawler??
             

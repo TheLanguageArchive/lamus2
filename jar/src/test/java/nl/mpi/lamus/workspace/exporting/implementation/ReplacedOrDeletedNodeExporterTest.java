@@ -37,12 +37,15 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.metadata.api.MetadataException;
 import org.jmock.Expectations;
+import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -73,7 +76,8 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock ArchiveHandleHelper mockArchiveHandleHelper;
     
-    @Mock WorkspaceNode mockWorkspaceNode;
+    @Mock WorkspaceNode mockParentWsNode;
+    @Mock WorkspaceNode mockChildWsNode;
     @Mock CorpusNode mockCorpusNode;
     
     public ReplacedOrDeletedNodeExporterTest() {
@@ -108,7 +112,99 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void tearDown() {
     }
 
+    
+    @Test
+    public void exportReplacedNode_SubmissionTypeDelete() throws WorkspaceExportException {
+        
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
+        }});
+        
+        try {
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportReplacedNode_ExportPhaseUnlinkedNodes() throws WorkspaceExportException {
+        
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
+        }});
+        
+        try {
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting the tree, not for unlinked nodes";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
 
+    @Test
+    public void exportDeletedNode_SubmissionTypeDelete() throws WorkspaceExportException {
+        
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
+        }});
+        
+        try {
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportDeletedNode_ExportPhaseTree() throws WorkspaceExportException {
+        
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
+        }});
+        
+        try {
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
     @Test
     public void exportDeletedResourceNodeWithArchiveURI()
             throws MalformedURLException, URISyntaxException, WorkspaceExportException,
@@ -120,29 +216,31 @@ public class ReplacedOrDeletedNodeExporterTest {
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         
-        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE);
             
         }});
         
@@ -155,9 +253,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //remove node from searchDB????
         
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
         
     }
     
@@ -171,28 +267,29 @@ public class ReplacedOrDeletedNodeExporterTest {
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
         
-        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE);
             
         }});
         
@@ -205,9 +302,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //remove node from searchDB????
         
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
         
     }
     
@@ -215,41 +310,49 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void exportDeletedExternalNode() throws WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         
-        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         context.checking(new Expectations() {{
             
-            //logger
-            exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.TRUE));
+            //logger
+            exactly(2).of(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.TRUE));
         }});
         
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
     public void exportDeletedNodeWithoutArchiveURI() throws WorkspaceExportException {
      
         final int testWorkspaceNodeID = 10;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         
-        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            exactly(2).of(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            exactly(2).of(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(null));
         }});
         
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
         
     }
     
@@ -260,24 +363,31 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final boolean isNodeProtected = Boolean.TRUE;
         
+        //TODO does it make sense a protected node which was deleted?
+        
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
 
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
         }});
         
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
         
     }
     
@@ -295,30 +405,32 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.txt");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
             
         }});
@@ -332,9 +444,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //remove node from searchDB????
         
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
         
     }
     
@@ -352,32 +462,33 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.cmdi");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockWorkspaceNode, keepUnlinkedFiles);
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
             
         }});
@@ -391,9 +502,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //remove node from searchDB????
         
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     //TODO EXCEPTIONS...
@@ -413,27 +522,29 @@ public class ReplacedOrDeletedNodeExporterTest {
         final String expectedExceptionMessage = "This exporter only supports deleted or replaced nodes. Current node status: " + testNodeStatus.toString();
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            
-            oneOf(mockWorkspaceNode).getStatusAsString(); will(returnValue(testNodeStatus.toString()));
+            oneOf(mockChildWsNode).getStatusAsString(); will(returnValue(testNodeStatus.toString()));
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(IllegalStateException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -454,35 +565,37 @@ public class ReplacedOrDeletedNodeExporterTest {
         final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
         final String expectedExceptionMessage = "Error deleting handle for node " + testNodeVersionArchiveURL;
         
-        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE); will(throwException(expectedException));
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE); will(throwException(expectedException));
             //logger
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
 
         }});
         
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
+        
 //        try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
 //            fail("should have thrown an exception");
 //        } catch(WorkspaceExportException ex) {
 //            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -512,39 +625,40 @@ public class ReplacedOrDeletedNodeExporterTest {
         final String expectedExceptionMessage = "Error updating handle for node " + testNewNodeArchiveURL;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         context.checking(new Expectations() {{
             
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            
             //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
             
-            oneOf(mockWorkspaceNode).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
 
-            exactly(2).of(mockWorkspaceNode).getStatus(); will(returnValue(testNodeStatus));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
                 will(throwException(expectedExceptionCause));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNewNodeArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNewNodeArchiveURL));
             
         }});
         
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -579,20 +693,20 @@ public class ReplacedOrDeletedNodeExporterTest {
 //        
 //        context.checking(new Expectations() {{
 //            
-//            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
+//            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
 //            
-//            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-//            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
+//            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
+//            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
 //            
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
 //            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
 //
 //            //exception caught
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
 //        }});
 //        
 //        try {
-//            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
+//            deletedNodeExporter.exportNode(null, mockChildWsNode);
 //            fail("should have thrown exception");
 //        } catch(WorkspaceExportException ex) {
 //            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -605,9 +719,11 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, null, mockWorkspaceNode, keepUnlinkedFiles);
+            replacedOrDeletedNodeExporter.exportNode(null, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";

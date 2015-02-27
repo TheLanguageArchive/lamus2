@@ -26,7 +26,9 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +49,8 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     
     private Workspace workspace;
     private boolean keepUnlinkedFiles;
-
+    private WorkspaceSubmissionType submissionType;
+    
     @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
             UnlinkedAndDeletedNodesExportHandler dnExportHandler,
@@ -74,6 +77,16 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     public void setKeepUnlinkedFiles(boolean keepUnlinkedFiles) {
         this.keepUnlinkedFiles = keepUnlinkedFiles;
     }
+    
+    /**
+     * Setter for the enumeration that indicates if the intention is to
+     * submit or delete the workspace
+     * @param submissionType indicates if the workspace should be submitted or deleted
+     */
+    public void setSubmissionType(WorkspaceSubmissionType submissionType) {
+        this.submissionType = submissionType;
+    }
+    
 
     /**
      * The export process is started in a separate thread.
@@ -85,6 +98,9 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         
         if(workspace == null) {
             throw new IllegalStateException("Workspace not set");
+        }
+        if(submissionType == null) {
+            throw new IllegalStateException("It should be specified what type of submission (submit or delete) to perform");
         }
         
         //1. save imdi files - NOT NEEDED (?)
@@ -124,27 +140,36 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 //            currentNodeExporter.exportNode(currentNode);
 //        }
         
-        WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
-//        workspaceTreeExporter.explore(topNode);
+        if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            
+            this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            
+        } else if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
         
-        NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode);
-        topNodeExporter.exportNode(workspace, null, topNode, keepUnlinkedFiles);
-        
-        //TODO Export unlinked and deleted nodes...
-        this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles);
-        
-        //TODO take care of unlinked nodes in the workspace...
-        //TODO cleanup WS DB / filesystem
-        
-        // crawler service
-        String crawlerID = corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
-        workspace.setCrawlerID(crawlerID);
-        workspaceDao.updateWorkspaceCrawlerID(workspace);
-        
+            WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
+    //        workspaceTreeExporter.explore(topNode);
 
-        //TODO fix permissions
-        permissionAdjuster.adjustPermissions(workspace.getWorkspaceID());
+            NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode, WorkspaceExportPhase.TREE_EXPORT);
+            topNodeExporter.exportNode(workspace, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+
+            //TODO Export unlinked and deleted nodes...
+            this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+
+            //TODO take care of unlinked nodes in the workspace...
+            //TODO cleanup WS DB / filesystem
+
+            // crawler service
+            String crawlerID = corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
+            workspace.setCrawlerID(crawlerID);
+            workspaceDao.updateWorkspaceCrawlerID(workspace);
+
+
+            //TODO fix permissions
+            permissionAdjuster.adjustPermissions(workspace.getWorkspaceID());
         
+        } else {
+            throw new UnsupportedOperationException("Type of submission not supported");
+        }
         
         return Boolean.TRUE;
     }

@@ -151,9 +151,10 @@ public class MockWorkspaceService implements WorkspaceTreeService {
      *
      * @param userID ID of the user who is trying to delete the workspace
      * @param workspaceID ID of the workspace to be deleted
+     * @param keepUnlinkedFiles true if user chooses to keep unlinked files for future use
      */
     @Override
-    public void deleteWorkspace(String userID, int workspaceID) {
+    public void deleteWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles) {
 	//DO something;
     }
 

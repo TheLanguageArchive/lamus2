@@ -19,6 +19,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,16 +45,20 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
     private UnlinkedNodeExporter unlinkedNodeExporter;
     
     /**
-     * @see NodeExporterFactory#getNodeExporterForNode(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeExporterFactory#getNodeExporterForNode(nl.mpi.lamus.workspace.model.Workspace,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
-    public NodeExporter getNodeExporterForNode(Workspace workspace, WorkspaceNode node) {
+    public NodeExporter getNodeExporterForNode(Workspace workspace,
+        WorkspaceNode node, WorkspaceExportPhase exportPhase) {
 
         if(workspace.getTopNodeID() != node.getWorkspaceNodeID()) {
-            if(workspaceDao.getParentWorkspaceNodes(node.getWorkspaceNodeID()).isEmpty() &&
+            
+            boolean hasParents = !workspaceDao.getParentWorkspaceNodes(node.getWorkspaceNodeID()).isEmpty();
+            
+            if(WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase) &&
                     !WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus()) &&
-                    !WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus()) &&
-                    !WorkspaceNodeStatus.NODE_REPLACED.equals(node.getStatus())) { // unlinked node, but not deleted or replaced
+                    !WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus())) {
                 return unlinkedNodeExporter;
             }
 

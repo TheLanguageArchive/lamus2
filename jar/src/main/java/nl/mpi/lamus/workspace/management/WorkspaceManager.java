@@ -46,9 +46,10 @@ public interface WorkspaceManager {
      * 
      * @param userID ID of the user who is deleting the workspace
      * @param workspaceID  ID of the workspace to be deleted
+     * @param keepUnlinkedFiles true if the unlinked files are to be kept for future use
      */
-    public void deleteWorkspace(int workspaceID)
-            throws IOException;
+    public void deleteWorkspace(int workspaceID, boolean keepUnlinkedFiles)
+            throws WorkspaceNotFoundException, WorkspaceExportException, IOException;
     
     /**
      * Triggers the submission of a workspace 

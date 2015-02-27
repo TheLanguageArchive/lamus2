@@ -18,6 +18,8 @@ package nl.mpi.lamus.workspace.exporting;
 
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 
 /**
  * Interface for the handler of unlinked and deleted nodes export.
@@ -29,7 +31,14 @@ public interface UnlinkedAndDeletedNodesExportHandler {
      * Triggers the export of all the unlinked and deleted nodes in the workspace
      * @param workspace Workspace to explore
      * @param keepUnlinkedFiles true if unlinked files (orphans) are to be kept for future use
+     * @param submissionType indicates whether the method is being executed
+     * during a workspace submission or deletion
+     * @param exportPhase indicates whether the workspace export is currently in
+     * the first stage, in which the tree is exported, or in the second stage,
+     * in which the unlinked nodes are exported
      */
-    public void exploreUnlinkedAndDeletedNodes(Workspace workspace, boolean keepUnlinkedFiles)
+    public void exploreUnlinkedAndDeletedNodes(
+        Workspace workspace, boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException;
 }

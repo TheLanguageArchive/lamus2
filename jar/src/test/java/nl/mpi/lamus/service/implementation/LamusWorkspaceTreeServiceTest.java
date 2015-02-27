@@ -36,6 +36,7 @@ import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
 public class LamusWorkspaceTreeServiceTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     

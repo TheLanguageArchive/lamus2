@@ -5,6 +5,9 @@ lamus2-1.3.0
           can be copied to in order to have them automatically upload to a
           new workspace under the corresponding top node.
 
+    Fixes:
+        - EXTERNAL HANDLES: Fixed issue with documents without self-handle.
+
 lamus2-1.2.0 (2015-01-29)
 
     Additions:

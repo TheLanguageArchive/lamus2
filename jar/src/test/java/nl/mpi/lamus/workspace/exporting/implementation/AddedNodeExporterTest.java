@@ -38,10 +38,12 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -62,6 +64,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
 import static org.jmock.Expectations.returnValue;
+import org.jmock.lib.concurrent.Synchroniser;
 import static org.junit.Assert.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -72,6 +75,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class AddedNodeExporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     
@@ -143,6 +147,40 @@ public class AddedNodeExporterTest {
 
     
     @Test
+    public void export_SubmissionTypeDelete() throws WorkspaceExportException {
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        try {
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter should only be used when submitting the workspace, not when deleting";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void export_ExportPhaseUnlinkedNodes() throws WorkspaceExportException {
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        try {
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter should only be used when exporting the tree, not for unlinked nodes";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
     public void exportUploadedResourceNodeWithParentInArchive()
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException {
         
@@ -174,7 +212,8 @@ public class AddedNodeExporterTest {
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -183,7 +222,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -205,7 +244,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
-        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -240,7 +279,8 @@ public class AddedNodeExporterTest {
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -249,7 +289,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -271,7 +311,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
-        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -306,7 +346,8 @@ public class AddedNodeExporterTest {
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -315,7 +356,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -337,7 +378,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
                 
         
-        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -372,6 +413,8 @@ public class AddedNodeExporterTest {
         final String childPathRelativeToParent = "child/" + nodeWsFilename;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
         
@@ -383,7 +426,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -405,7 +448,7 @@ public class AddedNodeExporterTest {
 //        checkSearchClientInvocations(nodeFormat, nodeNewArchiveHandle);
         
         
-        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -413,9 +456,11 @@ public class AddedNodeExporterTest {
             throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException {
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         try {
-            addedNodeExporter.exportNode(null, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(null, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -446,7 +491,8 @@ public class AddedNodeExporterTest {
         final IOException expectedException = new IOException("some exception message");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -456,7 +502,7 @@ public class AddedNodeExporterTest {
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
-            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -488,7 +534,8 @@ public class AddedNodeExporterTest {
         final MetadataException expectedException = new MetadataException("some exception message");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -497,7 +544,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -506,7 +553,7 @@ public class AddedNodeExporterTest {
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, expectedException);
         
         try {
-            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -538,6 +585,8 @@ public class AddedNodeExporterTest {
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -546,10 +595,10 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, expectedException, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, expectedException, keepUnlinkedFiles, submissionType, exportPhase);
 
         try {
-            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -585,7 +634,8 @@ public class AddedNodeExporterTest {
         final HandleException expectedException = new HandleException(HandleException.INVALID_VALUE, "some exception message");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -594,7 +644,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -606,7 +656,7 @@ public class AddedNodeExporterTest {
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, expectedException);
         
         try {
-            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -652,7 +702,8 @@ public class AddedNodeExporterTest {
         final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
-        
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -661,7 +712,7 @@ public class AddedNodeExporterTest {
         
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
-        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles);
+        checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
         context.checking(new Expectations() {{
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -681,7 +732,7 @@ public class AddedNodeExporterTest {
                 nextAvailableFile, childPathRelativeToParent, expectedException);
         
         try {
-            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles);
+            addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -751,19 +802,23 @@ public class AddedNodeExporterTest {
     }
     
     
-    private void checkExploreInvocations(final boolean isMetadata, final Exception expectedException, final boolean keepUnlinkedFiles) throws WorkspaceExportException {
+    private void checkExploreInvocations(
+        final boolean isMetadata, final Exception expectedException,
+        final boolean keepUnlinkedFiles,
+        final WorkspaceSubmissionType submissionType, final WorkspaceExportPhase exportPhase)
+            throws WorkspaceExportException {
         
         if(isMetadata) {
             if(expectedException != null) {
                 context.checking(new Expectations() {{
                     oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles);
+                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
                         will(throwException(expectedException));
                 }});
             } else {
                 context.checking(new Expectations() {{
                     oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles);
+                    oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
                     oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
 
                 }});

@@ -17,7 +17,9 @@ package nl.mpi.lamus.workspace.exporting;
 
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 
 /**
  * Generic interface for a node exporter.
@@ -33,8 +35,16 @@ public interface NodeExporter {
      * @param currentNode Node to export
      * @param keepUnlinkedFiles true if unlinked files are to be kept for future use
      *  (only used in the unlinked files exporter)
+     * @param submissionType indicates whether the method is being executed
+     * during a workspace submission or deletion
+     * @param exportPhase indicates whether the workspace export is currently in
+     * the first stage, in which the tree is exported, or in the second stage,
+     * in which the unlinked nodes are exported
      */
-    public void exportNode(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode, boolean keepUnlinkedFiles)
+    public void exportNode(
+        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
+        boolean keepUnlinkedFiles,
+        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException;
     
 }

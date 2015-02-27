@@ -65,6 +65,7 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.*;
+import org.jmock.lib.concurrent.Synchroniser;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
@@ -80,6 +81,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class LamusWorkspaceUploaderTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     

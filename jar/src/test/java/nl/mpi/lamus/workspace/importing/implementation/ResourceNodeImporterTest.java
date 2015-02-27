@@ -48,6 +48,7 @@ import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -60,6 +61,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class ResourceNodeImporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     

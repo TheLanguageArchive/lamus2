@@ -28,9 +28,11 @@ import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -83,6 +85,22 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
     }
 
     
+    @Test
+    public void explore_ExportPhaseTree() throws WorkspaceExportException {
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+    
+        try {
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, exportPhase);
+        } catch(IllegalArgumentException ex) {
+            String errorMessage = "This stage of the export (handling unlinked and deleted nodes) should not be called during the tree export (current 'exportPhase': " + exportPhase.toString();
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
     
     @Test
     public void exploreDeletedTopNodes() throws MalformedURLException, WorkspaceExportException {
@@ -90,6 +108,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final int workspaceID = 1;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
@@ -135,12 +155,12 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         for(final WorkspaceNode deletedNode : unlinkedAndDeletedTopNodes) {
             
             context.checking(new Expectations() {{
-                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles);
+                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
             }});
         }
     
-        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
+        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, exportPhase);
     }
 
     @Test
@@ -149,6 +169,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final int workspaceID = 1;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         final Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = new ArrayList<>();
         
@@ -196,8 +218,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         for(final WorkspaceNode deletedNode : unlinkedAndDeletedTopNodes) {
             
             context.checking(new Expectations() {{
-                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles);
+                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
                     will(throwException(expectedException));
             }});
             
@@ -205,7 +227,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         }
     
         try {
-            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

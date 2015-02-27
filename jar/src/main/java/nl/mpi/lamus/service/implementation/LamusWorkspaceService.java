@@ -105,17 +105,17 @@ public class LamusWorkspaceService implements WorkspaceService {
     }
     
     /**
-     * @see WorkspaceService#deleteWorkspace(java.lang.String, int)
+     * @see WorkspaceService#deleteWorkspace(java.lang.String, int, boolean)
      */
     @Override
-    public void deleteWorkspace(String userID, int workspaceID)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void deleteWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException, IOException {
         
         logger.debug("Triggered deletion of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
         
         this.nodeAccessChecker.ensureUserCanDeleteWorkspace(userID, workspaceID);
         
-        this.workspaceManager.deleteWorkspace(workspaceID);
+        this.workspaceManager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
     }
 
     /**

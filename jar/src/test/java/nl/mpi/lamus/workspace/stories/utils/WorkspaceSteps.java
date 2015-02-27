@@ -466,14 +466,14 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to delete the workspace")
-    public void thatUserChoosesToDeleteTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
+    public void thatUserChoosesToDeleteTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException, WorkspaceExportException {
         
         assertNotNull("corpusstructureDataSource null, was not correctly injected", this.corpusstructureDataSource);
         assertNotNull("amsDataSource null, was not correctly injected", this.amsDataSource);
         assertNotNull("lamusDataSource null, was not correctly injected", this.lamusDataSource);
         assertNotNull("workspaceDao null, was not correctly injected", this.workspaceDao);
 
-        this.workspaceService.deleteWorkspace(this.currentUserID, this.createdWorkspaceID);
+        this.workspaceService.deleteWorkspace(this.currentUserID, this.createdWorkspaceID, Boolean.FALSE);
     }
     
     @When("that user chooses to submit the workspace")

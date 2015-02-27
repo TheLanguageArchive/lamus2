@@ -21,20 +21,24 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceStatus;
-import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
+import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -56,14 +60,24 @@ public class UnlinkedNodeExporterTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     private NodeExporter unlinkedNodeExporter;
-    private Workspace testWorkspace;
+//    private Workspace testWorkspace;
     
     @Mock VersioningHandler mockVersioningHandler;
     @Mock ArchiveHandleHelper mockArchiveHandleHelper;
+    @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
+    @Mock MetadataAPI mockMetadataAPI;
     
     @Mock Workspace mockWorkspace;
-    @Mock WorkspaceNode mockWorkspaceNode;
+    @Mock WorkspaceNode mockNode;
+    @Mock WorkspaceNode mockParentNode;
+    @Mock WorkspaceNode mockSomeOtherNode;
     @Mock CorpusNode mockCorpusNode;
+    @Mock ReferencingMetadataDocument mockParentDocument;
+    @Mock Reference mockReference;
+    
+    private final int wsID = 1;
+    private final int nodeWsID = 10;
     
     public UnlinkedNodeExporterTest() {
     }
@@ -82,10 +96,13 @@ public class UnlinkedNodeExporterTest {
         unlinkedNodeExporter = new UnlinkedNodeExporter();
         ReflectionTestUtils.setField(unlinkedNodeExporter, "versioningHandler", mockVersioningHandler);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "archiveHandleHelper", mockArchiveHandleHelper);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataAPI", mockMetadataAPI);
         
-        testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
-                Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
-                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
+//        testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
+//                Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
+//                0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
     }
     
     @After
@@ -94,11 +111,88 @@ public class UnlinkedNodeExporterTest {
 
     
     @Test
-    public void exportNodeWithArchiveURI_DoNotKeepUnlinkedFiles()
+    public void exportNode_NullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        try {
+            unlinkedNodeExporter.exportNode(null, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "Workspace not set";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void export_ExportPhaseTree() throws WorkspaceExportException {
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        try {
+            unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch (IllegalArgumentException ex) {
+            String errorMessage = "This exporter should only be used when exporting unlinked nodes, not for the tree";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
+    @Test
+    public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+        
+        final boolean isNodeProtected = Boolean.TRUE;
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void export_DoNotKeepUnlinkedFiles_DeleteSubmissionType() throws WorkspaceExportException {
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+
+        initialExpectations(isNodeProtected);
+            
+        //do nothing else - given that the workspace is being deleted, a node cannot be moved or copied from the archive to the "sessions" folder
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalResource_DoNotKeepUnlinkedFiles_SubmitSubmissionType() throws WorkspaceExportException {
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        //do nothing else - given that the workspace is being deleted, a node cannot be moved or copied from the archive to the "sessions" folder
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportArchiveResource_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
             throws MalformedURLException, WorkspaceExportException {
         
-        final int wsID = 1;
-        final int nodeWsID = 10;
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
         final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
@@ -106,206 +200,332 @@ public class UnlinkedNodeExporterTest {
         final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
         
         final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(wsID));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(nodeVersionArchiveURL));
-            oneOf(mockWorkspaceNode).setArchiveURL(nodeVersionArchiveURL);
-            //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
         }});
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
-    public void exportNodeWithArchiveURI_KeepUnlinkedFiles()
+    public void exportArchiveResourceWithParent_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
             throws MalformedURLException, WorkspaceExportException,
-            HandleException, IOException, TransformerException, MetadataException {
+            IOException, MetadataException, TransformerException {
         
-        final int wsID = 1;
-        final int nodeWsID = 10;
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
+        final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
+        final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
+        final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        final String nodeVersionArchiveFile = nodeVersionArchiveURL.getFile();
+        final URI nodeVersionArchiveFileUri = URI.create(nodeVersionArchiveFile);
+        
+        final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
+        }});
+        
+        updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeVersionArchiveFileUri);
+
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportArchiveMetadata_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
+            throws MalformedURLException, WorkspaceExportException {
+        
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
+        
+        final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
+        final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
+        final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.TRUE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
+        }});
+
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalResource_KeepUnlinkedFiles_SubmitSubmissionType()
+            throws MalformedURLException, WorkspaceExportException {
+        
+        final String nodeFilename = "node.txt";
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+        }});
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalResourceWithParent_KeepUnlinkedFiles_SubmitSubmissionType()
+            throws MalformedURLException, WorkspaceExportException,
+            IOException, MetadataException, TransformerException {
+        
+        final String nodeFilename = "node.txt";
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        final String newNodeLocationFile = newNodeLocation.getFile();
+        final URI newNodeLocationFileUri = URI.create(newNodeLocationFile);
+        
+        final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+        }});
+        
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationFileUri);
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalMetadataWithParent_KeepUnlinkedFiles_SubmitSubmissionType()
+            throws MalformedURLException, WorkspaceExportException,
+            IOException, MetadataException, TransformerException {
+        
         final String nodeFilename = "node.cmdi";
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        final String newNodeLocationFile = newNodeLocation.getFile();
+        final URI newNodeLocationFileUri = URI.create(newNodeLocationFile);
+        
+        final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.TRUE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+        }});
+        
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationFileUri);
+        
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportArchiveResource_KeepUnlinkedFiles_SubmitSubmissionType() throws MalformedURLException, HandleException, IOException, TransformerException, MetadataException, WorkspaceExportException {
+        
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
+        
+        final String nodeFilename = "node.txt";
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+        
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockNode, Boolean.FALSE);
+        }});
+
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalResource_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException {
+        
+        final String nodeFilename = "node.txt";
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+        }});
+
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportLocalMetadataWithParent_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException, IOException, MetadataException, TransformerException {
+        
+        final String nodeFilename = "node.cmdi";
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        final URI newNodeLocationFileUri = URI.create(newNodeLocation.getFile());
+        
+        final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.TRUE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+        }});
+        
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationFileUri);
+
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
+    public void exportArchiveNode_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException {
+        
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
         final boolean isNodeProtected = Boolean.FALSE;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        initialExpectations(isNodeProtected);
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(wsID));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
-            
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
-            
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode); will(returnValue(newNodeLocation));
-            
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
         }});
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
-    @Test
-    public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
-        
-        final int nodeWsID = 10;
-        final boolean isNodeProtected = Boolean.TRUE;
-        final boolean keepUnlinkedFiles = Boolean.FALSE;
-        
+    
+    private void initialExpectations(final boolean isNodeProtected) {
         context.checking(new Expectations() {{
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(wsID));
+            allowing(mockNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
             
-            //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
-            
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
-            
-            //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+            oneOf(mockNode).isProtected(); will(returnValue(isNodeProtected));
         }});
-        
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(testWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
-        
     }
     
-    @Test
-    public void exportNodeWithoutArchiveURI_DoNotKeepUnlinkedFiles() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
-        
-        final int wsID = 1;
-        final int nodeWsID = 10;
-        
-        final boolean isNodeProtected = Boolean.FALSE;
-        
-        final boolean keepUnlinkedFiles = Boolean.FALSE;
-
+    private void updateReferenceInParent(final URL parentWsUrl, final URI newNodeLocationUri, final URI newNodeLocationReferenceUri)
+            throws IOException, MetadataException, TransformerException {
         context.checking(new Expectations() {{
-            
-            //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(wsID));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
-            
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
-            //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
-            
-            //logger
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentWsUrl));
+            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataAPI).getMetadataDocument(parentWsUrl); will(returnValue(mockParentDocument));
+            oneOf(mockParentDocument).getDocumentReferenceByLocation(newNodeLocationUri); will(returnValue(mockReference));
+            oneOf(mockReference).setURI(newNodeLocationReferenceUri);
+            oneOf(mockReference).setLocation(newNodeLocationReferenceUri);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentWsUrl);
         }});
-        
-        
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
-        
-    }
-    
-    @Test
-    public void exportNodeWithoutArchiveURI_KeepUnlinkedFiles() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
-        
-        final int wsID = 1;
-        final int nodeWsID = 10;
-        
-        final String nodeFilename = "node.cmdi";
-        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
-        
-        final boolean isNodeProtected = Boolean.FALSE;
-        
-        final boolean keepUnlinkedFiles = Boolean.TRUE;
-
-        context.checking(new Expectations() {{
-            
-           //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(wsID));
-            oneOf(mockWorkspaceNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
-            
-            oneOf(mockWorkspaceNode).isProtected(); will(returnValue(isNodeProtected));
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
-            
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode); will(returnValue(newNodeLocation));
-        }});
-        
-        
-        
-        //TODO DO NOT USE NULL - THAT WOULD MEAN DELETING THE TOP NODE - THAT WOULD INVOLVE MESSING WITH THE PARENT OF THE TOP NODE (OUTSIDE OF THE SCOPE OF THE WORKSPACE)
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockWorkspaceNode, keepUnlinkedFiles);
-        
-    }
-    
-//    @Test
-//    public void exportUnknownNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
-//        
-//        final int testWorkspaceNodeID = 10;
-//        final String testBaseName = "node.txt";
-//        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-//        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
-//        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-//        final URL testNodeArchiveURL = testNodeOriginURL;
-//        
-//        final String testNodeDisplayValue = "node";
-//        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-//        final String testNodeFormat = "text/plain";
-//        final URI testNodeSchemaLocation = new URI("http://some.location");
-//
-//        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-//                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
-//        
-//        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
-//        
-//        final String expectedErrorMessage = "Node not found in archive database for URI " + testNode.getArchiveURI();
-//        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
-//            
-//            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockWorkspaceNode); will(returnValue(testNodeVersionArchiveURL));
-//            oneOf(mockWorkspaceNode).setArchiveURL(testNodeVersionArchiveURL);
-//            
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
-//
-//            //exception caught
-//            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//        }});
-//        
-//        try {
-//            deletedNodeExporter.exportNode(null, mockWorkspaceNode);
-//            fail("should have thrown exception");
-//        } catch(WorkspaceExportException ex) {
-//            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-//            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-//            assertEquals("Cause different from expected", expectedException, ex.getCause());
-//        }
-//    }
-    
-    @Test
-    public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
-        
-        final boolean keepUnlinkedFiles = Boolean.FALSE;
-        
-        try {
-            unlinkedNodeExporter.exportNode(null, null, mockWorkspaceNode, keepUnlinkedFiles);
-            fail("should have thrown exception");
-        } catch (IllegalArgumentException ex) {
-            String errorMessage = "Workspace not set";
-            assertEquals("Message different from expected", errorMessage, ex.getMessage());
-            assertNull("Cause should be null", ex.getCause());
-        }
     }
 }

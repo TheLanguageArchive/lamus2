@@ -35,10 +35,12 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
 import org.jmock.States;
@@ -144,8 +146,9 @@ public class WorkspaceExportRunnerTest {
         final States exporting = context.states("exporting");
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
-        
+        workspaceExportRunner.setSubmissionType(submissionType);
         
         context.checking(new Expectations() {{
             
@@ -154,13 +157,13 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
@@ -173,6 +176,53 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
                 then(exporting.is("finished"));
+        }});
+        
+        boolean result = executeRunner();
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+        
+        assertTrue("Execution result should have been successful (true)", result);
+    }
+    
+    @Test
+    public void callExporter_DeleteMode()
+            throws MalformedURLException, InterruptedException,
+            ExecutionException, WorkspaceNodeNotFoundException, WorkspaceExportException,
+            VersionCreationException, CrawlerInvocationException {
+        
+        final int workspaceID = 1;
+        final int wsNodeID = 10;
+        final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
+        final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URI originURI = URI.create("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURI.toURL();
+        final String testDisplayValue = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = URI.create("http://some.location");
+        final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        
+        final States exporting = context.states("exporting");
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        workspaceExportRunner.setSubmissionType(submissionType);
+        
+        context.checking(new Expectations() {{
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+                then(exporting.is("finished"));
+            
+            //TODO FIX PERMISSIONS AS WELL?
+                
+//            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
+//                then(exporting.is("finished"));
         }});
         
         boolean result = executeRunner();
@@ -208,8 +258,9 @@ public class WorkspaceExportRunnerTest {
         
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
-        
+        workspaceExportRunner.setSubmissionType(submissionType);
         
         context.checking(new Expectations() {{
             
@@ -218,13 +269,13 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode); will(returnValue(mockNodeExporter));
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles);
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));

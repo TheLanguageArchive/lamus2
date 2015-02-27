@@ -55,9 +55,10 @@ public interface WorkspaceService {
      * 
      * @param userID ID of the user who is trying to delete the workspace
      * @param workspaceID ID of the workspace to be deleted
+     * @param keepUnlinkedFiles true if user chooses to keep unlinked files for future use
      */
-    public void deleteWorkspace(String userID, int workspaceID)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, IOException;
+    public void deleteWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException, IOException;
     
     /**
      * Retrieves a workspace with the given ID.
