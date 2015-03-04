@@ -88,11 +88,15 @@ public class LamusWorkspaceServiceTest {
     @Mock private File mockWorkspaceUploadDirectory;
     @Mock private List<WorkspaceNode> mockUnlinkedNodesList;
     @Mock private InputStream mockInputStream;
+    @Mock private File mockFile;
     @Mock private Collection<File> mockUploadedFiles;
     @Mock private Collection<ImportProblem> mockFailedUploads;
     @Mock private TypecheckedResults mockTypecheckedResults;
     @Mock private ZipInputStream mockZipInputStream;
 
+    private final int workspaceID = 1;
+    private final String userID = "testUser";
+    
     
     public LamusWorkspaceServiceTest() {
     }
@@ -124,7 +128,6 @@ public class LamusWorkspaceServiceTest {
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = null;
-        final String userID = "someUser";
         final String expectedMessage = "Both userID and archiveNodeURI should not be null";
         
         try {
@@ -140,11 +143,10 @@ public class LamusWorkspaceServiceTest {
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = new URI(UUID.randomUUID().toString());
-        final String userID = null;
         final String expectedMessage = "Both userID and archiveNodeURI should not be null";
         
         try {
-            service.createWorkspace(userID, archiveNodeURI);
+            service.createWorkspace(null, archiveNodeURI);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
@@ -156,7 +158,6 @@ public class LamusWorkspaceServiceTest {
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
         final URI archiveNodeURI = new URI("node:001");
-        final String userID = "someUser";
         final NodeNotFoundException expectedException = new NodeNotFoundException(archiveNodeURI, "access problem");
         
         context.checking(new Expectations() {{
@@ -178,7 +179,6 @@ public class LamusWorkspaceServiceTest {
         
         final URI archiveNodeURI = new URI("node:001");
         final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
-        final String userID = "someUser";
         final NodeAccessException expectedException = new NodeAccessException("access problem", archiveNodeURI, null);
         
         context.checking(new Expectations() {{
@@ -199,10 +199,8 @@ public class LamusWorkspaceServiceTest {
     public void createWorkspaceThrowsWorkspaceImportException()
             throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
         
-        final int workspaceID = 10;
         final URI archiveNodeURI = new URI("node:001");
         final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
-        final String userID = "someUser";
         final WorkspaceImportException expectedException = new WorkspaceImportException("some problem", workspaceID, null);
         
         context.checking(new Expectations() {{
@@ -226,7 +224,6 @@ public class LamusWorkspaceServiceTest {
         
         final URI archiveNodeURI = new URI("node:001");
         final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
-        final String userID = "someUser";
         final long usedStorageSpace = 0L;
         final long maxStorageSpace = 10000000L;
         final Workspace newWorkspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
@@ -246,8 +243,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         context.checking(new Expectations() {{
@@ -262,8 +257,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNonExistingWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
@@ -284,8 +277,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteInaccessibleWorkspace() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
@@ -306,8 +297,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteWorkspaceExportException() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
@@ -329,8 +318,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceExportException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         final IOException expectedException = new IOException("some exception message");
@@ -352,8 +339,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void getExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -379,8 +364,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void getNonExistingWorkspace() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -411,7 +394,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void listUserWorkspaces() throws URISyntaxException, MalformedURLException {
         
-        final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
@@ -434,7 +416,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void listAllWorkspaces() throws URISyntaxException, MalformedURLException {
         
-        final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
@@ -457,7 +438,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void userHasActiveWorkspaces() throws URISyntaxException, MalformedURLException {
         
-        final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
@@ -480,7 +460,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void userHasActiveAndInactiveWorkspaces() throws URISyntaxException, MalformedURLException {
         
-        final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.INITIALISED, "workspace is in good shape", "still not sure what this would be");
@@ -502,7 +481,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void userHasNoActiveWorkspaces() throws URISyntaxException, MalformedURLException {
         
-        final String userID = "someUser";
         final Date date = Calendar.getInstance().getTime();
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
@@ -524,8 +502,6 @@ public class LamusWorkspaceServiceTest {
     public void openExistingWorkspace()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -553,8 +529,6 @@ public class LamusWorkspaceServiceTest {
     public void openNonExistingWorkspace()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -586,7 +560,6 @@ public class LamusWorkspaceServiceTest {
     public void openWorkspaceNullUser()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
         final String expectedMessage = "userID should not be null";
         
         try {
@@ -601,8 +574,6 @@ public class LamusWorkspaceServiceTest {
     public void openInaccessibleWorkspace()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -634,8 +605,6 @@ public class LamusWorkspaceServiceTest {
     public void openWorkspaceThrowsIOException()
             throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, IOException {
         
-        final int workspaceID = 1;
-        final String userID = "someUser";
         final int topNodeID = 1;
         final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
@@ -666,8 +635,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void submitWorkspaceNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
-        final int workspaceID = 1;
-        final String userID = "testUser";
+        
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
@@ -687,8 +655,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void submitWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
-        final int workspaceID = 1;
-        final String userID = "testUser";
+        
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
@@ -708,8 +675,7 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void submitWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
-        final int workspaceID = 1;
-        final String userID = "testUser";
+        
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
         final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", workspaceID, null);
@@ -730,8 +696,7 @@ public class LamusWorkspaceServiceTest {
         
     @Test
     public void submitWorkspaceSuccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
-        final int workspaceID = 1;
-        final String userID = "testUser";
+        
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
         context.checking(new Expectations() {{
@@ -748,7 +713,6 @@ public class LamusWorkspaceServiceTest {
     public void getExistingNode() throws URISyntaxException, WorkspaceNodeNotFoundException {
         
         final int nodeID = 1;
-        final int workspaceID = 1;
         URI profileSchemaURI = null;
         String name = "node_name";
         String title = "node_title";
@@ -778,7 +742,6 @@ public class LamusWorkspaceServiceTest {
     public void getNonExistingNode() throws URISyntaxException, WorkspaceNodeNotFoundException {
         
         final int nodeID = 1;
-        final int workspaceID = 1;
         URI profileSchemaURI = null;
         String name = "node_name";
         String title = "node_title";
@@ -832,8 +795,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void getWorkspaceUploadDirectory() {
         
-        final int workspaceID = 1;
-        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceUploader).getWorkspaceUploadDirectory(workspaceID);
@@ -846,10 +807,45 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
+    public void uploadFileIntoWorkspace() throws IOException {
+        
+        final String filename = "someFile.cmdi";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(returnValue(mockFile));
+        }});
+        
+        File result = service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+        
+        assertEquals("Result different from expected", mockFile, result);
+    }
+    
+    @Test
+    public void uploadFileIntoWorkspace_throwsException() throws IOException {
+        
+        final String filename = "someFile.cmdi";
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceUploader).uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            service.uploadFileIntoWorkspace(userID, workspaceID, mockInputStream, filename);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
     public void uploadZipFileIntoWorkspace() throws IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final String filename = "someFile.cmdi";
         
         context.checking(new Expectations() {{
@@ -866,8 +862,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void uploadZipFileIntoWorkspace_throwsException() throws IOException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final String filename = "someFile.cmdi";
         
         final IOException expectedException = new IOException("some exception message");
@@ -889,9 +883,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void processUploadedFiles() throws IOException, WorkspaceException, TypeCheckerException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
-        
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceUploader).processUploadedFiles(workspaceID, mockUploadedFiles);
@@ -906,8 +897,6 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void processUploadedFilesThrowsWorkspaceException() throws IOException, WorkspaceException, TypeCheckerException {
         
-        final int workspaceID = 1;
-        final String userID = "testUser";
         final WorkspaceException workspaceException = new WorkspaceException("some error message", workspaceID, null);
         
         context.checking(new Expectations() {{
@@ -927,9 +916,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void addNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
-        final int workspaceID = 1;
         final URL nodeURL = new URL("file:/workspace/node.cmdi");
-        final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -953,9 +940,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void addNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
-        final int workspaceID = 1;
         final URL nodeURL = new URL("file:/workspace/node.cmdi");
-        final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -979,9 +964,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void addNodeSuccessfully() throws WorkspaceNotFoundException, WorkspaceAccessException, MalformedURLException {
         
-        final int workspaceID = 1;
         final URL nodeURL = new URL("file:/workspace/node.cmdi");
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
@@ -999,10 +982,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void linkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
@@ -1021,10 +1002,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void linkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -1049,10 +1028,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void linkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -1077,10 +1054,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void linkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1106,11 +1081,9 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void linkNodesProtectedNodeException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException, URISyntaxException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final URI parentNodeURI = new URI(UUID.randomUUID().toString());
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", parentNodeURI, workspaceID);
         
@@ -1136,10 +1109,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void unlinkNodesWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
@@ -1158,10 +1129,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void unlinkNodesWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -1186,10 +1155,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void unlinkNodesNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -1214,10 +1181,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void unlinkNodesWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1243,11 +1208,9 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void unlinkNodesProtectedNodeException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException, URISyntaxException {
         
-        final int workspaceID = 1;
         final int parentNodeID = 10;
         final URI parentNodeURI = new URI(UUID.randomUUID().toString());
         final int childNodeID = 20;
-        final String userID = "testUser";
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", parentNodeURI, workspaceID);
         
@@ -1273,9 +1236,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNodeWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int nodeID = 4;
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
@@ -1293,9 +1254,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int nodeID = 4;
-        final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -1319,9 +1278,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int nodeID = 4;
-        final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -1345,9 +1302,7 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNodeWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int nodeID = 4;
-        final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1372,10 +1327,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void deleteNodeProtectedNodeException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException, URISyntaxException {
         
-        final int workspaceID = 1;
         final int nodeID = 4;
         final URI nodeURI = new URI(UUID.randomUUID().toString());
-        final String userID = "testUser";
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", nodeURI, workspaceID);
         
@@ -1400,10 +1353,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void replaceNodeWithAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int oldNodeID = 10;
         final int newNodeID = 20;
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             
@@ -1422,10 +1373,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void replaceNodeWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int oldNodeID = 10;
         final int newNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
         
@@ -1450,10 +1399,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void replaceNodeNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int oldNodeID = 10;
         final int newNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
         
@@ -1478,10 +1425,8 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void replaceNodeWorkspaceException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
-        final int workspaceID = 1;
         final int oldNodeID = 10;
         final int newNodeID = 20;
-        final String userID = "testUser";
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1506,11 +1451,9 @@ public class LamusWorkspaceServiceTest {
     @Test
     public void replaceNodeProtectedNodeException() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException, URISyntaxException {
         
-        final int workspaceID = 1;
         final int oldNodeID = 10;
         final URI oldNodeURI = new URI(UUID.randomUUID().toString());
         final int newNodeID = 20;
-        final String userID = "testUser";
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", oldNodeURI, workspaceID);
         
@@ -1534,9 +1477,6 @@ public class LamusWorkspaceServiceTest {
     
     @Test
     public void listUnlinkedNodes() {
-        
-        final int workspaceID = 1;
-        final String userID = "testUser";
         
         context.checking(new Expectations() {{
             

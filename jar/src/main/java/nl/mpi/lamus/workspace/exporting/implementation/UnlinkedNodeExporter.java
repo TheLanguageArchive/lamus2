@@ -36,6 +36,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,10 +113,11 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 
                 URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
                 currentNode.setArchiveURL(trashedNodeArchiveURL);
+                URI trashedNodeArchiveUri = URI.create(trashedNodeArchiveURL.toString());
                 
                 if(parentNode != null) {
                     ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, parentNode.getWorkspaceURL(), parentDocument, trashedNodeArchiveURL.getFile());
+                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, trashedNodeArchiveUri, parentNode.getWorkspaceURL(), parentDocument, trashedNodeArchiveURL.getFile());
                 }
                 logger.debug("Node " + currentArchiveUri + " not to be kept, but moved to the trashcan.");
                 return;
@@ -133,7 +135,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
 
                 if(parentNode != null) {
                     ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, parentNode.getWorkspaceURL(), parentDocument, null);
+                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, currentArchiveUri, parentNode.getWorkspaceURL(), parentDocument, null);
                 }
                 
                 return;
@@ -158,8 +160,9 @@ public class UnlinkedNodeExporter implements NodeExporter{
             }
 
             if(parentNode != null) {
+                URI nodeWsUri = URI.create(currentNode.getWorkspaceURL().toString());
                 ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                updateReferenceInParent(workspace.getWorkspaceID(), nodeUri, parentNode.getWorkspaceURL(), parentDocument, orphanedNodeURL.getFile());
+                updateReferenceInParent(workspace.getWorkspaceID(), nodeWsUri, nodeUri, parentNode.getWorkspaceURL(), parentDocument, FilenameUtils.getName(orphanedNodeURL.toString()));
             }
         }
 
@@ -199,11 +202,11 @@ public class UnlinkedNodeExporter implements NodeExporter{
         return referencingParentDocument;
     }
     
-    private void updateReferenceInParent(int workspaceID, URI currentNodeUri, URL parentLocation,
+    private void updateReferenceInParent(int workspaceID, URI currentNodeOldUri, URI currentNodeUri, URL parentLocation,
             ReferencingMetadataDocument referencingParentDocument, String filename) throws WorkspaceExportException {
         
         try {
-            Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNodeUri);
+            Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNodeOldUri);
             
             if(filename == null) {
                 referencingParentDocument.removeDocumentReference(currentReference);
@@ -212,7 +215,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
             
             URI filenameUri = URI.create(filename);
             currentReference.setURI(filenameUri);
-            currentReference.setLocation(filenameUri);
+            currentReference.setLocation(currentNodeUri);
             metadataApiBridge.saveMetadataDocument(referencingParentDocument, parentLocation);
         } catch (IOException | MetadataException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentLocation;

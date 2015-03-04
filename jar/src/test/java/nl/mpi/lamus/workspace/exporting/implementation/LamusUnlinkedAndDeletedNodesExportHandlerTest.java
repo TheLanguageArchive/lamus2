@@ -103,7 +103,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
     
     
     @Test
-    public void exploreDeletedTopNodes() throws MalformedURLException, WorkspaceExportException {
+    public void exploreUnlinkedAndDeletedTopNodes_SubmitWorkspace() throws MalformedURLException, WorkspaceExportException {
 
         final int workspaceID = 1;
         
@@ -162,9 +162,70 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
     
         unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, exportPhase);
     }
+    
+    @Test
+    public void exploreUnlinkedAndDeletedTopNodes_DeleteWorkspace() throws MalformedURLException, WorkspaceExportException {
+
+        final int workspaceID = 1;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        final Collection<WorkspaceNode> unlinkedTopNodes = new ArrayList<>();
+        
+        final int firstNodeID = 10;
+        final URL firstNodeWsURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URI firstNodeOriginURI = URI.create("file:/some.url/someName.cmdi");
+        final URL firstNodeArchiveURL = firstNodeOriginURI.toURL();
+        final URI firstNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final String firstNodeDisplayValue = "someName";
+        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String firstNodeFormat = "";
+        final URI firstNodeSchemaLocation = URI.create("http://some.location");
+        final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
+                firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURI,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
+        
+        final int secondNodeID = 10;
+        final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
+        final URI secondNodeOriginURI = URI.create("file:/some.url/node.cmdi");
+        final URL secondNodeArchiveURL = secondNodeOriginURI.toURL();
+        final URI secondNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final String secondNodeDisplayValue = "someName";
+        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final String secondNodeFormat = "";
+        final URI secondNodeSchemaLocation = URI.create("http://some.location");
+        final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
+                secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURI,
+                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
+        
+        unlinkedTopNodes.add(firstNode);
+        unlinkedTopNodes.add(secondNode);
+        
+    
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockWorkspaceDao).getUnlinkedNodes(workspaceID); will(returnValue(unlinkedTopNodes));
+        }});
+        
+        for(final WorkspaceNode deletedNode : unlinkedTopNodes) {
+            
+            context.checking(new Expectations() {{
+                oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
+            }});
+        }
+    
+        unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, exportPhase);
+    }
 
     @Test
-    public void exploreDeletedTopNodesThrowsException() throws MalformedURLException, WorkspaceExportException {
+    public void exploreUnlinkedAndDeletedTopNodesThrowsException() throws MalformedURLException, WorkspaceExportException {
 
         final int workspaceID = 1;
         

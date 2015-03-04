@@ -17,6 +17,7 @@ package nl.mpi.lamus.service.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -295,6 +296,18 @@ public class LamusWorkspaceService implements WorkspaceService {
         return this.workspaceUploader.getWorkspaceUploadDirectory(workspaceID);
     }
 
+    /**
+     * @see WorkspaceService#uploadFileIntoWorkspace(java.lang.String, int, java.io.InputStream, java.lang.String)
+     */
+    @Override
+    public File uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
+            throws IOException {
+        
+        logger.debug("Triggered upload of file into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
+        
+        return this.workspaceUploader.uploadFileIntoWorkspace(workspaceID, inputStream, filename);
+    }
+    
     /**
      * @see WorkspaceService#uploadZipFileIntoWorkspace(java.lang.String, int, java.util.zip.ZipInputStream, java.lang.String)
      */

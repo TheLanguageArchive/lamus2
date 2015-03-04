@@ -197,6 +197,14 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID);
     
     /**
+     * Retrieves a collection containing the descendant nodes of the node with
+     * the given ID.
+     * @param workspaceNodeID ID of the parent node
+     * @return Collection of nodes that have the given node as ancestor
+     */
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodes(int workspaceNodeID);
+    
+    /**
      * Retrieves a collection containing the parent nodes of the node with the
      * given ID.
      * 
@@ -220,6 +228,14 @@ public interface WorkspaceDao {
      * @return List of unlinked nodes in the workspace
      */
     public List<WorkspaceNode> getUnlinkedNodes(int workspaceID);
+    
+    /**
+     * Retrieves a collection containing the nodes that have no parent
+     * (unlinked nodes) and their descendants.
+     * @param workspaceID ID of the workspace
+     * @return Collection of unlinked nodes in the workspace
+     */
+    public Collection<WorkspaceNode> getUnlinkedNodesAndDescendants(int workspaceID);
     
     /**
      * Updates the Workspace URL of the given node.

@@ -17,6 +17,7 @@ package nl.mpi.lamus.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -184,8 +185,18 @@ public interface WorkspaceService {
     public File getWorkspaceUploadDirectory(int workspaceID);
     
     /**
-     * Given a ZipInputStream and filename, uploads the zip content into the workspace,
-     * in case it's archivable.
+     * Given an InputStream and filename, uploads the file into the workspace.
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     * @param inputStream InputStream to be uploaded
+     * @param filename name of the file to upload
+     * @return uploaded File
+     */
+    public File uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
+            throws IOException;
+    
+    /**
+     * Given a ZipInputStream and filename, uploads the zip content into the workspace.
      * @param userID ID of the user
      * @param workspaceID ID of the workspace
      * @param zipInputStream ZipInputStream to be uploaded

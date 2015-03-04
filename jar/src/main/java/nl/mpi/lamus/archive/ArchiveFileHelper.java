@@ -85,7 +85,7 @@ public interface ArchiveFileHelper {
      * @param fileNameAttempt Attempted filename, which can be adjusted if there are conflicts
      * @return File object for the adjusted (or not) filename
      */
-    public File getFinalFile(String baseDirectory, String fileNameAttempt);
+    public File getFinalFile(File baseDirectory, String fileNameAttempt);
     
     /**
      * Creates the file and parent directories, if needed, for the given File object

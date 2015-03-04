@@ -20,6 +20,7 @@ import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -43,7 +45,6 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.MetadataChecker;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final MetadataApiBridge metadataApiBridge;
     private final MetadataChecker metadataChecker;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
+    private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
@@ -74,7 +76,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
         MetadataApiBridge mdApiBridge, MetadataChecker mdChecker,
-        ArchiveFileLocationProvider afLocationProvider) {
+        ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -85,6 +87,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.metadataApiBridge = mdApiBridge;
         this.metadataChecker = mdChecker;
         this.archiveFileLocationProvider = afLocationProvider;
+        this.archiveFileHelper = archiveFileHelper;
     }
 
     /**
@@ -95,6 +98,23 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         return this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
     }
 
+    /**
+     * @see WorkspaceUploader#uploadFileIntoWorkspace(int, java.io.InputStream, java.lang.String)
+     */
+    @Override
+    public File uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
+            throws IOException {
+        
+        File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+        File finalFile = archiveFileHelper.getFinalFile(workspaceUploadDirectory, filename);
+        
+        
+        workspaceFileHandler.copyInputStreamToTargetFile(inputStream, finalFile);
+        
+        return finalFile;
+    }
+    
     /**
      * @see WorkspaceUploader#uploadZipFileIntoWorkspace(int, java.util.zip.ZipInputStream)
      */
@@ -129,7 +149,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 continue;
             }
             
-            File changedEntryFile = entryFile;
+            File finalEntryFile = archiveFileHelper.getFinalFile(workspaceUploadDirectory, entryFile.getName());
+            
 //            for(String changedName : changedDirectoryNames.keySet()) {
 //                if(entryFile.getPath().contains(changedName)) {
 //                    String newName = entryFile.getPath().replace(changedName, changedDirectoryNames.get(changedName));
@@ -138,10 +159,10 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
 //                }
 //            }
             
-            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, changedEntryFile);
+            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, finalEntryFile);
             
             nextEntry = zipInputStream.getNextEntry();
-            copiedFiles.add(changedEntryFile);
+            copiedFiles.add(finalEntryFile);
 
         }
         
@@ -268,7 +289,11 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         failedFiles.add(new FileImportProblem(file, errorMessage, null));
         try {
             //remove unarchivable file after adding it to the collection of failed uploads
-            FileUtils.forceDelete(file);
+                // but only if it was an uploaded file
+                // if it's being imported from the orphans folder, it shouldn't be deleted
+            if(!archiveFileLocationProvider.isFileInOrphansDirectory(file)) {
+                workspaceFileHandler.deleteFile(file);
+            }
         } catch (IOException ex) {
             logger.warn("Couldn't delete unarchivable file: " + ex.getMessage());
         }

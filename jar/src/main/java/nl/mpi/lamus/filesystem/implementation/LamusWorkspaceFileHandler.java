@@ -83,6 +83,16 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         
         Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
+
+    /**
+     * @see WorkspaceFileHandler#deleteFile(java.io.File)
+     */
+    @Override
+    public void deleteFile(File file)
+            throws IOException {
+        
+        Files.deleteIfExists(file.toPath());
+    }
     
     /**
      * @see WorkspaceFileHandler#getStreamResultForWorkspaceNodeFile(java.io.File)

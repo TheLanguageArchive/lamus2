@@ -112,7 +112,7 @@ public class LamusVersioningHandler implements VersioningHandler {
                 logger.error("Problem with write permissions in target directory " + orphansDirectory);
                 return null;
             }
-            orphanNewLocation = new File(orphansDirectory, filename);
+            orphanNewLocation = archiveFileHelper.getFinalFile(orphansDirectory, filename);
         } catch (URISyntaxException ex) {
             String errorMessage = "Error retrieving archive location of node " + workspace.getTopNodeArchiveURI();
             logger.error(errorMessage, ex);

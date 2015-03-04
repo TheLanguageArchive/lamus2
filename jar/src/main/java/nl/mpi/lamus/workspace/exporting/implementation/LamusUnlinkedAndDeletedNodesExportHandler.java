@@ -71,10 +71,18 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
         logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID() +
                 "; submission mode: " + submissionType.toString() + "; export phase: " + exportPhase.toString());
         
-        Collection<WorkspaceNode> unlinkedAndDeletedTopNodes = this.workspaceDao.getUnlinkedAndDeletedTopNodes(workspace.getWorkspaceID());
+        Collection<WorkspaceNode> nodesToExport;
         
-        for(WorkspaceNode unlinkedOrDeletedNode : unlinkedAndDeletedTopNodes) {
-            NodeExporter nodeExporter = this.nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode, exportPhase);
+        if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
+            nodesToExport = workspaceDao.getUnlinkedAndDeletedTopNodes(workspace.getWorkspaceID());
+        } else if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
+            nodesToExport = workspaceDao.getUnlinkedNodes(workspace.getWorkspaceID());
+        } else {
+            throw new IllegalArgumentException("Unknown submission type");
+        }
+        
+        for(WorkspaceNode unlinkedOrDeletedNode : nodesToExport) {
+            NodeExporter nodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode, exportPhase);
             nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
     }

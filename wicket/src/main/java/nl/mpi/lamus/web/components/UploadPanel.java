@@ -144,14 +144,10 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             } else {
 
                                 try {
-                                    //TODO PERFORM A "SHALLOW" TYPECHECK BEFORE UPLOADING?
-
-                                    // Save to new file
-                                    newFile.createNewFile();
-                                    upload.writeTo(newFile);
-
-                                    //TODO ADD UPLOADED FILE TO LIST OF FILES TO PROCESS LATER
-                                    copiedFiles.add(newFile);
+                                    File tempCopiedFile =
+                                            workspaceService.uploadFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), newFile.getName());
+                                    
+                                    copiedFiles.add(tempCopiedFile);
 
                                 } catch (IOException | MissingResourceException e) {
                                     throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);

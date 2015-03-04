@@ -187,7 +187,7 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
      * @see ArchiveFileHelper#getFinalFile(java.lang.String, java.lang.String)
      */
     @Override
-    public File getFinalFile(String baseDirectory, String fileNameAttempt) {
+    public File getFinalFile(File baseDirectory, String fileNameAttempt) {
         
         int suffix = 1;
         String attemptSuffix = "";

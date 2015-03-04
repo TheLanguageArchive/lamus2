@@ -73,7 +73,7 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
         
         String correctedFilename = archiveFileHelper.correctPathElement(filenameAttempt, "getAvailableFile");
         String baseDirectoryForFileType = archiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
-        File finalFile = archiveFileHelper.getFinalFile(baseDirectoryForFileType, correctedFilename);
+        File finalFile = archiveFileHelper.getFinalFile(new File(baseDirectoryForFileType), correctedFilename);
         
         archiveFileHelper.createFileAndDirectories(finalFile);
         

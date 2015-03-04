@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.archive.permissions;
 
+import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
+
 /**
  * Interface for adjusting the permissions of files submitted from a certain
  * workspace according to the configuration file.
@@ -27,7 +29,8 @@ public interface PermissionAdjuster {
      * Checks the file permissions for a given submitted workspace and
      * compares them with the desired permissions in the
      * configuration file, changing them if necessary.
-     * @param workspaceID 
+     * @param workspaceID ID of the workspace
+     * @param scope Scope of the permission adjuster
      */
-    public void adjustPermissions(int workspaceID);
+    public void adjustPermissions(int workspaceID, PermissionAdjusterScope scope);
 }

@@ -285,7 +285,7 @@ public class LamusArchiveFileHelperTest {
         File dir = testFolder.newFolder(dirPath);
         File expectedFile = new File(dir, fileName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -303,7 +303,7 @@ public class LamusArchiveFileHelperTest {
         FileUtils.touch(file);
         File expectedFile = new File(dir, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -327,7 +327,7 @@ public class LamusArchiveFileHelperTest {
         String expectedName = "file_11.cmdi";
         File expectedFile = new File(dir, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -350,7 +350,7 @@ public class LamusArchiveFileHelperTest {
             FileUtils.touch(currentFile);
         }
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir.getPath(), fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
         
         //TODO Some Exception instead?
         

@@ -225,6 +225,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public Collection<WorkspaceNode> getChildWorkspaceNodes(int workspaceNodeID) {
         return this.getWorkspaceDao().getChildWorkspaceNodes(workspaceNodeID);
     }
+
+    /**
+     * @see WorkspaceDao#getDescendantWorkspaceNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodes(int workspaceNodeID) {
+        return this.getWorkspaceDao().getDescendantWorkspaceNodes(workspaceNodeID);
+    }
     
     /**
      * @see WorkspaceDao#getParentWorkspaceNodes(int)
@@ -250,6 +258,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
         return this.getWorkspaceDao().getUnlinkedNodes(workspaceID);
     }
 
+    /**
+     * @see WorkspaceDao#getUnlinkedNodesAndDescendants(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getUnlinkedNodesAndDescendants(int workspaceID) {
+        return this.getWorkspaceDao().getUnlinkedNodesAndDescendants(workspaceID);
+    }
+    
     /**
      * @see WorkspaceDao#updateNodeWorkspaceURL(nl.mpi.lamus.workspace.model.WorkspaceNode)
      */

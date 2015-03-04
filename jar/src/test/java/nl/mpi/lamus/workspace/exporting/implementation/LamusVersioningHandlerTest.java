@@ -259,8 +259,8 @@ public class LamusVersioningHandlerTest {
         final File fileToMove = new File(archiveDirectory, fileBaseName);
         final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
         
-        
-        final URL expectedURL = new File(orphansDirectory, fileBaseName).toURI().toURL();
+        final File finalFile = new File(orphansDirectory, fileBaseName);
+        final URL expectedURL = finalFile.toURI().toURL();
         
         context.checking(new Expectations() {{
             
@@ -271,6 +271,8 @@ public class LamusVersioningHandlerTest {
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockArchiveFileHelper).getFinalFile(orphansDirectory, fileBaseName); will(returnValue(finalFile));
         }});
         
         suppress(method(FileUtils.class, "moveFile", File.class, File.class));
@@ -291,7 +293,8 @@ public class LamusVersioningHandlerTest {
         final File fileToMove = new File(testNodeWsURL.getPath());
         final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
         
-        final URL expectedURL = new File(orphansDirectory, fileBaseName).toURI().toURL();
+        final File finalFile = new File(orphansDirectory, fileBaseName);
+        final URL expectedURL = finalFile.toURI().toURL();
         
         context.checking(new Expectations() {{
             
@@ -302,6 +305,8 @@ public class LamusVersioningHandlerTest {
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockArchiveFileHelper).getFinalFile(orphansDirectory, fileBaseName); will(returnValue(finalFile));
         }});
         
         suppress(method(FileUtils.class, "moveFile", File.class, File.class));

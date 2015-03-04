@@ -1302,48 +1302,57 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertEquals("Returned list of nodes should be empty", 0, result.size());
     }
     
-//    @Test
-//    public void getExistingChildTreeNodes() throws URISyntaxException, MalformedURLException {
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, Boolean.TRUE, Boolean.TRUE);
-//        WorkspaceNode childNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 2, Boolean.TRUE, Boolean.TRUE);
-//        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode);
-//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(parentNode, null, workspaceDao);
-//        WorkspaceTreeNode childTreeNode = new LamusWorkspaceTreeNode(childNode, parentTreeNode, workspaceDao);
-//        
-//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(parentTreeNode);
-//        
-//        assertNotNull("The returned list of tree nodes should not be null", result);
-//        assertEquals("Size of the returned list of tree nodes is different from expected", 1, result.size());
-//        assertTrue("The returned list of tree nodes does not contain the expected tree node", result.contains(childTreeNode));
-//    }
-
-//    @Test
-//    public void getNonExistingChildTreeNodes() throws URISyntaxException, MalformedURLException {
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode parentNode = insertTestWorkspaceNodeWithArchiveIDIntoDB(testWorkspace, 1, Boolean.TRUE, Boolean.TRUE);
-//        WorkspaceTreeNode parentTreeNode = new LamusWorkspaceTreeNode(parentNode, null, workspaceDao);
-//        
-//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(parentTreeNode);
-//        
-//        assertNotNull("The returned list of treenodes should not be null", result);
-//        assertEquals("Returned list of treenodes should be empty", 0, result.size());
-//    }
-
-//    @Test
-//    public void getChildTreeNodesFromNonExistingParent() throws URISyntaxException, MalformedURLException {
-//        
-//        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-//        WorkspaceNode nonExistingParentNode = createWorkspaceNode(testWorkspace, -1, Boolean.FALSE, Boolean.FALSE);
-//        WorkspaceTreeNode nonExistingParentTreeNode = new LamusWorkspaceTreeNode(nonExistingParentNode, null, workspaceDao);
-//        
-//        List<WorkspaceTreeNode> result = this.workspaceDao.getChildWorkspaceTreeNodes(nonExistingParentTreeNode);
-//        
-//        assertNotNull("The returned list of tree nodes should not be null", result);
-//        assertEquals("Returned list of tree nodes should be empty", 0, result.size());
-//    }
+    @Test
+    public void getExistingDescendantNodes() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        URI childURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_1 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode childNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_1, childURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_1);
+        URI childURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_2 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode childNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_2, childURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_2);
+        URI subChildURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL subChildURL_1 = new URL("file:/archive/folder/subchild.cmdi");
+        WorkspaceNode subChildNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, subChildURI_1, subChildURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(childNode_1, subChildNode_1);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodes(parentNode.getWorkspaceNodeID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 3, result.size());
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_1)", result.contains(childNode_1));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_2)", result.contains(childNode_2));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (subChild_1)", result.contains(subChildNode_1));
+    }
+    
+    @Test
+    public void getNonExistingDescendantNodes() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodes(parentNode.getWorkspaceNodeID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void getDescendantNodesFromNonExistingParent() {
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodes(1);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Returned list of nodes should be empty", 0, result.size());
+    }
     
     @Test
     public void getExistingParentNodes() throws MalformedURLException, URISyntaxException {
@@ -1626,6 +1635,45 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertNotNull("List of unlinked nodes should not be null", result);
         assertTrue("List of unlinked nodes has a different size than what was expected", result.isEmpty());
+    }
+    
+    @Test
+    public void getUnlinkedNodesAndDescendants() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        URI childURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL = new URL("file:/archive/folder/childnode.cmdi");
+        WorkspaceNode childNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI, childURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, childNode);
+        
+        URI unlinkedURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL unlinkedURL = new URL("file:/archive/folder/unlinkednode.cmdi");
+        WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedURI, unlinkedURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        URI unlinkedNodeChildURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL unlinkedNodeChildURL_1 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode unlinkedNodeChildNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedNodeChildURI_1, unlinkedNodeChildURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(unlinkedNode, unlinkedNodeChildNode_1);
+        URI unlinkedNodeChildURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL unlinkedNodeChildURL_2 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode unlinkedNodeChildNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedNodeChildURI_2, unlinkedNodeChildURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(unlinkedNode, unlinkedNodeChildNode_2);
+        URI unlinkedNodeSubChildURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL unlinkedNodeSubChildURL_1 = new URL("file:/archive/folder/subchild.cmdi");
+        WorkspaceNode unlinkedNodeSubChildNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedNodeSubChildURI_1, unlinkedNodeSubChildURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(unlinkedNodeChildNode_1, unlinkedNodeSubChildNode_1);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getUnlinkedNodesAndDescendants(testWorkspace.getWorkspaceID());
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 4, result.size());
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (unlinkedNode)", result.contains(unlinkedNode));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_1)", result.contains(unlinkedNodeChildNode_1));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_2)", result.contains(unlinkedNodeChildNode_2));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (subChild_1)", result.contains(unlinkedNodeSubChildNode_1));
     }
     
     @Test

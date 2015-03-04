@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
+import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.VersionCreationException;
@@ -174,7 +175,7 @@ public class WorkspaceExportRunnerTest {
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(exporting.isNot("finished"));
-            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
                 then(exporting.is("finished"));
         }});
         
@@ -217,12 +218,11 @@ public class WorkspaceExportRunnerTest {
         context.checking(new Expectations() {{
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
                 then(exporting.is("finished"));
-            
-            //TODO FIX PERMISSIONS AS WELL?
-                
-//            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID);
-//                then(exporting.is("finished"));
         }});
         
         boolean result = executeRunner();

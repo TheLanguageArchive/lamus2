@@ -18,9 +18,9 @@ package nl.mpi.lamus.workspace.upload;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.zip.ZipInputStream;
-import nl.mpi.lamus.exception.TypeCheckerException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 
@@ -40,8 +40,17 @@ public interface WorkspaceUploader {
     public File getWorkspaceUploadDirectory(int workspaceID);
 
     /**
-     * Given a ZipInputStream and the filename, this method uploads its content
-     * and triggers typecheck on the contained files.
+     * Given an InputStream and a filename, this method uploads the corresponding file.
+     * @param workspaceID ID of the workspace
+     * @param inputStream InputStream to upload
+     * @param filename name of the file
+     * @return uploaded File
+     */
+    public File uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
+            throws IOException;
+    
+    /**
+     * Given a ZipInputStream and the filename, this method uploads its content.
      * @param workspaceID ID of the workspace
      * @param zipInputStream ZipInputStream to upload
      * @return Collection containing copied files

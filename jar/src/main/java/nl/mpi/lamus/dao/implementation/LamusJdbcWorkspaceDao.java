@@ -22,6 +22,7 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -662,6 +663,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return listToReturn;
     }
+
+    /**
+     * @see WorkspaceDao#getDescendantWorkspaceNodes(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodes(int workspaceNodeID) {
+        
+        logger.debug("Retrieving list containing descendant nodes of the node with ID: " + workspaceNodeID);
+        
+        Collection<WorkspaceNode> allDescendants = new ArrayList<>();
+        
+        Collection<WorkspaceNode> children = getChildWorkspaceNodes(workspaceNodeID);
+        
+        for(WorkspaceNode child : children) {
+            allDescendants.add(child);
+            allDescendants.addAll(getDescendantWorkspaceNodes(child.getWorkspaceNodeID()));
+        }
+        
+        return allDescendants;
+    }
     
     /**
      * @see WorkspaceDao#getParentWorkspaceNodes(int)
@@ -722,7 +743,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return listToReturn;
     }
-    
+
+    /**
+     * @see WorkspaceDao#getUnlinkedNodesAndDescendants(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getUnlinkedNodesAndDescendants(int workspaceID) {
+        
+        logger.debug("Retrieving list containing unlinked nodes and descendants for workspace with ID: " + workspaceID);
+        
+        Collection<WorkspaceNode> unlinkedNodesAndDescendants = new ArrayList<>();
+        
+        List<WorkspaceNode> unlinkedNodes = getUnlinkedNodes(workspaceID);
+        
+        for(WorkspaceNode node : unlinkedNodes) {
+            unlinkedNodesAndDescendants.add(node);
+            unlinkedNodesAndDescendants.addAll(getDescendantWorkspaceNodes(node.getWorkspaceNodeID()));
+        }
+        
+        return unlinkedNodesAndDescendants;
+    }
     
     
     /**

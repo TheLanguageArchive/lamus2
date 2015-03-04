@@ -149,9 +149,11 @@ public class LamusWorkspaceFileHandlerTest {
     public void tearDown() throws IOException {
         FileUtils.cleanDirectory(workspaceBaseDirectory);
         if(tempDirectory != null) {
+            tempDirectory.setWritable(true);
             FileUtils.cleanDirectory(tempDirectory);
         }
         if(anotherTempDirectory != null) {
+            anotherTempDirectory.setWritable(true);
             FileUtils.cleanDirectory(anotherTempDirectory);
         }
     }
@@ -291,6 +293,43 @@ public class LamusWorkspaceFileHandlerTest {
         }
         
         assertFalse("File shouldn't exist in its expected final location", destinationFile.exists());
+        assertTrue("File should still exist in its original location", originFile.exists());
+    }
+    
+    @Test
+    public void deleteFileSuccessfully() throws MalformedURLException, IOException, URISyntaxException {
+        
+        File originFile = createFileToCopy();
+        
+        workspaceFileHandler.deleteFile(originFile);
+        
+        assertFalse("File shouldn't exist anymore in its original location", originFile.exists());
+    }
+    
+    @Test
+    public void deleteFile_doesntExist() throws IOException {
+        
+        File originFile = doNotCreateFileToCopy();
+        
+        workspaceFileHandler.deleteFile(originFile);
+        //shouldn't cause any error if the file doesn't exist
+        
+        assertFalse("File shouldn't exist in the origin location", originFile.exists());
+    }
+    
+    @Test
+    public void deleteFileThrowsException() throws MalformedURLException, IOException, URISyntaxException {
+        
+        File originFile = createFileToCopy();
+        tempDirectory.setReadOnly();
+        
+        try {
+            workspaceFileHandler.deleteFile(originFile);
+            fail("An exception should have been thrown");
+        } catch(IOException ex) {
+            //expected exception is thrown
+        }
+        
         assertTrue("File should still exist in its original location", originFile.exists());
     }
     
@@ -607,10 +646,30 @@ public class LamusWorkspaceFileHandlerTest {
         return node;
     }
     
-    private File createFileToCopy() throws IOException {
+    private void prepareTempDirectory() {
         tempDirectory = testFolder.newFolder("temp_directory");
-
         assertTrue("Temp directory wasn't created.", tempDirectory.exists());
+    }
+    
+    private void prepareAnotherTempDirectory() {
+        anotherTempDirectory = testFolder.newFolder("another_temp_directory");
+        assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
+    }
+    
+    private File createFileWithNameInTempDirectory(String filename) throws IOException {
+        prepareTempDirectory();
+        
+        File tempFile = new File(tempDirectory, filename);
+        boolean isFileCreated = tempFile.createNewFile();
+        
+        assertTrue("Temp file was not successfuly created.", isFileCreated);
+        assertTrue("Temp file wasn't created.", tempFile.exists());
+        
+        return tempFile;
+    }
+    
+    private File createFileToCopy() throws IOException {
+        prepareTempDirectory();
         
         File tempFile = new File(tempDirectory, "temp_file.txt");
         boolean isFileCreated = tempFile.createNewFile();
@@ -622,9 +681,7 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     private File doNotCreateFileToCopy() throws IOException {
-        tempDirectory = testFolder.newFolder("temp_directory");
-
-        assertTrue("Temp directory wasn't created.", tempDirectory.exists());
+        prepareTempDirectory();
         
         File tempFile = new File(tempDirectory, "temp_file.txt");
         
@@ -634,9 +691,7 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     private File createTargetDirectory_retrieveTargetFileLocation() {
-        anotherTempDirectory = testFolder.newFolder("another_temp_directory");
-        
-        assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
+        prepareAnotherTempDirectory();
         
         File targetLocation = new File(anotherTempDirectory, "target_temp_file.txt");
         
@@ -644,9 +699,7 @@ public class LamusWorkspaceFileHandlerTest {
     }
     
     private File doNotCreateTargetDirectory_retrieveTargetFileLocation() {
-        anotherTempDirectory = testFolder.newFolder("another_temp_directory");
-        
-        assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
+        prepareAnotherTempDirectory();
         
         File targetDirectory = new File(anotherTempDirectory, "nonexistingfolder");
         

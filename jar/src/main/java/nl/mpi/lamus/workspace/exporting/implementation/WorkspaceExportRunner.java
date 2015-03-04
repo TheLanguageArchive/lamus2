@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
+import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -144,6 +145,8 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
             
             this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
             
+            permissionAdjuster.adjustPermissions(workspace.getWorkspaceID(), PermissionAdjusterScope.UNLINKED_NODES_ONLY);
+            
         } else if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
         
             WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
@@ -165,7 +168,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 
 
             //TODO fix permissions
-            permissionAdjuster.adjustPermissions(workspace.getWorkspaceID());
+            permissionAdjuster.adjustPermissions(workspace.getWorkspaceID(), PermissionAdjusterScope.ALL_NODES);
         
         } else {
             throw new UnsupportedOperationException("Type of submission not supported");

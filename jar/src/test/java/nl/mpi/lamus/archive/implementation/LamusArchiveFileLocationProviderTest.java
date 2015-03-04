@@ -100,6 +100,7 @@ public class LamusArchiveFileLocationProviderTest {
         final String filenameAttempt = "resource.pdf";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
+        final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         
         context.checking(new Expectations() {{
@@ -107,7 +108,7 @@ public class LamusArchiveFileLocationProviderTest {
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
             oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
-            oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileType, filenameAttempt); will(returnValue(mockFile));
+            oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile);
             
         
@@ -131,6 +132,7 @@ public class LamusArchiveFileLocationProviderTest {
         final String filenameAttempt = "resource.pdf";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
+        final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         
         final Exception ioException = new IOException("some error message");
@@ -140,7 +142,7 @@ public class LamusArchiveFileLocationProviderTest {
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
             oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
-            oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileType, filenameAttempt); will(returnValue(mockFile));
+            oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile); will(throwException(ioException));
             
         

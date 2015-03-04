@@ -51,6 +51,13 @@ public interface WorkspaceFileHandler {
             throws IOException;
     
     /**
+     * Deletes the given file.
+     * @param file file to delete
+     */
+    public void deleteFile(File file)
+            throws IOException;
+    
+    /**
      * Gets a StreamResult object based on the given file.
      * 
      * @param nodeFile file with which to construct the StreamResult
