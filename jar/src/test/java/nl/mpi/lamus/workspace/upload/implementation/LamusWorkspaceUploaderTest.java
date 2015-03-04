@@ -258,7 +258,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(firstEntryFile));
-            oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(firstEntryFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
