@@ -109,7 +109,8 @@ public class UnlinkedNodeExporterTest {
 
     
     @Test
-    public void exportNode_NullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+    public void exportNode_NullWorkspace()
+            throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -126,7 +127,8 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void export_ExportPhaseTree() throws WorkspaceExportException {
+    public void export_ExportPhaseTree()
+            throws WorkspaceExportException {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -143,7 +145,8 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
+    public void exportProtectedNode()
+            throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final boolean isNodeProtected = Boolean.TRUE;
         final boolean keepUnlinkedFiles = Boolean.FALSE;
@@ -156,7 +159,8 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void export_DoNotKeepUnlinkedFiles_DeleteSubmissionType() throws WorkspaceExportException {
+    public void export_DoNotKeepUnlinkedFiles_DeleteSubmissionType()
+            throws WorkspaceExportException {
         
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -172,7 +176,8 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportLocalResource_DoNotKeepUnlinkedFiles_SubmitSubmissionType() throws WorkspaceExportException {
+    public void exportLocalResource_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
+            throws WorkspaceExportException {
         
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -255,7 +260,7 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeVersionArchivePathURI, nodeVersionArchiveFileUri);
+        updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeVersionArchivePathURI, nodeVersionArchiveFileUri, null);
 
         unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
@@ -358,7 +363,7 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri);
+        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
@@ -400,7 +405,7 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri);
+        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
@@ -408,7 +413,9 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportArchiveResource_KeepUnlinkedFiles_SubmitSubmissionType() throws MalformedURLException, HandleException, IOException, TransformerException, MetadataException, WorkspaceExportException {
+    public void exportArchiveResource_KeepUnlinkedFiles_SubmitSubmissionType()
+            throws MalformedURLException, HandleException, IOException,
+            TransformerException, MetadataException, WorkspaceExportException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
@@ -441,7 +448,8 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportLocalResource_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException {
+    public void exportLocalResource_KeepUnlinkedFiles_DeleteSubmissionType()
+            throws MalformedURLException, WorkspaceExportException {
         
         final String nodeFilename = "node.txt";
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
@@ -469,7 +477,9 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportLocalMetadataWithParent_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException, IOException, MetadataException, TransformerException {
+    public void exportLocalMetadataWithParent_KeepUnlinkedFiles_DeleteSubmissionType()
+            throws MalformedURLException, WorkspaceExportException, IOException,
+            MetadataException, TransformerException {
         
         final String nodeFilename = "node.cmdi";
         final URI nodeFilenameUri = URI.create(nodeFilename);
@@ -500,7 +510,7 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri);
+        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
 
@@ -508,7 +518,9 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-    public void exportArchiveNode_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException {
+    public void exportArchiveNode_KeepUnlinkedFiles_DeleteSubmissionType()
+            throws MalformedURLException, WorkspaceExportException, HandleException,
+            IOException, TransformerException, MetadataException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
@@ -529,7 +541,9 @@ public class UnlinkedNodeExporterTest {
     }
     
     @Test
-        public void exportArchiveNodeWithParent_KeepUnlinkedFiles_DeleteSubmissionType() throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException {
+        public void exportArchiveNodeWithParent_KeepUnlinkedFiles_DeleteSubmissionType()
+            throws MalformedURLException, WorkspaceExportException, HandleException,
+            IOException, TransformerException, MetadataException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
@@ -548,16 +562,97 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeArchiveURI, null);
+        updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeArchiveURI, null, null);
 
         unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
-    public void exportSomething_someException() {
-        fail("not tested yet");
-    }
+    public void exportArchiveMetadata_DoNotKeepUnlinkedFiles_SubmitSubmissionType_throwsException()
+            throws MalformedURLException, WorkspaceExportException {
+        
+        final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
+        
+        final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
+        final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
+        final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.TRUE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        final WorkspaceExportException expectedException = new WorkspaceExportException("some exception message", wsID, null);
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
 
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+                will(throwException(expectedException));
+        }});
+
+        try {
+            unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+        public void exportLocalResourceWithParent_KeepUnlinkedFiles_SubmitSubmissionType_throwsException()
+            throws MalformedURLException, WorkspaceExportException, HandleException,
+            IOException, TransformerException, MetadataException {
+        
+        final String nodeFilename = "node.txt";
+        final URI nodeFilenameUri = URI.create(nodeFilename);
+        final URL nodeWsLocation = new URL("file:/workspace/location/" + nodeFilename);
+        final URI nodeWsLocationUri = URI.create(nodeWsLocation.toString());
+        final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        
+        final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        
+        final boolean isNodeProtected = Boolean.FALSE;
+        final boolean isNodeMetadata = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        final MetadataException expectedCause = new MetadataException("some exception message");
+        final String expectedMessage = "Error writing file (updating child reference) for node " + parentWsUrl;
+        
+        initialExpectations(isNodeProtected);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            
+            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            
+            oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
+        }});
+        
+        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, expectedCause);
+
+        try {
+            unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown an exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception cause different from expected", expectedCause, ex.getCause());
+        }
+    }
+    
     
     private void initialExpectations(final boolean isNodeProtected) {
         context.checking(new Expectations() {{
@@ -568,8 +663,10 @@ public class UnlinkedNodeExporterTest {
         }});
     }
     
-    private void updateReferenceInParent(final URL parentWsUrl, final URI oldNodeLocationUri, final URI newNodeLocationUri, final URI newNodeLocationFilenameUri)
-            throws IOException, MetadataException, TransformerException {
+    private void updateReferenceInParent(final URL parentWsUrl, final URI oldNodeLocationUri,
+            final URI newNodeLocationUri, final URI newNodeLocationFilenameUri,
+            final Exception saveDocumentException)
+                throws IOException, MetadataException, TransformerException {
         context.checking(new Expectations() {{
             allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentWsUrl));
             oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
@@ -581,7 +678,13 @@ public class UnlinkedNodeExporterTest {
             } else {
                 oneOf(mockReference).setURI(newNodeLocationFilenameUri);
                 oneOf(mockReference).setLocation(newNodeLocationUri);
-                oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentWsUrl);
+                
+                if(saveDocumentException == null) {
+                    oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentWsUrl);
+                } else {
+                    oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentWsUrl);
+                        will(throwException(saveDocumentException));
+                }
             }
         }});
     }

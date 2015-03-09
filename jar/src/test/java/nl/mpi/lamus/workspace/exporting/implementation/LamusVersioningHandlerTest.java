@@ -287,6 +287,31 @@ public class LamusVersioningHandlerTest {
     }
     
     @Test
+    public void moveFileToOrphansFolder_ResourceNodeWithArchiveURI_FileNull() throws MalformedURLException, URISyntaxException {
+        
+        final String testNodeStrippedHandle = UUID.randomUUID().toString();
+        final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
+        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        
+        final String expectedMessage = "No valid file location was found.";
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(null));
+        }});
+        
+        try {
+            versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+            fail("should have thrown exception");
+        } catch(IllegalStateException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
     public void moveFileToOrphansFolder_ResourceNodeWithoutArchiveURI() throws MalformedURLException, URISyntaxException {
         
         final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
