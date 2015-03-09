@@ -240,7 +240,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE);
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
@@ -289,7 +290,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE);
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
@@ -587,7 +589,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
             
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, Boolean.FALSE); will(throwException(expectedException));
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
             //logger
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
 

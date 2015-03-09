@@ -41,7 +41,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
@@ -252,9 +251,8 @@ public class AddedNodeExporter implements NodeExporter {
         
         //create self link in header, either if it is already there (will be replaced) or not (will be added)
         try {
-            HeaderInfo newInfo = metadataApiBridge.getNewSelfHandleHeaderInfo(handleManager.prepareHandleWithHdlPrefix(node.getArchiveURI()));
-            document.putHeaderInformation(newInfo);
-        } catch (MetadataException | URISyntaxException ex) {
+            metadataApiBridge.addSelfHandleAndSaveDocument(document, node.getArchiveURI(), node.getWorkspaceURL());
+        } catch (MetadataException | TransformerException | IOException | URISyntaxException ex) {
             String errorMessage = "Error updating header information for node " + node.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }

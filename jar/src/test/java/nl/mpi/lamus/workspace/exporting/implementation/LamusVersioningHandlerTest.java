@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -57,7 +59,7 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileUtils.class})
+@PrepareForTest({FileUtils.class, Files.class})
 public class LamusVersioningHandlerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
@@ -246,7 +248,7 @@ public class LamusVersioningHandlerTest {
     }
     
     @Test
-    public void moveFileToOrphansFolder_WithArchiveURI() throws MalformedURLException, URISyntaxException {
+    public void moveFileToOrphansFolder_ResourceNodeWithArchiveURI() throws MalformedURLException, URISyntaxException {
         
         final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
         final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
@@ -254,7 +256,7 @@ public class LamusVersioningHandlerTest {
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
         final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
         
-        final String fileBaseName = "node.cmdi";
+        final String fileBaseName = "node.txt";
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
         final File fileToMove = new File(archiveDirectory, fileBaseName);
         final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
@@ -264,9 +266,10 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            exactly(2).of(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
             oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(fileToMove));
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
@@ -276,6 +279,7 @@ public class LamusVersioningHandlerTest {
         }});
         
         suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        suppress(method(Files.class, "deleteIfExists", Path.class));
         
         URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
         
@@ -283,12 +287,12 @@ public class LamusVersioningHandlerTest {
     }
     
     @Test
-    public void moveFileToOrphansFolder_WithoutArchiveURI() throws MalformedURLException, URISyntaxException {
+    public void moveFileToOrphansFolder_ResourceNodeWithoutArchiveURI() throws MalformedURLException, URISyntaxException {
         
         final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
         final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
         
-        final String fileBaseName = "node.cmdi";
+        final String fileBaseName = "node.txt";
         final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
         final File fileToMove = new File(testNodeWsURL.getPath());
         final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
@@ -298,7 +302,7 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.FALSE));
             
@@ -317,6 +321,81 @@ public class LamusVersioningHandlerTest {
     }
     
     @Test
+    public void moveFileToOrphansFolder_MetadataWithoutArchiveURI() throws MalformedURLException, URISyntaxException {
+        
+        final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
+        final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
+        
+        final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final File fileToMove = new File(testNodeWsURL.getPath());
+        final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
+        
+        final File finalFile = new File(orphansDirectory, fileBaseName);
+        final URL expectedURL = finalFile.toURI().toURL();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockArchiveFileHelper).getFinalFile(orphansDirectory, fileBaseName); will(returnValue(finalFile));
+        }});
+        
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        
+        URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+        
+        assertEquals("Result different from expected", expectedURL, result);
+    }
+    
+    @Test
+    public void moveFileToOrphansFolder_MetadataWithArchiveURI() throws MalformedURLException, URISyntaxException {
+        
+        final URL wsTopNodeUrl = new URL("file:/workspace/folder/topnode.cmdi");
+        final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
+        final String testNodeStrippedHandle = UUID.randomUUID().toString();
+        final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
+        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        
+        final String fileBaseName = "node.cmdi";
+        final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
+        final File fileToMove = new File(testNodeWsURL.getPath());
+        final File orphansDirectory = new File("/lat/corpora/corpora/archive/somefolder/sessions");
+        
+        final File finalFile = new File(orphansDirectory, fileBaseName);
+        final URL expectedURL = finalFile.toURI().toURL();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(fileToMove));
+            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
+            oneOf(mockArchiveFileHelper).canWriteTargetDirectory(orphansDirectory); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockArchiveFileHelper).getFinalFile(orphansDirectory, fileBaseName); will(returnValue(finalFile));
+        }});
+        
+        suppress(method(FileUtils.class, "moveFile", File.class, File.class));
+        suppress(method(Files.class, "deleteIfExists", Path.class));
+        
+        URL result = versioningHandler.moveFileToOrphansFolder(mockWorkspace, mockWorkspaceNode);
+        
+        assertEquals("Result different from expected", expectedURL, result);
+    }
+    
+    @Test
     public void moveFileToOrphansFolder_WithoutArchiveURI_AlreadyInOrphansFolder() throws MalformedURLException, URISyntaxException {
         
         final String fileBaseName = "node.cmdi";
@@ -325,7 +404,7 @@ public class LamusVersioningHandlerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
+            allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.TRUE));
         }});

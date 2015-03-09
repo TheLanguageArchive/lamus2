@@ -22,6 +22,7 @@ import java.net.URL;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -61,6 +62,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
     private MetadataApiBridge metadataApiBridge;
     @Autowired
     private MetadataAPI metadataAPI;
+    @Autowired
+    private WorkspaceDao workspaceDao;
     
 
     /**
@@ -90,7 +93,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         logger.debug("Exporting unlinked node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
         logger.debug("Keep unlinked files: " + keepUnlinkedFiles + "; Submission type: " + submissionType.toString() + "; Export phase: " + exportPhase.toString());
-        
+
         if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
             logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
             return;
@@ -113,6 +116,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 
                 URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
                 currentNode.setArchiveURL(trashedNodeArchiveURL);
+                workspaceDao.updateNodeArchiveUrl(currentNode);
                 URI trashedNodeArchiveUri = URI.create(trashedNodeArchiveURL.toString());
                 
                 if(parentNode != null) {
@@ -135,7 +139,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
 
                 if(parentNode != null) {
                     ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, currentArchiveUri, parentNode.getWorkspaceURL(), parentDocument, null);
+                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, null, parentNode.getWorkspaceURL(), parentDocument, null);
                 }
                 
                 return;
@@ -150,10 +154,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 
             if(currentArchiveUri != null) {
 
-                nodeUri = currentArchiveUri;
-
                 try {
-                    archiveHandleHelper.deleteArchiveHandle(currentNode, false);
+                    archiveHandleHelper.deleteArchiveHandle(currentNode, orphanedNodeURL);
                 } catch (HandleException | IOException | TransformerException | MetadataException ex) {
                     logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
                 }
@@ -164,8 +166,12 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
                 updateReferenceInParent(workspace.getWorkspaceID(), nodeWsUri, nodeUri, parentNode.getWorkspaceURL(), parentDocument, FilenameUtils.getName(orphanedNodeURL.toString()));
             }
+            
+            //this will be used later for adjusting file permissions
+            currentNode.setWorkspaceURL(orphanedNodeURL);
+            workspaceDao.updateNodeWorkspaceURL(currentNode);
         }
-
+        
         //TODO is this necessary?
 //        searchClientBridge.removeNode(currentNode.getArchiveURI());
     }

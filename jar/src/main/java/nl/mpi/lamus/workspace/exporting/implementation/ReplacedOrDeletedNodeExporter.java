@@ -181,7 +181,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         
         if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
             try {
-                archiveHandleHelper.deleteArchiveHandle(currentNode, false);
+                archiveHandleHelper.deleteArchiveHandle(currentNode, currentNode.getArchiveURL());
             } catch (HandleException | IOException | TransformerException | MetadataException ex) {
                 logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
             }

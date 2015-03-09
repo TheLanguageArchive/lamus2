@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -90,11 +91,20 @@ public class LamusVersioningHandler implements VersioningHandler {
     public URL moveFileToOrphansFolder(Workspace workspace, WorkspaceNode nodeToMove) {
         
         
-        File orphanOldLocation;
+        File orphanOldLocation = null;
+        
+        File archiveLocation = null;
+        
+        //if file was not in the archive already, then it will be moved from its workspace location
+        //if file is in the archive and is a resource, then it will be moved from its archive location
+        //if file is metadata, then it will be moved from its workspace location; if it is also in the archive, then it has to be removed from there
+        
         if(nodeToMove.getArchiveURI() != null) {
             CorpusNode archiveNode = corpusStructureProvider.getNode(nodeToMove.getArchiveURI());
-            orphanOldLocation = nodeResolver.getLocalFile(archiveNode);
-        } else {
+            archiveLocation = nodeResolver.getLocalFile(archiveNode);
+        }
+        
+        if(nodeToMove.getArchiveURI() == null || nodeToMove.isMetadata()) {
             URL orphanOldLocationUrl = nodeToMove.getWorkspaceURL();
             orphanOldLocation = new File(orphanOldLocationUrl.getPath());
             if(archiveFileLocationProvider.isFileInOrphansDirectory(orphanOldLocation)) {
@@ -103,7 +113,16 @@ public class LamusVersioningHandler implements VersioningHandler {
             }
         }
         
-        String filename = orphanOldLocation.getName();
+        if(orphanOldLocation == null) {
+            orphanOldLocation = archiveLocation;
+        }
+        
+        String filename;
+        if(orphanOldLocation != null) {
+            filename = orphanOldLocation.getName();
+        } else {
+            throw new IllegalStateException("No valid file location was found.");
+        }
         
         File orphanNewLocation;
         try {
@@ -121,6 +140,9 @@ public class LamusVersioningHandler implements VersioningHandler {
         
         try {
             FileUtils.moveFile(orphanOldLocation, orphanNewLocation);
+            if(archiveLocation != null) {
+                Files.deleteIfExists(archiveLocation.toPath());
+            }
         } catch (IOException ex) {
             logger.error("File couldn't be moved from [" + orphanOldLocation + "] to [" + orphanNewLocation + "]", ex);
             return null;

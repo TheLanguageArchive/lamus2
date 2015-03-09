@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -37,6 +38,10 @@ import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.Description;
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -73,11 +78,17 @@ public class LamusMetadataApiBridgeTest {
     
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock HandleManager mockHandleManager;
     
     @Mock MetadataDocument mockMetadataDocument;
     @Mock CMDIDocument mockCmdiDocument;
     @Mock File mockFile;
     @Mock StreamResult mockStreamResult;
+    
+    @Factory
+    public static Matcher<HeaderInfo> equivalentHeaderInfo(HeaderInfo headerInfo ) {
+        return new HeaderInfoMatcher(headerInfo);
+    }
     
     
     public LamusMetadataApiBridgeTest() {
@@ -93,7 +104,7 @@ public class LamusMetadataApiBridgeTest {
     
     @Before
     public void setUp() {
-        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI, mockWorkspaceFileHandler);
+        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI, mockWorkspaceFileHandler, mockHandleManager);
     }
     
     @After
@@ -238,6 +249,104 @@ public class LamusMetadataApiBridgeTest {
         URI retrievedHandle = lamusMetadataApiBridge.getSelfHandleFromDocument(mockMetadataDocument);
         
         assertNull("Retrieved handle should be null", retrievedHandle);
+    }
+    
+    @Test
+    public void addSelfHandle() throws MalformedURLException, URISyntaxException, MetadataException, IOException, TransformerException {
+        
+        final URI handle = URI.create("11142/" + UUID.randomUUID().toString());
+        final URI preparedHandle = URI.create("hdl:" + handle.toString());
+        final URL targetLocation = new URL("file:/workspace/folder/file.cmdi");
+        final HeaderInfo headerInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, preparedHandle.toString());
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+    }
+    
+    @Test
+    public void addSelfHandle_throwsURISyntaxException() throws MalformedURLException, URISyntaxException, MetadataException, IOException, TransformerException {
+        
+        final URI handle = URI.create("11142/" + UUID.randomUUID().toString());
+        final URI preparedHandle = URI.create("hdl:" + handle.toString());
+        final URL targetLocation = new URL("file:/workspace/folder/file.cmdi");
+        final HeaderInfo headerInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, preparedHandle.toString());
+        
+        final URISyntaxException expectedException = new URISyntaxException(handle.toString(), "some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(throwException(expectedException));
+        }});
+
+        try {
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            fail("should have thrown exception");
+        } catch(URISyntaxException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void addSelfHandle_throwsMetadataException() throws MalformedURLException, URISyntaxException, MetadataException, IOException, TransformerException {
+        
+        final URI handle = URI.create("11142/" + UUID.randomUUID().toString());
+        final URI preparedHandle = URI.create("hdl:" + handle.toString());
+        final URL targetLocation = new URL("file:/workspace/folder/file.cmdi");
+        final HeaderInfo headerInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, preparedHandle.toString());
+        
+        final MetadataException expectedException = new MetadataException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo))); will(throwException(expectedException));
+        }});
+
+        try {
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            fail("should have thrown exception");
+        } catch(MetadataException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void addSelfHandle_throwsIOException() throws MalformedURLException, URISyntaxException, MetadataException, IOException, TransformerException {
+        
+        final URI handle = URI.create("11142/" + UUID.randomUUID().toString());
+        final URI preparedHandle = URI.create("hdl:" + handle.toString());
+        final URL targetLocation = new URL("file:/workspace/folder/file.cmdi");
+        final HeaderInfo headerInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, preparedHandle.toString());
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
+            
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult); will(throwException(expectedException));
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
+        
+        try {
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test
@@ -463,10 +572,46 @@ public class LamusMetadataApiBridgeTest {
         
         final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/orphanCollection.cmdi");
         
-        MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null);
+        MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null, null);
         
         boolean result = testMdApiBridge.isMetadataFileValid(metadataFileToCheck);
         
         assertTrue("Metadata file should be valid", result);
+    }
+}
+
+
+class HeaderInfoMatcher extends TypeSafeMatcher<HeaderInfo> {
+    
+    private String headerInfoName;
+    private String headerInfoValue;
+
+    public HeaderInfoMatcher(HeaderInfo hInfo) {
+        headerInfoName = hInfo.getName();
+        headerInfoValue = hInfo.getValue();
+    }
+
+    @Override
+    public boolean matchesSafely(HeaderInfo hi) {
+        if(hi.getName() == null) {
+            return Boolean.FALSE;
+        }
+        if(!hi.getName().equals(headerInfoName)) {
+            return Boolean.FALSE;
+        }
+        
+        if(hi.getValue() == null) {
+            return Boolean.FALSE;
+        }
+        if(!hi.getValue().equals(headerInfoValue)) {
+            return Boolean.FALSE;
+        }
+        
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+        description.appendText("a HeaderInfo with name ").appendValue(headerInfoName).appendText(" and valu ").appendValue(headerInfoValue);
     }
 }

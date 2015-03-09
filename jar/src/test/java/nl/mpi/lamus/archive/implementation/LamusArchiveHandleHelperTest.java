@@ -141,9 +141,10 @@ public class LamusArchiveHandleHelperTest {
     }
     
     @Test
-    public void deleteHandleResource_targetInArchive()
+    public void deleteHandleResource()
             throws HandleException, IOException, TransformerException, MetadataException {
         
+        final URL location = new URL("file:/location/file.txt");
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
         
@@ -157,16 +158,16 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
         }});
         
-        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
     }
     
     @Test
-    public void deleteHandleMetadata_targetInArchive()
+    public void deleteHandleMetadata()
             throws HandleException, IOException, TransformerException, MetadataException {
         
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
-        final URL archiveUrl = new URL("file:/trash/location/r_node.cmdi");
+        final URL location = new URL("file:/workspace/location/r_node.cmdi");
         
         context.checking(new Expectations() {{
             
@@ -176,40 +177,17 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(archiveUrl));
-            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(archiveUrl);
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location);
         }});
         
-        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
-    }
-    
-    @Test
-    public void deleteHandleMetadata_targetInWorkspace()
-            throws HandleException, IOException, TransformerException, MetadataException {
-        
-        final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
-        final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
-        final URL workspaceUrl = new URL("file:/workspace/location/r_node.cmdi");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(archiveHandle));
-            oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
-            oneOf(mockWorkspaceNode).setArchiveURI(null);
-            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
-            
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(workspaceUrl));
-            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(workspaceUrl);
-        }});
-        
-        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.TRUE);
+        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
     }
     
     @Test
     public void deleteHandle_throwsHandleException()
             throws HandleException, IOException, TransformerException, MetadataException {
         
+        final URL location = new URL("file:/location/file.txt");
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
         
@@ -222,7 +200,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(HandleException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -233,6 +211,7 @@ public class LamusArchiveHandleHelperTest {
     public void deleteHandle_throwsIOException()
             throws HandleException, IOException, TransformerException, MetadataException {
         
+        final URL location = new URL("file:/location/file.txt");
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
         
@@ -245,7 +224,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(IOException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -258,7 +237,7 @@ public class LamusArchiveHandleHelperTest {
         
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
-        final URL archiveUrl = new URL("file:/trash/location/r_node.cmdi");
+        final URL location = new URL("file:/trash/location/r_node.cmdi");
         
         final TransformerException expectedException = new TransformerException("some exception message");
         
@@ -270,12 +249,11 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(archiveUrl));
-            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(archiveUrl); will(throwException(expectedException));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(TransformerException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -288,7 +266,7 @@ public class LamusArchiveHandleHelperTest {
         
         final URI archiveHandle = URI.create("hdl:" + UUID.randomUUID().toString());
         final URI archiveHandleWithoutHdl = URI.create(archiveHandle.getSchemeSpecificPart());
-        final URL archiveUrl = new URL("file:/trash/location/r_node.cmdi");
+        final URL location = new URL("file:/trash/location/r_node.cmdi");
         
         final MetadataException expectedException = new MetadataException("some exception message");
         
@@ -300,12 +278,11 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
             
             oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceNode).getArchiveURL(); will(returnValue(archiveUrl));
-            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(archiveUrl); will(throwException(expectedException));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, Boolean.FALSE);
+            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(MetadataException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

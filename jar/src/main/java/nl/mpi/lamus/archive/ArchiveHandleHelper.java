@@ -18,6 +18,7 @@ package nl.mpi.lamus.archive;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
@@ -44,8 +45,8 @@ public interface ArchiveHandleHelper {
      * lamus2 database.
      * 
      * @param node Node to have the archive handle deleted
-     * @param targetInWorkspace true if the file is located in the workspace directory
+     * @param currenLocation current location of the node
      */
-    public void deleteArchiveHandle(WorkspaceNode node, boolean targetInWorkspace)
+    public void deleteArchiveHandle(WorkspaceNode node, URL currenLocation)
             throws HandleException, IOException, TransformerException, MetadataException;
 }

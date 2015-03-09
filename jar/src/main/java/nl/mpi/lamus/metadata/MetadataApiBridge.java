@@ -18,6 +18,7 @@ package nl.mpi.lamus.metadata;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.metadata.api.MetadataException;
@@ -46,6 +47,16 @@ public interface MetadataApiBridge {
      * @return URI corresponding to the self link, null if none is found
      */
     public URI getSelfHandleFromDocument(MetadataDocument document);
+    
+    /**
+     * Adds a self handle in the given document, given the intended URI
+     * and saves the document in the given location.
+     * @param document MetadataDocument object
+     * @param handleUri intended URI for the handle
+     * @param targetLocation location where the document should be saved
+     */
+    public void addSelfHandleAndSaveDocument(MetadataDocument document, URI handleUri, URL targetLocation)
+            throws URISyntaxException, MetadataException, IOException, TransformerException;
     
     /**
      * Removes the self link (handle) from the given file, if it has one,

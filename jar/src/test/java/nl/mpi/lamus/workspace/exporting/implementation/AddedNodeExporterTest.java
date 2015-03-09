@@ -48,9 +48,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
-import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -215,6 +213,11 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+        }});
+        
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -224,16 +227,12 @@ public class AddedNodeExporterTest {
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
-        
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
         checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
-        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
         
         checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
         
@@ -282,6 +281,11 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+        }});
+        
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -291,16 +295,12 @@ public class AddedNodeExporterTest {
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
-        
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
         checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
-        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
         
         checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
         
@@ -349,6 +349,11 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+        }});
+        
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -358,16 +363,12 @@ public class AddedNodeExporterTest {
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
-        
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
         checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
-        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
         
         checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
         
@@ -416,8 +417,10 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
-        final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
-        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+        }});
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -428,16 +431,12 @@ public class AddedNodeExporterTest {
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
-        
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
         checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
-        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
         
         checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
         
@@ -494,6 +493,10 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
+        
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -537,6 +540,10 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
+                
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -545,10 +552,6 @@ public class AddedNodeExporterTest {
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
-        
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, expectedException);
         
@@ -587,6 +590,10 @@ public class AddedNodeExporterTest {
         
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -637,6 +644,10 @@ public class AddedNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+        }});
+        
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
         
@@ -645,10 +656,6 @@ public class AddedNodeExporterTest {
         checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
-        
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
         
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
@@ -699,11 +706,14 @@ public class AddedNodeExporterTest {
         final String expectedErrorMessage = "Error writing file (updating child reference) for node " + parentNodeWsURL;
         final TransformerException expectedException = new TransformerException("some exception message");
         
-        final HeaderInfo childSelfLinkHeaderInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, nodeNewArchiveHandle.toString());
-        
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+        }});
         
         checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
         
@@ -714,16 +724,12 @@ public class AddedNodeExporterTest {
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-        }});
-        
         checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
         
         checkHandleAssignmentInvocations(nodeWsURL, nodeNewArchiveURL, nodeWsFile,
                 nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
         
-        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, preparedNewArchiveHandle, childSelfLinkHeaderInfo);
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
         
         checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
         
@@ -762,7 +768,6 @@ public class AddedNodeExporterTest {
         } else {
             context.checking(new Expectations() {{
                 oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
-//                oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(null));
                 
                 oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveURL));
                 oneOf(mockArchiveFileLocationProvider).getUriWithLocalRoot(parentArchiveURL.toURI());
@@ -777,7 +782,6 @@ public class AddedNodeExporterTest {
             final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException, URISyntaxException {
         
         context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
         }});
         
@@ -786,8 +790,6 @@ public class AddedNodeExporterTest {
                 oneOf(mockArchiveFileLocationProvider).getAvailableFile(
                         parentNodeArchivePath, nodeWsFilename, nodeType);
                     will(throwException(expectedException));
-                //during logging of the exception
-                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             }});
         } else {
         
@@ -836,12 +838,9 @@ public class AddedNodeExporterTest {
             if(expectedException != null) {
                 context.checking(new Expectations() {{
                     oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
-                    //during logging of the exception
-                    oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
                 }});
             } else {
                 context.checking(new Expectations() {{
-                    oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
                     oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
                 }});
             }
@@ -849,16 +848,13 @@ public class AddedNodeExporterTest {
     }
     
     private void checkUpdateSelfHandleInvocations(
-            final boolean isMetadata, final URI nodeNewArchiveHandle, final URI preparedNodeNewArchiveHandle,
-            final HeaderInfo childSelfLinkHeaderInfo) throws MetadataException, URISyntaxException {
+            final boolean isMetadata, final URI nodeNewArchiveHandle, final URL nodeLocation) throws MetadataException, URISyntaxException, IOException, TransformerException {
         
         if(isMetadata) {
             context.checking(new Expectations() {{
                 oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
                 oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
-                oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNodeNewArchiveHandle));
-                oneOf(mockMetadataApiBridge).getNewSelfHandleHeaderInfo(preparedNodeNewArchiveHandle); will(returnValue(childSelfLinkHeaderInfo));
-                oneOf(mockChildCmdiDocument).putHeaderInformation(childSelfLinkHeaderInfo);
+                oneOf(mockMetadataApiBridge).addSelfHandleAndSaveDocument(mockChildCmdiDocument, nodeNewArchiveHandle, nodeLocation);
             }});
         } else {
             context.checking(new Expectations() {{
@@ -906,14 +902,10 @@ public class AddedNodeExporterTest {
         
         if(expectedException != null) {
             context.checking(new Expectations() {{
-                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
                 oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpsRoot); will(throwException(expectedException));
-                //logging for the exception
-                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             }});
         } else {
             context.checking(new Expectations() {{
-                oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
                 oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpsRoot); will(returnValue(nodeNewArchiveHandle));
                 oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
                 oneOf(mockChildWsNode).setArchiveURI(preparedNewArchiveHandle);
@@ -933,14 +925,12 @@ public class AddedNodeExporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockParentWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL);
                 will(returnValue(mockParentCmdiDocument));
             
             oneOf(mockArchiveFileLocationProvider).getChildPathRelativeToParent(parentNodeArchiveFile, nextAvailableFile);
                 will(returnValue(childPathRelativeToParent));
             
-            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockParentCmdiDocument).getDocumentReferenceByLocation(nodeWsURL.toURI());
                 will(returnValue(mockResourceProxy));
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
@@ -948,8 +938,6 @@ public class AddedNodeExporterTest {
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             
-            
-            oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
                 will(returnValue(mockStreamResult));
         }});
@@ -958,8 +946,6 @@ public class AddedNodeExporterTest {
             context.checking(new Expectations() {{
                 oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
                     will(throwException(expectedException));
-                //logging for the exception
-                oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
             }});
         } else {
             context.checking(new Expectations() {{

@@ -255,7 +255,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(firstEntryFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
@@ -281,7 +281,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(changedFirstEntryFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, changedFirstEntryFile);
@@ -308,18 +308,17 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
 
             // second loop iteration
             
-            oneOf(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
-            oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, createdFile.getName()); will(returnValue(createdFile));
+            oneOf(mockArchiveFileHelper).getFinalFile(createdDirectory, createdFile.getName()); will(returnValue(createdFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});

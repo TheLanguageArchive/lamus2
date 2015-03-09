@@ -91,9 +91,10 @@ public class LamusPermissionAdjuster implements PermissionAdjuster {
             } // skip remote files
             n++;
             
-            URL nodeURL = node.getArchiveURL();
-            
-            if(nodeURL == null) {
+            URL nodeURL;
+            if(node.getArchiveURI() != null) {
+                nodeURL = node.getArchiveURL();
+            } else {
                 //could be a node that was never in the archive and won't be (uploaded and deleted)
                 // but could also be an unlinked node which was saved in the orphans folder, for which case we want to continue
                 nodeURL = node.getWorkspaceURL();
@@ -103,11 +104,11 @@ public class LamusPermissionAdjuster implements PermissionAdjuster {
             try {
                 nodeFile = new File(nodeURL.toURI());
             } catch (URISyntaxException ex) {
-                logger.info("Could not proceed with permission change for location " + node.getArchiveURL(), ex);
+                logger.info("Could not proceed with permission change for location " + nodeURL, ex);
                 continue;
             }
             
-            if(node.getArchiveURL() == null && !archiveFileLocationProvider.isFileInOrphansDirectory(nodeFile)) {
+            if(node.getArchiveURI() == null && !archiveFileLocationProvider.isFileInOrphansDirectory(nodeFile)) {
                 //in this case we don't need to adjust any permissions; only if the node was in the orphans folder
                 continue;
             }

@@ -74,10 +74,10 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     }
 
     /**
-     * @see ArchiveHandleHelper#deleteArchiveHandle(nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     * @see ArchiveHandleHelper#deleteArchiveHandle(nl.mpi.lamus.workspace.model.WorkspaceNode, java.net.URL)
      */
     @Override
-    public void deleteArchiveHandle(WorkspaceNode node, boolean targetInWorkspace)
+    public void deleteArchiveHandle(WorkspaceNode node, URL currentLocation)
             throws HandleException, IOException, TransformerException, MetadataException {
         
         handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
@@ -86,13 +86,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
         workspaceDao.updateNodeArchiveUri(node);
         
         if(node.isMetadata()) {
-            URL targetUrl;
-            if(targetInWorkspace) {
-                targetUrl = node.getWorkspaceURL();
-            } else {
-                targetUrl = node.getArchiveURL();
-            }
-            metadataApiBridge.removeSelfHandleAndSaveDocument(targetUrl);
+            metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);
         }
     }
 }

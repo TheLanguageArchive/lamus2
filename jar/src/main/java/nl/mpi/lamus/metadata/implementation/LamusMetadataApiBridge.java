@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -48,13 +49,15 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
 
     private static final Logger logger = LoggerFactory.getLogger(LamusMetadataApiBridge.class);
     
-    private MetadataAPI metadataAPI;
-    private WorkspaceFileHandler workspaceFileHandler;
+    private final MetadataAPI metadataAPI;
+    private final WorkspaceFileHandler workspaceFileHandler;
+    private final HandleManager handleManager;
     
     @Autowired
-    public LamusMetadataApiBridge(MetadataAPI mdApi, WorkspaceFileHandler wsFileHandler) {
+    public LamusMetadataApiBridge(MetadataAPI mdApi, WorkspaceFileHandler wsFileHandler, HandleManager hdlManager) {
         this.metadataAPI = mdApi;
         this.workspaceFileHandler = wsFileHandler;
+        this.handleManager = hdlManager;
     }
     
     /**
@@ -97,6 +100,19 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         }
     }
 
+    /**
+     * @see MetadataApiBridge#addSelfHandleAndSaveDocument(nl.mpi.metadata.api.model.MetadataDocument, java.net.URI, java.net.URL)
+     */
+    @Override
+    public void addSelfHandleAndSaveDocument(MetadataDocument document, URI handleUri, URL targetLocation) throws URISyntaxException, MetadataException, IOException, TransformerException {
+        
+        logger.debug("Adding self handle with URI '{}' in metadata document '{}'", handleUri, targetLocation);
+        
+        HeaderInfo newInfo = getNewSelfHandleHeaderInfo(handleManager.prepareHandleWithHdlPrefix(handleUri));
+        document.putHeaderInformation(newInfo);
+        saveMetadataDocument(document, targetLocation);
+    }
+    
     /**
      * @see MetadataApiBridge#removeSelfHandleAndSaveDocument(java.net.URL)
      */

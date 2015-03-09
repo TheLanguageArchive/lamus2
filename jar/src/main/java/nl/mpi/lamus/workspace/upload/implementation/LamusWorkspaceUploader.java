@@ -149,7 +149,10 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 continue;
             }
             
-            File finalEntryFile = archiveFileHelper.getFinalFile(workspaceUploadDirectory, entryFile.getName());
+            File entryBaseDirectory = entryFile.getParentFile();
+            String entryFilename = entryFile.getName();
+            
+            File finalEntryFile = archiveFileHelper.getFinalFile(entryBaseDirectory, entryFilename);
             
 //            for(String changedName : changedDirectoryNames.keySet()) {
 //                if(entryFile.getPath().contains(changedName)) {
