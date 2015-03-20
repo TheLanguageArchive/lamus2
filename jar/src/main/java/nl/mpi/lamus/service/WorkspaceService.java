@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -108,7 +109,8 @@ public interface WorkspaceService {
      * @param keepUnlinkedFiles true if user chooses to keep unlinked files for future use
      */
     public void submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException;
+            throws WorkspaceNotFoundException, WorkspaceAccessException,
+            WorkspaceExportException, MetadataValidationException;
     
     /**
      * Retrieves a workspace node with the given ID.

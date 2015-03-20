@@ -43,6 +43,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.MetadataChecker;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.slf4j.Logger;
@@ -243,12 +244,22 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 }
                 
                 try {
-                    if(!metadataChecker.isProfileAllowed(currentFile)) {
-                        String errorMessage = "Profile of metadata file [" + currentFile.getName() + "] not allowed.";
-                        failUploadForFile(currentFile, errorMessage, failedFiles);
+                    
+                    Collection<MetadataValidationIssue> validationIssues = metadataChecker.validateUploadedFile(currentFile);
+                    
+                    if(!validationIssues.isEmpty()) {
+                    
+                        StringBuilder errorMessage = new StringBuilder();
+                        
+                        for(MetadataValidationIssue issue : validationIssues) {
+                            
+                            errorMessage.append(issue.getAssertionErrorMessage()).append(" ");
+                        }
+                        
+                        failUploadForFile(currentFile, errorMessage.toString(), failedFiles);
                         continue;
                     } else {
-                        String debugMessage = "Profile of metadata file [" + currentFile.getName() + "] allowed.";
+                        String debugMessage = "No validation issues for file " + currentFile.getName();
                         logger.debug(debugMessage);
                     }
                 } catch (Exception ex) {

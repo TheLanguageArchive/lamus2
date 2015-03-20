@@ -24,6 +24,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 
 /**
  * Data access layer for the workspace data.
@@ -188,6 +189,14 @@ public interface WorkspaceDao {
     public Collection<WorkspaceNode> getNodesForWorkspace(int workspaceID);
     
     /**
+     * Retrieves a collection containing all the metadata nodes present in the tree
+     * (top node and descendants) of the workspace with the given ID.
+     * @param workspaceID ID of the workspace
+     * @return Collection of nodes associated with the given workspace
+     */
+    public Collection<WorkspaceNode> getMetadataNodesInTreeForWorkspace(int workspaceID);
+    
+    /**
      * Retrieves a collection containing the child nodes of the node with the
      * given ID.
      * 
@@ -203,6 +212,15 @@ public interface WorkspaceDao {
      * @return Collection of nodes that have the given node as ancestor
      */
     public Collection<WorkspaceNode> getDescendantWorkspaceNodes(int workspaceNodeID);
+    
+    /**
+     * Retrieves a collection containing the descendant nodes of the node with
+     * the given ID, filtering them by the given node type.
+     * @param workspaceNodeID ID of the parent node
+     * @param nodeType type to filter the descendants; if UNKNOWN is passed, all nodes will be returned
+     * @return Collection of nodes, of the given type, that have the given node as ancestor
+     */
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodesByType(int workspaceNodeID, WorkspaceNodeType nodeType);
     
     /**
      * Retrieves a collection containing the parent nodes of the node with the

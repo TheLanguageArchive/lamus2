@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.metadata.implementation;
 
-import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @see MetadataApiBridge
@@ -178,7 +178,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         }
         
         try {
-            metadataAPI.validateMetadataDocument(document, new DefaultErrorHandler());
+            metadataAPI.validateMetadataDocument(document, new DefaultHandler());
         } catch(SAXException ex) {
             logger.info("Validation error in file [" + fileURL + "]", ex);
             return false;

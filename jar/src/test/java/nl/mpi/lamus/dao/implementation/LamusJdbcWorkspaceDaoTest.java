@@ -1261,6 +1261,106 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void getExistingMetadataNodesInTreeForWorkspace_workspaceHasNoUnlinkedNodes()
+            throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        URI topNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topNodeURL = new URL("file:/archive/folder/top.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topNodeURI, topNodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        testWorkspace.setTopNodeArchiveURI(topNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, parentNode);
+        
+        URI childURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_1 = new URL("file:/archive/folder/child_1.cmdi");
+        WorkspaceNode childNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_1, childURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_1);
+        URI childURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_2 = new URL("file:/archive/folder/child_2.txt");
+        WorkspaceNode childNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_2, childURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_2);
+        URI childURI_3 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_3 = new URL("file:/archive/folder/child_3.cmdi");
+        WorkspaceNode childNode_3 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_3, childURL_3, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_3);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getMetadataNodesInTreeForWorkspace(testWorkspace.getWorkspaceID());
+        
+        assertTrue("Top node missing from the result", result.contains(topNode));
+        assertTrue("Parent node missing from the result", result.contains(parentNode));
+        assertTrue("First child node missing from the result", result.contains(childNode_1));
+        assertFalse("Second child shouldn't be part of the result", result.contains(childNode_2));
+        assertTrue("Third child node missing from the result", result.contains(childNode_3));
+    }
+    
+    @Test
+    public void getExistingMetadataNodesInTreeForWorkspace_workspaceHasUnlinkedNodes()
+            throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        URI topNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topNodeURL = new URL("file:/archive/folder/top.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topNodeURI, topNodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        testWorkspace.setTopNodeArchiveURI(topNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, parentNode);
+        
+        URI childURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_1 = new URL("file:/archive/folder/child_1.cmdi");
+        WorkspaceNode childNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_1, childURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_1);
+        URI childURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_2 = new URL("file:/archive/folder/child_2.cmdi");
+        WorkspaceNode childNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_2, childURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_2);
+        URI childURI_3 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_3 = new URL("file:/archive/folder/child_3.txt");
+        WorkspaceNode childNode_3 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_3, childURL_3, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_3);
+        
+        
+        URI unlinkedNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL unlinkedNodeURL = new URL("file:/archive/folder/unlinked.cmdi");
+        WorkspaceNode unlinkedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, unlinkedNodeURI, unlinkedNodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        
+        URI deletedNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL deletedNodeURL = new URL("file:/archive/folder/deleted.cmdi");
+        WorkspaceNode deletedNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, deletedNodeURI, deletedNodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsDeleted(deletedNode);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getMetadataNodesInTreeForWorkspace(testWorkspace.getWorkspaceID());
+        
+        assertTrue("Top node missing from the result", result.contains(topNode));
+        assertTrue("Parent node missing from the result", result.contains(parentNode));
+        assertTrue("First child node missing from the result", result.contains(childNode_1));
+        assertTrue("Second child node missing from the result", result.contains(childNode_2));
+        assertFalse("Third child node shouldn't be part of the result", result.contains(childNode_3));
+        assertFalse("Unlinked node shouldn't be part of the result", result.contains(unlinkedNode));
+        assertFalse("Deleted node shouldn't be part of the result", result.contains(deletedNode));
+    }
+    
+    @Test
+    public void getNonExistingMetadataNodesInTreeForWorkspace() {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getMetadataNodesInTreeForWorkspace(testWorkspace.getWorkspaceID());
+        
+        assertTrue("Result should be empty", result.isEmpty());
+    }
+    
+    @Test
     public void getExistingChildNodes() throws URISyntaxException, MalformedURLException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
@@ -1349,6 +1449,65 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     public void getDescendantNodesFromNonExistingParent() {
         
         Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodes(1);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Returned list of nodes should be empty", 0, result.size());
+    }
+    
+    @Test
+    public void getExistingDescendantNodesByType() throws MalformedURLException, URISyntaxException {
+        
+        WorkspaceNodeType typeToFilter = WorkspaceNodeType.METADATA;
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        URI childURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_1 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode childNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_1, childURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_1);
+        URI childURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL childURL_2 = new URL("file:/archive/folder/child.cmdi");
+        WorkspaceNode childNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, childURI_2, childURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(parentNode, childNode_2);
+        URI subChildURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL subChildURL_1 = new URL("file:/archive/folder/subchild.cmdi");
+        WorkspaceNode subChildNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, subChildURI_1, subChildURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(childNode_1, subChildNode_1);
+        URI subChildURI_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL subChildURL_2 = new URL("file:/archive/folder/subchild.txt");
+        WorkspaceNode subChildNode_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, subChildURI_2, subChildURL_2, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(childNode_1, subChildNode_2);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodesByType(parentNode.getWorkspaceNodeID(), typeToFilter);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertEquals("Size of the returned list of nodes is different from expected", 3, result.size());
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_1)", result.contains(childNode_1));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (child_2)", result.contains(childNode_2));
+        assertTrue("The returned list of nodes does not contain one of the expected nodes (subChild_1)", result.contains(subChildNode_1));
+        assertFalse("The returned list of nodes contains an unexpected node (subChild_2)", result.contains(subChildNode_2));
+    }
+    
+    @Test
+    public void getNonExistingDescendantNodesByType() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI parentURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL parentURL = new URL("file:/archive/folder/parent.cmdi");
+        WorkspaceNode parentNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, parentURI, parentURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodesByType(parentNode.getWorkspaceNodeID(), WorkspaceNodeType.METADATA);
+        
+        assertNotNull("The returned list of nodes should not be null", result);
+        assertTrue("Returned list of nodes should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void getDescendantNodesByTypeFromNonExistingParent() {
+        
+        Collection<WorkspaceNode> result = this.workspaceDao.getDescendantWorkspaceNodesByType(1, WorkspaceNodeType.METADATA);
         
         assertNotNull("The returned list of nodes should not be null", result);
         assertEquals("Returned list of nodes should be empty", 0, result.size());
@@ -2107,7 +2266,11 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         testWorkspaceNode.setOriginURI(originURI);
 
         testWorkspaceNode.setName("someNode");
-        testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
+        if( (archiveURL != null && archiveURL.toString().endsWith(".cmdi")) || (originURI != null && originURI.toString().endsWith(".cmdi")) ) {
+            testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
+        } else {
+            testWorkspaceNode.setType(WorkspaceNodeType.RESOURCE);
+        }
         testWorkspaceNode.setFormat("someFormat");
         testWorkspaceNode.setStatus(status);
         testWorkspaceNode.setProtected(isProtected);

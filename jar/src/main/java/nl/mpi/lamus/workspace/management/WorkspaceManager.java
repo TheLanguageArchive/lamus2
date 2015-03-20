@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.management;
 
 import java.io.IOException;
 import java.net.URI;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
@@ -59,7 +60,7 @@ public interface WorkspaceManager {
      * @param keepUnlinkedFiles true if the unlinked files are to be kept for future use
      */
     public void submitWorkspace(int workspaceID, boolean keepUnlinkedFiles)
-            throws WorkspaceNotFoundException, WorkspaceExportException;
+            throws WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException;
     
     /**
      * Opens a workspace, getting the corresponding object from the

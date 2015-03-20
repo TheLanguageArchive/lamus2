@@ -25,6 +25,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -124,7 +125,8 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public void submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
-            throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+            throws WorkspaceNotFoundException, WorkspaceAccessException,
+            WorkspaceExportException, MetadataValidationException {
         
         logger.debug("Triggered submission of workspace; userID " + userID + "; workspaceID: " + workspaceID);
 

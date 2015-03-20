@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.exception;
+package nl.mpi.lamus.typechecking;
+
+import nl.mpi.lamus.exception.MetadataValidationException;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
- *
+ * Validator for metadata files in the workspace.
  * @author guisil
  */
-public class InvalidMetadataException extends Exception {
- 
-    public InvalidMetadataException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface WorkspaceFileValidator {
+    
+    /**
+     * Given a workspace, it gets the relevant metadata files and validates them.
+     * @param workspace Workspace to validate
+     */
+    public void validateWorkspaceFiles(Workspace workspace) throws MetadataValidationException;
 }

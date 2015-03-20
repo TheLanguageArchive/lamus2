@@ -14,29 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking;
+package nl.mpi.lamus.exception;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 
 /**
- * Class used to perform validation checks in metadata files.
+ *
  * @author guisil
  */
-public interface MetadataChecker {
+public class MetadataValidationException extends WorkspaceException {
     
-    /**
-     * Performs the appropriate validation checks for the given uploaded file.
-     * @param metadataFile Metadata file to check
-     * @return validation issues, if any
-     */
-    public Collection<MetadataValidationIssue> validateUploadedFile(File metadataFile) throws Exception;
+    private Collection<MetadataValidationIssue> validationIssues;
+ 
+    public MetadataValidationException(String message, int workspaceID, Throwable cause) {
+        super(message, workspaceID, cause);
+        validationIssues = new ArrayList<>();
+    }
     
-    /**
-     * Performs the appropriate validation checks for the given submitted file.
-     * @param metadataFile Metadata file to check
-     * @return validation issues, if any
-     */
-    public Collection<MetadataValidationIssue> validateSubmittedFile(File metadataFile) throws Exception;
+    
+    public Collection<MetadataValidationIssue> getValidationIssues() {
+        return Collections.unmodifiableCollection(validationIssues);
+    }
+    
+    public void addValidationIssue(MetadataValidationIssue issue) {
+        validationIssues.add(issue);
+    }
+    
+    public void addValidationIssues(Collection<MetadataValidationIssue> issues) {
+        validationIssues.addAll(issues);
+    }
 }

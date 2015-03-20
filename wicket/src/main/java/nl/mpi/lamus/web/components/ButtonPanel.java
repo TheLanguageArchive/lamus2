@@ -18,10 +18,12 @@ package nl.mpi.lamus.web.components;
 
 import java.io.IOException;
 import java.io.Serializable;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -105,6 +107,12 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             workspaceService.submitWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
         } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
             Session.get().error(ex.getMessage());
+        } catch(MetadataValidationException ex) {
+            StringBuilder errorMessage = new StringBuilder();
+            for(MetadataValidationIssue issue : ex.getValidationIssues()) {
+                errorMessage.append(issue.toString()).append(" ");
+            }
+            Session.get().error(errorMessage);
         }
         
         Session.get().info("Workspace successfully submitted");

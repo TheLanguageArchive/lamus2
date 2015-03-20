@@ -26,6 +26,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceDaoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,6 +220,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#getMetadataNodesInTreeForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getMetadataNodesInTreeForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getMetadataNodesInTreeForWorkspace(workspaceID);
+    }
+
+    /**
      * @see WorkspaceDao#getChildWorkspaceNodes(int)
      */
     @Override
@@ -232,6 +241,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     @Override
     public Collection<WorkspaceNode> getDescendantWorkspaceNodes(int workspaceNodeID) {
         return this.getWorkspaceDao().getDescendantWorkspaceNodes(workspaceNodeID);
+    }
+
+    /**
+     * @see WorkspaceDao#getDescendantWorkspaceNodesByType(int, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     */
+    @Override
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodesByType(int workspaceNodeID, WorkspaceNodeType nodeType) {
+        return this.getWorkspaceDao().getDescendantWorkspaceNodesByType(workspaceNodeID, nodeType);
     }
     
     /**

@@ -28,6 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.implementation.LamusAmsServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -477,7 +478,7 @@ public class WorkspaceSteps {
     }
     
     @When("that user chooses to submit the workspace")
-    public void thatUserChoosesToSubmitTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+    public void thatUserChoosesToSubmitTheWorkspace() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
         
         boolean keepUnlinkedFiles = Boolean.TRUE;
         

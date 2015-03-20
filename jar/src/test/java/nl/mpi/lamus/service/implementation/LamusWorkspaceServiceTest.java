@@ -32,6 +32,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
@@ -634,7 +635,8 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void submitWorkspaceNoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+    public void submitWorkspaceNoAccess() throws WorkspaceNotFoundException,
+            WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -654,7 +656,8 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void submitWorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+    public void submitWorkspaceNotFound() throws WorkspaceNotFoundException,
+            WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -674,7 +677,8 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void submitWorkspaceFails() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+    public void submitWorkspaceFails() throws WorkspaceNotFoundException,
+            WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
@@ -693,9 +697,32 @@ public class LamusWorkspaceServiceTest {
             assertEquals("Exception different from expected", expectedException, ex);
         }
     }
+    
+    @Test
+    public void submitWorkspaceMetadataValidationIssues() throws WorkspaceNotFoundException,
+            WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final MetadataValidationException expectedException = new MetadataValidationException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceManager).submitWorkspace(workspaceID, keepUnlinkedFiles); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch(MetadataValidationException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
         
     @Test
-    public void submitWorkspaceSuccess() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceExportException {
+    public void submitWorkspaceSuccess() throws WorkspaceNotFoundException,
+            WorkspaceAccessException, WorkspaceExportException, MetadataValidationException {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         

@@ -48,6 +48,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.MetadataChecker;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.apache.commons.fileupload.FileItem;
@@ -105,6 +106,8 @@ public class LamusWorkspaceUploaderTest {
     @Mock File mockFile1;
     @Mock File mockFile2;
     
+    @Mock MetadataValidationIssue mockValidationIssue1;
+    @Mock MetadataValidationIssue mockValidationIssue2;
     @Mock ImportProblem mockUploadProblem;
     
     private WorkspaceUploader uploader;
@@ -526,7 +529,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_ProfileIsAllowed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
+    public void processOneUploadedMetadataFile_NoValidationIssues() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
@@ -548,6 +551,8 @@ public class LamusWorkspaceUploaderTest {
         
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
+        
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
         
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
@@ -576,7 +581,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataChecker).isProfileAllowed(mockFile1); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataChecker).validateUploadedFile(mockFile1); will(returnValue(issues));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
@@ -604,7 +609,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_ProfileNotAllowed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
+    public void processOneUploadedMetadataFile_withOneValidationIssue() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
@@ -627,9 +632,13 @@ public class LamusWorkspaceUploaderTest {
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        issues.add(mockValidationIssue1);
+        
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
-        final String expectedErrorMessage = "Profile of metadata file [" + filename + "] not allowed.";
+        final String validationErrorMessage = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
+        final String expectedCompleteErrorMessage = validationErrorMessage + " ";
         
         //only one file in the collection, so only one loop cycle
         
@@ -653,8 +662,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataChecker).isProfileAllowed(mockFile1); will(returnValue(Boolean.FALSE));
-            oneOf(mockFile1).getName(); will(returnValue(filename));
+            oneOf(mockMetadataChecker).validateUploadedFile(mockFile1); will(returnValue(issues));
+            oneOf(mockValidationIssue1).getAssertionErrorMessage(); will(returnValue(validationErrorMessage));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).deleteFile(mockFile1);
@@ -673,8 +682,94 @@ public class LamusWorkspaceUploaderTest {
         
         assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
         assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
-        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
+        assertEquals("Reason for failure of file upload is different from expected", expectedCompleteErrorMessage.trim(), ((FileImportProblem) problem).getErrorMessage().trim());
     }
+    
+    @Test
+    public void processOneUploadedMetadataFile_withTwoValidationIssues() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
+        
+        final String filename = "someFile.cmdi";
+        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File uploadedFile = new File(workspaceUploadDirectory, filename);
+        final URI uploadedFileURI = uploadedFile.toURI();
+        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL uploadedFileURL = uploadedFileURI.toURL();
+        final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE;
+        final String fileMimetype = "text/x-cmdi-xml";
+        
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode.setName(filename);
+        uploadedNode.setStatus(WorkspaceNodeStatus.NODE_UPLOADED);
+        uploadedNode.setType(fileType);
+        uploadedNode.setFormat(fileMimetype);
+        uploadedNode.setWorkspaceURL(uploadedFileURL);
+        uploadedNode.setArchiveURI(uploadedFileArchiveURI);
+        
+        final Collection<File> uploadedFiles = new ArrayList<>();
+        uploadedFiles.add(mockFile1);
+        
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        issues.add(mockValidationIssue1);
+        issues.add(mockValidationIssue2);
+        
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
+        
+        final String validationErrorMessage1 = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
+        final String validationErrorMessage2 = "[CMDI Archive Restriction] Something completely different went wrong.";
+        final String expectedCompleteErrorMessage = validationErrorMessage1 + " " + validationErrorMessage2 + " ";
+        
+        //only one file in the collection, so only one loop cycle
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveURL));
+            
+            //loop
+
+            oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
+                will(returnValue(mockTypecheckedResults));
+            
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+                will(returnValue(Boolean.TRUE));
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            
+            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockMetadataChecker).validateUploadedFile(mockFile1); will(returnValue(issues));
+            oneOf(mockValidationIssue1).getAssertionErrorMessage(); will(returnValue(validationErrorMessage1));
+            oneOf(mockValidationIssue2).getAssertionErrorMessage(); will(returnValue(validationErrorMessage2));
+            
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceFileHandler).deleteFile(mockFile1);
+            
+            
+            //still calls method to process links
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+        }});
+        
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.size() == 1);
+
+        ImportProblem problem = result.iterator().next();
+        
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedCompleteErrorMessage.trim(), ((FileImportProblem) problem).getErrorMessage().trim());
+    }
+    
+    @Test
+    public void processOneUploadedMetadataFile_withValidationWarnings() {
+        fail("not tested yet");
+    }
+
     
     @Test
     public void processOneUploadedMetadataFile_MetadataFileNotValid() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {

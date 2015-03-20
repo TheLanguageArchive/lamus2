@@ -23,10 +23,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
@@ -58,6 +60,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceImportRunner workspaceImportRunner;
     private final WorkspaceExportRunner workspaceExportRunner;
     private final CalendarHelper calendarHelper;
+    private final WorkspaceFileValidator workspaceFileValidator;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
@@ -66,7 +69,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     @Autowired
     public LamusWorkspaceManager(@Qualifier("WorkspaceExecutorService") ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
         WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
-        CalendarHelper calendarHelper) {
+        CalendarHelper calendarHelper, WorkspaceFileValidator wsFileValidator) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
@@ -74,6 +77,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         this.workspaceImportRunner = wsImportRunner;
         this.workspaceExportRunner = wsExportRunner;
         this.calendarHelper = calendarHelper;
+        this.workspaceFileValidator = wsFileValidator;
     }
     
     /**
@@ -193,9 +197,11 @@ public class LamusWorkspaceManager implements WorkspaceManager {
      */
     @Override
     public void submitWorkspace(int workspaceID, boolean keepUnlinkedFiles)
-            throws WorkspaceNotFoundException, WorkspaceExportException {
+            throws WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
+        
+        workspaceFileValidator.validateWorkspaceFiles(workspace);
         
         workspace.setStatus(WorkspaceStatus.SUBMITTED);
         workspace.setMessage("workspace was submitted");

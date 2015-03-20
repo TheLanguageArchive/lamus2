@@ -646,6 +646,29 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return listToReturn;
     }
+
+    /**
+     * @see WorkspaceDao#getMetadataNodesInTreeForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceNode> getMetadataNodesInTreeForWorkspace(int workspaceID) {
+        
+        logger.debug("Retrieving list containing nodes which are part of the tree of the workspace with ID " + workspaceID);
+        
+        Collection<WorkspaceNode> listToReturn = new ArrayList<>();
+        WorkspaceNode topNode;
+        try {
+            topNode = getWorkspaceTopNode(workspaceID);
+            listToReturn.add(topNode);
+        } catch(WorkspaceNodeNotFoundException ex) {
+            logger.warn("Top node not found for workspace " + workspaceID);
+            return listToReturn;
+        }
+        Collection<WorkspaceNode> topNodeMetadataDescendants = getDescendantWorkspaceNodesByType(topNode.getWorkspaceNodeID(), WorkspaceNodeType.METADATA);
+        listToReturn.addAll(topNodeMetadataDescendants);
+        
+        return listToReturn;
+    }
     
     /**
      * @see WorkspaceDao#getChildWorkspaceNodes(int)
@@ -672,16 +695,29 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Retrieving list containing descendant nodes of the node with ID: " + workspaceNodeID);
         
-        Collection<WorkspaceNode> allDescendants = new ArrayList<>();
+        return getDescendantWorkspaceNodesByType(workspaceNodeID, WorkspaceNodeType.UNKNOWN);
+    }
+
+    /**
+     * @see WorkspaceDao#getDescendantWorkspaceNodesByType(int, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     */
+    @Override
+    public Collection<WorkspaceNode> getDescendantWorkspaceNodesByType(int workspaceNodeID, WorkspaceNodeType nodeType) {
+        
+        logger.debug("Retrieving list containing descendant nodes (filtered by type " + nodeType.toString() + ") of the node with ID: " + workspaceNodeID);
+        
+        Collection<WorkspaceNode> allDescendantsOfType = new ArrayList<>();
         
         Collection<WorkspaceNode> children = getChildWorkspaceNodes(workspaceNodeID);
         
         for(WorkspaceNode child : children) {
-            allDescendants.add(child);
-            allDescendants.addAll(getDescendantWorkspaceNodes(child.getWorkspaceNodeID()));
+            if(WorkspaceNodeType.UNKNOWN.equals(nodeType) || child.getType().equals(nodeType)) {
+                allDescendantsOfType.add(child);
+            }
+            allDescendantsOfType.addAll(getDescendantWorkspaceNodesByType(child.getWorkspaceNodeID(), nodeType));
         }
         
-        return allDescendants;
+        return allDescendantsOfType;
     }
     
     /**

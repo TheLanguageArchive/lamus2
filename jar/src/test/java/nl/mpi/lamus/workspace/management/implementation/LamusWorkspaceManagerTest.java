@@ -27,10 +27,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
@@ -67,6 +69,7 @@ public class LamusWorkspaceManagerTest {
     @Mock private WorkspaceImportRunner mockWorkspaceImportRunner;
     @Mock private WorkspaceExportRunner mockWorkspaceExportRunner;
     @Mock private CalendarHelper mockCalendarHelper;
+    @Mock private WorkspaceFileValidator mockWorkspaceFileValidator;
     
     @Mock private Future<Boolean> mockFuture;
     @Mock private Workspace mockWorkspace;
@@ -90,7 +93,8 @@ public class LamusWorkspaceManagerTest {
     public void setUp() {
         this.manager = new LamusWorkspaceManager(
                 mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao,
-                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner, mockWorkspaceExportRunner, mockCalendarHelper);
+                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner,
+                mockWorkspaceExportRunner, mockCalendarHelper, mockWorkspaceFileValidator);
         
         ReflectionTestUtils.setField(manager, "numberOfDaysOfInactivityAllowedSinceLastSession", numberOfDaysOfInactivityAllowedSinceLastSession);
     }
@@ -585,7 +589,10 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void submitWorkspaceSuccessful() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+    public void submitWorkspaceSuccessful()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException,
+            WorkspaceExportException, MetadataValidationException {
 
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -605,6 +612,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -633,9 +642,37 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
+    public void submitWorkspaceInvalidMetadataException()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
+        
+        final int workspaceID = 1;
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final String expectedErrorMessage = "Invalid metadata file.";
+        final MetadataValidationException expectedException = new MetadataValidationException(expectedErrorMessage, workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace); will(throwException(expectedException));
+        }});
+        
+        try {
+            manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
+            fail("should have thrown exception");
+        } catch(MetadataValidationException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
     public void submitWorkspaceThrowsWorkspaceNotFoundException()
             throws InterruptedException, ExecutionException, URISyntaxException,
-            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+            MalformedURLException, WorkspaceNotFoundException,
+            WorkspaceExportException, MetadataValidationException {
         
         final int workspaceID = 1;
         
@@ -657,7 +694,10 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void submitWorkspaceThreadInterrupted() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+    public void submitWorkspaceThreadInterrupted()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException,
+            WorkspaceExportException, MetadataValidationException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -681,6 +721,8 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
@@ -714,7 +756,10 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void submitWorkspaceExecutionException() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+    public void submitWorkspaceExecutionException()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException,
+            WorkspaceExportException, MetadataValidationException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -738,6 +783,8 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
@@ -771,7 +818,10 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void submitWorkspaceFails() throws InterruptedException, ExecutionException, URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException {
+    public void submitWorkspaceFails()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException,
+            WorkspaceExportException, MetadataValidationException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -793,6 +843,8 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);

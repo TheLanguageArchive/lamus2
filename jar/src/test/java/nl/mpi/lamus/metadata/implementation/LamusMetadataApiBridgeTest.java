@@ -16,9 +16,9 @@
  */
 package nl.mpi.lamus.metadata.implementation;
 
-import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,6 +60,7 @@ import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
@@ -526,7 +527,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL); will(returnValue(mockMetadataDocument));
-            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultErrorHandler.class)));
+            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class)));
         }});
         
         boolean result = lamusMetadataApiBridge.isMetadataFileValid(fileURL);
@@ -543,7 +544,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL); will(returnValue(mockMetadataDocument));
-            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultErrorHandler.class))); will(throwException(expectedException));
+            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class))); will(throwException(expectedException));
         }});
         
         boolean result = lamusMetadataApiBridge.isMetadataFileValid(fileURL);
@@ -568,9 +569,13 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataValid_ActuallyReadFile() throws MalformedURLException {
+    public void metadataValid_ActuallyReadFile() throws MalformedURLException, UnsupportedEncodingException {
         
-        final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/orphanCollection.cmdi");
+        final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/folder with spaces/orphanCollection.cmdi");
+////        final String encodedUrl = URLEncoder.encode("file:/Users/guisil/Workspaces/with spaces/orphanCollection.cmdi", "UTF-8");
+//        final String fileLocation = "file:/Users/guisil/Workspaces/with spaces/orphanCollection.cmdi";
+//        final String noSpaceString = fileLocation.replace(" ", "%20");
+//        final URL metadataFileToCheck = new URL(noSpaceString);
         
         MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null, null);
         
