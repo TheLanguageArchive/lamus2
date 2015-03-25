@@ -201,7 +201,22 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
-        workspaceFileValidator.validateWorkspaceFiles(workspace);
+        try{
+            workspaceFileValidator.validateMetadataFilesInWorkspace(workspaceID);
+        } catch(MetadataValidationException ex) {
+            String issuesMessage = workspaceFileValidator.validationIssuesToString(ex.getValidationIssues());
+            if(workspaceFileValidator.validationIssuesContainErrors(ex.getValidationIssues())) {
+                throw ex;
+            } else {
+                String message;
+                if(issuesMessage.isEmpty()) {
+                    message = ex.getMessage();
+                } else {
+                    message = issuesMessage;
+                }
+                logger.warn(message);
+            }
+        }
         
         workspace.setStatus(WorkspaceStatus.SUBMITTED);
         workspace.setMessage("workspace was submitted");

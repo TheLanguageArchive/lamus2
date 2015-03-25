@@ -17,6 +17,8 @@
 package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.File;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Class representing an issue with the validation of a metadata file.
@@ -61,6 +63,38 @@ public class MetadataValidationIssue {
     
     public MetadataValidationIssueLevel getAssertionErrorLevel() {
         return assertionErrorLevel;
+    }
+
+    @Override
+    public int hashCode() {
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .append(this.metadataFile)
+                .append(this.assertionTest)
+                .append(this.assertionErrorMessage)
+                .append(this.assertionErrorLevel);
+        
+        return hashCodeB.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof MetadataValidationIssue)) {
+            return false;
+        }
+        MetadataValidationIssue other = (MetadataValidationIssue) obj;
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .append(this.metadataFile, other.getMetadataFile())
+                .append(this.assertionTest, other.getAssertionTest())
+                .append(this.assertionErrorMessage, other.getAssertionErrorMessage())
+                .append(this.assertionErrorLevel, other.getAssertionErrorLevel());
+        
+        return equalsB.isEquals();
     }
 
     @Override

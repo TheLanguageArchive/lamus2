@@ -617,6 +617,6 @@ class HeaderInfoMatcher extends TypeSafeMatcher<HeaderInfo> {
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("a HeaderInfo with name ").appendValue(headerInfoName).appendText(" and valu ").appendValue(headerInfoValue);
+        description.appendText("a HeaderInfo with name ").appendValue(headerInfoName).appendText(" and value ").appendValue(headerInfoValue);
     }
 }

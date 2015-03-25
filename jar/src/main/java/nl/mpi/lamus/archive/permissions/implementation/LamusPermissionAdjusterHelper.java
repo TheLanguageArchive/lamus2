@@ -55,6 +55,11 @@ public class LamusPermissionAdjusterHelper implements PermissionAdjusterHelper {
     public void loadConfiguredPermissions() throws FileNotFoundException, IOException {
         
         configuredPermissions = new TreeMap<>();
+        
+        if(permissionConfigFile == null) {
+            throw new IOException("Configuration file not specified");
+        }
+        
         try (BufferedReader input = new BufferedReader(new FileReader(permissionConfigFile))) {
             String line = null; // not declared within while loop
             // readLine returns null at EOF. Returns line without newline.

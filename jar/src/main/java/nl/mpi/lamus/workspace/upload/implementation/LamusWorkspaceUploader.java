@@ -32,6 +32,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.TypeCheckerException;
@@ -42,8 +43,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.typechecking.MetadataChecker;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final WorkspaceDao workspaceDao;
     private final WorkspaceUploadHelper workspaceUploadHelper;
     private final MetadataApiBridge metadataApiBridge;
-    private final MetadataChecker metadataChecker;
+    private final WorkspaceFileValidator workspaceFileValidator;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final ArchiveFileHelper archiveFileHelper;
     
@@ -76,7 +76,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceFileHandler wsFileHandler,
         WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
-        MetadataApiBridge mdApiBridge, MetadataChecker mdChecker,
+        MetadataApiBridge mdApiBridge, WorkspaceFileValidator wsFileValidator,
         ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper) {
         
         this.nodeDataRetriever = ndRetriever;
@@ -86,7 +86,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceDao = wsDao;
         this.workspaceUploadHelper = wsUploadHelper;
         this.metadataApiBridge = mdApiBridge;
-        this.metadataChecker = mdChecker;
+        this.workspaceFileValidator = wsFileValidator;
         this.archiveFileLocationProvider = afLocationProvider;
         this.archiveFileHelper = archiveFileHelper;
     }
@@ -243,30 +243,19 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                     continue;
                 }
                 
-                try {
-                    
-                    Collection<MetadataValidationIssue> validationIssues = metadataChecker.validateUploadedFile(currentFile);
-                    
-                    if(!validationIssues.isEmpty()) {
-                    
-                        StringBuilder errorMessage = new StringBuilder();
-                        
-                        for(MetadataValidationIssue issue : validationIssues) {
-                            
-                            errorMessage.append(issue.getAssertionErrorMessage()).append(" ");
-                        }
-                        
-                        failUploadForFile(currentFile, errorMessage.toString(), failedFiles);
+                logger.debug("Metadata API validation successful for file " + currentFile.getName());
+                
+                try{
+                    workspaceFileValidator.validateMetadataFile(workspaceID, currentFile);
+                } catch(MetadataValidationException ex) {
+                    String issuesMessage = workspaceFileValidator.validationIssuesToString(ex.getValidationIssues());
+                    if(workspaceFileValidator.validationIssuesContainErrors(ex.getValidationIssues())) {
+                        failUploadForFile(currentFile, issuesMessage, failedFiles);
                         continue;
                     } else {
-                        String debugMessage = "No validation issues for file " + currentFile.getName();
-                        logger.debug(debugMessage);
+                        logger.warn(issuesMessage);
                     }
-                } catch (Exception ex) {
-                    throw new UnsupportedOperationException("not handled yet", ex);
                 }
-                
-                
             }
             
             String nodeMimetype = typecheckedResults.getCheckedMimetype();

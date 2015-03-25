@@ -212,7 +212,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -245,17 +244,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        //TODO Handle external nodes (those can't be deleted, just unlinked)
-        
-        
-        //retire version
-        //move to trash
-        //update csdb to point to the trash location
-        
-        //remove node from searchDB????
-        
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-        
     }
     
     @Test
@@ -263,7 +252,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
@@ -295,17 +283,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        //TODO Handle external nodes (those can't be deleted, just unlinked)
-        
-        
-        //retire version
-        //move to trash
-        //update csdb to point to the trash location
-        
-        //remove node from searchDB????
-        
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-        
     }
     
     @Test
@@ -355,7 +333,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-        
     }
     
     @Test
@@ -390,7 +367,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-        
     }
     
     @Test
@@ -437,17 +413,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        //TODO Handle external nodes (those can't be deleted, just unlinked)
-        
-        
-        //retire version
-        //move to trash
-        //update csdb to point to the trash location
-        
-        //remove node from searchDB????
-        
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-        
     }
     
     @Test
@@ -495,24 +461,8 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        //TODO Handle external nodes (those can't be deleted, just unlinked)
-        
-        
-        //retire version
-        //move to trash
-        //update csdb to point to the trash location
-        
-        //remove node from searchDB????
-        
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
-    
-    //TODO EXCEPTIONS...
-    //TODO EXCEPTIONS...
-    //TODO EXCEPTIONS...
-    //TODO EXCEPTIONS...
-    //TODO EXCEPTIONS...
-    //TODO EXCEPTIONS...
     
     @Test
     public void exportNodeWithDifferentStatus() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
@@ -551,7 +501,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         } catch(IllegalStateException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
-        
     }
     
     @Test
@@ -559,13 +508,11 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
         final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
-        final String expectedExceptionMessage = "Error deleting handle for node " + testNodeVersionArchiveURL;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -596,15 +543,7 @@ public class ReplacedOrDeletedNodeExporterTest {
 
         }});
         
-        
-//        try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-//            fail("should have thrown an exception");
-//        } catch(WorkspaceExportException ex) {
-//            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-//            assertEquals("Exception cause different from expected", expectedException, ex.getCause());
-//        }
-        
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -667,56 +606,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
             assertEquals("Exception cause different from expected", expectedExceptionCause, ex.getCause());
         }
-        
     }
-    
-    
-//    @Test
-//    public void exportUnknownNode() throws MalformedURLException, URISyntaxException, UnknownNodeException, WorkspaceExportException {
-//        
-//        final int testWorkspaceNodeID = 10;
-//        final String testBaseName = "node.txt";
-//        final URL testNodeWsURL = new URL("file:/workspace/" + testBaseName);
-//        final URI testNodeArchiveURI = new URI(UUID.randomUUID().toString());
-//        final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-//        final URL testNodeArchiveURL = testNodeOriginURL;
-//        
-//        final String testNodeDisplayValue = "node";
-//        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
-//        final String testNodeFormat = "text/plain";
-//        final URI testNodeSchemaLocation = new URI("http://some.location");
-//
-//        final WorkspaceNode testNode = new LamusWorkspaceNode(testWorkspaceNodeID, testWorkspace.getWorkspaceID(), testNodeSchemaLocation,
-//                testNodeDisplayValue, "", testNodeType, testNodeWsURL, testNodeArchiveURI, testNodeArchiveURL, testNodeOriginURL, WorkspaceNodeStatus.NODE_DELETED, testNodeFormat);
-//        
-//        final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
-//        
-//        final String expectedErrorMessage = "Node not found in archive database for URI " + testNode.getArchiveURI();
-//        final UnknownNodeException expectedException = new UnknownNodeException("some exception message");
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeArchiveURL));
-//            
-//            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
-//            oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
-//            
-//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//            oneOf(mockCorpusStructureProvider).getNode(testNodeArchiveURI); will(throwException(expectedException));
-//
-//            //exception caught
-//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
-//        }});
-//        
-//        try {
-//            deletedNodeExporter.exportNode(null, mockChildWsNode);
-//            fail("should have thrown exception");
-//        } catch(WorkspaceExportException ex) {
-//            assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
-//            assertEquals("Workspace ID different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
-//            assertEquals("Cause different from expected", expectedException, ex.getCause());
-//        }
-//    }
     
     @Test
     public void exportNodeNullWorkspace() throws MalformedURLException, URISyntaxException, WorkspaceExportException {

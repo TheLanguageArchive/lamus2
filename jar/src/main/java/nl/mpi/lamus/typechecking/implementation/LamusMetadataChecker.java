@@ -38,26 +38,24 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusMetadataChecker implements MetadataChecker {
-    
+
     @Autowired
     @Qualifier("schematronFile_upload")
     private File schematronFile_upload;
     @Autowired
     @Qualifier("schematronFile_submit")
     private File schematronFile_submit;
-
     private static final String uploadPhase = "upload.phase";
     private static final String submitPhase = "submit.phase";
-    
-    
+
     /**
      * @see MetadataChecker#validateUploadedFile(java.io.File)
      */
     @Override
     public Collection<MetadataValidationIssue> validateUploadedFile(File metadataFile) throws Exception {
-        
+
         final ISchematronResource schRes = getSchematronResource(schematronFile_upload, uploadPhase);
-        
+
         return validateFile(schRes, metadataFile);
     }
 
@@ -66,40 +64,39 @@ public class LamusMetadataChecker implements MetadataChecker {
      */
     @Override
     public Collection<MetadataValidationIssue> validateSubmittedFile(File metadataFile) throws Exception {
-        
+
         final ISchematronResource schRes = getSchematronResource(schematronFile_submit, submitPhase);
-        
+
         return validateFile(schRes, metadataFile);
     }
-    
-    
+
     private ISchematronResource getSchematronResource(File schFile, String phase) {
-        
+
         final ISchematronResource schRes = new SchematronResourceSCH(new FileSystemResource(schFile), phase, (String) null);
-        
-        if(!schRes.isValidSchematron()) {
+
+        if (!schRes.isValidSchematron()) {
             throw new IllegalArgumentException("Invalid Schematron");
         }
-        
+
         return schRes;
     }
-    
+
     private Collection<MetadataValidationIssue> validateFile(ISchematronResource schRes, File fileToValidate) throws Exception {
-        
+
         Collection<MetadataValidationIssue> issues = new ArrayList<>();
-        
+
         SchematronOutputType result = schRes.applySchematronValidationToSVRL(new StreamSource(fileToValidate));
-        
-        if(result == null) {
+
+        if (result == null) {
             return issues;
         }
-        
+
         List<SVRLFailedAssert> failedAssertions = SVRLUtils.getAllFailedAssertions(result);
-        
-        for(SVRLFailedAssert failure : failedAssertions) {
+
+        for (SVRLFailedAssert failure : failedAssertions) {
             issues.add(new MetadataValidationIssue(fileToValidate, failure.getTest(), failure.getText().trim(), failure.getRole()));
         }
-        
+
         return issues;
     }
 }

@@ -16,8 +16,10 @@
  */
 package nl.mpi.lamus.typechecking;
 
+import java.io.File;
+import java.util.Collection;
 import nl.mpi.lamus.exception.MetadataValidationException;
-import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 
 /**
  * Validator for metadata files in the workspace.
@@ -27,7 +29,28 @@ public interface WorkspaceFileValidator {
     
     /**
      * Given a workspace, it gets the relevant metadata files and validates them.
-     * @param workspace Workspace to validate
+     * @param workspaceID ID of the workspace to validate
      */
-    public void validateWorkspaceFiles(Workspace workspace) throws MetadataValidationException;
+    public void validateMetadataFilesInWorkspace(int workspaceID) throws MetadataValidationException;
+    
+    /**
+     * Validates the given metadata file.
+     * @param workspaceID ID of the workspace associated with file
+     * @param file File to validate
+     */
+    public void validateMetadataFile(int workspaceID, File file) throws MetadataValidationException;
+    
+    /**
+     * Checks if the given collection of issues contains any error.
+     * @param issues Collection of validation issues
+     * @return true if the collection contains at least one validation error
+     */
+    public boolean validationIssuesContainErrors(Collection<MetadataValidationIssue> issues);
+    
+    /**
+     * Converts the given collection of issues into a string for presentation purposes.
+     * @param issues Collection of issues
+     * @return String containing the main information about the issues in the collection
+     */
+    public String validationIssuesToString(Collection<MetadataValidationIssue> issues);
 }

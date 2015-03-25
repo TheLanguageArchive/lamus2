@@ -82,6 +82,27 @@ public class LamusPermissionAdjusterHelperTest {
         //check if permissions are correct
         assertEquals("Loaded permissions different from expected", expectedPermissions, loadedConfiguredPermissions);
     }
+    
+    @Test
+    public void loadConfiguredPermissions_NullFile() throws FileNotFoundException, IOException {
+
+        ReflectionTestUtils.setField(permissionAdjusterHelper, "permissionConfigFile", null);
+        
+        final String expectedExceptionMessage = "Configuration file not specified";
+        final TreeMap<String, ApaPermission> expectedPermissions = new TreeMap<>();
+        
+        try {
+            permissionAdjusterHelper.loadConfiguredPermissions();
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        TreeMap<String, ApaPermission> loadedConfiguredPermissions = (TreeMap<String, ApaPermission>) ReflectionTestUtils.getField(permissionAdjusterHelper, "configuredPermissions");
+        
+        //check if permissions are correct
+        assertEquals("Loaded permissions different from expected", expectedPermissions, loadedConfiguredPermissions);
+    }
 
     @Test
     public void getCurrentPermissionsForPath() {

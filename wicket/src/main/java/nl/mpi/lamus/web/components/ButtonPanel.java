@@ -103,8 +103,12 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     
     
     private void onSubmitConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
+        
+        boolean success = false;
+        boolean showInitialPage = true;
         try {
             workspaceService.submitWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+            success = true;
         } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
             Session.get().error(ex.getMessage());
         } catch(MetadataValidationException ex) {
@@ -113,11 +117,18 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
                 errorMessage.append(issue.toString()).append(" ");
             }
             Session.get().error(errorMessage);
+            
+            showInitialPage = false;
         }
         
-        Session.get().info("Workspace successfully submitted");
-                    
-        setResponsePage(pagesProvider.getIndexPage());
+        if(success) {
+            Session.get().info("Workspace successfully submitted");
+        }
+        if(showInitialPage) {
+            setResponsePage(pagesProvider.getIndexPage());
+        }
+        
+        target.add(getFeedbackPanel());
     }
     
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {

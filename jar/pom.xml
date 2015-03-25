@@ -261,6 +261,13 @@
             <artifactId>metadata-api</artifactId>
             <version>1.4.0</version>
         </dependency>
+        
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>typechecker</artifactId>

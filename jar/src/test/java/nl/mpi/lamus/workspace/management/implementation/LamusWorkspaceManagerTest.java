@@ -20,7 +20,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +34,10 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.typechecking.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
@@ -42,6 +47,8 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -74,7 +81,13 @@ public class LamusWorkspaceManagerTest {
     @Mock private Future<Boolean> mockFuture;
     @Mock private Workspace mockWorkspace;
     @Mock private Workspace mockSubmittedWorkspace;
+    @Mock private MetadataValidationIssue mockValidationIssue1;
+    @Mock private MetadataValidationIssue mockValidationIssue2;
 
+    @Factory
+    public static Matcher<Collection<MetadataValidationIssue>> equivalentValidationIssueCollection(Collection<MetadataValidationIssue> collection) {
+        return new ValidationIssueCollectionMatcher(collection);
+    }
     
     private final int numberOfDaysOfInactivityAllowedSinceLastSession = 60;
     
@@ -613,7 +626,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -642,7 +655,7 @@ public class LamusWorkspaceManagerTest {
     }
     
     @Test
-    public void submitWorkspaceInvalidMetadataException()
+    public void submitWorkspace_ValidationIssues_Error()
             throws InterruptedException, ExecutionException, URISyntaxException,
             MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
         
@@ -650,14 +663,28 @@ public class LamusWorkspaceManagerTest {
         
         final boolean keepUnlinkedFiles = Boolean.TRUE;
         
-        final String expectedErrorMessage = "Invalid metadata file.";
-        final MetadataValidationException expectedException = new MetadataValidationException(expectedErrorMessage, workspaceID, null);
+        final String filename = "file.cmdi";
+        
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        issues.add(mockValidationIssue1);
+        issues.add(mockValidationIssue2);
+        
+        final String assertionErrorMessage1 = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
+        final String assertionErrorMessage2 = "[CMDI Archive Restriction] Something completely different went wrong.";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage1 + ".\n" +
+                "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage2 + ".\n";
+        
+        final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
+        expectedException.addValidationIssues(issues);
+        
         
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
+            oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
         }});
         
         try {
@@ -666,6 +693,71 @@ public class LamusWorkspaceManagerTest {
         } catch(MetadataValidationException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
         }
+    }
+    
+    @Test
+    public void submitWorkspace_ValidationIssues_Warning()
+            throws InterruptedException, ExecutionException, URISyntaxException,
+            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
+        
+        final int workspaceID = 1;
+        
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.add(Calendar.DAY_OF_MONTH, -2);
+        
+        final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
+        final String submittedMessage = "workspace was submitted";
+        
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE;
+        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
+        
+        final Calendar endCalendar = Calendar.getInstance();
+        final Date endDate = endCalendar.getTime();
+        
+        final boolean keepUnlinkedFiles = Boolean.TRUE;
+        
+        final String filename = "file.cmdi";
+        
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        issues.add(mockValidationIssue1);
+        
+        final String assertionErrorMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:Title shouldn't be empty.";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.WARN.toString() + ": " + assertionErrorMessage + ".\n";
+        
+        final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
+        expectedException.addValidationIssues(issues);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
+            oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspace).setStatus(submittedStatus);
+            oneOf(mockWorkspace).setMessage(submittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
+            
+            oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
+            oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
+            oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
+            
+            oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
+            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockCalendarHelper).getCalendarInstance(); will(returnValue(endCalendar));
+            
+            oneOf(mockSubmittedWorkspace).setSessionEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setEndDate(endDate);
+            oneOf(mockSubmittedWorkspace).setStatus(successfullySubmittedStatus);
+            oneOf(mockSubmittedWorkspace).setMessage(successfullySubmittedMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+        }});
+        
+        manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
     }
     
     @Test
@@ -721,7 +813,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -783,7 +875,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -844,7 +936,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateWorkspaceFiles(mockWorkspace);
+            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
