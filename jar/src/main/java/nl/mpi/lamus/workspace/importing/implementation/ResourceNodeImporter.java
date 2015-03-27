@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -104,18 +105,24 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             throw new WorkspaceImportException(errorMessage, workspaceID, null);
         }
 
-        File childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
-        if(childLocalFile == null) {
-            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
-            logger.error(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        }
-
-        URL childURL;
+        boolean childOnSite = childCorpusNode.isOnSite();
+        File childLocalFile = null;
+        URL childArchiveURL = null;
+        
         try {
-            childURL = childLocalFile.toURI().toURL();
-        } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+	        if(childOnSite) {
+	            childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
+	            if(childLocalFile == null) {
+	            	String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+	            	logger.error(errorMessage);
+	            	throw new IllegalArgumentException(errorMessage);
+            	}
+	            childArchiveURL = childLocalFile.toURI().toURL();
+	        } else {
+	        	childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+	        }
+        } catch(MalformedURLException ex) {
+        	throw new UnsupportedOperationException("not handled yet");
         }
 
         String childMimetype = referenceFromParent.getMimetype();
@@ -124,7 +131,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             
             TypecheckedResults typecheckedResults = null;
             try {
-                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childURL, childLocalFile.getName());
+                typecheckedResults = nodeDataRetriever.triggerResourceFileCheck(childArchiveURL, childLocalFile.getName());
             } catch(TypeCheckerException tcex) {
                 String errorMessage = "ResourceNodeImporter.importNode: error during type checking";
                 logger.error(errorMessage, tcex);
@@ -138,17 +145,13 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
 
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
-                workspaceID, childURI, childURL, referenceFromParent,
-                childMimetype, childCorpusNode.getName(), childCorpusNode.isOnSite(), childToBeProtected);
+                workspaceID, childURI, childArchiveURL, referenceFromParent,
+                childMimetype, childCorpusNode.getName(), childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
                 parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
         workspaceDao.addWorkspaceNodeLink(nodeLink);
-        
-        //TODO DO NOT copy file to workspace folder... it will only exist as a link in the DB
-            // and any changes made to it will be done during workspace submission
-        
         
         referenceFromParent.setLocation(null);
         try {
@@ -159,6 +162,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
 	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
     }
+    
     
     private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {
         logger.error(errorMessage, cause);

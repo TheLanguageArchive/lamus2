@@ -150,8 +150,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             childDocument = metadataAPI.getMetadataDocument(childArchiveURL);
 
         } catch (IOException | MetadataException ioex) {
-	    String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
-	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
+        	String errorMessage = "Error getting Metadata Document for node " + childArchiveURI;
+        	throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
         
         boolean childToBeProtected = false;

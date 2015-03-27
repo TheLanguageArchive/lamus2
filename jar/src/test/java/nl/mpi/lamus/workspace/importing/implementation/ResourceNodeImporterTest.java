@@ -158,12 +158,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
 
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -173,11 +176,9 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
-            
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
                     childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
@@ -192,7 +193,6 @@ public class ResourceNodeImporterTest {
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
-        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
     }
     
@@ -233,12 +233,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithoutHandle).getURI(); will(returnValue(childOriginURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childOriginURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithoutHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
                 
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -248,11 +251,9 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
-            
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
             
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
                     childOriginURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
@@ -267,7 +268,72 @@ public class ResourceNodeImporterTest {
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
-        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithoutHandle);
+    }
+    
+    @Test
+    public void importResourceNode_NotOnSite()
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int childWorkspaceNodeID = 10;
+        final String childNodeName = "file name label";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final String childNodeMimetype = "text/plain";
+        final URI childNodeSchemaLocation = URI.create("http://some.location");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = null;
+        final URI childOriginURI = URI.create("http://some.uri/" + childFilename);
+        final URL childArchiveURL = childOriginURI.toURL();
+
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final boolean childOnSite = Boolean.FALSE;
+        final boolean childProtected = Boolean.FALSE;
+        
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final boolean parentProtected = Boolean.FALSE;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childNodeType, childWsURL, childOriginURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildLinkWithoutHandle).getURI(); will(returnValue(childOriginURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(childOriginURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
+            oneOf(mockNodeResolver).getUrl(mockCorpusNode); will(returnValue(childArchiveURL));
+            
+            oneOf(mockChildLinkWithoutHandle).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, null, mockCorpusNode);
+                will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
+                    childOriginURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+                will(returnValue(testChildNode));
+
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+                will(returnValue(testNodeLink));
+            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithoutHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
+        }});
+        
         nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithoutHandle);
     }
     
@@ -312,12 +378,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
                 
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -327,11 +396,9 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
-            
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
                     childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
@@ -347,7 +414,6 @@ public class ResourceNodeImporterTest {
                 will(throwException(expectedException));
         }});
         
-        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         try {
             nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
             fail("Should have thrown exception");
@@ -400,12 +466,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
                 
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -415,11 +484,9 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
-            
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
                     childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
@@ -435,7 +502,6 @@ public class ResourceNodeImporterTest {
                 will(throwException(expectedException));
         }});
         
-        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         try {
             nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
             fail("Should have thrown exception");
@@ -488,12 +554,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
                 
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -503,11 +572,9 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
-            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
-            
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
                     childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
@@ -523,7 +590,6 @@ public class ResourceNodeImporterTest {
                 will(throwException(expectedException));
         }});
         
-        //TODO PID SHOULD BE COMING FROM THE CHILD LINK (HandleCarrier)
         try {
             nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
             fail("Should have thrown exception");
@@ -565,6 +631,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final boolean childOnSite = Boolean.TRUE;
         
         final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
@@ -580,7 +647,8 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
             
-            //TODO Maybe use the method getStream instead, so it can be passed directly to the typechecker?
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(null));
         }});
         
@@ -640,6 +708,7 @@ public class ResourceNodeImporterTest {
         final String childFilename = "childname.txt";
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
+        final boolean childOnSite = Boolean.TRUE;
 
         final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
@@ -657,12 +726,15 @@ public class ResourceNodeImporterTest {
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
             
             oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
             oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
             
             oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
-                will(returnValue(true));
+                will(returnValue(Boolean.TRUE));
             
             oneOf(mockFile).getName(); will(returnValue(childFilename));
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
@@ -679,11 +751,4 @@ public class ResourceNodeImporterTest {
         }
         
     }
-    
-    
-    //TODO MalformedURLException?
-    
-    //TODO IOException
-    
-    //TODO test if/else possible branches
 }
