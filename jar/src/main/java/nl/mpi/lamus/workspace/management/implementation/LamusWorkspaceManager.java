@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
+import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
@@ -61,6 +63,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceExportRunner workspaceExportRunner;
     private final CalendarHelper calendarHelper;
     private final WorkspaceFileValidator workspaceFileValidator;
+    private final PermissionAdjuster permissionAdjuster;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
@@ -69,7 +72,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     @Autowired
     public LamusWorkspaceManager(@Qualifier("WorkspaceExecutorService") ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
         WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
-        CalendarHelper calendarHelper, WorkspaceFileValidator wsFileValidator) {
+        CalendarHelper calendarHelper, WorkspaceFileValidator wsFileValidator, PermissionAdjuster permAdjuster) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
@@ -78,6 +81,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         this.workspaceExportRunner = wsExportRunner;
         this.calendarHelper = calendarHelper;
         this.workspaceFileValidator = wsFileValidator;
+        this.permissionAdjuster = permAdjuster;
     }
     
     /**
@@ -120,22 +124,12 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             logger.error(errorMessage, iex);
             throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), iex);
         } catch (ExecutionException eex) {
-            
-            //TODO Find a better way of handling these exceptions
-                // In most cases this WorkspaceImportException is wrapping an ExecutionException
-                    // that already contains a nested WorkspaceImportException
-                // One possibility would be to just throw here the cause of the ExecutionException
-                    // but perhaps some stacktrace information would be lost that way
-            
             String errorMessage = "Problem with thread execution while creating workspace in node " + topArchiveNodeURI;
             logger.error(errorMessage, eex);
             throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), eex);
         }
         
         if(!isSuccessful) {
-            //TODO remove whatever was already created for the workspace
-                // (filesystem, database) and return some error instead??
-            
             String errorMessage = "Workspace creation failed in node " + topArchiveNodeURI;
             logger.error(errorMessage);
             throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), null);
@@ -160,10 +154,11 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             throws WorkspaceNotFoundException, WorkspaceExportException, IOException {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
+        WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
-        workspaceExportRunner.setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
+        workspaceExportRunner.setSubmissionType(submissionType);
         
         Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
         
@@ -174,22 +169,25 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         } catch(InterruptedException iex) {
             String errorMessage = "Interruption in thread while deleting workspace " + workspaceID;
             logger.error(errorMessage, iex);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, iex);
         } catch(ExecutionException eex) {
             String errorMessage = "Problem with thread execution while deleting workspace " + workspaceID;
             logger.error(errorMessage, eex);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, eex);
         }
         
         if(!isSuccessful) {
             String errorMessage = "Workspace deletion failed for workspace " + workspaceID;
             logger.error(errorMessage);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, null);
         }
         
         workspaceDao.deleteWorkspace(workspaceID);
-        
         workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
+        adjustPermissionsInArchive(workspaceID, submissionType);
     }
 
     /**
@@ -200,6 +198,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             throws WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
+        WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         
         try{
             workspaceFileValidator.validateMetadataFilesInWorkspace(workspaceID);
@@ -224,7 +223,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
-        workspaceExportRunner.setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
+        workspaceExportRunner.setSubmissionType(submissionType);
         
         //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
             // this should be part of the export thread?
@@ -241,33 +240,26 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             String errorMessage = "Interruption in thread while submitting workspace " + workspaceID;
             logger.error(errorMessage, iex);
             finaliseWorkspace(workspace, Boolean.FALSE);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, iex);
         } catch(ExecutionException eex) {
-            
-            //TODO Find a better way of handling these exceptions
-                // In most cases this WorkspaceImportException is wrapping an ExecutionException
-                    // that already contains a nested WorkspaceImportException
-                // One possibility would be to just throw here the cause of the ExecutionException
-                    // but perhaps some stacktrace information would be lost that way
-            
             String errorMessage = "Problem with thread execution while submitting workspace " + workspaceID;
             logger.error(errorMessage, eex);
             finaliseWorkspace(workspace, Boolean.FALSE);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, eex);
         }
-        
-        //TODO CATCH CrawlerException?
-        
-        
         
         if(!isSuccessful) {
             String errorMessage = "Workspace submission failed for workspace " + workspaceID;
             logger.error(errorMessage);
             finaliseWorkspace(workspace, Boolean.FALSE);
+            adjustPermissionsInArchive(workspaceID, submissionType);
             throw new WorkspaceExportException(errorMessage, workspaceID, null);
         }
         
         finaliseWorkspace(workspace, Boolean.TRUE);
+        adjustPermissionsInArchive(workspaceID, submissionType);
     }
 
     /**
@@ -287,10 +279,6 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             Date nowPlusExpiry = calendarNow.getTime();
             workspace.setSessionEndDate(nowPlusExpiry);
             workspaceDao.updateWorkspaceSessionDates(workspace);
-
-            //TODO necessary?
-//                workspace = workspaceDao.getWorkspace(workspaceID);
-
         } else {
             String errorMessage = "Directory for workpace " + workspaceID + " does not exist";
             logger.error(errorMessage);
@@ -317,5 +305,17 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         workspaceDao.updateWorkspaceEndDates(workspace);
         workspaceDao.updateWorkspaceStatusMessage(workspace);
+    }
+    
+    private void adjustPermissionsInArchive(int workspaceID, WorkspaceSubmissionType submissionType) {
+    	
+    	PermissionAdjusterScope scope;
+    	if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
+    		scope = PermissionAdjusterScope.ALL_NODES;
+    	} else {
+    		scope = PermissionAdjusterScope.UNLINKED_NODES_ONLY;
+    	}
+    	
+    	permissionAdjuster.adjustPermissions(workspaceID, scope);
     }
 }

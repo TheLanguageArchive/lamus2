@@ -28,16 +28,18 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
+import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.typechecking.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
 import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
+import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
@@ -77,6 +79,7 @@ public class LamusWorkspaceManagerTest {
     @Mock private WorkspaceExportRunner mockWorkspaceExportRunner;
     @Mock private CalendarHelper mockCalendarHelper;
     @Mock private WorkspaceFileValidator mockWorkspaceFileValidator;
+    @Mock private PermissionAdjuster mockPermissionAdjuster;
     
     @Mock private Future<Boolean> mockFuture;
     @Mock private Workspace mockWorkspace;
@@ -107,7 +110,8 @@ public class LamusWorkspaceManagerTest {
         this.manager = new LamusWorkspaceManager(
                 mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao,
                 mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner,
-                mockWorkspaceExportRunner, mockCalendarHelper, mockWorkspaceFileValidator);
+                mockWorkspaceExportRunner, mockCalendarHelper,
+                mockWorkspaceFileValidator, mockPermissionAdjuster);
         
         ReflectionTestUtils.setField(manager, "numberOfDaysOfInactivityAllowedSinceLastSession", numberOfDaysOfInactivityAllowedSinceLastSession);
     }
@@ -388,6 +392,8 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
+            
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});
         
         
@@ -434,6 +440,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});
         
         try {
@@ -465,6 +472,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});
         
         try {
@@ -495,6 +503,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});
         
         try {
@@ -648,6 +657,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setMessage(successfullySubmittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
         }});
         
         
@@ -755,6 +765,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setMessage(successfullySubmittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
         }});
         
         manager.submitWorkspace(workspaceID, keepUnlinkedFiles);
@@ -835,6 +846,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
         }});
         
         try {
@@ -897,6 +909,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
         }});
         
         try {
@@ -958,6 +971,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockSubmittedWorkspace).setMessage(errorSubmittingMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceEndDates(mockSubmittedWorkspace);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSubmittedWorkspace);
+            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
         }});
         
         try {

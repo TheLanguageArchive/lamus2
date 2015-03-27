@@ -74,7 +74,6 @@ public class WorkspaceExportRunnerTest {
     @Mock NodeExporterFactory mockNodeExporterFactory;
     @Mock UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
-    @Mock PermissionAdjuster mockPermissionAdjuster;
     
     @Mock NodeExporter mockNodeExporter;
     
@@ -98,7 +97,7 @@ public class WorkspaceExportRunnerTest {
         workspaceExportRunner = new WorkspaceExportRunner(
                 mockWorkspaceDao, mockNodeExporterFactory,
                 mockUnlinkedAndDeletedNodesExportHandler,
-                mockCorpusStructureServiceBridge, mockPermissionAdjuster);
+                mockCorpusStructureServiceBridge);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -172,10 +171,6 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockWorkspace).setCrawlerID(crawlerID);
                 when(exporting.isNot("finished"));
             oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-                when(exporting.isNot("finished"));
-            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.ALL_NODES);
                 then(exporting.is("finished"));
         }});
         
@@ -218,10 +213,6 @@ public class WorkspaceExportRunnerTest {
         context.checking(new Expectations() {{
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-                when(exporting.isNot("finished"));
-            oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
                 then(exporting.is("finished"));
         }});
         

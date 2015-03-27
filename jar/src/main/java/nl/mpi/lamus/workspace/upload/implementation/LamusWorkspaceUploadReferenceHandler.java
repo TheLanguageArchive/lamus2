@@ -181,7 +181,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 } else {
                     //Multiple parents NOT allowed - won't be linked
                     String message = "Matched node (ID " + matchedNode.getWorkspaceNodeID() + ") cannot be linked to parent node (ID " + currentNode.getWorkspaceNodeID() + ") because it already has a parent. Multiple parents are not allowed.";
-                    logger.error(message, null);
+                    logger.error(message);
                     failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, null));
                 }
                 

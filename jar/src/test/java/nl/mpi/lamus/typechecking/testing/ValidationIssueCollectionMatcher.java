@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking;
+package nl.mpi.lamus.typechecking.testing;
 
 import java.util.Collection;
 import java.util.Iterator;
