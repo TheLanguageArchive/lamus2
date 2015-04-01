@@ -60,6 +60,10 @@ public class SelectWorkspacePage extends LamusPage {
         createNodeIdForm("workspaceForm");
         
         createNavigationPanel("navigationPanel");
+    	
+    	if(!LamusSession.get().isAuthenticated()) {
+    		LamusSession.get().invalidateNow();
+    	}
     }
 
     private NavigationPanel createNavigationPanel(final String id) {

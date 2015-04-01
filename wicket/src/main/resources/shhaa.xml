@@ -13,8 +13,8 @@
                 <username>anonymous</username>
             </fallback>
             <!-- enable '?shhaaDo=lo in URL triggers slo action' etc here: -->
-            <sso action="li">${shhaa.li}</sso>
-            <slo action="lo">${shhaa.lo}</slo>
+            <sso action="lI">${shhaa.li}</sso>
+            <slo action="lO">${shhaa.lo}</slo>
         </authentication>
         
         <composition action="rF">
@@ -31,17 +31,11 @@
             <!--<location  target="/*" />-->
             <location target="/CreateWorkspacePage*" />
             <location target="/SelectWorkspacePage*" />
-<!--            <location target="/ManageWorkspacePage*" >
-                <require id="email">${shhaa.corpman}</require>
-            </location>-->
-            <!--<location target="/LoginInfoPage*" />-->
-            <!--<location target="/login*" />-->
         </authorization>
         
         <handler>
             <pages>
-                <!--<info action="dI">/LoginInfoPage</info>-->
-                <!--<info action="dI">/login.jsp</info>-->
+            	<info action="dI">/WEB-INF/classes/nl/mpi/lamus/web/pages/LoginInfoPage.html</info>
             </pages>
         </handler>
     </shhaa>

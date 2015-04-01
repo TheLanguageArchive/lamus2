@@ -22,6 +22,7 @@ import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
+
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
@@ -38,8 +39,6 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
     
     @SpringBean
     private LamusSessionFactory lamusSessionFactory;
-//    @SpringBean
-//    private WorkspaceService workspaceService;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
 	this.lamusSessionFactory = sessionFactory;
@@ -51,16 +50,8 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         if(!LamusSession.get().isAuthenticated()) {
             return IndexPage.class;
         } else {
-//            if(workspaceService.userHasWorkspaces(LamusSession.get().getUserId())) {
-//                return SelectWorkspacePage.class;
-//            } else {
-                return CreateWorkspacePage.class;
-//            }
+            return CreateWorkspacePage.class;
         }
-        // if user logged in
-            // if has open workspaces, set "select workspace page" as homepage
-            // else set "create workspace" as homepage
-        // else set "about" as homepage
     }
 
     @Override
@@ -75,32 +66,13 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/IndexPage", IndexPage.class);
         mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
         mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
-//        mountPage("/ManageWorkspacePage", ManageWorkspacesPage.class);
-//        mountPage("/LoginInfoPage", LoginInfoPage.class);
-        
-//        PackageResourceReference lamus2CssReference = new PackageResourceReference(LamusPage.class, "lamus2.css");
-//        getSharedResources().add("lamus2Css", lamus2CssReference.getResource());
-//        mountResource("/css/lamus2.css", lamus2CssReference);
-        
+
         PackageResourceReference tlaLogoImageReference = new PackageResourceReference(LamusPage.class, "tla_logo.png");
         getSharedResources().add("tlaLogoImage", tlaLogoImageReference.getResource());
-//        mountResource("/images/tla_logo.png", tlaLogoImageReference);
         PackageResourceReference homeImageReference = new PackageResourceReference(LamusPage.class, "home.png");
         getSharedResources().add("homeImage", homeImageReference.getResource());
-//        mountResource("/images/home.png", homeImageReference);
         PackageResourceReference clarinInvertedImageReference = new PackageResourceReference(LamusPage.class, "CLARIN-inverted.png");
         getSharedResources().add("clarinInvertedImage", clarinInvertedImageReference.getResource());
-//        mountResource("/images/CLARIN-inverted.png", clarinInvertedImageReference);
-        
-//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.eot", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.eot"));
-//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.svg", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.svg"));
-//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.ttf", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.ttf"));
-//        mountResource("/fonts/lamus_icon_font/lamus_icon_font.woff", new PackageResourceReference(LamusPage.class, "lamus_icon_font/lamus_icon_font.woff"));
-        
-//        mountResource("/css/fonts/icomoon/icomoon.eot", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.eot"));
-//        mountResource("/css/fonts/icomoon/icomoon.svg", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.svg"));
-//        mountResource("/css/fonts/icomoon/icomoon.ttf", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.ttf"));
-//        mountResource("/css/fonts/icomoon/icomoon.woff", new PackageResourceReference(LamusPage.class, "icomoon/icomoon.woff"));
     }
 
     @Override

@@ -28,6 +28,5 @@ import org.apache.wicket.model.Model;
 public class LoginInfoPage extends WebPage {
     
     public LoginInfoPage() {
-        add(new Label("userId", Model.of(LamusSession.get().getUserId())));
     }
 }

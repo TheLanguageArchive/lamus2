@@ -69,12 +69,16 @@ public class CreateWorkspacePage extends LamusPage {
 
     
     public CreateWorkspacePage() {
-	super();
+    	super();
         
         createNavigationPanel("navigationPanel");
         
-	nodeIdForm = createNodeIdForm("nodeIdForm");
-	createArchiveTreePanel("archiveTree");
+		nodeIdForm = createNodeIdForm("nodeIdForm");
+		createArchiveTreePanel("archiveTree");
+		
+		if(!LamusSession.get().isAuthenticated()) {
+			LamusSession.get().invalidateNow();
+		}	
     }
 
     
