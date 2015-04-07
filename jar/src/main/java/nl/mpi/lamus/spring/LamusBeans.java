@@ -75,7 +75,6 @@ public class LamusBeans {
         return Executors.newScheduledThreadPool(1);
     }
     
-    //TODO change properties to initialise API
     @Bean
     public MetadataAPI metadataAPI() {
         return new CMDIApi();

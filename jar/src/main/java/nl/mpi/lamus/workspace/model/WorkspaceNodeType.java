@@ -26,7 +26,4 @@ public enum WorkspaceNodeType {
     RESOURCE,
     
     UNKNOWN
-    
-    
-    //TODO enough types?
 }

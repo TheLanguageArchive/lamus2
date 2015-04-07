@@ -135,7 +135,7 @@ public class WorkspaceExportRunnerTest {
         final URI originURI = URI.create("http://some.url/someName.cmdi");
         final URL archiveNodeURL = originURI.toURL();
         final String testDisplayValue = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
@@ -195,7 +195,7 @@ public class WorkspaceExportRunnerTest {
         final URI originURI = URI.create("http://some.url/someName.cmdi");
         final URL archiveNodeURL = originURI.toURL();
         final String testDisplayValue = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
@@ -237,7 +237,7 @@ public class WorkspaceExportRunnerTest {
         final URI originURI = URI.create("http://some.url/someName.cmdi");
         final URL archiveNodeURL = originURI.toURL();
         final String testDisplayValue = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,

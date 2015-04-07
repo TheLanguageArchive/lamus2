@@ -493,7 +493,6 @@ class SomeOtherWorkspace implements Workspace {
         this.startDate = now;
         this.sessionStartDate = now;
         this.status = WorkspaceStatus.INITIALISING;
-        //TODO set message, etc
     }
     
     public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,

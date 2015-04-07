@@ -87,23 +87,13 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference referenceFromParent) throws WorkspaceImportException {
 
-	if (workspace == null) {
-	    String errorMessage = "Workspace not set";
-	    logger.error(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-	}
+		if (workspace == null) {
+		    String errorMessage = "Workspace not set";
+		    logger.error(errorMessage);
+	            throw new IllegalArgumentException(errorMessage);
+		}
         
         int workspaceID = workspace.getWorkspaceID();
-        
-	//TODO if not onsite: create external node
-	//TODO setURID
-	//TODO if no access: create forbidden node
-	//TODO if unknown node: create forbidden node
-	//TODO if needsProtection: create external node
-
-	//TODO check if node already exists in db
-	//TODO if so, it should be for the same workspace
-	//TODO also, the node file should already exist in the workspace directory
 
         URI childArchiveURI;
         
@@ -200,18 +190,16 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             throwWorkspaceImportException(workspaceID, errorMessage, usex);
         }
 
-	//TODO change the referenced URL in the parent document
-	//TODO not of the original one, but the one IN THE WORKSPACE FOLDER
-	if (parentDocument != null) {
-	    //TODO how to change the child link/element (of the new document) using the MetadataAPI?
-	    //TODO change link of the copied document to have a different handle when it is null, for instance
-	}
-
-	if (childDocument instanceof ReferencingMetadataDocument) {
-	    ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
-            List<Reference> links = childReferencingDocument.getDocumentReferences();
-	    workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
-	}
+		if (parentDocument != null) {
+		    //TODO how to change the child link/element (of the new document) using the MetadataAPI?
+		    //TODO change link of the copied document to have a different handle when it is null, for instance
+		}
+	
+		if (childDocument instanceof ReferencingMetadataDocument) {
+		    ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
+	            List<Reference> links = childReferencingDocument.getDocumentReferences();
+		    workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
+		}
     }
     
     private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {

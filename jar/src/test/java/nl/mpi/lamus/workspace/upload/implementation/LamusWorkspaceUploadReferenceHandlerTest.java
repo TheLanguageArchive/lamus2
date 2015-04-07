@@ -348,8 +348,6 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         assertTrue("Upload problem different from expected", problem instanceof LinkImportProblem);
         assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((LinkImportProblem) problem).getParentNode());
         assertEquals("Upload problem has different child node from expected", mockSecondNode, ((LinkImportProblem) problem).getChildNode());
-        
-        //TODO ASSERT ERROR MESSAGE
     }
     
     @Test
@@ -480,10 +478,6 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     
     @Test
     public void matchOneReference_WithoutLocalUrl_WithExternalHandle() throws MetadataException, IOException, TransformerException, WorkspaceException {
-        
-        //TODO if a match is never found, what should happen?
-            // reference should be removed from parent file??
-                // what else?
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
@@ -711,10 +705,6 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Test
     public void noMatchForReference_WithoutLocalUrl() throws MetadataException, IOException, TransformerException {
         
-        //TODO if a match is never found, what should happen?
-            // reference should be removed from parent file??
-                // what else?
-        
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         //URI is not a handle
@@ -758,10 +748,6 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Test
     public void noMatchForReference_WithoutLocalUrl_WithHandle() throws MetadataException, IOException, TransformerException {
         
-        //TODO if a match is never found, what should happen?
-            // reference should be removed from parent file??
-                // what else?
-        
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         //URI is a handle
@@ -803,10 +789,6 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     
     @Test
     public void noMatchForReference_RemovingReferenceThrowsException() throws MetadataException, IOException, TransformerException {
-        
-        //TODO if a match is never found, what should happen?
-            // reference should be removed from parent file??
-                // what else?
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         

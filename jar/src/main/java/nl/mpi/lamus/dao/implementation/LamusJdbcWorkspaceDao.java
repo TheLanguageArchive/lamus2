@@ -147,8 +147,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
             topNodeArchiveUrlStr = workspace.getTopNodeArchiveURL().toString();
         }
         
-        //TODO end dates are null when adding a workspace, which makes sense; is there any case where it would be different?
-        // if dates are null, let the database throw the errors
         Timestamp startDate = null;
         if(workspace.getStartDate() != null) {
             startDate = new Timestamp(workspace.getStartDate().getTime());

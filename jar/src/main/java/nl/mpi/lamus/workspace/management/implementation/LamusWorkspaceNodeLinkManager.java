@@ -79,25 +79,18 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
 	if(parentNode == null && childLink == null) { //TODO find a better way of checking for the top node
             
-            logger.debug("Setting top node of workspace; workspaceID: " + workspace.getWorkspaceID() + "; topNodeID: " + childNode.getWorkspaceNodeID());
-            
-//            Workspace workspace;
-//
-//            workspace = this.workspaceDao.getWorkspace(childNode.getWorkspaceID());
+        logger.debug("Setting top node of workspace; workspaceID: " + workspace.getWorkspaceID() + "; topNodeID: " + childNode.getWorkspaceNodeID());
 
-            workspace.setTopNodeID(childNode.getWorkspaceNodeID());
+        workspace.setTopNodeID(childNode.getWorkspaceNodeID());
 	    workspace.setTopNodeArchiveURI(childNode.getArchiveURI());
-            workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
-            
-	    this.workspaceDao.updateWorkspaceTopNode(workspace);
+        workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
+        this.workspaceDao.updateWorkspaceTopNode(workspace);
 	} else if(parentNode != null && childLink != null) { //TODO Is there a situation when this would be different?
             
-            logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+        logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
             
-	    //TODO add information about parent link
-	    // add the link in the database
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
-		    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
+	    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
 	    this.workspaceDao.addWorkspaceNodeLink(nodeLink);
 	    //TODO possible problems with adding the link? if the link already exists?
 	} else {
@@ -125,8 +118,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         
         logger.debug("Linking nodes; workspaceID: " + workspaceID + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
-        
-//        URI childNodeURI = getNodeURI(childNode);
         
         MetadataDocument tempParentDocument = null;
         try {
@@ -297,11 +288,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         
         workspaceDao.replaceNode(oldNode, newNode);
-        
-        //TODO case when old node was newly added in the workspace
-        
-        //TODO case when the old node and/or the new node are external
-        
     }
     
     /**

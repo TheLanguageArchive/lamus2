@@ -57,8 +57,6 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        //TODO add other values as well
-
         return node;
     }
     
@@ -106,7 +104,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
         node.setName(displayValue);
-        node.setTitle(displayValue); //TODO CHANGE THIS
+        node.setTitle(displayValue);
         node.setType(WorkspaceNodeType.RESOURCE);
         node.setFormat(mimetype);
         
@@ -138,7 +136,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setFormat(mimetype);
         
 //        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
-        if(workspaceURL.toString().endsWith("cmdi")) { //TODO THIS IS HERE TEMPORARILY WHILE THE TYPECHECKER DOESN'T RECOGNISE CMDI...
+        if(workspaceURL.toString().endsWith("cmdi")) {
             node.setType(WorkspaceNodeType.METADATA);
         } else {
             node.setType(WorkspaceNodeType.RESOURCE);

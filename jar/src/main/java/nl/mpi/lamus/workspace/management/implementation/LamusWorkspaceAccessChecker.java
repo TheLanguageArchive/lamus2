@@ -77,7 +77,6 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     public void ensureWorkspaceCanBeCreated(String userID, URI archiveNodeURI)
             throws NodeAccessException, NodeNotFoundException {
         
-        //TODO Maybe this is not necessary anymore...
         CorpusNode node = corpusStructureProvider.getNode(archiveNodeURI);
 
         if(node == null) {
@@ -102,15 +101,8 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("Ensuring that node '{}' is accessible to user {}", archiveNodeURI, userID);
         ensureWriteAccessToNode(userID, nodeID_URI);
         
-        //TODO Should it take into account the "sessions" folders, where write access is always true?
-        
         logger.debug("Ensuring that node '{}' is not locked", archiveNodeURI);
         ensureNodeIsNotLocked(archiveNodeURI);
-        
-        //TODO Should it check now if any of the child nodes is locked??
-            // maybe that's too much to compute for a large workspace...
-            // on the other hand, it can also be a lot of waiting when creating the workspace, in case it ends up being locked
-            // if there was a way of checking just the leave nodes, it would be a bit easier
         
         Collection<CorpusNode> descendants = corpusStructureProvider.getDescendantNodes(archiveNodeURI);
         

@@ -127,7 +127,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -203,7 +203,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final String childFilename = "childname.txt";
@@ -278,7 +278,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("http://some.location");
         final String childFilename = "childname.txt";
@@ -344,7 +344,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -432,7 +432,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -520,7 +520,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE; //TODO WHat to use here?
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");

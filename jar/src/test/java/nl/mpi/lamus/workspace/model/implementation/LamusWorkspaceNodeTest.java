@@ -71,9 +71,7 @@ public class LamusWorkspaceNodeTest {
     public void tearDown() {
     }
 
-    /**
-     * Test for one of the constructors
-     */
+
     @Test
     public void constructorWithAllParametersProperlyCreatesWorkspace() {
 
@@ -98,11 +96,6 @@ public class LamusWorkspaceNodeTest {
         assertEquals("Value for 'format' is not the expected one.", this.workspaceNodeFormat, testNode.getFormat());
     }
     
-    //TODO test unmodifiable collection (parent references)
-    
-    /**
-     * Test of equals method, of class LamusWorkspace.
-     */
     @Test
     public void nodesAreEqual() {
 
@@ -143,9 +136,6 @@ public class LamusWorkspaceNodeTest {
         assertEquals("Workspace objects don't have the same hashcode.", testWorkspaceNode1.hashCode(), testWorkspaceNode2.hashCode());
     }
     
-    /**
-     * Test of equals method, of class LamusWorkspace.
-     */
     @Test
     public void nodesAreNotEqual() throws MalformedURLException {
         

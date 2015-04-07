@@ -113,9 +113,6 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
             if(versioningWasSuccessful) {
                 amsBridge.triggerAmsNodeReplacements(nodeReplacements, workspace.getUserID());
             }
-            
-            //TODO CHECK IF IT WAS SUCCESSFUL??
-            
         }
         
         if(!crawlerWasSuccessful) {
@@ -144,8 +141,6 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
             } else {
                 amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
             }
-            
-            //TODO CHECK IF IT WAS SUCCESSFUL??
         }
         
         //TODO some more details about the situation (especially in case of failure)

@@ -111,7 +111,6 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
         String nodeFilename = FilenameUtils.getName(archiveFile.getPath());
         
-        //TODO Should it be based on the name in the node's metadata??
         File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
         
         return workspaceNodeFile;
@@ -139,10 +138,6 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
      */
     @Override
     public Collection<File> getFilesInOrphanDirectory(Workspace workspace) {
-        
-        
-        //TODO FILTER FILES IN SOME WAY??? MAYBE IGNORE SOME FILES WITH SPECIFIC NAMES?
-        
         
         File orphansDirectory;
         try {

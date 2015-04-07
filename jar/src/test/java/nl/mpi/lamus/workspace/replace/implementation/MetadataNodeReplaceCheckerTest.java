@@ -120,9 +120,6 @@ public class MetadataNodeReplaceCheckerTest {
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
-            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
-            
-            
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
@@ -156,9 +153,6 @@ public class MetadataNodeReplaceCheckerTest {
             //logger
             oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
-            
-            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
-            
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             //exception

@@ -135,18 +135,17 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         String resourceCheckedMimetype = typecheckedResults.getCheckedMimetype();
         
         if(typecheckedResults.isTypeUnspecified() && resourceReferenceMimetype != null) {
-            //TODO WARN
+
             logger.warn("ResourceNodeImporter.importNode: Unrecognized file contents, assuming format " + resourceReferenceMimetype +
                     " as specified in metadata file for file: " + resourceFile.getAbsolutePath());
             logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
                     typecheckedResults.getAnalysis() + " for: " + resourceFile.getAbsolutePath());
         } else if(!resourceCheckedMimetype.equals(resourceReferenceMimetype)) {
-            //TODO do stuff... WARN
+
             if (resourceReferenceMimetype != null) {
                 logger.warn("ResourceNodeImporter.importNode: Metadata file claimed format " + resourceReferenceMimetype + " but contents are " +
                     typecheckedResults.getCheckedMimetype() + " for file: " + resourceFile.getAbsolutePath());
 
-                //TODO if "un", WARN
                 if (resourceReferenceMimetype.startsWith("Un")) {
                     logger.info("ResourceNodeImporter.importNode: File type check result was: " + 
                         typecheckedResults.getAnalysis() + " for: " + resourceFile.getAbsolutePath());

@@ -158,7 +158,7 @@ public class MetadataNodeImporterTest {
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final String testChildName = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -211,7 +211,7 @@ public class MetadataNodeImporterTest {
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
         final String testChildName = "someName";
-        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");

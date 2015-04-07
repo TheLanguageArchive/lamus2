@@ -100,9 +100,6 @@ public class LamusWorkspaceService implements WorkspaceService {
 
         this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
         
-        //TODO what about the browser session? does it make sense to check for a workspace in the session? disconnect it?
-        //TODO thread for timeout checking? - WorkspaceTimeoutChecker/WorkspaceDates...
-        
         return this.workspaceManager.createWorkspace(userID, archiveUriToUse);
     }
     
@@ -129,9 +126,6 @@ public class LamusWorkspaceService implements WorkspaceService {
             WorkspaceExportException, MetadataValidationException {
         
         logger.debug("Triggered submission of workspace; userID " + userID + "; workspaceID: " + workspaceID);
-
-        //TODO requests in this session?
-        //TODO workspace should be initialised / connected
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         

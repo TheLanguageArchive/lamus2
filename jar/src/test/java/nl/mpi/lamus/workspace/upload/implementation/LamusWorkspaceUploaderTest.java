@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.upload.implementation;
 
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
@@ -55,6 +57,7 @@ import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
 import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+
 import org.apache.commons.fileupload.FileItem;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -67,10 +70,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+
 import static org.hamcrest.Matchers.*;
+
 import org.jmock.lib.concurrent.Synchroniser;
 
 /**

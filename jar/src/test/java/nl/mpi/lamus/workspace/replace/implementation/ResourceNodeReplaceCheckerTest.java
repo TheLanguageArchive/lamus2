@@ -151,13 +151,6 @@ public class ResourceNodeReplaceCheckerTest {
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
             
-            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
-            
-            
-            //TODO GET OLD NODE FROM ARCHIVE
-                //TODO IF NOT PRESENT THERE, PROBABLY IT'S A NEWLY ADDED FILE - ADD REPLACE ACTION
-                //TODO IF PRESENT, COMPARE FILESIZE AND/OR CHECKSUM AND ADD ACTIONS ACCORDINGLY...
-            
             oneOf(mockOldNode).getArchiveURI(); will(returnValue(archiveNodeHandleURI));
             
             oneOf(mockCorpusStructureProvider).getNode(archiveNodeHandleURI); will(returnValue(mockOldCorpusNode));
@@ -207,13 +200,6 @@ public class ResourceNodeReplaceCheckerTest {
             
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
-            
-            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
-            
-            
-            //TODO GET OLD NODE FROM ARCHIVE
-                //TODO IF NOT PRESENT THERE, PROBABLY IT'S A NEWLY ADDED FILE - ADD REPLACE ACTION
-                //TODO IF PRESENT, COMPARE FILESIZE AND/OR CHECKSUM AND ADD ACTIONS ACCORDINGLY...
             
             oneOf(mockOldNode).getArchiveURI(); will(returnValue(archiveNodeHandleURI));
             
@@ -271,13 +257,6 @@ public class ResourceNodeReplaceCheckerTest {
             
             oneOf(mockOldNode).getFormat(); will(returnValue(oldNodeFormat));
             oneOf(mockNewNode).getFormat(); will(returnValue(newNodeFormat));
-            
-            //TODO CHECK IF FILE EXISTS, IS A FILE AND IS READABLE?
-            
-            
-            //TODO GET OLD NODE FROM ARCHIVE
-                //TODO IF NOT PRESENT THERE, PROBABLY IT'S A NEWLY ADDED FILE - ADD REPLACE ACTION
-                //TODO IF PRESENT, COMPARE FILESIZE AND/OR CHECKSUM AND ADD ACTIONS ACCORDINGLY...
             
             oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeArchiveHandleURI));
             oneOf(mockCorpusStructureProvider).getNode(oldNodeArchiveHandleURI); will(returnValue(mockOldCorpusNode));

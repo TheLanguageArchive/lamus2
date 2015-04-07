@@ -93,11 +93,7 @@ public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
                 currentNodeReplaceChecker.decideReplaceActions(oldChild, currentMatch, newNode, true, actions);
             } else {
                 
-                //TODO something else?
-                
                 replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(oldChild), actions);
-                
-                //TODO something else?
             }
         }
         

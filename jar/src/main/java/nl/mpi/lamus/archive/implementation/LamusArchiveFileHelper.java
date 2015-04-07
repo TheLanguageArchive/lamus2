@@ -40,8 +40,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusArchiveFileHelper implements ArchiveFileHelper {
     
-    //TODO based on the class 'ArchiveUtils' from the old Lamus
-    
     private static final Logger logger = LoggerFactory.getLogger(LamusArchiveFileHelper.class);
     
     @Autowired

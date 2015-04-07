@@ -55,34 +55,6 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
             throws ProtectedNodeException {
         
         logger.debug("Deciding which actions should take place to perform the replacement of metadata node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
-        
-        //TODO CHECK IF OLD NODE AND NEW NODE ARE OF SIMILAR TYPES
-        //TODO CHECK IF OLD NODE AND NEW NODE ARE THE SAME (can happen in a tree replace with links to the archive)
-        //TODO CHECK EXTERNAL NODES?
-        //TODO ...
-        
-        //TODO CHECK IF NEW FILE EXISTS, IS READABLE?...
-        
-        
-        
-        //TODO CHECK IF THE OLD NODE WAS NEWLY ADDED IN THIS WORKSPACE
-        
-        //TODO MAKE SURE THAT HANDLES ARE THE SAME (BUT THE NEW NODE WAS NEWLY ADDED IN THIS WORKSPACE),
-            // OTHERWISE WARN THAT THE WHOLE BRANCH WILL BE REPLACED WITHOUT VERSIONING
-        
-        //TODO CHECK FOR CIRCULAR LINKS (ADD MULTIPLE PARENTS TO THE CHECK?)
-        
-        
-        //TODO IF THERE'S NO HANDLE IN THE NEW NODE (IT'S NOT A NEW VERSION), A REPLACE SHOULD BE PERFORMED,
-            // BUT THE NODE ITSELF SHOULD BE HANDLED LATER AS AN ADDED NODE, AND THE OLD NODE SHOULD BE HANDLED AS AN UNLINKED? DELETED NODE?
-        //TODO IF THERE'S A HANDLE IN THE NEW NODE (IT'S A NEW VERSION), A REPLACE SHOULD BE PERFORMED,
-            // AND LATER IT SHOULD BE HANDLED AS A NEW NODE, AND THE OLD NODE SHOULD BE HANDLED AS A REPLACED NODE
-        
-        
-        //TODO IF THERE ARE CHILDREN, EXPLORE THOSE
-        //TODO CHECK IF ALL LINKS IN METADATA ARE IN THE DB? (SHOULD BE, OF COURSE), BUT I WOULD PREFER TO ONLY RELY ON ONE OF THESE THINGS...
-        
-        //TODO FOR EACH CHILD (OLD NODE) CALL THE APPROPRIATE REPLACE CHECKER...
 
         // if the node to replace is the top node of the workspace, the replace action should not go ahead
         if(parentNode == null) {

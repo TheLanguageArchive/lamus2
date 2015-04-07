@@ -90,7 +90,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
@@ -113,7 +113,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
         final String nodeFormat = "";
         final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,

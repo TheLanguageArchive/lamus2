@@ -134,7 +134,7 @@ public class LamusWorkspaceFactoryTest {
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);
-        //TODO assert if the workspace object contains the expected values
+
         assertEquals("Status of created workspace is not the expected one.", expectedStatus, testWorkspace.getStatus());
         assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
         assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
@@ -165,7 +165,7 @@ public class LamusWorkspaceFactoryTest {
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);
-        //TODO assert if the workspace object contains the expected values
+
         assertEquals("Status of created workspace is not the expected one.", expectedStatus, testWorkspace.getStatus());
         assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
         assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());
@@ -196,7 +196,7 @@ public class LamusWorkspaceFactoryTest {
         
         assertNotNull("Returned workspace should not be null.", testWorkspace);
         assertTrue("Returned object is not an instance of Workspace.", testWorkspace instanceof LamusWorkspace);
-        //TODO assert if the workspace object contains the expected values
+
         assertEquals("Status of created workspace is not the expected one.", expectedStatus, testWorkspace.getStatus());
         assertEquals("Value of 'usedStorageSpace' is not the expected one.", expectedUsedStorageSpace, testWorkspace.getUsedStorageSpace());
         assertEquals("Value of 'maxStorageSpace' is not the expected one.", expectedMaxStorageSpace, testWorkspace.getMaxStorageSpace());

@@ -119,7 +119,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL firstNodeArchiveURL = firstNodeOriginURI.toURL();
         final URI firstNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String firstNodeDisplayValue = "someName";
-        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA;
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
@@ -132,7 +132,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL secondNodeArchiveURL = secondNodeOriginURI.toURL();
         final URI secondNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String secondNodeDisplayValue = "someName";
-        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA;
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
@@ -180,7 +180,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL firstNodeArchiveURL = firstNodeOriginURI.toURL();
         final URI firstNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String firstNodeDisplayValue = "someName";
-        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA;
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
@@ -193,7 +193,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL secondNodeArchiveURL = secondNodeOriginURI.toURL();
         final URI secondNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String secondNodeDisplayValue = "someName";
-        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA;
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
@@ -241,7 +241,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL firstNodeArchiveURL = firstNodeOriginURI.toURL();
         final URI firstNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String firstNodeDisplayValue = "someName";
-        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType firstNodeType = WorkspaceNodeType.METADATA;
         final String firstNodeFormat = "";
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
@@ -254,7 +254,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URL secondNodeArchiveURL = secondNodeOriginURI.toURL();
         final URI secondNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String secondNodeDisplayValue = "someName";
-        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType secondNodeType = WorkspaceNodeType.METADATA;
         final String secondNodeFormat = "";
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,

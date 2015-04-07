@@ -102,7 +102,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
@@ -150,7 +150,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
@@ -205,7 +205,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA; //TODO change this
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,

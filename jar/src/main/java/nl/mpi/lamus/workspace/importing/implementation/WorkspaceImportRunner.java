@@ -105,27 +105,17 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
         
-        
-        //TODO IMPORT ORPHANS FILES... 
-            // RETURN SOMETHING???
         Collection<ImportProblem> orphanImportProblems = orphanNodesImportHandler.exploreOrphanNodes(workspace);
         
-        //TODO CATCH EXCEPTION INSTEAD???
-        
-        
         if(!orphanImportProblems.isEmpty()) {
-            //TODO WHAT?
-                // at least log something...
-            logger.warn("Some problems importing orphan files.");
+        
+        	logger.warn("Some problems importing orphan files.");
             
             for(ImportProblem problem : orphanImportProblems) {
                 logger.warn("[Orphan Import Problem] " + problem.getErrorMessage());
             }
         }
         
-            
-        //TODO When to return false?
         return true;
     }
-    
 }

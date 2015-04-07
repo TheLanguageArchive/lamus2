@@ -127,9 +127,6 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Override
     public String callCrawler(URI nodeUri) throws CrawlerInvocationException {
         
-        
-        //TODO catch possible exceptions
-        
         JsonObject responseJsonObject;
         try {
             responseJsonObject =

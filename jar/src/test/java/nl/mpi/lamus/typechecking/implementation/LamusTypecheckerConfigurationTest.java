@@ -37,10 +37,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 public class LamusTypecheckerConfigurationTest {
     
-    //TODO should be wiring automatically the bean (having a test config class, for instance),
-        // but after trying in a few unsuccessful attempts skipped it, for now
-    
-    private TypecheckerConfiguration typecheckerConfiguration;
+private TypecheckerConfiguration typecheckerConfiguration;
     
     private Map<String, String> customTypecheckerFolderToConfigFileMap;
     private String specialConfigIncludedFolder = "/included_folder";

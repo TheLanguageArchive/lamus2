@@ -74,10 +74,6 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         
         logger.debug("Executing Replace Action: " + action.toString());
 
-        //TODO check if top node
-        
-        //TODO replaceNodeVersioned
-        
         workspaceNodeLinkManager.replaceNode(action.getParentNode(), action.getAffectedNode(), action.getNewNode(), action.isAlreadyLinked());
     }
     

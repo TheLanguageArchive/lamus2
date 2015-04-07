@@ -82,15 +82,6 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
         
         CorpusNode archiveNode = corpusStructureProvider.getNode(oldNode.getArchiveURI());
         
-        
-        //TODO CHECK IF OLD NODE AND NEW NODE ARE OF SIMILAR TYPES
-        //TODO CHECK IF OLD NODE AND NEW NODE ARE THE SAME (can happen in a tree replace with links to the archive)
-        //TODO CHECK EXTERNAL NODES?
-        //TODO ...
-        
-        //TODO CHECK IF NEW FILE EXISTS, IS READABLE?...
-        
-        
         if(archiveNode == null ||
                 archiveFileHelper.hasArchiveFileChanged(archiveNode.getFileInfo(), new File(newNode.getWorkspaceURL().getPath()))) {
             

@@ -192,7 +192,7 @@ public class AddedNodeExporter implements NodeExporter {
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
         currentNode.setArchiveURL(newNodeArchiveURL);
-        workspaceDao.updateNodeArchiveUrl(currentNode); //TODO Is it worth it to update this in the database?
+        workspaceDao.updateNodeArchiveUrl(currentNode);
         
         return nextAvailableFile;
     }

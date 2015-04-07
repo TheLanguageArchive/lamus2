@@ -123,19 +123,8 @@ public class GeneralNodeExporter implements NodeExporter {
             
             workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
             
-            //TODO ensureChecksum - will this be done by the crawler??
-            
-            //TODO should the checksum be created at some other point (when the node is actually changed, for instance)
-                // so it takes less time at this point?
-            // node hasn't changed
-            
-            // It's possible that a metadata document was changed just to adjust the reference to the workspace URL, for instance
-                // and not necessarily because of a real change
-            //TODO Maybe there should be a better way of comparing the files
-            
-            //ASSUME THAT METADATA ALWAYS CHANGES (due to the localURI attribute being edited during the import)
-                // SO THIS CANNOT BE CHECKED WITH FILESIZE OR CHECKSUM
-
+            // assuming that the metadata always changes (due to the localURI attribute being edited during the import)
+                // so a file size or checksum check wouldn't work in this case
             
             MetadataDocument nodeDocument = null;
             try {
@@ -160,10 +149,7 @@ public class GeneralNodeExporter implements NodeExporter {
             
         } else {
             
-            //TODO resources
-                // they were not copied from the archive to the workspace, so should not be copied back...
-                // they might need some database update, due to some possible changes in their information...
-                    // the file itself shouldn't have changed, otherwise it's a replaced node
+            // resources were not copied from the archive to the workspace, so should not be copied back
         }
         
         CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());

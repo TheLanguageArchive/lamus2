@@ -161,9 +161,6 @@ public class LamusVersioningHandler implements VersioningHandler {
     
     private URL moveFileTo(WorkspaceNode nodeToMove, boolean toDelete) {
         
-        //TODO consistency checks?
-        
-        
         CorpusNode archiveNode = corpusStructureProvider.getNode(nodeToMove.getArchiveURI());
         File currentFile = nodeResolver.getLocalFile(archiveNode);
         

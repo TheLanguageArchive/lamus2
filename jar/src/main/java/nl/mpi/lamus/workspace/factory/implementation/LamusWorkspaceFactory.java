@@ -61,10 +61,7 @@ public class LamusWorkspaceFactory implements WorkspaceFactory {
         }
         
         Workspace workspace = new LamusWorkspace(userID, usedStorageSpace, maxStorageSpace);
-        //TODO set more values?
-        
-        //SET TOPNODEID?????
-        
+
         return workspace;
         
     }

@@ -58,13 +58,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
         logger.debug("Exploring references in metadata node to import; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + nodeToExplore.getWorkspaceNodeID());
         
         for(Reference currentLink : linksInNode) {
-        
-            //TODO check if the file does exist
 
-            //TODO check here if it's already locked or not?
-            
-            //TODO check if it is Metadata or Resource node
-            
             NodeImporter linkImporterToUse = null;
             try {
                 linkImporterToUse = nodeImporterAssigner.getImporterForReference(currentLink);
