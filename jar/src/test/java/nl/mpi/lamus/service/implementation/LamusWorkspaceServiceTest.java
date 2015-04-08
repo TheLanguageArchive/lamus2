@@ -32,6 +32,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -834,7 +835,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspace() throws IOException {
+    public void uploadFileIntoWorkspace() throws IOException, DisallowedPathException {
         
         final String filename = "someFile.cmdi";
         
@@ -850,7 +851,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadFileIntoWorkspace_throwsException() throws IOException {
+    public void uploadFileIntoWorkspace_throwsException() throws IOException, DisallowedPathException {
         
         final String filename = "someFile.cmdi";
         
@@ -871,7 +872,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadZipFileIntoWorkspace() throws IOException {
+    public void uploadZipFileIntoWorkspace() throws IOException, DisallowedPathException {
         
         final String filename = "someFile.cmdi";
         
@@ -887,7 +888,7 @@ public class LamusWorkspaceServiceTest {
     }
     
     @Test
-    public void uploadZipFileIntoWorkspace_throwsException() throws IOException {
+    public void uploadZipFileIntoWorkspace_throwsException() throws IOException, DisallowedPathException {
         
         final String filename = "someFile.cmdi";
         

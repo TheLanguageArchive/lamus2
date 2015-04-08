@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.DirectoryNotEmptyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
@@ -32,6 +33,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
@@ -104,7 +106,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
      */
     @Override
     public File uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
-            throws IOException {
+            throws IOException, DisallowedPathException {
+        
+        try {
+            workspaceDirectoryHandler.ensurePathIsAllowed(filename);
+        } catch(DisallowedPathException ex) {
+            logger.warn(ex.getMessage());
+            throw ex;
+        }
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
@@ -121,53 +130,43 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
      */
     @Override
     public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
-            throws IOException {
+            throws IOException, DisallowedPathException {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
         
-        //TODO code to restrict names of created folders has been commented out.
-            // If it turns out that folders in workspaces also need to be restricted, this should be uncommented and other changes made accordingly.
-            // Not only the folders should be renamed if necessary, but also the paths of its children.
-            // Also the links in metadata files become incorrect after this, so they should be changed as well, or just completely reject the files and instruct the user to change the folder names before uploading.
-        
-//        Map<String, String> changedDirectoryNames = new HashMap<>();
-        
         Collection<File> copiedFiles = new ArrayList<>();
+        Collection<File> createdDirectories = new ArrayList<>();
         
         ZipEntry nextEntry = zipInputStream.getNextEntry();
         while(nextEntry != null) {
             
-            File entryFile = new File(workspaceUploadDirectory, nextEntry.getName());
+            String entryName = nextEntry.getName();
+
+            try {
+                workspaceDirectoryHandler.ensurePathIsAllowed(entryName);
+            } catch(DisallowedPathException ex) {
+                logger.warn(ex.getMessage());
+                deleteCreatedFilesAndDirectories(copiedFiles, createdDirectories);
+                throw ex;
+            }
+            
+            File entryFile = new File(workspaceUploadDirectory, entryName);
             if(nextEntry.isDirectory()) {
              
-                File createdDirectory = workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, nextEntry.getName());
-                
-//                if(!createdDirectory.getName().equals(entryFile.getName())) {
-//                    changedDirectoryNames.put(entryFile.getName(), createdDirectory.getName());
-//                }
-                
+                File createdDirectory = workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, entryName);
+                createdDirectories.add(createdDirectory);
                 nextEntry = zipInputStream.getNextEntry();
                 continue;
             }
             
             File entryBaseDirectory = entryFile.getParentFile();
             String entryFilename = entryFile.getName();
-            
             File finalEntryFile = archiveFileHelper.getFinalFile(entryBaseDirectory, entryFilename);
-            
-//            for(String changedName : changedDirectoryNames.keySet()) {
-//                if(entryFile.getPath().contains(changedName)) {
-//                    String newName = entryFile.getPath().replace(changedName, changedDirectoryNames.get(changedName));
-//                    changedEntryFile = new File(newName);
-//                    
-//                }
-//            }
             
             workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, finalEntryFile);
             
             nextEntry = zipInputStream.getNextEntry();
             copiedFiles.add(finalEntryFile);
-
         }
         
         return copiedFiles;
@@ -299,6 +298,29 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
         } catch (IOException ex) {
             logger.warn("Couldn't delete unarchivable file: " + ex.getMessage());
+        }
+    }
+    
+    private void deleteCreatedFilesAndDirectories(Collection<File> filesToDelete, Collection<File> directoriesToDelete) {
+        
+        for(File file : filesToDelete) {
+            deleteFileOrDirectory(file);
+        }
+        for(File dir : directoriesToDelete) {
+            deleteFileOrDirectory(dir);
+        }
+    }
+    
+    private void deleteFileOrDirectory(File fileOrDir) {
+        
+        logger.debug("Deleting previously created file or directory (" + fileOrDir + ")");
+        
+        try {
+            workspaceFileHandler.deleteFile(fileOrDir);
+        } catch(DirectoryNotEmptyException ex) {
+            logger.warn("Couldn't delete created directory (" + fileOrDir + ") because it's not empty");
+        } catch(IOException ex) {
+            logger.warn("Couldn't delete uploaded file (" + fileOrDir + ")");
         }
     }
 }

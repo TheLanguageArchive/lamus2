@@ -17,6 +17,7 @@ package nl.mpi.lamus.filesystem;
 
 import java.io.File;
 import java.io.IOException;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
@@ -30,7 +31,6 @@ public interface WorkspaceDirectoryHandler {
      * Creates the directory for the given workspace.
      * 
      * @param workspaceID ID of the workspace for which the directory should be created
-     * @throws FailedToCreateWorkspaceDirectoryException if the directory creation fails
      */
     public void createWorkspaceDirectory(int workspaceID) throws IOException;
     
@@ -76,4 +76,10 @@ public interface WorkspaceDirectoryHandler {
      * @return File object corresponding to the directory
      */
     public File createDirectoryInWorkspace(int workspaceID, String directoryName) throws IOException;
+    
+    /**
+     * Checks any folder in the given path has one of the reserved folder names
+     * @param path Path to check
+     */
+    public void ensurePathIsAllowed(String path) throws DisallowedPathException;
 }

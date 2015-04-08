@@ -55,7 +55,7 @@ public class LamusFilesystemTestProperties {
         folderNames.add("^tmp$");
         folderNames.add("^temp$");
         folderNames.add("^DesktopFolderDB$");
-        folderNames.add("^\\w+\\.svn$");
+        folderNames.add("^\\.svn$");
         return folderNames;
     }
     

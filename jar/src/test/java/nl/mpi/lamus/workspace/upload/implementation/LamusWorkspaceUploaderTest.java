@@ -37,6 +37,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -115,6 +116,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock ZipInputStream mockZipInputStream;
     @Mock ZipEntry mockFirstZipEntry;
     @Mock ZipEntry mockSecondZipEntry;
+    @Mock ZipEntry mockThirdZipEntry;
     
     @Mock File mockFile1;
     @Mock File mockFile2;
@@ -131,8 +133,8 @@ public class LamusWorkspaceUploaderTest {
     
     private WorkspaceUploader uploader;
     
-    private File workspaceBaseDirectory = new File("/lamus/workspaces");
-    private String workspaceUploadDirectoryName = "upload";
+    private final File workspaceBaseDirectory = new File("/lamus/workspaces");
+    private final String workspaceUploadDirectoryName = "upload";
 //    private File workspaceUploadDirectory = new File("/lamus/workspace/upload");
     
     private final int workspaceID = 1;
@@ -178,13 +180,33 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadFile_noNameChange() throws IOException {
+    public void uploadFile_nameNotAllowed() throws IOException, DisallowedPathException {
+        
+        final String filename = "temp";
+        final DisallowedPathException expectedException = new DisallowedPathException(filename, "path is not allowed and so on");
+        
+        context.checking(new Expectations() {{
+        
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename); will(throwException(expectedException));
+        }});
+        
+        try {
+            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void uploadFile_noNameChange() throws IOException, DisallowedPathException {
         
         final String filename = "file.cmdi";
         final File expectedFile = new File(workspaceUploadDirectory, filename);
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, filename); will(returnValue(expectedFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile);
@@ -196,7 +218,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadFile_nameChanged() throws IOException {
+    public void uploadFile_nameChanged() throws IOException, DisallowedPathException {
         
         final String filename = "file.cmdi";
         final File file = new File(workspaceUploadDirectory, filename);
@@ -205,6 +227,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, filename); will(returnValue(expectedFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile);
@@ -216,7 +239,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadFile_ThrowsException() throws IOException {
+    public void uploadFile_ThrowsException() throws IOException, DisallowedPathException {
         
         final String filename = "file.cmdi";
         final File file = new File(workspaceUploadDirectory, filename);
@@ -227,6 +250,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, filename); will(returnValue(expectedFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile); will(throwException(expectedException));
@@ -241,7 +265,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadZipFile_IsDirectory() throws IOException {
+    public void uploadZipFile_IsDirectory() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "directory";
         
@@ -251,10 +275,10 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -265,7 +289,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadZipFile_IsNotDirectory() throws IOException {
+    public void uploadZipFile_IsNotDirectory() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "file.cmdi";
         final File firstEntryFile = new File(workspaceUploadDirectory, firstEntryName);
@@ -278,6 +302,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(firstEntryFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
@@ -290,7 +315,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadZipFile_IsNotDirectory_fileNeedsRenaming() throws IOException {
+    public void uploadZipFile_IsNotDirectory_fileNeedsRenaming() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "file.cmdi";
         final String changedFirstEntryName = "file_01.cmdi";
@@ -304,6 +329,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(workspaceUploadDirectory, firstEntryName); will(returnValue(changedFirstEntryFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, changedFirstEntryFile);
@@ -316,7 +342,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void uploadZipFile_DirectoryAndFile() throws IOException {
+    public void uploadZipFile_DirectoryAndFile() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "directory/";
         final File createdDirectory = new File(workspaceUploadDirectory, firstEntryName);
@@ -331,6 +357,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
@@ -339,6 +366,7 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockArchiveFileHelper).getFinalFile(createdDirectory, createdFile.getName()); will(returnValue(createdFile));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
@@ -350,48 +378,84 @@ public class LamusWorkspaceUploaderTest {
         assertEquals("Result different from expected", expectedCopiedFiles, result);
     }
     
-    //TODO Following test was commented out until it's known if folder names in the workspace have to be restricted or not
-    
-//    @Test
-//    public void uploadZipFile_DirectoryAndFile_DirectoryNameHadToBeChanged() throws IOException {
-//        
-//        final String firstEntryName = "temp/";
-//        final String changedFirstEntryName = "temp_1/";
-//        final File createdDirectory = new File(workspaceUploadDirectory, changedFirstEntryName);
-//        final String secondEntryName = "temp/file.cmdi";
-//        final String changedSecondEntryName = "temp_1/file.cmdi";
-//        final File createdFile = new File(workspaceUploadDirectory, changedSecondEntryName);
-//        
-//        final Collection<File> expectedCopiedFiles = new ArrayList<>();
-//        expectedCopiedFiles.add(createdFile);
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
-//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
-//            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-//            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
-//            
-//            oneOf(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-//            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
-//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
-//
-//            // second loop iteration
-//            
-//            oneOf(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
-//            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
-//            
-//            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
-//            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
-//        }});
-//        
-//        Collection<File> result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
-//        
-//        assertEquals("Result different from expected", expectedCopiedFiles, result);
-//    }
+    @Test
+    public void uploadZipFile_DirectoryAndFile_NameNotAllowed() throws IOException, DisallowedPathException {
+        
+        final String firstEntryName = "temp/";
+        final String secondEntryName = "temp/file.cmdi";
+        
+        final DisallowedPathException expectedException = new DisallowedPathException(firstEntryName, "Path not allowed and so on...");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName); will(throwException(expectedException));
+            
+            // nothing was created, so nothing has to be deleted
+        }});
+        
+        try {
+            uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
-    public void uploadZipFile_ThrowsException() throws IOException {
+    public void uploadZipFile_MoreThanOneDirectoryAndFile_NameNotAllowed() throws IOException, DisallowedPathException {
+        
+        final String firstEntryName = "dir";
+        final File createdDirectory = new File(workspaceUploadDirectory, firstEntryName);
+        final String secondEntryName = "dir/file.cmdi";
+        final File createdFile = new File(workspaceUploadDirectory, secondEntryName);
+        final String thirdEntryName = "temp/";
+        final String fourthEntryName = "temp/anotherfile.cmdi";
+        
+        final DisallowedPathException expectedException = new DisallowedPathException(firstEntryName, "Path not allowed and so on...");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
+            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
+
+            // second loop iteration
+            
+            allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
+            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            oneOf(mockArchiveFileHelper).getFinalFile(createdDirectory, createdFile.getName()); will(returnValue(createdFile));
+            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockThirdZipEntry));
+            
+            // third loop iteration
+            
+            allowing(mockThirdZipEntry).getName(); will(returnValue(thirdEntryName));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(thirdEntryName); will(throwException(expectedException));
+            
+            // folder and file were created, so will have to be deleted in this case
+            oneOf(mockWorkspaceFileHandler).deleteFile(createdFile);
+            oneOf(mockWorkspaceFileHandler).deleteFile(createdDirectory);
+        }});
+        
+        try {
+            uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void uploadZipFile_ThrowsException() throws IOException, DisallowedPathException {
         
         final IOException expectedException = new IOException("some exception message");
         

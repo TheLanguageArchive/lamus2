@@ -25,6 +25,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -297,7 +298,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public File uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException {
+            throws IOException, DisallowedPathException {
         
         logger.debug("Triggered upload of file into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
         
@@ -309,7 +310,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      */
     @Override
     public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
-            throws IOException {
+            throws IOException, DisallowedPathException {
         
         logger.debug("Triggered upload of zip file into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);
         

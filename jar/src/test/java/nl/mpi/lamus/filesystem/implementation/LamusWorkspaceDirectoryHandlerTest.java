@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import javax.annotation.Resource;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestBeans;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
@@ -292,41 +293,43 @@ public class LamusWorkspaceDirectoryHandlerTest {
         assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
     }
     
-    //TODO The following tests were commented out until it's known if folder names in the workspace have to be restricted or not
+    @Test
+    public void pathIsAllowed_oneLevel() throws DisallowedPathException {
+        
+        final String path = "file.txt";
+        workspaceDirectoryHandler.ensurePathIsAllowed(path);
+    }
     
-//    @Test
-//    public void createDirectoryInWorkspace_NotAllowed_AlternativeStillDoesntExist() throws IOException {
-//        
-//        int workspaceID = 1;
-//        String intendedDirectoryName = "temp/";
-//        String alternativeDirectoryName = "temp_1";
-//        
-//        File workspaceDirectory = createTestWorkspaceDirectory(workspaceID);
-//        File uploadDirectory = createTestWorkspaceUploadDirectory(workspaceDirectory);
-//        File expectedDirectory = new File(uploadDirectory, alternativeDirectoryName);
-//        
-//        this.workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, intendedDirectoryName);
-//        
-//        assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
-//    }
-//    
-//    @Test
-//    public void createDirectoryInWorkspace_NotAllowed_AlternativeAlreadyExists() throws IOException {
-//        
-//        int workspaceID = 1;
-//        String intendedDirectoryName = "temp/";
-//        String alternativeDirectoryName = "temp_1";
-//        String secondAlternativeDirectoryName = "temp_2";
-//        
-//        File workspaceDirectory = createTestWorkspaceDirectory(workspaceID);
-//        File uploadDirectory = createTestWorkspaceUploadDirectory(workspaceDirectory);
-//        File alternativeDirectory = createTestDirectoryInUploadDirectory(uploadDirectory, alternativeDirectoryName);
-//        File expectedDirectory = new File(uploadDirectory, secondAlternativeDirectoryName);
-//        
-//        this.workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, intendedDirectoryName);
-//        
-//        assertTrue("Directory '" + expectedDirectory.getName() + "' should have been created in the workspace upload directory", expectedDirectory.exists());
-//    }
+    @Test
+    public void pathIsAllowed_twoLevels() throws DisallowedPathException {
+        
+        final String path = "folder/file.txt";
+        workspaceDirectoryHandler.ensurePathIsAllowed(path);
+    }
+    
+    @Test
+    public void pathIsNotAllowed_oneLevel() {
+        
+        assertDisallowedPathException(".svn", ".svn");
+        
+        assertDisallowedPathException("DesktopFolderDB", "DesktopFolderDB");;
+        
+        assertDisallowedPathException("temp", "temp");
+        
+        assertDisallowedPathException("tmp", "tmp");
+    }
+    
+    @Test
+    public void pathIsNotAllowed_twoLevels() {
+        
+        assertDisallowedPathException(".svn", ".svn/file.txt");
+        
+        assertDisallowedPathException("DesktopFolderDB", "DesktopFolderDB/file.txt");
+        
+        assertDisallowedPathException("temp", "temp/file.txt");
+        
+        assertDisallowedPathException("tmp", "tmp/file.txt");
+    }
     
     
     private File createTestWorkspaceDirectory(int workspaceID) {
@@ -357,5 +360,17 @@ public class LamusWorkspaceDirectoryHandlerTest {
         assertTrue("Test directory wasn't created.", testDirectory.exists());
         
         return testDirectory;
+    }
+    
+    private void assertDisallowedPathException(String disallowedName, String path) {
+        
+        String expectedMessage = "The path [" + path + "] contains a disallowed file/folder name (" + disallowedName + ")";
+        try {
+            workspaceDirectoryHandler.ensurePathIsAllowed(path);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Exception problematic path different from expected", path, ex.getProblematicPath());
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
     }
 }

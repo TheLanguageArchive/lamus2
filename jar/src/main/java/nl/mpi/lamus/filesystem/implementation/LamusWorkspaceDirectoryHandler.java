@@ -17,8 +17,13 @@ package nl.mpi.lamus.filesystem.implementation;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.regex.Pattern;
 import javax.annotation.Resource;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.commons.io.FileUtils;
@@ -142,37 +147,32 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     @Override
     public File createDirectoryInWorkspace(int workspaceID, String directoryName) throws IOException {
         
-        //TODO commented code that would prevent restricted names to be used in created folders
-            // assuming that backups wouldn't include workspaces, but if they do, this code can be uncommented
-        
         String normalizedDirectoryName = FilenameUtils.normalizeNoEndSeparator(directoryName);
-        
         File workspaceUploadDirectory = getUploadDirectoryForWorkspace(workspaceID);
-//        boolean allowed = true;
-//        for(String disallowed : disallowedFolderNamesWorkspace) {
-//            if(normalizedDirectoryName.matches(disallowed)) {
-//                allowed = false;
-//                break;
-//            }
-//        }
-        
-        File finalDirectory;
-//        if(allowed) {
-            finalDirectory = new File(workspaceUploadDirectory, normalizedDirectoryName);
-//        } else {
-//            int suffix = 1;
-//            String alternativeDirectoryName = normalizedDirectoryName + "_" + suffix;
-//            File alternativeDirectory = new File(workspaceUploadDirectory, alternativeDirectoryName);
-//            while(alternativeDirectory.exists()) {
-//                suffix++;
-//                alternativeDirectoryName = normalizedDirectoryName + "_" + suffix;
-//                alternativeDirectory = new File(workspaceUploadDirectory, alternativeDirectoryName);
-//            }
-//            finalDirectory = alternativeDirectory;
-//        }
-        
+        File finalDirectory = new File(workspaceUploadDirectory, normalizedDirectoryName);
         finalDirectory.mkdir();
         
         return finalDirectory;
+    }
+    
+    /**
+     * @see WorkspaceDirectoryHandler#ensurePathIsAllowed(String)
+     */
+    @Override
+    public void ensurePathIsAllowed(String path) throws DisallowedPathException {
+
+    	Path pathToCheck = Paths.get("", path);
+        
+        Iterator<Path> pathIterator = pathToCheck.iterator();
+        while(pathIterator.hasNext()) {
+            Path currentPathItem = pathIterator.next();
+            String nameToMatch = currentPathItem.getFileName().toString();
+            for(String regex : disallowedFolderNamesWorkspace) {
+                if(Pattern.matches(regex, nameToMatch)) {
+                    String message = "The path [" + path + "] contains a disallowed file/folder name (" + nameToMatch + ")";
+                    throw new DisallowedPathException(path, message);
+                }
+            }
+        }
     }
 }

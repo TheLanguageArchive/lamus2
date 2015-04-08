@@ -54,8 +54,8 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
     
-    private ArchiveFileLocationProvider archiveFileLocationProvider;
-    private WorkspaceAccessChecker workspaceAccessChecker;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
     
     @Autowired
     public LamusWorkspaceFileHandler(ArchiveFileLocationProvider aflProvider, WorkspaceAccessChecker wsAccessChecker) {

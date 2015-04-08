@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.zip.ZipInputStream;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 
@@ -47,7 +48,7 @@ public interface WorkspaceUploader {
      * @return uploaded File
      */
     public File uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
-            throws IOException;
+            throws IOException, DisallowedPathException;
     
     /**
      * Given a ZipInputStream and the filename, this method uploads its content.
@@ -56,7 +57,7 @@ public interface WorkspaceUploader {
      * @return Collection containing copied files
      */
     public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
-            throws IOException;
+            throws IOException, DisallowedPathException;
     
     /**
      * After the files are uploaded, process the files by performing

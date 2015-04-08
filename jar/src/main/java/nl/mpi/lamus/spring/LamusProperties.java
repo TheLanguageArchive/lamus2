@@ -140,18 +140,10 @@ public class LamusProperties implements ServletContextAware {
         return splitStringIntoCollectionOfStrings(disallowedFolderNamesWorkspace);
     }
     
-    @Value("${disallowed_folder_names_archive}")
-    private String disallowedFolderNamesArchive;
-    @Bean
-    @Qualifier("disallowedFolderNamesArchive")
-    public Collection<String> disallowedFolderNamesArchive() {
-        return splitStringIntoCollectionOfStrings(disallowedFolderNamesArchive);
-    }
-    
     private Collection<String> splitStringIntoCollectionOfStrings(String stringToSplit) {
         Collection<String> collectionOfStrings = new ArrayList<>();
         
-        String[] stringsArray = disallowedFolderNamesWorkspace.split(",");
+        String[] stringsArray = stringToSplit.split(",");
         for(String string : stringsArray) {
             if(!string.isEmpty()) {
                 collectionOfStrings.add(string);

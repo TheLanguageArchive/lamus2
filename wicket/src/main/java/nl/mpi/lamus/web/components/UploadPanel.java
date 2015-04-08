@@ -22,8 +22,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.MissingResourceException;
 import java.util.zip.ZipInputStream;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
@@ -61,11 +61,6 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
     private final IModel<Workspace> model;
     
     
-    /**
-     * Constructor.
-     *
-     * @param parameters Page parameters
-     */
     public UploadPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         
         super(id, model, feedbackPanel);
@@ -82,18 +77,11 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
     }
     
 
-    /**
-     * Form for uploads.
-     */
     private class FileUploadForm extends Form<Void> {
 
         FileUploadField fileUploadField;
 
-        /**
-         * Construct.
-         *
-         * @param name Component name
-         */
+        
         public FileUploadForm(String name) {
             super(name);
 
@@ -126,7 +114,6 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                 continue;
                             }
 
-                            //TODO a better way of deciding this? typechecker?
                             if (newFile.getName().endsWith(".zip")) {
 
                                 try {
@@ -138,7 +125,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                         copiedFiles.addAll(tempCopiedFiles);
                                     }
 
-                                } catch (IOException ex) {
+                                } catch (IOException | DisallowedPathException ex) {
                                     UploadPanel.this.error(ex.getMessage());
                                 }
                             } else {
@@ -149,20 +136,17 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                     
                                     copiedFiles.add(tempCopiedFile);
 
-                                } catch (IOException | MissingResourceException e) {
-                                    throw new IllegalStateException(getLocalizer().getString("upload_panel_failure_message", this), e);
+                                } catch (IOException | DisallowedPathException ex) {
+                                    UploadPanel.this.error(ex.getMessage());
                                 }
                             }
                         }
                         
+                        if(copiedFiles.isEmpty()) {
+                            UploadPanel.this.info(getLocalizer().getString("upload_panel_no_files", this));
+                            return;
+                        }
                         
-                        
-                        
-                        //TODO UNIFORMIZE EXCEPTIONS - ALL IMPORT EXCEPTIONS?
-                        
-                        
-                        
-
                         try {
                             Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
 
@@ -203,7 +187,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
 
 
-                            if (uploadProblems.isEmpty()) {
+                            if (uploadProblems.isEmpty() && !copiedFiles.isEmpty()) {
                                 UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
 
 
@@ -211,6 +195,8 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                 //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
 
                             }
+                            
+                            
 
                         } catch (WorkspaceException ex) {
                             UploadPanel.this.error(ex.getMessage());

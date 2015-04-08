@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -195,7 +196,7 @@ public interface WorkspaceService {
      * @return uploaded File
      */
     public File uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename)
-            throws IOException;
+            throws IOException, DisallowedPathException;
     
     /**
      * Given a ZipInputStream and filename, uploads the zip content into the workspace.
@@ -206,7 +207,7 @@ public interface WorkspaceService {
      * @return Collection containing the copied files
      */
     public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
-            throws IOException;
+            throws IOException, DisallowedPathException;
     
     /**
      * After the files are uploaded, process the files by performing
