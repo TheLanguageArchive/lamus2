@@ -23,7 +23,11 @@ public enum WorkspaceNodeType {
 
     METADATA,
     
-    RESOURCE,
+    RESOURCE_IMAGE,
+    RESOURCE_AUDIO,
+    RESOURCE_VIDEO,
+    RESOURCE_WRITTEN,
+    RESOURCE_OTHER,
     
     UNKNOWN
 }

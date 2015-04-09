@@ -29,6 +29,7 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +47,19 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     private final HandleManager handleManager;
     private final WorkspaceDao workspaceDao;
     private final MetadataApiBridge metadataApiBridge;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusArchiveHandleHelper(
             CorpusStructureProvider provider, NodeResolver resolver,
-            HandleManager hManager, WorkspaceDao wsDao, MetadataApiBridge mApiBridge) {
+            HandleManager hManager, WorkspaceDao wsDao,
+            MetadataApiBridge mApiBridge, NodeUtil nUtil) {
         corpusStructureProvider = provider;
         nodeResolver = resolver;
         handleManager = hManager;
         workspaceDao = wsDao;
         metadataApiBridge = mApiBridge;
+        nodeUtil = nUtil;
     }
     
     /**
@@ -85,7 +89,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
         node.setArchiveURI(null);
         workspaceDao.updateNodeArchiveUri(node);
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);
         }
     }

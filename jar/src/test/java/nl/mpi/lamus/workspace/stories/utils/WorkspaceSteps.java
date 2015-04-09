@@ -417,7 +417,7 @@ public class WorkspaceSteps {
         } else if("resource".equals(type)) {
             filename = "RandomWrittenResourceFile.txt";
             fileLocationToUpload = "test_files/files_to_upload/" + filename;
-            nodeType = WorkspaceNodeType.RESOURCE;
+            nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
             fileMimetype = "text/plain";
         }
         

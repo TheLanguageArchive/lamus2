@@ -32,6 +32,7 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -68,6 +69,7 @@ public class UnlinkedNodeExporterTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock Workspace mockWorkspace;
     @Mock WorkspaceNode mockNode;
@@ -101,6 +103,7 @@ public class UnlinkedNodeExporterTest {
         ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataAPI", mockMetadataAPI);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "nodeUtil", mockNodeUtil);
     }
     
     @After
@@ -215,7 +218,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
@@ -253,7 +256,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
@@ -288,7 +291,7 @@ public class UnlinkedNodeExporterTest {
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
@@ -319,7 +322,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
         }});
@@ -356,7 +359,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -397,7 +400,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
@@ -435,7 +438,7 @@ public class UnlinkedNodeExporterTest {
         
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -466,7 +469,7 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
         }});
@@ -503,7 +506,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
@@ -592,7 +595,7 @@ public class UnlinkedNodeExporterTest {
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
                 will(throwException(expectedException));
         }});
@@ -635,7 +638,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -669,7 +672,7 @@ public class UnlinkedNodeExporterTest {
                 throws IOException, MetadataException, TransformerException {
         context.checking(new Expectations() {{
             allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentWsUrl));
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataAPI).getMetadataDocument(parentWsUrl); will(returnValue(mockParentDocument));
             oneOf(mockParentDocument).getDocumentReferenceByLocation(oldNodeLocationUri); will(returnValue(mockReference));
             

@@ -22,6 +22,8 @@ import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -42,6 +44,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class LamusWsNodeActionsProviderTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceService mockWorkspaceService;
     @Mock WorkspaceTreeNode mockWorkspaceNodeResourceOne;
@@ -76,7 +80,7 @@ public class LamusWsNodeActionsProviderTest {
     
     @Before
     public void setUp() {
-        wsNodeActionsProvider = new LamusWsNodeActionsProvider();
+        wsNodeActionsProvider = new LamusWsNodeActionsProvider(mockNodeUtil);
         
         expectedResourceNodeActions = new ArrayList<>();
         expectedResourceNodeActions.add(new DeleteNodesAction());
@@ -140,7 +144,7 @@ public class LamusWsNodeActionsProviderTest {
             oneOf(mockWorkspaceNodeResourceOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockWorkspaceNodeResourceOne).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNodeResourceOne); will(returnValue(Boolean.FALSE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
@@ -158,7 +162,7 @@ public class LamusWsNodeActionsProviderTest {
             oneOf(mockWorkspaceNodeMetadataOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockWorkspaceNodeMetadataOne).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNodeMetadataOne); will(returnValue(Boolean.TRUE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);

@@ -91,12 +91,14 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
     
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL,
-     *      nl.mpi.metadata.api.model.Reference, java.lang.String, java.lang.String, boolean, boolean)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, java.net.URI, java.net.URL,
+     *          nl.mpi.metadata.api.model.Reference, java.lang.String,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, boolean, boolean) 
      */
     @Override
-    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name, boolean onSite, boolean isProtected) {
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            Reference resourceReference, String mimetype, WorkspaceNodeType nodeType,
+            String name, boolean onSite, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
         
@@ -105,7 +107,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
         node.setName(displayValue);
         node.setTitle(displayValue);
-        node.setType(WorkspaceNodeType.RESOURCE);
+        node.setType(nodeType);
         node.setFormat(mimetype);
         
         if(onSite) {
@@ -120,11 +122,14 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URI,
+     *          java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean) 
      */
     @Override
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URI originURI, URL workspaceURL,
-        String mimetype, WorkspaceNodeStatus status, boolean isProtected) {
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI,
+            URI originURI, URL workspaceURL, String mimetype, WorkspaceNodeType nodeType,
+            WorkspaceNodeStatus status, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
@@ -134,14 +139,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setOriginURI(originURI);
         node.setWorkspaceURL(workspaceURL);
         node.setFormat(mimetype);
-        
-//        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
-        if(workspaceURL.toString().endsWith("cmdi")) {
-            node.setType(WorkspaceNodeType.METADATA);
-        } else {
-            node.setType(WorkspaceNodeType.RESOURCE);
-        }
-        
+        node.setType(nodeType);
         node.setArchiveURI(archiveURI);
         
         node.setStatus(status);
@@ -203,11 +201,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         } catch (URISyntaxException ex) {
             logger.warn("URL (" + archiveURL + ") couldn't be converted to URI. OriginURI not set.");
         }
-        if(archiveURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
-            node.setType(WorkspaceNodeType.METADATA);
-        } else {
-            node.setType(WorkspaceNodeType.RESOURCE);
-        }
+        node.setType(WorkspaceNodeType.UNKNOWN);
         node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
         
         node.setProtected(Boolean.FALSE);

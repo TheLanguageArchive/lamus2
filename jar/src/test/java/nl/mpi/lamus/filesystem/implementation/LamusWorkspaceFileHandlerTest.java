@@ -639,7 +639,7 @@ public class LamusWorkspaceFileHandlerTest {
         workspaceNodeFile.createNewFile();
         node.setWorkspaceURL(workspaceNodeFile.toURI().toURL());
         node.setName(filename);
-        node.setType(WorkspaceNodeType.RESOURCE);
+        node.setType(WorkspaceNodeType.RESOURCE_OTHER);
         node.setFormat("someFormat");
         node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
 

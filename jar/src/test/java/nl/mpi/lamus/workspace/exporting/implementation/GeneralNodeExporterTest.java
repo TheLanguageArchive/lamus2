@@ -35,6 +35,7 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -77,6 +78,7 @@ public class GeneralNodeExporterTest {
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock ReferencingMetadataDocument mockChildCmdiDocument;
     @Mock ReferencingMetadataDocument mockParentCmdiDocument;
@@ -117,6 +119,7 @@ public class GeneralNodeExporterTest {
         ReflectionTestUtils.setField(generalNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
         ReflectionTestUtils.setField(generalNodeExporter, "nodeResolver", mockNodeResolver);
         ReflectionTestUtils.setField(generalNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
+        ReflectionTestUtils.setField(generalNodeExporter, "nodeUtil", mockNodeUtil);
     }
     
     @After
@@ -201,7 +204,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -275,7 +278,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -507,7 +510,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -565,7 +568,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -622,7 +625,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
@@ -699,7 +702,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             //TODO what to expect here?
                 // resources are not copied to the workspace, so if they need to be copied back, it means they are replacements,
@@ -738,7 +741,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentArchiveLocalFile));
             
-            oneOf(mockParentWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentWsURL);
                 will(returnValue(mockParentCmdiDocument));

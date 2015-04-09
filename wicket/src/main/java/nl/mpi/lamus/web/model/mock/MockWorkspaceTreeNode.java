@@ -140,11 +140,6 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
     }
     
     @Override
-    public boolean isMetadata() {
-        return WorkspaceNodeType.METADATA.equals(this.type);
-    }
-    
-    @Override
     public void setType(WorkspaceNodeType type) {
         this.type = type;
     }

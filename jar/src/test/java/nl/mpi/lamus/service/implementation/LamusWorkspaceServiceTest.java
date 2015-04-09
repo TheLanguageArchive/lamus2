@@ -806,7 +806,7 @@ public class LamusWorkspaceServiceTest {
         final int nodeID = 1;
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<>();
         final WorkspaceNode childNode = new LamusWorkspaceNode(
-                2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null,
+                2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE_IMAGE, null,
                 null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, "jpeg");
         expectedChildNodes.add(childNode);
         

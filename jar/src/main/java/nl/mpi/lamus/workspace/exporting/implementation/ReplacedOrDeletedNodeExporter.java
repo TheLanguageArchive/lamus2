@@ -31,6 +31,7 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -70,6 +71,8 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private MetadataApiBridge metadataApiBridge;
     @Autowired
     private ArchiveHandleHelper archiveHandleHelper;
+    @Autowired
+    private NodeUtil nodeUtil;
     
 
     /**
@@ -142,7 +145,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             return;
         }
         
-        if(currentNode.isMetadata() && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        if(nodeUtil.isNodeMetadata(currentNode) && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
             workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
 

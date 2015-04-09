@@ -37,6 +37,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -86,6 +87,7 @@ public class AddedNodeExporterTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
+    @Mock NodeUtil mockNodeUtil;
     
     // initially had these mock objects as CMDIDocument,
     // but the expectations were not being properly matched after the cast (to ReferencingMetadataObject) was made in the code to be tested
@@ -133,6 +135,7 @@ public class AddedNodeExporterTest {
         ReflectionTestUtils.setField(addedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(addedNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
         ReflectionTestUtils.setField(addedNodeExporter, "nodeResolver", mockNodeResolver);
+        ReflectionTestUtils.setField(addedNodeExporter, "nodeUtil", mockNodeUtil);
         
         testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -813,21 +816,21 @@ public class AddedNodeExporterTest {
         if(isMetadata) {
             if(expectedException != null) {
                 context.checking(new Expectations() {{
-                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                    oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
                     oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
                         will(throwException(expectedException));
                 }});
             } else {
                 context.checking(new Expectations() {{
-                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                    oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
                     oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-                    oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                    oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
 
                 }});
             }
         } else {
             context.checking(new Expectations() {{
-                exactly(2).of(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+                exactly(2).of(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             }});
         }
     }
@@ -852,13 +855,13 @@ public class AddedNodeExporterTest {
         
         if(isMetadata) {
             context.checking(new Expectations() {{
-                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+                oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
                 oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
                 oneOf(mockMetadataApiBridge).addSelfHandleAndSaveDocument(mockChildCmdiDocument, nodeNewArchiveHandle, nodeLocation);
             }});
         } else {
             context.checking(new Expectations() {{
-                oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+                oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             }});
         }
     }
@@ -877,7 +880,7 @@ public class AddedNodeExporterTest {
             
         } else {
 
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(isMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(isMetadata));
 
             if(isMetadata) {
                 oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
@@ -924,7 +927,7 @@ public class AddedNodeExporterTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockParentWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataAPI).getMetadataDocument(parentNodeWsURL);
                 will(returnValue(mockParentCmdiDocument));
             
@@ -998,7 +1001,7 @@ public class AddedNodeExporterTest {
     }
     
     private WorkspaceNode getCurrentResourceNode() throws MalformedURLException, URISyntaxException {
-        return getCurrentNode(resourceExtension, WorkspaceNodeType.RESOURCE, "application/pdf");
+        return getCurrentNode(resourceExtension, WorkspaceNodeType.RESOURCE_WRITTEN, "application/pdf");
     }
     
     private WorkspaceNode getCurrentNode(String fileExtension, WorkspaceNodeType type, String format) throws MalformedURLException, URISyntaxException {

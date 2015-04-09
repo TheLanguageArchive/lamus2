@@ -74,6 +74,7 @@ public class ResourceNodeImporterTest {
     @Mock NodeDataRetriever mockNodeDataRetriever;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceNodeLinkFactory mockWorkspaceNodeLinkFactory;
+    @Mock NodeUtil mockNodeUtil;
     
     private Workspace testWorkspace;
     
@@ -113,6 +114,7 @@ public class ResourceNodeImporterTest {
         ReflectionTestUtils.setField(nodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeFactory", mockWorkspaceNodeFactory);
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeLinkFactory", mockWorkspaceNodeLinkFactory);
+        ReflectionTestUtils.setField(nodeImporter, "nodeUtil", mockNodeUtil);
     }
     
     @After
@@ -127,7 +129,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -176,11 +178,14 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
+                    mockChildLinkWithHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -203,7 +208,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final String childFilename = "childname.txt";
@@ -251,11 +256,14 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childOriginURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childOriginURI, childArchiveURL,
+                    mockChildLinkWithoutHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -278,7 +286,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("http://some.location");
         final String childFilename = "childname.txt";
@@ -317,11 +325,14 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithoutHandle, null, mockCorpusNode);
                 will(returnValue(Boolean.FALSE));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childOriginURI, childArchiveURL, mockChildLinkWithoutHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childOriginURI, childArchiveURL,
+                    mockChildLinkWithoutHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -344,7 +355,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -396,11 +407,14 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
+                    mockChildLinkWithHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -432,7 +446,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -484,11 +498,14 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
+                    mockChildLinkWithHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -520,7 +537,7 @@ public class ResourceNodeImporterTest {
         final int parentWorkspaceNodeID = 1;
         final int childWorkspaceNodeID = 10;
         final String childNodeName = "file name label";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeMimetype = "text/plain";
         final URI childNodeSchemaLocation = URI.create("file:/some.location");
         final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
@@ -572,11 +589,14 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
             
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceResourceNode(testWorkspace.getWorkspaceID(),
-                    childURI, childArchiveURL, mockChildLinkWithHandle, childNodeMimetype, childNodeName, childOnSite, childProtected);
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
+                    mockChildLinkWithHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);

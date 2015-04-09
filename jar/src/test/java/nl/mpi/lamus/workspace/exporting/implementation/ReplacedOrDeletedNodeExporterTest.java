@@ -36,6 +36,7 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -75,6 +76,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock ArchiveHandleHelper mockArchiveHandleHelper;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceNode mockParentWsNode;
     @Mock WorkspaceNode mockChildWsNode;
@@ -102,6 +104,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "archiveHandleHelper", mockArchiveHandleHelper);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "nodeUtil", mockNodeUtil);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -234,7 +237,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -273,7 +276,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -399,7 +402,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -446,7 +449,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
@@ -490,7 +493,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockChildWsNode).getStatusAsString(); will(returnValue(testNodeStatus.toString()));
         }});
@@ -531,7 +534,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
@@ -583,7 +586,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);

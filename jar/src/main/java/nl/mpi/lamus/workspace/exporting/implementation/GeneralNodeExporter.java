@@ -29,6 +29,7 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -67,6 +68,8 @@ public class GeneralNodeExporter implements NodeExporter {
     private NodeResolver nodeResolver;
     @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
+    @Autowired
+    private NodeUtil nodeUtil;
     
 
     /**
@@ -119,7 +122,7 @@ public class GeneralNodeExporter implements NodeExporter {
         
         File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
         
-        if(currentNode.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(currentNode)) {
             
             workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
             
@@ -172,7 +175,7 @@ public class GeneralNodeExporter implements NodeExporter {
         
         MetadataDocument document = null;
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 

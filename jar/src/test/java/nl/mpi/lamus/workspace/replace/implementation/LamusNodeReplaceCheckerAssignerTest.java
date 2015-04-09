@@ -20,12 +20,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.UUID;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
+import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -52,6 +54,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
     
     @Mock MetadataNodeReplaceChecker mockMetadataNodeReplaceChecker;
     @Mock ResourceNodeReplaceChecker mockResourceNodeReplaceChecker;
+    @Mock NodeUtil mockNodeUtil;
     
     private NodeReplaceCheckerAssigner nodeReplaceCheckerAssigner;
     
@@ -73,6 +76,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
         
         ReflectionTestUtils.setField(nodeReplaceCheckerAssigner, "metadataNodeReplaceChecker", mockMetadataNodeReplaceChecker);
         ReflectionTestUtils.setField(nodeReplaceCheckerAssigner, "resourceNodeReplaceChecker", mockResourceNodeReplaceChecker);
+        ReflectionTestUtils.setField(nodeReplaceCheckerAssigner, "nodeUtil", mockNodeUtil);
     }
     
     @After
@@ -96,6 +100,10 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
         
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(node); will(returnValue(Boolean.TRUE));
+        }});
+        
         NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         
         assertNotNull(retrievedNodeReplacedChecker);
@@ -113,11 +121,15 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create(UUID.randomUUID().toString());
         final String nodeName = "someName";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_AUDIO;
         final String nodeFormat = "";
         final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
                 nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(node); will(returnValue(Boolean.FALSE));
+        }});
         
         NodeReplaceChecker retrievedNodeReplacedChecker = nodeReplaceCheckerAssigner.getReplaceCheckerForNode(node);
         

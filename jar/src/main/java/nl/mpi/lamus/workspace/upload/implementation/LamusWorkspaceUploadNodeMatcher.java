@@ -26,6 +26,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
 import nl.mpi.metadata.api.util.HandleUtil;
@@ -44,12 +45,13 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
 
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadNodeMatcher.class);
     
-    private CorpusStructureProvider corpusStructureProvider;
-    private NodeResolver nodeResolver;
-    private HandleManager handleManager;
-    private WorkspaceNodeFactory workspaceNodeFactory;
-    private WorkspaceDao workspaceDao;
-    private HandleUtil metadataApiHandleUtil;
+    private final CorpusStructureProvider corpusStructureProvider;
+    private final NodeResolver nodeResolver;
+    private final HandleManager handleManager;
+    private final WorkspaceNodeFactory workspaceNodeFactory;
+    private final WorkspaceDao workspaceDao;
+    private final HandleUtil metadataApiHandleUtil;
+    private final NodeUtil nodeUtil;
     
     
     @Autowired
@@ -57,13 +59,14 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             HandleManager handleManager,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao,
-            HandleUtil handleUtil) {
+            HandleUtil handleUtil, NodeUtil nodeUtil) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.handleManager = handleManager;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.metadataApiHandleUtil = handleUtil;
+        this.nodeUtil = nodeUtil;
     }
     
     /**
@@ -74,7 +77,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
         
         for(WorkspaceNode innerNode : nodesToCheck) {
             
-            if(innerNode.isMetadata()) {
+            if(nodeUtil.isNodeMetadata(innerNode)) {
                 
                 try {
                     if(handleManager.areHandlesEquivalent(handle, innerNode.getArchiveURI())) { // handle matches

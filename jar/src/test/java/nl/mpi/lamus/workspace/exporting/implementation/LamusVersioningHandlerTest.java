@@ -31,6 +31,7 @@ import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
@@ -69,6 +70,7 @@ public class LamusVersioningHandlerTest {
     @Mock HandleInfoRetriever mockHandleInfoRetriever;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock CorpusNode mockCorpusNode;
     @Mock Workspace mockWorkspace;
@@ -91,7 +93,7 @@ public class LamusVersioningHandlerTest {
     public void setUp() {
         
         versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper, mockArchiveFileLocationProvider,
-                mockHandleInfoRetriever, mockCorpusStructureProvider, mockNodeResolver);
+                mockHandleInfoRetriever, mockCorpusStructureProvider, mockNodeResolver, mockNodeUtil);
     }
     
     @After
@@ -269,7 +271,7 @@ public class LamusVersioningHandlerTest {
             allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
             oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(fileToMove));
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(wsTopNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(wsTopNodeUrlToUri); will(returnValue(orphansDirectory));
@@ -298,7 +300,7 @@ public class LamusVersioningHandlerTest {
         context.checking(new Expectations() {{
             
             allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.FALSE));
             oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(null));
         }});
@@ -401,7 +403,7 @@ public class LamusVersioningHandlerTest {
             allowing(mockWorkspaceNode).getArchiveURI(); will(returnValue(testNodeFullArchiveURI));
             oneOf(mockCorpusStructureProvider).getNode(testNodeFullArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(fileToMove));
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceNode).getWorkspaceURL(); will(returnValue(testNodeWsURL));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(fileToMove); will(returnValue(Boolean.FALSE));
             

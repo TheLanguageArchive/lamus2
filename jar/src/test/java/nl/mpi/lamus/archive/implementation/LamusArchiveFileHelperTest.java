@@ -425,7 +425,7 @@ public class LamusArchiveFileHelperTest {
     public void getDirectoryForResourceWithTopParent() {
         
         final String parentpath = "/archive/root/root.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_IMAGE;
         final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
@@ -449,7 +449,7 @@ public class LamusArchiveFileHelperTest {
     public void getDirectoryForResource() {
         
         final String parentpath = "/archive/root/Metadata/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_VIDEO;
         final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
         
         String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);

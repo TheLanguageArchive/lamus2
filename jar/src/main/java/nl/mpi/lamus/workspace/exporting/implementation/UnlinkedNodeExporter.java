@@ -28,6 +28,7 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -64,6 +65,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
     private MetadataAPI metadataAPI;
     @Autowired
     private WorkspaceDao workspaceDao;
+    @Autowired
+    private NodeUtil nodeUtil;
     
 
     /**
@@ -110,7 +113,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
             
             if(currentArchiveUri != null) {
                 
-                if(currentNode.isMetadata()) {
+                if(nodeUtil.isNodeMetadata(currentNode)) {
                     workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
                 }
                 
@@ -145,7 +148,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 return;
             }
     
-            if(currentNode.isMetadata()) {
+            if(nodeUtil.isNodeMetadata(currentNode)) {
                 workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
             }
 
@@ -181,7 +184,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         MetadataDocument document = null;
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 

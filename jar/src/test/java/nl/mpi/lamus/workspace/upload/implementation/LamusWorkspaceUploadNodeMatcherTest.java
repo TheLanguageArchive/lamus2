@@ -29,6 +29,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.util.HandleUtil;
@@ -65,6 +66,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock HandleUtil mockMetadataApiHandleUtil;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceNode mockFirstNode;
     @Mock WorkspaceNode mockSecondNode;
@@ -93,7 +95,8 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         workspaceUploadNodeMatcher = new LamusWorkspaceUploadNodeMatcher(
                 mockCorpusStructureProvider, mockNodeResolver,
                 mockHandleManager, mockWorkspaceNodeFactory,
-                mockWorkspaceDao, mockMetadataApiHandleUtil);
+                mockWorkspaceDao, mockMetadataApiHandleUtil,
+                mockNodeUtil);
     }
     
     @After
@@ -119,7 +122,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and matches the given handle, so it won't continue the loop and return the node
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.TRUE));
         }});
@@ -150,7 +153,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and doesn't match the given handle, so it will continue the loop
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
@@ -158,7 +161,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and its URL will not match the one of the current node, so it will exit the loop
             //  and create an external node pointing to the matched corpus node
-            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(matchesInWorkspace));
         }});
         
@@ -191,7 +194,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and doesn't match the given handle, so it will continue the loop
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
@@ -199,7 +202,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and its URL will not match the one of the current node, so it will exit the loop
             //  and create an external node pointing to the matched corpus node
-            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(matchesInWorkspace));
         }});
         
@@ -232,7 +235,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and doesn't match the given handle, so it will continue the loop
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
@@ -240,7 +243,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and its URL will not match the one of the current node, so it will exit the loop
             //  and create an external node pointing to the matched corpus node
-            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
             
             oneOf(mockCorpusStructureProvider).getNode(handleToMatch); will(returnValue(mockCorpusNode));
@@ -276,14 +279,14 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and doesn't match the given handle, so it will continue the loop
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and since the retrieved archive URL is null, it will continue (in this case exit) the loop
-            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
 
             //since the node could not be found in the archive, an external archive node won't be created, and null will be returned instead
@@ -314,7 +317,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node is metadata and retrieved archive URI is null, so it will continue the loop
-            oneOf(mockFirstNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, null); will(throwException(secondExpectedException));
             //extra call from the logger
@@ -323,7 +326,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
             // and since the retrieved archive URL is null, it will continue (in this case exit) the loop
-            oneOf(mockSecondNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(emptyMatchesInWorkspace));
 
             //since the node could not be found in the archive, an external archive node won't be created, and null will be returned instead

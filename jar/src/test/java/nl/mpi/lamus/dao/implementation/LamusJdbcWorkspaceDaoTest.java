@@ -2269,7 +2269,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         if( (archiveURL != null && archiveURL.toString().endsWith(".cmdi")) || (originURI != null && originURI.toString().endsWith(".cmdi")) ) {
             testWorkspaceNode.setType(WorkspaceNodeType.METADATA);
         } else {
-            testWorkspaceNode.setType(WorkspaceNodeType.RESOURCE);
+            testWorkspaceNode.setType(WorkspaceNodeType.RESOURCE_OTHER);
         }
         testWorkspaceNode.setFormat("someFormat");
         testWorkspaceNode.setStatus(status);

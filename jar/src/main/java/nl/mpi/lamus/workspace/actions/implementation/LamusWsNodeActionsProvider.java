@@ -21,7 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
 
+    private final NodeUtil nodeUtil;
+    
     private final List<WsTreeNodesAction> resourcesActions;;
     private final List<WsTreeNodesAction> metadataActions;
     private final List<WsTreeNodesAction> externalActions;
@@ -41,7 +45,11 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
     private final List<WsTreeNodesAction> emptyActions;
     
     
-    public LamusWsNodeActionsProvider() {
+    @Autowired
+    public LamusWsNodeActionsProvider(NodeUtil nodeUtil) {
+        
+        this.nodeUtil = nodeUtil;
+        
         resourcesActions = new ArrayList<>();
         resourcesActions.add(new DeleteNodesAction());
         resourcesActions.add(new UnlinkNodesAction());
@@ -86,7 +94,7 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
                 return protectedActions;
             } else if(next.isExternal()) {
                 return externalActions;
-            } else if(!next.isMetadata()) {
+            } else if(!nodeUtil.isNodeMetadata(next)) {
                 return resourcesActions;
             } else {
                 return metadataActions;

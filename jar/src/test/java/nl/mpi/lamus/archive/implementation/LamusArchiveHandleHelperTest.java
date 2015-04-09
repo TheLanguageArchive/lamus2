@@ -30,7 +30,9 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataException;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -58,6 +60,7 @@ public class LamusArchiveHandleHelperTest {
     @Mock HandleManager mockHandleManager;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock MetadataApiBridge mockMetadataApiBridge;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock CorpusNode mockCorpusNode;
     @Mock WorkspaceNode mockWorkspaceNode;
@@ -78,7 +81,8 @@ public class LamusArchiveHandleHelperTest {
     public void setUp() {
         archiveHandleHelper = new LamusArchiveHandleHelper(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockHandleManager, mockWorkspaceDao, mockMetadataApiBridge);
+                mockHandleManager, mockWorkspaceDao,
+                mockMetadataApiBridge, mockNodeUtil);
     }
     
     @After
@@ -154,8 +158,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockWorkspaceNode).setArchiveURI(null);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
-            
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.FALSE));
         }});
         
         archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
@@ -175,8 +178,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockWorkspaceNode).setArchiveURI(null);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
-            
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location);
         }});
         
@@ -247,8 +249,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockWorkspaceNode).setArchiveURI(null);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
-            
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
         
@@ -276,8 +277,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockWorkspaceNode).setArchiveURI(null);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockWorkspaceNode);
-            
-            oneOf(mockWorkspaceNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
         

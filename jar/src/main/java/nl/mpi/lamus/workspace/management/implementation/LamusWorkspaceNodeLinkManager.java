@@ -29,6 +29,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -58,17 +59,19 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     private final MetadataAPI metadataAPI;
     private final WorkspaceFileHandler workspaceFileHandler;
     private final MetadataApiBridge metadataApiBridge;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusWorkspaceNodeLinkManager(WorkspaceNodeLinkFactory nodeLinkFactory,
             WorkspaceDao wsDao, MetadataAPI mdAPI, WorkspaceFileHandler wsFileHandler,
-            MetadataApiBridge mdApiBridge) {
+            MetadataApiBridge mdApiBridge, NodeUtil nodeUtil) {
         
         this.workspaceNodeLinkFactory = nodeLinkFactory;
         this.workspaceDao = wsDao;
         this.metadataAPI = mdAPI;
         this.workspaceFileHandler = wsFileHandler;
         this.metadataApiBridge = mdApiBridge;
+        this.nodeUtil = nodeUtil;
     }
 
     /**
@@ -145,7 +148,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 childUri = getNodeURI(childNode);
             }
             
-            if(childNode.isMetadata()) {
+            if(nodeUtil.isNodeMetadata(childNode)) {
                 parentDocument.createDocumentMetadataReference(
                         childUri, childLocation, childNode.getFormat());
             } else {
@@ -316,7 +319,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
             
-            if(childNode.isMetadata()) {
+            if(nodeUtil.isNodeMetadata(childNode)) {
                 MetadataDocument tempChildDocument = metadataAPI.getMetadataDocument(childNode.getWorkspaceURL());
                 HandleCarrier childHandleCarrier = null;
                 if(tempChildDocument instanceof HandleCarrier) {

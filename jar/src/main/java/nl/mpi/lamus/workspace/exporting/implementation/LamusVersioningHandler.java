@@ -28,6 +28,7 @@ import nl.mpi.handle.util.HandleInfoRetriever;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
@@ -50,16 +51,19 @@ public class LamusVersioningHandler implements VersioningHandler {
     private final HandleInfoRetriever handleInfoRetriever;
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusVersioningHandler(ArchiveFileHelper fileHelper, ArchiveFileLocationProvider fileLocationProvider,
-        HandleInfoRetriever handleInfoRetriever, CorpusStructureProvider csProvider, NodeResolver resolver) {
+        HandleInfoRetriever handleInfoRetriever, CorpusStructureProvider csProvider, NodeResolver resolver,
+        NodeUtil nodeUtil) {
         
         this.archiveFileHelper = fileHelper;
         this.handleInfoRetriever = handleInfoRetriever;
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = resolver;
         this.archiveFileLocationProvider = fileLocationProvider;
+        this.nodeUtil = nodeUtil;
     }
 
     /**
@@ -104,7 +108,7 @@ public class LamusVersioningHandler implements VersioningHandler {
             archiveLocation = nodeResolver.getLocalFile(archiveNode);
         }
         
-        if(nodeToMove.getArchiveURI() == null || nodeToMove.isMetadata()) {
+        if(nodeToMove.getArchiveURI() == null || nodeUtil.isNodeMetadata(nodeToMove)) {
             URL orphanOldLocationUrl = nodeToMove.getWorkspaceURL();
             orphanOldLocation = new File(orphanOldLocationUrl.getPath());
             if(archiveFileLocationProvider.isFileInOrphansDirectory(orphanOldLocation)) {

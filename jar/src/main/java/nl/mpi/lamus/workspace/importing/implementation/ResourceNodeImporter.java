@@ -70,6 +70,8 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private WorkspaceNodeFactory workspaceNodeFactory;
     @Autowired
     private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
+    @Autowired
+    private NodeUtil nodeUtil;
 
     
     /**
@@ -142,11 +144,12 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
         
+        WorkspaceNodeType childNodeType = nodeUtil.convertMimetype(childMimetype);
         boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
 
-        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(
                 workspaceID, childURI, childArchiveURL, referenceFromParent,
-                childMimetype, childCorpusNode.getName(), childOnSite, childToBeProtected);
+                childMimetype, childNodeType, childCorpusNode.getName(), childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(

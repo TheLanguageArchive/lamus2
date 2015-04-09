@@ -323,11 +323,6 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     }
     
     @Override
-    public boolean isMetadata() {
-        return WorkspaceNodeType.METADATA.equals(this.type);
-    }
-    
-    @Override
     public void setType(WorkspaceNodeType type) {
         this.type = type;
     }

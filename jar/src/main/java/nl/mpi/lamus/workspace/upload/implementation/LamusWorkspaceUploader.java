@@ -46,6 +46,8 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import org.slf4j.Logger;
@@ -72,6 +74,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final WorkspaceFileValidator workspaceFileValidator;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final ArchiveFileHelper archiveFileHelper;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
@@ -79,7 +82,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         WorkspaceNodeFactory wsNodeFactory,
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
         MetadataApiBridge mdApiBridge, WorkspaceFileValidator wsFileValidator,
-        ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper) {
+        ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper,
+        NodeUtil nodeUtil) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -91,6 +95,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceFileValidator = wsFileValidator;
         this.archiveFileLocationProvider = afLocationProvider;
         this.archiveFileHelper = archiveFileHelper;
+        this.nodeUtil = nodeUtil;
     }
 
     /**
@@ -258,6 +263,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             String nodeMimetype = typecheckedResults.getCheckedMimetype();
+            WorkspaceNodeType nodeType = nodeUtil.convertMimetype(nodeMimetype);
             
             URI archiveUri = null;
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
@@ -269,7 +275,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveUri, originUri, uploadedFileUrl, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
+                    workspaceID, archiveUri, originUri, uploadedFileUrl,
+                    nodeMimetype, nodeType, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);
             

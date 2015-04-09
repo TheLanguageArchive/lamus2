@@ -328,7 +328,7 @@ public class WorkspaceStepsHelper {
             childNodeFormat = "application/pdf";
             childFile = new File(workspaceDirectory, childWsNodeID + ".pdf");
             childOriginFile = new File("/some/directory/" + childWsNodeID + ".pdf");
-            childNodeType = WorkspaceNodeType.RESOURCE;
+            childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         } else if("metadata".equals(type)) {
             childNodeFormat = "text/x-cmdi+xml";
             childFile = new File(workspaceDirectory, childWsNodeID + ".cmdi");
