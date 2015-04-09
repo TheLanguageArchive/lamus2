@@ -125,7 +125,7 @@ public class SelectWorkspacePage extends LamusPage {
         
         if(!showPanel) {
             formContainer.setVisible(false);
-            Session.get().info(getLocalizer().getString("select_workspace_no_open_workspaces", this));
+            info(getLocalizer().getString("select_workspace_no_open_workspaces", this));
         }
         
         // Add container to page

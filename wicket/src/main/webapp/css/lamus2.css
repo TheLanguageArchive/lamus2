@@ -110,8 +110,19 @@ header > ul#header_info_container > li > a:hover {
 
 /* Feedback panel */
 
+.expandablePanel{
+    
+    clear: both;
+    float: right;
+    
+    border: thin;
+    border-color: #eee;
+    border-style: solid;
+    margin-bottom:5px;
+}
+
 .feedbackPanel {
-    /*float: right;*/
+    width: 100%;
 }
 
 .feedbackPanel ul {
@@ -242,13 +253,6 @@ a#loginOrLogoutLink:hover {
     float: left;
 }*/
 
-
-
-/* feedback panel */
-
-.feedbackPanel {
-    width: 100%;
-}
 
 /* workspace buttons panel */
 

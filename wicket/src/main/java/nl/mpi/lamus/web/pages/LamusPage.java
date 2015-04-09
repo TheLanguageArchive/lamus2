@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.components.AboutPanel;
+import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,6 +28,7 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.SharedResourceReference;
@@ -57,7 +59,18 @@ public class LamusPage extends WebPage {
         
         feedbackPanel = new FeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
-	add(feedbackPanel);
+        
+        Panel expandableFeedback = new ExpandableFeedbackPanel("expandablePanel", Model.of("panel")) {
+            
+            @Override
+            protected FeedbackPanel getInnerFeedbackPanel() {
+                return feedbackPanel;
+            }
+        };
+        
+	expandableFeedback.add(feedbackPanel);
+        add(expandableFeedback);
+        
         add(new Image("header_tla_logo", new SharedResourceReference("tlaLogoImage")));
         add(new Label("header_appname", appName));
         add(new Image("header_clarin_logo", new SharedResourceReference("clarinInvertedImage")));

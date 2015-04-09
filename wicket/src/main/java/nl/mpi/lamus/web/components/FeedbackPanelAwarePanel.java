@@ -28,7 +28,7 @@ import org.apache.wicket.model.IModel;
  */
 public class FeedbackPanelAwarePanel<T extends Object> extends GenericPanel<T> {
     
-    private FeedbackPanel feedbackPanel;
+    private final FeedbackPanel feedbackPanel;
     
     public FeedbackPanelAwarePanel(String id, IModel<T> model, FeedbackPanel feedbackPanel) {
         super(id, model);
