@@ -18,7 +18,7 @@
     </phase>
     
     <sch:let name="profile" value="/cmd:CMD/cmd:Header/cmd:MdProfile" />
-    <sch:let name="allowedProfilesDocument" value="document('/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml')" />
+    <sch:let name="allowedProfilesDocument" value="document('target/test-classes/cmdi_validation/cmdi_allowed_profiles.xml')" />
     <sch:let name="profileName" value="$allowedProfilesDocument//profile[@id = normalize-space($profile)]/@name" />
     <sch:let name="profileAllowedReferenceTypes" value="$allowedProfilesDocument//profile[@id = normalize-space($profile)]/allowedReferenceTypes" />
 
@@ -44,7 +44,13 @@
                 [CMDI Profile Restriction] the CMD profile of this record doesn't allow for this resource type.
             </sch:assert>
 
-<!-- INCLUDE CHECK FOR MIMETYPE - prevent 'Resource' from pointing to metadata and 'Metadata' from pointing to resources -->
+            <sch:assert id="assert.reference.mimetype.present" role="warn" test="current()/cmd:ResourceType/@mimetype" >
+                [CMDI Best Practice] Mimetype not present in ResourceProxy.
+            </sch:assert>
+            
+            <sch:assert id="assert.reference.mimetype.valid" role="error" test="(current()/cmd:ResourceType[not(@mimetype)]) or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml') or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')">
+                [CMDI Invalid reference] Mimetype not consistent with ResourceProxy type. 
+            </sch:assert>
 
             <sch:assert id="assert.reference.component.present" role="error" test="($profileName != 'lat-corpus' or contains(/cmd:CMD/cmd:Components/cmd:lat-corpus/@ref, current()/@id)) 
                             and ($profileName != 'lat-session' or contains(/cmd:CMD/cmd:Components/cmd:lat-session/@ref, current()/@id))">
