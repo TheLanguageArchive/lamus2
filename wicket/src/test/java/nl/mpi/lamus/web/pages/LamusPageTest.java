@@ -17,6 +17,7 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
+import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -73,8 +74,10 @@ public class LamusPageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("header_username");
         getTester().assertLabel("header_username", AbstractLamusWicketTest.MOCK_USER_ID);
         
-        getTester().assertComponent("feedbackPanel", FeedbackPanel.class);
-        getTester().assertEnabled("feedbackPanel");
+        getTester().assertComponent("expandablePanel", ExpandableFeedbackPanel.class);
+        getTester().assertEnabled("expandablePanel");
+//        getTester().assertComponent("expandablePanel:feedbackPanel", FeedbackPanel.class);
+//        getTester().assertEnabled("expandablePanel:feedbackPanel");
     }
     
     @Test
