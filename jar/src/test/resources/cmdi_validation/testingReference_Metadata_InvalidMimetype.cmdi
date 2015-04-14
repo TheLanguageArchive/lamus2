@@ -5,29 +5,27 @@
      xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064/xsd ">
    <Header>
       <MdCreator>guisil</MdCreator>
-      <MdCreationDate>2015-03-12+01:00</MdCreationDate>
+      <MdCreationDate>2015-04-14+02:00</MdCreationDate>
       <MdProfile>clarin.eu:cr1:p_1407745712064</MdProfile>
    </Header>
    <Resources>
       <ResourceProxyList>
-         <ResourceProxy id="res_52365370-b01d-421e-a682-8779429ee897">
-            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
-            <ResourceRef>someSession.cmdi</ResourceRef>
-         </ResourceProxy>
-         <ResourceProxy id="res_2e042594-92b5-4b64-a367-670ed74d77b3">
-            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
-            <ResourceRef>someOtherSession.cmdi</ResourceRef>
+         <ResourceProxy id="res_87337b34-dc58-448b-8d7c-9610873ba9c8">
+            <ResourceType mimetype="image/jpeg">Metadata</ResourceType>
+            <ResourceRef>corpusreference/sessionreference.cmdi</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
       <JournalFileProxyList/>
       <ResourceRelationList/>
    </Resources>
    <Components>
-      <lat-corpus ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
-         <Name>testingReference_componentReferenceMissing</Name>
-         <Title>testingReference_componentReferenceMissing</Title>
+      <lat-corpus ref="res_87337b34-dc58-448b-8d7c-9610873ba9c8">
+         <Name>corpusreference</Name>
+         <Title>corpusreference</Title>
          <descriptions>
+            <Description xml:lang="eng">descr</Description>
          </descriptions>
+         
       </lat-corpus>
    </Components>
 </CMD>

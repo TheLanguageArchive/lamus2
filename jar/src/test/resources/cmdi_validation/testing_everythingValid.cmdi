@@ -11,7 +11,7 @@
    <Resources>
       <ResourceProxyList>
          <ResourceProxy id="res_2e042594-92b5-4b64-a367-670ed74d77b3">
-            <ResourceType>Metadata</ResourceType>
+            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
             <ResourceRef>someOtherSession.cmdi</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>

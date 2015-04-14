@@ -126,6 +126,52 @@ public class LamusMetadataCheckerTest {
         assertTrue("Issues should be empty", issues.isEmpty());
     }
     
+    @Test
+    public void validateUploadedFile_validMimeType() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_validMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_validMimetype.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (1)", issues2.isEmpty());
+    }
+    
+    @Test
+    public void validateUploadedFile_missingMimeType() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_missingMimetype.cmdi");
+        final String expectedTest = "current()/cmd:ResourceType/@mimetype";
+        final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        
+        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+    }
+    
+    @Test
+    public void validateUploadedFile_invalidMimeType() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_invalidMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_invalidMimetype.cmdi");
+        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)]) or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml') or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
+        final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        
+        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+    }
+    
+    
     //validate submit phase
     
     @Test
@@ -166,11 +212,48 @@ public class LamusMetadataCheckerTest {
     }
     
     @Test
+    public void validateSubmittedFile_validMimeType() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_validMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_validMimetype.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (1)", issues2.isEmpty());
+    }
+    
+    @Test
+    public void validateSubmittedFile_missingMimeType() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_missingMimetype.cmdi");
+        final String expectedTest = "current()/cmd:ResourceType/@mimetype";
+        final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        
+        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+    }
+    
+    @Test
     public void validateSubmittedFile_invalidMimeType() throws Exception {
         
-        //TODO How to make this work? Metadata files seem to have no mimetype at all.
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_invalidMimetype.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_invalidMimetype.cmdi");
+        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)]) or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml') or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
+        final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         
-        fail("not tested yet");
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        
+        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test

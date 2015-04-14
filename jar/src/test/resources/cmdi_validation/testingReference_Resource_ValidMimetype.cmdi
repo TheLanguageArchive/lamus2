@@ -5,39 +5,47 @@
      xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd ">
    <Header>
       <MdCreator>guisil</MdCreator>
-      <MdCreationDate>2015-03-12+01:00</MdCreationDate>
+      <MdCreationDate>2015-04-14+02:00</MdCreationDate>
       <MdProfile>clarin.eu:cr1:p_1407745712035</MdProfile>
    </Header>
    <Resources>
       <ResourceProxyList>
-         <ResourceProxy id="res_40b796e9-5989-4ea0-9585-a614ae0e5056">
-            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
-            <ResourceRef>someotherfile.cmdi</ResourceRef>
+         <ResourceProxy id="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+            <ResourceType mimetype="image/jpeg">Resource</ResourceType>
+            <ResourceRef>sessionreference/aperfectcircle_merdenoms.jpg</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
       <JournalFileProxyList/>
       <ResourceRelationList/>
    </Resources>
    <Components>
-      <lat-session ref="res_40b796e9-5989-4ea0-9585-a614ae0e5056">
-         <Name>testReference_invalidType</Name>
+      <lat-session ref="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+         <Name>sessionreference</Name>
+         <Title>sessionreference</Title>
          <Date>2015</Date>
          <descriptions>
-            <Description xml:lang="eng">this kind of describes something</Description>
+            <Description xml:lang="eng">descr</Description>
          </descriptions>
          <Location>
-            <Continent>Europe</Continent>
-            <Country>Poland</Country>
+            <Continent>Africa</Continent>
+            <Country>Tunisia</Country>
          </Location>
          <Project>
-            <Name>invalid stuff</Name>
+            <Name>something</Name>
             <Contact/>
          </Project>
          <Content>
-            <Genre>fantasy</Genre>
+            <Genre>something</Genre>
             <CommunicationContext/>
          </Content>
-         <Resources/>
+         <Resources>
+            <MediaFile ref="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+               <Type>image</Type>
+               <Format>jpeg</Format>
+               <Size/>
+               <Quality>3</Quality>
+            </MediaFile>
+         </Resources>
       </lat-session>
    </Components>
 </CMD>
