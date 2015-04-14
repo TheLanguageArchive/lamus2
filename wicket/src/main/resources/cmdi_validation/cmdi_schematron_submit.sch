@@ -18,7 +18,7 @@
     </phase>
     
     <sch:let name="profile" value="/cmd:CMD/cmd:Header/cmd:MdProfile" />
-    <sch:let name="allowedProfilesDocument" value="document('target/test-classes/cmdi_validation/cmdi_allowed_profiles.xml')" />
+    <sch:let name="allowedProfilesDocument" value="document('/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml')" />
     <sch:let name="profileName" value="$allowedProfilesDocument//profile[@id = normalize-space($profile)]/@name" />
     <sch:let name="profileAllowedReferenceTypes" value="$allowedProfilesDocument//profile[@id = normalize-space($profile)]/allowedReferenceTypes" />
 
