@@ -16,12 +16,12 @@
  */
 package nl.mpi.lamus.web.workspace.tree;
 
-import javax.swing.ImageIcon;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreeNodeIconProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,6 +31,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvider<WorkspaceTreeNode> {
+    
+    @Autowired
+    private WorkspaceTreeNodeProfileIconMapper profileIconMapper;
+
     
     /**
      * @see ArchiveTreeNodeIconProvider#getNodeIcon(nl.mpi.archiving.tree.GenericTreeNode)
@@ -53,7 +57,7 @@ public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvide
         
         switch(nodeType) {
             case METADATA:
-                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "clarin.png");
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, profileIconMapper.matchProfileIdWithIconName(contentNode.getProfileSchemaURI().toString()));
             case RESOURCE_AUDIO:
                 return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "audio.gif");
             case RESOURCE_IMAGE:

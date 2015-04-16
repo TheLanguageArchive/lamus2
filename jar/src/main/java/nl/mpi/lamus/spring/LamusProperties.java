@@ -22,6 +22,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -397,5 +401,21 @@ public class LamusProperties implements ServletContextAware {
     @Qualifier("schematronFile_submit")
     public File schematronFile_submit() {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronValidationFile_submit"));
+    }
+    
+    @Bean
+    @Qualifier("allowedProfiles_File")
+    public File allowedProfiles_File() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.allowedProfilesFile"));
+    }
+    
+    @Bean
+    public AllowedCmdiProfiles allowedProfiles() throws JAXBException {
+        
+        JAXBContext jaxbContext = JAXBContext.newInstance(AllowedCmdiProfiles.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        
+        AllowedCmdiProfiles profiles = (AllowedCmdiProfiles) jaxbUnmarshaller.unmarshal(allowedProfiles_File());
+        return profiles;
     }
 }
