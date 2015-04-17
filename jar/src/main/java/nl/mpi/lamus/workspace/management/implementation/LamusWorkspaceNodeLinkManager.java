@@ -284,10 +284,19 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 "; oldNodeID: " + oldNodeID + "; newNodeID: " + newNodeID +
                 "; isNewNodeAlreadyLinked: " + isNewNodeAlreadyLinked);
         
-        if(!isNewNodeAlreadyLinked) {
+        boolean isTopNode = workspaceDao.isTopNodeOfWorkspace(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID());
+        
+        if(!isNewNodeAlreadyLinked && !isTopNode) {
             
             unlinkNodes(parentNode, oldNode, false);
             linkNodes(parentNode, newNode);
+        } else if(isTopNode) {
+            
+            Workspace ws = workspaceDao.getWorkspace(oldNode.getWorkspaceID());
+            ws.setTopNodeID(newNode.getWorkspaceNodeID());
+            ws.setTopNodeArchiveURI(newNode.getArchiveURI());
+            ws.setTopNodeArchiveURL(newNode.getArchiveURL());
+            workspaceDao.updateWorkspaceTopNode(ws);
         }
         
         workspaceDao.replaceNode(oldNode, newNode);

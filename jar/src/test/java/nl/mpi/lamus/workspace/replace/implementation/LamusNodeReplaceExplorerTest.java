@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
@@ -121,7 +122,7 @@ public class LamusNodeReplaceExplorerTest {
 
     
     @Test
-    public void exploreReplace_WithoutChildren() throws ProtectedNodeException {
+    public void exploreReplace_WithoutChildren() throws ProtectedNodeException, IncompatibleNodesException {
         
         final List<NodeReplaceAction> actions = new ArrayList<>();
         
@@ -153,7 +154,7 @@ public class LamusNodeReplaceExplorerTest {
 //    }
     
     @Test
-    public void exploreReplace_OnlyNewNodeHasChildren() throws URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+    public void exploreReplace_OnlyNewNodeHasChildren() throws URISyntaxException, IOException, MetadataException, TransformerException, ProtectedNodeException, IncompatibleNodesException {
         
         final List<NodeReplaceAction> actions = new ArrayList<>();
         
@@ -194,7 +195,7 @@ public class LamusNodeReplaceExplorerTest {
     }
     
     @Test
-    public void exploreReplace_WithChild_Resource_NotMatching() throws URISyntaxException, MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException {
+    public void exploreReplace_WithChild_Resource_NotMatching() throws URISyntaxException, MalformedURLException, IOException, MetadataException, TransformerException, ProtectedNodeException, IncompatibleNodesException {
         
         final List<NodeReplaceAction> actions = new ArrayList<>();
         
@@ -247,7 +248,7 @@ public class LamusNodeReplaceExplorerTest {
     }
     
     @Test
-    public void exploreReplace_WithChild_Resource_Matching() throws URISyntaxException, ProtectedNodeException {
+    public void exploreReplace_WithChild_Resource_Matching() throws URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
 
         final List<NodeReplaceAction> actions = new ArrayList<>();
         
@@ -292,7 +293,7 @@ public class LamusNodeReplaceExplorerTest {
     }
     
     @Test
-    public void exploreReplace_WithChild_Resource_Matching_ProtectedNode() throws URISyntaxException, ProtectedNodeException {
+    public void exploreReplace_WithChild_Resource_Matching_ProtectedNode() throws URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
 
         final List<NodeReplaceAction> actions = new ArrayList<>();
         

@@ -180,6 +180,13 @@ public interface WorkspaceDao {
     public int getWorkspaceTopNodeID(int workspaceID);
     
     /**
+     * @param workspaceID ID of the workspace
+     * @param workspaceNodeID ID of the node
+     * @return true if the given node is the top node of the given workspace
+     */
+    public boolean isTopNodeOfWorkspace(int workspaceID, int workspaceNodeID);
+    
+    /**
      * Retrieves a collection containing all the nodes
      * of the workspace with the given ID.
      * 

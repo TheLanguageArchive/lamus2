@@ -69,9 +69,9 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         protectedActions = new ArrayList<>();
         protectedActions.add(new UnlinkNodesAction());
         
-        //TODO Replace should also be supported in the future
         topNodeActions = new ArrayList<>();
         topNodeActions.add(new LinkNodesAction());
+        topNodeActions.add(new ReplaceNodesAction());
         
         multipleNodesActions = new ArrayList<>();
         multipleNodesActions.add(new DeleteNodesAction());

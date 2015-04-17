@@ -1528,35 +1528,26 @@ public class LamusWorkspaceNodeLinkManagerTest {
         // unlink old node
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            allowing(mockOldNode).getWorkspaceURL(); will(returnValue(oldChildURL));
+            allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newChildURL));
             
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldChildNodeID); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(newChildNodeID); will(returnValue(emptyParentNodes));
             
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
-            
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockOldNode).getWorkspaceURL(); will(returnValue(oldChildURL));
             oneOf(mockParentDocument).getDocumentReferenceByLocation(oldChildURI); will(returnValue(mockChildReferenceWithHandle));
             oneOf(mockParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
             
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
-            
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
             
             oneOf(mockWorkspaceDao).deleteWorkspaceNodeLink(workspaceID, parentNodeID, oldChildNodeID);
         }});
@@ -1567,32 +1558,20 @@ public class LamusWorkspaceNodeLinkManagerTest {
         // link new node
         context.checking(new Expectations() {{
             
-            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
-            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
-            
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNewNode); will(returnValue(Boolean.FALSE));
-            oneOf(mockNewNode).getWorkspaceURL(); will(returnValue(newChildURL));
+            
             oneOf(mockNewNode).getArchiveURI(); will(returnValue(null));
-            oneOf(mockNewNode).getWorkspaceURL(); will(returnValue(newChildURL));
             oneOf(mockNewNode).getType(); will(returnValue(childWsType));
             oneOf(mockNewNode).getFormat(); will(returnValue(childMimetype));
             oneOf(mockParentDocument).createDocumentResourceReference(null, newChildURI, childStringType, childMimetype);
                 will(returnValue(mockChildResourceReference));
                 
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
             oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
-            
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
             
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, newChildNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
@@ -1624,17 +1603,50 @@ public class LamusWorkspaceNodeLinkManagerTest {
         //replace node in DB (create new version and set old node as replaced)
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldChildNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newChildNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldChildNodeID); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceDao).replaceNode(mockOldNode, mockNewNode);
         }});
         
         
         nodeLinkManager.replaceNode(mockParentNode, mockOldNode, mockNewNode, Boolean.TRUE);
+    }
+    
+        @Test
+    public void replaceTopNode() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+     
+        final int workspaceID = 1;
+        final int oldNodeID = 3;
+        final int newNodeID = 20;
+        final URI newNodeURI = URI.create(UUID.randomUUID().toString());
+        
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            allowing(mockNewNode).getArchiveURL(); will(returnValue(null));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
+            oneOf(mockWorkspace).setTopNodeID(newNodeID);
+            oneOf(mockWorkspace).setTopNodeArchiveURI(newNodeURI);
+            oneOf(mockWorkspace).setTopNodeArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateWorkspaceTopNode(mockWorkspace);
+            
+            oneOf(mockWorkspaceDao).replaceNode(mockOldNode, mockNewNode);
+        }});
+        
+        nodeLinkManager.replaceNode(null, mockOldNode, mockNewNode, Boolean.FALSE);
     }
     
     @Test

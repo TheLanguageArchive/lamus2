@@ -28,6 +28,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
@@ -114,7 +115,7 @@ public class ResourceNodeReplaceCheckerTest {
 
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithoutChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeInArchive_WithoutChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -164,7 +165,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithoutChange_AlreadyLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeInArchive_WithoutChange_AlreadyLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -221,7 +222,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeInArchive_WithChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeInArchive_WithChange_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -273,7 +274,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -318,7 +319,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
+    public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -367,7 +368,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -409,7 +410,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsOldNodeProtected() throws MalformedURLException, URISyntaxException, ProtectedNodeException {
+    public void decideReplaceActionsOldNodeProtected() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
@@ -453,7 +454,7 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActionsNodesAreTheSame() throws ProtectedNodeException {
+    public void decideReplaceActionsNodesAreTheSame() throws ProtectedNodeException, IncompatibleNodesException {
         
         final int nodeID = 100;
         

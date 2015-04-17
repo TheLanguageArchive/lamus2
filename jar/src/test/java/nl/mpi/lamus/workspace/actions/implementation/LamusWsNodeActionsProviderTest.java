@@ -108,6 +108,7 @@ public class LamusWsNodeActionsProviderTest {
         
         expectedTopNodeActions = new ArrayList<>();
         expectedTopNodeActions.add(new LinkNodesAction());
+        expectedTopNodeActions.add(new ReplaceNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "topNodeActions", expectedTopNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<>();

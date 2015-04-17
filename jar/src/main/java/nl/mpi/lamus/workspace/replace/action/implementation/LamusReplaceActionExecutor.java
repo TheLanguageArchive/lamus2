@@ -56,15 +56,15 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing action: " + action.toString());
 
         if(action instanceof ReplaceNodeReplaceAction) {
-            executeReplaceAction((ReplaceNodeReplaceAction) action); //(ir, ws, tag, (ReplaceNodeAction) currentAction, error);
+            executeReplaceAction((ReplaceNodeReplaceAction) action);
         } else if(action instanceof DeleteNodeReplaceAction) {
-            executeDeleteAction((DeleteNodeReplaceAction) action); //(ws, tag, (DeleteNodeAction) currentAction, error);
+            executeDeleteAction((DeleteNodeReplaceAction) action);
         } else if(action instanceof UnlinkNodeReplaceAction) {
-            executeUnlinkAction((UnlinkNodeReplaceAction) action); //(ws, tag, (UnlinkNodeAction) currentAction, error);
+            executeUnlinkAction((UnlinkNodeReplaceAction) action);
         } else if(action instanceof LinkNodeReplaceAction) {
-            executeLinkAction((LinkNodeReplaceAction) action); //(ws, tag, (LinkNodeAction) currentAction, error);
+            executeLinkAction((LinkNodeReplaceAction) action);
         } else if(action instanceof MoveLinkLocationNodeReplaceAction) {
-            executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action); //(ws, tag, (MoveLinkLocationAction) currentAction, error);
+            executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action);
         } else if(action instanceof RemoveArchiveUriReplaceAction) {
             executeRemoveArchiveUriAction((RemoveArchiveUriReplaceAction) action);
         }

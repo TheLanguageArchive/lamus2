@@ -628,6 +628,21 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return topWorkspaceNodeID;
     }
+
+    /**
+     * @see WorkspaceDao#isTopNodeOfWorkspace(int, int)
+     */
+    @Override
+    public boolean isTopNodeOfWorkspace(int workspaceID, int workspaceNodeID) {
+        
+        logger.debug("Checking if given node (" + workspaceNodeID + ") is top node of workspace " + workspaceID);
+        
+        if(workspaceNodeID == getWorkspaceTopNodeID(workspaceID)) {
+            return true;
+        }
+        
+        return false;
+    }
     
     /**
      * @see WorkspaceDao#getNodesForWorkspace(int)

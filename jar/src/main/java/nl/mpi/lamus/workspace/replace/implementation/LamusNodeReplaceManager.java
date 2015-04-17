@@ -47,10 +47,14 @@ public class LamusNodeReplaceManager implements NodeReplaceManager {
     }
     
     /**
-     * @see NodeReplaceChecker#decideReplaceActions(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeReplaceManager#replaceTree(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
     public void replaceTree(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode) throws WorkspaceException, ProtectedNodeException {
+        
+        if(oldNode.getWorkspaceID() != newNode.getWorkspaceID()) {
+            throw new IllegalArgumentException("Old node and new node belong to different workspaces.");
+        }
         
         List<NodeReplaceAction> actions = new ArrayList<>();
         NodeReplaceChecker replaceChecker = nodeReplaceCheckerFactory.getReplaceCheckerForNode(oldNode);

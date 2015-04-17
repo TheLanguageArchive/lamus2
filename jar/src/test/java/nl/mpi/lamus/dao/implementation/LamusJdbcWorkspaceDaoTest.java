@@ -1231,6 +1231,40 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void nodeIsTopNodeOfWorkspace() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
+        
+        boolean result = this.workspaceDao.isTopNodeOfWorkspace(testWorkspace.getWorkspaceID(), testNode.getWorkspaceNodeID());
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void nodeIsNotTopNodeOfWorkspace() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI testURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL testURL = new URL("file:/archive/folder/test.cmdi");
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, testURI, testURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        testWorkspace.setTopNodeArchiveURI(testNode.getArchiveURI());
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, testNode);
+        
+        URI anotherTestURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL anotherTestURL = new URL("file:/archive/folder/anothertest.cmdi");
+        WorkspaceNode anotherTestNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, anotherTestURI, anotherTestURL, null, Boolean.TRUE, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE);
+        
+        boolean result = this.workspaceDao.isTopNodeOfWorkspace(testWorkspace.getWorkspaceID(), anotherTestNode.getWorkspaceNodeID());
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
     public void getExistingNodesForWorkspace() throws MalformedURLException, URISyntaxException {
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
