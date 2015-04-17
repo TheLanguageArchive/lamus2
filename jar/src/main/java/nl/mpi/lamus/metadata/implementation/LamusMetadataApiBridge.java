@@ -59,7 +59,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         this.workspaceFileHandler = wsFileHandler;
         this.handleManager = hdlManager;
     }
-    
+
     /**
      * @see MetadataApiBridge#getSelfHandleFromFile(java.net.URL)
      */
@@ -177,14 +177,23 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             return false;
         }
         
+        return isMetadataDocumentValid(document);
+    }
+
+    /**
+     * @see MetadataApiBridge#isMetadataDocumentValid(nl.mpi.metadata.api.model.MetadataDocument)
+     */
+    @Override
+    public boolean isMetadataDocumentValid(MetadataDocument document) {
+        
         try {
             metadataAPI.validateMetadataDocument(document, new DefaultHandler());
         } catch(SAXException ex) {
-            logger.info("Validation error in file [" + fileURL + "]", ex);
+            logger.info("Validation error in file [" + document.getFileLocation() + "]", ex);
             return false;
         }
         
-        logger.debug("Metadata file [" + fileURL + "] is valid");
+        logger.debug("Metadata file [" + document.getFileLocation() + "] is valid");
         return true;
     }
 }

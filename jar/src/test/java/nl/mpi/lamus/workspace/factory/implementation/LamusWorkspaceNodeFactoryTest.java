@@ -268,7 +268,7 @@ public class LamusWorkspaceNodeFactoryTest {
         
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
-                workspaceID, null, originURI, workspaceURL,
+                workspaceID, null, originURI, workspaceURL, null,
                 nodeMimetype, nodeType, nodeStatus, isProtected);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
@@ -281,6 +281,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URI archiveURI = URI.create(UUID.randomUUID().toString());
         final URI originURI = URI.create("file:/local/folder/file.cmdi");
         final URL workspaceURL = new URL("file:/workspace/folder/file.cmdi");
+        final URI schemaLocation = new URI("http:/some/location/schema.xsd");
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeMimetype = "text/x-cmdi+xml";
@@ -294,6 +295,7 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setArchiveURI(archiveURI);
         expectedNode.setOriginURI(originURI);
         expectedNode.setWorkspaceURL(workspaceURL);
+        expectedNode.setProfileSchemaURI(schemaLocation);
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeMimetype);
         expectedNode.setStatus(nodeStatus);
@@ -301,7 +303,7 @@ public class LamusWorkspaceNodeFactoryTest {
         
         
         WorkspaceNode retrievedNode = factory.getNewWorkspaceNodeFromFile(
-                workspaceID, archiveURI, originURI, workspaceURL,
+                workspaceID, archiveURI, originURI, workspaceURL, schemaLocation,
                 nodeMimetype, nodeType, nodeStatus, isProtected);
         
         assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);

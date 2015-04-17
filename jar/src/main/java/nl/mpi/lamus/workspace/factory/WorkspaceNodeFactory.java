@@ -83,6 +83,7 @@ public interface WorkspaceNodeFactory {
      * @param archiveURI URI (handle) from the archive, if the node comes from there
      * @param originURI URI of the original file location (mostly for uploaded files)
      * @param workspaceURL URL of the file location in the workspace
+     * @param profileSchemaURI URI of the profile schema, in case it's a metadata file
      * @param mimetype Mimetype of the file
      * @param nodeType node type for the file
      * @param status Status of the node
@@ -90,7 +91,7 @@ public interface WorkspaceNodeFactory {
      * @return created WorkspaceNode object
      */
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI,
-            URI originURI, URL workspaceURL, String mimetype, WorkspaceNodeType nodeType,
+            URI originURI, URL workspaceURL, URI profileSchemaURI, String mimetype, WorkspaceNodeType nodeType,
             WorkspaceNodeStatus status, boolean isProtected);
     
     /**

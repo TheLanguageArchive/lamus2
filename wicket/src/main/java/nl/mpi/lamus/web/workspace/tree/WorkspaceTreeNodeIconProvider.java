@@ -57,7 +57,7 @@ public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvide
         
         switch(nodeType) {
             case METADATA:
-                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, profileIconMapper.matchProfileIdWithIconName(contentNode.getProfileSchemaURI().toString()));
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, profileIconMapper.matchProfileIdWithIconName(contentNode.getProfileSchemaURI()));
             case RESOURCE_AUDIO:
                 return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "audio.gif");
             case RESOURCE_IMAGE:

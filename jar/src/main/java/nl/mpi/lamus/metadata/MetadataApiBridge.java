@@ -31,7 +31,7 @@ import nl.mpi.metadata.api.model.MetadataDocument;
  * @author guisil
  */
 public interface MetadataApiBridge {
-   
+    
     /**
      * Retrieves the self link (handle) from the given file, if it has one.
      * 
@@ -97,4 +97,11 @@ public interface MetadataApiBridge {
      * @return true if the file is valid
      */
     public boolean isMetadataFileValid(URL fileURL);
+    
+    /**
+     * Validates the given metadata document.
+     * @param document MetadataDocument to check
+     * @return true if the document is valid
+     */
+    public boolean isMetadataDocumentValid(MetadataDocument document);
 }

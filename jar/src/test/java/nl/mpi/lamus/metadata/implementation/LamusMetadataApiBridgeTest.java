@@ -521,12 +521,13 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataFileIsValid() throws MalformedURLException, IOException, MetadataException, SAXException {
+    public void metadataFileIsValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
         
         final URL fileURL = new URL("file:/some/location/file.cmdi");
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL); will(returnValue(mockMetadataDocument));
+            allowing(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
             oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class)));
         }});
         
@@ -536,7 +537,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataFileIsNotValid() throws MalformedURLException, IOException, MetadataException, SAXException {
+    public void metadataFileIsNotValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
         
         final URL fileURL = new URL("file:/some/location/file.cmdi");
         
@@ -544,6 +545,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL); will(returnValue(mockMetadataDocument));
+            allowing(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
             oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class))); will(throwException(expectedException));
         }});
         
@@ -582,6 +584,38 @@ public class LamusMetadataApiBridgeTest {
         boolean result = testMdApiBridge.isMetadataFileValid(metadataFileToCheck);
         
         assertTrue("Metadata file should be valid", result);
+    }
+    
+    @Test
+    public void metadataDocumentIsValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
+        
+        final URL fileURL = new URL("file:/some/location/file.cmdi");
+        
+        context.checking(new Expectations() {{
+            allowing(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
+            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class)));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isMetadataDocumentValid(mockMetadataDocument);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void metadataDocumentIsNotValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
+        
+        final URL fileURL = new URL("file:/some/location/file.cmdi");
+        
+        final SAXException expectedException = new SAXException("some exception message");
+        
+        context.checking(new Expectations() {{
+            allowing(mockMetadataDocument).getFileLocation(); will(returnValue(fileURL.toURI()));
+            oneOf(mockMetadataAPI).validateMetadataDocument(with(same(mockMetadataDocument)), with(any(DefaultHandler.class))); will(throwException(expectedException));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isMetadataDocumentValid(mockMetadataDocument);
+        
+        assertFalse("Result should be false", result);
     }
 }
 

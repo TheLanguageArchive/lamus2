@@ -50,6 +50,9 @@ import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.MetadataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +73,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceUploadHelper workspaceUploadHelper;
+    private final MetadataAPI metadataAPI;
     private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceFileValidator workspaceFileValidator;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
@@ -80,7 +84,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceFileHandler wsFileHandler,
         WorkspaceNodeFactory wsNodeFactory,
-        WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
+        WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper, MetadataAPI mdAPI,
         MetadataApiBridge mdApiBridge, WorkspaceFileValidator wsFileValidator,
         ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper,
         NodeUtil nodeUtil) {
@@ -91,6 +95,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.workspaceUploadHelper = wsUploadHelper;
+        this.metadataAPI = mdAPI;
         this.metadataApiBridge = mdApiBridge;
         this.workspaceFileValidator = wsFileValidator;
         this.archiveFileLocationProvider = afLocationProvider;
@@ -239,9 +244,20 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 logger.debug(debugMessage);
             }
             
+            //to be used if the file is metadata
+            MetadataDocument mdDocument = null;
+            
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
+                
+                try {
+                    mdDocument = metadataAPI.getMetadataDocument(uploadedFileUrl);
+                } catch (IOException | MetadataException ex) {
+                    String errorMessage = "Error retrieving metadata document for file [" + currentFile.getName() + "]";
+                    failUploadForFile(currentFile, errorMessage, failedFiles);
+                    continue;
+                }
 
-                if(!metadataApiBridge.isMetadataFileValid(uploadedFileUrl)) {
+                if(!metadataApiBridge.isMetadataDocumentValid(mdDocument)) {
                     String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
                     failUploadForFile(currentFile, errorMessage, failedFiles);
                     continue;
@@ -267,15 +283,17 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             URI archiveUri = null;
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
-                archiveUri = metadataApiBridge.getSelfHandleFromFile(uploadedFileUrl);   
+                archiveUri = metadataApiBridge.getSelfHandleFromDocument(mdDocument);
             }
             URI originUri = null;
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentFile)) {
                 originUri = uploadedFileUri;
             }
             
+            URI profileSchemaURI = mdDocument != null ? mdDocument.getDocumentType().getSchemaLocation() : null;
+            
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveUri, originUri, uploadedFileUrl,
+                    workspaceID, archiveUri, originUri, uploadedFileUrl, profileSchemaURI,
                     nodeMimetype, nodeType, WorkspaceNodeStatus.NODE_UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);

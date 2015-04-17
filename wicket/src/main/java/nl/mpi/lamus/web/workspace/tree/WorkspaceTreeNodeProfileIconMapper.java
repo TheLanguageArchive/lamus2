@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.workspace.tree;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,16 +48,18 @@ public class WorkspaceTreeNodeProfileIconMapper {
      * @param profileLocation Profile location, which should contain the profile ID
      * @return name of the icon file to use for the given profile
      */
-    public String matchProfileIdWithIconName(String profileLocation) {
+    public String matchProfileIdWithIconName(URI profileLocation) {
         
-        if(allowedProfiles == null || profileLocation == null || profileLocation.isEmpty()) {
+        if(allowedProfiles == null || profileLocation == null || profileLocation.toString().isEmpty()) {
             return "clarin.png";
         }
+        
+        String profileLocationStr = profileLocation.toString();
         
         List<CmdiProfile> profiles = allowedProfiles.getProfiles();
         
         for(CmdiProfile profile : profiles) {
-            if(profileLocation.contains(profile.getId())) {
+            if(profileLocationStr.contains(profile.getId())) {
                 if(profile.getDisplayIcon() == null || profile.getDisplayIcon().isEmpty()) {
                     continue;
                 }

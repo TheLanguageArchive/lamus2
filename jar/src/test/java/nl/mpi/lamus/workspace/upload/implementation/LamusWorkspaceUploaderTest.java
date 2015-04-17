@@ -59,6 +59,10 @@ import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.type.MetadataDocumentType;
 
 import org.apache.commons.fileupload.FileItem;
 import org.hamcrest.Factory;
@@ -101,6 +105,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceUploadHelper mockWorkspaceUploadHelper;
+    @Mock MetadataAPI mockMetadataAPI;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileValidator mockWorkspaceFileValidator;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
@@ -114,6 +119,9 @@ public class LamusWorkspaceUploaderTest {
     @Mock File mockWorkspaceTopNodeFile;
     @Mock WorkspaceNode mockWorkspaceTopNode;
     @Mock TypecheckedResults mockTypecheckedResults;
+    
+    @Mock MetadataDocument mockMetadataDocument;
+    @Mock MetadataDocumentType mockMetadataDocumentType;
     
     @Mock ZipInputStream mockZipInputStream;
     @Mock ZipEntry mockFirstZipEntry;
@@ -158,8 +166,8 @@ public class LamusWorkspaceUploaderTest {
     public void setUp() {
         uploader = new LamusWorkspaceUploader(mockNodeDataRetriever,
                 mockWorkspaceDirectoryHandler, mockWorkspaceFileHandler,
-                mockWorkspaceNodeFactory,
-                mockWorkspaceDao, mockWorkspaceUploadHelper,
+                mockWorkspaceNodeFactory, mockWorkspaceDao,
+                mockWorkspaceUploadHelper, mockMetadataAPI,
                 mockMetadataApiBridge, mockWorkspaceFileValidator,
                 mockArchiveFileLocationProvider, mockArchiveFileHelper,
                 mockNodeUtil);
@@ -529,7 +537,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL, fileMimetype, fileNodeType,
+                    workspaceID, null, null, uploadedFileURL, null, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -600,7 +608,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, uploadedFileURI, uploadedFileURL, fileMimetype, fileNodeType,
+                    workspaceID, null, uploadedFileURI, uploadedFileURL, null, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -628,6 +636,7 @@ public class LamusWorkspaceUploaderTest {
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
         final URL uploadedFileURL = uploadedFileURI.toURL();
+        final URI schemaLocation = new URI("http://some/location/schema.xsd");
         final WorkspaceNodeType fileNodeType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
         
@@ -669,19 +678,23 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+                
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
-            oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(uploadedFileArchiveURI));
+            oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
+            oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
+            oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, fileMimetype, fileNodeType,
+                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -755,7 +768,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+            
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
@@ -839,7 +854,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+            
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
@@ -866,7 +883,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException {
+    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
@@ -875,6 +892,7 @@ public class LamusWorkspaceUploaderTest {
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
         final URL uploadedFileURL = uploadedFileURI.toURL();
+        final URI schemaLocation = new URI("http://some/location/schema.xsd");
         final WorkspaceNodeType fileNodeType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
         
@@ -922,7 +940,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+            
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
@@ -931,12 +951,14 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
-            oneOf(mockMetadataApiBridge).getSelfHandleFromFile(uploadedFileURL); will(returnValue(uploadedFileArchiveURI));
+            oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
+            oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
+            oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, fileMimetype, fileNodeType,
+                    workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -1002,7 +1024,9 @@ public class LamusWorkspaceUploaderTest {
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
-            oneOf(mockMetadataApiBridge).isMetadataFileValid(uploadedFileURL); will(returnValue(Boolean.FALSE));
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+            
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.FALSE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
@@ -1094,7 +1118,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, fileNodeType1,
+                    workspaceID, null, null, uploadedFileURL1, null, fileMimetype1, fileNodeType1,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode1));
 
@@ -1117,7 +1141,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile2); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, fileNodeType2,
+                    workspaceID, null, null, uploadedFileURL2, null, fileMimetype2, fileNodeType2,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode2));
 
@@ -1205,7 +1229,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL1, fileMimetype1, fileNodeType1,
+                    workspaceID, null, null, uploadedFileURL1, null, fileMimetype1, fileNodeType1,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode1));
 
@@ -1228,7 +1252,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile2); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(
-                    workspaceID, null, null, uploadedFileURL2, fileMimetype2, fileNodeType2,
+                    workspaceID, null, null, uploadedFileURL2, null, fileMimetype2, fileNodeType2,
                     WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode2));
 

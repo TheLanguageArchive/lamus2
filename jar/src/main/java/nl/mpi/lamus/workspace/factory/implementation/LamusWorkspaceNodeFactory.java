@@ -122,13 +122,13 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URI,
-     *          java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean) 
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI,
+     *      java.net.URI, java.net.URL, java.net.URI, java.lang.String,
+     *      nl.mpi.lamus.workspace.model.WorkspaceNodeType, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
      */
     @Override
     public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI,
-            URI originURI, URL workspaceURL, String mimetype, WorkspaceNodeType nodeType,
+            URI originURI, URL workspaceURL, URI profileSchemaURI, String mimetype, WorkspaceNodeType nodeType,
             WorkspaceNodeStatus status, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
@@ -138,6 +138,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setTitle(displayValue);
         node.setOriginURI(originURI);
         node.setWorkspaceURL(workspaceURL);
+        node.setProfileSchemaURI(profileSchemaURI);
         node.setFormat(mimetype);
         node.setType(nodeType);
         node.setArchiveURI(archiveURI);
