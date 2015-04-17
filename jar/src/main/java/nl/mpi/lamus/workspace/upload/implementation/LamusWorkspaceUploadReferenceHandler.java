@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -59,14 +60,14 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
 
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadReferenceHandler.class);
     
-    private HandleUtil metadataApiHandleUtil;
-    private WorkspaceUploadNodeMatcher workspaceUploadNodeMatcher;
-    private WorkspaceDao workspaceDao;
-    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private HandleManagerImpl handleManager;
-    private MetadataAPI metadataAPI;
-    private MetadataApiBridge metadataApiBridge;
-    private WorkspaceFileHandler workspaceFileHandler;
+    private final HandleUtil metadataApiHandleUtil;
+    private final WorkspaceUploadNodeMatcher workspaceUploadNodeMatcher;
+    private final WorkspaceDao workspaceDao;
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private final HandleManagerImpl handleManager;
+    private final MetadataAPI metadataAPI;
+    private final MetadataApiBridge metadataApiBridge;
+    private final WorkspaceFileHandler workspaceFileHandler;
     
     @Autowired
     public LamusWorkspaceUploadReferenceHandler(
@@ -109,7 +110,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             
             URI refLocalURI = ref.getLocation();
             URI refURI = ref.getURI();
-            WorkspaceNode matchedNode;
+            WorkspaceNode matchedNode = null;
             boolean externalNode = false;
 
             if(refLocalURI != null) {
@@ -126,13 +127,25 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     
                 }
                 
-            } else {
+            }
+            
+            if(matchedNode == null) {
                 if(metadataApiHandleUtil.isHandleUri(refURI)) {
                     matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
 
                     if(matchedNode != null) {
                         try {
-                            updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                            URL urlToUse = matchedNode.getWorkspaceURL();
+                            if(urlToUse == null) {
+                                urlToUse = matchedNode.getArchiveURL();
+                            }
+                            URI locationToUse;
+                            if(urlToUse != null) {
+                                locationToUse = urlToUse.toURI();
+                            } else {
+                                throw new IllegalArgumentException("No location found for matched node " + matchedNode.getWorkspaceNodeID());
+                            }
+                            updateLocalUrl(currentDocument, ref, locationToUse, matchedNode);
                         } catch (URISyntaxException ex) {
                             logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
                         }
@@ -150,7 +163,11 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
 
                     if(matchedNode != null) {
                         try {
-                            updateLocalUrl(currentDocument, ref, matchedNode.getWorkspaceURL().toURI(), matchedNode);
+                            URI locationToUse = matchedNode.getWorkspaceURL().toURI();
+                            if(locationToUse == null) {
+                                locationToUse = matchedNode.getArchiveURL().toURI();
+                            }
+                            updateLocalUrl(currentDocument, ref, locationToUse, matchedNode);
                         } catch (URISyntaxException ex) {
                             logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
                         }
@@ -171,18 +188,32 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 Collection<WorkspaceNode> alreadyLinkedParents = workspaceDao.getParentWorkspaceNodes(matchedNode.getWorkspaceNodeID());
                 
                 if(alreadyLinkedParents.isEmpty()) {
-                    try {
-                        workspaceNodeLinkManager.linkNodesOnlyInDb(currentNode, matchedNode);
-                    } catch (WorkspaceException ex) {
-                        String message = "Error linking nodes " + currentNode.getWorkspaceNodeID() + " and " + matchedNode.getWorkspaceNodeID() + " in workspace " + workspaceID;
-                        logger.error(message, ex);
-                        failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, ex));
-                    }
+                    linkNodes(currentNode, matchedNode, workspaceID, failedLinks);
                 } else {
-                    //Multiple parents NOT allowed - won't be linked
-                    String message = "Matched node (ID " + matchedNode.getWorkspaceNodeID() + ") cannot be linked to parent node (ID " + currentNode.getWorkspaceNodeID() + ") because it already has a parent. Multiple parents are not allowed.";
-                    logger.error(message);
-                    failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, null));
+                    
+                    boolean sameParent = true;
+                    for(WorkspaceNode existingParent : alreadyLinkedParents) {
+                        boolean areHandlesEquivalent;
+                        try {
+                            areHandlesEquivalent = handleManager.areHandlesEquivalent(currentNode.getArchiveURI(), existingParent.getArchiveURI());
+                        } catch(IllegalArgumentException ex) {
+                            sameParent = false;
+                            break;
+                        }
+                        if(!areHandlesEquivalent) {
+                            sameParent = false;
+                            break;
+                        }
+                    }
+                    
+                    if(!sameParent) {
+                        //Multiple parents NOT allowed - won't be linked
+                        String message = "Matched node (ID " + matchedNode.getWorkspaceNodeID() + ") cannot be linked to parent node (ID " + currentNode.getWorkspaceNodeID() + ") because it already has a parent. Multiple parents are not allowed.";
+                        logger.error(message);
+                        failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, null));
+                    } else {
+                        linkNodes(currentNode, matchedNode, workspaceID, failedLinks);
+                    }
                 }
                 
                 if(!externalNode) {
@@ -247,4 +278,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         }
     }
     
+    private void linkNodes(WorkspaceNode parent, WorkspaceNode child, int workspaceID, Collection<ImportProblem> failedLinks) {
+        try {
+            workspaceNodeLinkManager.linkNodesOnlyInDb(parent, child);
+        } catch (WorkspaceException ex) {
+            String message = "Error linking nodes " + parent.getWorkspaceNodeID() + " and " + child.getWorkspaceNodeID() + " in workspace " + workspaceID;
+            logger.error(message, ex);
+            failedLinks.add(new LinkImportProblem(parent, child, message, ex));
+        }
+    }
 }
