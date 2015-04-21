@@ -153,7 +153,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                         childUri, childLocation, childNode.getFormat());
             } else {
                 parentDocument.createDocumentResourceReference(
-                        childUri, childLocation, childNode.getType().toString(), childNode.getFormat());
+                        childUri, childLocation, childNode.getType().name(), childNode.getFormat());
             }
             
             StreamResult parentStreamResult =

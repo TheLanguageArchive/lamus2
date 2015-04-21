@@ -282,7 +282,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/plain";
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
-        final String childStringType = childWsType.toString();
+        final String childStringType = childWsType.name();
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -340,7 +340,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String childMimetype = "text/plain";
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
-        final String childStringType = childWsType.toString();
+        final String childStringType = childWsType.name();
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -396,7 +396,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 3;
         final URI childURI = URI.create("http:/remote/folder/child.txt");
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
-        final String childStringType = childWsType.toString();
+        final String childStringType = childWsType.name();
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -1518,7 +1518,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final String childMimetype = "text/plain";
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
-        final String childStringType = childWsType.toString();
+        final String childStringType = childWsType.name();
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         

@@ -29,5 +29,10 @@ public enum WorkspaceNodeType {
     RESOURCE_WRITTEN,
     RESOURCE_OTHER,
     
-    UNKNOWN
+    UNKNOWN;
+    
+    @Override
+    public String toString() {
+        return (name().charAt(0) + name().substring(1).toLowerCase()).replace("_", " - ");
+    }
 }

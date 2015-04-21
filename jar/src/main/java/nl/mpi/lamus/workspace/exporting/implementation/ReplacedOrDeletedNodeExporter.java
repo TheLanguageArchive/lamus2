@@ -94,30 +94,30 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
-        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when submitting the workspace, not when deleting";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) &&
                 WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting the tree, not for unlinked nodes";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when exporting the tree, not for unlinked nodes";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when submitting the workspace, not when deleting";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus()) &&
                 WorkspaceExportPhase.TREE_EXPORT.equals(exportPhase)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when exporting unlinked nodes, not for the tree";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
@@ -145,7 +145,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             return;
         }
         
-        if(nodeUtil.isNodeMetadata(currentNode) && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        if(nodeUtil.isNodeMetadata(currentNode) && WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
             workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
 
@@ -162,9 +162,9 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private void moveNodeToAppropriateLocationInArchive(WorkspaceNode currentNode) {
         
         URL targetArchiveURL = null;
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
             targetArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
-        } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        } else if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
             targetArchiveURL = this.versioningHandler.moveFileToVersioningFolder(currentNode);
         } else {
             throw new IllegalStateException("This exporter only supports deleted or replaced nodes. Current node status: " + currentNode.getStatusAsString());
@@ -182,13 +182,13 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     
     private void updateHandleLocation(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
             try {
                 archiveHandleHelper.deleteArchiveHandle(currentNode, currentNode.getArchiveURL());
             } catch (HandleException | IOException | TransformerException | MetadataException ex) {
                 logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
             }
-        } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        } else if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
             URI newTargetUri = null;
             try {
                  newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());

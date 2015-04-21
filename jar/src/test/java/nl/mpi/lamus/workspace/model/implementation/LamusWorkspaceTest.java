@@ -462,7 +462,7 @@ public class LamusWorkspaceTest {
     public void statusAndMessageSetAsErrorDuringInitialisation() {
         Workspace testWorkspace = new LamusWorkspace(this.userID, this.usedStorageSpace, this.maxStorageSpace);
         testWorkspace.setStatusMessageErrorDuringInitialisation();
-        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.ERROR_DURING_INITIALISATION, testWorkspace.getStatus());
+        assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.ERROR_INITIALISATION, testWorkspace.getStatus());
         assertEquals("Value for 'message' is not the expected one.", "Error during initialisation", testWorkspace.getMessage());
         //TODO move message to properties file
     }

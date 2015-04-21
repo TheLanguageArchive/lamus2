@@ -25,8 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
-import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
-import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.VersionCreationException;
@@ -139,7 +137,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -199,7 +197,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -241,7 +239,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
         
         final CrawlerInvocationException expectedCause = new CrawlerInvocationException("some exception message", null);
         

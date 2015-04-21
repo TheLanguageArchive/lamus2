@@ -120,7 +120,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -172,7 +172,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         final Collection<WorkspaceNodeReplacement> firstNodeReplacements = new ArrayList<>();
         final Collection<WorkspaceNodeReplacement> secondNodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -238,7 +238,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus failedStatus = WorkspaceStatus.CRAWLER_ERROR;
+        final WorkspaceStatus failedStatus = WorkspaceStatus.ERROR_CRAWLING;
         final String failedMessage = "Data was successfully moved to the archive but the crawler failed.";
         
         context.checking(new Expectations() {{
@@ -282,7 +282,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         nodeReplacements.add(mockNodeReplacement1);
         nodeReplacements.add(mockNodeReplacement2);
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -338,7 +338,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final VersionCreationException expectedException = new VersionCreationException("some error with versioning", null);
         
-        final WorkspaceStatus failedStatus = WorkspaceStatus.VERSIONING_ERROR;
+        final WorkspaceStatus failedStatus = WorkspaceStatus.ERROR_VERSIONING;
         final String failedMessage = "Data was successfully moved to the archive, the crawler was successful but archive versioning failed.";
         
         context.checking(new Expectations() {{

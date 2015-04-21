@@ -383,7 +383,7 @@ public class WorkspaceSteps {
         Collection<WorkspaceNode> workspaceNodes = this.workspaceDao.getNodesForWorkspace(createdWorkspaceID);
         for(WorkspaceNode node : workspaceNodes) {
             if(node.getArchiveURL().getPath().contains(filename)) {
-                assertEquals("Status of the node should be deleted", WorkspaceNodeStatus.NODE_DELETED, node.getStatus());
+                assertEquals("Status of the node should be deleted", WorkspaceNodeStatus.DELETED, node.getStatus());
                 
                 //TODO FIX NODEID...
                 //TODO FIX NODEID...
@@ -432,7 +432,7 @@ public class WorkspaceSteps {
         
         int wsNodeID = 2;
         WorkspaceStepsHelper.insertNodeWithoutParentInWSDB(this.lamusDataSource, uploadedFile,
-                this.createdWorkspaceID, wsNodeID, nodeType, WorkspaceNodeStatus.NODE_UPLOADED, null, fileMimetype);
+                this.createdWorkspaceID, wsNodeID, nodeType, WorkspaceNodeStatus.UPLOADED, null, fileMimetype);
         
         
         Collection<WorkspaceNode> nodesFound =
@@ -970,7 +970,7 @@ public class WorkspaceSteps {
         WorkspaceNode retrievedNode =
                 this.workspaceDao.getWorkspaceNode(this.deletedWsNode.getWorkspaceNodeID());
         
-        assertEquals("Node should be set as deleted", WorkspaceNodeStatus.NODE_DELETED, retrievedNode.getStatus());
+        assertEquals("Node should be set as deleted", WorkspaceNodeStatus.DELETED, retrievedNode.getStatus());
     }
     
     //TODO OTHER CHECKS MISSING... ANNEX, CRAWLER AND OTHER STUFF

@@ -191,7 +191,7 @@ public class MockWorkspaceTreeNode implements WorkspaceTreeNode {
 
     @Override
     public boolean isExternal() {
-        return WorkspaceNodeStatus.NODE_EXTERNAL.equals(status);
+        return WorkspaceNodeStatus.EXTERNAL.equals(status);
     }
 
     @Override

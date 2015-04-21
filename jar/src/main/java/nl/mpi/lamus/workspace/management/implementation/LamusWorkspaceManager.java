@@ -296,10 +296,10 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspace.setEndDate(endDate);
         
         if(submitSuccessful) {
-            workspace.setStatus(WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE);
+            workspace.setStatus(WorkspaceStatus.UPDATING_ARCHIVE);
             workspace.setMessage("Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).");
         } else {
-            workspace.setStatus(WorkspaceStatus.DATA_MOVED_ERROR);
+            workspace.setStatus(WorkspaceStatus.ERROR_MOVING_DATA);
             workspace.setMessage("There were errors when submitting the workspace. Please contact the corpus management team.");
         }
         

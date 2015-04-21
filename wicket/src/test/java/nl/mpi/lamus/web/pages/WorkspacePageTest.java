@@ -140,7 +140,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
 //        
 //        getTester().assertComponent("workspaceInfo:status", Label.class);
 //        getTester().assertEnabled("workspaceInfo:status");
-//        getTester().assertLabel("workspaceInfo:status", mockWorkspace.getStatus().toString());
+//        getTester().assertLabel("workspaceInfo:status", mockWorkspace.getStatus().name());
         
 //        getTester().assertComponent("workspaceInfoPanel", Panel.class);
 //        getTester().assertEnabled("workspaceInfoPanel");

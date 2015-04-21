@@ -280,7 +280,7 @@ public class LamusWorkspace implements Workspace {
 
     @Override
     public void setStatusMessageErrorDuringInitialisation() {
-        setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+        setStatus(WorkspaceStatus.ERROR_INITIALISATION);
         setMessage("Error during initialisation");
         //TODO Change message, move to properties file
     }

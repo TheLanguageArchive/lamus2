@@ -119,7 +119,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportReplacedNode_SubmissionTypeDelete() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
@@ -133,7 +133,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when submitting the workspace, not when deleting";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -142,7 +142,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportReplacedNode_ExportPhaseUnlinkedNodes() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -156,7 +156,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting the tree, not for unlinked nodes";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when exporting the tree, not for unlinked nodes";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -165,7 +165,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportDeletedNode_SubmissionTypeDelete() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
@@ -179,7 +179,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when submitting the workspace, not when deleting";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -188,7 +188,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportDeletedNode_ExportPhaseTree() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -202,7 +202,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when exporting unlinked nodes, not for the tree";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -215,7 +215,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
@@ -255,7 +255,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
         
@@ -293,7 +293,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void exportDeletedExternalNode() throws WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -316,7 +316,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     public void exportDeletedNodeWithoutArchiveURI() throws WorkspaceExportException {
      
         final int testWorkspaceNodeID = 10;
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -347,7 +347,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         //TODO does it make sense a protected node which was deleted?
         
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -378,7 +378,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
@@ -425,7 +425,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.cmdi");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.cmdi";
@@ -472,7 +472,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_CREATED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.CREATED;
         final boolean isNodeProtected = Boolean.FALSE;
         final String expectedExceptionMessage = "This exporter only supports deleted or replaced nodes. Current node status: " + testNodeStatus.toString();
         
@@ -511,7 +511,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         
@@ -557,7 +557,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";

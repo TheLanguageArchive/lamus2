@@ -98,7 +98,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(node); will(returnValue(Boolean.TRUE));
@@ -125,7 +125,7 @@ public class LamusNodeReplaceCheckerAssignerTest {
         final String nodeFormat = "";
         final URI nodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(topNodeID, workspaceID, nodeSchemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.VIRTUAL, Boolean.FALSE, nodeFormat);
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(node); will(returnValue(Boolean.FALSE));

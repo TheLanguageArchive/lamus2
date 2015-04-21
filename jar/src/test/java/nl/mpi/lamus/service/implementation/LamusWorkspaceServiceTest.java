@@ -487,7 +487,7 @@ public class LamusWorkspaceServiceTest {
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
-                date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_DURING_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
         final Collection<Workspace> expectedList = new ArrayList<>();
         
         context.checking(new Expectations() {{
@@ -749,7 +749,7 @@ public class LamusWorkspaceServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
@@ -778,7 +778,7 @@ public class LamusWorkspaceServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
@@ -807,7 +807,7 @@ public class LamusWorkspaceServiceTest {
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<>();
         final WorkspaceNode childNode = new LamusWorkspaceNode(
                 2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE_IMAGE, null,
-                null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, "jpeg");
+                null, null, null, WorkspaceNodeStatus.VIRTUAL, Boolean.FALSE, "jpeg");
         expectedChildNodes.add(childNode);
         
         context.checking(new Expectations() {{

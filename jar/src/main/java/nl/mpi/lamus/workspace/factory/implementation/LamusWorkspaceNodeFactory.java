@@ -80,9 +80,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
         if(onSite) {
-            node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+            node.setStatus(WorkspaceNodeStatus.ARCHIVE_COPY);
         } else {
-            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+            node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         }
         
         node.setProtected(isProtected);
@@ -111,9 +111,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setFormat(mimetype);
         
         if(onSite) {
-            node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
+            node.setStatus(WorkspaceNodeStatus.VIRTUAL);
         } else {
-            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+            node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         }
         
         node.setProtected(isProtected);
@@ -168,7 +168,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 //            node.setType(WorkspaceNodeType.RESOURCE);
 //        }
         node.setType(WorkspaceNodeType.UNKNOWN);
-        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
         node.setProtected(Boolean.FALSE);
         
@@ -183,8 +183,6 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
-        
-        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
         
         String displayValue = FilenameUtils.getName(archiveURL.getPath());
         node.setName(displayValue);
@@ -203,7 +201,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             logger.warn("URL (" + archiveURL + ") couldn't be converted to URI. OriginURI not set.");
         }
         node.setType(WorkspaceNodeType.UNKNOWN);
-        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
         node.setProtected(Boolean.FALSE);
         

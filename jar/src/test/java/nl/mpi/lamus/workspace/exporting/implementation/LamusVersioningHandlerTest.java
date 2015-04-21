@@ -448,7 +448,7 @@ public class LamusVersioningHandlerTest {
         final URI nodeSchemaURI = new URI("http://some.location");
         final String nodeName = "some_name";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean nodeProtected = Boolean.FALSE;
         final String nodeFormat = "";
         

@@ -95,7 +95,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         }
         
         logger.debug("Exporting unlinked node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
-        logger.debug("Keep unlinked files: " + keepUnlinkedFiles + "; Submission type: " + submissionType.toString() + "; Export phase: " + exportPhase.toString());
+        logger.debug("Keep unlinked files: " + keepUnlinkedFiles + "; Submission type: " + submissionType.name() + "; Export phase: " + exportPhase.toString());
 
         if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
             logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");

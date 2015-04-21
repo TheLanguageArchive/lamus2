@@ -624,7 +624,7 @@ public class LamusWorkspaceFileHandlerTest {
         node.setName(filename);
         node.setType(WorkspaceNodeType.METADATA);
         node.setFormat("someFormat");
-        node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        node.setStatus(WorkspaceNodeStatus.CREATED);
 
         return node;
     }
@@ -641,7 +641,7 @@ public class LamusWorkspaceFileHandlerTest {
         node.setName(filename);
         node.setType(WorkspaceNodeType.RESOURCE_OTHER);
         node.setFormat("someFormat");
-        node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        node.setStatus(WorkspaceNodeStatus.CREATED);
 
         return node;
     }

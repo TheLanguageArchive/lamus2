@@ -157,7 +157,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         }
         String statusStr = null;
         if(workspace.getStatus() != null) {
-            statusStr = workspace.getStatus().toString();
+            statusStr = workspace.getStatus().name();
         }
         
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -266,13 +266,13 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     @Override
     public void updateWorkspaceStatusMessage(Workspace workspace) {
         
-        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + workspace.getStatus() 
-                + "; setting message to: \"" + workspace.getMessage() + "\"");
-        
         String statusStr = null;
         if(workspace.getStatus() != null) {
-            statusStr = workspace.getStatus().toString();
+            statusStr = workspace.getStatus().name();
         }
+        
+        logger.debug("Updating workspace with ID: " + workspace.getWorkspaceID() + "; setting status to: " + statusStr
+                + "; setting message to: \"" + workspace.getMessage() + "\"");
         
         String updateSql = "UPDATE workspace SET status = :status, message = :message WHERE workspace_id = :workspace_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
@@ -362,8 +362,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + " AND status IN (:initialised_status, :sleeping_status)";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("user_id", userID)
-                .addValue("initialised_status", WorkspaceStatus.INITIALISED.toString())
-                .addValue("sleeping_status", WorkspaceStatus.SLEEPING.toString());
+                .addValue("initialised_status", WorkspaceStatus.INITIALISED.name())
+                .addValue("sleeping_status", WorkspaceStatus.SLEEPING.name());
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
         
@@ -380,7 +380,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         String queryWorkspaceListSql = "SELECT * FROM workspace WHERE status LIKE :pending_db_update_status";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("pending_db_update_status", WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE.toString());
+                .addValue("pending_db_update_status", WorkspaceStatus.UPDATING_ARCHIVE.name());
         
         Collection<Workspace> listToReturn = this.namedParameterJdbcTemplate.query(queryWorkspaceListSql, namedParameters, new WorkspaceMapper());
         
@@ -489,7 +489,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         }
         String typeStr = null;
         if(node.getType() != null) {
-            typeStr = node.getType().toString();
+            typeStr = node.getType().name();
         }
         String workspaceURLStr = null;
         if(node.getWorkspaceURL() != null) {
@@ -509,7 +509,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         }
         String statusStr = null;
         if(node.getStatus() != null) {
-            statusStr = node.getStatus().toString();
+            statusStr = node.getStatus().name();
         }
         
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -543,11 +543,11 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + " WHERE workspace_node_id = :workspace_node_id";
         
         WorkspaceNodeStatus deletedStatus = isExternal ?
-                WorkspaceNodeStatus.NODE_EXTERNAL_DELETED :
-                WorkspaceNodeStatus.NODE_DELETED;
+                WorkspaceNodeStatus.EXTERNAL_DELETED :
+                WorkspaceNodeStatus.DELETED;
         
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("status", deletedStatus.toString())
+                .addValue("status", deletedStatus.name())
                 .addValue("workspace_node_id", nodeID);
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         
@@ -717,7 +717,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     @Override
     public Collection<WorkspaceNode> getDescendantWorkspaceNodesByType(int workspaceNodeID, WorkspaceNodeType nodeType) {
         
-        logger.debug("Retrieving list containing descendant nodes (filtered by type " + nodeType.toString() + ") of the node with ID: " + workspaceNodeID);
+        logger.debug("Retrieving list containing descendant nodes (filtered by type " + nodeType.name() + ") of the node with ID: " + workspaceNodeID);
         
         Collection<WorkspaceNode> allDescendantsOfType = new ArrayList<>();
         
@@ -783,9 +783,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + " AND workspace_node_id NOT IN (SELECT top_node_id FROM workspace WHERE workspace_id = :workspace_id);";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("workspace_id", workspaceID)
-                .addValue("status_deleted", WorkspaceNodeStatus.NODE_DELETED.toString())
-                .addValue("status_external_deleted", WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.toString())
-                .addValue("status_replaced", WorkspaceNodeStatus.NODE_REPLACED.toString());
+                .addValue("status_deleted", WorkspaceNodeStatus.DELETED.name())
+                .addValue("status_external_deleted", WorkspaceNodeStatus.EXTERNAL_DELETED.name())
+                .addValue("status_replaced", WorkspaceNodeStatus.REPLACED.name());
         
         List<WorkspaceNode> listToReturn =
                 this.namedParameterJdbcTemplate.query(queryUnlinkedNodeListSql, namedParameters, new WorkspaceNodeMapper());
@@ -975,8 +975,8 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Replacing node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
         
-        if(WorkspaceNodeStatus.NODE_CREATED.equals(oldNode.getStatus()) ||
-                WorkspaceNodeStatus.NODE_UPLOADED.equals(oldNode.getStatus())) {
+        if(WorkspaceNodeStatus.CREATED.equals(oldNode.getStatus()) ||
+                WorkspaceNodeStatus.UPLOADED.equals(oldNode.getStatus())) {
             
             setWorkspaceNodeAsDeleted(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID(), oldNode.isExternal());
         } else {
@@ -1018,7 +1018,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         String updateSql = "UPDATE node SET status = :status"
                 + " WHERE workspace_node_id = :workspace_node_id";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("status", WorkspaceNodeStatus.NODE_REPLACED.toString())
+                .addValue("status", WorkspaceNodeStatus.REPLACED.name())
                 .addValue("workspace_node_id", nodeID);
         this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
         

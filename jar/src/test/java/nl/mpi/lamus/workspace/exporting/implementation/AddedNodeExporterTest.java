@@ -986,7 +986,7 @@ public class AddedNodeExporterTest {
             parentNodeArchiveURI = null;
         }
         final WorkspaceNodeType parentNodeType = WorkspaceNodeType.METADATA;
-        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentNodeStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentNodeProtected = Boolean.FALSE;
         final String parentNodeFormat = "text/x-cmdi+xml";
         final URI nodeSchemaLocation = new URI("http://some.location");
@@ -1012,7 +1012,7 @@ public class AddedNodeExporterTest {
         final URL nodeWsURL = new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + "/" + nodeFilename);
         final URI nodeOriginURI = URI.create("file:/localdirectory/" + nodeFilename);
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         final URI nodeSchemaLocation = new URI("http://some.location");
         final boolean nodeProtected = Boolean.FALSE;
         

@@ -116,13 +116,13 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         }
         
         if(!crawlerWasSuccessful) {
-            workspace.setStatus(WorkspaceStatus.CRAWLER_ERROR);
+            workspace.setStatus(WorkspaceStatus.ERROR_CRAWLING);
             workspace.setMessage("Data was successfully moved to the archive but the crawler failed.");
         } else if(!versioningWasSuccessful) {
-            workspace.setStatus(WorkspaceStatus.VERSIONING_ERROR);
+            workspace.setStatus(WorkspaceStatus.ERROR_VERSIONING);
             workspace.setMessage("Data was successfully moved to the archive, the crawler was successful but archive versioning failed.");
         } else {
-            workspace.setStatus(WorkspaceStatus.DATA_MOVED_SUCCESS);
+            workspace.setStatus(WorkspaceStatus.SUCCESS);
             workspace.setMessage("Data was successfully moved to the archive and the crawler was successful.");
         }
         

@@ -42,7 +42,7 @@ public class LamusWorkspaceNodeTest {
     private URI archiveNodeURI;
     private URL archiveNodeURL;
     private URI originNodeURI;
-    private WorkspaceNodeStatus workspaceNodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+    private WorkspaceNodeStatus workspaceNodeStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
     private boolean workspaceNodeIsProtected = Boolean.FALSE;
     private String workspaceNodeFormat = "someFormat";
     
@@ -217,7 +217,7 @@ public class LamusWorkspaceNodeTest {
                 + ", Archive URI: " + testWorkspaceNode.getArchiveURI()
                 + ", Archive URL: " + testWorkspaceNode.getArchiveURL()
                 + ", Origin URL: " + testWorkspaceNode.getOriginURI()
-                + ", Status: " + testWorkspaceNode.getStatus()
+                + ", Status: " + testWorkspaceNode.getStatus().name()
                 + ", Protected: " + testWorkspaceNode.isProtected()
                 + ", Format: " + testWorkspaceNode.getFormat();
         
@@ -374,7 +374,7 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
 
     @Override
     public boolean isExternal() {
-        return WorkspaceNodeStatus.NODE_EXTERNAL.equals(this.status);
+        return WorkspaceNodeStatus.EXTERNAL.equals(this.status);
     }
 
     @Override

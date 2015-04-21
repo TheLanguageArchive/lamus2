@@ -103,7 +103,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
         final URI schemaLocation = URI.create("http://some.location");
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean onSite = Boolean.TRUE;
         final boolean isProtected = Boolean.FALSE;
         
@@ -113,7 +113,7 @@ public class LamusWorkspaceNodeFactoryTest {
         expectedNode.setType(nodeType);
         expectedNode.setFormat(nodeFormat);
         expectedNode.setProfileSchemaURI(schemaLocation);
-        expectedNode.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+        expectedNode.setStatus(WorkspaceNodeStatus.ARCHIVE_COPY);
         expectedNode.setProtected(isProtected);
 
         context.checking(new Expectations() {{
@@ -143,7 +143,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "text/x-cmdi+xml";
         final URI schemaLocation = URI.create("http://some.location");
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean onSite = Boolean.FALSE;
         final boolean isProtected = Boolean.TRUE;
         
@@ -182,7 +182,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final String nodeName = "someName.txt";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String nodeMimetype = "text/plain";
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean onSite = Boolean.TRUE;
         final boolean isProtected = Boolean.FALSE;
         
@@ -217,7 +217,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final String nodeName = "someName.txt";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String nodeMimetype = "text/plain";
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean onSite = Boolean.FALSE;
         final boolean isProtected = Boolean.FALSE;
         
@@ -251,7 +251,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String nodeMimetype = "text/plain";
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         final boolean isProtected = Boolean.FALSE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();
@@ -285,7 +285,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final String displayValue = FilenameUtils.getName(workspaceURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeMimetype = "text/x-cmdi+xml";
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         final boolean isProtected = Boolean.FALSE;
         
         final WorkspaceNode expectedNode = new LamusWorkspaceNode();
@@ -316,7 +316,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URI originURI = URI.create("http:/remote/folder/file.txt");
         final String displayValue = FilenameUtils.getName(originURI.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();
@@ -342,7 +342,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
         final String displayValue = FilenameUtils.getName(archiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();
@@ -369,7 +369,7 @@ public class LamusWorkspaceNodeFactoryTest {
         final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
         final String displayValue = FilenameUtils.getName(archiveURL.getPath());
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();

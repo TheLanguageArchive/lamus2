@@ -69,7 +69,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
         }
         
         logger.debug("Exploring unlinked and deleted nodes for export; workspaceID: " + workspace.getWorkspaceID() +
-                "; submission mode: " + submissionType.toString() + "; export phase: " + exportPhase.toString());
+                "; submission mode: " + submissionType.name() + "; export phase: " + exportPhase.toString());
         
         Collection<WorkspaceNode> nodesToExport;
         

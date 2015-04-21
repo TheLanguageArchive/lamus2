@@ -138,7 +138,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -146,7 +146,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -216,7 +216,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -224,7 +224,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -294,7 +294,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("http://some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.FALSE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -302,7 +302,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -364,7 +364,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -372,7 +372,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -455,7 +455,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -463,7 +463,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -546,7 +546,7 @@ public class ResourceNodeImporterTest {
         final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
         final URL childArchiveURL = childOriginURI.toURL();
 
-        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.NODE_VIRTUAL;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
         final boolean childOnSite = Boolean.TRUE;
         final boolean childProtected = Boolean.FALSE;
         
@@ -554,7 +554,7 @@ public class ResourceNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
@@ -632,7 +632,7 @@ public class ResourceNodeImporterTest {
         final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
 
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, "cmdi");
         
         try {
             nodeImporter.importNode(null, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
@@ -659,7 +659,7 @@ public class ResourceNodeImporterTest {
         final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, "cmdi");
         
         context.checking(new Expectations() {{
             
@@ -697,7 +697,7 @@ public class ResourceNodeImporterTest {
         final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, "cmdi");
         
         context.checking(new Expectations() {{
             
@@ -736,7 +736,7 @@ public class ResourceNodeImporterTest {
         final URL parentArchiveURL = parentOriginURI.toURL();
         
         final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
-                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, "cmdi");
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, "cmdi");
         
         final TypecheckedResults typecheckedResults = new LamusTypecheckedResults(childNodeMimetype, "some analysis", TypecheckerJudgement.UNARCHIVABLE);
         final TypeCheckerException expectedException = new TypeCheckerException(typecheckedResults, "some exception message", null);

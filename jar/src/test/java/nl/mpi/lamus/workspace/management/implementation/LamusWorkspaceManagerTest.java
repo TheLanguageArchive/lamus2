@@ -623,7 +623,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE;
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
         final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -718,7 +718,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE;
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
         final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -809,7 +809,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -872,7 +872,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -935,7 +935,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();

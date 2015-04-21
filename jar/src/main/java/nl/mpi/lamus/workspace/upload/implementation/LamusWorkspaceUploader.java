@@ -292,9 +292,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             URI profileSchemaURI = mdDocument != null ? mdDocument.getDocumentType().getSchemaLocation() : null;
             
-            WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveUri, originUri, uploadedFileUrl, profileSchemaURI,
-                    nodeMimetype, nodeType, WorkspaceNodeStatus.NODE_UPLOADED, false);
+            WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(workspaceID, archiveUri, originUri, uploadedFileUrl, profileSchemaURI,
+                    nodeMimetype, nodeType, WorkspaceNodeStatus.UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);
             
