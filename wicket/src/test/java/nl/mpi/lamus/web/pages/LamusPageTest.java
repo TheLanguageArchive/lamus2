@@ -74,8 +74,10 @@ public class LamusPageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("header_username");
         getTester().assertLabel("header_username", AbstractLamusWicketTest.MOCK_USER_ID);
         
-        getTester().assertComponent("expandablePanel", ExpandableFeedbackPanel.class);
-        getTester().assertEnabled("expandablePanel");
+        getTester().assertComponent("feedbackPanel", FeedbackPanel.class);
+        getTester().assertEnabled("feedbackPanel");
+//        getTester().assertComponent("expandablePanel", ExpandableFeedbackPanel.class);
+//        getTester().assertEnabled("expandablePanel");
 //        getTester().assertComponent("expandablePanel:feedbackPanel", FeedbackPanel.class);
 //        getTester().assertEnabled("expandablePanel:feedbackPanel");
     }
