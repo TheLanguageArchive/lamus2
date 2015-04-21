@@ -59,17 +59,26 @@ public class LamusPage extends WebPage {
         
         feedbackPanel = new FeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
+        feedbackPanel.setOutputMarkupPlaceholderTag(true);
         
-        Panel expandableFeedback = new ExpandableFeedbackPanel("expandablePanel", Model.of("panel")) {
-            
-            @Override
-            protected FeedbackPanel getInnerFeedbackPanel() {
-                return feedbackPanel;
-            }
-        };
+//        Panel expandableFeedback = new ExpandableFeedbackPanel("expandablePanel", Model.of("panel"), true) {
+//            
+//            @Override
+//            protected FeedbackPanel getInnerFeedbackPanel() {
+//                return feedbackPanel;
+//            }
+//        };
         
-	expandableFeedback.add(feedbackPanel);
-        add(expandableFeedback);
+//        innerPanel.setVisible(visibleByDefault);
+//        innerPanel.setOutputMarkupId(true);
+//        innerPanel.setOutputMarkupPlaceholderTag(true);
+//        add(innerPanel);
+        
+//	expandableFeedback.add(feedbackPanel);
+//        add(expandableFeedback);
+        
+        add(feedbackPanel);
+        
         
         add(new Image("header_tla_logo", new SharedResourceReference("tlaLogoImage")));
         add(new Label("header_appname", appName));

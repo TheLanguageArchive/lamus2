@@ -38,14 +38,16 @@ public abstract class ExpandableFeedbackPanel extends Panel {
     private boolean visible = false;
     protected FeedbackPanel innerPanel;
     
-    public ExpandableFeedbackPanel(String id, IModel<String> titleModel) {
+    public ExpandableFeedbackPanel(String id, IModel<String> titleModel, boolean visibleByDefault) {
         super(id);
         
-        innerPanel = getInnerFeedbackPanel();
-        innerPanel.setVisible(false);
-        innerPanel.setOutputMarkupId(true);
-        innerPanel.setOutputMarkupPlaceholderTag(true);
-        add(innerPanel);
+        visible = visibleByDefault;
+        
+//        innerPanel = getInnerFeedbackPanel();
+//        innerPanel.setVisible(visibleByDefault);
+//        innerPanel.setOutputMarkupId(true);
+//        innerPanel.setOutputMarkupPlaceholderTag(true);
+//        add(innerPanel);
         
         final Image showHideIcon = new Image("showHideIcon") {
 
@@ -60,8 +62,10 @@ public abstract class ExpandableFeedbackPanel extends Panel {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 visible = !visible;
-                innerPanel.setVisible(visible);
-                target.add(innerPanel);
+//                innerPanel.setVisible(visible);
+//                getInnerFeedbackPanel().setVisible(visible);
+//                target.add(innerPanel);
+                target.add(getInnerFeedbackPanel());
                 target.add(showHideIcon);
             }
         };

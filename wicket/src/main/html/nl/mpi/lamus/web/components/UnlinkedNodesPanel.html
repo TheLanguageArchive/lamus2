@@ -27,12 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <wicket:message key="unlinked_nodes_panel_title"></wicket:message>
             </h4>
             <div wicket:id="unlinkedNodesTableTree" class="tableTree"></div>
-            <a href="#" wicket:id="delete_all_link">
-                <wicket:message key="unlinked_nodes_table_remove_all"></wicket:message>
-            </a>
-            <a href="#" wicket:id="delete_selected_link">
-                <wicket:message key="unlinked_nodes_table_remove_selected"></wicket:message>
-            </a>
+            <div class="tableTreeLinks">
+                <a href="#" wicket:id="delete_all_link">
+                    <wicket:message key="unlinked_nodes_table_remove_all"></wicket:message>
+                </a>
+                <a href="#" wicket:id="delete_selected_link">
+                    <wicket:message key="unlinked_nodes_table_remove_selected"></wicket:message>
+                </a>
+            </div>
         </wicket:panel>
     </body>
 </html>
