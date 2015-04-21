@@ -313,16 +313,40 @@ public class LamusWorkspaceNodeFactoryTest {
     public void newExternalNode() throws MalformedURLException {
         
         final int workspaceID = 10;
-        final URI originURI = URI.create("http:/remote/folder/file.txt");
-        final String displayValue = FilenameUtils.getName(originURI.getPath());
+        final String filename = "file.txt";
+        final URI originURI = URI.create("http:/remote/folder/" + filename);
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();
         expectedNode.setWorkspaceID(workspaceID);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(filename);
+        expectedNode.setTitle(filename);
+        expectedNode.setOriginURI(originURI);
+        expectedNode.setType(nodeType);
+        expectedNode.setStatus(nodeStatus);
+        expectedNode.setProtected(isProtected);
+        
+        WorkspaceNode retrievedNode = factory.getNewExternalNode(workspaceID, originURI);
+        
+        assertEquals("Retrieved node different from expected", expectedNode, retrievedNode);
+    }
+    
+    @Test
+    public void newExternalNode_NoFilename() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        final String lastFolderName = "something";
+        final URI originURI = URI.create("http:/remote/folder/" + lastFolderName + "/");
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
+        final boolean isProtected = Boolean.FALSE;
+        
+        WorkspaceNode expectedNode = new LamusWorkspaceNode();
+        expectedNode.setWorkspaceID(workspaceID);
+        expectedNode.setName(lastFolderName);
+        expectedNode.setTitle(lastFolderName);
         expectedNode.setOriginURI(originURI);
         expectedNode.setType(nodeType);
         expectedNode.setStatus(nodeStatus);
@@ -339,16 +363,16 @@ public class LamusWorkspaceNodeFactoryTest {
         final int workspaceID = 10;
         final URI archiveURI = URI.create("node:001");
         final URI archivePID = URI.create("hdl:" + UUID.randomUUID().toString());
-        final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
-        final String displayValue = FilenameUtils.getName(archiveURL.getPath());
+        final String filename = "node.cmdi";
+        final URL archiveURL = new URL("file:/archive/folder/" + filename);
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();
         expectedNode.setWorkspaceID(workspaceID);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(filename);
+        expectedNode.setTitle(filename);
         expectedNode.setArchiveURI(archivePID);
         expectedNode.setArchiveURL(archiveURL);
         expectedNode.setOriginURI(archiveURL.toURI());
@@ -366,16 +390,16 @@ public class LamusWorkspaceNodeFactoryTest {
         
         final int workspaceID = 10;
         final URI archiveURI = URI.create("node:001");
-        final URL archiveURL = new URL("file:/archive/folder/node.cmdi");
-        final String displayValue = FilenameUtils.getName(archiveURL.getPath());
+        final String filename = "node.cmdi";
+        final URL archiveURL = new URL("file:/archive/folder/" + filename);
         final WorkspaceNodeType nodeType = WorkspaceNodeType.UNKNOWN;
         final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL;
         final boolean isProtected = Boolean.FALSE;
         
         WorkspaceNode expectedNode = new LamusWorkspaceNode();
         expectedNode.setWorkspaceID(workspaceID);
-        expectedNode.setName(displayValue);
-        expectedNode.setTitle(displayValue);
+        expectedNode.setName(filename);
+        expectedNode.setTitle(filename);
         expectedNode.setArchiveURI(archiveURI);
         expectedNode.setArchiveURL(archiveURL);
         expectedNode.setOriginURI(archiveURL.toURI());

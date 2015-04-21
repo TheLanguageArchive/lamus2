@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -158,7 +159,13 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workpaceID);
-        String displayValue = FilenameUtils.getName(originURI.getSchemeSpecificPart());
+        String uriSchemeSpecificPart = originURI.getSchemeSpecificPart();
+        String displayValue;
+        if(!uriSchemeSpecificPart.endsWith(File.separator)) {
+            displayValue = FilenameUtils.getName(uriSchemeSpecificPart);
+        } else {
+            displayValue = FilenameUtils.getName(uriSchemeSpecificPart.substring(0, uriSchemeSpecificPart.length() - 1));
+        }
         node.setName(displayValue);
         node.setTitle(displayValue);
         node.setOriginURI(originURI);
