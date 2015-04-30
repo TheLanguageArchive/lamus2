@@ -106,6 +106,8 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                         final String currentUserId = LamusSession.get().getUserId();
                         try {
 
+                            target.add(getFeedbackPanel());
+                            
                             setActionParameters(WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes);
 
                             if(getAction() instanceof UnlinkNodesAction || getAction() instanceof DeleteNodesAction || getAction() instanceof ReplaceNodesAction) {
@@ -119,7 +121,7 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                             send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
 
                         } catch(WorkspaceException | IllegalArgumentException | ProtectedNodeException ex) {
-                            Session.get().error(ex.getMessage());
+                            error(ex.getMessage());
                         }
 
                         target.add(WsNodeActionsPanel.this.getPage().get("workspaceTree"));
