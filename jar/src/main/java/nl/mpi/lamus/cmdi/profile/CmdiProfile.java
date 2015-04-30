@@ -2,12 +2,14 @@ package nl.mpi.lamus.cmdi.profile;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /*
  * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
@@ -49,6 +51,10 @@ public class CmdiProfile {
     @XmlElement(name = "allowedReferenceType")
     private List<String> allowedReferenceTypes;
     
+    @XmlElement(name = "components")
+    @XmlJavaTypeAdapter(ComponentMapAdapter.class)
+    private Map<String, String> componentMap;
+    
     @XmlElement
     private String displayIcon;
     
@@ -79,6 +85,13 @@ public class CmdiProfile {
     }
     public void setAllowedReferenceTypes(List<String> allowedReferenceTypes) {
         this.allowedReferenceTypes = allowedReferenceTypes;
+    }
+    
+    public Map<String, String> getComponentMap() {
+        return componentMap;
+    }
+    public void setComponentMap(Map<String, String> componentMap) {
+        this.componentMap = componentMap;
     }
     
     public String getDisplayIcon() {

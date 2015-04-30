@@ -24,6 +24,8 @@ import javax.xml.transform.TransformerException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 
 /**
  * Provides some functionality that interacts with the Metadata API.
@@ -104,4 +106,44 @@ public interface MetadataApiBridge {
      * @return true if the document is valid
      */
     public boolean isMetadataDocumentValid(MetadataDocument document);
+    
+    /**
+     * Given a Metadata profile, it checks if a Metadata reference is allowed.
+     * @param profileLocation Profile to check
+     * @return true if a Metadata reference is allowed in the profile
+     */
+    public boolean isMetadataReferenceAllowedInProfile(URI profileLocation);
+    
+    /**
+     * Given a Metadata profile, it checks if a Resource reference is allowed.
+     * @param profileLocation Profile to check
+     * @return true if a Resource reference is allowed in the profile
+     */
+    public boolean isResourceReferenceAllowedInProfile(URI profileLocation);
+    
+    /**
+     * Given a Metadata profile and a reference type, retrieves the appropriate component path.
+     * @param profileLocation Profile to check
+     * @param referenceType Reference type to check
+     * @return Appropriate component path for the given parameters
+     */
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType);
+    
+    /**
+     * Given an element and a path, checks if the path exists within the element.
+     * If not, it creates it.
+     * @param root Element to check
+     * @param path Path to check
+     * @return Element corresponding to the path
+     */
+    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path);
+    
+    /**
+     * Given a Metadata document and the name of a component, it adds the
+     * appropriate reference to the component, creating the component if needed.
+     * @param component Metadata document to edit
+     * @param resourceProxy  Resource proxy to reference
+     * @return Created reference
+     */
+    public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy);
 }

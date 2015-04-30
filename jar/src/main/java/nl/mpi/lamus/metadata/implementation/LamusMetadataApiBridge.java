@@ -20,9 +20,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -31,6 +37,11 @@ import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
+import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
+import nl.mpi.metadata.cmdi.api.type.ComponentType;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +63,20 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     private final MetadataAPI metadataAPI;
     private final WorkspaceFileHandler workspaceFileHandler;
     private final HandleManager handleManager;
+    private final CMDIMetadataElementFactory metadataElementFactory;
+    
+    private final AllowedCmdiProfiles allowedCmdiProfiles;
+    
     
     @Autowired
-    public LamusMetadataApiBridge(MetadataAPI mdApi, WorkspaceFileHandler wsFileHandler, HandleManager hdlManager) {
+    public LamusMetadataApiBridge(MetadataAPI mdApi,
+            WorkspaceFileHandler wsFileHandler, HandleManager hdlManager,
+            CMDIMetadataElementFactory mdElementFactory, AllowedCmdiProfiles profiles) {
         this.metadataAPI = mdApi;
         this.workspaceFileHandler = wsFileHandler;
         this.handleManager = hdlManager;
+        this.metadataElementFactory = mdElementFactory;
+        this.allowedCmdiProfiles = profiles;
     }
 
     /**
@@ -195,5 +214,117 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         
         logger.debug("Metadata file [" + document.getFileLocation() + "] is valid");
         return true;
+    }
+
+    /**
+     * @see MetadataApiBridge#isMetadataReferenceAllowedInProfile(java.net.URI)
+     */
+    @Override
+    public boolean isMetadataReferenceAllowedInProfile(URI profileLocation) {
+        
+        return isReferenceTypeAllowedInProfile("Metadata", profileLocation);
+    }
+
+    /**
+     * @see MetadataApiBridge#isResourceReferenceAllowedInProfile(java.net.URI)
+     */
+    @Override
+    public boolean isResourceReferenceAllowedInProfile(URI profileLocation) {
+        
+        return isReferenceTypeAllowedInProfile("Resource", profileLocation);
+    }
+
+    /**
+     * @see MetadataApiBridge#getComponentPathForProfileAndReferenceType(java.net.URI, java.lang.String)
+     */
+    @Override
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType) {
+        
+        List<CmdiProfile> allowedProfiles = allowedCmdiProfiles.getProfiles();
+        
+        CmdiProfile matchedProfile = null;
+        for(CmdiProfile profile : allowedProfiles) {
+            if(profileLocation.toString().contains(profile.getId())) {
+                matchedProfile = profile;
+                break;
+            }
+        }
+        
+        if(matchedProfile != null) {
+            Map<String, String> componentMap = matchedProfile.getComponentMap();
+            if(componentMap.isEmpty()) {
+                String message = "CMDI Profile [" + matchedProfile.getId() + "] has no component types configured. Reference cannot be added to parent.";
+                logger.error(message);
+                throw new IllegalStateException(message);
+            }
+            Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
+            for(Map.Entry<String, String> entry : entrySet) {
+                if(Pattern.matches(entry.getKey(), referenceType)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        
+        String message = "No matching component type could be found for type [" + referenceType + "]. Reference cannot be added to parent.";
+        logger.error(message);
+        throw new IllegalStateException(message);
+    }
+    
+    /**
+     * @see MetadataApiBridge#assureElementPathExistsWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
+     */
+    @Override
+    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path) {
+
+        CMDIMetadataElement child = root.getChildElement(path);
+        if(child != null && child instanceof CMDIContainerMetadataElement) {
+            return (CMDIContainerMetadataElement) child;
+        }
+        
+        String[] elementNames = path.split("/");
+        CMDIContainerMetadataElement currentParent = root;
+        ComponentType currentType = root.getType();
+        for(String elementName : elementNames) {
+            if(elementName.isEmpty() || elementName.equals(root.getName())) {
+                continue;
+            }
+            currentType = (ComponentType) currentType.getType(elementName);
+            child = currentParent.getChildElement(elementName);
+            if(child == null) {
+                child = metadataElementFactory.createNewMetadataElement(currentParent, currentType);
+            }
+            if(child instanceof CMDIContainerMetadataElement) {
+                currentParent = (CMDIContainerMetadataElement) child;
+            } else {
+                throw new UnsupportedOperationException("not supported yet");
+            }
+        }
+        
+        return currentParent;
+    }
+    
+    /**
+     * @see MetadataApiBridge#addReferenceInComponent(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, nl.mpi.metadata.cmdi.api.model.ResourceProxy)
+     */
+    @Override
+    public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy) {
+        
+        return component.addDocumentResourceProxyReference(resourceProxy.getId());
+    }
+    
+    
+    private boolean isReferenceTypeAllowedInProfile(String referenceTypeToCheck, URI profileLocation) {
+        
+        List<CmdiProfile> allowedProfiles = allowedCmdiProfiles.getProfiles();
+        
+        for(CmdiProfile profile : allowedProfiles) {
+            if(profileLocation.toString().contains(profile.getId())) {
+                List<String> allowedReferenceTypes = profile.getAllowedReferenceTypes();
+                if(allowedReferenceTypes.contains(referenceTypeToCheck)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

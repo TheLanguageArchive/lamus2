@@ -23,10 +23,16 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -36,7 +42,14 @@ import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
+import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
+import nl.mpi.metadata.cmdi.api.model.Component;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
+import nl.mpi.metadata.cmdi.api.type.CMDIProfile;
+import nl.mpi.metadata.cmdi.api.type.CMDIProfileElement;
+import nl.mpi.metadata.cmdi.api.type.ComponentType;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
@@ -80,11 +93,24 @@ public class LamusMetadataApiBridgeTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock HandleManager mockHandleManager;
+    @Mock CMDIMetadataElementFactory mockMetadataElementFactory;
+    
+    @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
+    
     
     @Mock MetadataDocument mockMetadataDocument;
-    @Mock CMDIDocument mockCmdiDocument;
+    @Mock CMDIDocument mockCMDIDocument;
     @Mock File mockFile;
     @Mock StreamResult mockStreamResult;
+    
+    @Mock ResourceProxy mockResourceProxy;
+    @Mock ResourceProxy mockAnotherResourceProxy;
+    @Mock Component mockCollectionComponent;
+    @Mock ComponentType mockComponentType;
+    @Mock CMDIProfile mockCMDIProfile;
+    @Mock CMDIProfileElement mockCMDIProfileElement;
+    @Mock CMDIContainerMetadataElement mockCmdiContainerMetadataElement;
+    
     
     @Factory
     public static Matcher<HeaderInfo> equivalentHeaderInfo(HeaderInfo headerInfo ) {
@@ -105,7 +131,9 @@ public class LamusMetadataApiBridgeTest {
     
     @Before
     public void setUp() {
-        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI, mockWorkspaceFileHandler, mockHandleManager);
+        lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI,
+                mockWorkspaceFileHandler, mockHandleManager,
+                mockMetadataElementFactory, mockAllowedCmdiProfiles);
     }
     
     @After
@@ -263,15 +291,15 @@ public class LamusMetadataApiBridgeTest {
         context.checking(new Expectations() {{
             
             oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
-            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
+            oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCMDIDocument, mockStreamResult);
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
         
-        lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+        lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
     }
     
     @Test
@@ -290,7 +318,7 @@ public class LamusMetadataApiBridgeTest {
         }});
 
         try {
-            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
             fail("should have thrown exception");
         } catch(URISyntaxException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -310,11 +338,11 @@ public class LamusMetadataApiBridgeTest {
         context.checking(new Expectations() {{
             
             oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
-            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo))); will(throwException(expectedException));
+            oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo))); will(throwException(expectedException));
         }});
 
         try {
-            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
             fail("should have thrown exception");
         } catch(MetadataException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -334,16 +362,16 @@ public class LamusMetadataApiBridgeTest {
         context.checking(new Expectations() {{
             
             oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
-            oneOf(mockCmdiDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
+            oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult); will(throwException(expectedException));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCMDIDocument, mockStreamResult); will(throwException(expectedException));
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
         
         try {
-            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCmdiDocument, handle, targetLocation);
+            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
             fail("should have thrown exception");
         } catch(IOException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -358,11 +386,11 @@ public class LamusMetadataApiBridgeTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
-                will(returnValue(mockCmdiDocument));
-            oneOf(mockCmdiDocument).setHandle(null);
+                will(returnValue(mockCMDIDocument));
+            oneOf(mockCMDIDocument).setHandle(null);
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCMDIDocument, mockStreamResult);
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
@@ -415,11 +443,11 @@ public class LamusMetadataApiBridgeTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataAPI).getMetadataDocument(fileURL);
-                    will(returnValue(mockCmdiDocument));
-            oneOf(mockCmdiDocument).setHandle(null);
+                    will(returnValue(mockCMDIDocument));
+            oneOf(mockCMDIDocument).setHandle(null);
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCMDIDocument, mockStreamResult);
                 will(throwException(expectedException));
         }});
         
@@ -461,15 +489,15 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockCmdiDocument).setHandle(null);
+            oneOf(mockCMDIDocument).setHandle(null);
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockCmdiDocument, mockStreamResult);
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockCMDIDocument, mockStreamResult);
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
         
-        lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(mockCmdiDocument, fileURL);
+        lamusMetadataApiBridge.removeSelfHandleAndSaveDocument(mockCMDIDocument, fileURL);
     }
     
     @Test
@@ -579,7 +607,7 @@ public class LamusMetadataApiBridgeTest {
 //        final String noSpaceString = fileLocation.replace(" ", "%20");
 //        final URL metadataFileToCheck = new URL(noSpaceString);
         
-        MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null, null);
+        MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null, null, null, null);
         
         boolean result = testMdApiBridge.isMetadataFileValid(metadataFileToCheck);
         
@@ -617,13 +645,261 @@ public class LamusMetadataApiBridgeTest {
         
         assertFalse("Result should be false", result);
     }
+    
+    @Test
+    public void bothReferenceTypesAllowed() {
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        List<String> allowedReferenceType = new ArrayList<>();
+        allowedReferenceType.add("Metadata");
+        allowedReferenceType.add("Resource");
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setAllowedReferenceTypes(allowedReferenceType);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
+        assertTrue("Result should be true for Metadata", result);
+        
+        result = lamusMetadataApiBridge.isResourceReferenceAllowedInProfile(profileLocation);
+        assertTrue("Result should be true for Resource", result);
+    }
+    
+    @Test
+    public void onlyMetadataReferenceAllowed() {
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        List<String> allowedReferenceType = new ArrayList<>();
+        allowedReferenceType.add("Metadata");
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setAllowedReferenceTypes(allowedReferenceType);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
+        assertTrue("Result should be true for Metadata", result);
+        
+        result = lamusMetadataApiBridge.isResourceReferenceAllowedInProfile(profileLocation);
+        assertFalse("Result should be false for Resource", result);
+    }
+    
+    @Test
+    public void onlyResourceReferenceAllowed() {
+
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        List<String> allowedReferenceType = new ArrayList<>();
+        allowedReferenceType.add("Resource");
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setAllowedReferenceTypes(allowedReferenceType);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
+        assertFalse("Result should be false for Metadata", result);
+        
+        result = lamusMetadataApiBridge.isResourceReferenceAllowedInProfile(profileLocation);
+        assertTrue("Result should be true for Resource", result);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_AnyReference() {
+        
+        final String expectedComponentPath = "/collection";
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        Map<String, String> componentMap = new HashMap<>();
+        componentMap.put("^.+$", expectedComponentPath);
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setComponentMap(componentMap);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        final String referenceMimetype = "text/x-cmdi+xml";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_SpecificReference() {
+        
+        final String expectedComponentPath = "/collection";
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        Map<String, String> componentMap = new HashMap<>();
+        componentMap.put("^text/x-cmdi\\+xml$", expectedComponentPath);
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setComponentMap(componentMap);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        final String referenceMimetype = "text/x-cmdi+xml";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        
+        assertEquals("Retrieved component type different from expected", expectedComponentPath, retrievedComponent);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_ReferenceNotMatched() {
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        Map<String, String> componentMap = new HashMap<>();
+        componentMap.put("^text/x-cmdi\\+xml$", "Collection");
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setComponentMap(componentMap);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        final String referenceMimetype = "text/x-imdi+xml";
+        
+        final String expectedExceptionMessage = "No matching component type could be found for type [" + referenceMimetype + "]. Reference cannot be added to parent.";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        try {
+            lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        } catch(IllegalStateException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void getComponentForReferenceType_EmptyComponentMap() {
+        
+        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        Map<String, String> componentMap = new HashMap<>();
+        CmdiProfile profile = new CmdiProfile();
+        profile.setId(profileId);
+        profile.setLocation(profileLocation);
+        profile.setComponentMap(componentMap);
+        final List<CmdiProfile> profiles = new ArrayList<>();
+        profiles.add(profile);
+        
+        final String referenceMimetype = "text/x-cmdi+xml";
+        
+        final String expectedExceptionMessage = "CMDI Profile [" + profileId + "] has no component types configured. Reference cannot be added to parent.";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        try {
+            lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+            fail("should have thrown exception");
+        } catch(IllegalStateException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void assure_elementPathExists_IsRoot() {
+        
+        final String elementName = "collection";
+        final String elementPath = "/" + elementName;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
+            oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
+            oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(elementName));
+        }});
+        
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
+        
+        assertEquals("Retrieved element different from expected", mockCmdiContainerMetadataElement, retrievedElement);
+    }
+    
+    @Test
+    public void assure_elementPathExists_IsNotRoot() {
+        
+        final String elementName = "MediaFile";
+        final String elementPath = "/lat-session/" + elementName;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
+            oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
+            oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(elementName));
+        }});
+        
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
+        
+        assertEquals("Retrieved element different from expected", mockCmdiContainerMetadataElement, retrievedElement);
+    }
+    
+    @Test
+    public void assure_elementPathExistsPartially() {
+        fail("not tested yet");
+    }
+    
+    @Test
+    public void assure_elementPathDoesNotExist() {
+        fail("not tested yet");
+    }
+    
+    @Test
+    public void addReferenceInComponent() {
+        
+        final String resourceProxyId = "res_12345667764785646342";
+        
+        context.checking(new Expectations() {{
+            oneOf(mockResourceProxy).getId(); will(returnValue(resourceProxyId));
+            oneOf(mockCollectionComponent).addDocumentResourceProxyReference(resourceProxyId); will(returnValue(mockAnotherResourceProxy));
+        }});
+        
+        ResourceProxy result = lamusMetadataApiBridge.addReferenceInComponent(mockCollectionComponent, mockResourceProxy);
+        
+        assertNotNull("Result should not be null", result);
+        assertEquals("Retrieved resource proxy different from expected", mockAnotherResourceProxy, result);
+    }
 }
 
 
 class HeaderInfoMatcher extends TypeSafeMatcher<HeaderInfo> {
     
-    private String headerInfoName;
-    private String headerInfoValue;
+    private final String headerInfoName;
+    private final String headerInfoValue;
 
     public HeaderInfoMatcher(HeaderInfo hInfo) {
         headerInfoName = hInfo.getName();

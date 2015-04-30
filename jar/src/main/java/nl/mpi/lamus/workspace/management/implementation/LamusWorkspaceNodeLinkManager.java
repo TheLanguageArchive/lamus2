@@ -38,7 +38,9 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +77,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     }
 
     /**
-     * @see WorkspaceNodeLinkManager#linkNodesWithReference(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
+     * @see WorkspaceNodeLinkManager#linkNodesWithReference(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.Reference)
      */
     @Override
     public void linkNodesWithReference(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
@@ -130,9 +132,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        ReferencingMetadataDocument parentDocument = null;
-        if(tempParentDocument instanceof ReferencingMetadataDocument) {
-            parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+        CMDIDocument parentDocument = null;
+        if(tempParentDocument instanceof CMDIDocument) {
+            parentDocument = (CMDIDocument) tempParentDocument;
         } else {
             String errorMessage = "Error retrieving referencing document for node " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, null);
@@ -148,12 +150,33 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 childUri = getNodeURI(childNode);
             }
             
+            ResourceProxy createdProxy;
+            
             if(nodeUtil.isNodeMetadata(childNode)) {
-                parentDocument.createDocumentMetadataReference(
+                
+                if(!metadataApiBridge.isMetadataReferenceAllowedInProfile(parentNode.getProfileSchemaURI())) {
+                    String message = "A metadata reference is not allowed in the profile of the selected parent node";
+                    throwWorkspaceException(message, workspaceID, null);
+                }
+                
+                createdProxy = parentDocument.createDocumentMetadataReference(
                         childUri, childLocation, childNode.getFormat());
+                
+                addReferenceToComponent(parentNode, createdProxy, parentDocument);
+                
+                
             } else {
-                parentDocument.createDocumentResourceReference(
+                
+                if(!metadataApiBridge.isResourceReferenceAllowedInProfile(parentNode.getProfileSchemaURI())) {
+                    String message = "A resource reference is not allowed in the profile of the selected parent node";
+                    throwWorkspaceException(message, workspaceID, null);
+                }
+                
+                createdProxy = parentDocument.createDocumentResourceReference(
                         childUri, childLocation, childNode.getType().name(), childNode.getFormat());
+                
+                addReferenceToComponent(parentNode, createdProxy, parentDocument);
+                
             }
             
             StreamResult parentStreamResult =
@@ -217,9 +240,9 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throwWorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        ReferencingMetadataDocument parentDocument;
-        if(tempParentDocument instanceof ReferencingMetadataDocument) {
-            parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+        CMDIDocument parentDocument;
+        if(tempParentDocument instanceof CMDIDocument) {
+            parentDocument = (CMDIDocument) tempParentDocument;
         } else {
             String errorMessage = "Error retrieving referencing document for node " + parentNode.getWorkspaceNodeID();
             logger.error(errorMessage);
@@ -228,7 +251,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
 
         try {
             URL childWsUrl = childNode.getWorkspaceURL();
-            Reference childReference = null;
+            ResourceProxy childReference = null;
             if(childWsUrl != null) {
                 childReference = parentDocument.getDocumentReferenceByLocation(childWsUrl.toURI());
             }
@@ -317,13 +340,13 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         
         try {
             MetadataDocument tempParentDocument = metadataAPI.getMetadataDocument(parentNode.getWorkspaceURL());
-            ReferencingMetadataDocument parentDocument;
-            if(tempParentDocument instanceof ReferencingMetadataDocument) {
-                parentDocument = (ReferencingMetadataDocument) tempParentDocument;
+            CMDIDocument parentDocument;
+            if(tempParentDocument instanceof CMDIDocument) {
+                parentDocument = (CMDIDocument) tempParentDocument;
             } else {
                 throw new UnsupportedOperationException("not referencing document not handled yet");
             }
-            Reference childReference = parentDocument.getDocumentReferenceByURI(childNode.getArchiveURI());
+            ResourceProxy childReference = parentDocument.getDocumentReferenceByURI(childNode.getArchiveURI());
             childReference.setURI(childNode.getWorkspaceURL().toURI());
             
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
@@ -375,5 +398,11 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         
         return nodeURI;
+    }
+    
+    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument) {
+        String componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(parentNode.getProfileSchemaURI(), createdProxy.getMimetype());
+        CMDIContainerMetadataElement component = metadataApiBridge.assureElementPathExistsWithin(parentDocument, componentName);
+        metadataApiBridge.addReferenceInComponent(component, createdProxy);
     }
 }

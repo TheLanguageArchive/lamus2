@@ -28,6 +28,8 @@ import nl.mpi.handle.util.implementation.HandleInfoRetrieverImpl;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
+import nl.mpi.metadata.cmdi.api.model.impl.CMDIMetadataElementFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -78,6 +80,11 @@ public class LamusBeans {
     @Bean
     public MetadataAPI metadataAPI() {
         return new CMDIApi();
+    }
+    
+    @Bean
+    public CMDIMetadataElementFactory metadataElementFactory() {
+        return new CMDIMetadataElementFactoryImpl();
     }
     
     @Bean
