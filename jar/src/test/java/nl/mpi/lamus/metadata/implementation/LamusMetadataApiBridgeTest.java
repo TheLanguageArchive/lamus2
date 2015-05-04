@@ -37,6 +37,7 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataDocumentException;
+import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -107,9 +108,11 @@ public class LamusMetadataApiBridgeTest {
     @Mock ResourceProxy mockAnotherResourceProxy;
     @Mock Component mockCollectionComponent;
     @Mock ComponentType mockComponentType;
+    @Mock ComponentType mockAnotherComponentType;
     @Mock CMDIProfile mockCMDIProfile;
     @Mock CMDIProfileElement mockCMDIProfileElement;
     @Mock CMDIContainerMetadataElement mockCmdiContainerMetadataElement;
+    @Mock CMDIContainerMetadataElement mockAnotherCmdiContainerMetadataElement;
     
     
     @Factory
@@ -792,17 +795,13 @@ public class LamusMetadataApiBridgeTest {
         
         final String referenceMimetype = "text/x-imdi+xml";
         
-        final String expectedExceptionMessage = "No matching component type could be found for type [" + referenceMimetype + "]. Reference cannot be added to parent.";
-        
         context.checking(new Expectations() {{
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        try {
-            lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
-        } catch(IllegalStateException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
+        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        
+        assertNull("Retrieved component should be null", retrievedComponent);
     }
     
     @Test
@@ -820,30 +819,25 @@ public class LamusMetadataApiBridgeTest {
         
         final String referenceMimetype = "text/x-cmdi+xml";
         
-        final String expectedExceptionMessage = "CMDI Profile [" + profileId + "] has no component types configured. Reference cannot be added to parent.";
-        
         context.checking(new Expectations() {{
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        try {
-            lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
-            fail("should have thrown exception");
-        } catch(IllegalStateException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
+        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        
+        assertNull("Retrieved component should be null", retrievedComponent);
     }
     
     @Test
-    public void assure_elementPathExists_IsRoot() {
+    public void assure_elementPathExists_IsRoot() throws MetadataElementException {
         
-        final String elementName = "collection";
-        final String elementPath = "/" + elementName;
+        final String rootName = "collection";
+        final String elementPath = "/" + rootName;
         
         context.checking(new Expectations() {{
             oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
             oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
-            oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(elementName));
+            oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
         }});
         
         CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
@@ -852,15 +846,14 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void assure_elementPathExists_IsNotRoot() {
+    public void assure_elementPathExists_IsNotRoot() throws MetadataElementException {
         
+        final String rootName = "lat-session";
         final String elementName = "MediaFile";
-        final String elementPath = "/lat-session/" + elementName;
+        final String elementPath = "/" + rootName + "/" + elementName;
         
         context.checking(new Expectations() {{
-            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
-            oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
-            oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(elementName));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(mockCmdiContainerMetadataElement));
         }});
         
         CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
@@ -869,13 +862,26 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void assure_elementPathExistsPartially() {
-        fail("not tested yet");
-    }
-    
-    @Test
-    public void assure_elementPathDoesNotExist() {
-        fail("not tested yet");
+    public void assure_elementPathExistsPartially() throws MetadataElementException {
+        
+        final String rootName = "lat-session";
+        final String elementName = "MediaFile";
+        final String elementPath = "/" + rootName + "/" + elementName;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
+            oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
+            allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
+            
+            oneOf(mockComponentType).getType(elementName); will(returnValue(mockAnotherComponentType));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementName); will(returnValue(null));
+            oneOf(mockMetadataElementFactory).createNewMetadataElement(mockCmdiContainerMetadataElement, mockAnotherComponentType); will(returnValue(mockAnotherCmdiContainerMetadataElement));
+            oneOf(mockCmdiContainerMetadataElement).addChildElement(mockAnotherCmdiContainerMetadataElement);
+        }});
+        
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
+        
+        assertEquals("Retrieved element different from expected", mockAnotherCmdiContainerMetadataElement, retrievedElement);
     }
     
     @Test

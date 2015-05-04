@@ -136,7 +136,7 @@ public class LamusMetadataCheckerTest {
         Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
         
         assertTrue("Issues should be empty (1)", issues1.isEmpty());
-        assertTrue("Issues should be empty (1)", issues2.isEmpty());
+        assertTrue("Issues should be empty (2)", issues2.isEmpty());
     }
     
     @Test
@@ -260,9 +260,9 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_missingComponentReference() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingComponent_referenceMissing.cmdi");
-        final String expectedTest = "($profileName != 'lat-corpus' or contains(/cmd:CMD/cmd:Components/cmd:lat-corpus/@ref, current()/@id))"
-                            + " and ($profileName != 'lat-session' or contains(/cmd:CMD/cmd:Components/cmd:lat-session/@ref, current()/@id))";
-        final String expectedMessage = "[CMDI Profile Restriction] There should be a '/cmd:CMD/cmd:Components/*/@ref' attribute for each /cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy.";
+        final String expectedTest = "($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
+                + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id])";
+        final String expectedMessage = "[CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
         

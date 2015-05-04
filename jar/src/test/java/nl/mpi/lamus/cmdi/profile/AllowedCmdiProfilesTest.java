@@ -20,6 +20,9 @@ import java.io.File;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Pattern;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -100,8 +103,10 @@ public class AllowedCmdiProfilesTest {
         
         //test case - collection
         boolean collectionFound = false;
-        for(CmdiProfile profile : profiles) {
-            if("clarin.eu:cr1:p_1345561703620".equals(profile.getId())) {
+        boolean corpusFound = false;
+        boolean sessionFound = false;
+        for(CmdiProfile profile : profiles) { // check if some profiles are properly loaded
+            if("clarin.eu:cr1:p_1345561703620".equals(profile.getId())) { //collection
                 collectionFound = true;
                 assertEquals("Collection profile name different from expected", "collection", profile.getName());
                 assertEquals("Collection profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620"), profile.getLocation());
@@ -109,14 +114,75 @@ public class AllowedCmdiProfilesTest {
                 assertFalse("Collection allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
                 assertTrue("Collection should only have one allowed reference type", profile.getAllowedReferenceTypes().size() == 1);
                 assertEquals("Collection should only allow the Metadata reference type", "Metadata", profile.getAllowedReferenceTypes().iterator().next());
-                assertNotNull("Collection component reference map should not be null", profile.getComponentMap());
-                assertFalse("Collection component reference map should not be empty", profile.getComponentMap().isEmpty());
-                assertTrue("Collection component reference map should contain one entry", profile.getComponentMap().size() == 1);
-                assertTrue("Collection component reference map entry key different from expected", profile.getComponentMap().containsKey("^.+$"));
-                assertTrue("Collection component reference map entry value different from expected", profile.getComponentMap().containsValue("collection"));
+                assertNull("Collection component reference map should be null", profile.getComponentMap());
+            }
+            
+            if("clarin.eu:cr1:p_1407745712064".equals(profile.getId())) { //lat-corpus
+                corpusFound = true;
+                
+                assertEquals("Lat-Corpus profile name different from expected", "lat-corpus", profile.getName());
+                assertEquals("Lat-Corpus profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064"), profile.getLocation());
+                assertNotNull("Lat-Corpus allowed reference types list should not be null", profile.getAllowedReferenceTypes());
+                assertFalse("Lat-Corpus allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
+                assertTrue("Lat-Corpus should have two allowed reference types", profile.getAllowedReferenceTypes().size() == 2);
+                assertTrue("Lat-Corpus should allow Metadata and Resource reference types", profile.getAllowedReferenceTypes().contains("Metadata") && profile.getAllowedReferenceTypes().contains("Resource"));
+                assertNotNull("Lat-Corpus component reference map should not be null", profile.getComponentMap());
+                assertFalse("Lat-Corpus component reference map should not be empty", profile.getComponentMap().isEmpty());
+                assertTrue("Lat-Corpus component reference map should contain two entries", profile.getComponentMap().size() == 2);
+                Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
+                boolean cmdiMatched = false;
+                boolean otherMatched = false;
+                for(Entry<String, String> entry : entrySet) {
+                    if(Pattern.matches(entry.getKey(), "text/x-cmdi+xml")) {
+                        cmdiMatched = true;
+                        assertEquals("Lat-Corpus component reference map entry value different from expected (cmdi)", entry.getValue(), "lat-corpus/CorpusLink");
+                    }
+                    if(Pattern.matches(entry.getKey(), "audio/wave")) {
+                        otherMatched = true;
+                        assertEquals("Lat-Corpus component reference map entry value different from expected (other)", entry.getValue(), "lat-corpus/InfoLink");
+                    }
+                }
+                assertTrue("Lat-Corpus component reference map entry for CMDI not found", cmdiMatched);
+                assertTrue("Lat-Corpus component reference map entry for other types not found", otherMatched);
+            }
+            
+            if("clarin.eu:cr1:p_1407745712035".equals(profile.getId())) { //lat-session
+                sessionFound = true;
+                
+                assertEquals("Lat-Session profile name different from expected", "lat-session", profile.getName());
+                assertEquals("Lat-Session profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035"), profile.getLocation());
+                assertNotNull("Lat-Session allowed reference types list should not be null", profile.getAllowedReferenceTypes());
+                assertFalse("Lat-Session allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
+                assertTrue("Lat-Session should only have one allowed reference type", profile.getAllowedReferenceTypes().size() == 1);
+                assertEquals("Lat-Session should only allow the Metadata reference type", "Resource", profile.getAllowedReferenceTypes().iterator().next());
+                assertNotNull("Lat-Session component reference map should not be null", profile.getComponentMap());
+                assertFalse("Lat-Session component reference map should not be empty", profile.getComponentMap().isEmpty());
+                assertTrue("Lat-Session component reference map should contain two entries", profile.getComponentMap().size() == 2);
+                Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
+                boolean cmdiMatched = false;
+                boolean mediaMatched = false;
+                boolean writtenMatched = false;
+                for(Entry<String, String> entry : entrySet) {
+                    if(Pattern.matches(entry.getKey(), "text/x-cmdi+xml")) {
+                        cmdiMatched = true;
+                    }
+                    if(Pattern.matches(entry.getKey(), "audio/wave")) {
+                        mediaMatched = true;
+                        assertEquals("Lat-Session component reference map entry value different from expected (media)", entry.getValue(), "lat-session/Resources/MediaFile");
+                    }
+                    if(Pattern.matches(entry.getKey(), "text/plain")) {
+                        writtenMatched = true;
+                        assertEquals("Lat-Session component reference map entry value different from expected (written)", entry.getValue(), "lat-session/Resources/WrittenResource");
+                    }
+                }
+                assertFalse("Lat-Session component reference map entry for CMDI should not exist", cmdiMatched);
+                assertTrue("Lat-Session component reference map entry for media resources not found", mediaMatched);
+                assertTrue("Lat-Session component reference map entry for written resources not found", writtenMatched);
             }
         }
         
         assertTrue("Collection profile not found", collectionFound);
+        assertTrue("Lat-Corpus profile not found", corpusFound);
+        assertTrue("Lat-Session profile not found", sessionFound);
     }
 }

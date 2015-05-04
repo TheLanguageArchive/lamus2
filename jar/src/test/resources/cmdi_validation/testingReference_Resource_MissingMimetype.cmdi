@@ -12,7 +12,7 @@
       <ResourceProxyList>
          <ResourceProxy id="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
             <ResourceType>Resource</ResourceType>
-            <ResourceRef>sessionreference/aperfectcircle_merdenoms.jpg</ResourceRef>
+            <ResourceRef>sessionreference/someimage.jpg</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
       <JournalFileProxyList/>

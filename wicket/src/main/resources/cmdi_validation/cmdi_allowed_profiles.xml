@@ -5,6 +5,16 @@
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
+        <components>
+            <component>
+                <key>^(video|audio|image)/.*$</key>
+                <value>/lat-session/Resources/MediaFile</value>
+            </component>
+            <component>
+                <key>^(?!.*text/x-cmdi\+xml)(text|application)/.*$</key>
+                <value>/lat-session/Resources/WrittenResource</value>
+            </component>
+        </components>
         <displayIcon>session</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1407745712064" name="lat-corpus">
@@ -13,6 +23,16 @@
             <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType> <!-- these will always be info links -->
         </allowedReferenceTypes>
+        <components>
+            <component>
+                <key>^text/x-cmdi\+xml$</key>
+                <value>/lat-corpus/CorpusLink</value>
+            </component>
+            <component>
+                <key>^(?!.*text/x-cmdi\+xml).*$</key>
+                <value>/lat-corpus/InfoLink</value>
+            </component>
+        </components>
         <displayIcon>corpus</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1361876010525" name="DiscAn_Project">

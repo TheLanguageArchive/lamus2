@@ -19,13 +19,15 @@
       <ResourceRelationList/>
    </Resources>
    <Components>
-      <lat-corpus ref="res_87337b34-dc58-448b-8d7c-9610873ba9c8">
+      <lat-corpus>
          <Name>corpusreference</Name>
          <Title>corpusreference</Title>
          <descriptions>
             <Description xml:lang="eng">descr</Description>
          </descriptions>
-         
+         <CorpusLink ref="res_87337b34-dc58-448b-8d7c-9610873ba9c8">
+            <Name>sessionreference</Name>
+         </CorpusLink>
       </lat-corpus>
    </Components>
 </CMD>

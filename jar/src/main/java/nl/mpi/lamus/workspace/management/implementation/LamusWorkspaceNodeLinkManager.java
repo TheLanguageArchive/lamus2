@@ -34,6 +34,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -179,11 +180,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
             }
             
-            StreamResult parentStreamResult =
-                    this.workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(parentNode.getWorkspaceURL()));
-                
-            this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
-                
+            metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
+            
         } catch (URISyntaxException | MetadataException | IOException | TransformerException ex) {
             String errorMessage = "Error creating reference in document with node ID " + parentNode.getWorkspaceNodeID();
             throwWorkspaceException(errorMessage, workspaceID, ex);
@@ -400,9 +398,18 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         return nodeURI;
     }
     
-    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument) {
+    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument) throws WorkspaceException {
         String componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(parentNode.getProfileSchemaURI(), createdProxy.getMimetype());
-        CMDIContainerMetadataElement component = metadataApiBridge.assureElementPathExistsWithin(parentDocument, componentName);
+        if(componentName == null) {
+            return;
+        }
+        CMDIContainerMetadataElement component = null;
+        try {
+            component = metadataApiBridge.assureElementPathExistsWithin(parentDocument, componentName);
+        } catch (MetadataElementException ex) {
+            String errorMessage = "Error assuring existance of path [" + componentName + "] in document " + parentDocument.getName();
+            throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
+        }
         metadataApiBridge.addReferenceInComponent(component, createdProxy);
     }
 }

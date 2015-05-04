@@ -23,11 +23,14 @@
       <ResourceRelationList/>
    </Resources>
    <Components>
-      <lat-corpus ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+      <lat-corpus>
          <Name>testingReference_componentReferenceMissing</Name>
          <Title>testingReference_componentReferenceMissing</Title>
          <descriptions>
          </descriptions>
+         <CorpusLink ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+            <Name>someOtherSession</Name>
+         </CorpusLink>
       </lat-corpus>
    </Components>
 </CMD>

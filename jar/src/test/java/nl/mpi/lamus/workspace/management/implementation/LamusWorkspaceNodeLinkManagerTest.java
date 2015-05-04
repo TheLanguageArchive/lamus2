@@ -225,7 +225,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
-        final String componentPath = "/collection";
+        final String componentPath = "collection";
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -263,16 +263,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
             
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
             
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
     }
@@ -337,10 +334,67 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/plain";
         
+        final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        final String childStringType = childWsType.name();
         
-        final String componentPath = "/lat-session/WrittenResource";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
+        context.checking(new Expectations() {{
+            
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+            allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockChildNode).getType(); will(returnValue(childWsType));
+            oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
+            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, childStringType, childMimetype);
+                will(returnValue(mockChildResourceReference));
+            
+            oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+                will(returnValue(null));
+            // null component retrieved - reference is not mandatory for this profile, so do not create one
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+
+            oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
+                will(returnValue(mockWorkspaceNodeLink));
+            
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
+        }});
+        
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+    }
+    
+    @Test
+    public void linkNodesResourceLocal_NoReferenceNeeded()
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final URI parentProfileLocation = URI.create("http:/schema/location/profile_bla_bla");
+        final int childNodeID = 3;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        final String childMimetype = "text/plain";
+        
+        final String componentPath = "lat-session/WrittenResource";
         
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childStringType = childWsType.name();
@@ -381,16 +435,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
 
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
             
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
     }
@@ -407,10 +458,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String childMimetype = "text/plain";
         
-        
-        final String componentPath = "/lat-session/WrittenResource";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
-        
+        final String componentPath = "lat-session/WrittenResource";
         
         final WorkspaceNodeType childWsType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childStringType = childWsType.name();
@@ -451,16 +499,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
             
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
             
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
     }
@@ -479,10 +524,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final String childStringType = childWsType.name();
         final String childMimetype = "text/plain";
         
-        
-        final String componentPath = "/lat-session/WrittenResource";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
-        
+        final String componentPath = "lat-session/WrittenResource";
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -521,16 +563,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
             
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
             
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
     }
@@ -799,10 +838,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
-        final String componentPath = "/collection";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
-        
-
+        final String componentPath = "collection";
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -842,12 +878,9 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
                 will(throwException(expectedException));
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         try {
             nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
@@ -872,10 +905,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         
-        final String componentPath = "/collection";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
-        
-
+        final String componentPath = "collection";
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -915,12 +945,9 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
                 will(throwException(expectedException));
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         try {
             nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
@@ -1702,17 +1729,13 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
-            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, newChildNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
             
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
-        
         
         //replace node in DB (create new version and set old node as replaced)
         context.checking(new Expectations() {{

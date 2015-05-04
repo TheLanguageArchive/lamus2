@@ -32,6 +32,7 @@ import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -252,29 +253,27 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         
         if(matchedProfile != null) {
             Map<String, String> componentMap = matchedProfile.getComponentMap();
-            if(componentMap.isEmpty()) {
-                String message = "CMDI Profile [" + matchedProfile.getId() + "] has no component types configured. Reference cannot be added to parent.";
-                logger.error(message);
-                throw new IllegalStateException(message);
-            }
-            Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
-            for(Map.Entry<String, String> entry : entrySet) {
-                if(Pattern.matches(entry.getKey(), referenceType)) {
-                    return entry.getValue();
+            if(componentMap != null && !componentMap.isEmpty()) {
+                Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
+                for(Map.Entry<String, String> entry : entrySet) {
+                    if(Pattern.matches(entry.getKey(), referenceType)) {
+                        return entry.getValue();
+                    }
                 }
             }
         }
         
-        String message = "No matching component type could be found for type [" + referenceType + "]. Reference cannot be added to parent.";
-        logger.error(message);
-        throw new IllegalStateException(message);
+        String message = "CMDI Profile [" + (matchedProfile != null ? matchedProfile.getId() : "null") + "] has no component types configured. Reference will not be added to parent.";
+        logger.info(message);
+        return null;
     }
     
     /**
      * @see MetadataApiBridge#assureElementPathExistsWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
      */
     @Override
-    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path) {
+    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path)
+            throws MetadataElementException {
 
         CMDIMetadataElement child = root.getChildElement(path);
         if(child != null && child instanceof CMDIContainerMetadataElement) {
@@ -292,11 +291,12 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             child = currentParent.getChildElement(elementName);
             if(child == null) {
                 child = metadataElementFactory.createNewMetadataElement(currentParent, currentType);
+                currentParent.addChildElement(child);
             }
             if(child instanceof CMDIContainerMetadataElement) {
                 currentParent = (CMDIContainerMetadataElement) child;
             } else {
-                throw new UnsupportedOperationException("not supported yet");
+                throw new IllegalArgumentException("Element " + child + " is not an instance of CMDIContainerMetadataElement");
             }
         }
         

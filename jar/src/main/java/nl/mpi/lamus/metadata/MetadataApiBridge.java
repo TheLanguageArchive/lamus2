@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
+import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -125,7 +126,7 @@ public interface MetadataApiBridge {
      * Given a Metadata profile and a reference type, retrieves the appropriate component path.
      * @param profileLocation Profile to check
      * @param referenceType Reference type to check
-     * @return Appropriate component path for the given parameters
+     * @return Appropriate component path for the given parameters (null if reference is not to be enforced)
      */
     public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType);
     
@@ -136,7 +137,8 @@ public interface MetadataApiBridge {
      * @param path Path to check
      * @return Element corresponding to the path
      */
-    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path);
+    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path)
+            throws MetadataElementException;
     
     /**
      * Given a Metadata document and the name of a component, it adds the

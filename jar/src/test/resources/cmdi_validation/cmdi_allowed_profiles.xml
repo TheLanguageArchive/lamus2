@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <allowedProfiles>
-    <profile id="clarin.eu:cr1:p_1361876010525" name="collection">
-        <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010525</location>
-        <allowedReferenceTypes>
-            <allowedReferenceType>Metadata</allowedReferenceType>
-        </allowedReferenceTypes>
-    </profile>
     <profile id="clarin.eu:cr1:p_1407745712035" name="lat-session">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
+        <components>
+            <component>
+                <key>^(video|audio|image)/.*$</key>
+                <value>lat-session/Resources/MediaFile</value>
+            </component>
+            <component>
+                <key>^(?!.*text/x-cmdi\+xml)(text|application)/.*$</key>
+                <value>lat-session/Resources/WrittenResource</value>
+            </component>
+        </components>
+        <displayIcon>session</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1407745712064" name="lat-corpus">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064</location>
@@ -18,37 +23,54 @@
             <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType> <!-- these will always be info links -->
         </allowedReferenceTypes>
+        <components>
+            <component>
+                <key>^text/x-cmdi\+xml$</key>
+                <value>lat-corpus/CorpusLink</value>
+            </component>
+            <component>
+                <key>^(?!.*text/x-cmdi\+xml).*$</key>
+                <value>lat-corpus/InfoLink</value>
+            </component>
+        </components>
+        <displayIcon>corpus</displayIcon>
+    </profile>
+    <profile id="clarin.eu:cr1:p_1361876010525" name="DiscAn_Project">
+        <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010525</location>
+        <allowedReferenceTypes>
+            <allowedReferenceType>Metadata</allowedReferenceType>
+        </allowedReferenceTypes>
+        <displayIcon>corpus</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1361876010653" name="DiscAn_TextCorpus">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010653</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
         </allowedReferenceTypes>
+        <displayIcon>corpus</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1366895758243" name="DiscAn_Case">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1366895758243</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
+        <displayIcon>session</displayIcon>
     </profile>
-    <profile id="clarin.eu:cr1:p_1328259700928" name="Soundbites-recording">
+    <profile id="clarin.eu:cr1:p_1328259700928" name="Soundbites">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1328259700928</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
-    </profile>
-    <profile id="clarin.eu:cr1:p_1328259700937" name="Soundbites">
-        <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1328259700937</location>
-        <allowedReferenceTypes>
-            <allowedReferenceType>Resource</allowedReferenceType>
-        </allowedReferenceTypes>
+        <displayIcon>session</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1345561703620" name="collection">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
         </allowedReferenceTypes>
+        <displayIcon>corpus</displayIcon>
     </profile>
+
     
     
     <profile id="clarin.eu:cr1:p_1337778924955" name="lucea">http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1337778924955</profile>
@@ -60,11 +82,13 @@
             <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
+        <displayIcon>session</displayIcon>
     </profile>
     <profile id="clarin.eu:cr1:p_1331113992512" name="SL-IPROSLA">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1331113992512</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
         </allowedReferenceTypes>
+        <displayIcon>session</displayIcon>
     </profile>
 </allowedProfiles>
