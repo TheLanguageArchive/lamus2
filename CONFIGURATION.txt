@@ -60,7 +60,6 @@ Lamus2 needs the 'corpusstructure3', "ams2cmdi" and 'lamus2' databases for direc
 
 The other necessary properties should be defined as parameters in the web context configuration.
 
-
         <Parameter name="nl.mpi.lamus.lamus2_manualUrl"
                    value="http://www.mpi.nl/corpus/html/lamus2/index.html"
                    description="location of the  Lamus 2 Manual"
@@ -85,6 +84,11 @@ The other necessary properties should be defined as parameters in the web contex
         <Parameter name="nl.mpi.lamus.resources_directory_name"
                    value="Resources"
                    description="Sub-directory for resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.orphans_directory_name"
+                   value="sessions"
+                   description="Directory, under a top node, which can be used as a backdoor for large files to be loaded into a workspace"
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.trashcan_base_directory"
@@ -122,12 +126,6 @@ The other necessary properties should be defined as parameters in the web contex
                    value="lamus@mpi.nl"
                    override="false"/>
 
-        <Parameter name="nl.mpi.lamus.mailAddress"
-                   value="corpman@mpi.nl"
-                   description="the LAMUS will send messages to"         
-                   override="false"/>
-
-
         <Parameter name="nl.mpi.lamus.manager.users"
                    value="corpman@mpi.nl"
                    override="false"/>
@@ -135,10 +133,6 @@ The other necessary properties should be defined as parameters in the web contex
 
         <Parameter name="nl.mpi.lamus.handle.prefix"
                    value="11142"
-                   override="false"/>
-
-        <Parameter name="nl.mpi.lamus.handle.proxy"
-                   value="hdl:"
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.handle.admin_key_file"
@@ -192,22 +186,32 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Location of the translation service"
                    override="false"/>
 
-        <Parameter name="nl.mpi.lamus.schematronValidationFile"
-                   value="/lat/tomcat-corpman/conf/cmdi_schematron.sch"
-                   description="Path to a schematron file to be used in Lamus for CMDI validation"
+        <Parameter name="nl.mpi.lamus.schematronValidationFile_upload"
+                   value="/lat/tomcat-corpman/conf/cmdi_schematron_upload.sch"
+                   description="Path to a schematron file to be used in Lamus for CMDI validation during file upload"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.schematronValidationFile_submit"
+                   value="/lat/tomcat-corpman/conf/cmdi_schematron_submit.sch"
+                   description="Path to a schematron file to be used in Lamus for CMDI validation during workspace submission"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.allowedProfilesFile"
+                   value="/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml"
+                   description="Path to an XML file containing the CMDI profiles allowed in the archive, including some information about them that can be useful to Lamus"
                    override="false"/>
 
 2. Schematron configuration
 
-In order to perform the validation of allowed profiles being introduced into the archive, a schematron is used.
-A schematron file is included in the configuration folder of tomcat-corpman (/lat/tomcat-corpman/conf/cmdi_schematron.sch). This schematron file needs an extra file which contains the list of allowed CMDI profiles (/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml).
+In order to perform the validation of allowed profiles being introduced into the archive, schematron is used.
+Two schematron files are included in the configuration folder of tomcat-corpman, one to be used during upload (/lat/tomcat-corpman/conf/cmdi_schematron_upload.sch) and the other during submission (/lat/tomcat-corpman/conf/cmdi_schematron_submit.sch).
+These schematron files need an extra file which contains the list of allowed CMDI profiles (/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml).
 
 3.  Filters
 
 When building the application, a parameter is passed, indicating the server for which it is being compiled. This loads a few more properties from the filter file regarding the given server.
 So, whenever the a new server is used to deploy the application, a new filter file should be created.
 
-log.home=/lat/tomcat-corpman/logs
 shhaa.li=https://lux16.mpi.nl/Shibboleth.sso/Login
 shhaa.lo=https://lux16.mpi.nl/Shibboleth.sso/Logout
 
