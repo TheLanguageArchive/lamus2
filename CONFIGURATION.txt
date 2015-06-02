@@ -201,6 +201,11 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Path to an XML file containing the CMDI profiles allowed in the archive, including some information about them that can be useful to Lamus"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.permissionConfigFile_CMDI"
+                   value="/lat/tomcat-corpman/conf/apa-permissions_cmdi.conf"
+                   description="name of a config file containing paths which require adjustments in the filesystem permissions, done by Lamus2"
+                   override="false"/>
+
 2. Schematron configuration
 
 In order to perform the validation of allowed profiles being introduced into the archive, schematron is used.
