@@ -32,7 +32,7 @@
     
     <sch:pattern id="reference.validity.check">
         <sch:rule context="/cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy">
-            <sch:assert id="assert.reference.valid" role="error" test="$profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]">
+            <sch:assert id="assert.reference.valid" role="error" test="not($profileName) or $profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]">
                 [CMDI Profile Restriction] the CMD profile of this record doesn't allow for this resource type.
             </sch:assert>
 
@@ -44,9 +44,10 @@
                 [CMDI Invalid reference] Mimetype not consistent with ResourceProxy type. 
             </sch:assert>
 
-            <sch:assert id="assert.reference.component.present" role="error" test="($profileName != 'lat-corpus' or contains(/cmd:CMD/cmd:Components/cmd:lat-corpus/@ref, current()/@id)) 
-                            and ($profileName != 'lat-session' or contains(/cmd:CMD/cmd:Components/cmd:lat-session/@ref, current()/@id))">
-                [CMDI Profile Restriction] There should be a '/cmd:CMD/cmd:Components/*/@ref' attribute for each /cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy.
+            <sch:assert id="assert.reference.component.present" role="error" test="not($profileName)
+                        or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id]) 
+                            and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id])">
+                [CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.
             </sch:assert>
         </sch:rule>
     </sch:pattern>
