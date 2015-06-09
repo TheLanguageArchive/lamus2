@@ -14,16 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.cmdi.profile;
+package nl.mpi.lamus.exception;
 
 /**
- * Part of the classes to be populated with the content of the XML file listing
- * CMDI allowed profiles.
- * This enumeration represents the possible values for the "allowedReferenceType"
- * element in the XML file.
+ *
  * @author guisil
  */
-public enum ReferenceType {
-    Metadata,
-    Resource
+public class UnusableReferenceTypeException extends Exception {
+
+    private final String referenceType;
+    
+    public UnusableReferenceTypeException(String message, String refType, Throwable cause) {
+        super(message, cause);
+        referenceType = refType;
+    }
+    
+    public String getReferenceType() {
+        return referenceType;
+    }
 }

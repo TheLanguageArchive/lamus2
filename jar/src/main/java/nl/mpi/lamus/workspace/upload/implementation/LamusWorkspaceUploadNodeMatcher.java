@@ -133,7 +133,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
         boolean uriIsUnknownHandle = uriIsHandle && !handleManager.isHandlePrefixKnown(uri);
         boolean uriIsExternalUrl = !uriIsHandle && !"file".equals(uri.getScheme());
         
-        //ir it is not a handle nor a local URL, it should at least be a valid external URL
+        //if it is not a handle nor a local URL, it should at least be a valid external URL
         if(uriIsExternalUrl) {
             try {
                 uri.toURL();

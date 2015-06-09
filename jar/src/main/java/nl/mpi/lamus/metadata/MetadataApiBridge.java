@@ -25,6 +25,7 @@ import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 
@@ -121,6 +122,14 @@ public interface MetadataApiBridge {
      * @return true if a Resource reference is allowed in the profile
      */
     public boolean isResourceReferenceAllowedInProfile(URI profileLocation);
+    
+    /**
+     * Checks if the type of the given reference is among the ones that point
+     * to pages (not Metadata or Resource)
+     * @param reference Reference to check
+     * @return true if reference type is "LandingPage", "SearchPage" or "SearchService"
+     */
+    public boolean isReferenceTypeAPage(Reference reference);
     
     /**
      * Given a Metadata profile and a reference type, retrieves the appropriate component path.

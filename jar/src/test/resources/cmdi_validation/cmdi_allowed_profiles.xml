@@ -4,6 +4,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <components>
             <component>
@@ -22,6 +25,9 @@
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType> <!-- these will always be info links -->
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <components>
             <component>
@@ -39,6 +45,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010525</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>corpus</displayIcon>
     </profile>
@@ -46,6 +55,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010653</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>corpus</displayIcon>
     </profile>
@@ -53,6 +65,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1366895758243</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>session</displayIcon>
     </profile>
@@ -60,6 +75,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1328259700928</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>session</displayIcon>
     </profile>
@@ -67,6 +85,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>corpus</displayIcon>
     </profile>
@@ -81,6 +102,9 @@
         <allowedReferenceTypes>
             <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>session</displayIcon>
     </profile>
@@ -88,6 +112,9 @@
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1331113992512</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <displayIcon>session</displayIcon>
     </profile>

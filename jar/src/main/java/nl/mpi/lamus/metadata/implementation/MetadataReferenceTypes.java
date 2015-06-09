@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing;
-
-import nl.mpi.lamus.exception.UnusableReferenceTypeException;
-import nl.mpi.metadata.api.model.Reference;
+package nl.mpi.lamus.metadata.implementation;
 
 /**
- * Class responsible for assigning an appropriate node importer
- * to a metadata reference, depending on its type.
+ *
  * @author guisil
  */
-public interface NodeImporterAssigner {
-
-    /**
-     * @param reference Reference of the file to be imported
-     * @return NodeImporter of the appropriate type
-     */
-    public NodeImporter getImporterForReference(Reference reference)
-            throws UnusableReferenceTypeException;
+public class MetadataReferenceTypes {
+    
+    public static final String REFERENCE_TYPE_METADATA = "Metadata";
+    public static final String REFERENCE_TYPE_RESOURCE = "Resource";
+    public static final String REFERENCE_TYPE_LANDING_PAGE = "LandingPage";
+    public static final String REFERENCE_TYPE_SEARCH_PAGE = "SearchPage";
+    public static final String REFERENCE_TYPE_SEARCH_SERVICE = "SearchService";
 }

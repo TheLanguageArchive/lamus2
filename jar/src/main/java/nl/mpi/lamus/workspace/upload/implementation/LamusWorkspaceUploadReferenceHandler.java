@@ -108,6 +108,10 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         
         for(Reference ref : references) {
             
+            if(metadataApiBridge.isReferenceTypeAPage(ref)) {
+                continue;
+            }
+            
             URI refLocalURI = ref.getLocation();
             URI refURI = ref.getURI();
             WorkspaceNode matchedNode = null;

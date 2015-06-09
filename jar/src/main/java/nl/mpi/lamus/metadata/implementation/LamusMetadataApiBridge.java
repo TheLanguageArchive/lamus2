@@ -37,6 +37,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
@@ -223,7 +224,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isMetadataReferenceAllowedInProfile(URI profileLocation) {
         
-        return isReferenceTypeAllowedInProfile("Metadata", profileLocation);
+        return isReferenceTypeAllowedInProfile(MetadataReferenceTypes.REFERENCE_TYPE_METADATA, profileLocation);
     }
 
     /**
@@ -232,7 +233,18 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isResourceReferenceAllowedInProfile(URI profileLocation) {
         
-        return isReferenceTypeAllowedInProfile("Resource", profileLocation);
+        return isReferenceTypeAllowedInProfile(MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, profileLocation);
+    }
+
+    /**
+     * @see MetadataApiBridge#isReferenceTypeAPage(nl.mpi.metadata.api.model.Reference)
+     */
+    @Override
+    public boolean isReferenceTypeAPage(Reference reference) {
+        
+        return  MetadataReferenceTypes.REFERENCE_TYPE_LANDING_PAGE.equals(reference.getType()) ||
+                MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_PAGE.equals(reference.getType()) ||
+                MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_SERVICE.equals(reference.getType());
     }
 
     /**

@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -99,6 +98,8 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         if(childURI == null) {
             childURI = referenceFromParent.getURI();
         }
+        
+        logger.debug("Importing node into new workspace; workspaceID: " + workspaceID + "; nodeURI: " + childURI);
             
         CorpusNode childCorpusNode = corpusStructureProvider.getNode(childURI);
         if(childCorpusNode == null) {
@@ -112,17 +113,17 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         URL childArchiveURL = null;
         
         try {
-	        if(childOnSite) {
-	            childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
-	            if(childLocalFile == null) {
-	            	String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
-	            	logger.error(errorMessage);
-	            	throw new IllegalArgumentException(errorMessage);
-            	}
-	            childArchiveURL = childLocalFile.toURI().toURL();
-	        } else {
-	        	childArchiveURL = nodeResolver.getUrl(childCorpusNode);
-	        }
+            if(childOnSite) {
+                childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
+                if(childLocalFile == null) {
+                    String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+                    logger.error(errorMessage);
+                    throw new IllegalArgumentException(errorMessage);
+            }
+                childArchiveURL = childLocalFile.toURI().toURL();
+            } else {
+                    childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+            }
         } catch(MalformedURLException ex) {
         	throw new UnsupportedOperationException("not handled yet");
         }

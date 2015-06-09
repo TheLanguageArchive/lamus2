@@ -87,11 +87,11 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference referenceFromParent) throws WorkspaceImportException {
 
-		if (workspace == null) {
-		    String errorMessage = "Workspace not set";
-		    logger.error(errorMessage);
-	            throw new IllegalArgumentException(errorMessage);
-		}
+        if (workspace == null) {
+            String errorMessage = "Workspace not set";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
         
         int workspaceID = workspace.getWorkspaceID();
 

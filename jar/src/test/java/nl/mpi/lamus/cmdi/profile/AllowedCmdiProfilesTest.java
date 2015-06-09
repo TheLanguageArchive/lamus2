@@ -112,7 +112,7 @@ public class AllowedCmdiProfilesTest {
                 assertEquals("Collection profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620"), profile.getLocation());
                 assertNotNull("Collection allowed reference types list should not be null", profile.getAllowedReferenceTypes());
                 assertFalse("Collection allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
-                assertTrue("Collection should only have one allowed reference type", profile.getAllowedReferenceTypes().size() == 1);
+                assertTrue("Collection should only have four allowed reference types", profile.getAllowedReferenceTypes().size() == 4);
                 assertEquals("Collection should only allow the Metadata reference type", "Metadata", profile.getAllowedReferenceTypes().iterator().next());
                 assertNull("Collection component reference map should be null", profile.getComponentMap());
             }
@@ -124,7 +124,7 @@ public class AllowedCmdiProfilesTest {
                 assertEquals("Lat-Corpus profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064"), profile.getLocation());
                 assertNotNull("Lat-Corpus allowed reference types list should not be null", profile.getAllowedReferenceTypes());
                 assertFalse("Lat-Corpus allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
-                assertTrue("Lat-Corpus should have two allowed reference types", profile.getAllowedReferenceTypes().size() == 2);
+                assertTrue("Lat-Corpus should have five allowed reference types", profile.getAllowedReferenceTypes().size() == 5);
                 assertTrue("Lat-Corpus should allow Metadata and Resource reference types", profile.getAllowedReferenceTypes().contains("Metadata") && profile.getAllowedReferenceTypes().contains("Resource"));
                 assertNotNull("Lat-Corpus component reference map should not be null", profile.getComponentMap());
                 assertFalse("Lat-Corpus component reference map should not be empty", profile.getComponentMap().isEmpty());
@@ -153,7 +153,7 @@ public class AllowedCmdiProfilesTest {
                 assertEquals("Lat-Session profile location different from expected", URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035"), profile.getLocation());
                 assertNotNull("Lat-Session allowed reference types list should not be null", profile.getAllowedReferenceTypes());
                 assertFalse("Lat-Session allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
-                assertTrue("Lat-Session should only have one allowed reference type", profile.getAllowedReferenceTypes().size() == 1);
+                assertTrue("Lat-Session should only have four allowed reference types", profile.getAllowedReferenceTypes().size() == 4);
                 assertEquals("Lat-Session should only allow the Metadata reference type", "Resource", profile.getAllowedReferenceTypes().iterator().next());
                 assertNotNull("Lat-Session component reference map should not be null", profile.getComponentMap());
                 assertFalse("Lat-Session component reference map should not be empty", profile.getComponentMap().isEmpty());

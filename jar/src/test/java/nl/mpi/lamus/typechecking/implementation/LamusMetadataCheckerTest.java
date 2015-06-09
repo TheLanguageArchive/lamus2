@@ -160,7 +160,10 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_invalidMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_invalidMimetype.cmdi");
-        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)]) or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml') or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
+        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)])"
+                + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
+                + " or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml')"
+                + " or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
         final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         
@@ -171,6 +174,21 @@ public class LamusMetadataCheckerTest {
         assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
     }
     
+    @Test
+    public void validateUploadedFile_otherResourceTypes() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_LandingPage.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_SearchPage.cmdi");
+        final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_SearchService.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues3 = metadataChecker.validateUploadedFile(fileToCheck3);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (2)", issues2.isEmpty());
+        assertTrue("Issues should be empty (3)", issues3.isEmpty());
+    }
     
     //validate submit phase
     
@@ -203,7 +221,7 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_notAllowedResourceType() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingReference_notAllowedType.cmdi");
-        final String expectedTest = "$profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]";
+        final String expectedTest = "not($profileName) or $profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]";
         final String expectedMessage = "[CMDI Profile Restriction] the CMD profile of this record doesn't allow for this resource type.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
@@ -245,7 +263,10 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_invalidMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_invalidMimetype.cmdi");
-        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)]) or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml') or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
+        final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)])"
+                + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
+                + " or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml')"
+                + " or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
         final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         
@@ -257,10 +278,28 @@ public class LamusMetadataCheckerTest {
     }
     
     @Test
+    public void validateSubmittedFile_otherResourceTypes() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_LandingPage.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_SearchPage.cmdi");
+        final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_SearchService.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues3 = metadataChecker.validateSubmittedFile(fileToCheck3);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (2)", issues2.isEmpty());
+        assertTrue("Issues should be empty (3)", issues3.isEmpty());
+    }
+    
+    @Test
     public void validateSubmittedFile_missingComponentReference() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingComponent_referenceMissing.cmdi");
-        final String expectedTest = "($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
+        final String expectedTest = "not($profileName)"
+                + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
+                + " or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
                 + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id])";
         final String expectedMessage = "[CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;

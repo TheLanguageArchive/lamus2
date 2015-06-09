@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
@@ -62,7 +63,10 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             NodeImporter linkImporterToUse = null;
             try {
                 linkImporterToUse = nodeImporterAssigner.getImporterForReference(currentLink);
-            } catch (Exception ex) {
+            } catch(UnusableReferenceTypeException ex) {
+                logger.info(ex.getMessage());
+                continue;
+            } catch(Exception ex) {
                 String errorMessage = "Error getting file importer";
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), ex);
             }
