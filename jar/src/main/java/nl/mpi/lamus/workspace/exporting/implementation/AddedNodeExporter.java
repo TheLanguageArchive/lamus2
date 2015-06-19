@@ -184,7 +184,7 @@ public class AddedNodeExporter implements NodeExporter {
         URL newNodeArchiveURL = null;
         
         try {
-            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename, currentNode.getType());
+            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNode, currentNodeFilename);
             logger.info("Retrieved new archive file path for added node: " + nextAvailableFile.getAbsolutePath());
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {

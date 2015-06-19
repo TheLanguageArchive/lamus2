@@ -41,4 +41,13 @@ public class AllowedCmdiProfiles {
     public void setProfiles(List<CmdiProfile> profiles) {
         this.profiles = profiles;
     }
+    
+    public CmdiProfile getProfile(String profileId) {
+        for(CmdiProfile p : profiles) {
+            if(profileId.equals(p.getId()) || profileId.contains(p.getId())) {
+                return p;
+            }
+        }
+        return null;
+    }
 }

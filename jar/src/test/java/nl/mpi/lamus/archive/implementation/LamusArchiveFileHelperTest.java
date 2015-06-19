@@ -25,6 +25,9 @@ import java.util.Calendar;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
@@ -68,14 +71,22 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockChildAbsoluteFile;
     @Mock File mockParentFile;
     
+    @Mock WorkspaceNode mockNode;
+    
     @Mock FileInfo mockArchiveFileInfo;
     @Mock File mockWorkspaceFile;
+    
+    @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
+    @Mock CmdiProfile mockCmdiProfile;
     
     private final int maxDirectoryNameLength = 50;
     private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
+    private final String corpusstructureDirectoryName = "Corpusstructure";
     private final String metadataDirectoryName = "Metadata";
-    private final String resourcesDirectoryName = "Resources";
+    private final String annotationsDirectoryName = "Annotations";
+    private final String mediaDirectoryName = "Media";
+    private final String infoDirectoryName = "Info";
     
     private File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
     private File versioningBaseDirectory = new File("/lat/corpora/versioning/");
@@ -97,11 +108,16 @@ public class LamusArchiveFileHelperTest {
         ReflectionTestUtils.setField(testArchiveFileHelper, "maxDirectoryNameLength", maxDirectoryNameLength);
         ReflectionTestUtils.setField(testArchiveFileHelper, "typeRecheckSizeLimitInBytes", typeRecheckSizeLimitInBytes);
         
+        ReflectionTestUtils.setField(testArchiveFileHelper, "corpusstructureDirectoryName", corpusstructureDirectoryName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "metadataDirectoryName", metadataDirectoryName);
-        ReflectionTestUtils.setField(testArchiveFileHelper, "resourcesDirectoryName", resourcesDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "annotationsDirectoryName", annotationsDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "mediaDirectoryName", mediaDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "infoDirectoryName", infoDirectoryName);
         
         ReflectionTestUtils.setField(testArchiveFileHelper, "trashCanBaseDirectory", trashCanBaseDirectory);
         ReflectionTestUtils.setField(testArchiveFileHelper, "versioningBaseDirectory", versioningBaseDirectory);
+        
+        ReflectionTestUtils.setField(testArchiveFileHelper, "allowedCmdiProfiles", mockAllowedCmdiProfiles);
     }
     
     @After
@@ -422,53 +438,94 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getDirectoryForResourceWithTopParent() {
+    public void getDirectoryForCorpus() {
         
-        final String parentpath = "/archive/root/root.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_IMAGE;
-        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
-        
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
-        
-        assertEquals("Returned directory different from expected", expectedDirectory, result);
-    }
-    
-    @Test
-    public void getDirectoryForMetadataWithTopParent() {
-        
-        final String parentPath = "/archive/root/root.cmdi";
+        final String parentPath = "/archive/root/topnode/Corpusstructure/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
+        final String expectedDirectory = "/archive/root/topnode/" + corpusstructureDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064/xsd"); //lat-corpus
+        final String translateType = "corpus";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, mockNode);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
     
     @Test
-    public void getDirectoryForResource() {
+    public void getDirectoryForSessionWithTopParent() {
         
-        final String parentpath = "/archive/root/Metadata/parent.cmdi";
+        final String parentPath = "/archive/root/topnode/Corpusstructure/topnode.cmdi";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/archive/root/topnode/" + metadataDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd"); //lat-session
+        final String translateType = "session";
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForWrittenResource() {
+        
+        final String parentpath = "/archive/root/topnode/Metadata/parent.cmdi";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        final String expectedDirectory = "/archive/root/topnode/" + annotationsDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentpath, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForMediaResource() {
+        
+        final String parentpath = "/archive/root/topnode/Metadata/parent.cmdi";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_VIDEO;
-        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
+        final String expectedDirectory = "/archive/root/topnode/" + mediaDirectoryName;
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentpath, mockNode);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
     
     @Test
-    public void getDirectoryForMetadata() {
+    public void getDirectoryForInfoFile() {
         
-        final String parentPath = "/archive/root/Metadata/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
+        final String parentpath = "/archive/root/topnode/Metadata/parent.cmdi";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_INFO;
+        final String expectedDirectory = "/archive/root/topnode/" + infoDirectoryName;
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentpath, mockNode);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
-
     
     @Test
     public void fileChangedDifferentSize() {

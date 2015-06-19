@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusNodeUtil implements NodeUtil {
-
+    
     /**
      * @see NodeUtil#convertArchiveNodeType(nl.mpi.archiving.corpusstructure.core.CorpusNodeType)
      */

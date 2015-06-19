@@ -22,7 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -65,6 +65,9 @@ public class LamusArchiveFileLocationProviderTest {
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock File mockFile;
     
+    @Mock WorkspaceNode mockNode;
+    
+    
     public LamusArchiveFileLocationProviderTest() {
     }
     
@@ -98,7 +101,6 @@ public class LamusArchiveFileLocationProviderTest {
         final String parentPath = "/archive/some/url/parent.cmdi";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
         final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
@@ -107,7 +109,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile);
             
@@ -119,7 +121,7 @@ public class LamusArchiveFileLocationProviderTest {
         //create directories if necessary, and empty file
         }});
         
-        File retrievedFile = archiveFileLocationProvider.getAvailableFile(parentPath, filenameAttempt, nodeType);
+        File retrievedFile = archiveFileLocationProvider.getAvailableFile(parentPath, mockNode, filenameAttempt);
         
         assertEquals("Retrieved file different from expected", mockFile, retrievedFile);
     }
@@ -130,7 +132,6 @@ public class LamusArchiveFileLocationProviderTest {
         final String parentPath = "/archive/some/url/parent.cmdi";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
         final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
@@ -141,7 +142,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile); will(throwException(ioException));
             
@@ -154,7 +155,7 @@ public class LamusArchiveFileLocationProviderTest {
         }});
         
         try {
-            archiveFileLocationProvider.getAvailableFile(parentPath, filenameAttempt, nodeType);
+            archiveFileLocationProvider.getAvailableFile(parentPath, mockNode, filenameAttempt);
             fail("An exception should have been thrown");
         } catch(IOException ex) {
             assertNotNull(ex);
@@ -297,10 +298,7 @@ public class LamusArchiveFileLocationProviderTest {
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
-
-    /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
+    
     @Test
     public void getOrphansDirectoryWithMetadataDirectory() throws MalformedURLException {
         
@@ -316,9 +314,6 @@ public class LamusArchiveFileLocationProviderTest {
         assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
     }
     
-    /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
     @Test
     public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
         

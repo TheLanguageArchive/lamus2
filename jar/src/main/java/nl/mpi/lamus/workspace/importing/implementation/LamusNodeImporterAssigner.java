@@ -45,7 +45,7 @@ public class LamusNodeImporterAssigner implements NodeImporterAssigner {
     public NodeImporter getImporterForReference(Reference reference)
             throws UnusableReferenceTypeException {
         if(reference instanceof ResourceReference) {
-            if(!MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE.equals(reference.getType())) {
+            if(!MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE.equalsIgnoreCase(reference.getType())) {
                 throw new UnusableReferenceTypeException("Reference of type [" + reference.getType() + "] cannot be imported.", reference.getType(), null);
             }
             return resourceNodeImporter;

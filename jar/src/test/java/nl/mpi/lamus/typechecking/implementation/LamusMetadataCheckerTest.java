@@ -190,6 +190,19 @@ public class LamusMetadataCheckerTest {
         assertTrue("Issues should be empty (3)", issues3.isEmpty());
     }
     
+    @Test
+    public void validateUploadedFile_withInfoLink() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Corpus.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Session.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (2)", issues2.isEmpty());
+    }
+    
     //validate submit phase
     
     @Test
@@ -300,7 +313,7 @@ public class LamusMetadataCheckerTest {
         final String expectedTest = "not($profileName)"
                 + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
                 + " or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
-                + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id])";
+                + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id] or /cmd:CMD/cmd:Components/cmd:lat-session/*[@ref = current()/@id])";
         final String expectedMessage = "[CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
@@ -330,6 +343,19 @@ public class LamusMetadataCheckerTest {
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+    }
+    
+    @Test
+    public void validateSubmittedFile_withInfoLink() throws Exception {
+        
+        final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Corpus.cmdi");
+        final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Session.cmdi");
+        
+        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
+        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        
+        assertTrue("Issues should be empty (1)", issues1.isEmpty());
+        assertTrue("Issues should be empty (2)", issues2.isEmpty());
     }
     
     @Test

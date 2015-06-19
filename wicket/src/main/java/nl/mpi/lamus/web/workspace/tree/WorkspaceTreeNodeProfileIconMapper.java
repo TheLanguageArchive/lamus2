@@ -60,11 +60,11 @@ public class WorkspaceTreeNodeProfileIconMapper {
         
         for(CmdiProfile profile : profiles) {
             if(profileLocationStr.contains(profile.getId())) {
-                if(profile.getDisplayIcon() == null || profile.getDisplayIcon().isEmpty()) {
+                if(profile.getTranslateType() == null || profile.getTranslateType().isEmpty()) {
                     continue;
                 }
-                if(iconsMap.containsKey(profile.getDisplayIcon())) {
-                    return iconsMap.get(profile.getDisplayIcon());
+                if(iconsMap.containsKey(profile.getTranslateType())) {
+                    return iconsMap.get(profile.getTranslateType());
                 }
             }
         }

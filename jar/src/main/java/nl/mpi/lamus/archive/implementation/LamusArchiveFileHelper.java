@@ -22,6 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
@@ -50,11 +53,20 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     private long typeRecheckSizeLimitInBytes;
     
     @Autowired
+    @Qualifier("corpusstructureDirectoryName")
+    private String corpusstructureDirectoryName;
+    @Autowired
     @Qualifier("metadataDirectoryName")
     private String metadataDirectoryName;
     @Autowired
-    @Qualifier("resourcesDirectoryName")
-    private String resourcesDirectoryName;
+    @Qualifier("annotationsDirectoryName")
+    private String annotationsDirectoryName;
+    @Autowired
+    @Qualifier("mediaDirectoryName")
+    private String mediaDirectoryName;
+    @Autowired
+    @Qualifier("infoDirectoryName")
+    private String infoDirectoryName;
     
     @Autowired
     @Qualifier("trashCanBaseDirectory")
@@ -62,6 +74,10 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Autowired
     @Qualifier("versioningBaseDirectory")
     private File versioningBaseDirectory;
+    
+    @Autowired
+    private AllowedCmdiProfiles allowedCmdiProfiles;
+    
     
     /**
      * 
@@ -218,25 +234,48 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         FileUtils.forceMkdir(parentFile);
         FileUtils.touch(fileToCreate);
     }
-    
+
     /**
-     * @see ArchiveFileHelper#getDirectoryForFileType(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     * @see ArchiveFileHelper#getDirectoryForNode(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
+    public String getDirectoryForNode(String parentPath, WorkspaceNode node) {
         
+        String corpusstructureFolderPlusFilename = corpusstructureDirectoryName + File.separator + FilenameUtils.getName(parentPath);
         String metadataFolderPlusFilename = this.metadataDirectoryName + File.separator + FilenameUtils.getName(parentPath);
         String parentBaseDirectory;
-        if(parentPath.endsWith(metadataFolderPlusFilename)) {
+
+        if(parentPath.endsWith(corpusstructureFolderPlusFilename)) {
+            parentBaseDirectory = parentPath.replace(corpusstructureFolderPlusFilename, "");
+        } else if(parentPath.endsWith(metadataFolderPlusFilename)) {
             parentBaseDirectory = parentPath.replace(metadataFolderPlusFilename, "");
         } else {
-            parentBaseDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
+            //TODO if this is supposed to be a top node, then a different method should be called specifically for that
+            throw new IllegalStateException("Parent node should be in either a 'Corpusstructure' or a 'Metadata' folder");
         }
         
-        if(WorkspaceNodeType.METADATA.equals(nodeType)) {
-            return FilenameUtils.concat(parentBaseDirectory, this.metadataDirectoryName);
+        if(WorkspaceNodeType.METADATA.equals(node.getType())) {
+            
+            CmdiProfile nodeProfile = allowedCmdiProfiles.getProfile(node.getProfileSchemaURI().toString());
+
+            if("corpus".equals(nodeProfile.getTranslateType())) {
+                return FilenameUtils.concat(parentBaseDirectory, corpusstructureDirectoryName);
+            } else if("session".equals(nodeProfile.getTranslateType())) {
+                return FilenameUtils.concat(parentBaseDirectory, metadataDirectoryName);
+            } else {
+                throw new IllegalArgumentException("Metadata should be translated to either corpus or session");
+            }
+            
+        } else if(WorkspaceNodeType.RESOURCE_WRITTEN.equals(node.getType())) {
+            return FilenameUtils.concat(parentBaseDirectory, annotationsDirectoryName);
+        } else if(WorkspaceNodeType.RESOURCE_AUDIO.equals(node.getType()) ||
+                WorkspaceNodeType.RESOURCE_IMAGE.equals(node.getType()) ||
+                WorkspaceNodeType.RESOURCE_VIDEO.equals(node.getType())) {
+            return FilenameUtils.concat(parentBaseDirectory, mediaDirectoryName);
+        } else if(WorkspaceNodeType.RESOURCE_INFO.equals(node.getType())) {
+            return FilenameUtils.concat(parentBaseDirectory, infoDirectoryName);
         } else {
-            return FilenameUtils.concat(parentBaseDirectory, this.resourcesDirectoryName);
+            throw new IllegalStateException("Not supported node type");
         }
     }
 

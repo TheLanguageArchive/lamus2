@@ -27,6 +27,9 @@ public enum WorkspaceNodeType {
     RESOURCE_AUDIO,
     RESOURCE_VIDEO,
     RESOURCE_WRITTEN,
+    
+    RESOURCE_INFO,
+    
     RESOURCE_OTHER,
     
     UNKNOWN;

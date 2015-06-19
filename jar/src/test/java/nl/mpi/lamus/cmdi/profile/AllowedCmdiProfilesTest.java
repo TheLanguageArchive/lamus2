@@ -185,4 +185,30 @@ public class AllowedCmdiProfilesTest {
         assertTrue("Lat-Corpus profile not found", corpusFound);
         assertTrue("Lat-Session profile not found", sessionFound);
     }
+    
+    @Test
+    public void getProfile() {
+        
+        final String profileToCheck = "clarin.eu:cr1:p_1407745712035";
+        final URI expectedProfileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035");
+        final String expectedProfileName = "lat-session";
+        final String expectedTranslateType = "session";
+        
+        CmdiProfile retrievedProfile = allowedCmdiProfiles.getProfile(profileToCheck);
+        
+        assertNotNull("Retrieved profile should not be null", retrievedProfile);
+        assertEquals("Profile location different from expected", expectedProfileLocation, retrievedProfile.getLocation());
+        assertEquals("Profile name different from expected", expectedProfileName, retrievedProfile.getName());
+        assertEquals("Profile translate type different from expected", expectedTranslateType, retrievedProfile.getTranslateType());
+    }
+    
+    @Test
+    public void getProfileNull() {
+        
+        final String profileToCheck = "clarin.eu:cr1:p_5555555555555";
+        
+        CmdiProfile retrievedProfile = allowedCmdiProfiles.getProfile(profileToCheck);
+        
+        assertNull("Retrieved profile should be null", retrievedProfile);
+    }
 }

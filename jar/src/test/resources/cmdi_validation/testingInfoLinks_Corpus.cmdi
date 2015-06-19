@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2015-06-19+02:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1407745712064</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="res_d6a70dee-b885-48e1-92fb-784f8e6c7e68">
+            <ResourceType mimetype="application/pdf">Resource</ResourceType>
+            <ResourceRef>CorpusWithInfo/Owly-Back_in_the_Swing.pdf</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="res_7413b884-1e5e-4afa-ba27-562af707a7d1">
+            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
+            <ResourceRef>CorpusWithInfo/SessionWithInfo.cmdi</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <lat-corpus>
+         <Name>CorpusWithInfo</Name>
+         <Title>CorpusWithInfo</Title>
+         <descriptions>
+            <Description xml:lang="eng">desc</Description>
+         </descriptions>
+         <InfoLink ref="res_d6a70dee-b885-48e1-92fb-784f8e6c7e68">
+            <Description xml:lang="eng">info desc</Description>
+         </InfoLink>
+         <CorpusLink ref="res_7413b884-1e5e-4afa-ba27-562af707a7d1">
+            <Name>NormalLink</Name>
+         </CorpusLink>
+      </lat-corpus>
+   </Components>
+</CMD>

@@ -99,6 +99,16 @@ public class LamusNodeImporterAssignerTest {
     }
     
     @Test
+    public void getResourceImporter_ignoreCase() throws URISyntaxException, UnusableReferenceTypeException {
+        Reference resourceReference = new DataResourceProxy("id", URI.create("http:/some/path/resource.txt"), "RESOURCE", "text/plain");
+        
+        NodeImporter retrievedNodeImporter = nodeImporterAssigner.getImporterForReference(resourceReference);
+        
+        assertNotNull(retrievedNodeImporter);
+        assertTrue(retrievedNodeImporter instanceof ResourceNodeImporter);
+    }
+    
+    @Test
     public void getImporterForOtherResourceType() {
         Reference resourceReferenceSearchPage = new DataResourceProxy("id", URI.create("http:/some/path/search.html"), "SearchPage", "text/html");
         

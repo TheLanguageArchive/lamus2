@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2015-06-19+02:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1407745712035</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="res_626ea191-2e69-4f7b-a6a8-3011667c4956">
+            <ResourceType mimetype="image/jpeg">Resource</ResourceType>
+            <ResourceRef>SessionWithInfo/Superman.jpg</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="res_ec3815b5-e846-403f-9297-07df7d91a71b">
+            <ResourceType mimetype="text/plain">Resource</ResourceType>
+            <ResourceRef>SessionWithInfo/complicatedTextDocument.txt</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <lat-session>
+         <Name>SessionWithInfo</Name>
+         <Title>SessionWithInfo</Title>
+         <Date>2015</Date>
+         <descriptions>
+            <Description xml:lang="eng">desc</Description>
+         </descriptions>
+         <InfoLink ref="res_ec3815b5-e846-403f-9297-07df7d91a71b">
+            <Description xml:lang="eng">info desc</Description>
+         </InfoLink>
+         
+         <Location>
+            <Continent>Europe</Continent>
+            <Country>Finland</Country>
+         </Location>
+         <Project>
+            <Name>SomeProject</Name>
+            <Contact>
+               <Name>Name</Name>
+               <Address>add ress</Address>
+               <Email>e@m.ail</Email>
+               <Organisation>Organisation</Organisation>
+            </Contact>
+         </Project>
+         <Content>
+            <Genre>something</Genre>
+            <CommunicationContext/>
+         </Content>
+         <Resources>
+            <MediaFile ref="res_626ea191-2e69-4f7b-a6a8-3011667c4956">
+               <Type>image</Type>
+               <Format>jpg</Format>
+               <Size/>
+               <Quality>2</Quality>
+            </MediaFile>
+         </Resources>
+      </lat-session>
+   </Components>
+</CMD>

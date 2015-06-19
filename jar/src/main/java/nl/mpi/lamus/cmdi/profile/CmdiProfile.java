@@ -56,7 +56,7 @@ public class CmdiProfile {
     private Map<String, String> componentMap;
     
     @XmlElement
-    private String displayIcon;
+    private String translateType;
     
     
     public String getId() {
@@ -94,10 +94,10 @@ public class CmdiProfile {
         this.componentMap = componentMap;
     }
     
-    public String getDisplayIcon() {
-        return displayIcon;
+    public String getTranslateType() {
+        return translateType;
     }
-    public void setDisplayIcon(String displayIcon) {
-        this.displayIcon = displayIcon;
+    public void setTranslateType(String translateType) {
+        this.translateType = translateType;
     }
 }

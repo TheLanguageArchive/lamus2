@@ -199,7 +199,6 @@ public class AddedNodeExporterTest {
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
         final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -226,7 +225,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -266,7 +265,6 @@ public class AddedNodeExporterTest {
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
         final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -294,7 +292,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.FALSE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -334,7 +332,6 @@ public class AddedNodeExporterTest {
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
         final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -362,7 +359,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.FALSE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -403,7 +400,6 @@ public class AddedNodeExporterTest {
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
         final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -430,7 +426,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -482,7 +478,6 @@ public class AddedNodeExporterTest {
         final String nodeWsPath = nodeWsURL.getPath();
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/child/" + nodeWsFilename);
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
@@ -505,7 +500,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, expectedException);
         
         try {
             addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
@@ -529,7 +524,6 @@ public class AddedNodeExporterTest {
         final String nodeWsPath = nodeWsURL.getPath();
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/child/" + nodeWsFilename);
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
@@ -552,7 +546,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -580,7 +574,6 @@ public class AddedNodeExporterTest {
         final String nodeWsPath = nodeWsURL.getPath();
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/child/" + nodeWsFilename);
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         
         final URL parentNodeArchiveURL = parentNode.getArchiveURL();
@@ -603,7 +596,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, expectedException, keepUnlinkedFiles, submissionType, exportPhase);
 
@@ -631,7 +624,6 @@ public class AddedNodeExporterTest {
         final File nodeWsFile = new File(nodeWsURL.getPath());
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final File nextAvailableFile = new File("/archive/root/child/" + nodeWsFilename);
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -656,7 +648,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -693,7 +685,6 @@ public class AddedNodeExporterTest {
         final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
         final String nextAvailableFilePath = "file:/archive/root/child/" + nodeWsFilename;
         final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
-        final WorkspaceNodeType nodeType = currentNode.getType();
         final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
         final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
         final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/root/child/" + nodeWsFilename);
@@ -723,7 +714,7 @@ public class AddedNodeExporterTest {
         
         checkParentPathRetrieval(Boolean.TRUE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
         
-        checkFirstInvocations(nodeWsURL, nodeType, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
+        checkFirstInvocations(nodeWsURL, mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, null);
         
         checkExploreInvocations(isFileMetadata, null, keepUnlinkedFiles, submissionType, exportPhase);
         
@@ -780,25 +771,21 @@ public class AddedNodeExporterTest {
     }
     
     private void checkFirstInvocations(
-            final URL nodeWsURL, final WorkspaceNodeType nodeType,
+            final URL nodeWsURL, final WorkspaceNode node,
             final String nodeWsFilename, final File nextAvailableFile,
             final URL nodeNewArchiveURL, final String parentNodeArchivePath, final Exception expectedException) throws IOException, URISyntaxException {
-        
-        context.checking(new Expectations() {{
-            oneOf(mockChildWsNode).getType(); will(returnValue(nodeType));
-        }});
         
         if(expectedException != null) {
             context.checking(new Expectations() {{
                 oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                        parentNodeArchivePath, nodeWsFilename, nodeType);
+                        parentNodeArchivePath, node, nodeWsFilename);
                     will(throwException(expectedException));
             }});
         } else {
         
             context.checking(new Expectations() {{
                 oneOf(mockArchiveFileLocationProvider).getAvailableFile(
-                        parentNodeArchivePath, nodeWsFilename, nodeType);
+                        parentNodeArchivePath, node, nodeWsFilename);
                     will(returnValue(nextAvailableFile));
                 oneOf(mockChildWsNode).setArchiveURL(nodeNewArchiveURL);
                 oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);

@@ -184,15 +184,33 @@ public class LamusProperties implements ServletContextAware {
     }
     
     @Bean
+    @Qualifier("corpusstructureDirectoryName")
+    public String corpusstructureDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure_directory_name");
+    }
+    
+    @Bean
     @Qualifier("metadataDirectoryName")
     public String metadataDirectoryName() {
         return servletContext.getInitParameter("nl.mpi.lamus.metadata_directory_name");
     }
     
     @Bean
-    @Qualifier("resourcesDirectoryName")
-    public String resourcesDirectoryName() {
-        return servletContext.getInitParameter("nl.mpi.lamus.resources_directory_name");
+    @Qualifier("annotationsDirectoryName")
+    public String annotationsDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.annotations_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("mediaDirectoryName")
+    public String mediaDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.media_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("infoDirectoryName")
+    public String infoDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.info_directory_name");
     }
     
     @Bean

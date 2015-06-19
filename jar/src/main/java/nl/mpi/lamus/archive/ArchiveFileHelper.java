@@ -18,7 +18,7 @@ package nl.mpi.lamus.archive;
 import java.io.File;
 import java.io.IOException;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.util.OurURL;
 
 /**
@@ -95,12 +95,13 @@ public interface ArchiveFileHelper {
     public void createFileAndDirectories(File fileToCreate) throws IOException;
     
     /**
-     * Determines the path for files of the given type, based on the path of the parent node
+     * Determines the path for a certain node, based on the path of the
+     * parent node, as well as the node type and/or profile.
      * @param parentPath Path of the parent node
-     * @param nodeType Type of the node
+     * @param node WorkspaceNode object for the node
      * @return Directory where the node should be located
      */
-    public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType);
+    public String getDirectoryForNode(String parentPath, WorkspaceNode node);
     
     /**
      * Given the FileInfo of an archive node and the location of the corresponding

@@ -64,7 +64,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             try {
                 linkImporterToUse = nodeImporterAssigner.getImporterForReference(currentLink);
             } catch(UnusableReferenceTypeException ex) {
-                logger.info(ex.getMessage());
+                logger.warn(ex.getMessage());
                 continue;
             } catch(Exception ex) {
                 String errorMessage = "Error getting file importer";
