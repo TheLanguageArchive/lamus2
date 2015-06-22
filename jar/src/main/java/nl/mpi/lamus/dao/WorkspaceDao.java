@@ -284,8 +284,14 @@ public interface WorkspaceDao {
     public void updateNodeArchiveUrl(WorkspaceNode node);
     
     /**
+     * Updates the type of the given node.
+     * @param node  WorkspaceNode object to be updated
+     */
+    public void updateNodeType(WorkspaceNode node);
+    
+    /**
      * Inserts a link between two nodes (parent and child) into the database.
-     * @param link WorkspaceNodeLink object to insert into the database
+     * @param nodeLink WorkspaceNodeLink object to insert into the database
      */
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink);
     

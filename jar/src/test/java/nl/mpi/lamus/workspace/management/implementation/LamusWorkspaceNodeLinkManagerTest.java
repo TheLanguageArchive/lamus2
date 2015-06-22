@@ -31,7 +31,7 @@ import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.metadata.implementation.MetadataReferenceTypes;
+import nl.mpi.lamus.metadata.implementation.MetadataReferenceType;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -359,7 +359,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
             
             oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
-            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, childMimetype);
+            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childMimetype);
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
@@ -417,7 +417,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
             
             oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
-            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, childMimetype);
+            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childMimetype);
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
@@ -477,7 +477,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
             
             oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
-            oneOf(mockParentDocument).createDocumentResourceReference(childURI, null, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, childMimetype);
+            oneOf(mockParentDocument).createDocumentResourceReference(childURI, null, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childMimetype);
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
@@ -538,7 +538,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockChildNode).getOriginURI(); will(returnValue(childURI));
             oneOf(mockChildNode).getFormat(); will(returnValue(null));
-            oneOf(mockParentDocument).createDocumentResourceReference(childURI, null, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, null);
+            oneOf(mockParentDocument).createDocumentResourceReference(childURI, null, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, null);
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
@@ -1699,7 +1699,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
             oneOf(mockNewNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockNewNode).getFormat(); will(returnValue(childMimetype));
-            oneOf(mockParentDocument).createDocumentResourceReference(null, newChildURI, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, childMimetype);
+            oneOf(mockParentDocument).createDocumentResourceReference(null, newChildURI, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childMimetype);
                 will(returnValue(mockChildResourceReference));
                 
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));

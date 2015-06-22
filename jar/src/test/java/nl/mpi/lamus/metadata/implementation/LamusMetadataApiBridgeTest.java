@@ -731,60 +731,60 @@ public class LamusMetadataApiBridgeTest {
     public void referenceTypeIsMetadata() {
         
         context.checking(new Expectations() {{
-            allowing(mockReference).getType(); will(returnValue(MetadataReferenceTypes.REFERENCE_TYPE_METADATA));
+            allowing(mockReference).getType(); will(returnValue(MetadataReferenceType.REFERENCE_TYPE_METADATA));
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceTypeAPage(mockReference);
         
-        assertFalse("Result should have been false for " + MetadataReferenceTypes.REFERENCE_TYPE_METADATA, result);
+        assertFalse("Result should have been false for " + MetadataReferenceType.REFERENCE_TYPE_METADATA, result);
     }
     
     @Test
     public void referenceTypeIsResource() {
         
         context.checking(new Expectations() {{
-            allowing(mockReference).getType(); will(returnValue(MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE));
+            allowing(mockReference).getType(); will(returnValue(MetadataReferenceType.REFERENCE_TYPE_RESOURCE));
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceTypeAPage(mockReference);
         
-        assertFalse("Result should have been false for " + MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, result);
+        assertFalse("Result should have been false for " + MetadataReferenceType.REFERENCE_TYPE_RESOURCE, result);
     }
     
     @Test
     public void referenceTypeIsLandingPage() {
         
         context.checking(new Expectations() {{
-            allowing(mockReference).getType(); will(returnValue(MetadataReferenceTypes.REFERENCE_TYPE_LANDING_PAGE));
+            allowing(mockReference).getType(); will(returnValue(MetadataReferenceType.REFERENCE_TYPE_LANDING_PAGE));
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceTypeAPage(mockReference);
         
-        assertTrue("Result should have been true for " + MetadataReferenceTypes.REFERENCE_TYPE_LANDING_PAGE, result);
+        assertTrue("Result should have been true for " + MetadataReferenceType.REFERENCE_TYPE_LANDING_PAGE, result);
     }
     
     @Test
     public void referenceTypeIsSearchPage() {
         
         context.checking(new Expectations() {{
-            allowing(mockReference).getType(); will(returnValue(MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_PAGE));
+            allowing(mockReference).getType(); will(returnValue(MetadataReferenceType.REFERENCE_TYPE_SEARCH_PAGE));
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceTypeAPage(mockReference);
         
-        assertTrue("Result should have been true for " + MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_PAGE, result);
+        assertTrue("Result should have been true for " + MetadataReferenceType.REFERENCE_TYPE_SEARCH_PAGE, result);
     }
     
     @Test
     public void referenceTypeIsSearchService() {
         
         context.checking(new Expectations() {{
-            allowing(mockReference).getType(); will(returnValue(MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_SERVICE));
+            allowing(mockReference).getType(); will(returnValue(MetadataReferenceType.REFERENCE_TYPE_SEARCH_SERVICE));
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceTypeAPage(mockReference);
         
-        assertTrue("Result should have been true for " + MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_SERVICE, result);
+        assertTrue("Result should have been true for " + MetadataReferenceType.REFERENCE_TYPE_SEARCH_SERVICE, result);
     }
     
     @Test

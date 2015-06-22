@@ -883,6 +883,23 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
 
     /**
+     * @see WorkspaceDao#updateNodeType(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void updateNodeType(WorkspaceNode node) {
+        logger.debug("Updating type for node with ID: " + node.getWorkspaceNodeID() + "; setting type to: " + node.getType());
+        
+        String updateSql = "UPDATE node SET type = :type"
+                + " WHERE workspace_node_id = :workspace_node_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("type", node.getType().name())
+                .addValue("workspace_node_id", node.getWorkspaceNodeID());
+        this.namedParameterJdbcTemplate.update(updateSql, namedParameters);
+        
+        logger.info("Type of node " + node.getWorkspaceNodeID() + " updated to " + node.getType());
+    }
+
+    /**
      * @see WorkspaceDao#addWorkspaceNodeLink(nl.mpi.lamus.workspace.model.WorkspaceNodeLink)
      */
     @Override

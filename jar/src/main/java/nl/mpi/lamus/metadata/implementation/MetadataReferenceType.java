@@ -20,7 +20,7 @@ package nl.mpi.lamus.metadata.implementation;
  *
  * @author guisil
  */
-public class MetadataReferenceTypes {
+public class MetadataReferenceType {
     
     public static final String REFERENCE_TYPE_METADATA = "Metadata";
     public static final String REFERENCE_TYPE_RESOURCE = "Resource";

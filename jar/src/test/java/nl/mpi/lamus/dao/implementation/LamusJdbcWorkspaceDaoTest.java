@@ -1055,6 +1055,24 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void updateNodeType() throws URISyntaxException, MalformedURLException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeIntoDB(testWorkspace);
+        setNodeType(testNode, WorkspaceNodeType.UNKNOWN);
+        
+        WorkspaceNodeType expectedType = WorkspaceNodeType.RESOURCE_INFO;
+        testNode.setType(expectedType);
+        
+        workspaceDao.updateNodeType(testNode);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
+        
+        assertEquals("WorkspaceNode object retrieved from the database is different from expected", testNode, retrievedNode);
+        assertEquals("Type of the node was not updated in the database", expectedType, retrievedNode.getType());
+    }
+    
+    @Test
     public void addWorkspaceNodeLink() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_link");
@@ -2433,6 +2451,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         String updateNodeSql = "UPDATE node SET status = ? WHERE workspace_node_id = ?";
         jdbcTemplate.update(updateNodeSql, WorkspaceNodeStatus.ARCHIVE_COPY.name(), node.getWorkspaceNodeID());
         node.setStatus(WorkspaceNodeStatus.ARCHIVE_COPY);
+    }
+    
+    private void setNodeType(WorkspaceNode node, WorkspaceNodeType newType) {
+        
+        String updateNodeSql = "UPDATE node SET type = ? WHERE workspace_node_id = ?";
+        jdbcTemplate.update(updateNodeSql, newType.name(), node.getWorkspaceNodeID());
+        node.setType(newType);
     }
     
     private void addNodeReplacement(WorkspaceNode oldNode, WorkspaceNode newNode) {

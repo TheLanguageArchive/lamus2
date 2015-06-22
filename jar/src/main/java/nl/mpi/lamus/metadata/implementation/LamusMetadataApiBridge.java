@@ -224,7 +224,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isMetadataReferenceAllowedInProfile(URI profileLocation) {
         
-        return isReferenceTypeAllowedInProfile(MetadataReferenceTypes.REFERENCE_TYPE_METADATA, profileLocation);
+        return isReferenceTypeAllowedInProfile(MetadataReferenceType.REFERENCE_TYPE_METADATA, profileLocation);
     }
 
     /**
@@ -233,7 +233,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isResourceReferenceAllowedInProfile(URI profileLocation) {
         
-        return isReferenceTypeAllowedInProfile(MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, profileLocation);
+        return isReferenceTypeAllowedInProfile(MetadataReferenceType.REFERENCE_TYPE_RESOURCE, profileLocation);
     }
 
     /**
@@ -242,9 +242,9 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isReferenceTypeAPage(Reference reference) {
         
-        return  MetadataReferenceTypes.REFERENCE_TYPE_LANDING_PAGE.equals(reference.getType()) ||
-                MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_PAGE.equals(reference.getType()) ||
-                MetadataReferenceTypes.REFERENCE_TYPE_SEARCH_SERVICE.equals(reference.getType());
+        return  MetadataReferenceType.REFERENCE_TYPE_LANDING_PAGE.equals(reference.getType()) ||
+                MetadataReferenceType.REFERENCE_TYPE_SEARCH_PAGE.equals(reference.getType()) ||
+                MetadataReferenceType.REFERENCE_TYPE_SEARCH_SERVICE.equals(reference.getType());
     }
 
     /**

@@ -35,13 +35,16 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.metadata.implementation.MetadataComponentType;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.util.HandleUtil;
@@ -228,6 +231,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                         }
                     }
                 }
+                
+                // check if it is an info link and update the node type accordingly
+                if(isRefInfoLink(currentDocument, ref)) {
+                    matchedNode.setType(WorkspaceNodeType.RESOURCE_INFO);
+                    workspaceDao.updateNodeType(matchedNode);
+                }
+                
             } else {
                 removeReference(currentDocument, ref, currentNode);
                 String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched";
@@ -290,5 +300,15 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             logger.error(message, ex);
             failedLinks.add(new LinkImportProblem(parent, child, message, ex));
         }
+    }
+    
+    private boolean isRefInfoLink(ReferencingMetadataDocument doc, Reference ref) {
+        Collection<MetadataElement> refElements = doc.getResourceProxyReferences(ref);
+        for(MetadataElement el : refElements) {
+            if(el.getType() != null && MetadataComponentType.COMPONENT_TYPE_INFO_LINK.equals(el.getType().getName())) { //info file
+                return true;
+            }
+        }
+        return false;
     }
 }

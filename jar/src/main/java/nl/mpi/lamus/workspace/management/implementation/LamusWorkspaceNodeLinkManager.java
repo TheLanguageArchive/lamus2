@@ -27,7 +27,7 @@ import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.metadata.implementation.MetadataReferenceTypes;
+import nl.mpi.lamus.metadata.implementation.MetadataReferenceType;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -174,8 +174,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                     throwWorkspaceException(message, workspaceID, null);
                 }
                 
-                createdProxy = parentDocument.createDocumentResourceReference(
-                        childUri, childLocation, MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE, childNode.getFormat());
+                createdProxy = parentDocument.createDocumentResourceReference(childUri, childLocation, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childNode.getFormat());
                 
                 addReferenceToComponent(parentNode, createdProxy, parentDocument);
                 

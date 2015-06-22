@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import nl.mpi.lamus.exception.UnusableReferenceTypeException;
-import nl.mpi.lamus.metadata.implementation.MetadataReferenceTypes;
+import nl.mpi.lamus.metadata.implementation.MetadataReferenceType;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.metadata.api.model.MetadataReference;
@@ -45,7 +45,7 @@ public class LamusNodeImporterAssigner implements NodeImporterAssigner {
     public NodeImporter getImporterForReference(Reference reference)
             throws UnusableReferenceTypeException {
         if(reference instanceof ResourceReference) {
-            if(!MetadataReferenceTypes.REFERENCE_TYPE_RESOURCE.equalsIgnoreCase(reference.getType())) {
+            if(!MetadataReferenceType.REFERENCE_TYPE_RESOURCE.equalsIgnoreCase(reference.getType())) {
                 throw new UnusableReferenceTypeException("Reference of type [" + reference.getType() + "] cannot be imported.", reference.getType(), null);
             }
             return resourceNodeImporter;
