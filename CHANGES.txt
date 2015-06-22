@@ -1,3 +1,14 @@
+lamus2-1.3.0-RC2 (2015-06-22)
+
+    Additions:
+        - RESOURCE TYPE Support for different ResourceType values for resource
+          proxies ("LandingPage", "SearchPage" and "SearchService").
+
+    Changes:
+        - FOLDER STRUCTURE: Changed the supported folder structure back to the
+          old one (used in the old Lamus), with the folders "Corpusstructure",
+          "Metadata", "sessions", "Annotations", "Media" and "Info".
+
 lamus2-1.3.0-RC1 (2015-05-15)
 
     Additions:
