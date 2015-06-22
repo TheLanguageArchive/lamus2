@@ -76,14 +76,29 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Sub-directory for uploaded files in the workspace"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.corpusstructure_directory_name"
+                   value="Corpusstructure"
+                   description="Sub-directory for corpus in the archive domain"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.metadata_directory_name"
                    value="Metadata"
                    description="Sub-directory for metadata in the archive domain"
                    override="false"/>
 
-        <Parameter name="nl.mpi.lamus.resources_directory_name"
-                   value="Resources"
-                   description="Sub-directory for resources in the archive domain"
+        <Parameter name="nl.mpi.lamus.annotations_directory_name"
+                   value="Annotations"
+                   description="Sub-directory for text resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.media_directory_name"
+                   value="Media"
+                   description="Sub-directory for media resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.info_directory_name"
+                   value="Info"
+                   description="Sub-directory for info files in the archive domain"
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.orphans_directory_name"
