@@ -147,6 +147,10 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         
         WorkspaceNodeType childNodeType = nodeUtil.convertMimetype(childMimetype);
         boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
+        
+        if(metadataApiBridge.isReferenceAnInfoLink(parentDocument, referenceFromParent)) {
+            childNodeType = WorkspaceNodeType.RESOURCE_INFO;
+        }
 
         WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(
                 workspaceID, childURI, childArchiveURL, referenceFromParent,

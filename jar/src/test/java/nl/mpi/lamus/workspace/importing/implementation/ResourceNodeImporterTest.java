@@ -181,10 +181,94 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithHandle); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
                     testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
                     mockChildLinkWithHandle, childNodeMimetype, childNodeType,
+                    childNodeName, childOnSite, childProtected);
+                will(returnValue(testChildNode));
+
+            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+
+            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+                will(returnValue(testNodeLink));
+            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            
+            oneOf(mockChildLinkWithHandle).setLocation(null);
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
+        }});
+        
+        nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockChildLinkWithHandle);
+    }
+    
+    @Test
+    public void importResourceNodeWithHandle_InfoLink()
+            throws MalformedURLException, TypeCheckerException, WorkspaceImportException, IOException, TransformerException, MetadataException {
+
+        final int parentWorkspaceNodeID = 1;
+        final int childWorkspaceNodeID = 10;
+        final String childNodeName = "file name label";
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        final WorkspaceNodeType childInfoNodeType = WorkspaceNodeType.RESOURCE_INFO;
+        final String childNodeMimetype = "text/plain";
+        final URI childNodeSchemaLocation = URI.create("file:/some.location");
+        final URI childURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final String childFilename = "childname.txt";
+        final URL childWsURL = new URL("file:/workspace/folder/" + childFilename);
+        final URI childOriginURI = URI.create("file:/some.uri/" + childFilename);
+        final URL childArchiveURL = childOriginURI.toURL();
+
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.VIRTUAL;
+        final boolean childOnSite = Boolean.TRUE;
+        final boolean childProtected = Boolean.FALSE;
+        
+        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
+        final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
+        final URL parentArchiveURL = parentOriginURI.toURL();
+        final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
+        final boolean parentProtected = Boolean.FALSE;
+        
+        final WorkspaceNode testParentNode = new LamusWorkspaceNode(parentWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                "parent label", "", WorkspaceNodeType.METADATA, parentWsURL, parentURI, parentArchiveURL, parentOriginURI, parentStatus, parentProtected, "cmdi");
+        final WorkspaceNode testChildNode = new LamusWorkspaceNode(childWorkspaceNodeID, testWorkspace.getWorkspaceID(), childNodeSchemaLocation,
+                childNodeName, "", childInfoNodeType, childWsURL, childURI, childArchiveURL, childOriginURI, childStatus, childProtected, childNodeMimetype);
+        final WorkspaceNodeLink testNodeLink = new LamusWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(childURI); will(returnValue(mockCorpusNode));
+            
+            allowing(mockCorpusNode).isOnSite(); will(returnValue(childOnSite));
+            
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockFile));
+            oneOf(mockFile).toURI(); will(returnValue(childOriginURI));
+            
+            oneOf(mockChildLinkWithHandle).getMimetype(); will(returnValue(childNodeMimetype));
+            oneOf(mockNodeDataRetriever).shouldResourceBeTypechecked(mockChildLinkWithHandle, mockFile, mockCorpusNode);
+                will(returnValue(Boolean.TRUE));
+
+            oneOf(mockFile).getName(); will(returnValue(childFilename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(childArchiveURL, childFilename);
+                will(returnValue(mockTypecheckedResults));
+                
+            oneOf(mockNodeDataRetriever).verifyTypecheckedResults(mockFile, mockChildLinkWithHandle, mockTypecheckedResults);
+            
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(childNodeMimetype));
+            
+            oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
+            
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithHandle); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
+                    testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
+                    mockChildLinkWithHandle, childNodeMimetype, childInfoNodeType,
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
@@ -259,6 +343,8 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
             
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithoutHandle); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
                     testWorkspace.getWorkspaceID(), childOriginURI, childArchiveURL,
@@ -327,6 +413,8 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childOriginURI); will(returnValue(childProtected));
+            
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithoutHandle); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
@@ -409,6 +497,8 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
+            
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithHandle); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
@@ -501,6 +591,8 @@ public class ResourceNodeImporterTest {
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
             
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithHandle); will(returnValue(Boolean.FALSE));
+            
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(
                     testWorkspace.getWorkspaceID(), childURI, childArchiveURL,
@@ -591,6 +683,8 @@ public class ResourceNodeImporterTest {
             
             oneOf(mockNodeUtil).convertMimetype(childNodeMimetype); will(returnValue(childNodeType));
             oneOf(mockNodeDataRetriever).isNodeToBeProtected(childURI); will(returnValue(childProtected));
+            
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockReferencingMetadataDocument, mockChildLinkWithHandle); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusNode).getName(); will(returnValue(childNodeName));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNode(

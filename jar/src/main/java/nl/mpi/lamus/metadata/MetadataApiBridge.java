@@ -26,6 +26,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 
@@ -157,4 +158,13 @@ public interface MetadataApiBridge {
      * @return Created reference
      */
     public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy);
+    
+    /**
+     * Given a metadata document and a reference in that document, checks if
+     * it refers to an info link.
+     * @param document Metadata document where the reference belongs
+     * @param reference Reference to check
+     * @return true if the reference corresponds to an info link
+     */
+    public boolean isReferenceAnInfoLink(ReferencingMetadataDocument document, Reference reference);
 }

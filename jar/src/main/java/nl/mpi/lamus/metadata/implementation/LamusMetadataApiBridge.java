@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,9 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
@@ -322,6 +325,21 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy) {
         
         return component.addDocumentResourceProxyReference(resourceProxy.getId());
+    }
+
+    /**
+     * @see MetadataApiBridge#isReferenceAnInfoLink(nl.mpi.metadata.api.model.ReferencingMetadataDocument, nl.mpi.metadata.api.model.Reference)
+     */
+    @Override
+    public boolean isReferenceAnInfoLink(ReferencingMetadataDocument document, Reference reference) {
+        
+        Collection<MetadataElement> refElements = document.getResourceProxyReferences(reference);
+        for(MetadataElement el : refElements) {
+            if(el.getType() != null && MetadataComponentType.COMPONENT_TYPE_INFO_LINK.equals(el.getType().getName())) { //info file
+                return true;
+            }
+        }
+        return false;
     }
     
     

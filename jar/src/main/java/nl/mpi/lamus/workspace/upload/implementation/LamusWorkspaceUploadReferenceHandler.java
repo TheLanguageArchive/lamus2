@@ -233,7 +233,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 }
                 
                 // check if it is an info link and update the node type accordingly
-                if(isRefInfoLink(currentDocument, ref)) {
+                if(metadataApiBridge.isReferenceAnInfoLink(currentDocument, ref)) {
                     matchedNode.setType(WorkspaceNodeType.RESOURCE_INFO);
                     workspaceDao.updateNodeType(matchedNode);
                 }
@@ -300,15 +300,5 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             logger.error(message, ex);
             failedLinks.add(new LinkImportProblem(parent, child, message, ex));
         }
-    }
-    
-    private boolean isRefInfoLink(ReferencingMetadataDocument doc, Reference ref) {
-        Collection<MetadataElement> refElements = doc.getResourceProxyReferences(ref);
-        for(MetadataElement el : refElements) {
-            if(el.getType() != null && MetadataComponentType.COMPONENT_TYPE_INFO_LINK.equals(el.getType().getName())) { //info file
-                return true;
-            }
-        }
-        return false;
     }
 }

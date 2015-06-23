@@ -1325,20 +1325,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             final Reference mockReference, final boolean isInfoLink,
             final WorkspaceNode mockMatchedNode) {
         
-        final String componentTypeName;
-        if(isInfoLink) {
-            componentTypeName = MetadataComponentType.COMPONENT_TYPE_INFO_LINK;
-        } else {
-            componentTypeName = "SomethingElse";
-        }
-        
-        final Collection<MetadataElement> elements = new ArrayList<>();
-        elements.add(mockMetadataElement);
-        
         context.checking(new Expectations() {{
-            oneOf(mockDocument).getResourceProxyReferences(mockReference); will(returnValue(elements));
-            allowing(mockMetadataElement).getType(); will(returnValue(mockMetadataElementType));
-            oneOf(mockMetadataElementType).getName(); will(returnValue(componentTypeName));
+            
+            oneOf(mockMetadataApiBridge).isReferenceAnInfoLink(mockDocument, mockReference); will(returnValue(isInfoLink));
             
             if(isInfoLink) {
                 oneOf(mockMatchedNode).setType(WorkspaceNodeType.RESOURCE_INFO);

@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,10 @@ import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
+import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
+import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.api.type.MetadataElementType;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
@@ -99,12 +103,11 @@ public class LamusMetadataApiBridgeTest {
     
     @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
     
-    
     @Mock MetadataDocument mockMetadataDocument;
     @Mock CMDIDocument mockCMDIDocument;
     @Mock File mockFile;
     @Mock StreamResult mockStreamResult;
-    
+    @Mock ReferencingMetadataDocument mockReferencingMetadataDocument;
     @Mock Reference mockReference;
     @Mock ResourceProxy mockResourceProxy;
     @Mock ResourceProxy mockAnotherResourceProxy;
@@ -115,6 +118,8 @@ public class LamusMetadataApiBridgeTest {
     @Mock CMDIProfileElement mockCMDIProfileElement;
     @Mock CMDIContainerMetadataElement mockCmdiContainerMetadataElement;
     @Mock CMDIContainerMetadataElement mockAnotherCmdiContainerMetadataElement;
+    @Mock MetadataElement mockMetadataElement;
+    @Mock MetadataElementType mockMetadataElementType;
     
     
     @Factory
@@ -960,6 +965,44 @@ public class LamusMetadataApiBridgeTest {
         
         assertNotNull("Result should not be null", result);
         assertEquals("Retrieved resource proxy different from expected", mockAnotherResourceProxy, result);
+    }
+    
+    @Test
+    public void referenceIsInfoLink() {
+        
+        final String componentTypeName = MetadataComponentType.COMPONENT_TYPE_INFO_LINK;
+        
+        final Collection<MetadataElement> elements = new ArrayList<>();
+        elements.add(mockMetadataElement);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockReferencingMetadataDocument).getResourceProxyReferences(mockReference); will(returnValue(elements));
+            allowing(mockMetadataElement).getType(); will(returnValue(mockMetadataElementType));
+            oneOf(mockMetadataElementType).getName(); will(returnValue(componentTypeName));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isReferenceAnInfoLink(mockReferencingMetadataDocument, mockReference);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void referenceIsNotInfoLink() {
+        
+        final String componentTypeName = "SomethingElse";
+        
+        final Collection<MetadataElement> elements = new ArrayList<>();
+        elements.add(mockMetadataElement);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockReferencingMetadataDocument).getResourceProxyReferences(mockReference); will(returnValue(elements));
+            allowing(mockMetadataElement).getType(); will(returnValue(mockMetadataElementType));
+            oneOf(mockMetadataElementType).getName(); will(returnValue(componentTypeName));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isReferenceAnInfoLink(mockReferencingMetadataDocument, mockReference);
+        
+        assertFalse("Result should be false", result);
     }
 }
 
