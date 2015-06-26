@@ -44,8 +44,9 @@ public interface WorkspaceNodeLinkManager {
      * 
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
+     * @param isInfoLink true if the child node is to be linked as an info file
      */
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, boolean isInfoLink)
             throws WorkspaceException, ProtectedNodeException;
     
     /**

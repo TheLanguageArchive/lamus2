@@ -51,6 +51,9 @@ public class CmdiProfile {
     @XmlElement(name = "allowedReferenceType")
     private List<String> allowedReferenceTypes;
     
+    @XmlElement
+    private boolean allowInfoLinks;
+    
     @XmlElement(name = "components")
     @XmlJavaTypeAdapter(ComponentMapAdapter.class)
     private Map<String, String> componentMap;
@@ -85,6 +88,13 @@ public class CmdiProfile {
     }
     public void setAllowedReferenceTypes(List<String> allowedReferenceTypes) {
         this.allowedReferenceTypes = allowedReferenceTypes;
+    }
+    
+    public boolean getAllowInfoLinks() {
+        return allowInfoLinks;
+    }
+    public void setAllowInfoLinks(boolean allowInfoLinks) {
+        this.allowInfoLinks = allowInfoLinks;
     }
     
     public Map<String, String> getComponentMap() {

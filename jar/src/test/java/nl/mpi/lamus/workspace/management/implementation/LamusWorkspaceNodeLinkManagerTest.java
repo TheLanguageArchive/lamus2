@@ -227,6 +227,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
         final String componentPath = "collection";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -257,7 +258,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildMetadataReference));
             
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -272,7 +273,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
     }
     
     @Test
@@ -285,6 +286,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URI parentProfileLocation = URI.create("http:/schema/location/profile_bla_bla");
         final int childNodeID = 3;
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -315,7 +317,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -334,6 +336,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -363,7 +366,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(null));
             // null component retrieved - reference is not mandatory for this profile, so do not create one
             
@@ -375,7 +378,116 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
+    }
+    
+    @Test
+    public void linkNodesResourceLocal_InfoLink()
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final URI parentProfileLocation = URI.create("http:/schema/location/profile_bla_bla");
+        final int childNodeID = 3;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.TRUE;
+        
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
+        final String expectedExceptionMessage = "An info link is not allowed in the profile of the selected parent node";
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+            allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockMetadataApiBridge).isInfoLinkAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.FALSE));
+        }});
+        
+        try {
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void linkNodesResourceLocal_InfoLinkNotAllowed()
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 1;
+        final int parentNodeID = 2;
+        final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final URI parentProfileLocation = URI.create("http:/schema/location/profile_bla_bla");
+        final int childNodeID = 3;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
+        final URI childURI = childURL.toURI();
+        final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.TRUE;
+        
+        final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+            allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockMetadataApiBridge).isResourceReferenceAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockMetadataApiBridge).isInfoLinkAllowedInProfile(parentProfileLocation); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
+            oneOf(mockParentDocument).createDocumentResourceReference(null, childURI, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childMimetype);
+                will(returnValue(mockChildResourceReference));
+            
+            oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
+                will(returnValue(null));
+            // null component retrieved - reference is not mandatory for this profile, so do not create one
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, parentURL);
+
+            oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
+                will(returnValue(mockWorkspaceNodeLink));
+            
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
+        }});
+        
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
     }
     
     @Test
@@ -390,6 +502,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.txt");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String componentPath = "lat-session/WrittenResource";
         
@@ -421,7 +534,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -436,7 +549,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
     }
     
     @Test
@@ -450,6 +563,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 3;
         final URI childURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String componentPath = "lat-session/WrittenResource";
         
@@ -481,7 +595,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -496,7 +610,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
     }
     
     @Test
@@ -510,6 +624,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int childNodeID = 3;
         final URI childURI = URI.create("http:/remote/folder/child.txt");
         final String childMimetype = "text/plain";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String componentPath = "lat-session/WrittenResource";
         
@@ -542,7 +657,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildResourceReference));
             
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -557,7 +672,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockWorkspaceDao).addWorkspaceNodeLink(mockWorkspaceNodeLink);
         }});
         
-        nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+        nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
     }
     
     @Test
@@ -567,6 +682,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int workspaceID = 1;
         final int childNodeID = 3;
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> existingParentNodes = new ArrayList<>();
         existingParentNodes.add(mockOtherParentNode);
@@ -587,7 +703,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -603,6 +719,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int workspaceID = 1;
         final int parentNodeID = 2;
         final URI parentNodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String expectedExceptionMessage = "Cannot proceed with linking because parent node (ID = " + parentNodeID + ") is protected (WS ID = " + workspaceID + ").";
         
@@ -616,7 +733,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
         } catch(ProtectedNodeException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
             assertEquals("Exception node URI different from expected", parentNodeURI, ex.getNodeURI());
@@ -632,6 +749,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -658,7 +776,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -675,6 +793,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -702,7 +821,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -719,6 +838,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int parentNodeID = 2;
         final int childNodeID = 3;
         final URL parentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -744,7 +864,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -765,6 +885,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -802,7 +923,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -823,6 +944,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String componentPath = "collection";
         
@@ -857,7 +979,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildMetadataReference));
             
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -869,7 +991,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -890,6 +1012,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
         final URI childURI = childURL.toURI();
         final String childMimetype = "text/x-cmdi+xml";
+        final boolean isInfoFile = Boolean.FALSE;
         
         final String componentPath = "collection";
         
@@ -924,7 +1047,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildMetadataReference));
             
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
@@ -936,7 +1059,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         try {
-            nodeLinkManager.linkNodes(mockParentNode, mockChildNode);
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, isInfoFile);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -1648,7 +1771,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final int newChildNodeID = 20;
         final URL newChildURL = new URL("file:/lamus/workspace/" + workspaceID + "/another_child.txt");
         final URI newChildURI = newChildURL.toURI();
-        
+        final WorkspaceNodeType childType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childMimetype = "text/plain";
         
         final String componentPath = "/lat-session/WrittenResource";
@@ -1689,6 +1812,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
         // link new node
         context.checking(new Expectations() {{
             
+            oneOf(mockOldNode).getType(); will(returnValue(childType));
+            
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
@@ -1703,7 +1828,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
                 will(returnValue(mockChildResourceReference));
                 
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
-            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype);
+
+            oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
             oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));

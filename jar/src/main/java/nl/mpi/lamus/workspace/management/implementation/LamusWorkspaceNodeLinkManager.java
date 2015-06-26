@@ -34,6 +34,7 @@ import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
@@ -106,10 +107,11 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     }
 
     /**
-     * @see WorkspaceNodeLinkManager#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see WorkspaceNodeLinkManager#linkNodes(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
      */
     @Override
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode) throws WorkspaceException, ProtectedNodeException {
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, boolean isInfoLink)
+            throws WorkspaceException, ProtectedNodeException {
         
         int workspaceID = parentNode.getWorkspaceID();
         
@@ -164,7 +166,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 createdProxy = parentDocument.createDocumentMetadataReference(
                         childUri, childLocation, childNode.getFormat());
                 
-                addReferenceToComponent(parentNode, createdProxy, parentDocument);
+                addReferenceToComponent(parentNode, createdProxy, parentDocument, false);
                 
                 
             } else {
@@ -173,10 +175,14 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                     String message = "A resource reference is not allowed in the profile of the selected parent node";
                     throwWorkspaceException(message, workspaceID, null);
                 }
+                if(isInfoLink && !metadataApiBridge.isInfoLinkAllowedInProfile(parentNode.getProfileSchemaURI())) {
+                    String message = "An info link is not allowed in the profile of the selected parent node";
+                    throwWorkspaceException(message, workspaceID, null);
+                }
                 
                 createdProxy = parentDocument.createDocumentResourceReference(childUri, childLocation, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childNode.getFormat());
                 
-                addReferenceToComponent(parentNode, createdProxy, parentDocument);
+                addReferenceToComponent(parentNode, createdProxy, parentDocument, isInfoLink);
                 
             }
             
@@ -310,7 +316,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         if(!isNewNodeAlreadyLinked && !isTopNode) {
             
             unlinkNodes(parentNode, oldNode, false);
-            linkNodes(parentNode, newNode);
+            linkNodes(parentNode, newNode, WorkspaceNodeType.RESOURCE_INFO.equals(oldNode.getType()));
         } else if(isTopNode) {
             
             Workspace ws = workspaceDao.getWorkspace(oldNode.getWorkspaceID());
@@ -398,8 +404,8 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         return nodeURI;
     }
     
-    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument) throws WorkspaceException {
-        String componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(parentNode.getProfileSchemaURI(), createdProxy.getMimetype());
+    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument, boolean isInfoLink) throws WorkspaceException {
+        String componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(parentNode.getProfileSchemaURI(), createdProxy.getMimetype(), isInfoLink);
         if(componentName == null) {
             return;
         }

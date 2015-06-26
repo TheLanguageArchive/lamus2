@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -30,9 +31,9 @@ import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.ReplaceNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -56,6 +57,10 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
     private WsNodeActionsProvider nodeActionsProvider;
     @SpringBean
     private WorkspaceService workspaceService;
+    @SpringBean
+    private WorkspaceDao workspaceDao;
+    @SpringBean
+    private NodeUtil nodeUtil;
     private final Form<Collection<WorkspaceTreeNode>> form;
     
     private Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
@@ -88,7 +93,9 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                 
                 Button nodeActionButton = new WsNodeActionButton(
                         "nodeActionButton", li.getModelObject(),
-                        WsNodeActionsPanel.this.workspaceService) {
+                        WsNodeActionsPanel.this.workspaceService,
+                        WsNodeActionsPanel.this.workspaceDao,
+                        WsNodeActionsPanel.this.nodeUtil) {
 
                     @Override
                     public void refreshStuff() {
@@ -161,6 +168,9 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
             return "icon-delete_node";
         }
         if("link_node_action".equals(action.getName())) {
+            return "icon-link_node";
+        }
+        if("link_node_info_action".equals(action.getName())) {
             return "icon-link_node";
         }
         if("replace_node_action".equals(action.getName())) {

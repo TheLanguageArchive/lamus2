@@ -1012,6 +1012,8 @@ public class LamusWorkspaceServiceTest {
         
         final int parentNodeID = 10;
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
@@ -1021,7 +1023,31 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
+        }});
+        
+        service.linkNodes(userID, mockParentNode, mockChildNode);
+    }
+    
+    @Test
+    public void linkNodesWithAccess_InfoLink() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
+        
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.RESOURCE_INFO;
+        final boolean isInfoLink = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
         }});
         
         service.linkNodes(userID, mockParentNode, mockChildNode);
@@ -1084,6 +1110,8 @@ public class LamusWorkspaceServiceTest {
         
         final int parentNodeID = 10;
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1095,7 +1123,8 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
         
         try {
@@ -1112,6 +1141,8 @@ public class LamusWorkspaceServiceTest {
         final int parentNodeID = 10;
         final URI parentNodeURI = new URI(UUID.randomUUID().toString());
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", parentNodeURI, workspaceID);
         
@@ -1123,7 +1154,8 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
         
         try {

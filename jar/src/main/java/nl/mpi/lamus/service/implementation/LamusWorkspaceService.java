@@ -45,6 +45,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,7 +241,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
         
-        this.workspaceNodeLinkManager.linkNodes(parentNode, childNode);
+        this.workspaceNodeLinkManager.linkNodes(parentNode, childNode, WorkspaceNodeType.RESOURCE_INFO.equals(childNode.getType()));
     }
     
     /**

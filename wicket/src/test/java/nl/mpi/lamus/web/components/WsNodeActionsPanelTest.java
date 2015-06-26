@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
-import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
@@ -34,7 +34,9 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
+import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAsInfoAction;
 import nl.mpi.lamus.workspace.actions.implementation.ReplaceNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Component;
@@ -43,7 +45,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.util.CollectionModel;
-import org.apache.wicket.util.tester.FormTester;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.mockito.Mock;
@@ -61,12 +62,15 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
     
     @Mock WorkspaceTreeService mockWorkspaceServiceBean;
     @Mock WsNodeActionsProvider mockTreeNodeActionsProviderBean;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock UnlinkedNodesModelProviderFactory mockUnlinkedNodesProviderFactory;
     
     @Mock private DeleteNodesAction mockDeleteAction;
     @Mock private UnlinkNodesAction mockUnlinkAction;
     @Mock private LinkNodesAction mockLinkAction;
+    @Mock private LinkNodesAsInfoAction mockLinkAsInfoAction;
     @Mock private ReplaceNodesAction mockReplaceAction;
     
     private FeedbackPanel feedbackPanel;
@@ -102,11 +106,14 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         when(mockDeleteAction.getName()).thenReturn("delete_node_action");
         when(mockUnlinkAction.getName()).thenReturn("unlink_node_action");
         when(mockLinkAction.getName()).thenReturn("link_node_action");
+        when(mockLinkAsInfoAction.getName()).thenReturn("link_node_info_action");
         when(mockReplaceAction.getName()).thenReturn("replace_node_action");
         
 
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_DAO, mockWorkspaceDao);
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_NODE_UTIL, mockNodeUtil);
         addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesProviderFactory);
         
         feedbackPanel = new FeedbackPanel("feedbackPanel") {{

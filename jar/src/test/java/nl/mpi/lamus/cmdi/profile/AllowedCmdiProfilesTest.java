@@ -131,19 +131,19 @@ public class AllowedCmdiProfilesTest {
                 assertTrue("Lat-Corpus component reference map should contain two entries", profile.getComponentMap().size() == 2);
                 Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
                 boolean cmdiMatched = false;
-                boolean otherMatched = false;
+                boolean infoMatched = false;
                 for(Entry<String, String> entry : entrySet) {
                     if(Pattern.matches(entry.getKey(), "text/x-cmdi+xml")) {
                         cmdiMatched = true;
                         assertEquals("Lat-Corpus component reference map entry value different from expected (cmdi)", entry.getValue(), "lat-corpus/CorpusLink");
                     }
-                    if(Pattern.matches(entry.getKey(), "audio/wave")) {
-                        otherMatched = true;
-                        assertEquals("Lat-Corpus component reference map entry value different from expected (other)", entry.getValue(), "lat-corpus/InfoLink");
+                    if(Pattern.matches(entry.getKey(), "info")) {
+                        infoMatched = true;
+                        assertEquals("Lat-Corpus component reference map entry value different from expected (info)", entry.getValue(), "lat-corpus/InfoLink");
                     }
                 }
                 assertTrue("Lat-Corpus component reference map entry for CMDI not found", cmdiMatched);
-                assertTrue("Lat-Corpus component reference map entry for other types not found", otherMatched);
+                assertTrue("Lat-Corpus component reference map entry for info files not found", infoMatched);
             }
             
             if("clarin.eu:cr1:p_1407745712035".equals(profile.getId())) { //lat-session
@@ -157,11 +157,12 @@ public class AllowedCmdiProfilesTest {
                 assertEquals("Lat-Session should only allow the Metadata reference type", "Resource", profile.getAllowedReferenceTypes().iterator().next());
                 assertNotNull("Lat-Session component reference map should not be null", profile.getComponentMap());
                 assertFalse("Lat-Session component reference map should not be empty", profile.getComponentMap().isEmpty());
-                assertTrue("Lat-Session component reference map should contain two entries", profile.getComponentMap().size() == 2);
+                assertTrue("Lat-Session component reference map should contain three entries", profile.getComponentMap().size() == 3);
                 Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
                 boolean cmdiMatched = false;
                 boolean mediaMatched = false;
                 boolean writtenMatched = false;
+                boolean infoMatched = false;
                 for(Entry<String, String> entry : entrySet) {
                     if(Pattern.matches(entry.getKey(), "text/x-cmdi+xml")) {
                         cmdiMatched = true;
@@ -174,10 +175,15 @@ public class AllowedCmdiProfilesTest {
                         writtenMatched = true;
                         assertEquals("Lat-Session component reference map entry value different from expected (written)", entry.getValue(), "lat-session/Resources/WrittenResource");
                     }
+                    if(Pattern.matches(entry.getKey(), "info")) {
+                        infoMatched = true;
+                        assertEquals("Lat-Session component reference map entry value different from expected (info)", entry.getValue(), "lat-session/InfoLink");
+                    }
                 }
                 assertFalse("Lat-Session component reference map entry for CMDI should not exist", cmdiMatched);
                 assertTrue("Lat-Session component reference map entry for media resources not found", mediaMatched);
                 assertTrue("Lat-Session component reference map entry for written resources not found", writtenMatched);
+                assertTrue("Lat-Session component reference map entry for info files not found", infoMatched);
             }
         }
         
@@ -187,23 +193,45 @@ public class AllowedCmdiProfilesTest {
     }
     
     @Test
-    public void getProfile() {
+    public void getProfileWithId() {
         
-        final String profileToCheck = "clarin.eu:cr1:p_1407745712035";
+        final String expectedProfileId = "clarin.eu:cr1:p_1407745712035";
         final URI expectedProfileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035");
         final String expectedProfileName = "lat-session";
         final String expectedTranslateType = "session";
         
+        final String profileToCheck = expectedProfileId;
+        
         CmdiProfile retrievedProfile = allowedCmdiProfiles.getProfile(profileToCheck);
         
         assertNotNull("Retrieved profile should not be null", retrievedProfile);
+        assertEquals("Profile ID different from expected", expectedProfileId, retrievedProfile.getId());
         assertEquals("Profile location different from expected", expectedProfileLocation, retrievedProfile.getLocation());
         assertEquals("Profile name different from expected", expectedProfileName, retrievedProfile.getName());
         assertEquals("Profile translate type different from expected", expectedTranslateType, retrievedProfile.getTranslateType());
     }
     
     @Test
-    public void getProfileNull() {
+    public void getProfileWithUri() {
+        
+        final String expectedProfileId = "clarin.eu:cr1:p_1407745712035";
+        final URI expectedProfileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035");
+        final String expectedProfileName = "lat-session";
+        final String expectedTranslateType = "session";
+        
+        final String profileToCheck = expectedProfileLocation.toString();
+        
+        CmdiProfile retrievedProfile = allowedCmdiProfiles.getProfile(profileToCheck);
+        
+        assertNotNull("Retrieved profile should not be null", retrievedProfile);
+        assertEquals("Profile ID different from expected", expectedProfileId, retrievedProfile.getId());
+        assertEquals("Profile location different from expected", expectedProfileLocation, retrievedProfile.getLocation());
+        assertEquals("Profile name different from expected", expectedProfileName, retrievedProfile.getName());
+        assertEquals("Profile translate type different from expected", expectedTranslateType, retrievedProfile.getTranslateType());
+    }
+    
+    @Test
+    public void getProfileWithIdNull() {
         
         final String profileToCheck = "clarin.eu:cr1:p_5555555555555";
         

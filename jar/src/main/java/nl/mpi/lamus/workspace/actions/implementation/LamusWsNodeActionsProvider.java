@@ -19,6 +19,8 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -34,9 +36,11 @@ import org.springframework.stereotype.Component;
 public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
 
     private final NodeUtil nodeUtil;
+    private final AllowedCmdiProfiles allowedCmdiProfiles;
     
     private final List<WsTreeNodesAction> resourcesActions;;
     private final List<WsTreeNodesAction> metadataActions;
+    private final List<WsTreeNodesAction> latMetadataActions;
     private final List<WsTreeNodesAction> externalActions;
     private final List<WsTreeNodesAction> protectedActions;
     private final List<WsTreeNodesAction> topNodeActions;
@@ -46,9 +50,10 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
     
     
     @Autowired
-    public LamusWsNodeActionsProvider(NodeUtil nodeUtil) {
+    public LamusWsNodeActionsProvider(NodeUtil nodeUtil, AllowedCmdiProfiles profiles) {
         
         this.nodeUtil = nodeUtil;
+        this.allowedCmdiProfiles = profiles;
         
         resourcesActions = new ArrayList<>();
         resourcesActions.add(new DeleteNodesAction());
@@ -60,6 +65,13 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         metadataActions.add(new UnlinkNodesAction());
         metadataActions.add(new LinkNodesAction());
         metadataActions.add(new ReplaceNodesAction());
+        
+        latMetadataActions = new ArrayList<>();
+        latMetadataActions.add(new DeleteNodesAction());
+        latMetadataActions.add(new UnlinkNodesAction());
+        latMetadataActions.add(new LinkNodesAction());
+        latMetadataActions.add(new LinkNodesAsInfoAction());
+        latMetadataActions.add(new ReplaceNodesAction());
         
         externalActions = new ArrayList<>();
         externalActions.add(new DeleteNodesAction());
@@ -97,6 +109,10 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
             } else if(!nodeUtil.isNodeMetadata(next)) {
                 return resourcesActions;
             } else {
+                CmdiProfile nextProfile = allowedCmdiProfiles.getProfile(next.getProfileSchemaURI().toString());
+                if(nodeUtil.isProfileLatCorpusOrSession(nextProfile)) {
+                    return latMetadataActions;
+                }
                 return metadataActions;
             }
         } else {

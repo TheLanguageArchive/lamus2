@@ -136,9 +136,10 @@ public interface MetadataApiBridge {
      * Given a Metadata profile and a reference type, retrieves the appropriate component path.
      * @param profileLocation Profile to check
      * @param referenceType Reference type to check
+     * @param isInfoLink true if the reference should refer to an info link
      * @return Appropriate component path for the given parameters (null if reference is not to be enforced)
      */
-    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType);
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink);
     
     /**
      * Given an element and a path, checks if the path exists within the element.
@@ -167,4 +168,11 @@ public interface MetadataApiBridge {
      * @return true if the reference corresponds to an info link
      */
     public boolean isReferenceAnInfoLink(ReferencingMetadataDocument document, Reference reference);
+    
+    /**
+     * Checks if the given profile allows the creation of info links.
+     * @param profileLocation Profile to check
+     * @return true if the given profile allows info links to be created
+     */
+    public boolean isInfoLinkAllowedInProfile(URI profileLocation);
 }

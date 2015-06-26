@@ -121,6 +121,10 @@ public class LamusMetadataApiBridgeTest {
     @Mock MetadataElement mockMetadataElement;
     @Mock MetadataElementType mockMetadataElementType;
     
+    private final Map<String, String> collectionComponentMap;
+    private final Map<String, String> latCorpusComponentMap;
+    private final Map<String, String> latSessionComponentMap;
+    private final List<CmdiProfile> aFewProfiles;
     
     @Factory
     public static Matcher<HeaderInfo> equivalentHeaderInfo(HeaderInfo headerInfo ) {
@@ -129,6 +133,56 @@ public class LamusMetadataApiBridgeTest {
     
     
     public LamusMetadataApiBridgeTest() {
+        
+        collectionComponentMap = new HashMap<>();
+        List<String> allowedCollectionTypes = new ArrayList<>();
+        allowedCollectionTypes.add("Metadata");
+        allowedCollectionTypes.add("LandingPage");
+        allowedCollectionTypes.add("SearchPage");
+        allowedCollectionTypes.add("SearchService");
+        CmdiProfile collectionProfile = new CmdiProfile();
+        collectionProfile.setId("clarin.eu:cr1:p_1345561703620");
+        collectionProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620"));
+        collectionProfile.setComponentMap(collectionComponentMap);
+        collectionProfile.setAllowedReferenceTypes(allowedCollectionTypes);
+        collectionProfile.setAllowInfoLinks(Boolean.FALSE);
+        
+        latCorpusComponentMap = new HashMap<>();
+        latCorpusComponentMap.put("^text/x-cmdi\\+xml$", "lat-corpus/CorpusLink");
+        latCorpusComponentMap.put("^info$", "lat-corpus/InfoLink");
+        List<String> allowedCorpusTypes = new ArrayList<>();
+        allowedCorpusTypes.add("Metadata");
+        allowedCorpusTypes.add("Resource");
+        allowedCorpusTypes.add("LandingPage");
+        allowedCorpusTypes.add("SearchPage");
+        allowedCorpusTypes.add("SearchService");
+        CmdiProfile latCorpusProfile = new CmdiProfile();
+        latCorpusProfile.setId("clarin.eu:cr1:p_1407745712064");
+        latCorpusProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064"));
+        latCorpusProfile.setComponentMap(latCorpusComponentMap);
+        latCorpusProfile.setAllowedReferenceTypes(allowedCorpusTypes);
+        latCorpusProfile.setAllowInfoLinks(Boolean.TRUE);
+        
+        latSessionComponentMap = new HashMap<>();
+        latSessionComponentMap.put("^(video|audio|image)/.*$", "lat-session/Resources/MediaFile");
+        latSessionComponentMap.put("^(?!.*text/x-cmdi\\+xml)(text|application)/.*$", "lat-session/Resources/WrittenResource");
+        latSessionComponentMap.put("^info$", "lat-session/InfoLink");
+        List<String> allowedSessionTypes = new ArrayList<>();
+        allowedSessionTypes.add("Resource");
+        allowedSessionTypes.add("LandingPage");
+        allowedSessionTypes.add("SearchPage");
+        allowedSessionTypes.add("SearchService");
+        CmdiProfile latSessionProfile = new CmdiProfile();
+        latSessionProfile.setId("clarin.eu:cr1:p_1407745712035");
+        latSessionProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035"));
+        latSessionProfile.setComponentMap(latSessionComponentMap);
+        latSessionProfile.setAllowedReferenceTypes(allowedSessionTypes);
+        latSessionProfile.setAllowInfoLinks(Boolean.TRUE);
+        
+        aFewProfiles = new ArrayList<>();
+        aFewProfiles.add(collectionProfile);
+        aFewProfiles.add(latCorpusProfile);
+        aFewProfiles.add(latSessionProfile);
     }
     
     @BeforeClass
@@ -612,10 +666,6 @@ public class LamusMetadataApiBridgeTest {
     public void metadataValid_ActuallyReadFile() throws MalformedURLException, UnsupportedEncodingException {
         
         final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/folder with spaces/orphanCollection.cmdi");
-////        final String encodedUrl = URLEncoder.encode("file:/Users/guisil/Workspaces/with spaces/orphanCollection.cmdi", "UTF-8");
-//        final String fileLocation = "file:/Users/guisil/Workspaces/with spaces/orphanCollection.cmdi";
-//        final String noSpaceString = fileLocation.replace(" ", "%20");
-//        final URL metadataFileToCheck = new URL(noSpaceString);
         
         MetadataApiBridge testMdApiBridge = new LamusMetadataApiBridge(new CMDIApi(), null, null, null, null);
         
@@ -659,20 +709,11 @@ public class LamusMetadataApiBridgeTest {
     @Test
     public void bothReferenceTypesAllowed() {
         
-        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final String profileId = "clarin.eu:cr1:p_1407745712064";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        List<String> allowedReferenceType = new ArrayList<>();
-        allowedReferenceType.add("Metadata");
-        allowedReferenceType.add("Resource");
-        CmdiProfile profile = new CmdiProfile();
-        profile.setId(profileId);
-        profile.setLocation(profileLocation);
-        profile.setAllowedReferenceTypes(allowedReferenceType);
-        final List<CmdiProfile> profiles = new ArrayList<>();
-        profiles.add(profile);
         
         context.checking(new Expectations() {{
-            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
         boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
@@ -687,17 +728,9 @@ public class LamusMetadataApiBridgeTest {
         
         final String profileId = "clarin.eu:cr1:p_1345561703620";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        List<String> allowedReferenceType = new ArrayList<>();
-        allowedReferenceType.add("Metadata");
-        CmdiProfile profile = new CmdiProfile();
-        profile.setId(profileId);
-        profile.setLocation(profileLocation);
-        profile.setAllowedReferenceTypes(allowedReferenceType);
-        final List<CmdiProfile> profiles = new ArrayList<>();
-        profiles.add(profile);
         
         context.checking(new Expectations() {{
-            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
         boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
@@ -710,19 +743,11 @@ public class LamusMetadataApiBridgeTest {
     @Test
     public void onlyResourceReferenceAllowed() {
 
-        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final String profileId = "clarin.eu:cr1:p_1407745712035";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        List<String> allowedReferenceType = new ArrayList<>();
-        allowedReferenceType.add("Resource");
-        CmdiProfile profile = new CmdiProfile();
-        profile.setId(profileId);
-        profile.setLocation(profileLocation);
-        profile.setAllowedReferenceTypes(allowedReferenceType);
-        final List<CmdiProfile> profiles = new ArrayList<>();
-        profiles.add(profile);
         
         context.checking(new Expectations() {{
-            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
         boolean result = lamusMetadataApiBridge.isMetadataReferenceAllowedInProfile(profileLocation);
@@ -793,57 +818,98 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_AnyReference() {
+    public void getComponentForReferenceType_Metadata_LatCorpus() {
         
-        final String expectedComponentPath = "/collection";
+        final String expectedComponentPath = "lat-corpus/CorpusLink";
         
-        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final String profileId = "clarin.eu:cr1:p_1407745712064";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        Map<String, String> componentMap = new HashMap<>();
-        componentMap.put("^.+$", expectedComponentPath);
-        CmdiProfile profile = new CmdiProfile();
-        profile.setId(profileId);
-        profile.setLocation(profileLocation);
-        profile.setComponentMap(componentMap);
-        final List<CmdiProfile> profiles = new ArrayList<>();
-        profiles.add(profile);
         
         final String referenceMimetype = "text/x-cmdi+xml";
         
         context.checking(new Expectations() {{
-            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
     
     @Test
-    public void getComponentForReferenceType_SpecificReference() {
+    public void getComponentForReferenceType_Info_LatCorpus() {
         
-        final String expectedComponentPath = "/collection";
+        final String expectedComponentPath = "lat-corpus/InfoLink";
         
-        final String profileId = "clarin.eu:cr1:p_1345561703620";
+        final String profileId = "clarin.eu:cr1:p_1407745712064";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        Map<String, String> componentMap = new HashMap<>();
-        componentMap.put("^text/x-cmdi\\+xml$", expectedComponentPath);
-        CmdiProfile profile = new CmdiProfile();
-        profile.setId(profileId);
-        profile.setLocation(profileLocation);
-        profile.setComponentMap(componentMap);
-        final List<CmdiProfile> profiles = new ArrayList<>();
-        profiles.add(profile);
         
-        final String referenceMimetype = "text/x-cmdi+xml";
+        final String referenceMimetype = "text/plain";
         
         context.checking(new Expectations() {{
-            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.TRUE);
         
-        assertEquals("Retrieved component type different from expected", expectedComponentPath, retrievedComponent);
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_Media_LatSession() {
+        
+        final String expectedComponentPath = "lat-session/Resources/MediaFile";
+        
+        final String profileId = "clarin.eu:cr1:p_1407745712035";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        
+        final String referenceMimetype = "image/jpg";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_Written_LatSession() {
+        
+        final String expectedComponentPath = "lat-session/Resources/WrittenResource";
+        
+        final String profileId = "clarin.eu:cr1:p_1407745712035";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        
+        final String referenceMimetype = "text/plain";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_Info_LatSession() {
+        
+        final String expectedComponentPath = "lat-session/InfoLink";
+        
+        final String profileId = "clarin.eu:cr1:p_1407745712035";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        
+        final String referenceMimetype = "text/plain";
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.TRUE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
     
     @Test
@@ -866,7 +932,7 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
         
         assertNull("Retrieved component should be null", retrievedComponent);
     }
@@ -890,7 +956,7 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype);
+        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
         
         assertNull("Retrieved component should be null", retrievedComponent);
     }
@@ -1001,6 +1067,34 @@ public class LamusMetadataApiBridgeTest {
         }});
         
         boolean result = lamusMetadataApiBridge.isReferenceAnInfoLink(mockReferencingMetadataDocument, mockReference);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void infoLinkIsAllowedInProfile() {
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.isInfoLinkAllowedInProfile(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064"));
+        
+        assertTrue("Result should be true (lat-corpus)", result);
+        
+        result = lamusMetadataApiBridge.isInfoLinkAllowedInProfile(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035"));
+        
+        assertTrue("Result should be true (lat-session)", result);
+    }
+    
+    @Test
+    public void infoLinkIsNotAllowedInProfile() {
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+                
+        boolean result = lamusMetadataApiBridge.isInfoLinkAllowedInProfile(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620"));
         
         assertFalse("Result should be false", result);
     }

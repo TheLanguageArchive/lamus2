@@ -17,12 +17,14 @@
 package nl.mpi.lamus.web.components;
 
 import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.model.Model;
 
@@ -35,12 +37,17 @@ public class WsNodeActionButton extends AutoDisablingAjaxButton {
     
     private final WsTreeNodesAction action;
     private final WorkspaceService workspaceService;
+    private final WorkspaceDao workspaceDao;
+    private final NodeUtil nodeUtil;
     
-    public WsNodeActionButton(
-            String id, WsTreeNodesAction action, WorkspaceService wsService) {
+    public WsNodeActionButton(String id,
+            WsTreeNodesAction action, WorkspaceService wsService,
+            WorkspaceDao wsDao, NodeUtil nodeUtil) {
         super(id, new Model<>(action.getName()));
         this.action = action;
         this.workspaceService = wsService;
+        this.workspaceDao = wsDao;
+        this.nodeUtil = nodeUtil;
     }
 
     public void refreshStuff() {
@@ -61,7 +68,7 @@ public class WsNodeActionButton extends AutoDisablingAjaxButton {
     }
     
     public void executeAction(String currentUserId) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
-        action.execute(currentUserId, workspaceService);
+        action.execute(currentUserId, workspaceService, workspaceDao, nodeUtil);
     }
     
 }

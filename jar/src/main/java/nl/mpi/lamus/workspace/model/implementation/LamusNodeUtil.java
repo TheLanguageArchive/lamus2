@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.model.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -116,5 +117,17 @@ public class LamusNodeUtil implements NodeUtil {
         }
         
         return false;
+    }
+
+    /**
+     * @see NodeUtil#isProfileLatCorpusOrSession(nl.mpi.lamus.cmdi.profile.CmdiProfile)
+     */
+    @Override
+    public boolean isProfileLatCorpusOrSession(CmdiProfile profile) {
+        
+        if(profile == null) {
+            return false;
+        }
+        return "lat-corpus".equals(profile.getName()) || "lat-session".equals(profile.getName());
     }
 }

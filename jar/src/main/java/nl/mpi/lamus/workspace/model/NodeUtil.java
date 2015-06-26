@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.model;
 
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 
 /**
  * Utilities related with nodes.
@@ -47,4 +48,11 @@ public interface NodeUtil {
      * @return true if type corresponds to metadata
      */
     public boolean isTypeMetadata(WorkspaceNodeType wsNodeType);
+    
+    /**
+     * @param profile Profile to check
+     * @return true if the profile object corresponds either to
+     * "lat-corpus" or "lat-session".
+     */
+    public boolean isProfileLatCorpusOrSession(CmdiProfile profile);
 }

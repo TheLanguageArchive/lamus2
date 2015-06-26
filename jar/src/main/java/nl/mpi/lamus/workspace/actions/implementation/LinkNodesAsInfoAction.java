@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,21 +19,22 @@ package nl.mpi.lamus.workspace.actions.implementation;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
+import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
-import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Implementation of the action to unlink nodes.
+ * Implementation of the action to link nodes as info files.
  * 
  * @author guisil
  */
-public class UnlinkNodesAction extends WsTreeNodesAction {
+public class LinkNodesAsInfoAction extends WsTreeNodesAction {
 
-    private final String name = "unlink_node_action";
+    private final String name = "link_node_info_action";
     
     /**
      * @see WsTreeNodesAction#getName()
@@ -42,7 +43,7 @@ public class UnlinkNodesAction extends WsTreeNodesAction {
     public String getName() {
         return this.name;
     }
-
+    
     /**
      * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService,
      *  nl.mpi.lamus.dao.WorkspaceDao, nl.mpi.lamus.workspace.model.NodeUtil) 
@@ -55,19 +56,39 @@ public class UnlinkNodesAction extends WsTreeNodesAction {
         if(wsService == null) {
             throw new IllegalArgumentException("WorkspaceService should have been set");
         }
+        if(wsDao == null) {
+            throw new IllegalArgumentException("WorkspaceDao should have been set");
+        }
+        if(nodeUtil == null) {
+            throw new IllegalArgumentException("NodeUtil should have been set");
+        }
         
         if(selectedTreeNodes == null) {
-            throw new IllegalArgumentException("Action for unlinking nodes requires at least one tree node; currently null");
+            throw new IllegalArgumentException("Action for linking nodes as info files requires exactly one tree node; currently null");
         }
-        else if(selectedTreeNodes.isEmpty()) {
-            throw new IllegalArgumentException("Action for unlinking nodes requires at least one tree node; currently selected " + selectedTreeNodes.size());
+        else if(selectedTreeNodes.size() != 1) {
+            throw new IllegalArgumentException("Action for linking nodes as info files requires exactly one tree node; currently selected " + selectedTreeNodes.size());
+        }
+        if(selectedUnlinkedNodes == null) {
+            throw new IllegalArgumentException("Action for linking nodes as info files requires at least one selected child node; currently null");
+        }
+        else if(selectedUnlinkedNodes.isEmpty()) {
+            throw new IllegalArgumentException("Action for linking nodes as info files requires at least one selected child node");
         }
         
-        // childNodes not used for this action
+        int failedLinks = 0;
+        for(WorkspaceTreeNode currentNode : selectedUnlinkedNodes) {
+            if(nodeUtil.isNodeMetadata(currentNode)) {
+                failedLinks++;
+                continue;
+            }
+            currentNode.setType(WorkspaceNodeType.RESOURCE_INFO);
+            wsService.linkNodes(userID, selectedTreeNodes.iterator().next(), currentNode);
+            wsDao.updateNodeType(currentNode);
+        }
         
-        for(WorkspaceTreeNode currentNode : selectedTreeNodes) {
-            wsService.unlinkNodes(userID, currentNode.getParent(), currentNode);
+        if(failedLinks > 0) {
+            throw new IllegalArgumentException("Some nodes (" + failedLinks + ") were not linked. Metadata nodes cannot be linked as info files.");
         }
     }
-    
 }

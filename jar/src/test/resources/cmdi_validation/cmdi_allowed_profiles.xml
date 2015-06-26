@@ -8,6 +8,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>true</allowInfoLinks>
         <components>
             <component>
                 <key>^(video|audio|image)/.*$</key>
@@ -16,6 +17,10 @@
             <component>
                 <key>^(?!.*text/x-cmdi\+xml)(text|application)/.*$</key>
                 <value>lat-session/Resources/WrittenResource</value>
+            </component>
+            <component>
+                <key>^info$</key>
+                <value>lat-session/InfoLink</value>
             </component>
         </components>
         <translateType>session</translateType>
@@ -29,13 +34,14 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>true</allowInfoLinks>
         <components>
             <component>
                 <key>^text/x-cmdi\+xml$</key>
                 <value>lat-corpus/CorpusLink</value>
             </component>
             <component>
-                <key>^(?!.*text/x-cmdi\+xml).*$</key>
+                <key>^info$</key>
                 <value>lat-corpus/InfoLink</value>
             </component>
         </components>
@@ -49,6 +55,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>corpus</translateType>
     </profile>
     <profile id="clarin.eu:cr1:p_1361876010653" name="DiscAn_TextCorpus">
@@ -59,6 +66,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>corpus</translateType>
     </profile>
     <profile id="clarin.eu:cr1:p_1366895758243" name="DiscAn_Case">
@@ -69,6 +77,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>session</translateType>
     </profile>
     <profile id="clarin.eu:cr1:p_1328259700928" name="Soundbites">
@@ -79,6 +88,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>session</translateType>
     </profile>
     <profile id="clarin.eu:cr1:p_1345561703620" name="collection">
@@ -89,6 +99,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>corpus</translateType>
     </profile>
 
@@ -106,6 +117,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>session</translateType>
     </profile>
     <profile id="clarin.eu:cr1:p_1331113992512" name="SL-IPROSLA">
@@ -116,6 +128,7 @@
             <allowedReferenceType>LandingPage</allowedReferenceType>
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
         <translateType>session</translateType>
     </profile>
 </allowedProfiles>

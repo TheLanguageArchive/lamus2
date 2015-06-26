@@ -18,12 +18,14 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -46,14 +48,16 @@ public class UnlinkNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     @Mock WorkspaceTreeNode mockChildNodeOne;
     @Mock WorkspaceTreeNode mockChildNodeTwo;
     @Mock WorkspaceTreeNode mockParentNode;
     
     private WsTreeNodesAction unlinkNodesAction;
     
-    private String expectedActionName = "unlink_node_action";
-    private String userID = "testUser";
+    private final String expectedActionName = "unlink_node_action";
+    private final String userID = "testUser";
 
     
     public UnlinkNodesActionTest() {
@@ -92,7 +96,7 @@ public class UnlinkNodesActionTest {
         String expectedExceptionMessage = "Action for unlinking nodes requires at least one tree node; currently null";
         
         try {
-            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -108,7 +112,7 @@ public class UnlinkNodesActionTest {
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
 
         try {
-            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -125,7 +129,7 @@ public class UnlinkNodesActionTest {
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            unlinkNodesAction.execute(userID, null);
+            unlinkNodesAction.execute(userID, null, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -145,7 +149,7 @@ public class UnlinkNodesActionTest {
 
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
-        unlinkNodesAction.execute(userID, mockWorkspaceService);
+        unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -164,7 +168,7 @@ public class UnlinkNodesActionTest {
 
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
-        unlinkNodesAction.execute(userID, mockWorkspaceService);
+        unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -185,7 +189,7 @@ public class UnlinkNodesActionTest {
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -210,7 +214,7 @@ public class UnlinkNodesActionTest {
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -235,7 +239,7 @@ public class UnlinkNodesActionTest {
         unlinkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            unlinkNodesAction.execute(userID, mockWorkspaceService);
+            unlinkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

@@ -251,27 +251,23 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     }
 
     /**
-     * @see MetadataApiBridge#getComponentPathForProfileAndReferenceType(java.net.URI, java.lang.String)
+     * @see MetadataApiBridge#getComponentPathForProfileAndReferenceType(java.net.URI, java.lang.String, boolean)
      */
     @Override
-    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType) {
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink) {
         
-        List<CmdiProfile> allowedProfiles = allowedCmdiProfiles.getProfiles();
-        
-        CmdiProfile matchedProfile = null;
-        for(CmdiProfile profile : allowedProfiles) {
-            if(profileLocation.toString().contains(profile.getId())) {
-                matchedProfile = profile;
-                break;
-            }
-        }
+        CmdiProfile matchedProfile = getProfileWithLocation(profileLocation);
         
         if(matchedProfile != null) {
             Map<String, String> componentMap = matchedProfile.getComponentMap();
             if(componentMap != null && !componentMap.isEmpty()) {
                 Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
                 for(Map.Entry<String, String> entry : entrySet) {
-                    if(Pattern.matches(entry.getKey(), referenceType)) {
+                    String typeToCheck = referenceType;
+                    if(isInfoLink) {
+                        typeToCheck = "info";
+                    }
+                    if(Pattern.matches(entry.getKey(), typeToCheck)) {
                         return entry.getValue();
                     }
                 }
@@ -341,20 +337,38 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         }
         return false;
     }
+
+    /**
+     * @see MetadataApiBridge#isInfoLinkAllowedInProfile(java.net.URI)
+     */
+    @Override
+    public boolean isInfoLinkAllowedInProfile(URI profileLocation) {
+        
+        CmdiProfile profile = getProfileWithLocation(profileLocation);
+        return profile.getAllowInfoLinks();
+    }
     
     
     private boolean isReferenceTypeAllowedInProfile(String referenceTypeToCheck, URI profileLocation) {
+        
+        CmdiProfile profile = getProfileWithLocation(profileLocation);
+        List<String> allowedReferenceTypes = profile.getAllowedReferenceTypes();
+        if(allowedReferenceTypes.contains(referenceTypeToCheck)) {
+            return true;
+        }
+                
+        return false;
+    }
+    
+    private CmdiProfile getProfileWithLocation(URI profileLocation) {
         
         List<CmdiProfile> allowedProfiles = allowedCmdiProfiles.getProfiles();
         
         for(CmdiProfile profile : allowedProfiles) {
             if(profileLocation.toString().contains(profile.getId())) {
-                List<String> allowedReferenceTypes = profile.getAllowedReferenceTypes();
-                if(allowedReferenceTypes.contains(referenceTypeToCheck)) {
-                    return true;
-                }
+                return profile;
             }
         }
-        return false;
+        return null;
     }
 }

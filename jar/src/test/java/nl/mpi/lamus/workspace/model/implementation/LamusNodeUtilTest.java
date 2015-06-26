@@ -17,14 +17,21 @@
 package nl.mpi.lamus.workspace.model.implementation;
 
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import org.jmock.Expectations;
+import org.jmock.auto.Mock;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
 
 /**
  *
@@ -32,7 +39,15 @@ import static org.junit.Assert.*;
  */
 public class LamusNodeUtilTest {
     
+        
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setThreadingPolicy(new Synchroniser());
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
+    
     private NodeUtil nodeUtil;
+    
+    @Mock CmdiProfile mockCmdiProfile;
     
     
     public LamusNodeUtilTest() {
@@ -241,6 +256,52 @@ public class LamusNodeUtilTest {
     @Test
     public void isMetadata_Unknown() {
         boolean result = nodeUtil.isTypeMetadata(WorkspaceNodeType.UNKNOWN);
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void isLatCorpus() {
+        
+        final String profileName = "lat-corpus";
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiProfile).getName(); will(returnValue(profileName));
+        }});
+        
+        boolean result = nodeUtil.isProfileLatCorpusOrSession(mockCmdiProfile);
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void isLatSession() {
+        
+        final String profileName = "lat-session";
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiProfile).getName(); will(returnValue(profileName));
+        }});
+        
+        boolean result = nodeUtil.isProfileLatCorpusOrSession(mockCmdiProfile);
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void isNeitherLatCorpusNorLatSession() {
+        
+        final String profileName = "something";
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiProfile).getName(); will(returnValue(profileName));
+        }});
+        
+        boolean result = nodeUtil.isProfileLatCorpusOrSession(mockCmdiProfile);
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void isNullProfile() {
+        
+        boolean result = nodeUtil.isProfileLatCorpusOrSession(null);
         assertFalse("Result should be false", result);
     }
 }

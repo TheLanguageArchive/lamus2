@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
@@ -35,6 +36,7 @@ import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
@@ -84,6 +86,8 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     }};
 
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
+    @Mock private WorkspaceDao mockWorkspaceDao;
+    @Mock private NodeUtil mockNodeUtilBean;
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     @Mock private UnlinkedNodesModelProviderFactory mockUnlinkedNodesModelProviderFactoryBean;
     @Mock private GenericTreeModelProvider mockCreateWorkspaceTreeModelProviderBean;
@@ -142,6 +146,8 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_DAO, mockWorkspaceDao);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_NODE_UTIL, mockNodeUtilBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockCreateWorkspaceTreeModelProviderBean);
