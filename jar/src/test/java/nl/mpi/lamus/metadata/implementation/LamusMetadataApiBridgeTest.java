@@ -114,10 +114,12 @@ public class LamusMetadataApiBridgeTest {
     @Mock Component mockCollectionComponent;
     @Mock ComponentType mockComponentType;
     @Mock ComponentType mockAnotherComponentType;
+    @Mock ComponentType mockYetAnotherComponentType;
     @Mock CMDIProfile mockCMDIProfile;
     @Mock CMDIProfileElement mockCMDIProfileElement;
     @Mock CMDIContainerMetadataElement mockCmdiContainerMetadataElement;
     @Mock CMDIContainerMetadataElement mockAnotherCmdiContainerMetadataElement;
+    @Mock CMDIContainerMetadataElement mockYetAnotherCmdiContainerMetadataElement;
     @Mock MetadataElement mockMetadataElement;
     @Mock MetadataElementType mockMetadataElementType;
     
@@ -962,59 +964,69 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void assure_elementPathExists_IsRoot() throws MetadataElementException {
+    public void createComponent_PathExists_IsRoot() throws MetadataElementException {
         
         final String rootName = "collection";
         final String elementPath = "/" + rootName;
         
         context.checking(new Expectations() {{
-            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
             oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
             oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
         }});
         
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
         
         assertEquals("Retrieved element different from expected", mockCmdiContainerMetadataElement, retrievedElement);
     }
     
     @Test
-    public void assure_elementPathExists_IsNotRoot() throws MetadataElementException {
+    public void createComponent_PathExists_IsNotRoot() throws MetadataElementException {
         
         final String rootName = "lat-session";
         final String elementName = "MediaFile";
         final String elementPath = "/" + rootName + "/" + elementName;
         
         context.checking(new Expectations() {{
-            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(mockCmdiContainerMetadataElement));
-        }});
-        
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
-        
-        assertEquals("Retrieved element different from expected", mockCmdiContainerMetadataElement, retrievedElement);
-    }
-    
-    @Test
-    public void assure_elementPathExistsPartially() throws MetadataElementException {
-        
-        final String rootName = "lat-session";
-        final String elementName = "MediaFile";
-        final String elementPath = "/" + rootName + "/" + elementName;
-        
-        context.checking(new Expectations() {{
-            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPath); will(returnValue(null));
+            
             oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
             allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
             
             oneOf(mockComponentType).getType(elementName); will(returnValue(mockAnotherComponentType));
-            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementName); will(returnValue(null));
             oneOf(mockMetadataElementFactory).createNewMetadataElement(mockCmdiContainerMetadataElement, mockAnotherComponentType); will(returnValue(mockAnotherCmdiContainerMetadataElement));
             oneOf(mockCmdiContainerMetadataElement).addChildElement(mockAnotherCmdiContainerMetadataElement);
         }});
         
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.assureElementPathExistsWithin(mockCmdiContainerMetadataElement, elementPath);
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
         
         assertEquals("Retrieved element different from expected", mockAnotherCmdiContainerMetadataElement, retrievedElement);
+    }
+    
+    @Test
+    public void createComponent_PathDoesNotExist() throws MetadataElementException {
+        
+        final String rootName = "someRoot";
+        final String intermediateName = "someIntermediate";
+        final String elementName = "MediaFile";
+        final String elementPath = "/" + rootName + "/" + intermediateName + "/" + elementName;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockCmdiContainerMetadataElement).getType(); will(returnValue(mockComponentType));
+            allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
+            
+            oneOf(mockComponentType).getType(intermediateName); will(returnValue(mockAnotherComponentType));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(intermediateName); will(returnValue(null));
+            oneOf(mockMetadataElementFactory).createNewMetadataElement(mockCmdiContainerMetadataElement, mockAnotherComponentType); will(returnValue(mockAnotherCmdiContainerMetadataElement));
+            oneOf(mockCmdiContainerMetadataElement).addChildElement(mockAnotherCmdiContainerMetadataElement);
+            
+            oneOf(mockAnotherComponentType).getType(elementName); will(returnValue(mockYetAnotherComponentType));
+            oneOf(mockMetadataElementFactory).createNewMetadataElement(mockAnotherCmdiContainerMetadataElement, mockYetAnotherComponentType); will(returnValue(mockYetAnotherCmdiContainerMetadataElement));
+            oneOf(mockAnotherCmdiContainerMetadataElement).addChildElement(mockYetAnotherCmdiContainerMetadataElement);
+        }});
+        
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
+        
+        assertEquals("Retrieved element different from expected", mockYetAnotherCmdiContainerMetadataElement, retrievedElement);
     }
     
     @Test

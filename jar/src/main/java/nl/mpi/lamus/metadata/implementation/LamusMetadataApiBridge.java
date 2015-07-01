@@ -280,18 +280,18 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     }
     
     /**
-     * @see MetadataApiBridge#assureElementPathExistsWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
+     * @see MetadataApiBridge#createComponentPathWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
      */
     @Override
-    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path)
+    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
             throws MetadataElementException {
-
-        CMDIMetadataElement child = root.getChildElement(path);
-        if(child != null && child instanceof CMDIContainerMetadataElement) {
-            return (CMDIContainerMetadataElement) child;
-        }
+        
+        CMDIMetadataElement child;
         
         String[] elementNames = path.split("/");
+        
+        String componentName = elementNames[elementNames.length - 1];
+        
         CMDIContainerMetadataElement currentParent = root;
         ComponentType currentType = root.getType();
         for(String elementName : elementNames) {
@@ -299,7 +299,12 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
                 continue;
             }
             currentType = (ComponentType) currentType.getType(elementName);
-            child = currentParent.getChildElement(elementName);
+            if(!componentName.equals(elementName)) {
+                child = currentParent.getChildElement(elementName);
+            } else {
+                child = null;
+            }
+            
             if(child == null) {
                 child = metadataElementFactory.createNewMetadataElement(currentParent, currentType);
                 currentParent.addChildElement(child);

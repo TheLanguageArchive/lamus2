@@ -260,7 +260,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -536,7 +536,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -597,7 +597,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -659,7 +659,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -981,7 +981,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -1049,7 +1049,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -1831,7 +1831,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
 
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).assureElementPathExistsWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));

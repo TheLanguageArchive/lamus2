@@ -65,9 +65,9 @@ public class LamusMetadataCheckerTest {
     public void setUp() {
         metadataChecker = new LamusMetadataChecker();
         ReflectionTestUtils.setField(metadataChecker, "schematronFile_upload",
-                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_upload.sch").getFile())));
+                new File(URLDecoder.decode(LamusMetadataCheckerTest.class.getClassLoader().getResource("cmdi_validation/cmdi_schematron_upload.sch").getFile())));
         ReflectionTestUtils.setField(metadataChecker, "schematronFile_submit",
-                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_submit.sch").getFile())));
+                new File(URLDecoder.decode(LamusMetadataCheckerTest.class.getClassLoader().getResource("cmdi_validation/cmdi_schematron_submit.sch").getFile())));
     }
     
     @After
@@ -369,7 +369,7 @@ public class LamusMetadataCheckerTest {
     
     
     private File getResourceFromLocation(String location) {
-        return new File(URLDecoder.decode(getClass().getClassLoader().getResource(location).getFile()));
+        return new File(URLDecoder.decode(LamusMetadataCheckerTest.class.getClassLoader().getResource(location).getFile()));
     }
    
     private void assertAtLeastOneIssue(Collection<MetadataValidationIssue> issues, File fileToCheck, String expectedTest, String expectedMessage, MetadataValidationIssueLevel expectedLevel) {

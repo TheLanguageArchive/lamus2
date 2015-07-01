@@ -142,13 +142,13 @@ public interface MetadataApiBridge {
     public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink);
     
     /**
-     * Given an element and a path, checks if the path exists within the element.
-     * If not, it creates it.
+     * Creates a component within the given element. If other elements in the path
+     * are missing, they're also created.
      * @param root Element to check
-     * @param path Path to check
-     * @return Element corresponding to the path
+     * @param path Relative path to the component
+     * @return Element corresponding to the created component
      */
-    public CMDIContainerMetadataElement assureElementPathExistsWithin(CMDIContainerMetadataElement root, String path)
+    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
             throws MetadataElementException;
     
     /**
