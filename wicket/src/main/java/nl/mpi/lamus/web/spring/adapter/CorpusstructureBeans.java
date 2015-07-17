@@ -22,7 +22,7 @@ import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.NodeUriUtils;
 import nl.mpi.archiving.corpusstructure.adapter.TranslationService;
 import nl.mpi.archiving.corpusstructure.adapter.VersioningAPIImplFactory;
-import nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter;
+import nl.mpi.archiving.corpusstructure.adapter.utils.FilePathTranslatorAdapter;
 import nl.mpi.archiving.corpusstructure.adapter.servlet.ThreadLocalCSDBContainer;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBProxy;
@@ -133,7 +133,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public FilePathTranslator filePathTranslator() {
-        return new FilePathTranslatorAdapter(aoProxy(), translationService(), handleResolver());
+        return new FilePathTranslatorAdapter(aoProxy(), handleResolver());
     }
     
     @Bean

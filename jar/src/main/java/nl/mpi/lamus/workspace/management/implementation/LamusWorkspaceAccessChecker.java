@@ -18,7 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.net.URI;
 import java.util.Collection;
 import javax.annotation.Resource;
-import nl.mpi.archiving.corpusstructure.adapter.AdapterUtils;
+import nl.mpi.archiving.corpusstructure.adapter.utils.AdapterUtils;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;

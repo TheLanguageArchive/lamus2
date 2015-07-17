@@ -207,13 +207,13 @@
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-provider</artifactId>
-            <version>1.1.7-SNAPSHOT</version>
+            <version>1.2.0-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.1.7-SNAPSHOT</version>
+            <version>1.2.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.handle</groupId>
