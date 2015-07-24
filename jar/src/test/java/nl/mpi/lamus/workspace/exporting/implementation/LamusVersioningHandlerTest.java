@@ -27,7 +27,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
@@ -67,7 +67,7 @@ public class LamusVersioningHandlerTest {
     
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
-    @Mock HandleInfoRetriever mockHandleInfoRetriever;
+    @Mock HandleParser mockHandleParser;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock NodeUtil mockNodeUtil;
@@ -93,7 +93,7 @@ public class LamusVersioningHandlerTest {
     public void setUp() {
         
         versioningHandler = new LamusVersioningHandler(mockArchiveFileHelper, mockArchiveFileLocationProvider,
-                mockHandleInfoRetriever, mockCorpusStructureProvider, mockNodeResolver, mockNodeUtil);
+                mockHandleParser, mockCorpusStructureProvider, mockNodeResolver, mockNodeUtil);
     }
     
     @After
@@ -129,7 +129,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
@@ -168,7 +168,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForReplacedNode(workspaceID); will(returnValue(versioningDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(versioningDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(versioningFile));
         }});
         
@@ -207,7 +207,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleInfoRetriever).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         

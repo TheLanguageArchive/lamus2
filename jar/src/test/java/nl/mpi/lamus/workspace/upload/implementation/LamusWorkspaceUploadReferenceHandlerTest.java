@@ -33,12 +33,11 @@ import java.util.Map;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.implementation.HandleManagerImpl;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.metadata.implementation.MetadataComponentType;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -84,7 +83,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Mock WorkspaceUploadNodeMatcher mockWorkspaceUploadNodeMatcher;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
-    @Mock HandleManagerImpl mockHandleManager;
+    @Mock HandleParser mockHandleParser;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
@@ -124,7 +123,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         workspaceUploadReferenceHandler = new LamusWorkspaceUploadReferenceHandler(
                 mockMetadataApiHandleUtil, mockWorkspaceUploadNodeMatcher,
-                mockWorkspaceDao, mockWorkspaceNodeLinkManager, mockHandleManager,
+                mockWorkspaceDao, mockWorkspaceNodeLinkManager, mockHandleParser,
                 mockMetadataAPI, mockMetadataApiBridge, mockWorkspaceFileHandler);
     }
     
@@ -1006,7 +1005,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockDocument); will(returnValue(parentDocumentHandle));
 
             if(parentDocumentHandle != null) {           
-                oneOf(mockHandleManager).isHandlePrefixKnown(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
+                oneOf(mockHandleParser).isHandlePrefixKnown(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
             }
             
             oneOf(mockDocument).getDocumentReferences(); will(returnValue(references));
@@ -1197,7 +1196,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         context.checking(new Expectations() {{
             //not necessary to change the archive URI in the workspace DB, since it's already the correct one
             oneOf(mockNode).getArchiveURI(); will(returnValue(mockNodeArchiveUri));
-            oneOf(mockHandleManager).areHandlesEquivalent(referenceUri, mockNodeArchiveUri); will(returnValue(handlesEquivalent));
+            oneOf(mockHandleParser).areHandlesEquivalent(referenceUri, mockNodeArchiveUri); will(returnValue(handlesEquivalent));
                 
             if(!handlesEquivalent) {
                 oneOf(mockNode).setArchiveURI(referenceUri);
@@ -1241,7 +1240,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 
             if(isHandle) {
                 context.checking(new Expectations() {{
-                    oneOf(mockHandleManager).isHandlePrefixKnown(referenceURI); will(returnValue(isHandlePrefixKnown));
+                    oneOf(mockHandleParser).isHandlePrefixKnown(referenceURI); will(returnValue(isHandlePrefixKnown));
                 }});
                 if(!isHandlePrefixKnown) {
                     clearReferenceUri(mockDocument, documentLocation, documentLocationFile, mockReference, referenceURI, Boolean.FALSE);
@@ -1280,7 +1279,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                     //doesn't really matter what this is returning... I can manipulate the result of the other method
                     oneOf(mockExistingParent).getArchiveURI(); will(returnValue(URI.create("node:123")));
                     oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("node:123")));
-                    oneOf(mockHandleManager).areHandlesEquivalent(with(any(URI.class)), with(any(URI.class))); will(returnValue(!multipleParents));
+                    oneOf(mockHandleParser).areHandlesEquivalent(with(any(URI.class)), with(any(URI.class))); will(returnValue(!multipleParents));
                 }});
             }
             if(multipleParents) {

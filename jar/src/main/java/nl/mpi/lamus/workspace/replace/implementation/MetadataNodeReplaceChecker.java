@@ -17,7 +17,7 @@
 package nl.mpi.lamus.workspace.replace.implementation;
 
 import java.util.List;
-import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.IncompatibleNodesException;
@@ -52,7 +52,7 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
     @Autowired
     private WorkspaceDao workspaceDao;
     @Autowired
-    private HandleManager handleManager;
+    private HandleParser handleParser;
     
     
     /**
@@ -95,7 +95,7 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         
         boolean handlesAreEquivalent = false;
         try {
-            handlesAreEquivalent = handleManager.areHandlesEquivalent(oldNode.getArchiveURI(), newNode.getArchiveURI());
+            handlesAreEquivalent = handleParser.areHandlesEquivalent(oldNode.getArchiveURI(), newNode.getArchiveURI());
         } catch(IllegalArgumentException ex) {
             //since the old node would always have a valid handle, this means that the new one is not valid, so they're not equivalent
             logger.warn("New node has invalid archive URI (" + newNode.getArchiveURI() + ")");

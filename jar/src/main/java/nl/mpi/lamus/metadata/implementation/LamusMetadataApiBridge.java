@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -67,7 +67,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     
     private final MetadataAPI metadataAPI;
     private final WorkspaceFileHandler workspaceFileHandler;
-    private final HandleManager handleManager;
+    private final HandleParser handleParser;
     private final CMDIMetadataElementFactory metadataElementFactory;
     
     private final AllowedCmdiProfiles allowedCmdiProfiles;
@@ -75,11 +75,11 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     
     @Autowired
     public LamusMetadataApiBridge(MetadataAPI mdApi,
-            WorkspaceFileHandler wsFileHandler, HandleManager hdlManager,
+            WorkspaceFileHandler wsFileHandler, HandleParser hdlParser,
             CMDIMetadataElementFactory mdElementFactory, AllowedCmdiProfiles profiles) {
         this.metadataAPI = mdApi;
         this.workspaceFileHandler = wsFileHandler;
-        this.handleManager = hdlManager;
+        this.handleParser = hdlParser;
         this.metadataElementFactory = mdElementFactory;
         this.allowedCmdiProfiles = profiles;
     }
@@ -128,11 +128,11 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
      * @see MetadataApiBridge#addSelfHandleAndSaveDocument(nl.mpi.metadata.api.model.MetadataDocument, java.net.URI, java.net.URL)
      */
     @Override
-    public void addSelfHandleAndSaveDocument(MetadataDocument document, URI handleUri, URL targetLocation) throws URISyntaxException, MetadataException, IOException, TransformerException {
+    public void addSelfHandleAndSaveDocument(MetadataDocument document, URI handleUri, URL targetLocation) throws MetadataException, IOException, TransformerException {
         
         logger.debug("Adding self handle with URI '{}' in metadata document '{}'", handleUri, targetLocation);
         
-        HeaderInfo newInfo = getNewSelfHandleHeaderInfo(handleManager.prepareHandleWithHdlPrefix(handleUri));
+        HeaderInfo newInfo = getNewSelfHandleHeaderInfo(handleParser.prepareHandleWithHdlPrefix(handleUri));
         document.putHeaderInformation(newInfo);
         saveMetadataDocument(document, targetLocation);
     }

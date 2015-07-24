@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
@@ -67,7 +67,7 @@ public class MetadataNodeReplaceCheckerTest {
     @Mock ReplaceActionFactory mockReplaceActionFactory;
     @Mock NodeReplaceExplorer mockNodeReplaceExplorer;
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock HandleManager mockHandleManager;
+    @Mock HandleParser mockHandleParser;
     
     @Mock WorkspaceNode mockOldNode;
     @Mock WorkspaceNode mockNewNode;
@@ -103,7 +103,7 @@ public class MetadataNodeReplaceCheckerTest {
         ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionFactory", mockReplaceActionFactory);
         ReflectionTestUtils.setField(nodeReplaceChecker, "nodeReplaceExplorer", mockNodeReplaceExplorer);
         ReflectionTestUtils.setField(nodeReplaceChecker, "workspaceDao", mockWorkspaceDao);
-        ReflectionTestUtils.setField(nodeReplaceChecker, "handleManager", mockHandleManager);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "handleParser", mockHandleParser);
         
         actions = new ArrayList<>();
     }
@@ -199,7 +199,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
             allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
             allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
@@ -240,7 +240,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
             allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(oldNodeURI, newNodeURI); will(throwException(exceptionToThrow));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(throwException(exceptionToThrow));
         }});
         
         try {
@@ -278,7 +278,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
             allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.FALSE));
         }});
         
         try {
@@ -320,7 +320,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
             allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
             allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
@@ -364,7 +364,7 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
             allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
             allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));

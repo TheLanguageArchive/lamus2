@@ -24,7 +24,7 @@ import java.nio.file.Files;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
@@ -48,18 +48,18 @@ public class LamusVersioningHandler implements VersioningHandler {
     
     private final ArchiveFileHelper archiveFileHelper;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
-    private final HandleInfoRetriever handleInfoRetriever;
+    private final HandleParser handleParser;
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
     private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusVersioningHandler(ArchiveFileHelper fileHelper, ArchiveFileLocationProvider fileLocationProvider,
-        HandleInfoRetriever handleInfoRetriever, CorpusStructureProvider csProvider, NodeResolver resolver,
+        HandleParser handleParser, CorpusStructureProvider csProvider, NodeResolver resolver,
         NodeUtil nodeUtil) {
         
         this.archiveFileHelper = fileHelper;
-        this.handleInfoRetriever = handleInfoRetriever;
+        this.handleParser = handleParser;
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = resolver;
         this.archiveFileLocationProvider = fileLocationProvider;
@@ -181,7 +181,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
         
         File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(
-                targetDirectory, handleInfoRetriever.stripHandle(nodeToMove.getArchiveURI().toString()), currentFile);
+                targetDirectory, handleParser.stripHandle(nodeToMove.getArchiveURI().toString()), currentFile);
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

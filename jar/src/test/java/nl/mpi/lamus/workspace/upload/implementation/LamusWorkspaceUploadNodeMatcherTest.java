@@ -26,7 +26,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.implementation.HandleManagerImpl;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -62,7 +62,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
-    @Mock HandleManagerImpl mockHandleManager;
+    @Mock HandleParser mockHandleParser;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock HandleUtil mockMetadataApiHandleUtil;
@@ -94,7 +94,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         workspaceUploadNodeMatcher = new LamusWorkspaceUploadNodeMatcher(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockHandleManager, mockWorkspaceNodeFactory,
+                mockHandleParser, mockWorkspaceNodeFactory,
                 mockWorkspaceDao, mockMetadataApiHandleUtil,
                 mockNodeUtil);
     }
@@ -124,7 +124,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and matches the given handle, so it won't continue the loop and return the node
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.TRUE));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, handleToMatch);
@@ -155,7 +155,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and doesn't match the given handle, so it will continue the loop
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
@@ -196,7 +196,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and doesn't match the given handle, so it will continue the loop
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
@@ -237,7 +237,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and doesn't match the given handle, so it will continue the loop
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
@@ -281,7 +281,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and doesn't match the given handle, so it will continue the loop
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(firstNodeURI));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, firstNodeURI); will(returnValue(Boolean.FALSE));
             
             //next iteration
             //second node is resource, so a match will be searched in the corpusstructure DB
@@ -319,7 +319,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //first node is metadata and retrieved archive URI is null, so it will continue the loop
             oneOf(mockNodeUtil).isNodeMetadata(mockFirstNode); will(returnValue(Boolean.TRUE));
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(null));
-            oneOf(mockHandleManager).areHandlesEquivalent(handleToMatch, null); will(throwException(secondExpectedException));
+            oneOf(mockHandleParser).areHandlesEquivalent(handleToMatch, null); will(throwException(secondExpectedException));
             //extra call from the logger
             oneOf(mockFirstNode).getArchiveURI(); will(returnValue(null));
             
@@ -432,7 +432,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleManager).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.TRUE));
         }});
                 
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -450,7 +450,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleManager).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceNodeFactory).getNewExternalNode(workspaceID, uriToMatch);
                 will(returnValue(mockExternalNode));

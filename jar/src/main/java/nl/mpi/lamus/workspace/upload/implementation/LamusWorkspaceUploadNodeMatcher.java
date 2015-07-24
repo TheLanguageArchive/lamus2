@@ -23,7 +23,7 @@ import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -47,7 +47,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
-    private final HandleManager handleManager;
+    private final HandleParser handleParser;
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
     private final HandleUtil metadataApiHandleUtil;
@@ -57,12 +57,12 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Autowired
     public LamusWorkspaceUploadNodeMatcher(
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            HandleManager handleManager,
+            HandleParser handleParser,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao,
             HandleUtil handleUtil, NodeUtil nodeUtil) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
-        this.handleManager = handleManager;
+        this.handleParser = handleParser;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.metadataApiHandleUtil = handleUtil;
@@ -80,7 +80,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             if(nodeUtil.isNodeMetadata(innerNode)) {
                 
                 try {
-                    if(handleManager.areHandlesEquivalent(handle, innerNode.getArchiveURI())) { // handle matches
+                    if(handleParser.areHandlesEquivalent(handle, innerNode.getArchiveURI())) { // handle matches
                         return innerNode;
                     }
                 } catch(IllegalArgumentException ex) {
@@ -130,7 +130,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     public WorkspaceNode findExternalNodeForUri(int workspaceID, URI uri) {
         
         boolean uriIsHandle = metadataApiHandleUtil.isHandleUri(uri);
-        boolean uriIsUnknownHandle = uriIsHandle && !handleManager.isHandlePrefixKnown(uri);
+        boolean uriIsUnknownHandle = uriIsHandle && !handleParser.isHandlePrefixKnown(uri);
         boolean uriIsExternalUrl = !uriIsHandle && !"file".equals(uri.getScheme());
         
         //if it is not a handle nor a local URL, it should at least be a valid external URL

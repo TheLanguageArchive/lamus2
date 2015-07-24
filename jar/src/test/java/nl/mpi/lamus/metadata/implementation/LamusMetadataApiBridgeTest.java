@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -98,7 +98,7 @@ public class LamusMetadataApiBridgeTest {
     
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
-    @Mock HandleManager mockHandleManager;
+    @Mock HandleParser mockHandleParser;
     @Mock CMDIMetadataElementFactory mockMetadataElementFactory;
     
     @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
@@ -198,7 +198,7 @@ public class LamusMetadataApiBridgeTest {
     @Before
     public void setUp() {
         lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI,
-                mockWorkspaceFileHandler, mockHandleManager,
+                mockWorkspaceFileHandler, mockHandleParser,
                 mockMetadataElementFactory, mockAllowedCmdiProfiles);
     }
     
@@ -356,7 +356,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
@@ -366,29 +366,6 @@ public class LamusMetadataApiBridgeTest {
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockFile);
         
         lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
-    }
-    
-    @Test
-    public void addSelfHandle_throwsURISyntaxException() throws MalformedURLException, URISyntaxException, MetadataException, IOException, TransformerException {
-        
-        final URI handle = URI.create("11142/" + UUID.randomUUID().toString());
-        final URI preparedHandle = URI.create("hdl:" + handle.toString());
-        final URL targetLocation = new URL("file:/workspace/folder/file.cmdi");
-        final HeaderInfo headerInfo = new HeaderInfo(CMDIConstants.CMD_HEADER_MD_SELF_LINK, preparedHandle.toString());
-        
-        final URISyntaxException expectedException = new URISyntaxException(handle.toString(), "some exception message");
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(throwException(expectedException));
-        }});
-
-        try {
-            lamusMetadataApiBridge.addSelfHandleAndSaveDocument(mockCMDIDocument, handle, targetLocation);
-            fail("should have thrown exception");
-        } catch(URISyntaxException ex) {
-            assertEquals("Exception different from expected", expectedException, ex);
-        }
     }
     
     @Test
@@ -403,7 +380,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo))); will(throwException(expectedException));
         }});
 
@@ -427,7 +404,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));

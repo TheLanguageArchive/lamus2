@@ -30,6 +30,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -84,6 +85,7 @@ public class AddedNodeExporterTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock HandleManager mockHandleManager;
+    @Mock HandleParser mockHandleParser;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
@@ -132,6 +134,7 @@ public class AddedNodeExporterTest {
         ReflectionTestUtils.setField(addedNodeExporter, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(addedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
         ReflectionTestUtils.setField(addedNodeExporter, "handleManager", mockHandleManager);
+        ReflectionTestUtils.setField(addedNodeExporter, "handleParser", mockHandleParser);
         ReflectionTestUtils.setField(addedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(addedNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
         ReflectionTestUtils.setField(addedNodeExporter, "nodeResolver", mockNodeResolver);
@@ -897,7 +900,7 @@ public class AddedNodeExporterTest {
         } else {
             context.checking(new Expectations() {{
                 oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpsRoot); will(returnValue(nodeNewArchiveHandle));
-                oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+                oneOf(mockHandleParser).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
                 oneOf(mockChildWsNode).setArchiveURI(preparedNewArchiveHandle);
                 oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildWsNode);
             }});
@@ -924,7 +927,7 @@ public class AddedNodeExporterTest {
             oneOf(mockParentCmdiDocument).getDocumentReferenceByLocation(nodeWsURL.toURI());
                 will(returnValue(mockResourceProxy));
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
-            oneOf(mockHandleManager).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             

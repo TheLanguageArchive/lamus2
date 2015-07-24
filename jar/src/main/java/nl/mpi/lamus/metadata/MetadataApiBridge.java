@@ -61,7 +61,7 @@ public interface MetadataApiBridge {
      * @param targetLocation location where the document should be saved
      */
     public void addSelfHandleAndSaveDocument(MetadataDocument document, URI handleUri, URL targetLocation)
-            throws URISyntaxException, MetadataException, IOException, TransformerException;
+            throws MetadataException, IOException, TransformerException;
     
     /**
      * Removes the self link (handle) from the given file, if it has one,

@@ -30,12 +30,11 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
-import nl.mpi.handle.util.implementation.HandleManagerImpl;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.metadata.implementation.MetadataComponentType;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -44,7 +43,6 @@ import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
-import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.util.HandleUtil;
@@ -67,7 +65,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     private final WorkspaceUploadNodeMatcher workspaceUploadNodeMatcher;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private final HandleManagerImpl handleManager;
+    private final HandleParser handleParser;
     private final MetadataAPI metadataAPI;
     private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceFileHandler workspaceFileHandler;
@@ -76,13 +74,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     public LamusWorkspaceUploadReferenceHandler(
             HandleUtil mdApiHandleUtil, WorkspaceUploadNodeMatcher wsUploadNodeMatcher,
             WorkspaceDao wsDao, WorkspaceNodeLinkManager wsNodeLinkManager,
-            HandleManagerImpl handleManager, MetadataAPI mdAPI,
+            HandleParser handleParser, MetadataAPI mdAPI,
             MetadataApiBridge mdApiBridge, WorkspaceFileHandler wsFileHandler) {
         this.metadataApiHandleUtil = mdApiHandleUtil;
         this.workspaceUploadNodeMatcher = wsUploadNodeMatcher;
         this.workspaceDao = wsDao;
         this.workspaceNodeLinkManager = wsNodeLinkManager;
-        this.handleManager = handleManager;
+        this.handleParser = handleParser;
         this.metadataAPI = mdAPI;
         this.metadataApiBridge = mdApiBridge;
         this.workspaceFileHandler = wsFileHandler;
@@ -103,7 +101,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         
         //check if document has external self-handle
         URI currentSelfHandle = metadataApiBridge.getSelfHandleFromDocument(currentDocument);
-        if(currentSelfHandle != null && !handleManager.isHandlePrefixKnown(currentSelfHandle)) {
+        if(currentSelfHandle != null && !handleParser.isHandlePrefixKnown(currentSelfHandle)) {
             documentsWithExternalSelfHandles.put(currentDocument, currentNode);
         }
         
@@ -158,7 +156,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                         }
 
                         //set handle in DB
-                        if(!handleManager.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
+                        if(!handleParser.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
                             matchedNode.setArchiveURI(refURI);
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                         }
@@ -202,7 +200,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     for(WorkspaceNode existingParent : alreadyLinkedParents) {
                         boolean areHandlesEquivalent;
                         try {
-                            areHandlesEquivalent = handleManager.areHandlesEquivalent(currentNode.getArchiveURI(), existingParent.getArchiveURI());
+                            areHandlesEquivalent = handleParser.areHandlesEquivalent(currentNode.getArchiveURI(), existingParent.getArchiveURI());
                         } catch(IllegalArgumentException ex) {
                             sameParent = false;
                             break;
@@ -226,7 +224,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 if(!externalNode) {
                     // check if ref is handle, and if is external... if so, remove it
                     if(metadataApiHandleUtil.isHandleUri(refURI)) {
-                        if(!handleManager.isHandlePrefixKnown(refURI)) { // external handle
+                        if(!handleParser.isHandlePrefixKnown(refURI)) { // external handle
                             clearReferenceUri(currentDocument, ref, currentNode);
                         }
                     }
