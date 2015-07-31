@@ -107,7 +107,7 @@ public class LamusVersioningHandlerTest {
         final int workspaceID = 10;
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String fileBaseName = "node.cmdi";
         final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
@@ -129,7 +129,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
@@ -146,7 +146,7 @@ public class LamusVersioningHandlerTest {
         final int workspaceID = 10;
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String fileBaseName = "node.cmdi";
         final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
@@ -168,7 +168,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForReplacedNode(workspaceID); will(returnValue(versioningDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(versioningDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(versioningFile));
         }});
         
@@ -185,7 +185,7 @@ public class LamusVersioningHandlerTest {
         final int workspaceID = 10;
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String fileBaseName = "node.cmdi";
         final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
@@ -207,7 +207,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandle(testNodeFullHandle); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
@@ -224,7 +224,7 @@ public class LamusVersioningHandlerTest {
         final int workspaceID = 10;
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String fileBaseName = "node.cmdi";
         final URL testNodeWsURL = new URL("file:/workspace/folder/" + fileBaseName);
@@ -256,7 +256,7 @@ public class LamusVersioningHandlerTest {
         final URI wsTopNodeUrlToUri = wsTopNodeUrl.toURI();
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String fileBaseName = "node.txt";
         final File archiveDirectory = new File("/lat/corpora/archive/somefolder");
@@ -293,7 +293,7 @@ public class LamusVersioningHandlerTest {
         
         final String testNodeStrippedHandle = UUID.randomUUID().toString();
         final String testNodeFullHandle = "hdl:12345/" + testNodeStrippedHandle;
-        final URI testNodeFullArchiveURI = new URI(testNodeFullHandle);
+        final URI testNodeFullArchiveURI = URI.create(testNodeFullHandle);
         
         final String expectedMessage = "No valid file location was found.";
         
