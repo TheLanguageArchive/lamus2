@@ -703,22 +703,22 @@ div.treePanelContainer div.treePanel {
     overflow: scroll;
 }
 
-.tableTree > table {
+.tableTree > table, .simpleTable {
     width: 100%;
     border: 1px solid #DDDDDD;
 }
 
-.tableTree > table > tbody {
+.tableTree > table > tbody, .simpleTable > tbody {
     width: 100%;
 }
 
-.tableTree > table > tbody > tr.even {
+.tableTree > table > tbody > tr.even, .simpleTable > tbody > tr.even {
     background-color: #FFFFFF;
 }
-.tableTree > table > tbody > tr.odd {
+.tableTree > table > tbody > tr.odd, .simpleTable > tbody > tr.odd {
     background-color: #EEEEEE;
 }
-.tableTree > table > tbody > tr.number {
+.tableTree > table > tbody > tr.number > .simpleTable > tbody > tr.number {
     text-align: right;
     padding-right: 1em;
 }
