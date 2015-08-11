@@ -168,8 +168,16 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-                } catch (NodeNotFoundException | NodeAccessException | WorkspaceImportException ex) {
+                } catch (NodeNotFoundException | NodeAccessException ex) {
                     Session.get().error(ex.getMessage());
+                } catch (WorkspaceImportException ex) {
+                    StringBuilder messageToShow = new StringBuilder();
+                    messageToShow.append(ex.getMessage());
+                    if(ex.getCause() != null) {
+                        messageToShow.append("\n");
+                        messageToShow.append(ex.getCause().getMessage());
+                    }
+                    Session.get().error(messageToShow);
                 }
             }
 	};

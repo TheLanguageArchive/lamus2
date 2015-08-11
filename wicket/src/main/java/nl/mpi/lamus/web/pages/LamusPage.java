@@ -115,9 +115,6 @@ public class LamusPage extends WebPage {
         } else {
             add(new ExternalLink("loginOrLogoutLink", "logout", getLocalizer().getString("header_logout_label", this)));
         }
-        
-        //TODO THE URLs IN THESE LINKS ARE NOT VALID AT THE MOMENT...
-
     }
     
     protected FeedbackPanel getFeedbackPanel() {

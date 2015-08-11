@@ -16,10 +16,7 @@
  */
 package nl.mpi.lamus.web.pages;
 
-import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.Model;
 
 /**
  *

@@ -29,9 +29,6 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
-import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
-import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
@@ -151,52 +148,19 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
 
                             for (ImportProblem problem : uploadProblems) {
-
-                                if (problem instanceof FileImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-                                if (problem instanceof LinkImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-                                if (problem instanceof MatchImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-
-                                //TODO COMPLETE EXCEPTION
-                                throw new IllegalStateException();
+                                UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
                             }
-
-                            //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
-
 
                             if (uploadProblems.isEmpty() && !copiedFiles.isEmpty()) {
-                                UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
-
-
-
-                                //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
-
+                                UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) +
+                                    getLocalizer().getString("upload_panel_total_successful_files", this) + copiedFiles.size());
                             }
                             
-                            
+                            if (!uploadProblems.isEmpty()) {
+                                UploadPanel.this.error(getLocalizer().getString("upload_panel_fail_message", this) +
+                                    getLocalizer().getString("upload_panel_total_failed_files", this) + uploadProblems.size() +
+                                    "; " + getLocalizer().getString("upload_panel_total_successful_files", this) + copiedFiles.size());
+                            }
 
                         } catch (WorkspaceException ex) {
                             UploadPanel.this.error(ex.getMessage());
