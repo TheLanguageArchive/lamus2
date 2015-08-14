@@ -58,7 +58,7 @@ public class LamusArchiveFileLocationProviderTest {
     private final String dbLocalRoot = "file:/some/loca/folder/archive/";
     
     private final String metadataDirectoryName = "Metadata";
-    private String orphansDirectoryName = "sessions";
+    private final String orphansDirectoryName = "sessions";
     
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
@@ -66,6 +66,8 @@ public class LamusArchiveFileLocationProviderTest {
     @Mock File mockFile;
     
     @Mock WorkspaceNode mockNode;
+    
+    private File tempDirectory;
     
     
     public LamusArchiveFileLocationProviderTest() {
@@ -317,17 +319,16 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
         
-        String pathPrefix = "/some/url/with/";
-        File pathPrefixFile = testFolder.newFolder(pathPrefix);
-        File metadataFolder = testFolder.newFolder(pathPrefix + metadataDirectoryName);
+        prepareExistingTempDirectory();
+        File metadataFolder = new File(tempDirectory, metadataDirectoryName);
         FileUtils.forceMkdir(metadataFolder);
         assertTrue(metadataFolder.exists());
 
-        File fullFilePath = new File(pathPrefixFile, "blabla.cmdi");
+        File fullFilePath = new File(tempDirectory, "blabla.cmdi");
         
         URI testURI = fullFilePath.toURI();
         
-        File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryName);
+        File expectedOrphansDirectory = new File(tempDirectory, orphansDirectoryName);
         File retrievedOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(testURI);
         
         assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
@@ -347,5 +348,11 @@ public class LamusArchiveFileLocationProviderTest {
         
         boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
         assertFalse("Result should be false", isFileInOrphansDirectory);
+    }
+    
+    
+    private void prepareExistingTempDirectory() throws IOException {
+        tempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory wasn't created.", tempDirectory.exists());
     }
 }
