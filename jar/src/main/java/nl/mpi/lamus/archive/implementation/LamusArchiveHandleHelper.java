@@ -26,6 +26,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -48,18 +49,21 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     private final WorkspaceDao workspaceDao;
     private final MetadataApiBridge metadataApiBridge;
     private final NodeUtil nodeUtil;
+    private final HandleParser handleParser;
     
     @Autowired
     public LamusArchiveHandleHelper(
             CorpusStructureProvider provider, NodeResolver resolver,
             HandleManager hManager, WorkspaceDao wsDao,
-            MetadataApiBridge mApiBridge, NodeUtil nUtil) {
+            MetadataApiBridge mApiBridge, NodeUtil nUtil,
+            HandleParser hdlParser) {
         corpusStructureProvider = provider;
         nodeResolver = resolver;
         handleManager = hManager;
         workspaceDao = wsDao;
         metadataApiBridge = mApiBridge;
         nodeUtil = nUtil;
+        handleParser = hdlParser;
     }
     
     /**
@@ -74,7 +78,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
             throw new NodeNotFoundException(nodeURI, message);
         }
         
-        return nodeResolver.getPID(node);
+        return handleParser.prepareHandleWithHdlPrefix(nodeResolver.getPID(node));
     }
 
     /**
