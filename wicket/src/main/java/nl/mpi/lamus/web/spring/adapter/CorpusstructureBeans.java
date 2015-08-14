@@ -61,7 +61,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public CorpusStructureDBFactory csdbImplFactory() {
-        return new CorpusStructureDBImplFactory("java:comp/env/jdbc/CSDB3");
+        return new CorpusStructureDBImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
     }
     
     @Bean
@@ -77,7 +77,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public ArchiveObjectsDBFactory aoImplFactory() {
-        return new ArchiveObjectsDBImplFactory("java:comp/env/jdbc/CSDB3");
+        return new ArchiveObjectsDBImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
     }
     
     @Bean(name = "adapterAO")
@@ -88,7 +88,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public VersioningAPIFactory versioningApiFactory() {
-        return new VersioningAPIImplFactory("java:comp/env/jdbc/CSDB3");
+        return new VersioningAPIImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
     }
     
     @Bean
