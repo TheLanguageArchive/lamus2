@@ -80,7 +80,7 @@ public class LamusArchiveFileHelperTest {
     @Mock CmdiProfile mockCmdiProfile;
     
     private final int maxDirectoryNameLength = 50;
-    private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
+    private final long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
     private final String corpusstructureDirectoryName = "Corpusstructure";
     private final String metadataDirectoryName = "Metadata";
@@ -88,8 +88,13 @@ public class LamusArchiveFileHelperTest {
     private final String mediaDirectoryName = "Media";
     private final String infoDirectoryName = "Info";
     
-    private File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
-    private File versioningBaseDirectory = new File("/lat/corpora/versioning/");
+    private final File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
+    private final File versioningBaseDirectory = new File("/lat/corpora/versioning/");
+    
+    private File existingTempFile;
+    private File existingTempDirectory;
+    private File existingNonWritableTempDirectory;
+    private File nonExistingTempDirectory;
     
     public LamusArchiveFileHelperTest() {
     }
@@ -121,7 +126,7 @@ public class LamusArchiveFileHelperTest {
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
     }
 
     @Test
@@ -293,15 +298,14 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getFinalFileNonExistingName() {
+    public void getFinalFileNonExistingName() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        File dir = testFolder.newFolder(dirPath);
-        File expectedFile = new File(dir, fileName);
+        File expectedFile = new File(existingTempDirectory, fileName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -309,17 +313,15 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingOneName() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
         final String expectedName = "file_2.cmdi";
+        prepareExistingTempDirectory();
         
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
-        File expectedFile = new File(dir, expectedName);
+        File expectedFile = new File(existingTempDirectory, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -327,23 +329,22 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingSeveralNames() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        prepareExistingTempDirectory();
+        
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         for(int suffix = 1; suffix < 11; suffix++) {
             String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
-            File currentFile = new File(dir, currentFileName);
+            File currentFile = new File(existingTempDirectory, currentFileName);
             FileUtils.touch(currentFile);
         }
         
         String expectedName = "file_11.cmdi";
-        File expectedFile = new File(dir, expectedName);
+        File expectedFile = new File(existingTempDirectory, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -353,20 +354,19 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingAllNames() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        prepareExistingTempDirectory();
+        
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         for(int suffix = 1; suffix < 10000; suffix++) {
             String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
-            File currentFile = new File(dir, currentFileName);
+            File currentFile = new File(existingTempDirectory, currentFileName);
             FileUtils.touch(currentFile);
         }
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         //TODO Some Exception instead?
         
@@ -376,28 +376,24 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesBothNonExistingYet() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
-        assertTrue("Directory should have been created", dir.exists());
+        assertTrue("Directory should have been created", existingTempDirectory.exists());
         assertTrue("File should have been created", file.exists());
     }
     
     @Test
     public void createFileAndDirectoriesFileNonExistingYet() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
@@ -407,13 +403,10 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesDirectoryExistingAlready() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
@@ -423,13 +416,10 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesBothExistingAlready() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         testArchiveFileHelper.createFileAndDirectories(file);
@@ -674,10 +664,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void canWriteExistingTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
-        targetDirectory.mkdirs();
+        prepareExistingTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingTempDirectory);
         
         assertTrue("Target directory should be writable", result);
     }
@@ -685,9 +674,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void canWriteNonExistingTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        prepareNonExistingTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(nonExistingTempDirectory);
         
         assertTrue("Target directory should have been created and be writable", result);
     }
@@ -695,11 +684,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void cannotWriteTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
-        targetDirectory.mkdirs();
-        targetDirectory.setReadOnly();
+        prepareExistingNonWritableTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingNonWritableTempDirectory);
         
         assertFalse("Target directory should not be writable", result);
     }
@@ -707,11 +694,34 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void targetDirectoryIsNotDirectory() throws IOException {
         
-        File someFile = testFolder.newFile("someFile");
-        someFile.createNewFile();
+        prepareExistingTempFile();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(someFile);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingTempFile);
         
         assertFalse("Target directory is not a directory, therefore it should fail", result);
+    }
+    
+    
+    private void prepareExistingTempFile() throws IOException {
+        existingTempFile = testFolder.newFile();
+        assertTrue("Temp file wasn't created.", existingTempFile.exists());
+    }
+    
+    private void prepareExistingTempDirectory() throws IOException {
+        existingTempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory wasn't created.", existingTempDirectory.exists());
+    }
+    
+    private void prepareExistingNonWritableTempDirectory() throws IOException {
+        existingNonWritableTempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory (non-writable) wasn't created.", existingNonWritableTempDirectory.exists());
+        existingNonWritableTempDirectory.setWritable(Boolean.FALSE);
+        assertFalse("Temp directory (non-writable) wasn't set as non-writable", existingNonWritableTempDirectory.canWrite());
+    }
+    
+    private void prepareNonExistingTempDirectory() throws IOException {
+        File someDirectory = testFolder.newFolder();
+        nonExistingTempDirectory = new File(someDirectory, "nonExistingFolder");
+        assertFalse("Temp directory shouldn't have been created.", nonExistingTempDirectory.exists());
     }
 }
