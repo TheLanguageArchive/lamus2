@@ -5,14 +5,14 @@ LAMUS2 CONFIGURATION
 
 1.1.    JNDI Resources
 
-Lamus2 needs the 'corpusstructure3', "ams2cmdi" and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
+Lamus2 needs the 'corpusstructure3' (or another name for the hybrid corpusstructure), "ams2cmdi" and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
 
     <Resource
-            name="jdbc/CSDB2"
+            name="jdbc/CSDB_HYBRID"
             auth="Container"
             type="javax.sql.DataSource"
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://localhost:5432/corpusstructure2"
+            url="jdbc:postgresql://localhost:5432/corpusstructure3"
             username="dummy"
             password="password"
             maxActive="20"
