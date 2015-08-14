@@ -27,6 +27,7 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -61,6 +62,7 @@ public class LamusArchiveHandleHelperTest {
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock NodeUtil mockNodeUtil;
+    @Mock HandleParser mockHandleParser;
     
     @Mock CorpusNode mockCorpusNode;
     @Mock WorkspaceNode mockWorkspaceNode;
@@ -82,7 +84,7 @@ public class LamusArchiveHandleHelperTest {
         archiveHandleHelper = new LamusArchiveHandleHelper(
                 mockCorpusStructureProvider, mockNodeResolver,
                 mockHandleManager, mockWorkspaceDao,
-                mockMetadataApiBridge, mockNodeUtil);
+                mockMetadataApiBridge, mockNodeUtil, mockHandleParser);
     }
     
     @After
@@ -120,6 +122,7 @@ public class LamusArchiveHandleHelperTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeUri); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(null));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(null); will(returnValue(null));
         }});
         
         URI retrievedPid = archiveHandleHelper.getArchiveHandleForNode(nodeUri);
@@ -131,12 +134,15 @@ public class LamusArchiveHandleHelperTest {
     public void getArchiveHandleForNode() throws NodeNotFoundException {
         
         final URI nodeUri = URI.create("node:001");
-        final URI expectedHandle = URI.create("hdl:" + UUID.randomUUID().toString());
+        final String baseHandle = UUID.randomUUID().toString();
+        final URI someIntermediateHandle = URI.create(baseHandle);
+        final URI expectedHandle = URI.create("hdl:" + baseHandle);
         
         context.checking(new Expectations() {{
             
             oneOf(mockCorpusStructureProvider).getNode(nodeUri); will(returnValue(mockCorpusNode));
-            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(expectedHandle));
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(someIntermediateHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(someIntermediateHandle); will(returnValue(expectedHandle));
         }});
         
         URI retrievedPid = archiveHandleHelper.getArchiveHandleForNode(nodeUri);

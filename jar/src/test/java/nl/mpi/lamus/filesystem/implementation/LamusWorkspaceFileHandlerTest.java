@@ -646,12 +646,12 @@ public class LamusWorkspaceFileHandlerTest {
         return node;
     }
     
-    private void prepareTempDirectory() {
+    private void prepareTempDirectory() throws IOException {
         tempDirectory = testFolder.newFolder("temp_directory");
         assertTrue("Temp directory wasn't created.", tempDirectory.exists());
     }
     
-    private void prepareAnotherTempDirectory() {
+    private void prepareAnotherTempDirectory() throws IOException {
         anotherTempDirectory = testFolder.newFolder("another_temp_directory");
         assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
     }
@@ -690,7 +690,7 @@ public class LamusWorkspaceFileHandlerTest {
         return tempFile;
     }
     
-    private File createTargetDirectory_retrieveTargetFileLocation() {
+    private File createTargetDirectory_retrieveTargetFileLocation() throws IOException {
         prepareAnotherTempDirectory();
         
         File targetLocation = new File(anotherTempDirectory, "target_temp_file.txt");
@@ -698,7 +698,7 @@ public class LamusWorkspaceFileHandlerTest {
         return targetLocation;
     }
     
-    private File doNotCreateTargetDirectory_retrieveTargetFileLocation() {
+    private File doNotCreateTargetDirectory_retrieveTargetFileLocation() throws IOException {
         prepareAnotherTempDirectory();
         
         File targetDirectory = new File(anotherTempDirectory, "nonexistingfolder");
