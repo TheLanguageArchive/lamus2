@@ -23,12 +23,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleParser;
+import nl.mpi.handle.util.implementation.HandleConstants;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -82,6 +85,7 @@ public class MetadataNodeImporterTest {
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
     @Mock NodeDataRetriever mockNodeDataRetriever;
+    @Mock HandleParser mockHandleParser;
     
     @Mock WorkspaceNode mockParentNode;
     @Mock Reference mockReferenceWithoutHandle;
@@ -100,6 +104,10 @@ public class MetadataNodeImporterTest {
     @Mock File mockArchiveFile;
     
     private final int workspaceID = 1;
+    
+    private final String handlePrefixWithSlash = "11142/";
+    private final String handleProxyPlusPrefixWithSlash = HandleConstants.HDL_SHORT_PROXY + ":" + handlePrefixWithSlash;
+    
     
     public MetadataNodeImporterTest() {
     }
@@ -129,6 +137,7 @@ public class MetadataNodeImporterTest {
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeFactory", mockWorkspaceNodeFactory);
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeExplorer", mockWorkspaceNodeExplorer);
         ReflectionTestUtils.setField(nodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
+        ReflectionTestUtils.setField(nodeImporter, "handleParser", mockHandleParser);
     }
     
     @After
@@ -161,7 +170,7 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
@@ -214,7 +223,7 @@ public class MetadataNodeImporterTest {
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus testChildStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean testChildOnSite = Boolean.TRUE;
         final boolean testChildProtected = Boolean.FALSE;
@@ -257,7 +266,7 @@ public class MetadataNodeImporterTest {
 
         final URI testChildURI = URI.create("http://some.url/node.something");
         final URL testChildURL = testChildURI.toURL();
-        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final boolean testChildOnSite = Boolean.TRUE;
         
@@ -294,7 +303,7 @@ public class MetadataNodeImporterTest {
 
         final URI testChildURI = URI.create("http://some.url/node.something");
         final URL testChildURL = testChildURI.toURL();
-        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final boolean testChildOnSite = Boolean.TRUE;
         
@@ -329,7 +338,7 @@ public class MetadataNodeImporterTest {
     public void importNodeMetadataDocumentCantFindNode() throws MalformedURLException, URISyntaxException,
         IOException, MetadataException {
 
-        final URI testURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         
         testWorkspace.setTopNodeArchiveURI(testURI);
         
@@ -359,7 +368,7 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
@@ -367,7 +376,9 @@ public class MetadataNodeImporterTest {
         final URI testChildWsURI = testChildWsURL.toURI();
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final String testChildRawHandle = UUID.randomUUID().toString();
+        final URI testChildURI = URI.create(handlePrefixWithSlash + testChildRawHandle);
+        final URI completeChildURI = URI.create(handleProxyPlusPrefixWithSlash + testChildRawHandle);
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -384,8 +395,10 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataResourceProxy).getHandle(); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
+            oneOf(mockMetadataResourceProxy).setHandle(completeChildURI);
             
-            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
             oneOf(mockArchiveFile).toURI(); will(returnValue(testChildArchiveURI));
             oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
@@ -394,10 +407,10 @@ public class MetadataNodeImporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
             
-            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(completeChildURI); will(returnValue(testChildProtected));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
-                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL,
+                    testWorkspace.getWorkspaceID(), completeChildURI, testChildArchiveURL,
                     mockTestReferencingMetadataDocumentWithHandle, testChildName, testChildOnSite, testChildProtected);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -424,7 +437,7 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
@@ -432,7 +445,9 @@ public class MetadataNodeImporterTest {
         final URI testChildWsURI = testChildWsURL.toURI();
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final String testChildRawHandle = UUID.randomUUID().toString();
+        final URI testChildURI = URI.create(handlePrefixWithSlash + testChildRawHandle);
+        final URI completeChildURI = URI.create(handleProxyPlusPrefixWithSlash + testChildRawHandle);
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -449,8 +464,10 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataResourceProxy).getHandle(); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
+            oneOf(mockMetadataResourceProxy).setHandle(completeChildURI);
             
-            oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
             oneOf(mockArchiveFile).toURI(); will(returnValue(testChildArchiveURI));
             oneOf(mockCorpusNode).getName(); will(returnValue(testChildName));
@@ -459,10 +476,10 @@ public class MetadataNodeImporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(testChildArchiveURL);
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
             
-            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(completeChildURI); will(returnValue(testChildProtected));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
-                    testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL,
+                    testWorkspace.getWorkspaceID(), completeChildURI, testChildArchiveURL,
                     mockTestNonReferencingMetadataDocumentWithHandle, testChildName, testChildOnSite, testChildProtected);
                 will(returnValue(testChildNode));
             oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
@@ -486,7 +503,7 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
@@ -548,7 +565,7 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
@@ -605,7 +622,7 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
@@ -663,14 +680,14 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -690,6 +707,8 @@ public class MetadataNodeImporterTest {
                 new MalformedURLException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -734,14 +753,14 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -761,6 +780,8 @@ public class MetadataNodeImporterTest {
                 new IOException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -805,14 +826,14 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -832,6 +853,8 @@ public class MetadataNodeImporterTest {
                 new TransformerException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -876,14 +899,14 @@ public class MetadataNodeImporterTest {
         final URL parentWsURL = new URL("file:/workspace/folder/filename.cmdi");
         final URI parentOriginURI = URI.create("file:/some.uri/filename.cmdi");
         final URL parentArchiveURL = parentOriginURI.toURL();
-        final URI parentURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000001");
+        final URI parentURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final WorkspaceNodeStatus parentStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         final boolean parentProtected = Boolean.FALSE;
         
         final URL testChildWsURL = new URL("file:/workspace/folder/node.something");
         final URI testChildArchiveURI = URI.create("file:/some.url/node.something");
         final URL testChildArchiveURL = testChildArchiveURI.toURL();
-        final URI testChildURI = URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000010");
+        final URI testChildURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final String testChildName = "someName";
         final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
         final String testNodeFormat = "";
@@ -903,6 +926,8 @@ public class MetadataNodeImporterTest {
                 new MetadataException("this is an exception thrown by the method 'getNewWorkspaceMetadataNode'");
         
         context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));

@@ -24,6 +24,7 @@ import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.WorkspaceImportException;
@@ -71,6 +72,8 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
     @Autowired
     private NodeUtil nodeUtil;
+    @Autowired
+    private HandleParser handleParser;
 
     
     /**
@@ -92,7 +95,15 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
    
         URI childURI = null;
         if(referenceFromParent instanceof HandleCarrier) {
-            childURI = ((HandleCarrier) referenceFromParent).getHandle();
+            URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
+            childURI = handleParser.prepareHandleWithHdlPrefix(handleInFile);
+            if(!handleInFile.equals(childURI)) {
+                try {
+                    ((HandleCarrier) referenceFromParent).setHandle(childURI);
+                } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
+                    logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                }
+            }
         }
         
         if(childURI == null) {
