@@ -59,11 +59,15 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         
         Collection<WorkspaceNode> metadataNodesInTree = workspaceDao.getMetadataNodesInTreeForWorkspace(workspaceID);
         try {
+            Collection<File> allFilesToValidate = new ArrayList<>();
             for(WorkspaceNode node : metadataNodesInTree) {
-                File nodeFile = new File(node.getWorkspaceURL().getPath());
-                Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(nodeFile);
-                validationIssues.addAll(issues);
+                allFilesToValidate.add(new File(node.getWorkspaceURL().getPath()));
+                
             }
+            
+            Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(allFilesToValidate);
+                validationIssues.addAll(issues);
+            
         } catch(Exception ex) {
             throwMetadataValidationException(workspaceID, ex, validationIssues);
         }

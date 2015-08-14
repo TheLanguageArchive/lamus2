@@ -18,6 +18,7 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.File;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.lamus.typechecking.MetadataChecker;
 import org.jmock.Expectations;
@@ -209,11 +210,14 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_profileIsNotAllowed() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingProfile_notAllowed.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "$allowedProfilesDocument//profile[@id = normalize-space(current()/cmd:Header/cmd:MdProfile)]"
                             + " or $allowedProfilesDocument//profile[@id = tokenize(normalize-space(current()/@xsi:schemaLocation), '/')[last() - 1]]";
         final String expectedMessage = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
-        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -222,10 +226,13 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_noResourceProxy() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingReference_noResourceProxy.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "count(cmd:ResourceProxy) ge 1";
         final String expectedMessage = "[CMDI Best Practice] There should be at least one /cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
-        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -234,10 +241,13 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_notAllowedResourceType() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingReference_notAllowedType.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "not($profileName) or $profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]";
         final String expectedMessage = "[CMDI Profile Restriction] the CMD profile of this record doesn't allow for this resource type.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
-        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -247,12 +257,13 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_validMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_validMimetype.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck1);
+        filesToCheck.add(fileToCheck2);
         
-        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
-        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertTrue("Issues should be empty (1)", issues1.isEmpty());
-        assertTrue("Issues should be empty (1)", issues2.isEmpty());
+        assertTrue("Issues should be empty (1)", issues.isEmpty());
     }
     
     @Test
@@ -260,15 +271,17 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_missingMimetype.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck1);
+        filesToCheck.add(fileToCheck2);
+        
         final String expectedTest = "current()/cmd:ResourceType/@mimetype";
         final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
         
-        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
-        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
-        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -276,6 +289,10 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_invalidMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_invalidMimetype.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck1);
+        filesToCheck.add(fileToCheck2);
+        
         final String expectedTest = "(current()/cmd:ResourceType[not(@mimetype)])"
                 + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
                 + " or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml')"
@@ -283,11 +300,9 @@ public class LamusMetadataCheckerTest {
         final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         
-        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
-        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
-        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertAtLeastOneIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -296,27 +311,30 @@ public class LamusMetadataCheckerTest {
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_LandingPage.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_SearchPage.cmdi");
         final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_SearchService.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck1);
+        filesToCheck.add(fileToCheck2);
+        filesToCheck.add(fileToCheck3);
         
-        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
-        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
-        Collection<MetadataValidationIssue> issues3 = metadataChecker.validateSubmittedFile(fileToCheck3);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertTrue("Issues should be empty (1)", issues1.isEmpty());
-        assertTrue("Issues should be empty (2)", issues2.isEmpty());
-        assertTrue("Issues should be empty (3)", issues3.isEmpty());
+        assertTrue("Issues should be empty (1)", issues.isEmpty());
     }
     
     @Test
     public void validateSubmittedFile_missingComponentReference() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingComponent_referenceMissing.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "not($profileName)"
                 + " or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')"
                 + " or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
                 + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id] or /cmd:CMD/cmd:Components/cmd:lat-session/*[@ref = current()/@id])";
         final String expectedMessage = "[CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
-        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -325,10 +343,13 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_missingTitle() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingComponent_titleMissing.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "current()/*[normalize-space(cmd:Title) != '']";
         final String expectedMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:Title shouldn't be empty.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
-        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -337,10 +358,13 @@ public class LamusMetadataCheckerTest {
     public void validateSubmittedFile_missingDescription() throws Exception {
         
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingComponent_descriptionMissing.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
         final String expectedTest = "current()/*/cmd:descriptions[normalize-space(cmd:Description) != '']";
         final String expectedMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:descriptions/cmd:Description shouldn't be empty.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
-        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
@@ -350,19 +374,23 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Corpus.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingInfoLinks_Session.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck1);
+        filesToCheck.add(fileToCheck2);
         
-        Collection<MetadataValidationIssue> issues1 = metadataChecker.validateSubmittedFile(fileToCheck1);
-        Collection<MetadataValidationIssue> issues2 = metadataChecker.validateSubmittedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertTrue("Issues should be empty (1)", issues1.isEmpty());
-        assertTrue("Issues should be empty (2)", issues2.isEmpty());
+        assertTrue("Issues should be empty (1)", issues.isEmpty());
     }
     
     @Test
     public void validateSubmittedFile_everythingValid() throws Exception {
         
         File fileToCheck = getResourceFromLocation("cmdi_validation/testing_everythingValid.cmdi");
-        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(fileToCheck);
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertTrue("Issues should be empty", issues.isEmpty());
     }

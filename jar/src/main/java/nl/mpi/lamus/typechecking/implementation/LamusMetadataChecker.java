@@ -19,7 +19,7 @@ package nl.mpi.lamus.typechecking.implementation;
 import com.helger.commons.io.resource.FileSystemResource;
 import com.helger.schematron.ISchematronResource;
 import com.helger.schematron.svrl.SVRLFailedAssert;
-import com.helger.schematron.svrl.SVRLUtils;
+import com.helger.schematron.svrl.SVRLHelper;
 import com.helger.schematron.xslt.SchematronResourceSCH;
 import java.io.File;
 import java.util.ArrayList;
@@ -60,19 +60,23 @@ public class LamusMetadataChecker implements MetadataChecker {
     }
 
     /**
-     * @see MetadataChecker#validateSubmittedFile(java.io.File)
+     * @see MetadataChecker#validateSubmittedFile(java.util.Collection)
      */
     @Override
-    public Collection<MetadataValidationIssue> validateSubmittedFile(File metadataFile) throws Exception {
+    public Collection<MetadataValidationIssue> validateSubmittedFile(Collection<File> metadataFiles) throws Exception {
 
         final ISchematronResource schRes = getSchematronResource(schematronFile_submit, submitPhase);
 
-        return validateFile(schRes, metadataFile);
+        Collection<MetadataValidationIssue> issuesToReturn = new ArrayList<>();
+        for(File mdFile : metadataFiles) {
+            issuesToReturn.addAll(validateFile(schRes, mdFile));
+        }
+        return issuesToReturn;
     }
 
     private ISchematronResource getSchematronResource(File schFile, String phase) {
 
-        final ISchematronResource schRes = new SchematronResourceSCH(new FileSystemResource(schFile), phase, (String) null);
+        final ISchematronResource schRes = new SchematronResourceSCH(new FileSystemResource(schFile));
 
         if (!schRes.isValidSchematron()) {
             throw new IllegalArgumentException("Invalid Schematron");
@@ -91,7 +95,7 @@ public class LamusMetadataChecker implements MetadataChecker {
             return issues;
         }
 
-        List<SVRLFailedAssert> failedAssertions = SVRLUtils.getAllFailedAssertions(result);
+        List<SVRLFailedAssert> failedAssertions = SVRLHelper.getAllFailedAssertions(result);
 
         for (SVRLFailedAssert failure : failedAssertions) {
             issues.add(new MetadataValidationIssue(fileToValidate, failure.getTest(), failure.getText().trim(), failure.getRole()));

@@ -85,21 +85,23 @@ public class LamusWorkspaceFileValidatorTest {
     @Test
     public void validateMetadataFilesInWorkspace_Succeeds() throws MalformedURLException, Exception {
         
+        final Collection<File> filesToValidate = new ArrayList<>();
         final URL nodeUrl_1 = new URL("file:/workspace/" + workspaceID + "/node_1.cmdi");
         final File nodeFile_1 = new File(nodeUrl_1.getPath());
+        filesToValidate.add(nodeFile_1);
         final URL nodeUrl_2 = new URL("file:/workspace/" + workspaceID + "/node_2.cmdi");
         final File nodeFile_2 = new File(nodeUrl_2.getPath());
+        filesToValidate.add(nodeFile_2);
         final URL nodeUrl_3 = new URL("file:/workspace/" + workspaceID + "/node_3.cmdi");
         final File nodeFile_3 = new File(nodeUrl_3.getPath());
+        filesToValidate.add(nodeFile_3);
         
         final Collection<WorkspaceNode> metadataNodesInTree = new ArrayList<>();
         metadataNodesInTree.add(mockNode_1);
         metadataNodesInTree.add(mockNode_2);
         metadataNodesInTree.add(mockNode_3);
         
-        final Collection<MetadataValidationIssue> emptyIssues_1 = new ArrayList<>();
-        final Collection<MetadataValidationIssue> emptyIssues_2 = new ArrayList<>();
-        final Collection<MetadataValidationIssue> emptyIssues_3 = new ArrayList<>();
+        final Collection<MetadataValidationIssue> emptyIssues = new ArrayList<>();
         
         
         context.checking(new Expectations() {{
@@ -108,11 +110,9 @@ public class LamusWorkspaceFileValidatorTest {
             
             //loop
             oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_1); will(returnValue(emptyIssues_1));
             oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_2); will(returnValue(emptyIssues_2));
             oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_3); will(returnValue(emptyIssues_3));
+            oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(returnValue(emptyIssues));
         }});
         
         workspaceFileValidator.validateMetadataFilesInWorkspace(workspaceID);
@@ -121,20 +121,23 @@ public class LamusWorkspaceFileValidatorTest {
     @Test
     public void validateMetadataFilesInWorkspace_Exception() throws MalformedURLException, Exception {
         
+        final Collection<File> filesToValidate = new ArrayList<>();
         final URL nodeUrl_1 = new URL("file:/workspace/" + workspaceID + "/node_1.cmdi");
         final File nodeFile_1 = new File(nodeUrl_1.getPath());
+        filesToValidate.add(nodeFile_1);
         final URL nodeUrl_2 = new URL("file:/workspace/" + workspaceID + "/node_2.cmdi");
         final File nodeFile_2 = new File(nodeUrl_2.getPath());
+        filesToValidate.add(nodeFile_2);
         final URL nodeUrl_3 = new URL("file:/workspace/" + workspaceID + "/node_3.cmdi");
         final File nodeFile_3 = new File(nodeUrl_3.getPath());
+        filesToValidate.add(nodeFile_3);
         
         final Collection<WorkspaceNode> metadataNodesInTree = new ArrayList<>();
         metadataNodesInTree.add(mockNode_1);
         metadataNodesInTree.add(mockNode_2);
         metadataNodesInTree.add(mockNode_3);
         
-        final Collection<MetadataValidationIssue> emptyIssues_1 = new ArrayList<>();
-        final Collection<MetadataValidationIssue> emptyIssues_2 = new ArrayList<>();
+        final Collection<MetadataValidationIssue> emptyIssues = new ArrayList<>();
         
         final String expectedErrorMessage = "Problems with schematron metadata validation";
         final Exception expectedCause = new Exception("something");
@@ -145,11 +148,9 @@ public class LamusWorkspaceFileValidatorTest {
             
             //loop
             oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_1); will(returnValue(emptyIssues_1));
             oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_2); will(returnValue(emptyIssues_2));
             oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_3); will(throwException(expectedCause));
+            oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(throwException(expectedCause));
         }});
         
         try {
@@ -166,25 +167,27 @@ public class LamusWorkspaceFileValidatorTest {
     @Test
     public void validateMetadataFilesInWorkspace_withIssues() throws MalformedURLException, Exception {
         
+        final Collection<File> filesToValidate = new ArrayList<>();
         final URL nodeUrl_1 = new URL("file:/workspace/" + workspaceID + "/node_1.cmdi");
         final File nodeFile_1 = new File(nodeUrl_1.getPath());
+        filesToValidate.add(nodeFile_1);
         final URL nodeUrl_2 = new URL("file:/workspace/" + workspaceID + "/node_2.cmdi");
         final File nodeFile_2 = new File(nodeUrl_2.getPath());
+        filesToValidate.add(nodeFile_2);
         final URL nodeUrl_3 = new URL("file:/workspace/" + workspaceID + "/node_3.cmdi");
         final File nodeFile_3 = new File(nodeUrl_3.getPath());
+        filesToValidate.add(nodeFile_3);
         
         final Collection<WorkspaceNode> metadataNodesInTree = new ArrayList<>();
         metadataNodesInTree.add(mockNode_1);
         metadataNodesInTree.add(mockNode_2);
         metadataNodesInTree.add(mockNode_3);
         
-        final Collection<MetadataValidationIssue> issues_1 = new ArrayList<>();
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
         final MetadataValidationIssue issue_1 = new MetadataValidationIssue(nodeFile_1, "some assertion test", "something wrong happened", MetadataValidationIssueLevel.ERROR.toString());
-        issues_1.add(issue_1);
-        final Collection<MetadataValidationIssue> emptyIssues_2 = new ArrayList<>();
-        final Collection<MetadataValidationIssue> issues_3 = new ArrayList<>();
+        issues.add(issue_1);
         final MetadataValidationIssue issue_3 = new MetadataValidationIssue(nodeFile_3, "another assertion test", "something else went wrong", MetadataValidationIssueLevel.ERROR.toString());
-        issues_3.add(issue_3);
+        issues.add(issue_3);
         
         final String expectedErrorMessage = "Problems with schematron metadata validation";
         
@@ -194,11 +197,9 @@ public class LamusWorkspaceFileValidatorTest {
             
             //loop
             oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_1); will(returnValue(issues_1));
             oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_2); will(returnValue(emptyIssues_2));
             oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
-            oneOf(mockMetadataChecker).validateSubmittedFile(nodeFile_3); will(returnValue(issues_3));
+            oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(returnValue(issues));
         }});
         
         try {
