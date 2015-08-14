@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -79,6 +80,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final ArchiveFileHelper archiveFileHelper;
     private final NodeUtil nodeUtil;
+    private final HandleParser handleParser;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
@@ -87,7 +89,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper, MetadataAPI mdAPI,
         MetadataApiBridge mdApiBridge, WorkspaceFileValidator wsFileValidator,
         ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper,
-        NodeUtil nodeUtil) {
+        NodeUtil nodeUtil, HandleParser hdlParser) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -101,6 +103,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.archiveFileLocationProvider = afLocationProvider;
         this.archiveFileHelper = archiveFileHelper;
         this.nodeUtil = nodeUtil;
+        this.handleParser = hdlParser;
     }
 
     /**
@@ -284,6 +287,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             URI archiveUri = null;
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
                 archiveUri = metadataApiBridge.getSelfHandleFromDocument(mdDocument);
+                if(archiveUri != null && !archiveUri.toString().trim().isEmpty()) {
+                    archiveUri = handleParser.prepareHandleWithHdlPrefix(archiveUri);
+                }
             }
             URI originUri = null;
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentFile)) {

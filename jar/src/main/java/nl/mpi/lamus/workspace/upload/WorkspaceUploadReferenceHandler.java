@@ -40,12 +40,12 @@ public interface WorkspaceUploadReferenceHandler {
      * @param nodesToCheck Collection of uploaded nodes which are going to be checked for links between themselves
      * @param currentNode Node whose references need to be matched
      * @param currentDocument MetadataDocument corresponding to the current node
-     * @param documentsWithExternalSelfHandles map to which the current document will be added,
-     * if it contains an external self-handle (which will need to be removed later)
+     * @param documentsWithInvalidSelfHandles map to which the current document will be added,
+     * if it contains an invalid self-handle (which will need to be removed later)
      * @return Collection containing the links that were supposed to be made, but failed
      */
     public Collection<ImportProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
-            Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles);
+            Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles);
 }

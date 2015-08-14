@@ -45,7 +45,6 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
-import nl.mpi.metadata.api.util.HandleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,6 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
 
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadReferenceHandler.class);
     
-    private final HandleUtil metadataApiHandleUtil;
     private final WorkspaceUploadNodeMatcher workspaceUploadNodeMatcher;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
@@ -72,11 +70,10 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     
     @Autowired
     public LamusWorkspaceUploadReferenceHandler(
-            HandleUtil mdApiHandleUtil, WorkspaceUploadNodeMatcher wsUploadNodeMatcher,
+            WorkspaceUploadNodeMatcher wsUploadNodeMatcher,
             WorkspaceDao wsDao, WorkspaceNodeLinkManager wsNodeLinkManager,
             HandleParser handleParser, MetadataAPI mdAPI,
             MetadataApiBridge mdApiBridge, WorkspaceFileHandler wsFileHandler) {
-        this.metadataApiHandleUtil = mdApiHandleUtil;
         this.workspaceUploadNodeMatcher = wsUploadNodeMatcher;
         this.workspaceDao = wsDao;
         this.workspaceNodeLinkManager = wsNodeLinkManager;
@@ -95,14 +92,15 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     public Collection<ImportProblem> matchReferencesWithNodes(
             int workspaceID, Collection<WorkspaceNode> nodesToCheck,
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
-            Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles) {
+            Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles) {
         
         Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         //check if document has external self-handle
         URI currentSelfHandle = metadataApiBridge.getSelfHandleFromDocument(currentDocument);
-        if(currentSelfHandle != null && !handleParser.isHandlePrefixKnown(currentSelfHandle)) {
-            documentsWithExternalSelfHandles.put(currentDocument, currentNode);
+        
+        if(!handleParser.isHandleUri(currentSelfHandle)) {
+            documentsWithInvalidSelfHandles.put(currentDocument, currentNode);
         }
         
         List<Reference> references = currentDocument.getDocumentReferences();
@@ -123,7 +121,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
                 
                 if(matchedNode != null) {
-                    if(refURI != null && !refURI.toString().isEmpty() && metadataApiHandleUtil.isHandleUri(refURI)) {
+                    if(refURI != null && !refURI.toString().isEmpty() && handleParser.isHandleUri(refURI)) {
                             matchedNode.setArchiveURI(refURI);
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                     } else {
@@ -135,9 +133,11 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             }
             
             if(matchedNode == null) {
-                if(metadataApiHandleUtil.isHandleUri(refURI)) {
-                    matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, refURI);
-
+                
+                if(handleParser.isHandleUri(refURI)) {
+                    URI preparedHandle = handleParser.prepareHandleWithHdlPrefix(refURI);
+                    matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, preparedHandle);
+                    
                     if(matchedNode != null) {
                         try {
                             URL urlToUse = matchedNode.getWorkspaceURL();
@@ -156,9 +156,13 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                         }
 
                         //set handle in DB
-                        if(!handleParser.areHandlesEquivalent(refURI, matchedNode.getArchiveURI())) {
-                            matchedNode.setArchiveURI(refURI);
+                        if(!handleParser.areHandlesEquivalent(preparedHandle, matchedNode.getArchiveURI())) {
+                            matchedNode.setArchiveURI(preparedHandle);
                             workspaceDao.updateNodeArchiveUri(matchedNode);
+                        }
+                        
+                        if(!refURI.equals(preparedHandle)) {
+                            updateHandle(currentDocument, ref, preparedHandle, currentNode);
                         }
                     }
                 
@@ -221,15 +225,6 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     }
                 }
                 
-                if(!externalNode) {
-                    // check if ref is handle, and if is external... if so, remove it
-                    if(metadataApiHandleUtil.isHandleUri(refURI)) {
-                        if(!handleParser.isHandlePrefixKnown(refURI)) { // external handle
-                            clearReferenceUri(currentDocument, ref, currentNode);
-                        }
-                    }
-                }
-                
                 // check if it is an info link and update the node type accordingly
                 if(metadataApiBridge.isReferenceAnInfoLink(currentDocument, ref)) {
                     matchedNode.setType(WorkspaceNodeType.RESOURCE_INFO);
@@ -270,6 +265,23 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             metadataAPI.writeMetadataDocument(document, documentStreamResult);
         } catch (MetadataException | IOException | TransformerException ex) {
             logger.error("Error removing reference '" + ref.getURI() + "' from node " + currentNode.getWorkspaceNodeID(), ex);
+        }
+    }
+    
+    private void updateHandle(ReferencingMetadataDocument document, Reference ref, URI updatedHandle, WorkspaceNode referencedNode) {
+        
+        StringBuilder message = new StringBuilder();
+        
+        URI oldHandle = ref.getURI();
+        message.append("[old URI: '").append(oldHandle).append("']");
+        ref.setURI(updatedHandle);
+        
+        try {
+            File documentFile = new File(document.getFileLocation().getPath());
+            StreamResult documentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(documentFile);
+            metadataAPI.writeMetadataDocument(document, documentStreamResult);
+        } catch (IOException | TransformerException | MetadataException ex) {
+            logger.error("Error updating the reference for node " + referencedNode.getWorkspaceNodeID() + message.toString(), ex);
         }
     }
     

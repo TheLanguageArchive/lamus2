@@ -32,7 +32,6 @@ import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
-import nl.mpi.metadata.api.util.HandleUtil;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
@@ -65,7 +64,6 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     @Mock HandleParser mockHandleParser;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceDao mockWorkspaceDao;
-    @Mock HandleUtil mockMetadataApiHandleUtil;
     @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceNode mockFirstNode;
@@ -95,8 +93,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         workspaceUploadNodeMatcher = new LamusWorkspaceUploadNodeMatcher(
                 mockCorpusStructureProvider, mockNodeResolver,
                 mockHandleParser, mockWorkspaceNodeFactory,
-                mockWorkspaceDao, mockMetadataApiHandleUtil,
-                mockNodeUtil);
+                mockWorkspaceDao, mockNodeUtil);
     }
     
     @After
@@ -428,11 +425,10 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final int workspaceID = 10;
         
         //reference to a local file (at this point should be external)
-        final URI uriToMatch = URI.create("file:/some/local/folder/parent/child.txt");
+        final URI uriToMatch = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
         }});
                 
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -446,21 +442,15 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final int workspaceID = 10;
         
         //reference to a local file (at this point should be external)
-        final URI uriToMatch = URI.create("file:/some/local/folder/parent/child.txt");
+        final URI uriToMatch = URI.create("hdl:55555/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).isHandlePrefixKnown(uriToMatch); will(returnValue(Boolean.FALSE));
-            
-            oneOf(mockWorkspaceNodeFactory).getNewExternalNode(workspaceID, uriToMatch);
-                will(returnValue(mockExternalNode));
-            oneOf(mockWorkspaceDao).addWorkspaceNode(mockExternalNode);
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
         
-        assertNotNull("Retrieved node should not be null", retrievedNode);
-        assertEquals("Retrieved node different from expected", mockExternalNode, retrievedNode);
+        assertNull("Retrieved node should be null", retrievedNode);
     }
     
     @Test
@@ -472,7 +462,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("file:/some/local/folder/parent/child.txt");
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -489,7 +479,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("http:/some/remote/folder/parent/child.txt");
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeFactory).getNewExternalNode(workspaceID, uriToMatch);
                 will(returnValue(mockExternalNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(mockExternalNode);
@@ -510,7 +500,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("invalidprotocol:/something");
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
                 
         //the invalid URL will cause an exception to be thrown, and therefore a null value to be returned
@@ -528,7 +518,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("some/relative/path.cmdi");
         
         context.checking(new Expectations() {{
-            oneOf(mockMetadataApiHandleUtil).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
                 
         //the invalid URL will cause an exception to be thrown, and therefore a null value to be returned

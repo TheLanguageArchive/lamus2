@@ -34,6 +34,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.handle.util.HandleParser;
+import nl.mpi.handle.util.implementation.HandleConstants;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -111,6 +113,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock NodeUtil mockNodeUtil;
+    @Mock HandleParser mockHandleParser;
     
     @Mock FileItem mockFileItem;
     @Mock InputStream mockInputStream;
@@ -151,6 +154,10 @@ public class LamusWorkspaceUploaderTest {
     private final File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
     private final File workspaceUploadDirectory = new File(workspaceDirectory, workspaceUploadDirectoryName);
     
+    private final String handlePrefixWithSlash = "11142/";
+    private final String handleProxyPlusPrefixWithSlash = HandleConstants.HDL_SHORT_PROXY + ":" + handlePrefixWithSlash;
+    
+    
     public LamusWorkspaceUploaderTest() {
     }
     
@@ -170,7 +177,7 @@ public class LamusWorkspaceUploaderTest {
                 mockWorkspaceUploadHelper, mockMetadataAPI,
                 mockMetadataApiBridge, mockWorkspaceFileValidator,
                 mockArchiveFileLocationProvider, mockArchiveFileHelper,
-                mockNodeUtil);
+                mockNodeUtil, mockHandleParser);
     }
     
     @After
@@ -488,7 +495,7 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedResourceFile() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
@@ -558,7 +565,7 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedResourceFile_IsInOrphansDirectory() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
@@ -628,13 +635,15 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedMetadataFile_NoValidationIssues() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final String uploadedFileRawHandle = "UUID.randomUUID().toString()";
+        final URI uploadedFileArchiveURI = URI.create(handlePrefixWithSlash + uploadedFileRawHandle);
+        final URI completeFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + uploadedFileRawHandle);
         final URL uploadedFileURL = uploadedFileURI.toURL();
-        final URI schemaLocation = new URI("http://some/location/schema.xsd");
+        final URI schemaLocation = URI.create("http://some/location/schema.xsd");
         final WorkspaceNodeType fileNodeType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
         
@@ -686,12 +695,13 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
             oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, completeFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -713,11 +723,11 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedMetadataFile_withOneValidationIssue_Error() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final WorkspaceNodeType fileType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
@@ -797,11 +807,11 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedMetadataFile_withTwoValidationIssues_Error() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final WorkspaceNodeType fileType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
@@ -883,13 +893,15 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException {
         
         final String filename = "someFile.cmdi";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final String uploadedFileRawHandle = UUID.randomUUID().toString();
+        final URI uploadedFileArchiveURI = URI.create(handlePrefixWithSlash + uploadedFileRawHandle);
+        final URI completeFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + uploadedFileRawHandle);
         final URL uploadedFileURL = uploadedFileURI.toURL();
-        final URI schemaLocation = new URI("http://some/location/schema.xsd");
+        final URI schemaLocation = URI.create("http://some/location/schema.xsd");
         final WorkspaceNodeType fileNodeType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
         
@@ -949,12 +961,13 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
             oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
-            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, uploadedFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, completeFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
@@ -976,11 +989,11 @@ public class LamusWorkspaceUploaderTest {
     public void processOneUploadedMetadataFile_MetadataFileNotValid() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
         
         final String filename = "someFile.cmdi";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final URI uploadedFileArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL uploadedFileURL = uploadedFileURI.toURL();
         final WorkspaceNodeType fileType = WorkspaceNodeType.METADATA;
         final String fileMimetype = "text/x-cmdi-xml";
@@ -1048,7 +1061,7 @@ public class LamusWorkspaceUploaderTest {
     @Test
     public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
@@ -1156,7 +1169,7 @@ public class LamusWorkspaceUploaderTest {
     @Test
     public void processTwoUploadedFiles_LinkingFailed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
@@ -1267,7 +1280,7 @@ public class LamusWorkspaceUploaderTest {
     public void processUploadedFileWorkspaceException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -1311,13 +1324,13 @@ public class LamusWorkspaceUploaderTest {
     public void processUploadedFileUrlException() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String fileMimetype = "text/plain";
         final String uploadedFilePath = uploadedFile.getPath();
-        final URI uriWhichIsNotUrl = new URI("node:0");
+        final URI uriWhichIsNotUrl = URI.create("node:0");
         
         final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
         uploadedNode.setName(filename);
@@ -1372,7 +1385,7 @@ public class LamusWorkspaceUploaderTest {
     public void processUploadedFileUnarchivable() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
@@ -1439,7 +1452,7 @@ public class LamusWorkspaceUploaderTest {
     public void processUploadedFileUnarchivable_IsInOrphansDirectory() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final String filename = "someFile.txt";
-        final URI workspaceTopNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();

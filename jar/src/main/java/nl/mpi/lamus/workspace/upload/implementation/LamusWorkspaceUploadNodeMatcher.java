@@ -29,7 +29,6 @@ import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
-import nl.mpi.metadata.api.util.HandleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     private final HandleParser handleParser;
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
-    private final HandleUtil metadataApiHandleUtil;
     private final NodeUtil nodeUtil;
     
     
@@ -59,13 +57,12 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             HandleParser handleParser,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao,
-            HandleUtil handleUtil, NodeUtil nodeUtil) {
+            NodeUtil nodeUtil) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.handleParser = handleParser;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
-        this.metadataApiHandleUtil = handleUtil;
         this.nodeUtil = nodeUtil;
     }
     
@@ -84,10 +81,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
                         return innerNode;
                     }
                 } catch(IllegalArgumentException ex) {
-                    logger.warn("Invalid handle(s): '" + handle + "'; '" + innerNode.getArchiveURI() + "'", ex);
-                    
-                    //TODO Or do something else?
-                    continue;
+                    logger.info("Invalid handle(s): '" + handle + "'; '" + innerNode.getArchiveURI() + "'");
                 }
             }
         }
@@ -129,21 +123,21 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findExternalNodeForUri(int workspaceID, URI uri) {
         
-        boolean uriIsHandle = metadataApiHandleUtil.isHandleUri(uri);
-        boolean uriIsUnknownHandle = uriIsHandle && !handleParser.isHandlePrefixKnown(uri);
-        boolean uriIsExternalUrl = !uriIsHandle && !"file".equals(uri.getScheme());
+        if(handleParser.isHandleUri(uri)) {
+            // shouldn't be a handle at this point
+            return null;
+        }
+        
+        boolean uriIsExternalUrl = uri.getScheme() != null && !"file".equals(uri.getScheme());
         
         //if it is not a handle nor a local URL, it should at least be a valid external URL
         if(uriIsExternalUrl) {
             try {
                 uri.toURL();
             } catch(MalformedURLException | IllegalArgumentException ex) {
-                logger.warn(ex.getMessage(), ex);
+                logger.info(ex.getMessage());
                 return null;
             }
-        }
-        
-        if(uriIsUnknownHandle || uriIsExternalUrl) {
             WorkspaceNode externalNode = workspaceNodeFactory.getNewExternalNode(workspaceID, uri);
             workspaceDao.addWorkspaceNode(externalNode);
             return externalNode;
