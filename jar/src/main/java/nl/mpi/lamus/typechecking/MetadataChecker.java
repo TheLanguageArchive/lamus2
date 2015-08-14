@@ -34,9 +34,9 @@ public interface MetadataChecker {
     public Collection<MetadataValidationIssue> validateUploadedFile(File metadataFile) throws Exception;
     
     /**
-     * Performs the appropriate validation checks for the given submitted file.
-     * @param metadataFile Metadata file to check
+     * Performs the appropriate validation checks for the given submitted files.
+     * @param metadataFiles Metadata file to check
      * @return validation issues, if any
      */
-    public Collection<MetadataValidationIssue> validateSubmittedFile(File metadataFile) throws Exception;
+    public Collection<MetadataValidationIssue> validateSubmittedFile(Collection<File> metadataFiles) throws Exception;
 }
