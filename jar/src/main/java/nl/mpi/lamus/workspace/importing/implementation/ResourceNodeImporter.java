@@ -130,13 +130,15 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
                     String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
                     logger.error(errorMessage);
                     throw new IllegalArgumentException(errorMessage);
-            }
+                }
                 childArchiveURL = childLocalFile.toURI().toURL();
             } else {
                     childArchiveURL = nodeResolver.getUrl(childCorpusNode);
             }
         } catch(MalformedURLException ex) {
-        	throw new UnsupportedOperationException("not handled yet");
+            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+            logger.error(errorMessage, ex);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         String childMimetype = referenceFromParent.getMimetype();
