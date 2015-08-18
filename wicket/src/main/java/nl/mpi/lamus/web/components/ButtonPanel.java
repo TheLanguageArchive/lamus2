@@ -52,14 +52,17 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
     
+    private IModel<Workspace> model;
+    
     
     public ButtonPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
+        this.model = model;
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
     
     public ButtonPanel(String id, Workspace workspace, FeedbackPanel feedbackPanel) {
-        this(id, new WorkspaceModel(workspace), feedbackPanel);
+        this(id, new WorkspaceModel(workspace.getWorkspaceID()), feedbackPanel);
     }
 
     
@@ -69,7 +72,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     private class WorkspaceActionsForm extends Form<Workspace> {
         
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
-            super(id, model);
+            super(id);
             
             final ModalWindow modalConfirmSubmit = createConfirmationModalWindow(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             add(modalConfirmSubmit);
@@ -107,7 +110,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         boolean success = false;
         boolean showInitialPage = true;
         try {
-            workspaceService.submitWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+            workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
             success = true;
         } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
             Session.get().error(ex.getMessage());
@@ -122,18 +125,16 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         }
         
         if(success) {
-            Session.get().info("Workspace successfully submitted");
+            Session.get().info(model.getObject().getMessage());
         }
         if(showInitialPage) {
             setResponsePage(pagesProvider.getIndexPage());
         }
-        
-        target.add(getFeedbackPanel());
     }
     
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
         try {
-            workspaceService.deleteWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+            workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
         } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException | IOException ex) {
             Session.get().error(ex.getMessage());
         }

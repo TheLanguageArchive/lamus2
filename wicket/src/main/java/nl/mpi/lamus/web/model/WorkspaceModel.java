@@ -21,7 +21,7 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Session;
 import org.apache.wicket.injection.Injector;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -29,27 +29,16 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * by {@link Workspace#getWorkspaceID() workspaceId}
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author guisil
  * @see WorkspaceService
  */
-public class WorkspaceModel extends LoadableDetachableModel<Workspace> {
+public class WorkspaceModel extends Model<Workspace> { // LoadableDetachableModel<Workspace> {
 
     // Services to be injected
     @SpringBean
     private WorkspaceService workspaceService;
     // Workspace identifier
     private final Integer workspaceId;
-
-    @SuppressWarnings("LeakingThisInConstructor")
-    public WorkspaceModel(Workspace workspace) {
-        super(workspace);
-        if (workspace == null) {
-            workspaceId = null;
-        } else {
-            workspaceId = workspace.getWorkspaceID();
-        }
-        // Get workspaceService injected
-        Injector.get().inject(this);
-    }
 
     @SuppressWarnings("LeakingThisInConstructor")
     public WorkspaceModel(int workspaceId) {
@@ -60,7 +49,7 @@ public class WorkspaceModel extends LoadableDetachableModel<Workspace> {
     }
 
     @Override
-    protected Workspace load() {
+    public Workspace getObject() {
         if (workspaceId == null) {
             return null;
         } else {

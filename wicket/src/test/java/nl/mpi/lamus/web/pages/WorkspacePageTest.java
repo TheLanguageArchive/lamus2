@@ -64,21 +64,21 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
-    private MockWorkspace mockWorkspace = new MockWorkspace() {{
+    private final MockWorkspace mockWorkspace = new MockWorkspace() {{
         setUserID(AbstractLamusWicketTest.MOCK_USER_ID);
         setWorkspaceID(mockWorkspaceID);
         setStatus(WorkspaceStatus.INITIALISED);
         setTopNodeID(mockWorkspaceTopNodeID);
     }};
-    private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
         setName("topNode");
         setType(WorkspaceNodeType.METADATA);
     }};
 
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
     
 
     @Override
@@ -108,7 +108,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         
-        wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspace));
+        wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspaceID));
         getTester().startPage(wsPage);
     }
 

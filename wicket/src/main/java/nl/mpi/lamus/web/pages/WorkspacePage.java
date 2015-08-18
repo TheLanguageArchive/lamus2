@@ -165,7 +165,7 @@ public class WorkspacePage extends LamusPage {
                 }
                 
                 wsNodeActionsPanel.setSelectedUnlinkedNodes(selectedUnlinkedNodes);
-                wsNodeActionsPanel.setModelObject(wsTreePanel.getSelectedNodes());
+                wsNodeActionsPanel.setModel(new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes()));
                 
                 if(linkNodesPanel != null) {
                     

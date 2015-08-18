@@ -44,34 +44,18 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
     private UploadPanel uploadPanel;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
-//    @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
-    
-//    @Mock private TreeNodeActionsProvider mockTreeNodeActionsProviderBean;
-    
-//    @Mock private LinkedTreeModelProvider mockTreeModelProvider;
-    
-//    @Mock private LamusWicketPagesProvider mockPagesProvider;
-    
-//    @Mock private FileUploadField mockFileUploadField;
-//    @Mock private FileUpload mockFileUpload;
-//    @Mock private InputStream mockFileInputStream;
-    
-//    private File mockFileToUpload;
-    
     @Mock private FeedbackPanel mockFeedbackPanel;
-    
-    private String mockFilename = "someimage.jpg";
     
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
-    private MockWorkspace mockWorkspace = new MockWorkspace() {{
+    private final MockWorkspace mockWorkspace = new MockWorkspace() {{
         setUserID(AbstractLamusWicketTest.MOCK_USER_ID);
         setWorkspaceID(mockWorkspaceID);
         setStatus(WorkspaceStatus.INITIALISED);
         setTopNodeID(mockWorkspaceTopNodeID);
     }};
-    private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
         setName("topNode");
@@ -81,48 +65,21 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
     TemporaryFolder testFolder = new TemporaryFolder();
     private File mockUploadDirectory;
     
-//    List<FileUpload> mockFileUploads = new ArrayList<FileUpload>();
     
     @Override
     protected void setUpTest() throws Exception {
         
         testFolder.create();
         mockUploadDirectory = testFolder.newFolder("workspace_" + mockWorkspaceID, "upload");
-//        mockFileToUpload = testFolder.newFile(mockFilename);
-//        mockFileToUpload.createNewFile();
-        
         
         MockitoAnnotations.initMocks(this);
         
         when(mockWorkspaceServiceBean.getWorkspace(mockWorkspaceID)).thenReturn(mockWorkspace);
-//        when(mockWorkspaceServiceBean.getTreeNode(mockWorkspaceTopNodeID, null)).thenReturn(mockWorkspaceTopNode);
         when(mockWorkspaceServiceBean.getWorkspaceUploadDirectory(mockWorkspaceID)).thenReturn(mockUploadDirectory);
-//        when(mockWorkspaceTreeModelProviderFactoryBean.createTreeModelProvider(mockWorkspaceTopNode)).thenReturn(mockTreeModelProvider);
-//        when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
-        
-//        when(mockFileUpload.getClientFileName()).thenReturn(mockFilename);
-//        when(mockFileUpload.getInputStream()).thenReturn(mockFileInputStream);
-        
-//        when(mockFileUploadField.getId()).thenReturn("fileInput");
-//        when(mockFileUploadField.getFileUploads()).thenReturn(mockFileUploads);
-        
-        
-//        when(mockFileToUpload.inputStream()).thenReturn(mockFileInputStream);
-        
-        
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
-//        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         
-//        addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
-        
-//        addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProvider);
-        
-        
-//        mockFileUploads.add(mockFileUpload);
-        
-        
-        uploadPanel = new UploadPanel("uploadPanel", new WorkspaceModel(mockWorkspace), mockFeedbackPanel);
+        uploadPanel = new UploadPanel("uploadPanel", new WorkspaceModel(mockWorkspaceID), mockFeedbackPanel);
         getTester().startComponentInPage(uploadPanel);
     }
 

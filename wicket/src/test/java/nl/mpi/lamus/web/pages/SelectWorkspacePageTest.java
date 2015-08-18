@@ -23,6 +23,8 @@ import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
+import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -45,11 +47,14 @@ import org.springframework.test.annotation.DirtiesContext;
  */
 public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
     
+    private final int wsId1 = 1;
+    private final int wsId2 = 2;
+    
     private final Workspace mockWs1 = new MockWorkspace() {{
-        setWorkspaceID(1);
+        setWorkspaceID(wsId1);
     }};
     private final Workspace mockWs2 = new MockWorkspace() {{
-        setWorkspaceID(2);
+        setWorkspaceID(wsId2);
     }};
     private final Collection<Workspace> mockWsList = new ArrayList<Workspace>() {{
         add(mockWs1);
@@ -64,9 +69,12 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
     @Mock private LamusWicketPagesProvider mockLamusWicketPagesProviderBean;
     @Mock private WorkspacePage mockWorkspacePage;
     @Mock private Collection<String> mockManagerUsers;
+    @Mock private WorkspaceModelProvider mockWorkspaceModelProvider;
+    
+    @Mock private WorkspaceModel mockWorkspaceModel;
 
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
     
     
     @Override
@@ -74,10 +82,16 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         
         MockitoAnnotations.initMocks(this);
         
+        when(mockWorkspaceServiceBean.getWorkspace(wsId1)).thenReturn(mockWs1);
+        
+        
+        
         when(mockWorkspaceServiceBean.listUserWorkspaces(AbstractLamusWicketTest.MOCK_USER_ID)).thenReturn(mockWsList);
         when(mockWorkspaceServiceBean.openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, 1)).thenReturn(mockWs1);
         when(mockLamusWicketPagesProviderBean.getWorkspacePage(mockWs1)).thenReturn(mockWorkspacePage);
         
+        when(mockWorkspaceModelProvider.getWorkspaceModel(wsId1)).thenReturn(mockWorkspaceModel);
+        when(mockWorkspaceModel.getObject()).thenReturn(mockWs1);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
@@ -85,6 +99,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_MODEL_PROVIDER, mockWorkspaceModelProvider);
         
         selectWsPage = new SelectWorkspacePage();
         getTester().startPage(selectWsPage);
@@ -138,11 +153,16 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         
         FormTester formTester = getTester().newFormTester("formContainer:workspaceForm", false);
         
+        
         formTester.select("workspaceSelection", 0);
         formTester.submit("openWorkspace");
         
         verify(mockWorkspaceServiceBean).openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWs1.getWorkspaceID());
         verify(mockLamusWicketPagesProviderBean).getWorkspacePage(mockWs1);
+        
+        verify(mockWorkspaceModelProvider).getWorkspaceModel(wsId1);
+        verify(mockWorkspaceModel, atLeast(1)).getObject();
+        
         
         getTester().assertRenderedPage(WorkspacePage.class);
     }

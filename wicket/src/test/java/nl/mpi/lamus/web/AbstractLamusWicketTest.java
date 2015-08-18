@@ -49,6 +49,9 @@ public abstract class AbstractLamusWicketTest {
     protected static final String BEAN_NAME_MANUAL_URL = "manualUrl";
     protected static final String BEAN_NAME_MANAGER_USERS = "managerUsers";
     
+    protected static final String BEAN_NAME_WORKSPACE_MODEL_PROVIDER = "workspaceModelProvider";
+    protected static final String BEAN_NAME_WORKSPACE_MODEL = "workspaceModel";
+    
     protected static final String MOCK_USER_ID = "testUser";
     protected static final String MOCK_LAMUS_PAGE_TITLE = "The Language Archive - LAMUS 2";
     

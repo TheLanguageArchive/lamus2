@@ -23,7 +23,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.components.AutoDisablingAjaxButton;
 import nl.mpi.lamus.web.components.NavigationPanel;
-import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -52,6 +52,9 @@ public class SelectWorkspacePage extends LamusPage {
     
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
+    
+    @SpringBean
+    private WorkspaceModelProvider workspaceModelProvider;
     
     final String currentUserId = LamusSession.get().getUserId();
 
@@ -89,7 +92,13 @@ public class SelectWorkspacePage extends LamusPage {
         } else {
             showPanel = false;
         }
-        IModel<Workspace> workspaceModel = new WorkspaceModel(defaultSelectedWs);
+        
+        IModel<Workspace> workspaceModel;
+        if(!showPanel) {
+            workspaceModel = null;
+        } else {
+            workspaceModel = workspaceModelProvider.getWorkspaceModel(defaultSelectedWs.getWorkspaceID());
+        }
         
         ListChoice<Workspace> listWorkspaces = new ListChoice<>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
         listWorkspaces.setMaxRows(5);
@@ -106,7 +115,7 @@ public class SelectWorkspacePage extends LamusPage {
                 
                 try {
                     if(form.getModelObject() != null) {
-                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, openWsForm.getModelObject().getWorkspaceID());
+                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, ((Workspace)form.getModelObject()).getWorkspaceID());
                         setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
                     } else {
                         //TODO MESSAGE IN FEEDBACK PANEL?
@@ -125,7 +134,7 @@ public class SelectWorkspacePage extends LamusPage {
         
         if(!showPanel) {
             formContainer.setVisible(false);
-            info(getLocalizer().getString("select_workspace_no_open_workspaces", this));
+            Session.get().info(getLocalizer().getString("select_workspace_no_open_workspaces", this));
         }
         
         // Add container to page
