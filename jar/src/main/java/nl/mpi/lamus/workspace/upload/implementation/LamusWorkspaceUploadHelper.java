@@ -69,7 +69,7 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
         Collection<ImportProblem> allFailedLinks = new ArrayList<>();
-        Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
+        Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
         
         for(WorkspaceNode node : nodesToCheck) {
             
@@ -93,13 +93,13 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             
             Collection<ImportProblem> failedLinks =
                     workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithInvalidSelfHandles);
+                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithExternalSelfHandles);
             
             allFailedLinks.addAll(failedLinks);
         }
         
         //remove external self-handles, if any
-        Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithInvalidSelfHandles.entrySet();
+        Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithExternalSelfHandles.entrySet();
         if(!entries.isEmpty()) {
             for(Map.Entry<MetadataDocument, WorkspaceNode> entry : entries) {
                 try {
