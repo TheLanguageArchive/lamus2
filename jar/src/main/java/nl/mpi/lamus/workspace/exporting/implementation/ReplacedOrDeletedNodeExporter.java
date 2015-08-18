@@ -198,11 +198,11 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             }
             try {
                 handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
-                        new URI(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
+                        URI.create(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
                 
                 //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
                 
-            } catch (HandleException | IOException | URISyntaxException ex) {
+            } catch (HandleException | IOException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
