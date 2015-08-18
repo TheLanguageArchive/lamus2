@@ -143,7 +143,8 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         try {
             orphansDirectory = archiveFileLocationProvider.getOrphansDirectory(workspace.getTopNodeArchiveURL().toURI());
         } catch (URISyntaxException ex) {
-            throw new UnsupportedOperationException("not handled yet");
+            logger.warn("Problem while trying to get the location of the orphans directory: " + ex.getMessage());
+            return new ArrayList<>();
         }
         
         Collection<File> allFiles = FileUtils.listFiles(orphansDirectory, null, true);
