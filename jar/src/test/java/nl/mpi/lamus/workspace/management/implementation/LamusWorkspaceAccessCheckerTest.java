@@ -245,6 +245,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -281,6 +283,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -319,6 +323,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -366,6 +372,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -422,6 +430,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -480,6 +490,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -521,12 +533,40 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(noDescendants));
         }});
         
         nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+    }
+    
+    @Test
+    public void canCreateWorkspaceIfNodeWithoutDescendantsIsNotLocked_passingNodeIdUri() throws URISyntaxException, NodeAccessException, NodeNotFoundException {
+        
+        final String userID = "someUser";
+        final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
+        final String archiveNodeID = "12";
+        final URI archiveNodeID_URI = URI.create("node:" + archiveNodeID);
+        
+        final Collection<CorpusNode> noDescendants = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(archiveNodeID_URI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
+            oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeID_URI); will(returnValue(noDescendants));
+        }});
+        
+        nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeID_URI);
     }
     
     @Test
@@ -551,6 +591,8 @@ public class LamusWorkspaceAccessCheckerTest {
             exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
             oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
