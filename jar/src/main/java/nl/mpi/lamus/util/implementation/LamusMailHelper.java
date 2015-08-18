@@ -25,6 +25,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import nl.mpi.lamus.util.MailHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -35,6 +37,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusMailHelper implements MailHelper {
+    
+    private static final Logger logger = LoggerFactory.getLogger(LamusMailHelper.class);
 
     private String mailServer;
     private String mailFromAddress;
@@ -70,7 +74,7 @@ public class LamusMailHelper implements MailHelper {
             message.setSentDate(Calendar.getInstance().getTime());
             message.setText(text);
         } catch (MessagingException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            logger.error("Error while trying to generate mail message to send to the user", ex);
         }
         
         return message;
@@ -85,7 +89,7 @@ public class LamusMailHelper implements MailHelper {
         try {
             Transport.send(message);
         } catch (MessagingException ex) {
-            throw new UnsupportedOperationException("exception not handled yet");
+            logger.error("Error while trying to send mail message to send to the user", ex);
         }
     }
 }
