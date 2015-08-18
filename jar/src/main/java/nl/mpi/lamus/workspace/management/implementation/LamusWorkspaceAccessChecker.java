@@ -101,8 +101,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("Ensuring that node '{}' is accessible to user {}", archiveNodeURI, userID);
         ensureWriteAccessToNode(userID, nodeID_URI);
         
-        logger.debug("Ensuring that node '{}' is not locked", archiveNodeURI);
-        ensureNodeIsNotLocked(archiveNodeURI);
+        URI nodePID = nodeResolver.getPID(node);
+        logger.debug("Ensuring that node '{}' is not locked", nodePID);
+        ensureNodeIsNotLocked(nodePID);
         
         Collection<CorpusNode> descendants = corpusStructureProvider.getDescendantNodes(archiveNodeURI);
         
