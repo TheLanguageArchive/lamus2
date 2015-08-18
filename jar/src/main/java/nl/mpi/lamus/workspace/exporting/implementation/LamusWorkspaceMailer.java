@@ -41,7 +41,7 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
     }
 
     /**
-     * @see WorkspaceMailer#sendWorkspaceFinalMessage(nl.mpi.lamus.workspace.model.Workspace, boolean)
+     * @see WorkspaceMailer#sendWorkspaceFinalMessage(nl.mpi.lamus.workspace.model.Workspace, boolean, boolean)
      */
     @Override
     public void sendWorkspaceFinalMessage(Workspace workspace, boolean crawlerWasSuccessful, boolean versioningWasSuccessful) {
