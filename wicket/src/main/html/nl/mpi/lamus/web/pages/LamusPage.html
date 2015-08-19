@@ -21,6 +21,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
             <link rel="stylesheet" href="css/lamus2.css" type="text/css" media="screen" title="Stylesheet" />
         <title>Lamus 2</title>
+        <style type="text/css">
+            #ajaxveil {
+              display: none;
+              float: right;
+              position:absolute;
+              bottom:0;
+              right: 0;
+              background: rgb(255,241,168);
+              margin-top: 5px;
+              z-index: 1000;
+              width: 200;
+              font-weight: bold;
+              text-align: center;
+              font-size: 1em;
+            }
+        </style>
     </head>
     <body>
         <header>
@@ -64,6 +80,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </li>
             </ul>
         </header>
+        
+        <script type="text/javascript">
+            window.onload = setupFunc;
+
+            function setupFunc() {
+              document.getElementsByTagName('body')[0].onclick = clickFunc;
+              hideBusysign();
+              Wicket.Event.subscribe('/ajax/call/beforeSend', function( attributes, jqXHR, settings ) {
+                  showBusysign()
+                   });
+              Wicket.Event.subscribe('/ajax/call/complete', function( attributes, jqXHR, textStatus) {
+                  hideBusysign()
+                   });
+            }
+
+            function hideBusysign() {
+              document.getElementById('ajaxveil').style.display ='none';
+            }
+
+            function showBusysign() {
+              document.getElementById('ajaxveil').style.display ='inline';
+            }
+
+            function clickFunc(eventData) {
+              var clickedElement = (window.event) ? event.srcElement : eventData.target;
+              if ((clickedElement.tagName.toUpperCase() == 'BUTTON' || clickedElement.tagName.toUpperCase() == 'A' || clickedElement.parentNode.tagName.toUpperCase() == 'A'
+                || (clickedElement.tagName.toUpperCase() == 'INPUT' && (clickedElement.type.toUpperCase() == 'BUTTON' || clickedElement.type.toUpperCase() == 'SUBMIT')))
+                && clickedElement.parentNode.id.toUpperCase() != 'NOBUSY' ) {
+                showBusysign();
+              }
+            }
+        </script>
+        
+        <div id="ajaxveil">
+            <h1>&nbsp;&nbsp; ... &nbsp;&nbsp;</h1>
+        </div>
         
         <div class="childPageContent">
             <wicket:child/>

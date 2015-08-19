@@ -20,6 +20,7 @@ import nl.mpi.lamus.web.components.AboutPanel;
 import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.WebPage;
@@ -40,7 +41,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author guisil
  */
-public class LamusPage extends WebPage {
+public class LamusPage extends WebPage implements IAjaxIndicatorAware{
 
     @SpringBean(name = "registerUrl")
     private String registerUrl;
@@ -141,6 +142,11 @@ public class LamusPage extends WebPage {
         }));
         
         return modalAbout;
+    }
+
+    @Override
+    public String getAjaxIndicatorMarkupId() {
+        return "ajaxveil";
     }
     
     
