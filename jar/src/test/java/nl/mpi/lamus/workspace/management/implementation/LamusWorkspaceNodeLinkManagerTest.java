@@ -154,12 +154,11 @@ public class LamusWorkspaceNodeLinkManagerTest {
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
                 
             oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentNodeID, childNodeID);
                 will(returnValue(mockWorkspaceNodeLink));
@@ -213,6 +212,23 @@ public class LamusWorkspaceNodeLinkManagerTest {
     
     //TODO top node -> UnknownNodeException
     
+    @Test
+    public void linkNodes_ParentNotMetadata() throws WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceNodeID = 1;
+        final String expectedExceptionMessage = "Unable to create link. Parent node (" + workspaceNodeID + ") is not metadata.";
+        
+        context.checking(new Expectations() {{
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(workspaceNodeID));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.FALSE));
+        }});
+        
+        try {
+            nodeLinkManager.linkNodes(mockParentNode, mockChildNode, Boolean.FALSE);
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
 
     @Test
     public void linkNodesMetadataLocal()
@@ -242,6 +258,9 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
@@ -294,16 +313,17 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            //logger
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
-            
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
@@ -349,6 +369,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
@@ -409,6 +431,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
             
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
@@ -458,6 +482,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
@@ -520,6 +546,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
@@ -580,6 +608,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildNode).getArchiveURI(); will(returnValue(childURI));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
@@ -642,6 +672,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
@@ -682,6 +714,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         final int workspaceID = 1;
         final int childNodeID = 3;
+        final int parentNodeID = 2;
         final boolean isInfoFile = Boolean.FALSE;
         
         final Collection<WorkspaceNode> existingParentNodes = new ArrayList<>();
@@ -691,15 +724,14 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
-            
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(existingParentNodes));
-            
-            //log
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
         }});
         
         try {
@@ -728,8 +760,10 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.TRUE));
             //log
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
             oneOf(mockParentNode).getArchiveURI(); will(returnValue(parentNodeURI));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
         }});
         
         try {
@@ -760,19 +794,17 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
-            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
-            
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
-            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
-            
             //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
+
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(throwException(expectedException));
-            
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
         }});
         
         try {
@@ -804,20 +836,18 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            //logger
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
-            
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(throwException(expectedException));
-            
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-
         }});
         
         try {
@@ -848,19 +878,18 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            //logger
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
-            
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockNotReferencingDocument));
-            
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
         }});
         
         try {
@@ -896,14 +925,15 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             
+            //logger
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            allowing(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(childNodeID); will(returnValue(emptyParentNodes));
-            
-            //logger
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
             
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
@@ -918,8 +948,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildNode).getFormat(); will(returnValue(childMimetype));
             oneOf(mockParentDocument).createDocumentMetadataReference(null, childURI, childMimetype);
                 will(throwException(expectedException));
-                
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
         }});
         
         try {
@@ -962,6 +990,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
             
@@ -1032,6 +1062,8 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
             
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             
@@ -1815,7 +1847,11 @@ public class LamusWorkspaceNodeLinkManagerTest {
             
             oneOf(mockOldNode).getType(); will(returnValue(childType));
             
+            allowing(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            
             allowing(mockParentNode).getProfileSchemaURI(); will(returnValue(parentProfileLocation));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockParentNode).isProtected(); will(returnValue(Boolean.FALSE));
             

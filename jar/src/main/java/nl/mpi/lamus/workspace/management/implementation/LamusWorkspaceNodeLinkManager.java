@@ -95,6 +95,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         this.workspaceDao.updateWorkspaceTopNode(workspace);
 	} else if(parentNode != null && childLink != null) { //TODO Is there a situation when this would be different?
             
+            if(!nodeUtil.isNodeMetadata(parentNode)) {
+                throw new IllegalArgumentException("Unable to create link. Parent node (" + parentNode.getWorkspaceNodeID() + ") is not metadata.");
+            }
+            
         logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
             
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
@@ -112,6 +116,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     @Override
     public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, boolean isInfoLink)
             throws WorkspaceException, ProtectedNodeException {
+        
+        if(!nodeUtil.isNodeMetadata(parentNode)) {
+            throw new IllegalArgumentException("Unable to create link. Parent node (" + parentNode.getWorkspaceNodeID() + ") is not metadata.");
+        }
         
         int workspaceID = parentNode.getWorkspaceID();
         

@@ -294,6 +294,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                     } catch(IllegalArgumentException ex) {
                         try {
                             // invalid handle - should be removed
+                            archiveUri = null;
                             metadataApiBridge.removeSelfHandleAndSaveDocument(uploadedFileUrl);
                         } catch (IOException | TransformerException | MetadataException ex1) {
                             logger.error("Couldn't remove invalid self-handle from file [" + uploadedFileUrl + "]", ex1);
