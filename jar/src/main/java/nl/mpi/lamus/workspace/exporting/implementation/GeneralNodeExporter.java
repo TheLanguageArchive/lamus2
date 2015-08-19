@@ -157,6 +157,10 @@ public class GeneralNodeExporter implements NodeExporter {
         } else {
             
             // resources were not copied from the archive to the workspace, so should not be copied back
+            
+            if(parentNode == null) { // a resource node can't be the top node
+                throw new IllegalArgumentException("The top node has to be a metadata node");
+            }
         }
         
         CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());
