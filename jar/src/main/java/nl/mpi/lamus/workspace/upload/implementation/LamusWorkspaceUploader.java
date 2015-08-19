@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
@@ -288,7 +289,16 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
                 archiveUri = metadataApiBridge.getSelfHandleFromDocument(mdDocument);
                 if(archiveUri != null && !archiveUri.toString().trim().isEmpty()) {
+                    try {
                     archiveUri = handleParser.prepareHandleWithHdlPrefix(archiveUri);
+                    } catch(IllegalArgumentException ex) {
+                        try {
+                            // invalid handle - should be removed
+                            metadataApiBridge.removeSelfHandleAndSaveDocument(uploadedFileUrl);
+                        } catch (IOException | TransformerException | MetadataException ex1) {
+                            logger.error("Couldn't remove invalid self-handle from file [" + uploadedFileUrl + "]", ex1);
+                        }
+                    }
                 }
             }
             URI originUri = null;

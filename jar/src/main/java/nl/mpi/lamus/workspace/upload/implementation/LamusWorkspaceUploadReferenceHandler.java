@@ -122,7 +122,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 
                 if(matchedNode != null) {
                     if(refURI != null && !refURI.toString().isEmpty() && handleParser.isHandleUri(refURI)) {
-                            matchedNode.setArchiveURI(refURI);
+                            matchedNode.setArchiveURI(handleParser.prepareHandleWithHdlPrefix(refURI));
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                     } else {
                         clearReferenceUri(currentDocument, ref, matchedNode);

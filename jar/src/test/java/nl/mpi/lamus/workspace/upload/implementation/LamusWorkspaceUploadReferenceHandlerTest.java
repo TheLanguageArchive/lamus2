@@ -1190,6 +1190,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         context.checking(new Expectations() {{
             oneOf(mockHandleParser).isHandleUri(referenceUri); will(returnValue(isHandle));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(referenceUri); will(returnValue(referenceUri));
             oneOf(mockNode).setArchiveURI(referenceUri);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockNode);
         }});

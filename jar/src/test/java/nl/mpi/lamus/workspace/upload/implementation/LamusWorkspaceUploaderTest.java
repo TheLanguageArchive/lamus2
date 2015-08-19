@@ -639,7 +639,7 @@ public class LamusWorkspaceUploaderTest {
         final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
-        final String uploadedFileRawHandle = "UUID.randomUUID().toString()";
+        final String uploadedFileRawHandle = UUID.randomUUID().toString();
         final URI uploadedFileArchiveURI = URI.create(handlePrefixWithSlash + uploadedFileRawHandle);
         final URI completeFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + uploadedFileRawHandle);
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -702,6 +702,94 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
             oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, completeFileArchiveURI, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
+                    WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+                will(returnValue(uploadedNode));
+
+            oneOf(mockWorkspaceDao).addWorkspaceNode(uploadedNode);
+            
+            
+            //check links
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+                will(returnValue(failedLinks));
+        }});
+        
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.isEmpty());
+    }
+    
+    @Test
+    public void processOneUploadedMetadataFile_NoValidationIssues_InvalidSelfHandle() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException, Exception {
+        
+        final String filename = "someFile.cmdi";
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File uploadedFile = new File(workspaceUploadDirectory, filename);
+        final URI uploadedFileURI = uploadedFile.toURI();
+        final String uploadedFileRawHandle = UUID.randomUUID().toString();
+        final URI uploadedFileArchiveURI = URI.create("INVALID/" + uploadedFileRawHandle);
+        final URL uploadedFileURL = uploadedFileURI.toURL();
+        final URI schemaLocation = URI.create("http://some/location/schema.xsd");
+        final WorkspaceNodeType fileNodeType = WorkspaceNodeType.METADATA;
+        final String fileMimetype = "text/x-cmdi-xml";
+        
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode.setName(filename);
+        uploadedNode.setStatus(WorkspaceNodeStatus.UPLOADED);
+        uploadedNode.setType(fileNodeType);
+        uploadedNode.setFormat(fileMimetype);
+        uploadedNode.setWorkspaceURL(uploadedFileURL);
+        uploadedNode.setArchiveURI(uploadedFileArchiveURI);
+        
+        final Collection<File> uploadedFiles = new ArrayList<>();
+        uploadedFiles.add(mockFile1);
+        
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
+        uploadedNodes.add(uploadedNode);
+        
+        //only one file in the collection, so only one loop cycle
+        
+        final Collection<ImportProblem> failedLinks = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveURL));
+            
+            //loop
+
+            allowing(mockFile1).getName(); will(returnValue(filename));
+                
+            oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
+                will(returnValue(mockTypecheckedResults));
+            
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+                will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+                
+            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1);
+            
+            oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
+            oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
+            
+            oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
+            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(throwException(new IllegalArgumentException()));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(uploadedFileURL);
+            
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockMetadataDocument).getDocumentType(); will(returnValue(mockMetadataDocumentType));
+            oneOf(mockMetadataDocumentType).getSchemaLocation(); will(returnValue(schemaLocation));
+            oneOf(mockWorkspaceNodeFactory).getNewWorkspaceNodeFromFile(workspaceID, null, null, uploadedFileURL, schemaLocation, fileMimetype, fileNodeType,
                     WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
                 will(returnValue(uploadedNode));
 
