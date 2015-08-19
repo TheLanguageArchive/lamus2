@@ -54,20 +54,20 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
         
         if(!crawlerWasSuccessful) {
             subject = "Workspace - Failure";
-            text = "Workspace " + workspace.getWorkspaceID() + " was submitted.\n"
-                    + "Data was moved into the archive but there were problems updating the database.\n"
+            text = "Your workspace (ID: " + workspace.getWorkspaceID() + "; creation date: " + workspace.getStartDate().toString() + ") was submitted.\n\n"
+                    + "The data was moved into the archive but there were problems updating the database.\n"
                     + "Please contact the corpus management team.";
             addBcc = true;
         } else if(!versioningWasSuccessful) {
             subject = "Workspace - Failure";
-            text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
-                    + "Data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
+            text = "Your workspace (ID: " + workspace.getWorkspaceID() + "; creation date: " + workspace.getStartDate().toString() + ") was successfully submitted.\n\n"
+                    + "The data was moved into the archive and the database was updated, but there were problems with versioning in the database.\n"
                     + "Please contact the corpus management team.";
             addBcc = true;
         } else {
             subject = "Workspace - Success";
-            text = "Workspace " + workspace.getWorkspaceID() + " was successfully submitted.\n"
-                    + "Data was moved into the archive and the database was updated.";
+            text = "Your workspace (ID: " + workspace.getWorkspaceID() + "; creation date: " + workspace.getStartDate().toString() + ") was successfully submitted.\n\n"
+                    + "The data was moved into the archive at '" + workspace.getTopNodeArchiveURL() + "' and the database was updated.";
         }
         
         Message mailMessage = mailHelper.getMailMessage(toAddress, subject, text, addBcc);
