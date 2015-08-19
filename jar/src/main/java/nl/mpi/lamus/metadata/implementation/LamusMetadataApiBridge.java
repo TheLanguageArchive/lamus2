@@ -43,6 +43,7 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -351,6 +352,33 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         
         CmdiProfile profile = getProfileWithLocation(profileLocation);
         return profile.getAllowInfoLinks();
+    }
+    
+    /**
+     * @see MetadataApiBridge#getDocumentReferenceByDoubleCheckingURI(nl.mpi.metadata.cmdi.api.model.CMDIDocument, java.net.URI)
+     */
+    @Override
+    public ResourceProxy getDocumentReferenceByDoubleCheckingURI(CMDIDocument cmdiParentDocument, URI uriToCheck) {
+        
+        ResourceProxy retrievedReference;
+        URI preparedHandle;
+        
+        try {
+            preparedHandle = handleParser.prepareHandleWithHdlPrefix(uriToCheck);
+        } catch(IllegalArgumentException ex) {
+            // not a handle
+            return cmdiParentDocument.getDocumentReferenceByURI(uriToCheck);
+        }
+        
+        retrievedReference = cmdiParentDocument.getDocumentReferenceByURI(preparedHandle);
+        if(retrievedReference != null) {
+            return retrievedReference;
+        }
+        
+        preparedHandle = handleParser.prepareHandleWithLongHdlPrefix(uriToCheck);
+        // not checking for the IllegalArgumentException because if the handle was invalid,
+            // it would already have happened in the previous attempt
+        return cmdiParentDocument.getDocumentReferenceByURI(preparedHandle);
     }
     
     

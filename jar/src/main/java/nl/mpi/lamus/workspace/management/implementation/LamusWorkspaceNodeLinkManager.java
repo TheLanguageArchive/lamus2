@@ -260,7 +260,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 childReference = parentDocument.getDocumentReferenceByLocation(childWsUrl.toURI());
             }
             if(childReference == null) {
-                childReference = parentDocument.getDocumentReferenceByURI(getNodeURI(childNode));
+                childReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(parentDocument, getNodeURI(childNode));
             }
             
             parentDocument.removeDocumentReference(childReference);
@@ -350,7 +350,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             } else {
                 throw new UnsupportedOperationException("not referencing document not handled yet");
             }
-            ResourceProxy childReference = parentDocument.getDocumentReferenceByURI(childNode.getArchiveURI());
+            ResourceProxy childReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(parentDocument, childNode.getArchiveURI());
             childReference.setURI(childNode.getWorkspaceURL().toURI());
             
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());

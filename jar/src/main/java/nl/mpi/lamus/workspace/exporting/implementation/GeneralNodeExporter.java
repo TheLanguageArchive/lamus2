@@ -27,6 +27,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -39,6 +40,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,8 @@ public class GeneralNodeExporter implements NodeExporter {
 
     @Autowired
     private MetadataAPI metadataAPI;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
     @Autowired
     private WorkspaceFileHandler workspaceFileHandler;
     @Autowired
@@ -163,11 +167,11 @@ public class GeneralNodeExporter implements NodeExporter {
         File parentNodeArchiveFile = nodeResolver.getLocalFile(parentCorpusNode);
         
         
-        ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(workspaceID, parentNode);
+        CMDIDocument cmdiDocument = retrieveCmdiDocument(workspaceID, parentNode);
         String currentPathRelativeToParent = 
                 archiveFileLocationProvider.getChildPathRelativeToParent(parentNodeArchiveFile, nodeArchiveFile);
         
-        updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
+        updateReferenceInParent(workspaceID, currentNode, parentNode, cmdiDocument, currentPathRelativeToParent);
     }
     
     
@@ -188,25 +192,25 @@ public class GeneralNodeExporter implements NodeExporter {
         return document;
     }
     
-    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
+    private CMDIDocument retrieveCmdiDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
         
         MetadataDocument document = retrieveMetadataDocument(workspaceID, node);
-        ReferencingMetadataDocument referencingParentDocument = null;
+        CMDIDocument cmdiDocument = null;
         if(document instanceof ReferencingMetadataDocument) {
-            referencingParentDocument = (ReferencingMetadataDocument) document;
+            cmdiDocument = (CMDIDocument) document;
         } else {
             String errorMessage = "Error retrieving child reference in file " + node.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
         
-        return referencingParentDocument;
+        return cmdiDocument;
     }
     
     private void updateReferenceInParent(int workspaceID, WorkspaceNode currentNode, WorkspaceNode parentNode,
-            ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
+            CMDIDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {
-            Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getArchiveURI());
+            Reference currentReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(referencingParentDocument, currentNode.getArchiveURI());
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
             currentReference.setLocation(currentUriRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));

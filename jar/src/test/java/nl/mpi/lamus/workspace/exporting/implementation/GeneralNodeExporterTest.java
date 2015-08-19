@@ -33,6 +33,7 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -44,7 +45,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -73,6 +74,7 @@ public class GeneralNodeExporterTest {
     }};
     
     @Mock MetadataAPI mockMetadataAPI;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
@@ -80,8 +82,8 @@ public class GeneralNodeExporterTest {
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock NodeUtil mockNodeUtil;
     
-    @Mock ReferencingMetadataDocument mockChildCmdiDocument;
-    @Mock ReferencingMetadataDocument mockParentCmdiDocument;
+    @Mock CMDIDocument mockChildCmdiDocument;
+    @Mock CMDIDocument mockParentCmdiDocument;
     @Mock ResourceProxy mockResourceProxy;
     @Mock StreamResult mockStreamResult;
     @Mock CorpusNode mockCorpusNode;
@@ -114,6 +116,7 @@ public class GeneralNodeExporterTest {
 
         generalNodeExporter = new GeneralNodeExporter();
         ReflectionTestUtils.setField(generalNodeExporter, "metadataAPI", mockMetadataAPI);
+        ReflectionTestUtils.setField(generalNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(generalNodeExporter, "workspaceFileHandler", mockWorkspaceFileHandler);
         ReflectionTestUtils.setField(generalNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
         ReflectionTestUtils.setField(generalNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
@@ -750,7 +753,7 @@ public class GeneralNodeExporterTest {
                 will(returnValue(childPathRelativeToParent));
             
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(childArchiveURI));
-            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(childArchiveURI);
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentCmdiDocument, childArchiveURI);
                 will(returnValue(mockResourceProxy));
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             

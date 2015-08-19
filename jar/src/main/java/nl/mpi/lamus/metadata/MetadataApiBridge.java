@@ -18,7 +18,6 @@ package nl.mpi.lamus.metadata;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.metadata.api.MetadataElementException;
@@ -28,6 +27,7 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 
 /**
@@ -175,4 +175,14 @@ public interface MetadataApiBridge {
      * @return true if the given profile allows info links to be created
      */
     public boolean isInfoLinkAllowedInProfile(URI profileLocation);
+    
+    /**
+     * Gets the document reference for the given URI.
+     * If the URI is a handle, it tries first with the short proxy ("hdl:") and,
+     * if no result is found, it tries again with the long one ("http://hdl.handle.net/").
+     * @param cmdiParentDocument Document from which the reference should be retrieved
+     * @param uriToCheck URI to use to retrieve the reference
+     * @return Corresponding reference, or null if none was found
+     */
+    public ResourceProxy getDocumentReferenceByDoubleCheckingURI(CMDIDocument cmdiParentDocument, URI uriToCheck);
 }
