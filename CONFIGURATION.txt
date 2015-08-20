@@ -60,6 +60,16 @@ Lamus2 needs the 'corpusstructure3' (or another name for the hybrid corpusstruct
 
 The other necessary properties should be defined as parameters in the web context configuration.
 
+        <Parameter name="nl.mpi.lamus.csdb_hybrid_db_resource"
+                   value="java:comp/env/jdbc/CSDB_HYBRID"
+                   description="corpusstructure (hybrid) database resource"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.lamus2_db_resource"
+                   value="java:comp/env/jdbc/LAMUS2_DB"
+                   description="lamus2 database resource"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.lamus2_manualUrl"
                    value="http://www.mpi.nl/corpus/html/lamus2/index.html"
                    description="location of the  Lamus 2 Manual"
