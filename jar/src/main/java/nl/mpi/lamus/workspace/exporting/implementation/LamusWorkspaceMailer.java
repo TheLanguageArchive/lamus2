@@ -35,6 +35,10 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
     private final MailHelper mailHelper;
     
     @Autowired
+    private String asvOpenhandleBaseUrl;
+    
+    
+    @Autowired
     public LamusWorkspaceMailer(AmsServiceBridge amsBridge, MailHelper mailHelper) {
         this.amsBridge = amsBridge;
         this.mailHelper = mailHelper;
@@ -67,7 +71,9 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
         } else {
             subject = "Workspace - Success";
             text = "Your workspace (ID: " + workspace.getWorkspaceID() + "; creation date: " + workspace.getStartDate().toString() + ") was successfully submitted.\n\n"
-                    + "The data was moved into the archive at '" + workspace.getTopNodeArchiveURL() + "' and the database was updated.";
+                    + "The data was moved into the archive at '" + workspace.getTopNodeArchiveURL() + "' and the database was updated.\n"
+                    + "You can visit the updated part of the archive at\n"
+                    + asvOpenhandleBaseUrl + workspace.getTopNodeArchiveURI();
         }
         
         Message mailMessage = mailHelper.getMailMessage(toAddress, subject, text, addBcc);

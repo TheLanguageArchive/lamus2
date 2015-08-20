@@ -19,6 +19,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,10 @@ import org.springframework.context.annotation.Profile;
 @ImportResource("classpath:/config/production/csdb.xml")
 public class JndiDatabaseBeans {
     
+    @Autowired
+    @Qualifier("lamus2DbResource")
+    private String lamus2DbResource;
+    
     /**
      * @return DataSource bean corresponding to the Lamus2 database
      * @throws NamingException
@@ -44,6 +49,6 @@ public class JndiDatabaseBeans {
     @Qualifier("lamusDataSource")
     public DataSource lamusDataSource() throws NamingException {
         Context ctx = new InitialContext();
-        return (DataSource) ctx.lookup("java:comp/env/jdbc/LAMUS2_DB");
+        return (DataSource) ctx.lookup(lamus2DbResource);
     }
 }

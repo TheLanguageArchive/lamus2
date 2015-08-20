@@ -56,12 +56,16 @@ import org.springframework.context.annotation.Profile;
 public class CorpusstructureBeans {
     
     @Autowired
+    @Qualifier("csdbHybridDbResource")
+    private String csdbHybridDbResource;
+    
+    @Autowired
     @Qualifier("translationServiceLocation")
     private String translationServiceLocation;
     
     @Bean
     public CorpusStructureDBFactory csdbImplFactory() {
-        return new CorpusStructureDBImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
+        return new CorpusStructureDBImplFactory(csdbHybridDbResource);
     }
     
     @Bean
@@ -77,7 +81,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public ArchiveObjectsDBFactory aoImplFactory() {
-        return new ArchiveObjectsDBImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
+        return new ArchiveObjectsDBImplFactory(csdbHybridDbResource);
     }
     
     @Bean(name = "adapterAO")
@@ -88,7 +92,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public VersioningAPIFactory versioningApiFactory() {
-        return new VersioningAPIImplFactory("java:comp/env/jdbc/CSDB_HYBRID");
+        return new VersioningAPIImplFactory(csdbHybridDbResource);
     }
     
     @Bean

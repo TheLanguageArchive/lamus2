@@ -160,6 +160,18 @@ public class LamusProperties implements ServletContextAware {
     // Properties loaded from the web server context
     
     @Bean
+    @Qualifier("csdbHybridDbResource")
+    public String csdbHybridDbResource() {
+        return servletContext.getInitParameter("nl.mpi.lamus.csdb_hybrid_db_resource");
+    }
+    
+    @Bean
+    @Qualifier("lamus2DbResource")
+    public String lamus2DbResource() {
+        return servletContext.getInitParameter("nl.mpi.lamus.lamus2_db_resource");
+    }   
+    
+    @Bean
     @Qualifier("registerUrl")
     public String registerUrl() {
         return servletContext.getInitParameter("nl.mpi.rrsUrl") + servletContext.getInitParameter("nl.mpi.rrsRegister");
@@ -405,6 +417,14 @@ public class LamusProperties implements ServletContextAware {
         } else {
             return null;
         }
+    }
+    
+    // ASV
+    
+    @Bean
+    @Qualifier("asvOpenhandleBaseUrl")
+    public String asvOpenhandleBaseUrl() {
+        return servletContext.getInitParameter("nl.mpi.lamus.asv_openhandle_base_url");
     }
     
     // Metadata checker
