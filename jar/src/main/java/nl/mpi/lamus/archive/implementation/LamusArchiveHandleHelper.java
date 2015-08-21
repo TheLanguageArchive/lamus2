@@ -78,7 +78,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
             throw new NodeNotFoundException(nodeURI, message);
         }
         
-        return handleParser.prepareHandleWithHdlPrefix(nodeResolver.getPID(node));
+        return handleParser.prepareAndValidateHandleWithHdlPrefix(nodeResolver.getPID(node));
     }
 
     /**

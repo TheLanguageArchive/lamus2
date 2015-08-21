@@ -695,7 +695,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             
@@ -782,7 +782,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(throwException(new IllegalArgumentException()));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(uploadedFileArchiveURI); will(throwException(new IllegalArgumentException()));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(uploadedFileURL);
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
@@ -1049,7 +1049,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
             
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockMetadataDocument); will(returnValue(uploadedFileArchiveURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(uploadedFileArchiveURI); will(returnValue(completeFileArchiveURI));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             

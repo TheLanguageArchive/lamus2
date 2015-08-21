@@ -269,7 +269,7 @@ public class AddedNodeExporter implements NodeExporter {
         
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL().toURI());
-            currentReference.setURI(handleParser.prepareHandleWithHdlPrefix(currentNode.getArchiveURI()));
+            currentReference.setURI(handleParser.prepareAndValidateHandleWithHdlPrefix(currentNode.getArchiveURI()));
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
             currentReference.setLocation(currentUriRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
@@ -288,7 +288,7 @@ public class AddedNodeExporter implements NodeExporter {
             URI targetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
             
             URI newNodeArchiveHandle = handleManager.assignNewHandle(new File(currentNode.getWorkspaceURL().getPath()), targetUri);
-            currentNode.setArchiveURI(handleParser.prepareHandleWithHdlPrefix(newNodeArchiveHandle));
+            currentNode.setArchiveURI(handleParser.prepareAndValidateHandleWithHdlPrefix(newNodeArchiveHandle));
             workspaceDao.updateNodeArchiveUri(currentNode);
         } catch (URISyntaxException | HandleException | IOException ex) {
             String errorMessage = "Error assigning new handle for node " + currentNode.getWorkspaceURL();

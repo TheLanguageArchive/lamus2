@@ -181,7 +181,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
         
         File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(
-                targetDirectory, handleParser.stripHandleIfPrefixIsKnown(nodeToMove.getArchiveURI()), currentFile);
+                targetDirectory, handleParser.stripAndValidateHandleIfPrefixIsKnown(nodeToMove.getArchiveURI()), currentFile);
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

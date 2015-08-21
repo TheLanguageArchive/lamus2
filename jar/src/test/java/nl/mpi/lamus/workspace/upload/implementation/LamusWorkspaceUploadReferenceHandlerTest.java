@@ -1006,7 +1006,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         context.checking(new Expectations() {{
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockDocument); will(returnValue(parentDocumentHandle));
-            oneOf(mockHandleParser).isHandleUri(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
             
             oneOf(mockDocument).getDocumentReferences(); will(returnValue(references));
         }});
@@ -1047,12 +1047,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             //first reference contains a handle
             oneOf(mockReference).getLocation(); will(returnValue(null));
             oneOf(mockReference).getURI(); will(returnValue(firstRefURI));
-            oneOf(mockHandleParser).isHandleUri(firstRefURI); will(returnValue(hasHandle));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(firstRefURI); will(returnValue(hasHandle));
         }});
         
         if(hasHandle) {
             context.checking(new Expectations() {{
-                oneOf(mockHandleParser).prepareHandleWithHdlPrefix(firstRefURI); will(returnValue(completeFirstRefURI));
+                oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(completeFirstRefURI));
                 if(!isExternal) {
                     //matches second node
                     oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, completeFirstRefURI);
@@ -1097,12 +1097,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockWorkspaceUploadNodeMatcher).findNodeForPath(nodesToCheck, firstRefLocalUri.toString());
                 will(returnValue(null));
 
-            oneOf(mockHandleParser).isHandleUri(firstRefURI); will(returnValue(hasHandle));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(firstRefURI); will(returnValue(hasHandle));
         }});
         
         if(hasHandle) {
             context.checking(new Expectations() {{
-                oneOf(mockHandleParser).prepareHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
+                oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
                 if(!isExternal) {
                     //matches second node
                     oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, firstRefURI);
@@ -1143,12 +1143,12 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             //first reference contains a URI
             oneOf(mockReference).getLocation(); will(returnValue(null));
             oneOf(mockReference).getURI(); will(returnValue(firstRefURI));
-            oneOf(mockHandleParser).isHandleUri(firstRefURI); will(returnValue(hasHandle));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(firstRefURI); will(returnValue(hasHandle));
         }});
         
         if(hasHandle) {
             context.checking(new Expectations() {{
-                oneOf(mockHandleParser).prepareHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
+                oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
                 //no matches
                 oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, firstRefURI);
                     will(returnValue(null));
@@ -1174,7 +1174,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         if(checkIsHandle) {
             context.checking(new Expectations() {{
-                oneOf(mockHandleParser).isHandleUri(referenceUri); will(returnValue(Boolean.FALSE));
+                oneOf(mockHandleParser).isHandleUriWithKnownPrefix(referenceUri); will(returnValue(Boolean.FALSE));
             }});
         }
         
@@ -1189,8 +1189,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     private void updateReferenceDbUri_refHasLocalUri(final URI referenceUri, final WorkspaceNode mockNode, final boolean isHandle) {
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(referenceUri); will(returnValue(isHandle));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(referenceUri); will(returnValue(referenceUri));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(referenceUri); will(returnValue(isHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(referenceUri); will(returnValue(referenceUri));
             oneOf(mockNode).setArchiveURI(referenceUri);
             oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockNode);
         }});

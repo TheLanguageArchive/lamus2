@@ -122,7 +122,7 @@ public class LamusArchiveHandleHelperTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeUri); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(null));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(null); will(returnValue(null));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(null); will(returnValue(null));
         }});
         
         URI retrievedPid = archiveHandleHelper.getArchiveHandleForNode(nodeUri);
@@ -142,7 +142,7 @@ public class LamusArchiveHandleHelperTest {
             
             oneOf(mockCorpusStructureProvider).getNode(nodeUri); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(someIntermediateHandle));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(someIntermediateHandle); will(returnValue(expectedHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(someIntermediateHandle); will(returnValue(expectedHandle));
         }});
         
         URI retrievedPid = archiveHandleHelper.getArchiveHandleForNode(nodeUri);

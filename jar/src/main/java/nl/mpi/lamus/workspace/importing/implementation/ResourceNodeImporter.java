@@ -96,7 +96,7 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         URI childURI = null;
         if(referenceFromParent instanceof HandleCarrier) {
             URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
-            childURI = handleParser.prepareHandleWithHdlPrefix(handleInFile);
+            childURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
             if(!handleInFile.equals(childURI)) {
                 try {
                     ((HandleCarrier) referenceFromParent).setHandle(childURI);

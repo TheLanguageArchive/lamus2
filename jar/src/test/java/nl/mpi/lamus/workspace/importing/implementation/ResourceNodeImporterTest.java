@@ -169,7 +169,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -255,7 +255,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -494,7 +494,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -591,7 +591,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -688,7 +688,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -789,7 +789,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -831,7 +831,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(null));
@@ -877,7 +877,7 @@ public class ResourceNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockChildLinkWithHandle).getHandle(); will(returnValue(childURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(childURI); will(returnValue(completeChildURI));
             oneOf(mockChildLinkWithHandle).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));

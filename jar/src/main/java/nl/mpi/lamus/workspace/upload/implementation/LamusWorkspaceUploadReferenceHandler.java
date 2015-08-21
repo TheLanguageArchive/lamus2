@@ -99,7 +99,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         //check if document has external self-handle
         URI currentSelfHandle = metadataApiBridge.getSelfHandleFromDocument(currentDocument);
         
-        if(!handleParser.isHandleUri(currentSelfHandle)) {
+        if(!handleParser.isHandleUriWithKnownPrefix(currentSelfHandle)) {
             documentsWithInvalidSelfHandles.put(currentDocument, currentNode);
         }
         
@@ -121,8 +121,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
                 
                 if(matchedNode != null) {
-                    if(refURI != null && !refURI.toString().isEmpty() && handleParser.isHandleUri(refURI)) {
-                            matchedNode.setArchiveURI(handleParser.prepareHandleWithHdlPrefix(refURI));
+                    if(refURI != null && !refURI.toString().isEmpty() && handleParser.isHandleUriWithKnownPrefix(refURI)) {
+                            matchedNode.setArchiveURI(handleParser.prepareAndValidateHandleWithHdlPrefix(refURI));
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                     } else {
                         clearReferenceUri(currentDocument, ref, matchedNode);
@@ -134,8 +134,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             
             if(matchedNode == null) {
                 
-                if(handleParser.isHandleUri(refURI)) {
-                    URI preparedHandle = handleParser.prepareHandleWithHdlPrefix(refURI);
+                if(handleParser.isHandleUriWithKnownPrefix(refURI)) {
+                    URI preparedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(refURI);
                     matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, preparedHandle);
                     
                     if(matchedNode != null) {

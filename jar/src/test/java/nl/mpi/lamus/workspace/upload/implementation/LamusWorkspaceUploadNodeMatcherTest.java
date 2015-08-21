@@ -428,7 +428,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.TRUE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.TRUE));
         }});
                 
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -445,7 +445,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("hdl:55555/" + UUID.randomUUID().toString());
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -462,7 +462,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("file:/some/local/folder/parent/child.txt");
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, uriToMatch);
@@ -479,7 +479,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("http:/some/remote/folder/parent/child.txt");
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeFactory).getNewExternalNode(workspaceID, uriToMatch);
                 will(returnValue(mockExternalNode));
             oneOf(mockWorkspaceDao).addWorkspaceNode(mockExternalNode);
@@ -500,7 +500,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("invalidprotocol:/something");
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
                 
         //the invalid URL will cause an exception to be thrown, and therefore a null value to be returned
@@ -518,7 +518,7 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         final URI uriToMatch = URI.create("some/relative/path.cmdi");
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).isHandleUri(uriToMatch); will(returnValue(Boolean.FALSE));
+            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(uriToMatch); will(returnValue(Boolean.FALSE));
         }});
                 
         //the invalid URL will cause an exception to be thrown, and therefore a null value to be returned

@@ -290,7 +290,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 archiveUri = metadataApiBridge.getSelfHandleFromDocument(mdDocument);
                 if(archiveUri != null && !archiveUri.toString().trim().isEmpty()) {
                     try {
-                    archiveUri = handleParser.prepareHandleWithHdlPrefix(archiveUri);
+                    archiveUri = handleParser.prepareAndValidateHandleWithHdlPrefix(archiveUri);
                     } catch(IllegalArgumentException ex) {
                         try {
                             // invalid handle - should be removed

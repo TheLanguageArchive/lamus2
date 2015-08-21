@@ -129,7 +129,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripAndValidateHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         
@@ -168,7 +168,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForReplacedNode(workspaceID); will(returnValue(versioningDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(versioningDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripAndValidateHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(versioningDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(versioningFile));
         }});
         
@@ -207,7 +207,7 @@ public class LamusVersioningHandlerTest {
             
             oneOf(mockArchiveFileHelper).getDirectoryForDeletedNode(workspaceID); will(returnValue(trashedDirectory));
             oneOf(mockArchiveFileHelper).canWriteTargetDirectory(trashedDirectory); will(returnValue(Boolean.TRUE));
-            oneOf(mockHandleParser).stripHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
+            oneOf(mockHandleParser).stripAndValidateHandleIfPrefixIsKnown(testNodeFullArchiveURI); will(returnValue(testNodeStrippedHandle));
             oneOf(mockArchiveFileHelper).getTargetFileForReplacedOrDeletedNode(trashedDirectory, testNodeStrippedHandle, archiveFile); will(returnValue(trashedFile));
         }});
         

@@ -395,7 +395,7 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataResourceProxy).getHandle(); will(returnValue(testChildURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
             oneOf(mockMetadataResourceProxy).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -464,7 +464,7 @@ public class MetadataNodeImporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockMetadataResourceProxy).getHandle(); will(returnValue(testChildURI));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(completeChildURI));
             oneOf(mockMetadataResourceProxy).setHandle(completeChildURI);
             
             oneOf(mockCorpusStructureProvider).getNode(completeChildURI); will(returnValue(mockCorpusNode));
@@ -708,7 +708,7 @@ public class MetadataNodeImporterTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -781,7 +781,7 @@ public class MetadataNodeImporterTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -854,7 +854,7 @@ public class MetadataNodeImporterTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));
@@ -927,7 +927,7 @@ public class MetadataNodeImporterTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(testChildURI); will(returnValue(testChildURI));
             
             oneOf(mockCorpusStructureProvider).getNode(testChildURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(mockArchiveFile));

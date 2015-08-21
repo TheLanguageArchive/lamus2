@@ -357,7 +357,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
@@ -381,7 +381,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo))); will(throwException(expectedException));
         }});
 
@@ -405,7 +405,7 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handle); will(returnValue(preparedHandle));
             oneOf(mockCMDIDocument).putHeaderInformation(with(equivalentHeaderInfo(headerInfo)));
             
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockFile); will(returnValue(mockStreamResult));
@@ -1099,7 +1099,7 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has short proxy, so the first check is successful
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithShortProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithShortProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1112,10 +1112,10 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has long proxy, so the first check is not successful, but the second one is
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithShortProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithShortProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(null));
             
-            oneOf(mockHandleParser).prepareHandleWithLongHdlPrefix(handleWithShortProxy); will(returnValue(handleWithLongProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithLongHdlPrefix(handleWithShortProxy); will(returnValue(handleWithLongProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithLongProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1134,7 +1134,7 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has short proxy, so the first check is successful
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithLongProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithLongProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1147,10 +1147,10 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has long proxy, so the first check is not successful, but the second one is
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithLongProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithLongProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(null));
             
-            oneOf(mockHandleParser).prepareHandleWithLongHdlPrefix(handleWithLongProxy); will(returnValue(handleWithLongProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithLongHdlPrefix(handleWithLongProxy); will(returnValue(handleWithLongProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithLongProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1170,7 +1170,7 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has short proxy, so the first check is successful
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithoutProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithoutProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1183,10 +1183,10 @@ public class LamusMetadataApiBridgeTest {
         // handle in reference has long proxy, so the first check is not successful, but the second one is
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(handleWithoutProxy); will(returnValue(handleWithShortProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(handleWithoutProxy); will(returnValue(handleWithShortProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithShortProxy); will(returnValue(null));
             
-            oneOf(mockHandleParser).prepareHandleWithLongHdlPrefix(handleWithoutProxy); will(returnValue(handleWithLongProxy));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithLongHdlPrefix(handleWithoutProxy); will(returnValue(handleWithLongProxy));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(handleWithLongProxy); will(returnValue(mockResourceProxy));
         }});
         
@@ -1203,7 +1203,7 @@ public class LamusMetadataApiBridgeTest {
         // not a handle, so it doesn't add any proxy - in this case the reference is found anyway (could be an external node)
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uri); will(throwException(new IllegalArgumentException()));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(uri); will(throwException(new IllegalArgumentException()));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(uri); will(returnValue(mockResourceProxy));
         }});
         
@@ -1214,7 +1214,7 @@ public class LamusMetadataApiBridgeTest {
         // in this case the reference is not found
         
         context.checking(new Expectations() {{
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(uri); will(throwException(new IllegalArgumentException()));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(uri); will(throwException(new IllegalArgumentException()));
             oneOf(mockCMDIDocument).getDocumentReferenceByURI(uri); will(returnValue(null));
         }});
         

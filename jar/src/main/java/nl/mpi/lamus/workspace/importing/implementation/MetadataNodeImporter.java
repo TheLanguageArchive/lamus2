@@ -106,7 +106,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         } else {
             if(referenceFromParent instanceof HandleCarrier) {
                 URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
-                childArchiveURI = handleParser.prepareHandleWithHdlPrefix(handleInFile);
+                childArchiveURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
                 if(!handleInFile.equals(childArchiveURI)) {
                     try {
                         ((HandleCarrier) referenceFromParent).setHandle(childArchiveURI);

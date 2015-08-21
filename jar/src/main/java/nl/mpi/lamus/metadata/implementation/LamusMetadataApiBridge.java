@@ -133,7 +133,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         
         logger.debug("Adding self handle with URI '{}' in metadata document '{}'", handleUri, targetLocation);
         
-        HeaderInfo newInfo = getNewSelfHandleHeaderInfo(handleParser.prepareHandleWithHdlPrefix(handleUri));
+        HeaderInfo newInfo = getNewSelfHandleHeaderInfo(handleParser.prepareAndValidateHandleWithHdlPrefix(handleUri));
         document.putHeaderInformation(newInfo);
         saveMetadataDocument(document, targetLocation);
     }
@@ -364,7 +364,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         URI preparedHandle;
         
         try {
-            preparedHandle = handleParser.prepareHandleWithHdlPrefix(uriToCheck);
+            preparedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(uriToCheck);
         } catch(IllegalArgumentException ex) {
             // not a handle
             return cmdiParentDocument.getDocumentReferenceByURI(uriToCheck);
@@ -375,7 +375,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             return retrievedReference;
         }
         
-        preparedHandle = handleParser.prepareHandleWithLongHdlPrefix(uriToCheck);
+        preparedHandle = handleParser.prepareAndValidateHandleWithLongHdlPrefix(uriToCheck);
         // not checking for the IllegalArgumentException because if the handle was invalid,
             // it would already have happened in the previous attempt
         return cmdiParentDocument.getDocumentReferenceByURI(preparedHandle);

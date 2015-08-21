@@ -123,7 +123,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findExternalNodeForUri(int workspaceID, URI uri) {
         
-        if(handleParser.isHandleUri(uri)) {
+        if(handleParser.isHandleUriWithKnownPrefix(uri)) {
             // shouldn't be a handle at this point
             return null;
         }

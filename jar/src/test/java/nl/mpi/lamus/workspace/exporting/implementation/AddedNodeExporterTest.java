@@ -900,7 +900,7 @@ public class AddedNodeExporterTest {
         } else {
             context.checking(new Expectations() {{
                 oneOf(mockHandleManager).assignNewHandle(nodeWsFile, nodeNewArchiveUriToUriHttpsRoot); will(returnValue(nodeNewArchiveHandle));
-                oneOf(mockHandleParser).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+                oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
                 oneOf(mockChildWsNode).setArchiveURI(preparedNewArchiveHandle);
                 oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildWsNode);
             }});
@@ -927,7 +927,7 @@ public class AddedNodeExporterTest {
             oneOf(mockParentCmdiDocument).getDocumentReferenceByLocation(nodeWsURL.toURI());
                 will(returnValue(mockResourceProxy));
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeNewArchiveHandle));
-            oneOf(mockHandleParser).prepareHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
+            oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(nodeNewArchiveHandle); will(returnValue(preparedNewArchiveHandle));
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             
