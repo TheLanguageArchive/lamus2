@@ -28,8 +28,11 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
@@ -147,19 +150,43 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                         try {
                             Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
 
+                            int failedUploadsCount = 0;
+                            int failedLinksCount = 0;
+                            
                             for (ImportProblem problem : uploadProblems) {
                                 UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+                                if(problem instanceof FileImportProblem) {
+                                    failedUploadsCount++;
+                                } else if(problem instanceof LinkImportProblem || problem instanceof MatchImportProblem) {
+                                    failedLinksCount++;
+                                }
                             }
 
+                            
+                            StringBuilder feedbackMessage = new StringBuilder();
+                            
                             if (uploadProblems.isEmpty() && !copiedFiles.isEmpty()) {
-                                UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) +
-                                    getLocalizer().getString("upload_panel_total_successful_files", this) + copiedFiles.size());
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_success_message", this));
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_total_successful_files", this));
+                                feedbackMessage.append(copiedFiles.size());
+                                UploadPanel.this.info(feedbackMessage.toString());
                             }
                             
                             if (!uploadProblems.isEmpty()) {
-                                UploadPanel.this.error(getLocalizer().getString("upload_panel_fail_message", this) +
-                                    getLocalizer().getString("upload_panel_total_failed_files", this) + uploadProblems.size() +
-                                    "; " + getLocalizer().getString("upload_panel_total_successful_files", this) + copiedFiles.size());
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_fail_message", this));
+                                if(failedUploadsCount != 0) {
+                                    feedbackMessage.append(getLocalizer().getString("upload_panel_total_failed_files", this));
+                                    feedbackMessage.append(failedUploadsCount);
+                                    feedbackMessage.append("; ");
+                                }
+                                if(failedLinksCount != 0) {
+                                    feedbackMessage.append(getLocalizer().getString("upload_panel_total_failed_links", this));
+                                    feedbackMessage.append(failedLinksCount);
+                                    feedbackMessage.append("; ");
+                                }
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_total_successful_files", this));
+                                feedbackMessage.append(copiedFiles.size());
+                                UploadPanel.this.error(feedbackMessage.toString());
                             }
 
                         } catch (WorkspaceException ex) {
