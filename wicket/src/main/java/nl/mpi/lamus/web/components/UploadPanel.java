@@ -33,6 +33,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
@@ -105,6 +106,9 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                         File uploadDirectory = workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID());
 
                         Collection<File> copiedFiles = new ArrayList<>();
+                        
+                        Collection<ImportProblem> uploadProblems = new ArrayList<>();
+                        int failedUploadsCount = 0;
 
                         for (FileUpload upload : uploads) {
                             // Create a new file
@@ -119,10 +123,13 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                 try {
                                     InputStream newInputStream = upload.getInputStream();
                                     try (ZipInputStream zipInputStream = new ZipInputStream(newInputStream)) {
-
-                                        Collection<File> tempCopiedFiles =
+                                        
+                                        ZipUploadResult zipUploadResults =
                                                 workspaceService.uploadZipFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), zipInputStream, newFile.getName());
-                                        copiedFiles.addAll(tempCopiedFiles);
+                                        
+                                        copiedFiles.addAll(zipUploadResults.getSuccessfulUploads());
+                                        uploadProblems.addAll(zipUploadResults.getFailedUploads());
+                                        failedUploadsCount += uploadProblems.size();
                                     }
 
                                 } catch (IOException | DisallowedPathException ex) {
@@ -131,6 +138,12 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             } else {
 
                                 try {
+                                    if(newFile.exists()) {
+                                        uploadProblems.add(new FileImportProblem(newFile, "Uploaded file with the same path already exists.", null));
+                                        failedUploadsCount++;
+                                        continue;
+                                    }
+                                    
                                     File tempCopiedFile =
                                             workspaceService.uploadFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), newFile.getName());
                                     
@@ -148,9 +161,8 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                         }
                         
                         try {
-                            Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
+                            uploadProblems.addAll(workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles));
 
-                            int failedUploadsCount = 0;
                             int failedLinksCount = 0;
                             
                             for (ImportProblem problem : uploadProblems) {

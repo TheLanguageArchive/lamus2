@@ -16,6 +16,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Representation of problems that can happen during workspace import.
  * 
@@ -23,8 +26,8 @@ package nl.mpi.lamus.workspace.importing.implementation;
  */
 public class ImportProblem {
     
-    private String errorMessage;
-    private Exception exception;
+    private final String errorMessage;
+    private final Exception exception;
     
     public ImportProblem(String errorMessage, Exception exception) {
         this.errorMessage = errorMessage;
@@ -37,5 +40,35 @@ public class ImportProblem {
     
     public Exception getException() {
         return exception;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .append(this.errorMessage)
+                .append(this.exception);
+        
+        return hashCodeB.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof ImportProblem)) {
+            return false;
+        }
+        ImportProblem other = (ImportProblem) obj;
+        
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .append(this.errorMessage, other.getErrorMessage())
+                .append(this.exception, other.getException());
+        
+        return equalsB.isEquals();
     }
 }

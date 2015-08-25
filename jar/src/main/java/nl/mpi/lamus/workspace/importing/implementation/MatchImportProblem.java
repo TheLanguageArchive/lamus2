@@ -16,9 +16,10 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  *
@@ -26,8 +27,8 @@ import nl.mpi.metadata.api.model.Reference;
  */
 public class MatchImportProblem extends ImportProblem {
     
-    private WorkspaceNode parentNode;
-    private Reference childReference;
+    private final WorkspaceNode parentNode;
+    private final Reference childReference;
     
     public MatchImportProblem(WorkspaceNode parentNode, Reference childReference, String errorMessage, Exception exception) {
         super(errorMessage, exception);
@@ -41,5 +42,37 @@ public class MatchImportProblem extends ImportProblem {
     
     public Reference getChildReference() {
         return childReference;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .appendSuper(super.hashCode())
+                .append(this.parentNode)
+                .append(this.childReference);
+        
+        return hashCodeB.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof MatchImportProblem)) {
+            return false;
+        }
+        MatchImportProblem other = (MatchImportProblem) obj;
+        
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .appendSuper(super.equals(obj))
+                .append(this.parentNode, other.getParentNode())
+                .append(this.childReference, other.getChildReference());
+        
+        return equalsB.isEquals();
     }
 }

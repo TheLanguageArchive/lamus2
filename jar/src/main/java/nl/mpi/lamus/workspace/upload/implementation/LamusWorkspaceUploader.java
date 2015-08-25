@@ -130,23 +130,23 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        File fileToCopy = new File(workspaceUploadDirectory, filename);
         
-        File finalFile = archiveFileHelper.getFinalFile(workspaceUploadDirectory, filename);
+        workspaceFileHandler.copyInputStreamToTargetFile(inputStream, fileToCopy);
         
-        
-        workspaceFileHandler.copyInputStreamToTargetFile(inputStream, finalFile);
-        
-        return finalFile;
+        return fileToCopy;
     }
     
     /**
      * @see WorkspaceUploader#uploadZipFileIntoWorkspace(int, java.util.zip.ZipInputStream)
      */
     @Override
-    public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
+    public ZipUploadResult uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
             throws IOException, DisallowedPathException {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+        ZipUploadResult uploadResults = new ZipUploadResult();
         
         Collection<File> copiedFiles = new ArrayList<>();
         Collection<File> createdDirectories = new ArrayList<>();
@@ -175,15 +175,22 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             File entryBaseDirectory = entryFile.getParentFile();
             String entryFilename = entryFile.getName();
-            File finalEntryFile = archiveFileHelper.getFinalFile(entryBaseDirectory, entryFilename);
             
-            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, finalEntryFile);
+            File fileAttempt = new File(entryBaseDirectory, entryFilename);
+            if(fileAttempt.exists()) {
+                uploadResults.addFailedUpload(new FileImportProblem(fileAttempt, "A file with the same path already exists", null));
+                nextEntry = zipInputStream.getNextEntry();
+                continue;
+            }
+            
+            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, fileAttempt);
             
             nextEntry = zipInputStream.getNextEntry();
-            copiedFiles.add(finalEntryFile);
+            copiedFiles.add(fileAttempt);
+            uploadResults.addSuccessfulUpload(fileAttempt);
         }
         
-        return copiedFiles;
+        return uploadResults;
     }
 
     /**

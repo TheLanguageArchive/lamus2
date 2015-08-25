@@ -36,6 +36,7 @@ import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 
 /**
  *
@@ -204,9 +205,9 @@ public interface WorkspaceService {
      * @param workspaceID ID of the workspace
      * @param zipInputStream ZipInputStream to be uploaded
      * @param filename name of the file to upload
-     * @return Collection containing the copied files
+     * @return Object containing results of the upload for the files in the zip
      */
-    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
+    public ZipUploadResult uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
             throws IOException, DisallowedPathException;
     
     /**

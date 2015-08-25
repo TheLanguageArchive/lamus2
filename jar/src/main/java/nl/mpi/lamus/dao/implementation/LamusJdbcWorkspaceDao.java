@@ -555,6 +555,30 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
 
     /**
+     * @see WorkspaceDao#deleteWorkspaceNode(int, int)
+     */
+    @Override
+    public void deleteWorkspaceNode(int workspaceID, int nodeID) {
+
+        logger.debug("Deleting node " + nodeID + " in workspace " + workspaceID);
+        
+        String deleteReplacementsSql = "DELETE FROM node_replacement" +
+                " WHERE old_node_id = :node_id OR new_node_id = :node_id";
+        String deleteLinksSql = "DELETE FROM node_link" +
+                " WHERE parent_workspace_node_id = :node_id OR child_workspace_node_id = :node_id";
+        String deleteNodeSql = "DELETE from node" +
+                " WHERE workspace_node_id = :node_id";
+        
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("node_id", nodeID);
+        this.namedParameterJdbcTemplate.update(deleteReplacementsSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteLinksSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
+        
+        logger.info("Node " + nodeID + " in workspace " + workspaceID + " has been deleted");
+    }
+
+    /**
      * @see WorkspaceDao#getWorkspaceNode(int)
      */
     @Override

@@ -46,6 +46,7 @@ import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -310,7 +311,7 @@ public class LamusWorkspaceService implements WorkspaceService {
      * @see WorkspaceService#uploadZipFileIntoWorkspace(java.lang.String, int, java.util.zip.ZipInputStream, java.lang.String)
      */
     @Override
-    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
+    public ZipUploadResult uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename)
             throws IOException, DisallowedPathException {
         
         logger.debug("Triggered upload of zip file into workspace; userID: " + userID + "; workspaceID: " + workspaceID + "; filename: " + filename);

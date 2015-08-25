@@ -55,6 +55,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -93,6 +94,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private File mockFile;
     @Mock private Collection<File> mockUploadedFiles;
     @Mock private Collection<ImportProblem> mockFailedUploads;
+    @Mock private ZipUploadResult mockZipUploadResult;
     @Mock private TypecheckedResults mockTypecheckedResults;
     @Mock private ZipInputStream mockZipInputStream;
 
@@ -879,12 +881,12 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceUploader).uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
-                will(returnValue(mockUploadedFiles));
+                will(returnValue(mockZipUploadResult));
         }});
         
-        Collection<File> result = service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
+        ZipUploadResult result = service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
         
-        assertEquals("Result different from expected", mockUploadedFiles, result);
+        assertEquals("Result different from expected", mockZipUploadResult, result);
     }
     
     @Test

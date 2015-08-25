@@ -16,8 +16,9 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
-import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  *
@@ -25,7 +26,7 @@ import java.io.File;
  */
 public class FileImportProblem extends ImportProblem {
     
-    private File problematicFile;
+    private final File problematicFile;
     
     public FileImportProblem(File problematicFile, String errorMessage, Exception exception) {
         super(errorMessage, exception);
@@ -34,5 +35,35 @@ public class FileImportProblem extends ImportProblem {
     
     public File getProblematicFile() {
         return problematicFile;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        
+        HashCodeBuilder hashCodeB = new HashCodeBuilder()
+                .appendSuper(super.hashCode())
+                .append(this.problematicFile);
+        
+        return hashCodeB.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if(this == obj) {
+            return true;
+        }
+        if(!(obj instanceof FileImportProblem)) {
+            return false;
+        }
+        FileImportProblem other = (FileImportProblem) obj;
+        
+        
+        EqualsBuilder equalsB = new EqualsBuilder()
+                .appendSuper(super.equals(obj))
+                .append(this.problematicFile, other.getProblematicFile());
+        
+        return equalsB.isEquals();
     }
 }

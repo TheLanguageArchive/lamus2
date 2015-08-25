@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Max Planck Institute for Psycholinguistics
+ * Copyright (C) 2015 Max Planck Institute for Psycholinguistics
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.workspace.importing.implementation;
+package nl.mpi.lamus.workspace.upload.implementation;
 
-import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -24,23 +27,32 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  *
  * @author guisil
  */
-public class LinkImportProblem extends ImportProblem {
+public class ZipUploadResult {
     
-    private final WorkspaceNode parentNode;
-    private final WorkspaceNode childNode;
+    private final Collection<File> successfulUploads;
+    private final Collection<ImportProblem> failedUploads;
     
-    public LinkImportProblem(WorkspaceNode parentNode, WorkspaceNode childNode, String errorMessage, Exception exception) {
-        super(errorMessage, exception);
-        this.parentNode = parentNode;
-        this.childNode = childNode;
+    
+    public ZipUploadResult() {
+        successfulUploads = new ArrayList<>();
+        failedUploads = new ArrayList<>();
     }
     
-    public WorkspaceNode getParentNode() {
-        return parentNode;
+    
+    public Collection<File> getSuccessfulUploads() {
+        return successfulUploads;
     }
     
-    public WorkspaceNode getChildNode() {
-        return childNode;
+    public void addSuccessfulUpload(File file) {
+        successfulUploads.add(file);
+    }
+    
+    public Collection<ImportProblem> getFailedUploads() {
+        return failedUploads;
+    }
+    
+    public void addFailedUpload(ImportProblem problem) {
+        failedUploads.add(problem);
     }
     
     
@@ -48,9 +60,8 @@ public class LinkImportProblem extends ImportProblem {
     public int hashCode() {
         
         HashCodeBuilder hashCodeB = new HashCodeBuilder()
-                .appendSuper(super.hashCode())
-                .append(this.parentNode)
-                .append(this.childNode);
+                .append(this.successfulUploads)
+                .append(this.failedUploads);
         
         return hashCodeB.toHashCode();
     }
@@ -61,16 +72,15 @@ public class LinkImportProblem extends ImportProblem {
         if(this == obj) {
             return true;
         }
-        if(!(obj instanceof LinkImportProblem)) {
+        if(!(obj instanceof ZipUploadResult)) {
             return false;
         }
-        LinkImportProblem other = (LinkImportProblem) obj;
+        ZipUploadResult other = (ZipUploadResult) obj;
         
         
         EqualsBuilder equalsB = new EqualsBuilder()
-                .appendSuper(super.equals(obj))
-                .append(this.parentNode, other.getParentNode())
-                .append(this.childNode, other.getChildNode());
+                .append(this.successfulUploads, other.getSuccessfulUploads())
+                .append(this.failedUploads, other.getFailedUploads());
         
         return equalsB.isEquals();
     }

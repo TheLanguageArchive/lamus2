@@ -1942,7 +1942,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Node was not inserted in the database", intermediateNumberOfRows == initialNumberOfRows + 1);
         
         this.workspaceDao.setWorkspaceNodeAsDeleted(
-                testWorkspace.getWorkspaceID(), testNode.getWorkspaceNodeID(), Boolean.TRUE);
+                testNode.getWorkspaceID(), testNode.getWorkspaceNodeID(), Boolean.TRUE);
         int finalNumberOfRows = countRowsInTable("node");
         
         assertTrue("Node should not be deleted from the database, just set as deleted", finalNumberOfRows == intermediateNumberOfRows);
@@ -1950,6 +1950,48 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode retrievedNode = getNodeFromDB(testNode.getWorkspaceNodeID());
         assertNotNull("Node should exist in the database", retrievedNode);
         assertEquals("Node should be set as deleted", WorkspaceNodeStatus.EXTERNAL_DELETED, retrievedNode.getStatus());
+    }
+    
+    @Test
+    public void deleteWorkspaceNode_withReplacementsAndLinks() throws URISyntaxException, MalformedURLException {
+        
+        int initialNumberOfNodes = countRowsInTable("node");
+        int initialNumberOfLinks = countRowsInTable("node_link");
+        int initialNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node3 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node4 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node5 = insertTestWorkspaceNodeIntoDB(ws);
+        WorkspaceNode node6 = insertTestWorkspaceNodeIntoDB(ws);
+        setNodeAsParentAndInsertLinkIntoDatabase(node1, node2);
+        setNodeAsParentAndInsertLinkIntoDatabase(node2, node3);
+        setNodeAsParentAndInsertLinkIntoDatabase(node2, node4);
+        setNodeAsReplacedAndAddReplacementInDatabase(node5, node6);
+        setNodeAsParentAndInsertLinkIntoDatabase(node2, node6);
+        
+        int intermediateNumberOfNodes = countRowsInTable("node");
+        int intermediateNumberOfLinks = countRowsInTable("node_link");
+        int intermediateNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 6, intermediateNumberOfNodes);
+        assertEquals("Intermediate number of links different from expected", initialNumberOfLinks + 4, intermediateNumberOfLinks);
+        assertEquals("Intermediate number of replacements different from expected", initialNumberOfReplacements + 1, intermediateNumberOfReplacements);
+        
+        this.workspaceDao.deleteWorkspaceNode(node6.getWorkspaceID(), node6.getWorkspaceNodeID());
+        
+        int finalNumberOfNodes = countRowsInTable("node");
+        int finalNumberOfLinks = countRowsInTable("node_link");
+        int finalNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        assertEquals("Final number of nodes different from expected", intermediateNumberOfNodes - 1, finalNumberOfNodes);
+        assertEquals("Final number of links different from expected", intermediateNumberOfLinks - 1, finalNumberOfLinks);
+        assertEquals("Final number of replacements different from expected", intermediateNumberOfReplacements - 1, finalNumberOfReplacements);
+        
+        WorkspaceNode retrievedNode = getNodeFromDB(node6.getWorkspaceNodeID());
+        assertNull("Node should not exist in the database", retrievedNode);
     }
     
     @Test
