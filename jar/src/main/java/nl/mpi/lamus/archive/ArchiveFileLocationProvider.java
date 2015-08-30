@@ -30,16 +30,17 @@ public interface ArchiveFileLocationProvider {
     
     /**
      * Provides an available location for the given node,
-     * adjusting the attemped filename if necessary.
+     * adjusting the attempted filename if necessary.
      * This method will also trigger the creation of the necessary folders and
      * an empty file in the correct location, so it becomes unavailable for other nodes.
      * @param parentNodePath Path where the parent node is located
+     * @param parentCorpusNamePathToClosestTopNode Name of the parent node, to be used possibly as a folder name
      * @param node WorkspaceNode object for the node
      * @param filenameAttempt Attempted filename for the node
      * @return File object corresponding to the available location
      * @throws IOException when there are problems in the creation of file or folders
      */
-    public File getAvailableFile(String parentNodePath, WorkspaceNode node, String filenameAttempt) throws IOException;
+    public File getAvailableFile(String parentNodePath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node, String filenameAttempt) throws IOException;
     
     /**
      * Given a parent and a child path, gets the relative path

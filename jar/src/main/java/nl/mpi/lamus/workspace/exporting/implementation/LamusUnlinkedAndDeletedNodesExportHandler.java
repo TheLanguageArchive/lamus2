@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.util.Collection;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
@@ -42,8 +43,8 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
     
     private static final Logger logger = LoggerFactory.getLogger(LamusUnlinkedAndDeletedNodesExportHandler.class);
 
-    private WorkspaceDao workspaceDao;
-    private NodeExporterFactory nodeExporterFactory;
+    private final WorkspaceDao workspaceDao;
+    private final NodeExporterFactory nodeExporterFactory;
     
     @Autowired
     public LamusUnlinkedAndDeletedNodesExportHandler(WorkspaceDao wsDao, NodeExporterFactory neFactory) {
@@ -83,7 +84,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandler implements UnlinkedAndDel
         
         for(WorkspaceNode unlinkedOrDeletedNode : nodesToExport) {
             NodeExporter nodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, unlinkedOrDeletedNode, exportPhase);
-            nodeExporter.exportNode(workspace, null, unlinkedOrDeletedNode, keepUnlinkedFiles, submissionType, exportPhase);
+            nodeExporter.exportNode(workspace, null, CorpusStructureBridge.IGNORE_CORPUS_PATH, unlinkedOrDeletedNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
     }
 }

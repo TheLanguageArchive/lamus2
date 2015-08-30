@@ -44,6 +44,12 @@ public interface NodeUtil {
     public boolean isNodeMetadata(WorkspaceNode wsNode);
     
     /**
+     * @param wsNode workspace node to check
+     * @return true if node is of the info file type
+     */
+    public boolean isNodeInfoFile(WorkspaceNode wsNode);
+    
+    /**
      * @param wsNodeType workspace node type to check
      * @return true if type corresponds to metadata
      */

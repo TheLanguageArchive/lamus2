@@ -34,6 +34,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -86,19 +87,22 @@ public class AddedNodeExporter implements NodeExporter {
     private NodeResolver nodeResolver;
     @Autowired
     private NodeUtil nodeUtil;
+    @Autowired
+    private ExporterHelper exporterHelper;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -128,10 +132,20 @@ public class AddedNodeExporter implements NodeExporter {
         
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
         
-        File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
+        
+        String currentCorpusNamePathToClosestTopNode = exporterHelper.getNamePathToUseForThisExporter(
+                currentNode, parentNode, parentCorpusNamePathToClosestTopNode, false, getClass());
+        
+        if(currentCorpusNamePathToClosestTopNode == null) {
+            String errorMessage = "Problems retrieving the corpus name path for node " + currentNode.getWorkspaceURL();
+            throwWorkspaceExportException(workspaceID, errorMessage, null);
+        }
+        
+        File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath(), currentCorpusNamePathToClosestTopNode);
         
         if(nodeUtil.isNodeMetadata(currentNode)) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+            
+            workspaceTreeExporter.explore(workspace, currentNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
         
         MetadataDocument currentDocument = retrieveMetadataDocument(workspaceID, currentNode);
@@ -181,13 +195,13 @@ public class AddedNodeExporter implements NodeExporter {
         return parentArchiveFile;
     }
     
-    private File retrieveAndUpdateNewArchivePath(int workspaceID, WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath) throws WorkspaceExportException {
+    private File retrieveAndUpdateNewArchivePath(int workspaceID, WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath, String corpusNamePathToClosestTopNode) throws WorkspaceExportException {
         
         File nextAvailableFile = null;
         URL newNodeArchiveURL = null;
         
         try {
-            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNode, currentNodeFilename);
+            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, corpusNamePathToClosestTopNode, currentNode, currentNodeFilename);
             logger.info("Retrieved new archive file path for added node: " + nextAvailableFile.getAbsolutePath());
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {

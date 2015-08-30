@@ -109,7 +109,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
             WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
 
             NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode, WorkspaceExportPhase.TREE_EXPORT);
-            topNodeExporter.exportNode(workspace, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+            topNodeExporter.exportNode(workspace, null, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
 
             this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
 

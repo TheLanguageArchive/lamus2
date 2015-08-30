@@ -25,9 +25,8 @@ import net.handle.hdllib.HandleException;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
-import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
@@ -60,15 +59,11 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     @Autowired
     private VersioningHandler versioningHandler;
     @Autowired
-    private WorkspaceDao workspaceDao;
-    @Autowired
     private HandleManager handleManager;
     @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     @Autowired
     private WorkspaceTreeExporter workspaceTreeExporter;
-    @Autowired
-    private MetadataApiBridge metadataApiBridge;
     @Autowired
     private ArchiveHandleHelper archiveHandleHelper;
     @Autowired
@@ -77,15 +72,16 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
 
         if (workspace == null) {
@@ -146,7 +142,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         }
         
         if(nodeUtil.isNodeMetadata(currentNode) && WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+            workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);

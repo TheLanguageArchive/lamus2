@@ -32,6 +32,8 @@ public interface NodeExporter {
      * Exports the given node from the workspace to the archive
      * @param workspace Workspace currently being exported
      * @param parentNode Parent of the node to export
+     * @param parentCorpusNamePathToClosestTopNode Path of corpus names
+     *  from the parent node up to the closest top node
      * @param currentNode Node to export
      * @param keepUnlinkedFiles true if unlinked files are to be kept for future use
      *  (only used in the unlinked files exporter)
@@ -42,9 +44,10 @@ public interface NodeExporter {
      * in which the unlinked nodes are exported
      */
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException;
     
 }

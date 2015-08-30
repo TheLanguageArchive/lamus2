@@ -98,10 +98,11 @@ public interface ArchiveFileHelper {
      * Determines the path for a certain node, based on the path of the
      * parent node, as well as the node type and/or profile.
      * @param parentPath Path of the parent node
+     * @param parentCorpusNamePathToClosestTopNode Path of corpus names up to the closest top node
      * @param node WorkspaceNode object for the node
      * @return Directory where the node should be located
      */
-    public String getDirectoryForNode(String parentPath, WorkspaceNode node);
+    public String getDirectoryForNode(String parentPath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node);
     
     /**
      * Given the FileInfo of an archive node and the location of the corresponding

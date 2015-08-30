@@ -102,6 +102,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
@@ -128,11 +129,11 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+        workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -150,6 +151,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
@@ -178,13 +180,13 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
                 will(throwException(expectedException));
             
         }});
         
         try {
-            workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+            workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -205,6 +207,7 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
@@ -236,13 +239,13 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             // should leave the loop for the second node because it's external and therefore doesn't require exporting
             never(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            never(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            never(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+        workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
 }

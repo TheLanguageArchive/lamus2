@@ -105,6 +105,19 @@ public class LamusNodeUtil implements NodeUtil {
     public boolean isNodeMetadata(WorkspaceNode wsNode) {
         return isTypeMetadata(wsNode.getType());
     }
+
+    /**
+     * @see NodeUtil#isNodeInfoFile(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public boolean isNodeInfoFile(WorkspaceNode wsNode) {
+        
+        if(WorkspaceNodeType.RESOURCE_INFO.equals(wsNode.getType())) {
+            return true;
+        }
+        
+        return false;
+    }
     
     /**
      * @see NodeUtil#isTypeMetadata(nl.mpi.lamus.workspace.model.WorkspaceNodeType)

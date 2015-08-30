@@ -19,6 +19,7 @@ package nl.mpi.lamus.workspace.model.implementation;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -48,6 +49,7 @@ public class LamusNodeUtilTest {
     private NodeUtil nodeUtil;
     
     @Mock CmdiProfile mockCmdiProfile;
+    @Mock WorkspaceNode mockWorkspaceNode;
     
     
     public LamusNodeUtilTest() {
@@ -257,6 +259,32 @@ public class LamusNodeUtilTest {
     public void isMetadata_Unknown() {
         boolean result = nodeUtil.isTypeMetadata(WorkspaceNodeType.UNKNOWN);
         assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void isNotInfoFile() {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNode).getType(); will(returnValue(WorkspaceNodeType.METADATA));
+        }});
+        
+        assertFalse("Result should be false", nodeUtil.isNodeInfoFile(mockWorkspaceNode));
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNode).getType(); will(returnValue(WorkspaceNodeType.RESOURCE_IMAGE));
+        }});
+        
+        assertFalse("Result should be false", nodeUtil.isNodeInfoFile(mockWorkspaceNode));
+    }
+    
+    @Test
+    public void isInfoFile() {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNode).getType(); will(returnValue(WorkspaceNodeType.RESOURCE_INFO));
+        }});
+        
+        assertTrue("Result should be true", nodeUtil.isNodeInfoFile(mockWorkspaceNode));
     }
     
     @Test

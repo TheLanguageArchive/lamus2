@@ -158,7 +158,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
@@ -261,7 +261,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
                 
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);

@@ -236,44 +236,52 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     }
 
     /**
-     * @see ArchiveFileHelper#getDirectoryForNode(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see ArchiveFileHelper#getDirectoryForNode(java.lang.String, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public String getDirectoryForNode(String parentPath, WorkspaceNode node) {
+    public String getDirectoryForNode(String parentPath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node) { // Not for top nodes
         
         String corpusstructureFolderPlusFilename = corpusstructureDirectoryName + File.separator + FilenameUtils.getName(parentPath);
-        String metadataFolderPlusFilename = this.metadataDirectoryName + File.separator + FilenameUtils.getName(parentPath);
-        String parentBaseDirectory;
-
-        if(parentPath.endsWith(corpusstructureFolderPlusFilename)) {
-            parentBaseDirectory = parentPath.replace(corpusstructureFolderPlusFilename, "");
-        } else if(parentPath.endsWith(metadataFolderPlusFilename)) {
-            parentBaseDirectory = parentPath.replace(metadataFolderPlusFilename, "");
-        } else {
-            //TODO if this is supposed to be a top node, then a different method should be called specifically for that
-            throw new IllegalStateException("Parent node should be in either a 'Corpusstructure' or a 'Metadata' folder");
+        
+        String closestTopNodeName = parentCorpusNamePathToClosestTopNode;
+        if(closestTopNodeName.contains(File.separator)) {
+            closestTopNodeName = parentCorpusNamePathToClosestTopNode.substring(0, parentCorpusNamePathToClosestTopNode.indexOf(File.separator));
         }
         
+        String topNodeBaseDirectory;
+        String topNodeBaseDirectoryPlusAncestorFolders;
+                
+        if(closestTopNodeName.isEmpty()) { // parent is top node
+            
+            topNodeBaseDirectory = parentPath.replace(corpusstructureFolderPlusFilename, "");
+            topNodeBaseDirectoryPlusAncestorFolders = topNodeBaseDirectory;
+            
+        } else {
+        
+            topNodeBaseDirectory = findTopNodeBaseDirectory(parentPath, closestTopNodeName);
+            topNodeBaseDirectoryPlusAncestorFolders = topNodeBaseDirectory.replace(closestTopNodeName, parentCorpusNamePathToClosestTopNode);
+        }
+
         if(WorkspaceNodeType.METADATA.equals(node.getType())) {
             
             CmdiProfile nodeProfile = allowedCmdiProfiles.getProfile(node.getProfileSchemaURI().toString());
 
             if("corpus".equals(nodeProfile.getTranslateType())) {
-                return FilenameUtils.concat(parentBaseDirectory, corpusstructureDirectoryName);
+                return FilenameUtils.concat(topNodeBaseDirectory, corpusstructureDirectoryName);
             } else if("session".equals(nodeProfile.getTranslateType())) {
-                return FilenameUtils.concat(parentBaseDirectory, metadataDirectoryName);
+                return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, metadataDirectoryName);
             } else {
                 throw new IllegalArgumentException("Metadata should be translated to either corpus or session");
             }
             
         } else if(WorkspaceNodeType.RESOURCE_WRITTEN.equals(node.getType())) {
-            return FilenameUtils.concat(parentBaseDirectory, annotationsDirectoryName);
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, annotationsDirectoryName);
         } else if(WorkspaceNodeType.RESOURCE_AUDIO.equals(node.getType()) ||
                 WorkspaceNodeType.RESOURCE_IMAGE.equals(node.getType()) ||
                 WorkspaceNodeType.RESOURCE_VIDEO.equals(node.getType())) {
-            return FilenameUtils.concat(parentBaseDirectory, mediaDirectoryName);
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, mediaDirectoryName);
         } else if(WorkspaceNodeType.RESOURCE_INFO.equals(node.getType())) {
-            return FilenameUtils.concat(parentBaseDirectory, infoDirectoryName);
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, infoDirectoryName);
         } else {
             throw new IllegalStateException("Not supported node type");
         }
@@ -379,5 +387,16 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         File subSubDirectory = new File(subDirectory, "" + workspaceID);
         
         return subSubDirectory;
+    }
+    
+    private String findTopNodeBaseDirectory(String directoryToCheck, String topNodeName) {
+        
+        String topNodeBaseDirectory = directoryToCheck;
+        
+        while(!topNodeBaseDirectory.endsWith(topNodeName)) {
+            topNodeBaseDirectory = topNodeBaseDirectory.substring(0, topNodeBaseDirectory.lastIndexOf(File.separator));
+        }
+        
+        return topNodeBaseDirectory;
     }
 }

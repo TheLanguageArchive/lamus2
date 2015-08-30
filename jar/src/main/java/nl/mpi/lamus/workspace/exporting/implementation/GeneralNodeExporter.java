@@ -28,6 +28,7 @@ import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
 import nl.mpi.lamus.workspace.model.NodeUtil;
@@ -74,19 +75,22 @@ public class GeneralNodeExporter implements NodeExporter {
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     @Autowired
     private NodeUtil nodeUtil;
+    @Autowired
+    private ExporterHelper exporterHelper;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -125,10 +129,19 @@ public class GeneralNodeExporter implements NodeExporter {
         }
         
         File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
+      
         
         if(nodeUtil.isNodeMetadata(currentNode)) {
             
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+            String currentCorpusNamePathToClosestTopNode = exporterHelper.getNamePathToUseForThisExporter(
+                    currentNode, parentNode, parentCorpusNamePathToClosestTopNode, true, getClass());
+            
+            if(currentCorpusNamePathToClosestTopNode == null) {
+                String errorMessage = "Problems retrieving the corpus name path for node " + currentNode.getArchiveURI();
+                throwWorkspaceExportException(workspaceID, errorMessage, null);
+            }
+            
+            workspaceTreeExporter.explore(workspace, currentNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             // assuming that the metadata always changes (due to the localURI attribute being edited during the import)
                 // so a file size or checksum check wouldn't work in this case
