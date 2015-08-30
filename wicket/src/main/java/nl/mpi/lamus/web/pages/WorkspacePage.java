@@ -170,7 +170,7 @@ public class WorkspacePage extends LamusPage {
                 if(linkNodesPanel != null) {
                     
                     if(selectedNode != null) {
-                        linkNodesPanel.setModelObject(selectedNode);
+                        linkNodesPanel.setModel(Model.of(selectedNode));
                     } else {
                         linkNodesPanel.setModelObject(null);
                     }
