@@ -1,4 +1,4 @@
-lamus2-1.3.0-RC4 (2015-08-31)
+lamus2-1.3.0-RC4 (2015-09-01)
 
     Changes:
         - HANDLE-UTILS: Updated the handle-utils library.
@@ -11,6 +11,8 @@ lamus2-1.3.0-RC4 (2015-08-31)
         - NODE NAMES: The names displayed in the nodes weren't always correct
           (sometimes the filename was being used instead
           of the name in the CMDI document).
+        - ORPHANS DIRECTORY: When the orphans directory didn't exist, an
+          exception was being thrown, preventing the workspace from being created.
 
 lamus2-1.3.0-RC3 (2015-08-20)
 
