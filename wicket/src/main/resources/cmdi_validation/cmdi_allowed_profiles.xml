@@ -102,16 +102,20 @@
         <allowInfoLinks>false</allowInfoLinks>
         <translateType>corpus</translateType>
     </profile>
-
-    
-    
-    <profile id="clarin.eu:cr1:p_1337778924955" name="lucea">http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1337778924955</profile>
-    
-    
+    <profile id="clarin.eu:cr1:p_1337778924955" name="lucea">
+        <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1337778924955</location>
+        <allowedReferenceTypes>
+            <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
+        </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
+        <translateType>session</translateType>
+    </profile>
     <profile id="clarin.eu:cr1:p_1375880372947" name="LESLLA">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1375880372947</location>
         <allowedReferenceTypes>
-            <allowedReferenceType>Metadata</allowedReferenceType>
             <allowedReferenceType>Resource</allowedReferenceType>
             <allowedReferenceType>SearchPage</allowedReferenceType>
             <allowedReferenceType>LandingPage</allowedReferenceType>
@@ -122,6 +126,17 @@
     </profile>
     <profile id="clarin.eu:cr1:p_1331113992512" name="SL-IPROSLA">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1331113992512</location>
+        <allowedReferenceTypes>
+            <allowedReferenceType>Resource</allowedReferenceType>
+            <allowedReferenceType>SearchPage</allowedReferenceType>
+            <allowedReferenceType>LandingPage</allowedReferenceType>
+            <allowedReferenceType>SearchService</allowedReferenceType>
+        </allowedReferenceTypes>
+        <allowInfoLinks>false</allowInfoLinks>
+        <translateType>session</translateType>
+    </profile>
+    <profile id="clarin.eu:cr1:p_1396012485083" name="VALID">
+        <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1396012485083</location>
         <allowedReferenceTypes>
             <allowedReferenceType>Resource</allowedReferenceType>
             <allowedReferenceType>SearchPage</allowedReferenceType>
