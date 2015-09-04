@@ -197,7 +197,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                     feedbackMessage.append("; ");
                                 }
                                 feedbackMessage.append(getLocalizer().getString("upload_panel_total_successful_files", this));
-                                feedbackMessage.append(copiedFiles.size());
+                                feedbackMessage.append(copiedFiles.size() - failedUploadsCount);
                                 UploadPanel.this.error(feedbackMessage.toString());
                             }
 
