@@ -17,6 +17,7 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
@@ -35,13 +36,15 @@ public class WorkspaceExporterHelper implements ExporterHelper {
     
     private final NodeUtil nodeUtil;
     private final CorpusStructureBridge corpusStructureBridge;
+    private final ArchiveFileHelper archiveFileHelper;
     private final AllowedCmdiProfiles allowedCmdiProfiles;
     
     @Autowired
     public WorkspaceExporterHelper(NodeUtil nUtil, CorpusStructureBridge csBridge,
-            AllowedCmdiProfiles cmdiProfiles) {
+            ArchiveFileHelper afHelper, AllowedCmdiProfiles cmdiProfiles) {
         nodeUtil = nUtil;
         corpusStructureBridge = csBridge;
+        archiveFileHelper = afHelper;
         allowedCmdiProfiles = cmdiProfiles;
     }
 
@@ -69,18 +72,18 @@ public class WorkspaceExporterHelper implements ExporterHelper {
             if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet    
                 namePathToReturn = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
             } else if(parentCorpusNamePathToClosestTopNode.isEmpty()) { // is top node
-                namePathToReturn = parentNode.getName();
+                namePathToReturn = archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             } else if(CorpusStructureBridge.IGNORE_CORPUS_PATH.equals(parentCorpusNamePathToClosestTopNode)) {
                 namePathToReturn = CorpusStructureBridge.IGNORE_CORPUS_PATH;
             } else {
-                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + parentNode.getName();
+                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             }
         } else if(nodeUtil.isNodeInfoFile(currentNode)) {
             
             CmdiProfile parentProfile = allowedCmdiProfiles.getProfile(parentNode.getProfileSchemaURI().toString());
             
             if("corpus".equals(parentProfile.getTranslateType())) {
-                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + parentNode.getName();
+                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             } else if("session".equals(parentProfile.getTranslateType())) {
                 namePathToReturn = parentCorpusNamePathToClosestTopNode;
             } else {

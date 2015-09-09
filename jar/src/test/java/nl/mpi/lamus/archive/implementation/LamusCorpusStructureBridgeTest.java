@@ -22,6 +22,7 @@ import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.jmock.Expectations;
@@ -50,6 +51,7 @@ public class LamusCorpusStructureBridgeTest {
     
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
+    @Mock ArchiveFileHelper mockArchiveFileHelper;
     
     @Mock WorkspaceNode mockNode;
     @Mock CorpusNode mockCorpusNode;
@@ -79,7 +81,7 @@ public class LamusCorpusStructureBridgeTest {
     @Before
     public void setUp() {
         corpusStructureBridge = new LamusCorpusStructureBridge(
-                mockCorpusStructureProvider, mockNodeResolver,
+                mockCorpusStructureProvider, mockNodeResolver, mockArchiveFileHelper,
                 corpusstructureDirectoryName, metadataDirectoryName);
     }
     
@@ -139,6 +141,49 @@ public class LamusCorpusStructureBridgeTest {
             allowing(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             allowing(mockParentCorpusNode).getNodeURI(); will(returnValue(parentArchiveURI));
             allowing(mockParentCorpusNode).getName(); will(returnValue(parentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(parentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(parentNodeName));
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(localFile));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodeArchiveURI); will(returnValue(parentArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentLocalFile));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(parentArchiveURI); will(returnValue(grandParentArchiveURI));
+            oneOf(mockCorpusStructureProvider).getNode(grandParentArchiveURI); will(returnValue(mockGrandParentCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockGrandParentCorpusNode); will(returnValue(grandParentLocalFile));
+        }});
+        
+        String result = corpusStructureBridge.getCorpusNamePathToClosestTopNode(mockNode);
+        
+        assertEquals("Result different from expected", expectedPath, result);
+    }
+    
+    @Test
+    public void getCorpusNamePathToClosestTopNode_TopNodeChild_SpecialCharacters() {
+        
+        final URI nodeArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final String localPath = "/archive/root/TopNode/Corpusstructure/othernode.cmdi";
+        final File localFile = new File(localPath);
+        
+        final URI parentArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final String parentLocalPath = "/archive/root/TopNode/Corpusstructure/noladecima.cmdi";
+        final File parentLocalFile = new File(parentLocalPath);
+        final String parentNodeName = "Nó Lá De Cima";
+        final String parentNodePathName = "N_L_De_Cima";
+        
+        final URI grandParentArchiveURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final String grandParentLocalPath = "/archive/root/Corpusstructure/root.cmdi";
+        final File grandParentLocalFile = new File(grandParentLocalPath);
+        
+        final String expectedPath = "N_L_De_Cima";
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            allowing(mockParentCorpusNode).getNodeURI(); will(returnValue(parentArchiveURI));
+            allowing(mockParentCorpusNode).getName(); will(returnValue(parentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(parentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(parentNodePathName));
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(localFile));
@@ -185,7 +230,9 @@ public class LamusCorpusStructureBridgeTest {
             allowing(mockParentCorpusNode).getNodeURI(); will(returnValue(parentArchiveURI));
             allowing(mockGrandParentCorpusNode).getNodeURI(); will(returnValue(grandParentArchiveURI));
             allowing(mockParentCorpusNode).getName(); will(returnValue(parentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(parentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(parentNodeName));
             allowing(mockGrandParentCorpusNode).getName(); will(returnValue(grandParentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(grandParentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(grandParentNodeName));
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(localFile));
@@ -230,6 +277,7 @@ public class LamusCorpusStructureBridgeTest {
             allowing(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             allowing(mockParentCorpusNode).getNodeURI(); will(returnValue(parentArchiveURI));
             allowing(mockParentCorpusNode).getName(); will(returnValue(parentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(parentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(parentNodeName));
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(localFile));
@@ -275,7 +323,9 @@ public class LamusCorpusStructureBridgeTest {
             allowing(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             allowing(mockParentCorpusNode).getNodeURI(); will(returnValue(parentArchiveURI));
             allowing(mockParentCorpusNode).getName(); will(returnValue(parentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(parentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(parentNodeName));
             allowing(mockGrandParentCorpusNode).getName(); will(returnValue(grandParentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(grandParentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(grandParentNodeName));
             allowing(mockGrandParentCorpusNode).getNodeURI(); will(returnValue(grandParentArchiveURI));
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
@@ -332,7 +382,9 @@ public class LamusCorpusStructureBridgeTest {
             allowing(mockGrandParentCorpusNode).getNodeURI(); will(returnValue(grandParentArchiveURI));
             allowing(mockGreatGrandParentCorpusNode).getNodeURI(); will(returnValue(greatGrandParentArchiveURI));
             allowing(mockGrandParentCorpusNode).getName(); will(returnValue(grandParentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(grandParentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(grandParentNodeName));
             allowing(mockGreatGrandParentCorpusNode).getName(); will(returnValue(greatGrandParentNodeName));
+            allowing(mockArchiveFileHelper).correctPathElement(greatGrandParentNodeName, "getCorpusNamePathToClosestTopNode"); will(returnValue(greatGrandParentNodeName));
             
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(localFile));

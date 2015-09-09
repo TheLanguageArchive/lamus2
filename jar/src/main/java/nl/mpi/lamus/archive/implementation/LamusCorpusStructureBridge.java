@@ -21,6 +21,7 @@ import java.net.URI;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FilenameUtils;
@@ -41,6 +42,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
     
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
+    private final ArchiveFileHelper archiveFileHelper;
     
     private final String corpusstructureDirectoryName;
     private final String metadataDirectoryName;
@@ -49,10 +51,12 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
     @Autowired
     public LamusCorpusStructureBridge(
             CorpusStructureProvider csProvider, NodeResolver nResolver,
+            ArchiveFileHelper afHelper,
             @Qualifier("corpusstructureDirectoryName") String csDirName,
             @Qualifier("metadataDirectoryName") String mdDirName) {
         corpusStructureProvider = csProvider;
         nodeResolver = nResolver;
+        archiveFileHelper = afHelper;
         corpusstructureDirectoryName = csDirName;
         metadataDirectoryName = mdDirName;
     }
@@ -103,10 +107,10 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
                 if(!currentDirectory.equals(parentDirectory)) {
                     foundTopNode = true;
                 } else {
-                    insertStringInTheBeginning(pathSoFar, parentCorpusNode.getName());
+                    insertStringInTheBeginning(pathSoFar, archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode"));
                 }
             } else if(currentPathContainsMetadataDir && parentPathContainsCorpusstructureDir) {
-                insertStringInTheBeginning(pathSoFar, parentCorpusNode.getName());
+                insertStringInTheBeginning(pathSoFar, archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode"));
             }
             
             currentNodeURI = parentNodeURI;

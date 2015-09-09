@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.net.URI;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
@@ -50,6 +51,7 @@ public class WorkspaceExporterHelperTest {
     
     @Mock NodeUtil mockNodeUtil;
     @Mock CorpusStructureBridge mockCorpusStructureBridge;
+    @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
     
     @Mock WorkspaceNode mockCurrentNode;
@@ -72,7 +74,7 @@ public class WorkspaceExporterHelperTest {
     
     @Before
     public void setUp() {
-        exporterHelper = new WorkspaceExporterHelper(mockNodeUtil, mockCorpusStructureBridge, mockAllowedCmdiProfiles);
+        exporterHelper = new WorkspaceExporterHelper(mockNodeUtil, mockCorpusStructureBridge, mockArchiveFileHelper, mockAllowedCmdiProfiles);
     }
     
     @After
@@ -190,6 +192,7 @@ public class WorkspaceExporterHelperTest {
             oneOf(mockAllowedCmdiProfiles).getProfile(parentProfileSchemaStr); will(returnValue(mockCmdiProfile));
             allowing(mockCmdiProfile).getTranslateType(); will(returnValue(parentTranslatedType));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
@@ -230,6 +233,26 @@ public class WorkspaceExporterHelperTest {
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
+        }});
+        
+        String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
+        
+        assertEquals("Result different from expected", expectedPath, result);
+    }
+    
+    @Test
+    public void getNamePathToUseForThisExporter_Session_SpecialCharacters() {
+        
+        final String parentNamePathToClosestTopNode = "TopNode/GrandParentNode";
+        final String parentName = "NóPai";
+        final String parentPathName = "N_Pai";
+        final String expectedPath = parentNamePathToClosestTopNode + File.separator + parentPathName;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
@@ -247,6 +270,7 @@ public class WorkspaceExporterHelperTest {
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
@@ -264,6 +288,7 @@ public class WorkspaceExporterHelperTest {
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
@@ -281,6 +306,26 @@ public class WorkspaceExporterHelperTest {
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
+        }});
+        
+        String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
+        
+        assertEquals("Result different from expected", expectedPath, result);
+    }
+    
+    @Test
+    public void getNamePathToUseForThisExporter_Corpus_ParentIsTopNode_SpecialCharacters() {
+        
+        final String parentNamePathToClosestTopNode = "";
+        final String parentName = "NóPai";
+        final String parentPathName = "N_Pai";
+        final String expectedPath = parentPathName;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getName(); will(returnValue(parentName));
+            oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
