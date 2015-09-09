@@ -165,6 +165,7 @@ public class LamusMetadataApiBridgeTest {
         latCorpusProfile.setComponentMap(latCorpusComponentMap);
         latCorpusProfile.setAllowedReferenceTypes(allowedCorpusTypes);
         latCorpusProfile.setAllowInfoLinks(Boolean.TRUE);
+        latCorpusProfile.setDocumentNamePath("/cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:Name");
         
         latSessionComponentMap = new HashMap<>();
         latSessionComponentMap.put("^(video|audio|image)/.*$", "lat-session/Resources/MediaFile");
@@ -181,6 +182,7 @@ public class LamusMetadataApiBridgeTest {
         latSessionProfile.setComponentMap(latSessionComponentMap);
         latSessionProfile.setAllowedReferenceTypes(allowedSessionTypes);
         latSessionProfile.setAllowInfoLinks(Boolean.TRUE);
+        latSessionProfile.setDocumentNamePath("/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Name");
         
         aFewProfiles = new ArrayList<>();
         aFewProfiles.add(collectionProfile);
@@ -1221,6 +1223,38 @@ public class LamusMetadataApiBridgeTest {
         retrievedReference = lamusMetadataApiBridge.getDocumentReferenceByDoubleCheckingURI(mockCMDIDocument, uri);
         
         assertNull("Retrieved reference should be null", retrievedReference);
+    }
+    
+    @Test
+    public void getDocumentNameForProfile_Mapped() {
+        
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064");
+        final String profileNamePath = "/cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:Name";
+        final String expectedName = "ThisNodeName";
+        
+        context.checking(new Expectations() {{
+            oneOf(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+            oneOf(mockMetadataDocument).getChildElement(profileNamePath); will(returnValue(mockMetadataElement));
+            oneOf(mockMetadataElement).getDisplayValue(); will(returnValue(expectedName));
+        }});
+        
+        String retrievedName = lamusMetadataApiBridge.getDocumentNameForProfile(mockMetadataDocument, profileLocation);
+        
+        assertEquals("Retrieved name different from expected", expectedName, retrievedName);
+    }
+    
+    @Test
+    public void getDocumentNameForProfile_NotMapped() {
+        
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        String retrievedName = lamusMetadataApiBridge.getDocumentNameForProfile(mockMetadataDocument, profileLocation);
+        
+        assertNull("Retrieved name should be null", retrievedName);
     }
 }
 

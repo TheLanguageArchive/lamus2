@@ -185,4 +185,13 @@ public interface MetadataApiBridge {
      * @return Corresponding reference, or null if none was found
      */
     public ResourceProxy getDocumentReferenceByDoubleCheckingURI(CMDIDocument cmdiParentDocument, URI uriToCheck);
+    
+    /**
+     * Gets the name for the given document by using the mapped (if any)
+     * path of the corresponding element (according to the profile).
+     * @param document Document for which the name should be retrieved
+     * @param profileLocation Profile to check
+     * @return Value corresponding to the document name
+     */
+    public String getDocumentNameForProfile(MetadataDocument document, URI profileLocation);
 }

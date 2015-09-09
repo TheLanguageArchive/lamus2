@@ -315,7 +315,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             URI profileSchemaURI = mdDocument != null ? mdDocument.getDocumentType().getSchemaLocation() : null;
-            String documentName = mdDocument != null ? mdDocument.getDisplayValue() : null;
+            
+            String documentName = null;
+            if(mdDocument != null) {
+                documentName = metadataApiBridge.getDocumentNameForProfile(mdDocument, profileSchemaURI);
+                if(documentName == null) {
+                    documentName = mdDocument.getDisplayValue();
+                }
+            }
             
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
                     workspaceID, archiveUri, originUri, uploadedFileUrl, profileSchemaURI, documentName,

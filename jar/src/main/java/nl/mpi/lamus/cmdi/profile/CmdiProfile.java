@@ -61,6 +61,9 @@ public class CmdiProfile {
     @XmlElement
     private String translateType;
     
+    @XmlElement
+    private String documentNamePath;
+    
     
     public String getId() {
         return id;
@@ -109,5 +112,12 @@ public class CmdiProfile {
     }
     public void setTranslateType(String translateType) {
         this.translateType = translateType;
+    }
+    
+    public String getDocumentNamePath() {
+        return documentNamePath;
+    }
+    public void setDocumentNamePath(String documentNamePath) {
+        this.documentNamePath = documentNamePath;
     }
 }

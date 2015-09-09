@@ -24,6 +24,7 @@
             </component>
         </components>
         <translateType>session</translateType>
+        <documentNamePath>/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Name</documentNamePath>
     </profile>
     <profile id="clarin.eu:cr1:p_1407745712064" name="lat-corpus">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064</location>
@@ -46,6 +47,7 @@
             </component>
         </components>
         <translateType>corpus</translateType>
+        <documentNamePath>/cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:Name</documentNamePath>
     </profile>
     <profile id="clarin.eu:cr1:p_1361876010525" name="DiscAn_Project">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1361876010525</location>
@@ -145,5 +147,6 @@
         </allowedReferenceTypes>
         <allowInfoLinks>false</allowInfoLinks>
         <translateType>session</translateType>
+        <documentNamePath>cmd:CMD/cmd:Components/cmd:VALID/cmd:Session[1]/cmd:Name</documentNamePath>
     </profile>
 </allowedProfiles>

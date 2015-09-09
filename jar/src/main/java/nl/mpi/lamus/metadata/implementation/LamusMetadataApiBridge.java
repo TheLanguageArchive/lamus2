@@ -380,6 +380,24 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             // it would already have happened in the previous attempt
         return cmdiParentDocument.getDocumentReferenceByURI(preparedHandle);
     }
+
+    /**
+     * @see MetadataApiBridge#getDocumentNameForProfile(nl.mpi.metadata.api.model.MetadataDocument, java.net.URI)
+     */
+    @Override
+    public String getDocumentNameForProfile(MetadataDocument document, URI profileLocation) {
+        
+        CmdiProfile profile = getProfileWithLocation(profileLocation);
+        String namePath = profile.getDocumentNamePath();
+        if(namePath == null) {
+            return null;
+        }
+        MetadataElement child = document.getChildElement(namePath);
+        if(child == null) {
+            return null;
+        }
+        return child.getDisplayValue();
+    }
     
     
     private boolean isReferenceTypeAllowedInProfile(String referenceTypeToCheck, URI profileLocation) {
