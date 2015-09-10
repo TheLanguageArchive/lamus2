@@ -130,6 +130,8 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         if(showInitialPage) {
             setResponsePage(pagesProvider.getIndexPage());
         }
+        
+        target.add(getFeedbackPanel());
     }
     
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
