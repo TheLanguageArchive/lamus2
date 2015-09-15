@@ -624,7 +624,7 @@ public class LamusWorkspaceManagerTest {
         final String submittedMessage = "workspace was submitted";
         
         final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
-        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
+        final String successfullySubmittedMessage = "Data was successfully moved to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
@@ -719,7 +719,7 @@ public class LamusWorkspaceManagerTest {
         final String submittedMessage = "workspace was submitted";
         
         final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
-        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
+        final String successfullySubmittedMessage = "Data was successfully moved to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
