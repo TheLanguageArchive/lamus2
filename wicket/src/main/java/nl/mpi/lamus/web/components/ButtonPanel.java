@@ -30,8 +30,9 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
@@ -79,7 +80,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             final ModalWindow modalConfirmDelete = createConfirmationModalWindow(WorkspaceSubmissionType.DELETE_WORKSPACE);
             add(modalConfirmDelete);
             
-            final IndicatingAjaxButton submitWorkspaceButton = new AutoDisablingAjaxButton("submitWorkspaceButton") {
+            final Button submitWorkspaceButton = new AjaxButton("submitWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -91,7 +92,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             
             add(submitWorkspaceButton);
             
-            final IndicatingAjaxButton deleteWorkspaceButton = new AutoDisablingAjaxButton("deleteWorkspaceButton") {
+            final Button deleteWorkspaceButton = new AjaxButton("deleteWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -202,8 +203,8 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         
         private boolean confirmed;
         private boolean keepUnlinkedFiles;
-        private WorkspaceSubmissionType submissionType;
-        private String confirmationText;
+        private final WorkspaceSubmissionType submissionType;
+        private final String confirmationText;
         
         public ConfirmationOptions(boolean confirmed, boolean keepUnlinkedFiles,
                 WorkspaceSubmissionType type, String confirmationText) {

@@ -35,7 +35,7 @@ import nl.mpi.lamus.web.model.mock.MockCorpusNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
-import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -62,10 +62,10 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
     
     private GenericTreeModelProvider mockTreeModelProviderBean;
     private MockCorpusNode mockArchiveRootNode;
-    private String mockArchiveRootNodeName;
-    private URI mockArchiveRootNodeURI;
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http:/test.mpi.nl/lamus/manual";
+    private final String mockArchiveRootNodeName;
+    private final URI mockArchiveRootNodeURI;
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http:/test.mpi.nl/lamus/manual";
     
     private MockCorpusNode expectedSelectedNode;
 
@@ -131,7 +131,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("nodeIdForm:nodeURI");
         getTester().assertLabel("nodeIdForm:nodeURI", ""); //TODO test when node selection changes
         
-        getTester().assertComponent("nodeIdForm:createWorkspace", IndicatingAjaxButton.class);
+        getTester().assertComponent("nodeIdForm:createWorkspace", AjaxButton.class);
         getTester().assertDisabled("nodeIdForm:createWorkspace"); //initially disabled
         
         

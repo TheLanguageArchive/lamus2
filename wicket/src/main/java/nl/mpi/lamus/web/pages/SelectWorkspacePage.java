@@ -21,7 +21,6 @@ import java.util.List;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.components.AutoDisablingAjaxButton;
 import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
@@ -30,6 +29,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
@@ -106,7 +106,7 @@ public class SelectWorkspacePage extends LamusPage {
         listWorkspaces.setRequired(true);
         final Form<Workspace> openWsForm = new Form<>(id, workspaceModel);
 
-        Button submitButton = new AutoDisablingAjaxButton("openWorkspace") {
+        Button submitButton = new AjaxButton("openWorkspace") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
