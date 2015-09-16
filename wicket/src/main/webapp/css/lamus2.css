@@ -205,7 +205,7 @@ ul.navigationMenu li {
 }
 
 select#workspaceSelection {
-    width: 750px;
+    width: auto;
     overflow: auto;
 }
 
