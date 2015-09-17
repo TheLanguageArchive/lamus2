@@ -34,6 +34,7 @@ import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataElementException;
@@ -99,7 +100,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 throw new IllegalArgumentException("Unable to create link. Parent node (" + parentNode.getWorkspaceNodeID() + ") is not metadata.");
             }
             
-        logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
+            logger.debug("Linking nodes in workspace; workspaceID: " + workspace.getWorkspaceID() + "; parentNodeID: " + parentNode.getWorkspaceNodeID() + "; childNodeID: " + childNode.getWorkspaceNodeID());
             
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
 	    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
@@ -363,22 +364,24 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
             
-            if(nodeUtil.isNodeMetadata(childNode)) {
-                MetadataDocument tempChildDocument = metadataAPI.getMetadataDocument(childNode.getWorkspaceURL());
-                HandleCarrier childHandleCarrier = null;
-                if(tempChildDocument instanceof HandleCarrier) {
-                    childHandleCarrier = (HandleCarrier) tempChildDocument;
-                } else {
-                    throw new UnsupportedOperationException("not handle carrier child document not handled yet");
-                }
-                childHandleCarrier.setHandle(null);
-                metadataApiBridge.saveMetadataDocument((MetadataDocument) childHandleCarrier, childNode.getWorkspaceURL());
-            }
+//            if(nodeUtil.isNodeMetadata(childNode)) {
+//                MetadataDocument tempChildDocument = metadataAPI.getMetadataDocument(childNode.getWorkspaceURL());
+//                HandleCarrier childHandleCarrier = null;
+//                if(tempChildDocument instanceof HandleCarrier) {
+//                    childHandleCarrier = (HandleCarrier) tempChildDocument;
+//                } else {
+//                    throw new UnsupportedOperationException("not handle carrier child document not handled yet");
+//                }
+//                childHandleCarrier.setHandle(null);
+//                metadataApiBridge.saveMetadataDocument((MetadataDocument) childHandleCarrier, childNode.getWorkspaceURL());
+//            }
+//            
+//            childNode.setArchiveURI(null);
+//            childNode.setArchiveURL(null);
+//            workspaceDao.updateNodeArchiveUri(childNode);
+//            workspaceDao.updateNodeArchiveUrl(childNode);
             
-            childNode.setArchiveURI(null);
-            childNode.setArchiveURL(null);
-            workspaceDao.updateNodeArchiveUri(childNode);
-            workspaceDao.updateNodeArchiveUrl(childNode);
+            removeArchiveUriFromNode(childNode);
             
         } catch (IOException | MetadataException | URISyntaxException | TransformerException ex) {
             String errorMessage = "Error when trying to remove URI of node " + childNode.getWorkspaceNodeID() + ", referenced in node " + parentNode.getWorkspaceNodeID();
@@ -425,5 +428,97 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         }
         metadataApiBridge.addReferenceInComponent(component, createdProxy);
+    }
+    
+    
+    /**
+     * @see WorkspaceNodeLinkManager#removeArchiveUriFromUploadedNodeRecursively(nl.mpi.lamus.workspace.model.WorkspaceNode, boolean)
+     */
+    @Override
+    public void removeArchiveUriFromUploadedNodeRecursively(WorkspaceNode node, boolean firstIteration)
+            throws WorkspaceException {
+        
+        try {
+            if(firstIteration) {
+                removeArchiveUriIfNodeWasUploaded(node);
+            }
+
+            if(!nodeUtil.isNodeMetadata(node)) {
+                return;
+            }
+            
+            Collection<WorkspaceNode> children = workspaceDao.getChildWorkspaceNodes(node.getWorkspaceNodeID());
+
+            for(WorkspaceNode child : children) {
+
+                removeArchiveUriFromParentReferenceIfNodeWasUploaded(node, child);
+
+                removeArchiveUriIfNodeWasUploaded(child);
+
+                removeArchiveUriFromUploadedNodeRecursively(child, false);
+            }
+        } catch(IOException | MetadataException | TransformerException | URISyntaxException ex) {
+            String errorMessage = "Error removing archive URI from node [" + node.getWorkspaceURL() + "] or descendant";
+            logger.error(errorMessage);
+            throw new WorkspaceException(errorMessage, node.getWorkspaceID(), ex);
+        }
+    }
+    
+    private void removeArchiveUriFromParentReferenceIfNodeWasUploaded(WorkspaceNode parent, WorkspaceNode child) throws IOException, MetadataException, URISyntaxException, TransformerException {
+        
+        // only applicable if the node was uploaded and the archive URI is not null
+        if(WorkspaceNodeStatus.UPLOADED.equals(child.getStatus()) && child.getArchiveURI() != null) {
+            removeArchiveUriFromParentReference(parent, child);
+        }
+    }
+    
+    private void removeArchiveUriFromParentReference(WorkspaceNode parent, WorkspaceNode child) throws IOException, MetadataException, URISyntaxException, TransformerException {
+        
+        if(child.getArchiveURI() == null) {
+            return;
+        }
+        
+        MetadataDocument tempParentDocument = metadataAPI.getMetadataDocument(parent.getWorkspaceURL());
+        CMDIDocument parentDocument;
+        if(tempParentDocument instanceof CMDIDocument) {
+            parentDocument = (CMDIDocument) tempParentDocument;
+        } else {
+            throw new UnsupportedOperationException("not referencing document not handled yet");
+        }
+        
+        ResourceProxy childReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(parentDocument, child.getArchiveURI());
+        childReference.setURI(child.getWorkspaceURL().toURI());
+
+        metadataApiBridge.saveMetadataDocument(parentDocument, parent.getWorkspaceURL());
+    }
+    
+    private void removeArchiveUriIfNodeWasUploaded(WorkspaceNode node) throws IOException, MetadataException, TransformerException {
+        
+        // only applicable if the node was uploaded and the archive URI is not null
+        if(WorkspaceNodeStatus.UPLOADED.equals(node.getStatus()) && node.getArchiveURI() != null) {
+            removeArchiveUriFromNode(node);
+        }
+    }
+    
+    private void removeArchiveUriFromNode(WorkspaceNode node) throws IOException, MetadataException, TransformerException {
+        
+        // remove archive URI from the metadata
+        if(nodeUtil.isNodeMetadata(node)) {
+            MetadataDocument tempDocument = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
+            HandleCarrier handleCarrierDocument = null;
+            if(tempDocument instanceof HandleCarrier) {
+                handleCarrierDocument = (HandleCarrier) tempDocument;
+            } else {
+                throw new UnsupportedOperationException("not handle carrier document not handled yet");
+            }
+            handleCarrierDocument.setHandle(null);
+            metadataApiBridge.saveMetadataDocument((MetadataDocument) handleCarrierDocument, node.getWorkspaceURL());
+        }
+        
+        // remove archive URI and URL from the database
+        node.setArchiveURI(null);
+        node.setArchiveURL(null);
+        workspaceDao.updateNodeArchiveUri(node);
+        workspaceDao.updateNodeArchiveUrl(node);
     }
 }

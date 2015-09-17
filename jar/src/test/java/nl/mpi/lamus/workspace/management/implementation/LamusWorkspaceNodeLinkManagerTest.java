@@ -38,6 +38,7 @@ import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
@@ -95,10 +96,15 @@ public class LamusWorkspaceNodeLinkManagerTest {
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockOtherParentNode;
     @Mock WorkspaceNode mockChildNode;
+    @Mock WorkspaceNode mockAnotherChildNode;
     @Mock WorkspaceNode mockOldNode;
     @Mock WorkspaceNode mockNewNode;
     @Mock ResourceProxy mockChildReference;
+    @Mock ResourceProxy mockAnotherChildReference;
     @Mock ResourceProxy mockChildReferenceWithHandle;
+    
+    @Mock WorkspaceNode mockGrandChildNode;
+    @Mock ResourceProxy mockGrandChildReference;
 
     @Mock CMDIDocument mockParentDocument;
     @Mock CMDIDocument mockOtherParentDocument;
@@ -2219,6 +2225,283 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         nodeLinkManager.removeArchiveUriFromChildNode(mockParentNode, mockChildNode);
     }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_NotUploaded() throws WorkspaceException {
+        
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
+        final Collection<WorkspaceNode> noChildren = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildNode).getStatus(); will(returnValue(nodeStatus));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeId));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeId); will(returnValue(noChildren));
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+    }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_ResourceNodeUploaded() throws WorkspaceException, MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL nodeURL = new URL("https://archive/location/node.cmdi");
+        final URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final Collection<WorkspaceNode> noChildren = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockChildNode).getStatus(); will(returnValue(nodeStatus));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(nodeURI));
+            allowing(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+
+            //remove archive URI and URL
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+    }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_ResourceNodeUploaded_ArchiveUriNull() throws WorkspaceException, MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL nodeURL = new URL("https://archive/location/node.cmdi");
+        final Collection<WorkspaceNode> noChildren = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockChildNode).getStatus(); will(returnValue(nodeStatus));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(null));
+            allowing(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+    }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_MetadataNodeUploadedWithoutChildren() throws WorkspaceException, MalformedURLException, IOException, MetadataException, TransformerException {
+        
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL nodeURL = new URL("https://archive/location/node.cmdi");
+        final URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final Collection<WorkspaceNode> noChildren = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockChildNode).getStatus(); will(returnValue(nodeStatus));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(nodeURI));
+            allowing(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(nodeURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(nodeURL); will(returnValue(mockChildCmdiDocument));
+            oneOf(mockChildCmdiDocument).setHandle(null);
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, nodeURL);
+
+            //remove archive URI and URL
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(nodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeId); will(returnValue(noChildren));
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+    }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_NodeWithChild() throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, URISyntaxException {
+
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL nodeURL = new URL("https://archive/location/node.cmdi");
+        final URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final int childNodeId = 2;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL childURL = new URL("https://archive/location/child.cmdi");
+        final URI childURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> children = new ArrayList<>();
+        children.add(mockChildNode);
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockParentNode).getStatus(); will(returnValue(nodeStatus));
+            allowing(mockParentNode).getArchiveURI(); will(returnValue(nodeURI));
+            allowing(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(nodeURL));
+            allowing(mockMetadataAPI).getMetadataDocument(nodeURL); will(returnValue(mockParentDocument));
+            oneOf(mockParentDocument).setHandle(null);
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, nodeURL);
+
+            //remove archive URI and URL from DB
+            oneOf(mockParentNode).setArchiveURI(null);
+            oneOf(mockParentNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockParentNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockParentNode);
+            
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(nodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeId); will(returnValue(children));
+            
+            // remove reference from parent to child
+            allowing(mockChildNode).getStatus(); will(returnValue(childStatus));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childURI); will(returnValue(mockChildReference));
+            oneOf(mockChildReference).setURI(childURL.toURI());
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, nodeURL);
+            
+            //remove archive URI and URL from DB
+            allowing(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockParentNode, Boolean.TRUE);
+    }
+    
+    @Test
+    public void removeArchiveUriFromUploadedNodeRecursively_NodeWithChildren() throws MalformedURLException, IOException, MetadataException, TransformerException, WorkspaceException, URISyntaxException {
+
+        final int nodeId = 1;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL nodeURL = new URL("https://archive/location/node.cmdi");
+        final URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final int childNodeId = 2;
+        final WorkspaceNodeStatus childStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL childURL = new URL("https://archive/location/child.cmdi");
+        final URI childURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final int anotherChildNodeId = 3;
+        final WorkspaceNodeStatus anotherChildStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL anotherChildURL = new URL("https://archive/location/anotherChild.cmdi");
+        final URI anotherChildURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final int grandChildNodeId = 4;
+        final WorkspaceNodeStatus grandChildStatus = WorkspaceNodeStatus.UPLOADED;
+        final URL grandChildURL = new URL("https://archive/location/grandChild.cmdi");
+        final URI grandChildURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final Collection<WorkspaceNode> children = new ArrayList<>();
+        children.add(mockChildNode);
+        children.add(mockAnotherChildNode);
+        
+        final Collection<WorkspaceNode> grandChildren = new ArrayList<>();
+        grandChildren.add(mockGrandChildNode);
+        
+        final Collection<WorkspaceNode> emptyGrandChildren = new ArrayList<>();
+        
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockParentNode).getStatus(); will(returnValue(nodeStatus));
+            allowing(mockParentNode).getArchiveURI(); will(returnValue(nodeURI));
+            allowing(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            allowing(mockParentNode).getWorkspaceURL(); will(returnValue(nodeURL));
+            allowing(mockMetadataAPI).getMetadataDocument(nodeURL); will(returnValue(mockParentDocument));
+            oneOf(mockParentDocument).setHandle(null);
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, nodeURL);
+
+            //remove archive URI and URL from DB
+            oneOf(mockParentNode).setArchiveURI(null);
+            oneOf(mockParentNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockParentNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockParentNode);
+            
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(nodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeId); will(returnValue(children));
+            
+            // remove reference from parent to child
+            allowing(mockChildNode).getStatus(); will(returnValue(childStatus));
+            allowing(mockChildNode).getArchiveURI(); will(returnValue(childURI));
+            allowing(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childURI); will(returnValue(mockChildReference));
+            oneOf(mockChildReference).setURI(childURL.toURI());
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, nodeURL);
+            
+            //remove archive URI and URL from DB
+            allowing(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
+            
+            //remove self handle
+            allowing(mockMetadataAPI).getMetadataDocument(childURL); will(returnValue(mockChildCmdiDocument));
+            oneOf(mockChildCmdiDocument).setHandle(null);
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, childURL);
+            
+            oneOf(mockChildNode).setArchiveURI(null);
+            oneOf(mockChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildNode);
+            
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeId));
+            oneOf(mockWorkspaceDao).getChildWorkspaceNodes(childNodeId); will(returnValue(grandChildren));
+            
+            // remove reference from child to grandchild
+            allowing(mockGrandChildNode).getStatus(); will(returnValue(grandChildStatus));
+            allowing(mockGrandChildNode).getArchiveURI(); will(returnValue(grandChildURI));
+            allowing(mockGrandChildNode).getWorkspaceURL(); will(returnValue(grandChildURL));
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockChildCmdiDocument, grandChildURI); will(returnValue(mockGrandChildReference));
+            oneOf(mockGrandChildReference).setURI(grandChildURL.toURI());
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, childURL);
+            
+            //remove archive URI and URL from DB
+            allowing(mockNodeUtil).isNodeMetadata(mockGrandChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockGrandChildNode).setArchiveURI(null);
+            oneOf(mockGrandChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockGrandChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockGrandChildNode);
+            
+            
+            //another child
+            
+            // remove reference from parent to child
+            allowing(mockAnotherChildNode).getStatus(); will(returnValue(anotherChildStatus));
+            allowing(mockAnotherChildNode).getArchiveURI(); will(returnValue(anotherChildURI));
+            allowing(mockAnotherChildNode).getWorkspaceURL(); will(returnValue(anotherChildURL));
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, anotherChildURI); will(returnValue(mockAnotherChildReference));
+            oneOf(mockAnotherChildReference).setURI(anotherChildURL.toURI());
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentDocument, nodeURL);
+            
+            //remove archive URI and URL from DB
+            allowing(mockNodeUtil).isNodeMetadata(mockAnotherChildNode); will(returnValue(Boolean.FALSE));
+            oneOf(mockAnotherChildNode).setArchiveURI(null);
+            oneOf(mockAnotherChildNode).setArchiveURL(null);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUri(mockAnotherChildNode);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockAnotherChildNode);
+        }});
+        
+        nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockParentNode, Boolean.TRUE);
+    }
+    
+    
+    
+    
+    //TODO ANY MORE TESTS????
+    
+    
 
     
     private void checkUnlinkNodeExpectations(

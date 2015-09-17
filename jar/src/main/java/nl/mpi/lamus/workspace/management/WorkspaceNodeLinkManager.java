@@ -95,4 +95,14 @@ public interface WorkspaceNodeLinkManager {
      */
     public void removeArchiveUriFromChildNode(WorkspaceNode parentNode, WorkspaceNode childNode)
             throws WorkspaceException;
+    
+    /**
+     * Removes an existing archiveURI from an uploaded node and does the same
+     * for the children. This is meant to be used to prevent nodes containing
+     * archive handles to be linked again in some other part of the tree.
+     * @param node Node where to start the URI removal
+     * @param firstIteration true if it's the initial call
+     */
+    public void removeArchiveUriFromUploadedNodeRecursively(WorkspaceNode node, boolean firstIteration)
+            throws WorkspaceException;
 }

@@ -242,6 +242,8 @@ public class LamusWorkspaceService implements WorkspaceService {
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, parentNode.getWorkspaceID());
         
+        this.workspaceNodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(childNode, true);
+        
         this.workspaceNodeLinkManager.linkNodes(parentNode, childNode, WorkspaceNodeType.RESOURCE_INFO.equals(childNode.getType()));
     }
     

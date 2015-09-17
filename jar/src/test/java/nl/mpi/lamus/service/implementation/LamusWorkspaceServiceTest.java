@@ -1025,6 +1025,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
             oneOf(mockChildNode).getType(); will(returnValue(childType));
             oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
         }});
@@ -1048,6 +1049,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
             oneOf(mockChildNode).getType(); will(returnValue(childType));
             oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
         }});
@@ -1125,6 +1127,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
             oneOf(mockChildNode).getType(); will(returnValue(childType));
             oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
@@ -1156,6 +1159,7 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
             oneOf(mockChildNode).getType(); will(returnValue(childType));
             oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
