@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -150,9 +151,14 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     public WorkspaceNode findNodeForPath(Collection<WorkspaceNode> nodesToCheck, String referencePath) {
         
         if(!referencePath.isEmpty()) {
+            
+            String referencePathEnding = referencePath;
+            if(referencePathEnding.startsWith(".")) {
+                referencePathEnding = referencePathEnding.substring(referencePathEnding.indexOf(File.separator));
+            }
+            
             for(WorkspaceNode innerNode : nodesToCheck) {
-
-                if(innerNode.getWorkspaceURL().toString().contains(referencePath)) { //check if the node URL contains the relative path that comes in the link reference
+                if(innerNode.getWorkspaceURL().toString().endsWith(referencePathEnding)) { //check if the node URL contains the relative path that comes in the link reference
                     return innerNode;
                 }
             }

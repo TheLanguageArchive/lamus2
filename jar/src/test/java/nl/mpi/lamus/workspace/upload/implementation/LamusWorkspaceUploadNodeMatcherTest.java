@@ -372,6 +372,39 @@ public class LamusWorkspaceUploadNodeMatcherTest {
     }
     
     @Test
+    public void findNodeForRelativePathMatches() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "Metadata" + File.separator + "parent.cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "Media" + File.separator + "child.jpg");
+        
+        //reference will match the second node
+        final String referencePath = ".." + File.separator + "Media" + File.separator + "child.jpg";
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            //first node doesn't match the given reference URI, so it will continue the loop
+            oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
+            
+            //second iteration
+            //second node matches the given reference URI, so it will return this node
+            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+        }});
+        
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencePath);
+        
+        assertNotNull("Matching node should not be null", retrievedNode);
+        assertEquals("Matching node different from expected", mockSecondNode, retrievedNode);
+    }
+    
+    @Test
     public void findNodeForPathDoesNotMatch() throws MalformedURLException {
         
         final int workspaceID = 10;
