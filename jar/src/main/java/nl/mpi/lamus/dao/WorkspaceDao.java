@@ -130,6 +130,25 @@ public interface WorkspaceDao {
     public boolean isNodeLocked(URI archiveNodeURI);
     
     /**
+     * Adds a lock on the given node.
+     * @param uriToLock Archive URI of the node to lock
+     * @param workspaceID ID of the workspace where the node is being locked
+     */
+    public void lockNode(URI uriToLock, int workspaceID);
+    
+    /**
+     * Removes a lock on the given node.
+     * @param uriToUnlock Archive URI of the node to be unlocked
+     */
+    public void unlockNode(URI uriToUnlock);
+    
+    /**
+     * Removes all locks on nodes of the given workspace.
+     * @param workspaceID ID of the workspace from which to unlock the nodes
+     */
+    public void unlockAllNodesOfWorkspace(int workspaceID);
+    
+    /**
      * Gets a list of workspace nodes with the given URI.
      * There should be only one, but in case of failed workspaces
      * that weren't deleted it could be possible to have more.
@@ -144,7 +163,7 @@ public interface WorkspaceDao {
      * @param node WorkspaceNode object to insert into the database
      */
     public void addWorkspaceNode(WorkspaceNode node);
-    
+
     /**
      * Sets a node as deleted in the database
      * @param workspaceID ID of the workspace

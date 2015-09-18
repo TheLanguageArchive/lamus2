@@ -164,6 +164,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         WorkspaceNode childNode =
                 workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
+        if(!childToBeProtected) {
+            workspaceDao.lockNode(childArchiveURI, workspaceID);
+        }
         
         workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, referenceFromParent);
         

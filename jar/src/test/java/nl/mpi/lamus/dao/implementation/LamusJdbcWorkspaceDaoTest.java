@@ -180,19 +180,33 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         int initialNumberOfWorkspaceRows = countRowsInTable("workspace");
         int initialNumberOfNodeRows = countRowsInTable("node");
+        int initialNumberOfNodeLocks = countRowsInTable("node_lock");
         int initialNumberOfLinkRows = countRowsInTable("node_link");
         int initialNumberOfReplacementRows = countRowsInTable("node_replacement");
         
         Workspace insertedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
-        WorkspaceNode firstNode = insertTestWorkspaceNodeIntoDB(insertedWorkspace);
-        WorkspaceNode secondNode = insertTestWorkspaceNodeIntoDB(insertedWorkspace);
-        WorkspaceNode thirdNode = insertTestWorkspaceNodeIntoDB(insertedWorkspace);
-        WorkspaceNode fourthNode = insertTestWorkspaceNodeIntoDB(insertedWorkspace);
+        URI firstNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL firstNodeURL = new URL("https://archive/location/firstNode.cmdi");
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(insertedWorkspace, firstNodeURI, firstNodeURL, firstNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(firstNode);
+        URI secondNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL secondNodeURL = new URL("https://archive/location/secondNode.cmdi");
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(insertedWorkspace, secondNodeURI, secondNodeURL, secondNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(secondNode);
+        URI thirdNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL thirdNodeURL = new URL("https://archive/location/thirdNode.cmdi");
+        WorkspaceNode thirdNode = insertTestWorkspaceNodeWithUriIntoDB(insertedWorkspace, thirdNodeURI, thirdNodeURL, thirdNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(thirdNode);
+        URI fourthNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL fourthNodeURL = new URL("https://archive/location/fourthNode.cmdi");
+        WorkspaceNode fourthNode = insertTestWorkspaceNodeWithUriIntoDB(insertedWorkspace, fourthNodeURI, fourthNodeURL, fourthNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(fourthNode);
         setNodeAsParentAndInsertLinkIntoDatabase(firstNode, secondNode);
         setNodeAsReplacedAndAddReplacementInDatabase(thirdNode, fourthNode);
         
         assertTrue("Workspace was not inserted into the database", countRowsInTable("workspace") == initialNumberOfWorkspaceRows + 1);
         assertTrue("Nodes were not inserted into the database", countRowsInTable("node") == initialNumberOfNodeRows + 4);
+        assertTrue("Node locks were not inserted into the database", countRowsInTable("node_lock") == initialNumberOfNodeLocks + 4);
         assertTrue("Link was not inserted into the database", countRowsInTable("node_link") == initialNumberOfLinkRows + 1);
         assertTrue("Replacement was not inserted into the database", countRowsInTable("node_replacement") == initialNumberOfReplacementRows + 1);
         
@@ -200,6 +214,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertTrue("Replacement was not deleted from the database", countRowsInTable("node_replacement") == initialNumberOfReplacementRows);
         assertTrue("Link was not deleted from the database", countRowsInTable("node_link") == initialNumberOfLinkRows);
+        assertTrue("Node locks were not deleted from the database", countRowsInTable("node_lock") == initialNumberOfNodeLocks);
         assertTrue("Nodes were not deleted from the database", countRowsInTable("node") == initialNumberOfNodeRows);
         assertTrue("Workspace was not deleted from the database", countRowsInTable("workspace") == initialNumberOfWorkspaceRows);
     }
@@ -769,39 +784,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         URL nodeURL = new URL("file:/archive/folder/node.cmdi");
         
         Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        WorkspaceNode testNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(testNode);
         
         boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
         
         assertTrue("Node should be locked (should exist in the database).", result);
-    }
-    
-    @Test
-    public void nodeIsLockedWithoutArchiveURI() throws MalformedURLException, URISyntaxException {
-        
-        URI uriToCheck = URI.create("file:/archive/folder/sessions/orphan.cmdi");
-        
-        Workspace testwWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testwWorkspace, null, null, uriToCheck, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
-        
-        boolean result = this.workspaceDao.isNodeLocked(uriToCheck);
-        
-        assertTrue("Node should be locked (should exist in the database)", result);
-    }
-    
-    @Test
-    public void nodeIsProtected_ThereforeNotLocked() throws MalformedURLException, URISyntaxException {
-        
-        URI archiveNodeUriToCheck = URI.create("hdl:11142/" + UUID.randomUUID().toString());
-        URI archiveNodeUriToBeInsertedInTheDb = archiveNodeUriToCheck;
-        URL nodeURL = new URL("file:/archive/folder/node.cmdi");
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, nodeURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.TRUE);
-        
-        boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
-        
-        assertFalse("Node shouldn't be locked (even though it exists in the database, it doens't count because it's protected).", result);
     }
     
     @Test
@@ -820,25 +808,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void nodeIsLockedMoreThanOnce() throws MalformedURLException, URISyntaxException {
-        
-        URI archiveNodeUriToCheck = URI.create("hdl:11142/" + UUID.randomUUID().toString());
-        URL firstURL = new URL("file:/archive/folder/first.cmdi");
-        URI archiveNodeUriToBeInsertedInTheDb = archiveNodeUriToCheck;
-        URL secondURL = new URL("file:/archive/folder/second.cmdi");
-        
-        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, firstURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
-        insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, archiveNodeUriToBeInsertedInTheDb, secondURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
-        
-        boolean result = this.workspaceDao.isNodeLocked(archiveNodeUriToCheck);
-        
-        assertTrue("Node should be locked (should exist in the database).", result);
-    }
-    
-    @Test
-    public void getLockedNode() throws URISyntaxException, MalformedURLException {
+    public void getNodeByArchiveURI() throws URISyntaxException, MalformedURLException {
         
         URI archiveNodeUriToCheck = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         URI archiveNodeUriToBeInsertedInTheDb = archiveNodeUriToCheck;
@@ -856,7 +826,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
-    public void getLockedNodeMoreThanOnce() throws URISyntaxException, MalformedURLException {
+    public void getNodeByArchiveURI_MoreThanOnce() throws URISyntaxException, MalformedURLException {
         
         URI archiveNodeUriToCheck = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         URL firstURL = new URL("file:/archive/folder/first.cmdi");
@@ -941,6 +911,93 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         }
         
         assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
+    }
+    
+    @Test
+    public void lockNode() throws MalformedURLException, URISyntaxException {
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL nodeURL = new URL("https://archive/location/node.cmdi");
+        WorkspaceNode node = insertTestWorkspaceNodeWithUriIntoDB(ws, nodeURI, nodeURL, nodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        int initialNumberOfLocks = countRowsInTable("node_lock");
+        
+        workspaceDao.lockNode(nodeURI, ws.getWorkspaceID());
+        
+        int finalNumberOfLocks = countRowsInTable("node_lock");
+        
+        assertEquals("Node lock wasn't created", finalNumberOfLocks, initialNumberOfLocks + 1);
+    }
+    
+    @Test
+    public void unlockNode() throws MalformedURLException, URISyntaxException {
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL nodeURL = new URL("https://archive/location/node.cmdi");
+        WorkspaceNode node = insertTestWorkspaceNodeWithUriIntoDB(ws, nodeURI, nodeURL, nodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(node);
+        
+        int initialNumberOfLocks = countRowsInTable("node_lock");
+        
+        workspaceDao.unlockNode(nodeURI);
+        
+        int finalNumberOfLocks = countRowsInTable("node_lock");
+        
+        assertEquals("Node lock wasn't removed", finalNumberOfLocks, initialNumberOfLocks - 1);
+    }
+    
+    @Test
+    public void unlockAllNodesOfWorkspace() throws MalformedURLException, URISyntaxException {
+
+        int initialNumberOfWorkspaces = countRowsInTable("workspace");
+        int initialNumberOfNodes = countRowsInTable("node");
+        int initialNumberOfLinks = countRowsInTable("node_link");
+        int initialNumberOfLocks = countRowsInTable("node_lock");
+        int initialNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI firstNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL firstNodeURL = new URL("https://archive/location/firstNode.cmdi");
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(ws, firstNodeURI, firstNodeURL, firstNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(firstNode);
+        URI secondNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL secondNodeURL = new URL("https://archive/location/secondNode.cmdi");
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(ws, secondNodeURI, secondNodeURL, secondNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(secondNode);
+        URI thirdNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL thirdNodeURL = new URL("https://archive/location/firstNode.cmdi");
+        WorkspaceNode thirdNode = insertTestWorkspaceNodeWithUriIntoDB(ws, thirdNodeURI, thirdNodeURL, thirdNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(thirdNode);
+        setNodeAsParentAndInsertLinkIntoDatabase(firstNode, secondNode);
+        setNodeAsReplacedAndAddReplacementInDatabase(secondNode, thirdNode);
+        
+        int intermediateNumberOfWorkspaces = countRowsInTable("workspace");
+        int intermediateNumberOfNodes = countRowsInTable("node");
+        int intermediateNumberOfLinks = countRowsInTable("node_link");
+        int intermediateNumberOfLocks = countRowsInTable("node_lock");
+        int intermediateNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        assertEquals("Intermediate number of workspaces different from expected", initialNumberOfWorkspaces + 1, intermediateNumberOfWorkspaces);
+        assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 3, intermediateNumberOfNodes);
+        assertEquals("Intermediate number of links different from expected", initialNumberOfLinks + 1, intermediateNumberOfLinks);
+        assertEquals("Intermediate number of locks different from expected", initialNumberOfLocks + 3, intermediateNumberOfLocks);
+        assertEquals("Intermediate number of replacements different from expected", initialNumberOfReplacements + 1, intermediateNumberOfReplacements);
+        
+        this.workspaceDao.unlockAllNodesOfWorkspace(ws.getWorkspaceID());
+        
+        int finalNumberOfWorkspaces = countRowsInTable("workspace");
+        int finalNumberOfNodes = countRowsInTable("node");
+        int finalNumberOfLinks = countRowsInTable("node_link");
+        int finalNumberOfLocks = countRowsInTable("node_lock");
+        int finalNumberOfReplacements = countRowsInTable("node_replacement");
+        
+        assertEquals("Final number of workspaces different from expected", intermediateNumberOfWorkspaces, finalNumberOfWorkspaces);
+        assertEquals("Final number of nodes different from expected", intermediateNumberOfNodes, finalNumberOfNodes);
+        assertEquals("Final number of links different from expected", intermediateNumberOfLinks, finalNumberOfLinks);
+        assertEquals("Final number of locks different from expected", initialNumberOfLocks, finalNumberOfLocks);
+        assertEquals("Final number of replacements different from expected", intermediateNumberOfReplacements, finalNumberOfReplacements);
     }
     
     @Test
@@ -2000,23 +2057,35 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int initialNumberOfWorkspaces = countRowsInTable("workspace");
         int initialNumberOfNodes = countRowsInTable("node");
         int initialNumberOfLinks = countRowsInTable("node_link");
+        int initialNumberOfLocks = countRowsInTable("node_lock");
         int initialNumberOfReplacements = countRowsInTable("node_replacement");
         
         Workspace ws = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
-        WorkspaceNode node1 = insertTestWorkspaceNodeIntoDB(ws);
-        WorkspaceNode node2 = insertTestWorkspaceNodeIntoDB(ws);
-        WorkspaceNode node3 = insertTestWorkspaceNodeIntoDB(ws);
-        setNodeAsParentAndInsertLinkIntoDatabase(node1, node2);
-        setNodeAsReplacedAndAddReplacementInDatabase(node2, node3);
+        URI firstNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL firstNodeURL = new URL("https://archive/location/firstNode.cmdi");
+        WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(ws, firstNodeURI, firstNodeURL, firstNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(firstNode);
+        URI secondNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL secondNodeURL = new URL("https://archive/location/secondNode.cmdi");
+        WorkspaceNode secondNode = insertTestWorkspaceNodeWithUriIntoDB(ws, secondNodeURI, secondNodeURL, secondNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(secondNode);
+        URI thirdNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        URL thirdNodeURL = new URL("https://archive/location/firstNode.cmdi");
+        WorkspaceNode thirdNode = insertTestWorkspaceNodeWithUriIntoDB(ws, thirdNodeURI, thirdNodeURL, thirdNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        addNodeLockToDb(thirdNode);
+        setNodeAsParentAndInsertLinkIntoDatabase(firstNode, secondNode);
+        setNodeAsReplacedAndAddReplacementInDatabase(secondNode, thirdNode);
         
         int intermediateNumberOfWorkspaces = countRowsInTable("workspace");
         int intermediateNumberOfNodes = countRowsInTable("node");
         int intermediateNumberOfLinks = countRowsInTable("node_link");
+        int intermediateNumberOfLocks = countRowsInTable("node_lock");
         int intermediateNumberOfReplacements = countRowsInTable("node_replacement");
         
         assertEquals("Intermediate number of workspaces different from expected", initialNumberOfWorkspaces + 1, intermediateNumberOfWorkspaces);
         assertEquals("Intermediate number of nodes different from expected", initialNumberOfNodes + 3, intermediateNumberOfNodes);
         assertEquals("Intermediate number of links different from expected", initialNumberOfLinks + 1, intermediateNumberOfLinks);
+        assertEquals("Intermediate number of locks different from expected", initialNumberOfLocks + 3, intermediateNumberOfLocks);
         assertEquals("Intermediate number of replacements different from expected", initialNumberOfReplacements + 1, intermediateNumberOfReplacements);
         
         this.workspaceDao.cleanWorkspaceNodesAndLinks(ws);
@@ -2024,11 +2093,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int finalNumberOfWorkspaces = countRowsInTable("workspace");
         int finalNumberOfNodes = countRowsInTable("node");
         int finalNumberOfLinks = countRowsInTable("node_link");
+        int finalNumberOfLocks = countRowsInTable("node_lock");
         int finalNumberOfReplacements = countRowsInTable("node_replacement");
         
         assertEquals("Final number of workspaces different from expected", intermediateNumberOfWorkspaces, finalNumberOfWorkspaces);
         assertEquals("Final number of nodes different from expected", initialNumberOfNodes, finalNumberOfNodes);
         assertEquals("Final number of links different from expected", initialNumberOfLinks, finalNumberOfLinks);
+        assertEquals("Final number of locks different from expected", initialNumberOfLocks, finalNumberOfLocks);
         assertEquals("Final number of replacements different from expected", initialNumberOfReplacements, finalNumberOfReplacements);
     }
     
@@ -2518,6 +2589,13 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         String updateWorkspaceSql = "UPDATE workspace SET crawler_id = ? WHERE workspace_id = ?";
         jdbcTemplate.update(updateWorkspaceSql, workspace.getCrawlerID(), workspace.getWorkspaceID());
+    }
+    
+    private void addNodeLockToDb(WorkspaceNode node) {
+        
+        String insertLockSql = "INSERT INTO node_lock (archive_uri, workspace_id) "
+                + "VALUES (?, ?)";
+        jdbcTemplate.update(insertLockSql, node.getArchiveURI().toString(), node.getWorkspaceID());
     }
 }
 

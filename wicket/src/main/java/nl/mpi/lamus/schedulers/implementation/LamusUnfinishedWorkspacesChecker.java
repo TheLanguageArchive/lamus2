@@ -4,7 +4,7 @@ package nl.mpi.lamus.schedulers.implementation;
 
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
-import nl.mpi.lamus.schedulers.WorkspaceFinaliser;
+import nl.mpi.lamus.schedulers.UnfinishedWorkspacesChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -27,16 +27,16 @@ import org.springframework.stereotype.Component;
  */
 
 /**
- * @see WorkspaceFinaliser
+ * @see UnfinishedWorkspacesChecker
  * @author guisil
  */
 @Component
-public class LamusWorkspaceFinaliser implements WorkspaceFinaliser {
+public class LamusUnfinishedWorkspacesChecker implements UnfinishedWorkspacesChecker {
 
     private final WorkspaceCrawlerChecker workspaceCrawlerChecker;
     
     @Autowired
-    public LamusWorkspaceFinaliser(WorkspaceCrawlerChecker wsCrawlerChecker) {
+    public LamusUnfinishedWorkspacesChecker(WorkspaceCrawlerChecker wsCrawlerChecker) {
         workspaceCrawlerChecker = wsCrawlerChecker;
     }
     

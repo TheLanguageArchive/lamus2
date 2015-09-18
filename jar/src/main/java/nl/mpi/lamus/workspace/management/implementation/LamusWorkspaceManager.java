@@ -99,8 +99,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             workspaceDirectoryHandler.createUploadDirectoryForWorkspace(newWorkspace.getWorkspaceID());
         } catch(IOException ex) {
             String errorMessage = "Error creating workspace in node " + topArchiveNodeURI;
-            logger.error(errorMessage, ex);
-            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), ex);
+            failWorkspaceImport(newWorkspace, errorMessage, ex);
         }
         
         workspaceImportRunner.setWorkspace(newWorkspace);
@@ -115,24 +114,21 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             // TODO implement some notification mechanism to let the caller know when this is ready
                 // OR just have some different way of filling up the tree
         
-        Boolean isSuccessful;
+        Boolean isSuccessful = false;
         
         try {            
             isSuccessful = importResult.get();
         } catch (InterruptedException iex) {
             String errorMessage = "Interruption in thread while creating workspace in node " + topArchiveNodeURI;
-            logger.error(errorMessage, iex);
-            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), iex);
+            failWorkspaceImport(newWorkspace, errorMessage, iex);
         } catch (ExecutionException eex) {
             String errorMessage = "Problem with thread execution while creating workspace in node " + topArchiveNodeURI;
-            logger.error(errorMessage, eex);
-            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), eex);
+            failWorkspaceImport(newWorkspace, errorMessage, eex);
         }
         
         if(!isSuccessful) {
             String errorMessage = "Workspace creation failed in node " + topArchiveNodeURI;
-            logger.error(errorMessage);
-            throw new WorkspaceImportException(errorMessage, newWorkspace.getWorkspaceID(), null);
+            failWorkspaceImport(newWorkspace, errorMessage, null);
         }
         
         // updated workspace
@@ -288,6 +284,14 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         return workspace;
     }
     
+    
+    private void failWorkspaceImport(Workspace ws, String errorMessage, Exception ex) throws WorkspaceImportException {
+        
+        workspaceDao.unlockAllNodesOfWorkspace(ws.getWorkspaceID());
+        
+        logger.error(errorMessage, ex);
+        throw new WorkspaceImportException(errorMessage, ws.getWorkspaceID(), ex);
+    }
     
     private void finaliseWorkspace(Workspace workspace, boolean submitSuccessful) {
         

@@ -38,12 +38,12 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * Data access layer that uses JDBC from the Spring framework
@@ -53,7 +53,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-//@Repository
 public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusJdbcWorkspaceDao.class);
@@ -61,6 +60,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private SimpleJdbcInsert insertWorkspace;
     private SimpleJdbcInsert insertWorkspaceNode;
+    private SimpleJdbcInsert insertWorkspaceNodeLock;
     private SimpleJdbcInsert insertWorkspaceNodeLink;
     private SimpleJdbcInsert insertNodeReplacement;
     
@@ -74,8 +74,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
      * 
      * @param datasource data source to be used for accessing the lamus database
      */
-//    @Autowired
-//    @Qualifier("lamusDataSource")
     public final void setDataSource(DataSource datasource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(datasource);
         this.insertWorkspace = new SimpleJdbcInsert(datasource)
@@ -95,7 +93,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "status",
                     "message",
                     "crawler_id");
-        //TODO Inject table and column names
         
         this.insertWorkspaceNode = new SimpleJdbcInsert(datasource)
                 .withTableName("node")
@@ -113,21 +110,24 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "status",
                     "protected",
                     "format");
-        //TODO Inject table and column names
+        
+        this.insertWorkspaceNodeLock = new SimpleJdbcInsert(datasource)
+                .withTableName("node_lock")
+                .usingColumns(
+                        "archive_uri",
+                        "workspace_id");
         
         this.insertWorkspaceNodeLink = new SimpleJdbcInsert(datasource)
                 .withTableName("node_link")
                 .usingColumns(
                     "parent_workspace_node_id",
                     "child_workspace_node_id");
-        //TODO Inject table and column names
         
         this.insertNodeReplacement = new SimpleJdbcInsert(datasource)
                 .withTableName("node_replacement")
                 .usingColumns(
                     "old_node_id",
                     "new_node_id");
-        
     }
     
     /**
@@ -188,11 +188,13 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         String deleteNodeReplacementSql = "DELETE FROM node_replacement WHERE old_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeLinkSql = "DELETE FROM node_link WHERE parent_workspace_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
+        String deleteNodeLockSql = "DELETE FROM node_lock WHERE workspace_id = :workspace_id";
         String deleteNodeSql = "DELETE FROM node WHERE workspace_ID = :workspace_id;";
         String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
         this.namedParameterJdbcTemplate.update(deleteNodeReplacementSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteNodeLockSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteWorkspaceSql, namedParameters);
         
@@ -430,32 +432,83 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         logger.debug("Checking if node " + archiveNodeURI + " is locked");
         
-        String queryNodeSql = "SELECT workspace_node_id FROM node WHERE (archive_uri = :uri OR origin_url = :uri) AND protected = :not_protected";
+        if(archiveNodeURI == null) {
+            throw new IllegalArgumentException("URI to check should not be null");
+        }
+        
+        String queryNodeSql = "SELECT * FROM node_lock WHERE (archive_uri = :uri)";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
-                .addValue("uri", archiveNodeURI.toString())
-                .addValue("not_protected", false);
+                .addValue("uri", archiveNodeURI.toString());
         
-        RowMapper<WorkspaceNode> mapper = new RowMapper<WorkspaceNode>() {
-            @Override
-            public WorkspaceNode mapRow(ResultSet rs, int rowNum) throws SQLException {
-                WorkspaceNode node = new LamusWorkspaceNode();
-                node.setWorkspaceNodeID(rs.getInt("workspace_node_id"));
-                return node;
-            }
-        };
+        SqlRowSet result = this.namedParameterJdbcTemplate.queryForRowSet(queryNodeSql, namedParameters);
         
-        try {
-            this.namedParameterJdbcTemplate.queryForObject(queryNodeSql, namedParameters, mapper);
-        } catch(EmptyResultDataAccessException eex) {
+        if(!result.first()) {
             logger.info("Node " + archiveNodeURI.toString() + " is not locked (there is no existing workspace that contains this node).");
             return false;
-        } catch(IncorrectResultSizeDataAccessException iex) {
-            logger.warn("Node " + archiveNodeURI.toString() + " is locked more than once.");
-            return true;
         }
 
         logger.info("Node " + archiveNodeURI + " is locked (there is already a workspace that contains this node).");
         return true;
+    }
+    
+    /**
+     * @see WorkspaceDao#lockNode(java.net.URI, int)
+     */
+    @Override
+    public void lockNode(URI uriToLock, int workspaceID) {
+        
+        logger.debug("Adding to the database a lock for node " + uriToLock
+                + " in workspace " + workspaceID);
+        
+        if(uriToLock == null) {
+            throw new IllegalArgumentException("Archive URI to lock should not be null");
+        }
+        
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("archive_uri", uriToLock.toString())
+                .addValue("workspace_id", workspaceID);
+        this.insertWorkspaceNodeLock.execute(parameters);
+
+        logger.info("Lock added to the database. Archive URI: " + uriToLock
+                + "; Workspace ID: " + workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#unlockNode(java.net.URI)
+     */
+    @Override
+    public void unlockNode(URI uriToUnlock) {
+        
+        logger.debug("Deleting lock on node " + uriToUnlock);
+        
+        if(uriToUnlock == null) {
+            throw new IllegalArgumentException("Archive URI to unlock should not be null");
+        }
+        
+        String deleteNodeLockSql =
+                "DELETE FROM node_lock WHERE archive_uri = :archive_uri;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("archive_uri", uriToUnlock.toString());
+        this.namedParameterJdbcTemplate.update(deleteNodeLockSql, namedParameters);
+        
+        logger.info("Lock on node " + uriToUnlock + " was deleted");
+    }
+
+    /**
+     * @see WorkspaceDao#unlockAllNodesOfWorkspace(int)
+     */
+    @Override
+    public void unlockAllNodesOfWorkspace(int workspaceID) {
+
+        logger.debug("Unlocking nodes belonging to workspace " + workspaceID);
+        
+        String deleteLocksSql =
+                "DELETE FROM node_lock WHERE workspace_id = :workspace_id;";
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        this.namedParameterJdbcTemplate.update(deleteLocksSql, namedParameters);
+        
+        logger.info("Node locks belonging to workspace " + workspaceID + " were deleted");
     }
 
     /**
@@ -464,8 +517,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     @Override
     public Collection<WorkspaceNode> getWorkspaceNodeByArchiveURI(URI archiveNodeURI) {
         
-        logger.debug("Retrieving locked node " + archiveNodeURI);
-        
+        logger.debug("Retrieving node(s) with archive URI " + archiveNodeURI);
         
         String queryWorkspaceNodeListSql = "SELECT * FROM node WHERE archive_uri = :uri";
         SqlParameterSource namedParameters = new MapSqlParameterSource("uri", archiveNodeURI.toString());
@@ -971,11 +1023,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 "DELETE FROM node_replacement WHERE old_node_id in (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteLinksSql =
                 "DELETE FROM node_link WHERE parent_workspace_node_id in (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
+        String deleteLocksSql =
+                "DELETE FROM node_lock WHERE workspace_id = :workspace_id;";
         String deleteNodesSql =
                 "DELETE FROM node WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspace.getWorkspaceID());
         this.namedParameterJdbcTemplate.update(deleteReplacementsSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteLinksSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deleteLocksSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodesSql, namedParameters);
         
         logger.info("Nodes and links belonging to workspace " + workspace.getWorkspaceID() + " were deleted");

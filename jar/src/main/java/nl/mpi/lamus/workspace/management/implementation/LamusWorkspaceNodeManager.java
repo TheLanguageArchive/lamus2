@@ -54,6 +54,9 @@ public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
         this.workspaceFileHandler = wsFileHandler;
     }
     
+    /**
+     * @see WorkspaceNodeManager#deleteNodesRecursively(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException, ProtectedNodeException {
         

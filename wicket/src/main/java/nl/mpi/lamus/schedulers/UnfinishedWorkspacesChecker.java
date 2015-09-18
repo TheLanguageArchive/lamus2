@@ -22,7 +22,7 @@ import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
  * Provides a way to trigger the workspace check and finalisation.
  * @author guisil
  */
-public interface WorkspaceFinaliser {
+public interface UnfinishedWorkspacesChecker {
     
     /**
      * Checks if there are workspaces which were submitted already

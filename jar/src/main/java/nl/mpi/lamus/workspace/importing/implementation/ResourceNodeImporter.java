@@ -169,6 +169,9 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
                 workspaceID, childURI, childArchiveURL, referenceFromParent,
                 childMimetype, childNodeType, childCorpusNode.getName(), childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
+        if(!childToBeProtected) {
+            workspaceDao.lockNode(childURI, workspaceID);
+        }
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
                 parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());

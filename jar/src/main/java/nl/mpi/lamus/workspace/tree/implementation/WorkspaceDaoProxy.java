@@ -164,6 +164,30 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#lockNode(java.net.URI, int)
+     */
+    @Override
+    public void lockNode(URI uriToLock, int workspaceID) {
+        this.getWorkspaceDao().lockNode(uriToLock, workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#unlockNode(java.net.URI)
+     */
+    @Override
+    public void unlockNode(URI uriToUnlock) {
+        this.getWorkspaceDao().unlockNode(uriToUnlock);
+    }
+
+    /**
+     * @see WorkspaceDao#unlockAllNodesOfWorkspace(int)
+     */
+    @Override
+    public void unlockAllNodesOfWorkspace(int workspaceID) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
      * @see WorkspaceDao#getWorkspaceNodeByArchiveURI(java.net.URI)
      */
     @Override

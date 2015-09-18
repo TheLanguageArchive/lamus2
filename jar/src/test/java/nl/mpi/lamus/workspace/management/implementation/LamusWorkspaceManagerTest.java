@@ -177,10 +177,11 @@ public class LamusWorkspaceManagerTest {
         final IOException expectedException = new IOException(errorMessage);
         
         context.checking(new Expectations() {{
-            oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
-            oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
                 will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(newWorkspace.getWorkspaceID());
         }});
         
         try {
@@ -226,7 +227,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {
@@ -271,7 +272,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {
@@ -314,7 +315,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {

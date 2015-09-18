@@ -203,11 +203,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(completeChildURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -289,11 +290,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(completeChildURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -369,11 +371,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(childOriginURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithoutHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -440,11 +443,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(childOriginURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithoutHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -528,11 +532,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(completeChildURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -625,11 +630,12 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(completeChildURI, testWorkspace.getWorkspaceID());
 
             oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
-            oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
+            oneOf(mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
             oneOf(mockChildLinkWithHandle).setLocation(null);
             oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
@@ -722,9 +728,10 @@ public class ResourceNodeImporterTest {
                     childNodeName, childOnSite, childProtected);
                 will(returnValue(testChildNode));
 
-            oneOf (mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).addWorkspaceNode(testChildNode);
+            oneOf(mockWorkspaceDao).lockNode(completeChildURI, testWorkspace.getWorkspaceID());
 
-            oneOf (mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
+            oneOf(mockWorkspaceNodeLinkFactory).getNewWorkspaceNodeLink(parentWorkspaceNodeID, childWorkspaceNodeID);
                 will(returnValue(testNodeLink));
             oneOf (mockWorkspaceDao).addWorkspaceNodeLink(testNodeLink);
             
