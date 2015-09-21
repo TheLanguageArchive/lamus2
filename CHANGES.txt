@@ -1,3 +1,25 @@
+lamus2-1.4.0-RC1 (2015-09-21)
+
+    Changes:
+        - METADATA PROFILES: The profile validation configuration has now more
+          complete information and missing profiles are now included.
+        - ACTIVITY INDICATOR: Changed the activity indicator (TLA logo) and
+          disabled the indicators in most buttons, since they became redundant (#4701).
+        - OPEN WORKSPACES: Improved the information displayed in the list of
+          currently open workspaces (#4720).
+        - NODE LOCKS: Changed the logic behind the node locks and the way they
+          are locked/unlocked (#4723).
+
+    Fixes:
+        - UPLOAD COUNT: Since a previous addition, the successful/failed upload
+          count was coming from different sources, resulting in inconsistencies.
+          This has been fixed (#4612).
+        - FOLDER NAMES: Corpora with strange characters were normalised regarding
+          the names of the resulting created folders (#4721).
+        - RELATIVE PATH: Uploading nodes with relative references (starting with
+          "./" or "../") were not being properly handled. This was fixed.
+        
+
 lamus2-1.3.0-RC4 (2015-09-01)
 
     Changes:
