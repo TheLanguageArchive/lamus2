@@ -15,20 +15,11 @@
  */
 package nl.mpi.lamus.spring;
 
-//import nl.mpi.common.util.spring.SpringContextLoader;
-//import nl.mpi.lat.ams.Constants;
-//import nl.mpi.lat.ams.service.LicenseService;
-//import nl.mpi.lat.ams.service.RuleService;
-//import nl.mpi.lat.auth.authentication.AuthenticationService;
-//import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
-//import nl.mpi.lat.auth.principal.PrincipalService;
-//import nl.mpi.lat.fabric.FabricService;
-import nl.mpi.common.util.spring.SpringContextLoader;
+import javax.servlet.ServletContext;
 import nl.mpi.lat.ams.Constants;
 import nl.mpi.lat.ams.export.RecalcTriggerService;
 import nl.mpi.lat.ams.service.LicenseService;
 import nl.mpi.lat.ams.service.RuleService;
-import nl.mpi.lat.auth.authentication.AuthenticationService;
 import nl.mpi.lat.auth.authorization.AdvAuthorizationService;
 import nl.mpi.lat.auth.authorization.export.AuthorizationExportService;
 import nl.mpi.lat.auth.principal.PrincipalService;
@@ -37,6 +28,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * Configuration class containing the beans needed by AMS2.
@@ -47,10 +40,11 @@ import org.springframework.context.annotation.Profile;
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
 @Configuration
-@Profile(value = {"production","cmdi-adapter-csdb"})
-public class AmsBeans {
+@Profile(value = {"production","cmdi-adapter-csdb","ams-hybrid"})
+public class AmsBeans implements ServletContextAware {
     
-    private SpringContextLoader contextLoader;
+    private ServletContext servletContext;
+    private ClassPathXmlApplicationContext context;
     
     private PrincipalService pcplSrv;
     private AdvAuthorizationService authoSrv;
@@ -64,15 +58,9 @@ public class AmsBeans {
     private AuthorizationExportService webserverExpSrv;
     
     
-    /**
-     * Initialises the context loader that will retrieve the beans from the
-     * configuration provided by AMS2.
-     */
-    private void initialiseContextLoader() {
-        if(this.contextLoader == null) {
-            this.contextLoader = new SpringContextLoader();
-            this.contextLoader.init("spring-ams2-core.xml");
-        }
+    @Override
+    public void setServletContext(ServletContext sc) {
+        servletContext = sc;
     }
     
     /**
@@ -81,11 +69,11 @@ public class AmsBeans {
     @Bean
     public PrincipalService principalService() {
         
-        initialiseContextLoader();
-        if(this.pcplSrv == null) {
-            this.pcplSrv = (PrincipalService) this.contextLoader.getBean(Constants.BEAN_PRINCIPAL_SRV);
+        initialiseContext();
+        if(pcplSrv == null) {
+            pcplSrv = context.getBean(Constants.BEAN_PRINCIPAL_SRV, PrincipalService.class);
         }
-        return this.pcplSrv;
+        return pcplSrv;
     }
     
     /**
@@ -94,11 +82,11 @@ public class AmsBeans {
     @Bean
     public AdvAuthorizationService authorizationService() {
         
-        initialiseContextLoader();
-        if(this.authoSrv == null) {
-            this.authoSrv = (AdvAuthorizationService) contextLoader.getBean(Constants.BEAN_AUTHORIZATION_SRV);
+        initialiseContext();
+        if(authoSrv == null) {
+           authoSrv = context.getBean(Constants.BEAN_AUTHORIZATION_SRV, AdvAuthorizationService.class);
         }
-        return this.authoSrv;
+        return authoSrv;
     }
     
     /**
@@ -107,11 +95,11 @@ public class AmsBeans {
     @Bean
     public FabricService fabricService() {
         
-        initialiseContextLoader();
-        if(this.fabSrv == null) {
-            this.fabSrv = (FabricService) contextLoader.getBean(Constants.BEAN_FABRIC_SRV);
+        initialiseContext();
+        if(fabSrv == null) {
+           fabSrv = context.getBean(Constants.BEAN_FABRIC_SRV, FabricService.class);
         }
-        return this.fabSrv;
+        return fabSrv;
     }
     
     /**
@@ -120,11 +108,11 @@ public class AmsBeans {
     @Bean
     public LicenseService licenseService() {
         
-        initialiseContextLoader();
-        if(this.licSrv == null) {
-            this.licSrv = (LicenseService) contextLoader.getBean(Constants.BEAN_LICENSE_SRV);
+        initialiseContext();
+        if(licSrv == null) {
+            licSrv = context.getBean(Constants.BEAN_LICENSE_SRV, LicenseService.class);
         }
-        return this.licSrv;
+        return licSrv;
     }
     
     /**
@@ -133,11 +121,11 @@ public class AmsBeans {
     @Bean
     public RuleService ruleService() {
         
-        initialiseContextLoader();
-        if(this.ruleSrv == null) {
-            this.ruleSrv = (RuleService) contextLoader.getBean(Constants.BEAN_RULE_SRV);
+        initialiseContext();
+        if(ruleSrv == null) {
+            ruleSrv = context.getBean(Constants.BEAN_RULE_SRV, RuleService.class);
         }
-        return this.ruleSrv;
+        return ruleSrv;
     }
     
     /**
@@ -146,11 +134,11 @@ public class AmsBeans {
     @Bean
     public RecalcTriggerService recalcTriggerService() {
         
-        initialiseContextLoader();
-        if(this.recalcTrSrv == null) {
-            this.recalcTrSrv = (RecalcTriggerService) contextLoader.getBean(Constants.BEAN_RECALC_TRIGGER_SRV);
+        initialiseContext();
+        if(recalcTrSrv == null) {
+            recalcTrSrv = context.getBean(Constants.BEAN_RECALC_TRIGGER_SRV, RecalcTriggerService.class);
         }
-        return this.recalcTrSrv;
+        return recalcTrSrv;
     }
     
     /**
@@ -160,11 +148,11 @@ public class AmsBeans {
     @Bean
     public AuthorizationExportService integratedExportService() {
         
-        initialiseContextLoader();
-        if(this.integratedExpSrv == null) {
-            this.integratedExpSrv = (AuthorizationExportService) contextLoader.getBean(Constants.BEAN_INTEGRATED_EXPORT_SRV);
+        initialiseContext();
+        if(integratedExpSrv == null) {
+            integratedExpSrv = context.getBean(Constants.BEAN_INTEGRATED_EXPORT_SRV, AuthorizationExportService.class);
         }
-        return this.integratedExpSrv;
+        return integratedExpSrv;
     }
     
     /**
@@ -174,11 +162,11 @@ public class AmsBeans {
     @Bean
     public AuthorizationExportService cachedCorpusDbExportService() {
         
-        initialiseContextLoader();
-        if(this.cachedCsDbExpSrv == null) {
-            this.cachedCsDbExpSrv = (AuthorizationExportService) contextLoader.getBean(Constants.BEAN_CACHED_CORPUS_DB_EXPORT_SRV);
+        initialiseContext();
+        if(cachedCsDbExpSrv == null) {
+            cachedCsDbExpSrv = context.getBean(Constants.BEAN_CACHED_CORPUS_DB_EXPORT_SRV, AuthorizationExportService.class);
         }
-        return this.cachedCsDbExpSrv;
+        return cachedCsDbExpSrv;
     }
     
     /**
@@ -188,10 +176,28 @@ public class AmsBeans {
     @Bean
     public AuthorizationExportService webserverExportService() {
         
-        initialiseContextLoader();
-        if(this.webserverExpSrv == null) {
-            this.webserverExpSrv = (AuthorizationExportService) contextLoader.getBean(Constants.BEAN_WEBSERVER_EXPORT_SRV);
+        initialiseContext();
+        if(webserverExpSrv == null) {
+            webserverExpSrv = context.getBean(Constants.BEAN_WEBSERVER_EXPORT_SRV, AuthorizationExportService.class);
         }
-        return this.webserverExpSrv;
+        return webserverExpSrv;
+    }
+    
+    
+    private void initialiseContext() {
+        
+        if(context == null) {
+            context = new ClassPathXmlApplicationContext();
+            
+            String activeProfilesString = servletContext.getInitParameter("spring.profiles.active");
+            String[] activeProfilesArray = activeProfilesString.split(",");
+            for(int i = 0; i < activeProfilesArray.length; i++) {
+                activeProfilesArray[i] = activeProfilesArray[i].trim();
+            }
+            
+            context.getEnvironment().setActiveProfiles(activeProfilesArray);
+            context.setConfigLocation("spring-ams2-core.xml");
+            context.refresh();
+        }
     }
 }
