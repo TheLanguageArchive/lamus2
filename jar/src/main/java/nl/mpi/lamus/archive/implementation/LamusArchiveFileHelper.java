@@ -241,6 +241,8 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Override
     public String getDirectoryForNode(String parentPath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node) { // Not for top nodes
         
+        logger.debug("Getting directory for node. parentPath: '" + parentPath + "'; parentCorpusNamePathToClosestTopNode: '" + parentCorpusNamePathToClosestTopNode + "'; node: " + node.toString());
+        
         String corpusstructureFolderPlusFilename = corpusstructureDirectoryName + File.separator + FilenameUtils.getName(parentPath);
         
         String closestTopNodeName = parentCorpusNamePathToClosestTopNode;

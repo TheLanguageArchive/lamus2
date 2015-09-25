@@ -82,6 +82,8 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         boolean currentPathContainsCorpusstructureDir = currentLocalPath.contains(File.separator + corpusstructureDirectoryName + File.separator);
         boolean currentPathContainsMetadataDir = currentLocalPath.contains(File.separator + metadataDirectoryName + File.separator);
         
+        String nextNodeNameToInsert = "";
+        
         while(!foundTopNode) {
         
             URI parentNodeURI = corpusStructureProvider.getCanonicalParent(currentNodeURI);
@@ -106,11 +108,23 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
                 String parentDirectory = FilenameUtils.getFullPath(parentLocalPath);
                 if(!currentDirectory.equals(parentDirectory)) {
                     foundTopNode = true;
+                    
+                    //for the top node, the path name (instead of the node name) should be used, since top node folders were probably created by corpus managers
+                    if(!nextNodeNameToInsert.isEmpty()) {
+                        insertStringInTheBeginning(pathSoFar, getFolderNameBeforeCorpusstructure(currentDirectory));
+                    }
+                    
                 } else {
-                    insertStringInTheBeginning(pathSoFar, archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode"));
+                    if(!nextNodeNameToInsert.isEmpty()) {
+                        insertStringInTheBeginning(pathSoFar, nextNodeNameToInsert);
+                    }
+                    nextNodeNameToInsert = archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode");
                 }
             } else if(currentPathContainsMetadataDir && parentPathContainsCorpusstructureDir) {
-                insertStringInTheBeginning(pathSoFar, archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode"));
+                if(!nextNodeNameToInsert.isEmpty()) {
+                    insertStringInTheBeginning(pathSoFar, nextNodeNameToInsert);
+                }
+                nextNodeNameToInsert = archiveFileHelper.correctPathElement(parentCorpusNode.getName(), "getCorpusNamePathToClosestTopNode");
             }
             
             currentNodeURI = parentNodeURI;
@@ -125,10 +139,15 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
     }
     
     
-    private void insertStringInTheBeginning(StringBuilder builder, String toInsert) {
-        if(builder.length() > 0) {
-            builder.insert(0, File.separator);
+    private void insertStringInTheBeginning(StringBuilder path, String toInsert) {
+        if(path.length() > 0) {
+            path.insert(0, File.separator);
         }
-        builder.insert(0, toInsert);
+        path.insert(0, toInsert);
+    }
+    
+    private String getFolderNameBeforeCorpusstructure(String directory) {
+        String pathBeforeCorpusstructure = directory.substring(0, directory.indexOf(File.separator + corpusstructureDirectoryName + File.separator));
+        return pathBeforeCorpusstructure.substring(pathBeforeCorpusstructure.lastIndexOf(File.separator) + 1, pathBeforeCorpusstructure.length());
     }
 }
