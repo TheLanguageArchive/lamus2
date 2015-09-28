@@ -1,3 +1,10 @@
+lamus2-1.4.0-RC2 (2015-09-28)
+
+    Fixes:
+        - FOLDER NAMES: Fix for the problems with folder name for the top node,
+          in cases when this was defined by a human (replacing a strange character
+          by a similarly looking one doesn't work the same way for Lamus2).
+
 lamus2-1.4.0-RC1 (2015-09-21)
 
     Changes:
