@@ -914,9 +914,9 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
         
-        assertNull("Retrieved component should be null", retrievedComponent);
+        assertNull("Retrieved component should be null", retrievedComponentPath);
     }
     
     @Test
@@ -938,9 +938,24 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponent = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
         
-        assertNull("Retrieved component should be null", retrievedComponent);
+        assertNull("Retrieved component should be null", retrievedComponentPath);
+    }
+    
+    @Test
+    public void getComponentForReferenceType_NullType() {
+        
+        final String profileId = "clarin.eu:cr1:p_1407745712064";
+        final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, Boolean.FALSE);
+        
+        assertNull("Retrieved component should be null", retrievedComponentPath);
     }
     
     @Test

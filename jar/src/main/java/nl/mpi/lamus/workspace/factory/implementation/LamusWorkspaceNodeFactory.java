@@ -147,7 +147,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URL)
+     * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URI)
      */
     @Override
     public WorkspaceNode getNewExternalNode(int workpaceID, URI originURI) {

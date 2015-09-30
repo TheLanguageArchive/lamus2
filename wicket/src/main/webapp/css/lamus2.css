@@ -521,6 +521,10 @@ div.treePanelContainer div.treePanel {
     height: 20%;
 }
 
+#externalNodesPanel .urlInputField {
+    width: 300px;
+}
+
 
 .tableTree {
     width: 100%;

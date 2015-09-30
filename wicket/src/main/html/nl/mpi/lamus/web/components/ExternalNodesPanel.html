@@ -31,10 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <wicket:message key="external_nodes_panel_new_item_link"></wicket:message>
                 </a>
                 <form wicket:id="form">
-                    <input type="text" wicket:id="externalUrl" /> 
-                    <input type="button" wicket:id="add" wicket:message="value:external_nodes_panel_add_button" />
-                    <wicket:message key="external_nodes_panel_or_space"></wicket:message>
-                    <input type="button" wicket:id="cancel" wicket:message="value:external_nodes_panel_cancel_button" />
+                    <p>
+                        <label><wicket:message key="external_nodes_panel_new_item_location"></wicket:message></label>
+                        <input type="text" wicket:id="externalUrl" class="urlInputField" />
+
+                        <label><wicket:message key="external_nodes_panel_new_item_type"></wicket:message></label>
+                        <select wicket:id="externalType" />
+                    </p>
+                    <p>
+                        <input type="button" wicket:id="add" wicket:message="value:external_nodes_panel_add_button" />
+                        <wicket:message key="external_nodes_panel_or_space"></wicket:message>
+                        <input type="button" wicket:id="cancel" wicket:message="value:external_nodes_panel_cancel_button" />
+                    </p>
                 </form>
             </div>
         </wicket:panel>

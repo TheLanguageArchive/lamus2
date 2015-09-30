@@ -16,10 +16,10 @@
  */
 package nl.mpi.lamus.web.components;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -27,9 +27,11 @@ import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -104,6 +106,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     private final class AddExternalNodeForm extends Form<Void> {
 
         TextField<String> externalUrlField;
+        DropDownChoice<WorkspaceNodeType> externalType;
 
         public AddExternalNodeForm(String id) {
             super(id);
@@ -113,6 +116,25 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
             externalUrlField = new TextField<>("externalUrl", Model.of(""));
             externalUrlField.add(new UrlValidator());
             add(externalUrlField);
+            
+            List<WorkspaceNodeType> possibleTypes = new ArrayList<>();
+            possibleTypes.add(WorkspaceNodeType.METADATA);
+            possibleTypes.add(WorkspaceNodeType.RESOURCE_INFO);
+            possibleTypes.add(WorkspaceNodeType.RESOURCE_AUDIO);
+            possibleTypes.add(WorkspaceNodeType.RESOURCE_IMAGE);
+            possibleTypes.add(WorkspaceNodeType.RESOURCE_VIDEO);
+            possibleTypes.add(WorkspaceNodeType.RESOURCE_WRITTEN);
+            
+            externalType = new DropDownChoice<WorkspaceNodeType>("externalType", new Model<WorkspaceNodeType>(), possibleTypes) {
+
+                @Override
+                protected void onSelectionChanged(WorkspaceNodeType newSelection) {
+                    super.onSelectionChanged(newSelection); //To change body of generated methods, choose Tools | Templates.
+                    
+                    setModel(new Model<>(newSelection));
+                }
+            };
+            add(externalType);
 
             add(new AjaxButton("add", this) {
 
@@ -132,6 +154,9 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
                     WorkspaceNode externalNode =
                         workspaceNodeFactory.getNewExternalNode(
                             model.getObject().getWorkspaceID(), enteredUri);
+                    
+                    externalNode.setType(externalType.getModelObject());
+                    
                     try {
 
                         workspaceService.addNode(LamusSession.get().getUserId(), externalNode);

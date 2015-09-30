@@ -257,6 +257,10 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink) {
         
+        if(referenceType == null) {
+            return null;
+        }
+        
         CmdiProfile matchedProfile = getProfileWithLocation(profileLocation);
         
         if(matchedProfile != null) {
