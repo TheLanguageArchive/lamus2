@@ -96,12 +96,14 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         URI childURI = null;
         if(referenceFromParent instanceof HandleCarrier) {
             URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
-            childURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
-            if(!handleInFile.equals(childURI)) {
-                try {
-                    ((HandleCarrier) referenceFromParent).setHandle(childURI);
-                } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
-                    logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+            if(handleInFile != null) {
+                childURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
+                if(!handleInFile.equals(childURI)) {
+                    try {
+                        ((HandleCarrier) referenceFromParent).setHandle(childURI);
+                    } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
+                        logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                    }
                 }
             }
         }

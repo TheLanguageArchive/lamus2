@@ -98,7 +98,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         
         int workspaceID = workspace.getWorkspaceID();
 
-        URI childArchiveURI;
+        URI childArchiveURI = null;
         
         //TODO another way of doing this?
         if(referenceFromParent == null) { // top node
@@ -106,15 +106,19 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         } else {
             if(referenceFromParent instanceof HandleCarrier) {
                 URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
-                childArchiveURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
-                if(!handleInFile.equals(childArchiveURI)) {
-                    try {
-                        ((HandleCarrier) referenceFromParent).setHandle(childArchiveURI);
-                    } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
-                        logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                if(handleInFile != null) {
+                    childArchiveURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
+                    if(!handleInFile.equals(childArchiveURI)) {
+                        try {
+                            ((HandleCarrier) referenceFromParent).setHandle(childArchiveURI);
+                        } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
+                            logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                        }
                     }
                 }
-            } else {
+            }
+            
+            if(childArchiveURI == null) {
                 childArchiveURI = referenceFromParent.getURI();
             }
         }
