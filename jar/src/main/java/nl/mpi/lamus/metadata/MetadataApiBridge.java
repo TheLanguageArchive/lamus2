@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -135,11 +136,13 @@ public interface MetadataApiBridge {
     /**
      * Given a Metadata profile and a reference type, retrieves the appropriate component path.
      * @param profileLocation Profile to check
-     * @param referenceType Reference type to check
+     * @param referenceMimetype Reference type to check
+     * @param referenceNodeType Reference node type to check (in case no mimetype is provided)
      * @param isInfoLink true if the reference should refer to an info link
      * @return Appropriate component path for the given parameters (null if reference is not to be enforced)
      */
-    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink);
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation,
+            String referenceMimetype, WorkspaceNodeType referenceNodeType, boolean isInfoLink);
     
     /**
      * Creates a component within the given element. If other elements in the path

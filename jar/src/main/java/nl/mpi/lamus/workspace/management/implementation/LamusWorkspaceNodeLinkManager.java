@@ -175,7 +175,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 createdProxy = parentDocument.createDocumentMetadataReference(
                         childUri, childLocation, childNode.getFormat());
                 
-                addReferenceToComponent(parentNode, createdProxy, parentDocument, false);
+                addReferenceToComponent(parentNode, childNode, createdProxy, parentDocument, false);
                 
                 
             } else {
@@ -191,7 +191,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 
                 createdProxy = parentDocument.createDocumentResourceReference(childUri, childLocation, MetadataReferenceType.REFERENCE_TYPE_RESOURCE, childNode.getFormat());
                 
-                addReferenceToComponent(parentNode, createdProxy, parentDocument, isInfoLink);
+                addReferenceToComponent(parentNode, childNode, createdProxy, parentDocument, isInfoLink);
                 
             }
             
@@ -415,8 +415,20 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         return nodeURI;
     }
     
-    private void addReferenceToComponent(WorkspaceNode parentNode, ResourceProxy createdProxy, CMDIDocument parentDocument, boolean isInfoLink) throws WorkspaceException {
-        String componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(parentNode.getProfileSchemaURI(), createdProxy.getMimetype(), isInfoLink);
+    private void addReferenceToComponent(WorkspaceNode parentNode, WorkspaceNode childNode,
+                ResourceProxy createdProxy, CMDIDocument parentDocument, boolean isInfoLink)
+            throws WorkspaceException {
+        
+        String componentName;
+        
+        if(createdProxy.getMimetype() != null) {
+            componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    parentNode.getProfileSchemaURI(), createdProxy.getMimetype(), null, isInfoLink);
+        } else {
+            componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    parentNode.getProfileSchemaURI(), null, childNode.getType(), isInfoLink);
+        }
+        
         if(componentName == null) {
             return;
         }

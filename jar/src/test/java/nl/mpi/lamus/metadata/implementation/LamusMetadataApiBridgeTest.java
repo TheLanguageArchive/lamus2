@@ -37,6 +37,7 @@ import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataDocumentException;
 import nl.mpi.metadata.api.MetadataElementException;
@@ -124,9 +125,12 @@ public class LamusMetadataApiBridgeTest {
     @Mock MetadataElement mockMetadataElement;
     @Mock MetadataElementType mockMetadataElementType;
     
-    private final Map<String, String> collectionComponentMap;
-    private final Map<String, String> latCorpusComponentMap;
-    private final Map<String, String> latSessionComponentMap;
+    private final Map<String, String> collectionComponentsByMimetypeMap;
+    private final Map<String, String> collectionComponentsByNodeTypeMap;
+    private final Map<String, String> latCorpusComponentsByMimetypeMap;
+    private final Map<String, String> latCorpusComponentsByNodeTypeMap;
+    private final Map<String, String> latSessionComponentsByMimetypeMap;
+    private final Map<String, String> latSessionComponentsByNodeTypeMap;
     private final List<CmdiProfile> aFewProfiles;
     
     @Factory
@@ -137,7 +141,8 @@ public class LamusMetadataApiBridgeTest {
     
     public LamusMetadataApiBridgeTest() {
         
-        collectionComponentMap = new HashMap<>();
+        collectionComponentsByMimetypeMap = new HashMap<>();
+        collectionComponentsByNodeTypeMap = new HashMap<>();
         List<String> allowedCollectionTypes = new ArrayList<>();
         allowedCollectionTypes.add("Metadata");
         allowedCollectionTypes.add("LandingPage");
@@ -146,13 +151,17 @@ public class LamusMetadataApiBridgeTest {
         CmdiProfile collectionProfile = new CmdiProfile();
         collectionProfile.setId("clarin.eu:cr1:p_1345561703620");
         collectionProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620"));
-        collectionProfile.setComponentMap(collectionComponentMap);
+        collectionProfile.setComponentsByMimetypeMap(collectionComponentsByMimetypeMap);
+        collectionProfile.setComponentsByNodeTypeMap(collectionComponentsByNodeTypeMap);
         collectionProfile.setAllowedReferenceTypes(allowedCollectionTypes);
         collectionProfile.setAllowInfoLinks(Boolean.FALSE);
         
-        latCorpusComponentMap = new HashMap<>();
-        latCorpusComponentMap.put("^text/x-cmdi\\+xml$", "lat-corpus/CorpusLink");
-        latCorpusComponentMap.put("^info$", "lat-corpus/InfoLink");
+        latCorpusComponentsByMimetypeMap = new HashMap<>();
+        latCorpusComponentsByMimetypeMap.put("^text/x-cmdi\\+xml$", "lat-corpus/CorpusLink");
+        latCorpusComponentsByMimetypeMap.put("^info$", "lat-corpus/InfoLink");
+        latCorpusComponentsByNodeTypeMap = new HashMap<>();
+        latCorpusComponentsByNodeTypeMap.put("^METADATA$", "lat-corpus/CorpusLink");
+        latCorpusComponentsByNodeTypeMap.put("^RESOURCE_INFO$", "lat-corpus/InfoLink");
         List<String> allowedCorpusTypes = new ArrayList<>();
         allowedCorpusTypes.add("Metadata");
         allowedCorpusTypes.add("Resource");
@@ -162,15 +171,20 @@ public class LamusMetadataApiBridgeTest {
         CmdiProfile latCorpusProfile = new CmdiProfile();
         latCorpusProfile.setId("clarin.eu:cr1:p_1407745712064");
         latCorpusProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064"));
-        latCorpusProfile.setComponentMap(latCorpusComponentMap);
+        latCorpusProfile.setComponentsByMimetypeMap(latCorpusComponentsByMimetypeMap);
+        latCorpusProfile.setComponentsByNodeTypeMap(latCorpusComponentsByNodeTypeMap);
         latCorpusProfile.setAllowedReferenceTypes(allowedCorpusTypes);
         latCorpusProfile.setAllowInfoLinks(Boolean.TRUE);
         latCorpusProfile.setDocumentNamePath("/cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:Name");
         
-        latSessionComponentMap = new HashMap<>();
-        latSessionComponentMap.put("^(video|audio|image)/.*$", "lat-session/Resources/MediaFile");
-        latSessionComponentMap.put("^(?!.*text/x-cmdi\\+xml)(text|application)/.*$", "lat-session/Resources/WrittenResource");
-        latSessionComponentMap.put("^info$", "lat-session/InfoLink");
+        latSessionComponentsByMimetypeMap = new HashMap<>();
+        latSessionComponentsByMimetypeMap.put("^(video|audio|image)/.*$", "lat-session/Resources/MediaFile");
+        latSessionComponentsByMimetypeMap.put("^(?!.*text/x-cmdi\\+xml)(text|application)/.*$", "lat-session/Resources/WrittenResource");
+        latSessionComponentsByMimetypeMap.put("^info$", "lat-session/InfoLink");
+        latSessionComponentsByNodeTypeMap = new HashMap<>();
+        latSessionComponentsByNodeTypeMap.put("^(RESOURCE_VIDEO|RESOURCE_AUDIO|RESOURCE_IMAGE)$", "lat-session/Resources/MediaFile");
+        latSessionComponentsByNodeTypeMap.put("^RESOURCE_WRITTEN$", "lat-session/Resources/WrittenResource");
+        latSessionComponentsByNodeTypeMap.put("^RESOURCE_INFO$", "lat-session/InfoLink");
         List<String> allowedSessionTypes = new ArrayList<>();
         allowedSessionTypes.add("Resource");
         allowedSessionTypes.add("LandingPage");
@@ -179,7 +193,8 @@ public class LamusMetadataApiBridgeTest {
         CmdiProfile latSessionProfile = new CmdiProfile();
         latSessionProfile.setId("clarin.eu:cr1:p_1407745712035");
         latSessionProfile.setLocation(URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035"));
-        latSessionProfile.setComponentMap(latSessionComponentMap);
+        latSessionProfile.setComponentsByMimetypeMap(latSessionComponentsByMimetypeMap);
+        latSessionProfile.setComponentsByNodeTypeMap(latSessionComponentsByNodeTypeMap);
         latSessionProfile.setAllowedReferenceTypes(allowedSessionTypes);
         latSessionProfile.setAllowInfoLinks(Boolean.TRUE);
         latSessionProfile.setDocumentNamePath("/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Name");
@@ -813,7 +828,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.FALSE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
@@ -832,7 +859,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.TRUE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.TRUE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_INFO;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
@@ -851,7 +890,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.FALSE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_IMAGE;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
@@ -870,7 +921,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.FALSE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
@@ -889,7 +952,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.TRUE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.TRUE);
+        
+        assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_INFO;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertEquals("Retrieved component different from expected", expectedComponentPath, retrievedComponentPath);
     }
@@ -899,22 +974,37 @@ public class LamusMetadataApiBridgeTest {
         
         final String profileId = "clarin.eu:cr1:p_1345561703620";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        Map<String, String> componentMap = new HashMap<>();
-        componentMap.put("^text/x-cmdi\\+xml$", "Collection");
+        Map<String, String> componentsByMimetypeMap = new HashMap<>();
+        componentsByMimetypeMap.put("^text/x-cmdi\\+xml$", "Collection");
+        Map<String, String> componentsByNodeTypeMap = new HashMap<>();
+        componentsByNodeTypeMap.put("^METADATA$", "Collection");
         CmdiProfile profile = new CmdiProfile();
         profile.setId(profileId);
         profile.setLocation(profileLocation);
-        profile.setComponentMap(componentMap);
+        profile.setComponentsByMimetypeMap(componentsByMimetypeMap);
+        profile.setComponentsByNodeTypeMap(componentsByNodeTypeMap);
         final List<CmdiProfile> profiles = new ArrayList<>();
         profiles.add(profile);
         
-        final String referenceMimetype = "text/x-imdi+xml";
+        final String referenceMimetype = "image/jpg";
         
         context.checking(new Expectations() {{
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.FALSE);
+        
+        assertNull("Retrieved component should be null", retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_IMAGE;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertNull("Retrieved component should be null", retrievedComponentPath);
     }
@@ -924,11 +1014,13 @@ public class LamusMetadataApiBridgeTest {
         
         final String profileId = "clarin.eu:cr1:p_1345561703620";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
-        Map<String, String> componentMap = new HashMap<>();
+        Map<String, String> componentsByMimetypeMap = new HashMap<>();
+        Map<String, String> componentsByNodeTypeMap = new HashMap<>();
         CmdiProfile profile = new CmdiProfile();
         profile.setId(profileId);
         profile.setLocation(profileLocation);
-        profile.setComponentMap(componentMap);
+        profile.setComponentsByMimetypeMap(componentsByMimetypeMap);
+        profile.setComponentsByNodeTypeMap(componentsByNodeTypeMap);
         final List<CmdiProfile> profiles = new ArrayList<>();
         profiles.add(profile);
         
@@ -938,7 +1030,19 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, referenceMimetype, null, Boolean.FALSE);
+        
+        assertNull("Retrieved component should be null", retrievedComponentPath);
+        
+        // using the node type
+        
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        
+        context.checking(new Expectations() {{
+            allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(profiles));
+        }});
+        
+        retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, nodeType, Boolean.FALSE);
         
         assertNull("Retrieved component should be null", retrievedComponentPath);
     }
@@ -953,7 +1057,7 @@ public class LamusMetadataApiBridgeTest {
             allowing(mockAllowedCmdiProfiles).getProfiles(); will(returnValue(aFewProfiles));
         }});
         
-        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, Boolean.FALSE);
+        String retrievedComponentPath = lamusMetadataApiBridge.getComponentPathForProfileAndReferenceType(profileLocation, null, null, Boolean.FALSE);
         
         assertNull("Retrieved component should be null", retrievedComponentPath);
     }

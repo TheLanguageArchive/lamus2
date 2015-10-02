@@ -32,6 +32,7 @@ import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
@@ -252,24 +253,35 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     }
 
     /**
-     * @see MetadataApiBridge#getComponentPathForProfileAndReferenceType(java.net.URI, java.lang.String, boolean)
+     * @see MetadataApiBridge#getComponentPathForProfileAndReferenceType(
+     *  java.net.URI, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType, boolean)
      */
     @Override
-    public String getComponentPathForProfileAndReferenceType(URI profileLocation, String referenceType, boolean isInfoLink) {
+    public String getComponentPathForProfileAndReferenceType(URI profileLocation,
+            String referenceMimetype, WorkspaceNodeType referenceNodeType, boolean isInfoLink) {
         
-        if(referenceType == null) {
+        if(referenceMimetype == null && referenceNodeType == null) {
             return null;
         }
         
         CmdiProfile matchedProfile = getProfileWithLocation(profileLocation);
         
         if(matchedProfile != null) {
-            Map<String, String> componentMap = matchedProfile.getComponentMap();
+            boolean usingMimetype = true;
+            Map<String, String> componentMap;
+            
+            if(referenceMimetype != null) {
+                componentMap = matchedProfile.getComponentsByMimetypeMap();
+            } else {
+                usingMimetype = false;
+                componentMap = matchedProfile.getComponentsByNodeTypeMap();
+            }
+            
             if(componentMap != null && !componentMap.isEmpty()) {
                 Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
                 for(Map.Entry<String, String> entry : entrySet) {
-                    String typeToCheck = referenceType;
-                    if(isInfoLink) {
+                    String typeToCheck = usingMimetype ? referenceMimetype : referenceNodeType.name();
+                    if(isInfoLink && usingMimetype) {
                         typeToCheck = "info";
                     }
                     if(Pattern.matches(entry.getKey(), typeToCheck)) {

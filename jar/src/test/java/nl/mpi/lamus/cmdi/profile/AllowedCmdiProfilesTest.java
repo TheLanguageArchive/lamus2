@@ -114,7 +114,7 @@ public class AllowedCmdiProfilesTest {
                 assertFalse("Collection allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
                 assertTrue("Collection should only have four allowed reference types", profile.getAllowedReferenceTypes().size() == 4);
                 assertEquals("Collection should only allow the Metadata reference type", "Metadata", profile.getAllowedReferenceTypes().iterator().next());
-                assertNull("Collection component reference map should be null", profile.getComponentMap());
+                assertNull("Collection component reference map should be null", profile.getComponentsByMimetypeMap());
             }
             
             if("clarin.eu:cr1:p_1407745712064".equals(profile.getId())) { //lat-corpus
@@ -126,10 +126,10 @@ public class AllowedCmdiProfilesTest {
                 assertFalse("Lat-Corpus allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
                 assertTrue("Lat-Corpus should have five allowed reference types", profile.getAllowedReferenceTypes().size() == 5);
                 assertTrue("Lat-Corpus should allow Metadata and Resource reference types", profile.getAllowedReferenceTypes().contains("Metadata") && profile.getAllowedReferenceTypes().contains("Resource"));
-                assertNotNull("Lat-Corpus component reference map should not be null", profile.getComponentMap());
-                assertFalse("Lat-Corpus component reference map should not be empty", profile.getComponentMap().isEmpty());
-                assertTrue("Lat-Corpus component reference map should contain two entries", profile.getComponentMap().size() == 2);
-                Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
+                assertNotNull("Lat-Corpus component reference map should not be null", profile.getComponentsByMimetypeMap());
+                assertFalse("Lat-Corpus component reference map should not be empty", profile.getComponentsByMimetypeMap().isEmpty());
+                assertTrue("Lat-Corpus component reference map should contain two entries", profile.getComponentsByMimetypeMap().size() == 2);
+                Set<Entry<String, String>> entrySet = profile.getComponentsByMimetypeMap().entrySet();
                 boolean cmdiMatched = false;
                 boolean infoMatched = false;
                 for(Entry<String, String> entry : entrySet) {
@@ -155,10 +155,10 @@ public class AllowedCmdiProfilesTest {
                 assertFalse("Lat-Session allowed reference types list should not be empty", profile.getAllowedReferenceTypes().isEmpty());
                 assertTrue("Lat-Session should only have four allowed reference types", profile.getAllowedReferenceTypes().size() == 4);
                 assertEquals("Lat-Session should only allow the Metadata reference type", "Resource", profile.getAllowedReferenceTypes().iterator().next());
-                assertNotNull("Lat-Session component reference map should not be null", profile.getComponentMap());
-                assertFalse("Lat-Session component reference map should not be empty", profile.getComponentMap().isEmpty());
-                assertTrue("Lat-Session component reference map should contain three entries", profile.getComponentMap().size() == 3);
-                Set<Entry<String, String>> entrySet = profile.getComponentMap().entrySet();
+                assertNotNull("Lat-Session component reference map should not be null", profile.getComponentsByMimetypeMap());
+                assertFalse("Lat-Session component reference map should not be empty", profile.getComponentsByMimetypeMap().isEmpty());
+                assertTrue("Lat-Session component reference map should contain three entries", profile.getComponentsByMimetypeMap().size() == 3);
+                Set<Entry<String, String>> entrySet = profile.getComponentsByMimetypeMap().entrySet();
                 boolean cmdiMatched = false;
                 boolean mediaMatched = false;
                 boolean writtenMatched = false;

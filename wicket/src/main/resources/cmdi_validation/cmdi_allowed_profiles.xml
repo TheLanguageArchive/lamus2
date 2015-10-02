@@ -9,7 +9,7 @@
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <allowInfoLinks>true</allowInfoLinks>
-        <components>
+        <componentsByMimetype>
             <component>
                 <key>^(video|audio|image)/.*$</key>
                 <value>lat-session/Resources/MediaFile</value>
@@ -22,7 +22,21 @@
                 <key>^info$</key>
                 <value>lat-session/InfoLink</value>
             </component>
-        </components>
+        </componentsByMimetype>
+        <componentsByNodeType>
+            <component>
+                <key>^(RESOURCE_VIDEO|RESOURCE_AUDIO|RESOURCE_IMAGE)$</key>
+                <value>lat-session/Resources/MediaFile</value>
+            </component>
+            <component>
+                <key>^RESOURCE_WRITTEN$</key>
+                <value>lat-session/Resources/WrittenResource</value>
+            </component>
+            <component>
+                <key>^RESOURCE_INFO$</key>
+                <value>lat-session/InfoLink</value>
+            </component>
+        </componentsByNodeType>
         <translateType>session</translateType>
         <documentNamePath>/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Name</documentNamePath>
     </profile>
@@ -36,7 +50,7 @@
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <allowInfoLinks>true</allowInfoLinks>
-        <components>
+        <componentsByMimetype>
             <component>
                 <key>^text/x-cmdi\+xml$</key>
                 <value>lat-corpus/CorpusLink</value>
@@ -45,7 +59,17 @@
                 <key>^info$</key>
                 <value>lat-corpus/InfoLink</value>
             </component>
-        </components>
+        </componentsByMimetype>
+        <componentsByNodeType>
+            <component>
+                <key>^METADATA$</key>
+                <value>lat-corpus/CorpusLink</value>
+            </component>
+            <component>
+                <key>^RESOURCE_INFO$</key>
+                <value>lat-corpus/InfoLink</value>
+            </component>
+        </componentsByNodeType>
         <translateType>corpus</translateType>
         <documentNamePath>/cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:Name</documentNamePath>
     </profile>

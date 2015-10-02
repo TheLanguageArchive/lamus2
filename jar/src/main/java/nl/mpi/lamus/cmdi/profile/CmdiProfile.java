@@ -54,9 +54,13 @@ public class CmdiProfile {
     @XmlElement
     private boolean allowInfoLinks;
     
-    @XmlElement(name = "components")
+    @XmlElement(name = "componentsByMimetype")
     @XmlJavaTypeAdapter(ComponentMapAdapter.class)
-    private Map<String, String> componentMap;
+    private Map<String, String> componentsByMimetypeMap;
+    
+    @XmlElement(name = "componentsByNodeType")
+    @XmlJavaTypeAdapter(ComponentMapAdapter.class)
+    private Map<String, String> componentsByNodeTypeMap;
     
     @XmlElement
     private String translateType;
@@ -100,11 +104,18 @@ public class CmdiProfile {
         this.allowInfoLinks = allowInfoLinks;
     }
     
-    public Map<String, String> getComponentMap() {
-        return componentMap;
+    public Map<String, String> getComponentsByMimetypeMap() {
+        return componentsByMimetypeMap;
     }
-    public void setComponentMap(Map<String, String> componentMap) {
-        this.componentMap = componentMap;
+    public void setComponentsByMimetypeMap(Map<String, String> componentMap) {
+        this.componentsByMimetypeMap = componentMap;
+    }
+    
+    public Map<String, String> getComponentsByNodeTypeMap() {
+        return componentsByNodeTypeMap;
+    }
+    public void setComponentsByNodeTypeMap(Map<String, String> componentMap) {
+        this.componentsByNodeTypeMap = componentMap;
     }
     
     public String getTranslateType() {

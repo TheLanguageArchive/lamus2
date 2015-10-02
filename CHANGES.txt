@@ -1,3 +1,9 @@
+lamus2-1.4.0-RC3 (2015-10-??)
+
+    Changes:
+        - COMPONENTS: Added the mapping between node types and components, for
+          the case of external nodes, for which the typechecker is not executed. (#4613)
+
 lamus2-1.4.0-RC2 (2015-09-28)
 
     Fixes:
