@@ -60,6 +60,8 @@ Lamus2 needs the 'corpusstructure3' (or another name for the hybrid corpusstruct
 
 The other necessary properties should be defined as parameters in the web context configuration.
 
+    LAMUS 2
+
         <Parameter name="nl.mpi.lamus.csdb_hybrid_db_resource"
                    value="java:comp/env/jdbc/CSDB_HYBRID"
                    description="corpusstructure (hybrid) database resource"
@@ -151,6 +153,11 @@ The other necessary properties should be defined as parameters in the web contex
                    value="lamus@mpi.nl"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.mailAddress"
+                   value="guisil@mpi.nl"            
+                   description="the LAMUS will send messages to"         
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.manager.users"
                    value="corpman@mpi.nl"
                    override="false"/>
@@ -234,6 +241,47 @@ The other necessary properties should be defined as parameters in the web contex
         <Parameter name="nl.mpi.lamus.permissionConfigFile_CMDI"
                    value="/lat/tomcat-corpman/conf/apa-permissions_cmdi.conf"
                    description="name of a config file containing paths which require adjustments in the filesystem permissions, done by Lamus2"
+                   override="false"/>
+
+
+    RRS
+
+        <Parameter name="nl.mpi.rrsUrl"
+                   value="https://lux16.mpi.nl/ds/RRS_V1/"
+                   description="Base URL for RRS"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.rrsRegister"                                    
+                   value="RrsRegistration"                              
+                   description="Name of RrsRegistration"                
+                   override="false"/>
+
+
+    AMS2
+
+        <Parameter name="nl.mpi.auth.cmdi.baseurl"
+                   value="http://127.0.0.1/am/ams2-cmdi"
+                   description=""
+                   override="false"/>
+
+        <Parameter name="nl.mpi.auth.recalc.url"
+                   value="pages/recalc.face"            
+                   description=""         
+                   override="false"/>
+                   
+        <Parameter name="nl.mpi.auth.recalc.param"
+                   value="nodeid"            
+                   description=""         
+                   override="false"/>
+                   
+        <Parameter name="nl.mpi.auth.recalc_csdb.url"
+                   value="pages/recalc_csdb.face"            
+                   description=""         
+                   override="false"/>
+
+        <Parameter name="nl.mpi.auth.recalc_webserver.url"
+                   value="pages/recalc_webserver.face"            
+                   description=""         
                    override="false"/>
 
 2. Schematron configuration
