@@ -184,7 +184,7 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
      */
     @Override
     public void unlockAllNodesOfWorkspace(int workspaceID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.getWorkspaceDao().unlockAllNodesOfWorkspace(workspaceID);
     }
     
     /**
