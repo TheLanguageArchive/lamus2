@@ -127,6 +127,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Override
     public String callCrawler(URI nodeUri) throws CrawlerInvocationException {
         
+        logger.debug("Calling crawler for URI " + nodeUri);
+        
         JsonObject responseJsonObject;
         try {
             responseJsonObject =
@@ -141,6 +143,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
             throw new CrawlerInvocationException(errorMessage, ex);
         }
         
+        logger.debug("Getting crawler ID after invocation");
+        
         String crawlerId = jsonTransformationHandler.getCrawlerIdFromJsonObject(responseJsonObject);
         
         return crawlerId;
@@ -151,6 +155,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
      */
     @Override
     public String getCrawlerState(String crawlerID) throws CrawlerStateRetrievalException {
+        
+        logger.debug("Getting state of crawler with ID " + crawlerID);
         
         JsonObject responseJsonObject;
         try {
