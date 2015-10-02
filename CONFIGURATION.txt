@@ -211,6 +211,11 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Location of the translation service"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.asv_openhandle_base_url"
+                   value="https://lux16.mpi.nl/ds/asv_hybrid?openhandle="
+                   description="Base URL to open a node in ASV using the hanlde"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.schematronValidationFile_upload"
                    value="/lat/tomcat-corpman/conf/cmdi_schematron_upload.sch"
                    description="Path to a schematron file to be used in Lamus for CMDI validation during file upload"
