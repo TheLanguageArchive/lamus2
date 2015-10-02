@@ -113,7 +113,15 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         try {
             workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
             success = true;
-        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
+        } catch(WorkspaceExportException ex) {
+            StringBuilder messageToShow = new StringBuilder();
+            messageToShow.append(ex.getMessage());
+            if(ex.getCause() != null) {
+                messageToShow.append("\n");
+                messageToShow.append(ex.getCause().getMessage());
+            }
+            Session.get().error(messageToShow);
+        } catch(WorkspaceNotFoundException | WorkspaceAccessException ex) {
             Session.get().error(ex.getMessage());
         } catch(MetadataValidationException ex) {
             StringBuilder errorMessage = new StringBuilder();
@@ -138,7 +146,15 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
         try {
             workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
-        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException | IOException ex) {
+        } catch(WorkspaceExportException ex) {
+            StringBuilder messageToShow = new StringBuilder();
+            messageToShow.append(ex.getMessage());
+            if(ex.getCause() != null) {
+                messageToShow.append("\n");
+                messageToShow.append(ex.getCause().getMessage());
+            }
+            Session.get().error(messageToShow);
+        } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
             Session.get().error(ex.getMessage());
         }
         
