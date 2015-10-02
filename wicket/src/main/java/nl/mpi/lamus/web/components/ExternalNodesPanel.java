@@ -114,6 +114,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
             setOutputMarkupId(true);
 
             externalUrlField = new TextField<>("externalUrl", Model.of(""));
+            externalUrlField.setRequired(true);
             externalUrlField.add(new UrlValidator());
             add(externalUrlField);
             
@@ -134,6 +135,7 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
                     setModel(new Model<>(newSelection));
                 }
             };
+            externalType.setRequired(true);
             add(externalType);
 
             add(new AjaxButton("add", this) {
