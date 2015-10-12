@@ -22,6 +22,7 @@ import nl.mpi.lamus.util.MailHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,6 +36,7 @@ public class LamusWorkspaceMailer implements WorkspaceMailer {
     private final MailHelper mailHelper;
     
     @Autowired
+    @Qualifier("asvOpenhandleBaseUrl")
     private String asvOpenhandleBaseUrl;
     
     
