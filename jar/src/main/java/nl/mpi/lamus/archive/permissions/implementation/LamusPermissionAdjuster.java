@@ -91,13 +91,17 @@ public class LamusPermissionAdjuster implements PermissionAdjuster {
             } // skip remote files
             n++;
             
-            URL nodeURL;
-            if(node.getArchiveURI() != null) {
-                nodeURL = node.getArchiveURL();
-            } else {
+            URL nodeURL = node.getArchiveURL();
+            
+            if(nodeURL == null) {
                 //could be a node that was never in the archive and won't be (uploaded and deleted)
                 // but could also be an unlinked node which was saved in the orphans folder, for which case we want to continue
                 nodeURL = node.getWorkspaceURL();
+            }
+            
+            if(nodeURL == null) { //it shouldn't be null, but if this eventually happens we want to skip to the next file
+                logger.warn("Could not get a URL for node " + node.getWorkspaceNodeID());
+                continue;
             }
             
             File nodeFile;
