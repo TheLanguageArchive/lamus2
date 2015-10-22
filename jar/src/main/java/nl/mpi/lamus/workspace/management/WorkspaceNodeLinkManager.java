@@ -75,6 +75,15 @@ public interface WorkspaceNodeLinkManager {
             throws WorkspaceException, ProtectedNodeException;
     
     /**
+     * Unlinks the given node from its replaced
+     * (or older, if none is replaced) parent.
+     * @param childNode WorkspaceNode object corresponding to the node to be unlinked
+     * @param newParentNode WorkspaceNode object corresponding to the new parent node
+     */
+    public void unlinkNodeFromReplacedParent(WorkspaceNode childNode, WorkspaceNode newParentNode)
+            throws WorkspaceException, ProtectedNodeException;
+    
+    /**
      * Replaces, in the workspace, a node by a newer version.
      * The link in the parent has to be changed as well.
      * 

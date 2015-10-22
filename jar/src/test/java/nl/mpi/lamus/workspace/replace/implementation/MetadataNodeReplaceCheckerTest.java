@@ -37,6 +37,7 @@ import nl.mpi.lamus.workspace.replace.action.implementation.DeleteNodeReplaceAct
 import nl.mpi.lamus.workspace.replace.action.implementation.LinkNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.ReplaceNodeReplaceAction;
+import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeFromReplacedParentReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeReplaceAction;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -75,6 +76,7 @@ public class MetadataNodeReplaceCheckerTest {
     @Mock CorpusNode mockOldCorpusNode;
     
     @Mock UnlinkNodeReplaceAction mockUnlinkAction;
+    @Mock UnlinkNodeFromReplacedParentReplaceAction mockUnlinkFromReplacedParentAction;
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock LinkNodeReplaceAction mockLinkAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
@@ -173,6 +175,27 @@ public class MetadataNodeReplaceCheckerTest {
             assertEquals("Exception node URI different from expected", oldNodeURI, ex.getNodeURI());
             assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
         }
+    }
+    
+    @Test
+    public void decideReplaceActions_OldNodeProtected_ButNotActuallyBeingReplaced() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
+        
+        final int oldNodeID = 100;
+        final int newNodeID = 100;
+        
+        final boolean newNodeAlreadyLinked = Boolean.TRUE;
+        final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+
+            oneOf(mockReplaceActionFactory).getUnlinkFromOldParentAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkFromReplacedParentAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkFromReplacedParentAction, actions);
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test

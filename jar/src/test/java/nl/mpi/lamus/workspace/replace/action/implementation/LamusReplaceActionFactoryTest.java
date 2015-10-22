@@ -117,4 +117,13 @@ public class LamusReplaceActionFactoryTest {
         assertEquals("Action affected node different from expected", mockAffectedNode, retrievedAction.getAffectedNode());
         assertEquals("Action parent node different from expected", mockParentNode, retrievedAction.getParentNode());
     }
+    
+    @Test
+    public void getUnlinkFromOldParentAction() {
+        
+        UnlinkNodeFromReplacedParentReplaceAction retrievedAction = replaceActionFactory.getUnlinkFromOldParentAction(mockAffectedNode, mockParentNode);
+        
+        assertEquals("Action affected node different from expected", mockAffectedNode, retrievedAction.getAffectedNode());
+        assertEquals("Action new parent node different from expected", mockParentNode, retrievedAction.getNewParentNode());
+    }
 }

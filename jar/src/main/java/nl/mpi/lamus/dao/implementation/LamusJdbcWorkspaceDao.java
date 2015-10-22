@@ -1036,6 +1036,31 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         logger.info("Nodes and links belonging to workspace " + workspace.getWorkspaceID() + " were deleted");
     }
 
+    /**
+     * @see WorkspaceDao#getOlderVersionOfNode(int, int)
+     */
+    @Override
+    public WorkspaceNode getOlderVersionOfNode(int workspaceID, int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException {
+        
+        logger.debug("Retrieving older version of node " + workspaceNodeID);
+        
+        String queryWorkspaceNodeSql = "SELECT * FROM node WHERE workspace_node_id IN (SELECT old_node_id FROM node_replacement WHERE new_node_id = :node_id)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("node_id", workspaceNodeID);
+        
+        WorkspaceNode olderVersion;
+        try {
+            olderVersion = this.namedParameterJdbcTemplate.queryForObject(queryWorkspaceNodeSql, namedParameters, new WorkspaceNodeMapper());
+        } catch(EmptyResultDataAccessException ex) {
+            String errorMessage = "Older version of node with ID " + workspaceNodeID + " not found in the database";
+            logger.error(errorMessage, ex);
+            throw new WorkspaceNodeNotFoundException(errorMessage, workspaceID, -1, ex);
+        }
+        
+        logger.info("Older version of node with ID " + workspaceNodeID + " retrieved from the database");
+        
+        return olderVersion;
+    }
     
     /**
      * @see WorkspaceDao#getNewerVersionOfNode(int, int)

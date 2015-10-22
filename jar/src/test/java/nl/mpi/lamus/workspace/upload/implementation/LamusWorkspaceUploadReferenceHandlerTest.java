@@ -152,7 +152,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     
     
     @Test
-    public void matchOneReference_WithLocalUri_WithEmptyUri() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithEmptyUri() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
@@ -161,6 +161,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -178,6 +181,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -191,12 +199,15 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithEmptyUri_OneReferenceIsAPage() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithEmptyUri_OneReferenceIsAPage() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
         final URI secondRefURI = URI.create("");
         final URI secondRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final URI secondDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File secondDocumentLocationFile = new File(secondDocumentLocation.getPath());
@@ -220,6 +231,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockSecondReference, mockSecondNode, secondRefLocalUri, secondRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, secondDocumentLocation, secondDocumentLocationFile, mockSecondReference, secondRefURI, Boolean.FALSE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockSecondReference, secondRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, secondRefLocalUri, secondNodeURI, null, secondDocumentLocation, secondDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockSecondReference, Boolean.FALSE, mockSecondNode);
         
@@ -233,13 +249,16 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithEmptyUri_parentHasNoSelfHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithEmptyUri_parentHasNoSelfHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI firstRefURI = URI.create("");
         final URI firstRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -257,6 +276,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -270,7 +294,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithEmptyUri_ParentWithExternalSelfHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithEmptyUri_ParentWithExternalSelfHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:34444/" + UUID.randomUUID().toString());
         
@@ -279,6 +303,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -299,6 +326,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -312,7 +344,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithHandle() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
@@ -321,6 +353,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -340,6 +375,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -353,7 +393,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithHandle_InfoLink() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithHandle_InfoLink() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
@@ -362,6 +402,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -381,6 +424,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.TRUE, mockSecondNode);
         
@@ -442,15 +490,21 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithHandle_MultipleParents() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithHandle_MultipleParents() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
-        final URI firstRefURI = URI.create("hdl:" + UUID.randomUUID().toString());
+        final String firstRefRawHandle = UUID.randomUUID().toString();
+        final URI firstRefURI = URI.create("11142" + firstRefRawHandle);
+        final URI completeFirstRefURI = URI.create("hdl:11142/" + firstRefRawHandle);
+        
         final URI firstRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -471,6 +525,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.TRUE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -490,14 +549,21 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     @Test
-    public void matchOneReference_WithLocalUri_WithUri() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException {
+    public void matchOneReference_WithLocalUri_WithUri() throws MalformedURLException, WorkspaceException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        final String firstRefRawHandle = UUID.randomUUID().toString();
+        final URI firstRefURI = URI.create("11142" + firstRefRawHandle);
+        final URI completeFirstRefURI = URI.create("hdl:11142/" + firstRefRawHandle);
         
         final URI firstRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
         
         final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
         final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final URL secondNodeURL = new URL("file:/workspaces/" + workspaceID + "/upload/parent/child.txt");
+        final URI secondNodeURI = secondNodeURL.toURI();
         
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockFirstNode);
@@ -517,6 +583,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefLocalUri, nodesToCheck);
         //URI is not a handle, so it should be cleared (since the local URL is already present in the localURI attribute)
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefLocalUri, Boolean.TRUE);
+        
+        //change the reference URI to the workspace URL and save the document in the same location
+        updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.TRUE, mockSecondNode,
+                secondNodeURL, null, firstRefLocalUri, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
+        
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
@@ -1229,7 +1300,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     }
     
     private void updateLocalUri(final ReferencingMetadataDocument mockDocument, final Reference mockReference, final URI referenceURI,
-            final boolean hasHandle, final boolean handlesEquivalent,
+            final boolean hasHandleAndNoLocalURI, final boolean handlesEquivalent,
             final WorkspaceNode mockNode, final URL nodeWsURL, final URL nodeArURL, final URI oldLocalUri, final URI newLocalUri, final URI nodeArchiveURI,
             final URI documentLocation, final File documentLocationFile) throws IOException, TransformerException, MetadataException {
         
@@ -1247,7 +1318,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             oneOf(mockMetadataAPI).writeMetadataDocument(mockDocument, mockStreamResult);
         }});
         
-        if(hasHandle) {
+        if(hasHandleAndNoLocalURI) {
             updateReferenceDbUri_refHasNoLocalUri(mockNode, nodeArchiveURI, referenceURI, handlesEquivalent);
         }
     }

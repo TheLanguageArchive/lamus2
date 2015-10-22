@@ -336,6 +336,15 @@ public interface WorkspaceDao {
     public void cleanWorkspaceNodesAndLinks(Workspace workspace);
     
     /**
+     * Retrieves the node which was replaced by the given node.
+     * @param workspaceID ID of the workspace
+     * @param workspaceNodeID ID of the node which replaced the one to retrieve
+     * @return WorkspaceNode object corresponding to the older version
+     */
+    public WorkspaceNode getOlderVersionOfNode(int workspaceID, int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException;
+    
+    /**
      * Retrieves the node which replaced the given node.
      * @param workspaceID ID of the workspace
      * @param workspaceNodeID ID of the node which was replaced

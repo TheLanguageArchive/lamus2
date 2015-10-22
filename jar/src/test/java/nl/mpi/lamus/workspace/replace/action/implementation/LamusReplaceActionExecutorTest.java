@@ -56,6 +56,7 @@ public class LamusReplaceActionExecutorTest {
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
     @Mock RemoveArchiveUriReplaceAction mockRemoveArchiveUriAction;
+    @Mock UnlinkNodeFromReplacedParentReplaceAction mockUnlinkFromReplacedParentAction;
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
     @Mock WorkspaceNode mockNewChildNode;
@@ -292,6 +293,43 @@ public class LamusReplaceActionExecutorTest {
         
         try {
             replaceActionExecutor.execute(mockRemoveArchiveUriAction);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void executeUnlinkFromReplacedParentActionSuccessful() throws WorkspaceException, ProtectedNodeException {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockUnlinkFromReplacedParentAction).getNewParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockUnlinkFromReplacedParentAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
+        }});
+        
+        replaceActionExecutor.execute(mockUnlinkFromReplacedParentAction);
+    }
+    
+    @Test
+    public void executeUnlinkFromOldParentActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 10;
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockUnlinkFromReplacedParentAction).getNewParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockUnlinkFromReplacedParentAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            replaceActionExecutor.execute(mockUnlinkFromReplacedParentAction);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

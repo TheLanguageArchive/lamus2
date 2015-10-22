@@ -139,48 +139,17 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, preparedHandle);
                     
                     if(matchedNode != null) {
-                        try {
-                            URL urlToUse = matchedNode.getWorkspaceURL();
-                            if(urlToUse == null) {
-                                urlToUse = matchedNode.getArchiveURL();
-                            }
-                            URI locationToUse;
-                            if(urlToUse != null) {
-                                locationToUse = urlToUse.toURI();
-                            } else {
-                                throw new IllegalArgumentException("No location found for matched node " + matchedNode.getWorkspaceNodeID());
-                            }
-                            updateLocalUrl(currentDocument, ref, locationToUse, matchedNode);
-                        } catch (URISyntaxException ex) {
-                            logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
-                        }
-
                         //set handle in DB
                         if(!handleParser.areHandlesEquivalent(preparedHandle, matchedNode.getArchiveURI())) {
                             matchedNode.setArchiveURI(preparedHandle);
                             workspaceDao.updateNodeArchiveUri(matchedNode);
                         }
-                        
                         if(!refURI.equals(preparedHandle)) {
                             updateHandle(currentDocument, ref, preparedHandle, currentNode);
                         }
                     }
-                
                 } else {
-
                     matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
-
-                    if(matchedNode != null) {
-                        try {
-                            URI locationToUse = matchedNode.getWorkspaceURL().toURI();
-                            if(locationToUse == null) {
-                                locationToUse = matchedNode.getArchiveURL().toURI();
-                            }
-                            updateLocalUrl(currentDocument, ref, locationToUse, matchedNode);
-                        } catch (URISyntaxException ex) {
-                            logger.warn("Problems updating localUrl in reference (URI: " + refURI + ")");
-                        }
-                    }
                 }
                 
                 //check if it's an external reference
@@ -193,6 +162,11 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             }
 
             if(matchedNode != null) {
+                
+                // update localURI, even if it was present already, since it could be a relative path and not matching the later calls using the absolute path
+                if(!externalNode) {
+                    updateLocalUrl(currentDocument, ref, matchedNode);
+                }
                 
                 Collection<WorkspaceNode> alreadyLinkedParents = workspaceDao.getParentWorkspaceNodes(matchedNode.getWorkspaceNodeID());
                 
@@ -285,13 +259,29 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         }
     }
     
-    private void updateLocalUrl(ReferencingMetadataDocument document, Reference ref, URI newLocation, WorkspaceNode referencedNode) {
+    private void updateLocalUrl(ReferencingMetadataDocument document, Reference ref, WorkspaceNode referencedNode) {
+        
+        URI locationToUse = null;
+        try {
+            URL urlToUse = referencedNode.getWorkspaceURL();
+            if(urlToUse == null) {
+                urlToUse = referencedNode.getArchiveURL();
+            }
+            if(urlToUse != null) {
+                locationToUse = urlToUse.toURI();
+            } else {
+                throw new IllegalArgumentException("No location found for matched node " + referencedNode.getWorkspaceNodeID());
+            }
+        } catch (URISyntaxException ex) {
+            logger.warn("Problems updating localUrl in reference (URI: " + ref.getURI() + ")");
+            return;
+        }
         
         StringBuilder message = new StringBuilder();
         
         String oldLocation = (ref.getLocation() != null) ? ref.getLocation().toString() : "";
         message.append("[old URL: '").append(oldLocation).append("']");
-        ref.setLocation(newLocation);
+        ref.setLocation(locationToUse);
         
         try {
             File documentFile = new File(document.getFileLocation().getPath());

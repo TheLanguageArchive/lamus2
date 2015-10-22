@@ -75,4 +75,12 @@ public class LamusReplaceActionFactory implements ReplaceActionFactory {
     public RemoveArchiveUriReplaceAction getRemoveArchiveUriAction(WorkspaceNode affectedNode, WorkspaceNode parentNode) {
         return new RemoveArchiveUriReplaceAction(affectedNode, parentNode);
     }
+
+    /**
+     * @see ReplaceActionFactory#getUnlinkFromOldParentAction(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public UnlinkNodeFromReplacedParentReplaceAction getUnlinkFromOldParentAction(WorkspaceNode affectedNode, WorkspaceNode newParentNode) {
+        return new UnlinkNodeFromReplacedParentReplaceAction(affectedNode, newParentNode);
+    }
 }

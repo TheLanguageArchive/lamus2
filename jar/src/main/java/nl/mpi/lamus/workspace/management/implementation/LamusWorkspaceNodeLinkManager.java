@@ -26,6 +26,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.metadata.implementation.MetadataReferenceType;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -302,6 +303,26 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         for(WorkspaceNode parent : parentNodes) {
             this.unlinkNodes(parent, childNode, false);
         }
+    }
+
+    /**
+     * @see WorkspaceNodeLinkManager#unlinkNodeFromReplacedParent(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void unlinkNodeFromReplacedParent(WorkspaceNode childNode, WorkspaceNode newParentNode)
+            throws WorkspaceException, ProtectedNodeException{
+        
+        WorkspaceNode replacedParentNode = null;
+        try {
+            replacedParentNode = this.workspaceDao.getOlderVersionOfNode(newParentNode.getWorkspaceID(), newParentNode.getWorkspaceNodeID());
+        } catch(WorkspaceNodeNotFoundException ex) {
+            //keep node as null
+        }
+        if(replacedParentNode == null) {
+            // nothing happens
+            return;
+        }
+        this.unlinkNodes(replacedParentNode, childNode, false);
     }
     
     /**

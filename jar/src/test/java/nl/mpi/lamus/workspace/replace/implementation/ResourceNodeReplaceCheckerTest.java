@@ -38,6 +38,7 @@ import nl.mpi.lamus.workspace.replace.action.ReplaceActionManager;
 import nl.mpi.lamus.workspace.replace.action.implementation.DeleteNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.LinkNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.ReplaceNodeReplaceAction;
+import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeFromReplacedParentReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeReplaceAction;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
@@ -77,6 +78,7 @@ public class ResourceNodeReplaceCheckerTest {
     @Mock FileInfo mockOldCorpusNodeFileInfo;
     
     @Mock UnlinkNodeReplaceAction mockUnlinkAction;
+    @Mock UnlinkNodeFromReplacedParentReplaceAction mockUnlinkFromReplacedParentAction;
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock LinkNodeReplaceAction mockLinkAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
@@ -122,10 +124,6 @@ public class ResourceNodeReplaceCheckerTest {
         final int newNodeID = 200;
         
         final URI archiveNodeHandleURI = new URI(UUID.randomUUID().toString());
-        final URL archiveNodeRemoteURL = new URL("http://remote/archive/file.txt");
-        final URI archiveNodeRemoteURI = archiveNodeRemoteURL.toURI();
-        final URL archiveNodeLocalURL = new URL("file:/local/archive/file.txt");
-        final URI archiveNodeLocalURI = archiveNodeLocalURL.toURI();
         
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
@@ -138,14 +136,10 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
@@ -172,10 +166,6 @@ public class ResourceNodeReplaceCheckerTest {
         final int newNodeID = 200;
         
         final URI archiveNodeHandleURI = new URI(UUID.randomUUID().toString());
-        final URL archiveNodeRemoteURL = new URL("http://remote/archive/file.txt");
-        final URI archiveNodeRemoteURI = archiveNodeRemoteURL.toURI();
-        final URL archiveNodeLocalURL = new URL("file:/local/archive/file.txt");
-        final URI archiveNodeLocalURI = archiveNodeLocalURL.toURI();
         
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
@@ -188,14 +178,10 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
@@ -229,10 +215,6 @@ public class ResourceNodeReplaceCheckerTest {
         final int newNodeID = 200;
         
         final URI oldNodeArchiveHandleURI = new URI(UUID.randomUUID().toString());
-        final URL oldNodeArchiveRemoteURL = new URL("http://remote/archive/file.txt");
-        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
-        final URL oldNodeArchiveLocalURL = new URL("file:/local/archive/file.txt");
-        final URI oldNodeArchiveLocalURI = oldNodeArchiveLocalURL.toURI();
         
         final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
         final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
@@ -245,14 +227,10 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
@@ -276,12 +254,8 @@ public class ResourceNodeReplaceCheckerTest {
     @Test
     public void decideReplaceActionsOldNodeNotInArchive() throws MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
-        final int workspaceID = 10;
         final int oldNodeID = 100;
         final int newNodeID = 200;
-        
-        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.txt");
-        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
         final String oldNodeFormat = "text/plain";
         final String newNodeFormat = "text/plain";
@@ -291,14 +265,10 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
@@ -321,18 +291,8 @@ public class ResourceNodeReplaceCheckerTest {
     @Test
     public void decideReplaceActionsNodesWithDifferentFormats() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
-        final int workspaceID = 10;
         final int oldNodeID = 100;
         final int newNodeID = 200;
-        
-        final URI oldNodeArchiveHandleURI = new URI(UUID.randomUUID().toString());
-        final URL oldNodeArchiveRemoteURL = new URL("http://remote/archive/file.txt");
-        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
-        final URL oldNodeArchiveLocalURL = new URL("file:/local/archive/file.txt");
-        final URI oldNodeArchiveLocalURI = oldNodeArchiveLocalURL.toURI();
-        
-        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/file.jpg");
-        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
         
         final String oldNodeFormat = "text/plain";
         final String newNodeFormat = "image/jpeg";
@@ -342,14 +302,10 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.FALSE));
             
@@ -370,31 +326,18 @@ public class ResourceNodeReplaceCheckerTest {
     @Test
     public void decideReplaceActionsOldNodeExternal() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
-        final int workspaceID = 10;
         final int oldNodeID = 100;
         final int newNodeID = 200;
-        
-        final URL oldNodeArchiveRemoteURL = new URL("http://external/location/file.txt");
-        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
-        
-        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/someotherfile.txt");
-        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
-        
-        final String newNodeFormat = "text/plain";
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         final boolean isOldNodeProtected = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isExternal(); will(returnValue(Boolean.TRUE));
             
@@ -417,14 +360,6 @@ public class ResourceNodeReplaceCheckerTest {
         final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
         final int newNodeID = 200;
         
-        final URL oldNodeArchiveRemoteURL = new URL("http://external/location/file.txt");
-        final URI oldNodeArchiveRemoteURI = oldNodeArchiveRemoteURL.toURI();
-        
-        final URL newNodeWorkspaceURL = new URL("file:/lamus/folder/workspace/" + workspaceID + "/someotherfile.txt");
-        final File newNodeWorkspaceFile = new File(newNodeWorkspaceURL.getPath());
-        
-        final String newNodeFormat = "text/plain";
-        
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         final boolean isOldNodeProtected = Boolean.TRUE;
         
@@ -432,14 +367,12 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            exactly(2).of(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));            
         }});
         
@@ -454,6 +387,26 @@ public class ResourceNodeReplaceCheckerTest {
     }
     
     @Test
+    public void decideReplaceActions_OldNodeProtected_ButNotActuallyBeingReplaced() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
+        
+        final int nodeID = 100;
+        
+        final boolean newNodeAlreadyLinked = Boolean.TRUE;
+        final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
+            oneOf(mockReplaceActionFactory).getUnlinkFromOldParentAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkFromReplacedParentAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkFromReplacedParentAction, actions);
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
     public void decideReplaceActionsNodesAreTheSame() throws ProtectedNodeException, IncompatibleNodesException {
         
         final int nodeID = 100;
@@ -463,14 +416,11 @@ public class ResourceNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             
-            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(nodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(nodeID));
+            oneOf(mockReplaceActionFactory).getUnlinkFromOldParentAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkFromReplacedParentAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkFromReplacedParentAction, actions);
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);

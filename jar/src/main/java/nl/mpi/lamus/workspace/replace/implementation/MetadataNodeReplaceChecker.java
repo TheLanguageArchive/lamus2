@@ -76,6 +76,13 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
             }
         }
         
+        // not actually replacing this one, so this check should be done before anything else can block the action
+        if(oldNode.getWorkspaceNodeID() == newNode.getWorkspaceNodeID()) {
+            logger.debug("Old Node and New Node are the same. Unlinking from old parent.");
+            replaceActionManager.addActionToList(replaceActionFactory.getUnlinkFromOldParentAction(oldNode, parentNode), actions);
+            return;
+        }
+        
         // if the node to replace is protected, the replace action should not go ahead
         if(oldNode.isProtected()) {
             String message = "Cannot proceed with replacement because old node (ID = " + oldNode.getWorkspaceNodeID() + ") is protected (WS ID = " + oldNode.getWorkspaceID() + ").";

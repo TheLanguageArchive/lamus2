@@ -30,6 +30,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.metadata.implementation.MetadataReferenceType;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeLinkFactory;
@@ -1794,6 +1795,78 @@ public class LamusWorkspaceNodeLinkManagerTest {
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         nodeLinkManager.unlinkNodeFromAllParents(mockChildNode);
+    }
+    
+    @Test
+    public void unlinkNodeFromReplacedParent() throws WorkspaceException, ProtectedNodeException, MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
+        
+        final int workspaceID = 1;
+        final int oldParentNodeID = 2;
+        final int newParentNodeID = 3;
+        
+        final URL oldParentURL = new URL("file:/lamus/workspace/" + workspaceID + "/parent.cmdi");
+        
+        final int childNodeID = 4;
+        final URL childURL = new URL("file:/lamus/workspace/" + workspaceID + "/child.cmdi");
+        final URI childURI = childURL.toURI();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(newParentNodeID));
+            
+            oneOf(mockWorkspaceDao).getOlderVersionOfNode(workspaceID, newParentNodeID); will(returnValue(mockOtherParentNode));
+        }});
+        
+        // unlink nodes
+        context.checking(new Expectations() {{
+            
+            oneOf(mockOtherParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            
+            //logger
+            oneOf(mockOtherParentNode).getWorkspaceNodeID(); will(returnValue(oldParentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockOtherParentNode).getWorkspaceURL(); will(returnValue(oldParentURL));
+            oneOf(mockMetadataAPI).getMetadataDocument(oldParentURL); will(returnValue(mockOtherParentDocument));
+            
+            oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
+            oneOf(mockOtherParentDocument).getDocumentReferenceByLocation(childURI); will(returnValue(mockChildReferenceWithHandle));
+            oneOf(mockOtherParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
+            
+            oneOf(mockOtherParentNode).getWorkspaceURL(); will(returnValue(oldParentURL));
+            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
+            oneOf(mockMetadataAPI).writeMetadataDocument(mockOtherParentDocument, mockParentStreamResult);
+            
+            oneOf(mockOtherParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockOtherParentNode).getWorkspaceNodeID(); will(returnValue(oldParentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockWorkspaceDao).deleteWorkspaceNodeLink(workspaceID, oldParentNodeID, childNodeID);
+        }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
+        
+        nodeLinkManager.unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
+    }
+    
+    @Test
+    public void unlinkNodeFromReplacedParent_NotFound() throws WorkspaceNodeNotFoundException, WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 1;
+        final int newParentNodeID = 3;
+        
+        final WorkspaceNodeNotFoundException exceptionToThrow = new WorkspaceNodeNotFoundException("some exception message", workspaceID, -1, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(newParentNodeID));
+            
+            oneOf(mockWorkspaceDao).getOlderVersionOfNode(workspaceID, newParentNodeID); will(throwException(exceptionToThrow));
+        }});
+        
+        nodeLinkManager.unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
     }
     
     @Test

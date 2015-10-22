@@ -37,8 +37,8 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusReplaceActionExecutor.class);
 
-    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private WorkspaceNodeManager workspaceNodeManager;
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private final WorkspaceNodeManager workspaceNodeManager;
     
     
     @Autowired
@@ -68,6 +68,8 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
             executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action);
         } else if(action instanceof RemoveArchiveUriReplaceAction) {
             executeRemoveArchiveUriAction((RemoveArchiveUriReplaceAction) action);
+        } else if(action instanceof UnlinkNodeFromReplacedParentReplaceAction) {
+            executeUnlinkFromReplacedParentAction((UnlinkNodeFromReplacedParentReplaceAction) action);
         }
     }
     
@@ -109,5 +111,12 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing Remove Archive URI Action: " + action.toString());
         
         workspaceNodeLinkManager.removeArchiveUriFromChildNode(action.getParentNode(), action.getAffectedNode());
+    }
+    
+    private void executeUnlinkFromReplacedParentAction(UnlinkNodeFromReplacedParentReplaceAction action) throws WorkspaceException, ProtectedNodeException {
+        
+        logger.debug("Executing Unlink from replaced parent Action: " + action.toString());
+        
+        workspaceNodeLinkManager.unlinkNodeFromReplacedParent(action.getAffectedNode(), action.getNewParentNode());
     }
 }

@@ -380,6 +380,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#getOlderVersionOfNode(int, int)
+     */
+    @Override
+    public WorkspaceNode getOlderVersionOfNode(int workspaceID, int workspaceNodeID) throws WorkspaceNodeNotFoundException {
+        return this.getWorkspaceDao().getOlderVersionOfNode(workspaceID, workspaceNodeID);
+    }
+
+    /**
      * @see WorkspaceDao#getNewerVersionOfNode(int, int)
      */
     @Override

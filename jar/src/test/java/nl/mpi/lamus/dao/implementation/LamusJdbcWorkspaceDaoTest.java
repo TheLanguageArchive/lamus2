@@ -2160,6 +2160,62 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     }
     
     @Test
+    public void getOlderVersionOfNodeExists() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI oldURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI newURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode, newNode);
+        
+        WorkspaceNode retrievedNode = this.workspaceDao.getOlderVersionOfNode(testWorkspace.getWorkspaceID(), newNode.getWorkspaceNodeID());
+        
+        assertEquals("Retrieved node different from expected", oldNode, retrievedNode);
+    }
+    
+    @Test
+    public void getOlderVersionOfNodeDoesNotExist() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException {
+        
+        Workspace testWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, topURI, topURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace, topNode);
+        
+        URI oldURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, oldURI, oldURL, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsReplaced(oldNode);
+        
+        URI newURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace, newURI, newURL, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode, newNode);
+        
+        String expectedExceptionMessage = "Older version of node with ID " + newNode.getWorkspaceNodeID() + " not found in the database";
+        
+        try {
+            this.workspaceDao.getOlderVersionOfNode(testWorkspace.getWorkspaceID(), newNode.getWorkspaceNodeID());
+            fail("should have thrown exception");
+        } catch(WorkspaceNodeNotFoundException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("workspaceID in Exception different from expected", testWorkspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertTrue("Cause of exception different from expected", ex.getCause() instanceof EmptyResultDataAccessException);
+        }
+    }
+    
+    @Test
     public void replaceNode() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfRows = countRowsInTable("node_replacement");
