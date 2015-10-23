@@ -1,0 +1,652 @@
+/* 
+
+    Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Document   : lamus2
+    Created on : Feb 13, 2014, 4:43:08 PM
+    Author     : guisil
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+html{
+    height: 100%;
+}
+
+body{
+    margin:0;
+    padding:0;
+    overflow-y: hidden;
+    height:100%;
+    font-family: Verdana, Arial, Helv, Helvetica, sans-serif;
+}
+
+
+/* header */
+
+header {
+    background: none repeat scroll 0 0 #1c3655;
+    height: 40px;
+    overflow: hidden;
+    width: 100%;
+    top: 0;
+    clear: right;
+}
+
+.header_components {
+    color: white;
+    float: left;
+    margin-left: 10px;
+}
+
+.header_components_general {
+    margin-right: 10px;
+    margin-top: 8px;
+}
+
+.header_components_logos {
+    margin-right: 10px;
+    margin-top: 2px;
+}
+
+.header_components_labels {
+    margin-right: 2px;
+    margin-top: 8px;
+}
+
+#header_tla_logo {
+    height: 35px;
+    border: 0px;
+}
+
+#header_appname {
+    margin-top: 8px;
+}
+
+#header_clarin_logo {
+    height: 35px;
+    border: 0px;
+}
+
+#header_home {
+    height: 16px;
+    border: 0px;
+}
+
+header > ul#header_info_container {
+    float: right;
+    margin: 0px;
+    padding-right: 20px;
+}
+
+header > ul#header_info_container > li {
+    display: inline-block;
+    margin-left: 20px;
+    list-style-type: none;
+}
+
+header > ul#header_info_container > li > a {
+    float: left;
+    color: white;
+    text-decoration: none;
+}
+
+header > ul#header_info_container > li > a:hover {
+    text-decoration: underline;
+}
+
+
+/* Child page content */
+
+.childPageContent {
+    
+    width: 100%;
+    height: 70%;
+}
+
+
+/* Feedback panel */
+
+.expandablePanel {
+    
+    clear: both;
+    float: right;
+    
+    border: thin;
+    border-color: #eee;
+    border-style: solid;
+    margin-bottom:5px;
+    
+    width: 100%;
+    height: 20%;
+}
+
+.feedbackPanelContainer {
+    
+    clear: both;
+    float: right;
+    
+    border: thin;
+    border-color: #eee;
+    border-style: solid;
+    margin-bottom:5px;
+    
+    width: 100%;
+    height: 20%;
+    
+    overflow: scroll;
+}
+
+
+/* Navigation menu */
+
+#navigationPanel {
+    float: left;
+    width: 230px;
+    height: 100%;
+}
+
+#navigationPanel ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+#navigationPanel li {
+    list-style: none;
+}
+
+ul.navigationMenu {
+    background: #1c3655;
+}
+
+ul.navigationMenu li {
+    border-bottom: #fff solid;
+    border-top: #fff solid;
+    border-width: 1px;
+}
+
+#navigationPanel a {
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    height: 25px;
+    line-height: 25px;
+    text-indent: 10px;
+    text-decoration: none;
+    width: 100%;
+}
+
+#navigationPanel a:hover {
+    text-decoration: underline;
+}
+
+/* Main page */
+
+.mainPageContent {
+    float: right;
+    
+    width: 75%;
+    min-width: 750px;
+    height: 90%;
+    min-height: 500px;
+}
+
+select#workspaceSelection {
+    width: auto;
+    overflow: auto;
+}
+
+div.archiveTreePanelContainer {
+    clear: both;
+    float: right;
+    
+    width: 60%;
+    height: 100%;
+}
+
+div.archiveTreePanelContainer div.treePanel {
+    width: 100%;
+    height: 70%;
+    clear: both;
+    overflow: auto;
+    bottom: 0;
+    border-left: 3px solid #1b324f;
+    border-bottom: 3px solid #1b324f;
+    
+    box-sizing: border-box;
+}
+
+
+div.archiveTreeFormContainer {
+    clear: both;
+}
+
+
+/* workspace buttons panel */
+
+.buttonPanel {
+    float: left;
+    text-align: right;
+    width: 35%;
+    height: 10%;
+    margin-left: 0px;
+    margin-top: 10px;
+    margin-right: 0px;
+    margin-bottom: 10px;
+}
+
+#workspaceActionsForm > ul {
+    overflow: hidden;
+    padding: 0px;
+}
+
+#workspaceActionsForm > ul > li {
+    width: 100%;
+    display: inline;
+}
+
+
+/* Workspace buttons */
+.ws_button {
+    border: none;
+    font-family: inherit;
+    font-size: 0.8em;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+    padding: 15px 20px;
+    display: inline-block;
+    margin: 5px 0px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    outline: none;
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+.ws_button:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+/* Pseudo elements for icons */
+.ws_button:before {
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    position: relative;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+.icon-home:before {
+    content: "\e900";
+}
+
+.icon-open_ws:before {
+    content: "\e930";
+}
+
+.icon-create_ws:before {
+    content: "\e95e";
+}
+
+.icon-submit_ws:before {
+    content: "\e95f";
+}
+
+.icon-delete_ws:before {
+    content: "\e9ac";
+}
+
+
+.icon-delete_node:before {
+    content: "\e9ad";
+}
+
+.icon-link_node:before {
+    content: "\e9cb";
+}
+
+.icon-replace_node:before {
+    content: "\ea2e";
+}
+
+.icon-unlink_node:before {
+    content: "\ea5a";
+}
+
+.icon-delete_unlinked_node:before {
+    content: "\ea0d";
+}
+
+.icon-download:before {
+    content: "\e960";
+}
+
+.icon-upload:before {
+    content: "\e961";
+}
+
+
+/* Button 3 */
+.ws_button-3 {
+	background: #25466f;
+	color: #fff;
+}
+
+.ws_button-3:hover {
+	background: #4f6d92;
+}
+
+.ws_button-3:active {
+	background: #576a75;
+	top: 2px;
+}
+
+.ws_button-3:disabled {
+    background: grey;
+}
+
+.ws_button-3:before {
+	position: absolute;
+	height: 100%;
+	left: 0;
+	top: 0;
+	line-height: 2;
+	font-size: 150%;
+	width: 40px;
+}
+
+
+/* Button 3b */
+.ws_button-3b {
+	padding: 10px 15px 10px 55px;
+	border-radius: 10px;
+}
+
+.ws_button-3b:before {
+	border-right: 2px solid rgba(255,255,255,0.5);
+}
+
+@font-face {
+        font-family: 'icomoon';
+        src:url('fonts/icomoon.eot?criqge');
+        src:url('fonts/icomoon.eot?#iefixcriqge') format('embedded-opentype'),
+                url('fonts/icomoon.woff?criqge') format('woff'),
+                url('fonts/icomoon.ttf?criqge') format('truetype'),
+                url('fonts/icomoon.svg?criqge#icomoon') format('svg');
+        font-weight: normal;
+        font-style: normal;
+}
+
+
+.ws_create_warning_message {
+    color: red;
+}
+
+
+div#wsNodeActionsPanel {
+    float: right;
+    text-align: left;
+    width: 60%;
+    height: 10%;
+    margin-left: 0px;
+    margin-top: 10px;
+    margin-right: 0px;
+    margin-bottom: 10px;
+}
+
+#wsNodeActionsForm > span {
+    overflow: hidden;
+    padding: 0px;
+    width: 100%;
+}
+
+
+/* workspace tree */
+
+div.treePanelContainer {
+    clear: both;
+    float: left;
+    
+    width: 35%;
+    height: 100%;
+}
+
+div.treePanelContainer div.treePanel {
+    width: 100%;
+    height: 100%;
+    clear: both;
+    overflow: auto;
+    bottom: 0;
+    
+    border-top: 3px solid #1b324f;
+    border-right: 3px solid #1b324f;
+    border-bottom: 3px solid #1b324f;
+    
+    box-sizing: border-box;
+}
+
+#nodeInfoPanel {
+    overflow: auto;
+}
+
+.tabpanel {
+    float: right;
+    overflow: auto;
+    width: 60%;
+    height: 100%;
+}
+
+.tabpanel > .tab-row > ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+.tabpanel > .tab-row > ul > li {
+    float: left;
+    display: inline;
+    
+    background: #1c3655;
+    padding: 1px 4px;
+    margin-right: 2px;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.tabpanel > .tab-row > ul > li > a {
+    color: white;
+}
+
+.tabpanel > .tab-row > ul > li:hover {
+    background: #4f6d92;
+}
+
+.tabpanel > .tab-row > ul > li:selected {
+    background: #4f6d92;
+}
+
+.tabpanel > .tab-panel {
+    height: 100%;
+}
+
+#linkNodesPanel {
+    height: 95%;
+}
+
+.infoContainer{
+    clear: both;
+    
+    border-collapse:collapse;
+    background-color: #F2F2F2;
+    border-left: solid 1px #B0B0B0;
+    border-top: solid 1px #B0B0B0;
+    border-right: solid 1px #B0B0B0;
+    border-bottom: solid 1px #B0B0B0;
+}
+
+#unlinkedNodesPanel {
+    height: 60%;
+}
+
+#externalNodesPanel {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    height: 20%;
+}
+
+#externalNodesPanel .urlInputField {
+    width: 300px;
+}
+
+
+.tableTree {
+    width: 100%;
+    height: 90%;
+    
+    overflow: scroll;
+}
+
+.tableTree > table, .simpleTable {
+    width: 100%;
+    border: 1px solid #DDDDDD;
+}
+
+.tableTree > table > tbody, .simpleTable > tbody {
+    width: 100%;
+}
+
+.tableTree > table > tbody > tr.even, .simpleTable > tbody > tr.even {
+    background-color: #FFFFFF;
+}
+.tableTree > table > tbody > tr.odd, .simpleTable > tbody > tr.odd {
+    background-color: #EEEEEE;
+}
+.tableTree > table > tbody > tr.number > .simpleTable > tbody > tr.number {
+    text-align: right;
+    padding-right: 1em;
+}
+
+.tableTreeLinks {
+    width: 100%;
+    height: 10%;
+    
+    padding-top: 5px;
+}
+
+.tableTreeLinks > a {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+.tableActionLink {
+    color: #c0c0c0;
+    text-decoration: none;
+}
+
+.tableActionLink:visited {
+    color: #808080;
+    text-decoration: none;
+}
+
+.tableActionLink:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.tableActionLink:active {
+    color: #ff0000;
+    text-decoration: underline;
+}
+
+
+/* AJAX Activity indicator */
+
+div#mainPageChild {
+    position:relative;
+}
+
+div#ajaxveil {
+    display:none;
+    position:absolute;
+    top:40%;
+    left:35%;
+    z-index:99999;
+}
+
+
+.small-triangle-1 {
+    -webkit-animation: small-triangle-1 2s ease infinite;
+    animation: small-triangle-1 2s ease infinite;
+}
+
+.small-triangle-2 {
+    -webkit-animation: small-triangle-2 2s ease infinite;
+    animation: small-triangle-2 2s ease infinite;
+}
+
+.small-triangle-3 {
+    -webkit-animation: small-triangle-3 2s ease infinite;
+    animation: small-triangle-3 2s ease infinite;
+}
+
+@-webkit-keyframes small-triangle-1 {
+    0%  { opacity: 0; }
+    33.3%   { opacity: 1; }
+    66.7%, 100%  { opacity: 0; }
+}
+
+@keyframes small-triangle-1 {
+    0%  { opacity: 0; }
+    33.3%   { opacity: 1; }
+    66.7%, 100%  { opacity: 0; }
+}
+
+@-webkit-keyframes small-triangle-2 {
+    0%, 33.3%    { opacity: 0; }
+    66.7%                 { opacity: 1; }
+    100%  { opacity: 0; }
+}
+
+@keyframes small-triangle-2 {
+    0%, 33.3%    { opacity: 0; }
+    66.7%                 { opacity: 1; }
+    100%  { opacity: 0; }
+}
+
+@-webkit-keyframes small-triangle-3 {
+    0%, 100% { opacity: 1; }
+    33.3%, 66.7%    { opacity: 0; }
+}
+
+@keyframes small-triangle-3 {
+    0%, 100% { opacity: 1; }
+    33.3%, 66.7%    { opacity: 0; }
+}

@@ -1,0 +1,169 @@
+lamus2-1.4.0-RC3 (2015-10-23)
+
+    Changes:
+        - COMPONENTS: Added the mapping between node types and components, for
+          the case of external nodes, for which the typechecker is not executed. (#4613)
+
+    Fixes:
+        - LOCALURI UPDATE: Now always updating 'localURI' during upload
+          (except for external files) in order to prevent issues when trying to
+          retrieve the reference using that attribute (#4751, #4753, #4754, #4756).
+        - UNLINKING REPLACED PARENT: After replacing a file, if its children
+          weren't changed (and still pointing to some workspace nodes),
+          they are unlinked, so that only the new parent has that connection (#4755, #4358).
+        - REPLACE EXPORTER: Changed the logic that determines which exporter to
+          use for what node. The replaced nodes were being handed, wrongly, to
+          the unlinked nodes exporter.
+
+lamus2-1.4.0-RC2 (2015-09-28)
+
+    Fixes:
+        - FOLDER NAMES: Fix for the problems with folder name for the top node,
+          in cases when this was defined by a human (replacing a strange character
+          by a similarly looking one doesn't work the same way for Lamus2).
+
+lamus2-1.4.0-RC1 (2015-09-21)
+
+    Changes:
+        - METADATA PROFILES: The profile validation configuration has now more
+          complete information and missing profiles are now included.
+        - ACTIVITY INDICATOR: Changed the activity indicator (TLA logo) and
+          disabled the indicators in most buttons, since they became redundant (#4701).
+        - OPEN WORKSPACES: Improved the information displayed in the list of
+          currently open workspaces (#4720).
+        - NODE LOCKS: Changed the logic behind the node locks and the way they
+          are locked/unlocked (#4723).
+
+    Fixes:
+        - UPLOAD COUNT: Since a previous addition, the successful/failed upload
+          count was coming from different sources, resulting in inconsistencies.
+          This has been fixed (#4612).
+        - FOLDER NAMES: Corpora with strange characters were normalised regarding
+          the names of the resulting created folders (#4721).
+        - RELATIVE PATH: Uploading nodes with relative references (starting with
+          "./" or "../") were not being properly handled. This was fixed.
+        
+
+lamus2-1.3.0-RC4 (2015-09-01)
+
+    Changes:
+        - HANDLE-UTILS: Updated the handle-utils library.
+
+    Fixes:
+        - DUPLICATE UPLOADS: Some fixes in the way uploaded files are handled,
+          mostly regarding the upload of repeated files (#4612).
+        - FOLDER STRUCTURE: The folder structure created for deeper branches of
+          the tree wasn't being done properly. That has been fixed (#4709).
+        - NODE NAMES: The names displayed in the nodes weren't always correct
+          (sometimes the filename was being used instead
+          of the name in the CMDI document).
+        - ORPHANS DIRECTORY: When the orphans directory didn't exist, an
+          exception was being thrown, preventing the workspace from being created.
+
+lamus2-1.3.0-RC3 (2015-08-20)
+
+    Additions:
+        - INFO FILES: Info files are now supported: they're recognized when
+          already present in files (import or upload) and it's also possible
+          to link files as info files within the workspace
+          (for 'lat-corpus' and 'lat-session' profiles) (#4655).
+        - HANDLE NORMALIZATION: Whenever files are imported, uploaded or exported,
+          the handles are normalized in order to have consistency in the database
+          and also prevent issues when searching the files using handles (#4705).
+        - ACTIVITY INDICATOR: Added an activity indicator (#4701).
+
+    Changes:
+        - MANAGEMENT CONSOLE: Some changes, mostly cosmetic, in the management
+          console (#4158).
+        - SUBMISSION MESSAGE: Added some more information to the submission
+          email messages (#4155).
+
+    Fixes:
+        - COMPONENT REFERENCES: Fixed the way references are added to components,
+          within the CMDI files (#4613).
+        - FEEDBACK PANEL REFRESH: Fixed the situations when the feedback panel
+          wasn't being properly updated, showing an old message (#3633).
+
+lamus2-1.3.0-RC2 (2015-06-22)
+
+    Additions:
+        - RESOURCE TYPE Support for different ResourceType values for resource
+          proxies ("LandingPage", "SearchPage" and "SearchService").
+
+    Changes:
+        - FOLDER STRUCTURE: Changed the supported folder structure back to the
+          old one (used in the old Lamus), with the folders "Corpusstructure",
+          "Metadata", "sessions", "Annotations", "Media" and "Info".
+
+lamus2-1.3.0-RC1 (2015-05-15)
+
+    Additions:
+        - SESSIONS FOLDER: Added support for the "sessions" folder, where files
+          can be copied to in order to have them automatically upload to a
+          new workspace under the corresponding top node.
+        - METADATA VALIDATION: Added schematron validation in two stages. One,
+          less strict, during upload, and another one during the submission.
+          This includes the restriction of metadata files to a limited set of
+          allowed profiles.
+        - DISALLOWED NAMES: Implemented the necessary restrictions for folder
+          names which should not be allowed in the backups.
+        - ICONS: A more complete set of tree icons has been added, based on the
+          existing one in the metadata browser.
+
+    Changes:
+        - REPLACE TOP NODE: Now it is possible to perform the replacement of the
+          top node of the workspace.
+
+    Fixes:
+        - EXTERNAL HANDLES: Fixed issue with documents without self-handle.
+        - LAYOUT: Several changes in the layout. The feedback panel has been
+          adjusted and several bugs in UI components have been fixed.
+        - USERNAME REFRESH: The username label on the top of the page now gets
+          refreshed properly (in almost all cases). A login intermediate page
+          is now used.
+        - EXTERNAL NODE NAME: Fixed the issue with adding external nodes without
+          a filename.
+        - REF ATTRIBUTE: The "ref" attribute was missing from the node linking
+          operation. This has been fixed.
+
+lamus2-1.2.0 (2015-01-29)
+
+    Additions:
+        - REMOVE UNLINKED NODES: Added the option of removing all or the selected
+          unlinked nodes from the unlinked nodes table.
+        - TOP NODE ACTIONS: Restricted the possible actions on the top node.
+        - MULTIPLE NODES ACTIONS: When multiple nodes are selected, it is now
+          possible to delete or unlink them (unless one of the selected nodes
+          is the top node of the workspace, in which case no actions are allowed).
+        - EXTERNAL HANDLES: If there are external handles included in uploaded
+          files, they are now dealt with accordingly.
+
+    Changes:
+        - CS2: Updated the version of the CS2 libraries.
+        - OPEN WORKSPACES: If the user has no open workspaces, the list shown
+          when "Select Workspace" is clicked becomes invisible and a message
+          directs the user to the "Create Workspace" option.
+    Fixes:
+        - INDICATING BUTTONS: Fixed some issues with the ajax indicating buttons,
+          including the confirmation dialogs, which had to be done in a different
+          way for the ajax version of the buttons, and also the update of the
+          feedback panel.
+        - UI AJAX: Fixed several issues regarding the UI, like clicking of buttons
+          in succession or refreshing different panels after some click.
+        - PERMISSION ADJUSTER: Fixed issue with files which were uploaded and
+          deleted in the same workspace (never having an archive URL and causing
+          problems when adjusting permissions).
+
+lamus2-1.1.0 (2014-12-12)
+
+    First release adapted for the CMDI / hybrid archive.
+
+lamus2-1.1-SNAPSHOT (2014-09-24)
+
+    Changes:
+        - DELETE WORKSPACE: In the management console, the manager is now able
+          to delete workspaces without being their owner.
+
+lamus2-1.0 (2014-08-20)
+
+    First release

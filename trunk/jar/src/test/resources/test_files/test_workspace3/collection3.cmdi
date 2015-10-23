@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1284723009187/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2013-07-15+02:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1284723009187</MdProfile>
+      <MdSelfLink>node:003</MdSelfLink>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="res_d514c711-f35b-4442-8037-e0683ea4d1f1">
+            <ResourceType mimetype="image/jpeg">Resource</ResourceType>
+            <ResourceRef>node:004</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="res_9ce2e83f-6920-412c-92af-0b4052542dbc">
+            <ResourceType mimetype="image/jpeg">Resource</ResourceType>
+            <ResourceRef>node:005</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <collection ref="res_d514c711-f35b-4442-8037-e0683ea4d1f1 res_9ce2e83f-6920-412c-92af-0b4052542dbc">
+         <GeneralInfo>
+            <Name>collection3_CHANGED</Name>
+         </GeneralInfo>
+      </collection>
+   </Components>
+</CMD>

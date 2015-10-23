@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title></title>
+    </head>
+    <body>
+        <wicket:panel>
+            <div>
+                <h4>
+                    <wicket:message key="external_nodes_panel_title"></wicket:message>
+                </h4>
+                <a href="#" wicket:id="link">
+                    <wicket:message key="external_nodes_panel_new_item_link"></wicket:message>
+                </a>
+                <form wicket:id="form">
+                    <p>
+                        <label><wicket:message key="external_nodes_panel_new_item_location"></wicket:message></label>
+                        <input type="text" wicket:id="externalUrl" class="urlInputField" />
+
+                        <label><wicket:message key="external_nodes_panel_new_item_type"></wicket:message></label>
+                        <select wicket:id="externalType" />
+                    </p>
+                    <p>
+                        <input type="button" wicket:id="add" wicket:message="value:external_nodes_panel_add_button" />
+                        <wicket:message key="external_nodes_panel_or_space"></wicket:message>
+                        <input type="button" wicket:id="cancel" wicket:message="value:external_nodes_panel_cancel_button" />
+                    </p>
+                </form>
+            </div>
+        </wicket:panel>
+    </body>
+</html>

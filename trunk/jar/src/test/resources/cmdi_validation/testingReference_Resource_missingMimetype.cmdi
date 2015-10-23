@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2015-04-14+02:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1407745712035</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+            <ResourceType>Resource</ResourceType>
+            <ResourceRef>sessionreference/someimage.jpg</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <lat-session ref="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+         <Name>sessionreference</Name>
+         <Title>sessionreference</Title>
+         <Date>2015</Date>
+         <descriptions>
+            <Description xml:lang="eng">descr</Description>
+         </descriptions>
+         <Location>
+            <Continent>Africa</Continent>
+            <Country>Tunisia</Country>
+         </Location>
+         <Project>
+            <Name>something</Name>
+            <Contact/>
+         </Project>
+         <Content>
+            <Genre>something</Genre>
+            <CommunicationContext/>
+         </Content>
+         <Resources>
+            <MediaFile ref="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+               <Type>image</Type>
+               <Format>jpeg</Format>
+               <Size/>
+               <Quality>3</Quality>
+            </MediaFile>
+         </Resources>
+      </lat-session>
+   </Components>
+</CMD>

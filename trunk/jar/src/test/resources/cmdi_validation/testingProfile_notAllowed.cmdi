@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703683/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2014-12-02+01:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1345561703683</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList/>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <ComicBook>
+         <Title>testingProfile_notAllowed</Title>
+         <PublicationYear>2000</PublicationYear>
+         <NumberOfPages>2</NumberOfPages>
+         <NumberOfChapters>75</NumberOfChapters>
+         <dc-publisher>
+            <publisher>Sher Li Pub</publisher>
+         </dc-publisher>
+         <Language>
+            <LanguageName xml:lang="eng">English</LanguageName>
+            <ISO639>
+               <iso-639-3-code>eng</iso-639-3-code>
+            </ISO639>
+         </Language>
+         <Format>
+            <ColorPrinting>true</ColorPrinting>
+         </Format>
+         
+         <Author>
+            <Name>Ruud Gullit</Name>
+            <BirthYear>1532</BirthYear>
+            <Country>
+               <Code>NL</Code>
+            </Country>
+         </Author>
+      </ComicBook>
+   </Components>
+</CMD>

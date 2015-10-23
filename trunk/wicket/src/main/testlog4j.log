@@ -1,0 +1,12 @@
+[ INFO] 2012-07-11 02:20:25 : Parsing configuration file [struts-default.xml]
+[ INFO] 2012-07-11 02:20:25 : Unable to locate configuration files of the name struts-plugin.xml, skipping
+[ INFO] 2012-07-11 02:20:25 : Parsing configuration file [struts-plugin.xml]
+[ INFO] 2012-07-11 02:20:25 : Parsing configuration file [struts.xml]
+[ INFO] 2012-07-11 02:20:25 : Overriding property struts.i18n.reload - old value: false new value: true
+[ INFO] 2012-07-11 02:20:25 : Overriding property struts.configuration.xml.reload - old value: false new value: true
+[ INFO] 2012-07-11 03:07:32 : Parsing configuration file [struts-default.xml]
+[ INFO] 2012-07-11 03:07:32 : Unable to locate configuration files of the name struts-plugin.xml, skipping
+[ INFO] 2012-07-11 03:07:32 : Parsing configuration file [struts-plugin.xml]
+[ INFO] 2012-07-11 03:07:32 : Parsing configuration file [struts.xml]
+[ INFO] 2012-07-11 03:07:33 : Overriding property struts.i18n.reload - old value: false new value: true
+[ INFO] 2012-07-11 03:07:33 : Overriding property struts.configuration.xml.reload - old value: false new value: true

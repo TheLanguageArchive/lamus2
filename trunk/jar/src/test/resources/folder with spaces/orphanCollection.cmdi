@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1345561703620/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2015-02-05+01:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1345561703620</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList/>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <collection>
+         <CollectionInfo>
+            <Name>orphanCollection</Name>
+         </CollectionInfo>
+         <License>
+            <DistributionType>public</DistributionType>
+            <LicenseName/>
+            <LicenseURL/>
+         </License>
+      </collection>
+   </Components>
+</CMD>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2012 Max Planck Institute for Psycholinguistics
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>CreateWorkspacePage</title>
+    </head>
+    <body>
+	<wicket:extend>
+            <div id="navigationPanel" wicket:id="navigationPanel" />
+            <div class="mainPageContent">
+<!--                    <div id="createWorkspaceHelp">
+                        <h2>Selecting a Workspace Topnode</h2>
+                        <p>Using the corpus tree on the left, you can browse the archive and select a node that will become
+                            the topnode of your new workspace. Select the desired node and use the right mouse button to open
+                            the pop-up menu, then choose the option <b>Select this node</b> to use the node as top-node for a new
+                            workspace</p>
+                        <p>Once you have selected a node, this node and the subcorpus it represents (all its descendant nodes)
+                            will be copied into the new workspace, where you can then modify and extend the subcorpus 
+                            with new resources</p>
+                    </div>-->
+                <div class="archiveTreePanelContainer">
+                    <div class="treePanel" wicket:id="archiveTree">[ARCHIVE TREE]</div>
+                        <form class="archiveTreeFormContainer" wicket:id="nodeIdForm">
+                            <p>
+                                <wicket:message key="create_workspace_selected_node_name"></wicket:message>
+                                <span wicket:id="name">Node name</span>
+                            </p>
+                            <p>
+                                <wicket:message key="create_workspace_selected_node_uri"></wicket:message>
+                                <span wicket:id="nodeURI">Node name</span>
+                            </p>
+                            <p>
+                                <wicket:message key="create_workspace_selected_node_type"></wicket:message>
+                                <span wicket:id="type">Node type</span>
+                            </p>
+                            <button class="ws_button ws_button-3 ws_button-3b icon-create_ws" wicket:id="createWorkspace" value="create_workspace_create_button">
+                                <wicket:message key="create_workspace_create_button"></wicket:message>
+                            </button>
+                            <span class="ws_create_warning_message" wicket:id="warning_message">[WARNING MESSAGE]</span>
+                            <button class="ws_button ws_button-3 ws_button-3b icon-submit_ws" wicket:id="addTopNode" value="create_workspace_add_top_node_button">
+                                <wicket:message key="create_workspace_add_top_node_button"></wicket:message>
+                            </button>
+                        </form>
+                </div>
+            </div>
+	</wicket:extend>
+    </body>
+</html>

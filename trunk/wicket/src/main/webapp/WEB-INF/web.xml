@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    <display-name>LAMUS 2</display-name>
+
+    <!--  
+        There are three means to configure Wickets configuration mode and they are
+        tested in the order given. 
+        1) A system property: -Dwicket.configuration
+        2) servlet specific <init-param>
+        3) context specific <context-param>
+        The value might be either "development" (reloading when templates change)
+        or "deployment". If no configuration is found, "development" is the default.
+    -->
+
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>
+            org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+        </param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>nl.mpi.lamus</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <!-- START Shibboleth SSO filter settings -->
+    <context-param>
+        <param-name>ShhaaConfigLocation</param-name>
+        <param-value>/WEB-INF/shhaa.xml</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>AAIFilter</filter-name>
+        <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AAIFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- END Shibboleth SSO filter settings -->
+    
+    <!-- START Lana2 auth filter - Disable when using Shibboleth -->
+<!--    <filter>
+        <filter-name>SsoFilter</filter-name>
+        <filter-class>nl.mpi.lat.auth.lana2.LanaAuthFilter</filter-class>
+        <init-param>
+            <param-name>freepages</param-name>
+            <param-value>/XmlRpcArchiveInfo,/ArchiveNodeInfo.jsp,/lana_big.gif,/logged-out.html,/authenticate,/login.jsp,/ErrorPage.jsp,/index.jsp,/lamusheader.jsp,/lamusstart.jsp,/lana.gif,/lams.css,/RegistrationPage.jsp,/about.jsp,/logout.js,/logout.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>logoutquery</param-name>
+            <param-value>logout=1</param-value>
+        </init-param>
+        <init-param>
+            <param-name>loginpage</param-name>
+            <param-value>/login.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>logoutpage</param-name>
+            <param-value>/index.jsp</param-value>
+        </init-param>
+        <init-param>
+            <param-name>ssowebapps</param-name>
+            <param-value>/jkc/lamus</param-value>
+        </init-param>
+        
+        <init-param>
+            <param-name>configPaths</param-name>
+            <param-value>spring-ams2-auth.xml</param-value>
+        </init-param>
+        
+        <init-param>
+            <param-name>authenticationService</param-name>
+            <param-value>integratedAuthenticationSrv</param-value>
+        </init-param>
+        <init-param>
+            <param-name>principalService</param-name>
+            <param-value>principalSrv</param-value>
+        </init-param>
+        <init-param>
+            <param-name>sessionService</param-name>
+            <param-value>ssoSrv</param-value>
+        </init-param>
+        <init-param>
+            <param-name>defaultUID</param-name>
+            <param-value>anonymous</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>super</param-name>
+            <param-value>damlr_check</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>SsoFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+    <!-- END Lana2 auth filter -->
+    
+    <!-- Login / Logout redirection filter -->
+    <filter>
+        <filter-name>LloFilter</filter-name>
+        <filter-class>nl.mpi.lat.auth.LoginLogoutRedirectFilter</filter-class>
+        <!--
+        <init-param>
+                <param-name>SHIB_LOGIN</param-name>
+                <param-value>/?shhaaDo=lI</param-value>
+        </init-param>
+        <init-param>
+                <param-name>SHIB_LOGOUT</param-name>
+                <param-value>/?shhaaDo=lO</param-value>
+        </init-param>
+        <init-param>
+                <param-name>LANA_LOGIN</param-name>
+                <param-value>/protected/login.jsp?login=1</param-value>
+        </init-param>
+        <init-param>
+                <param-name>LANA_LOGOUT</param-name>
+                <param-value>/protected/login.jsp?logout=1</param-value>
+        </init-param>
+        -->
+    </filter>
+    <filter-mapping>
+        <filter-name>LloFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+<!--    <filter>
+        <filter-name>OpenEntityManagerInViewFilter</filter-name>
+        <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+        <init-param>
+            <param-name>entityManagerFactoryBeanName</param-name>
+            <param-value>entityManagerFactory</param-value>
+        </init-param>
+        <init-param>
+            <param-name>persistenceUnitName</param-name>
+            <param-value>corpusstructure2-persistency</param-value>
+        </init-param>
+        <init-param>
+            <param-name>singleSession</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>flushMode</param-name>
+            <param-value>AUTO</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>OpenEntityManagerInViewFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+    
+    <!-- Order matters, put the data source connection filter first! -->
+    <filter>
+        <filter-name>springDataSourceConnectionFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <description>Filter responsible for managing the datasource connection, 
+            i.e. opening and closing database connection at the right time in 
+            the request lifetime
+        </description>
+    </filter>
+    <filter-mapping>
+        <filter-name>springDataSourceConnectionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <filter>
+	<filter-name>wicket.lamus2</filter-name>
+	<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
+	<init-param>
+	    <param-name>applicationFactoryClassName</param-name>
+	    <param-value>org.apache.wicket.spring.SpringWebApplicationFactory</param-value>
+	</init-param>
+    </filter>
+    <filter-mapping>
+	<filter-name>wicket.lamus2</filter-name>
+	<url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <resource-ref>
+	<res-ref-name>jdbc/CSDB_HYBRID</res-ref-name>
+	<res-type>javax.sql.DataSource</res-type>
+	<res-auth>Container</res-auth>
+	<res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+</web-app>

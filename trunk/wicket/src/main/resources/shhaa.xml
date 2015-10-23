@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+    <shhaa>
+        
+        <authentication>
+            <shibheader>
+                <username>oid:eduPersonPrincipalName</username>
+                <username>mace:eduPersonPrincipalName</username>
+                <username>eduPersonPrincipalName</username>
+                <username>eppn</username>
+            </shibheader>
+            <fallback>
+                <username>anonymous</username>
+            </fallback>
+            <!-- enable '?shhaaDo=lo in URL triggers slo action' etc here: -->
+            <sso action="lI">${shhaa.li}</sso>
+            <slo action="lO">${shhaa.lo}</slo>
+        </authentication>
+        
+        <composition action="rF">
+            <shibheader>
+                <attribute>eduPersonAffiliation</attribute>
+                <attribute>eduPersonEntitlement</attribute>
+                <attribute>email</attribute>
+                <attribute>ou</attribute>
+                <attribute>o</attribute>
+            </shibheader>
+        </composition>
+        
+        <authorization><!-- pages that need a login: all (except some) -->
+            <!--<location  target="/*" />-->
+            <location target="/CreateWorkspacePage*" />
+            <location target="/SelectWorkspacePage*" />
+        </authorization>
+        
+        <handler>
+            <pages>
+            	<info action="dI">/WEB-INF/classes/nl/mpi/lamus/web/pages/LoginInfoPage.html</info>
+            </pages>
+        </handler>
+    </shhaa>
+</ROOT>
