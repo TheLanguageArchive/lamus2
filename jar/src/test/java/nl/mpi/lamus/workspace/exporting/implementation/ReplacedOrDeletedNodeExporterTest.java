@@ -134,30 +134,6 @@ public class ReplacedOrDeletedNodeExporterTest {
             assertNull("Cause should be null", ex.getCause());
         }
     }
-    
-    @Test
-    public void exportReplacedNode_ExportPhaseUnlinkedNodes() throws WorkspaceExportException {
-        
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
-        
-        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
-        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
-        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
-        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
-        
-        context.checking(new Expectations() {{
-            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
-        }});
-        
-        try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-            fail("should have thrown exception");
-        } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when exporting the tree, not for unlinked nodes";
-            assertEquals("Message different from expected", errorMessage, ex.getMessage());
-            assertNull("Cause should be null", ex.getCause());
-        }
-    }
 
     @Test
     public void exportDeletedNode_SubmissionTypeDelete() throws WorkspaceExportException {
