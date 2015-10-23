@@ -97,13 +97,6 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) &&
-                WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when exporting the tree, not for unlinked nodes";
-            logger.error(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        }
-        
         if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
             String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when submitting the workspace, not when deleting";

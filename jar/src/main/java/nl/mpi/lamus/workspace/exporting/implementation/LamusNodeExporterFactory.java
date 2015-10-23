@@ -58,7 +58,8 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
             
             if(WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase) &&
                     !WorkspaceNodeStatus.DELETED.equals(node.getStatus()) &&
-                    !WorkspaceNodeStatus.EXTERNAL_DELETED.equals(node.getStatus())) {
+                    !WorkspaceNodeStatus.EXTERNAL_DELETED.equals(node.getStatus()) &&
+                    !WorkspaceNodeStatus.REPLACED.equals(node.getStatus())) {
                 return unlinkedNodeExporter;
             }
 
