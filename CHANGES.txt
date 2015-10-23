@@ -1,8 +1,19 @@
-lamus2-1.4.0-RC3 (2015-10-??)
+lamus2-1.4.0-RC3 (2015-10-23)
 
     Changes:
         - COMPONENTS: Added the mapping between node types and components, for
           the case of external nodes, for which the typechecker is not executed. (#4613)
+
+    Fixes:
+        - LOCALURI UPDATE: Now always updating 'localURI' during upload
+          (except for external files) in order to prevent issues when trying to
+          retrieve the reference using that attribute (#4751, #4753, #4754, #4756).
+        - UNLINKING REPLACED PARENT: After replacing a file, if its children
+          weren't changed (and still pointing to some workspace nodes),
+          they are unlinked, so that only the new parent has that connection (#4755, #4358).
+        - REPLACE EXPORTER: Changed the logic that determines which exporter to
+          use for what node. The replaced nodes were being handed, wrongly, to
+          the unlinked nodes exporter.
 
 lamus2-1.4.0-RC2 (2015-09-28)
 
