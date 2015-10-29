@@ -155,7 +155,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
     
     /**
-     * @see NodeDataRetriever#isCheckedResourceArchivable(java.net.URL, java.lang.StringBuilder)
+     * @see NodeDataRetriever#isCheckedResourceArchivable(nl.mpi.lamus.typechecking.TypecheckedResults, java.net.URL, java.lang.StringBuilder)
      */
     @Override
     public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, URL urlToCheckInConfiguration, StringBuilder message) {
