@@ -225,7 +225,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>ams2</artifactId>
-            <version>1.5.2-RC1</version>
+            <version>1.5.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-fileupload</groupId>
@@ -271,6 +271,12 @@
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!-- Used by the typechecker -->
+        <dependency>
+            <groupId>nl.mpi.annot</groupId>
+            <artifactId>annot-tools</artifactId>
+            <version>1.1.14</version>
         </dependency>
         
         <dependency>
