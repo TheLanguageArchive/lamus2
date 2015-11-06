@@ -1,3 +1,17 @@
+lamus2-1.4.0-RC4 (2015-11-06)
+
+    Changes:
+        - UPDATED DEPENDENCIES: Updated the versions of the
+          AMS2 and typechecker jars.
+        - ANNOT-TOOLS: Added the annot-tools jar, which is used by the
+          typechecker to parse EAF files.
+
+    Fixes:
+        - REMOVE COMPONENT: When unlinking a node, its corresponding component
+          is removed from the parent, besides the resource proxy (#4613, #4763).
+        - REMOVE ALL UNLINKED: The "Remove All" option in the unlinked nodes
+          panel has been fixed (#4765).
+
 lamus2-1.4.0-RC3 (2015-10-23)
 
     Changes:
