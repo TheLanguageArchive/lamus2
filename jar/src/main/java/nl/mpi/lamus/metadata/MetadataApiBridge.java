@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
-import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -145,6 +144,16 @@ public interface MetadataApiBridge {
             String referenceMimetype, WorkspaceNodeType referenceNodeType, boolean isInfoLink);
     
     /**
+     * Based on the given root, retrieves the component with the given path
+     * and reference ID.
+     * @param root Root element
+     * @param path Path of the component to retrieve
+     * @param refId Value of the "ref" attribute of the component to retrieve
+     * @return Component with the given path and reference ID
+     */
+    public nl.mpi.metadata.cmdi.api.model.Component getComponent(CMDIContainerMetadataElement root, String path, String refId);
+    
+    /**
      * Creates a component within the given element. If other elements in the path
      * are missing, they're also created.
      * @param root Element to check
@@ -152,16 +161,25 @@ public interface MetadataApiBridge {
      * @return Element corresponding to the created component
      */
     public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
-            throws MetadataElementException;
+            throws MetadataException;
     
     /**
-     * Given a Metadata document and the name of a component, it adds the
-     * appropriate reference to the component, creating the component if needed.
-     * @param component Metadata document to edit
+     * Given a Metadata component and a resource proxy, it adds the appropriate
+     * reference to the component (creating the component if needed).
+     * @param component Metadata component where to add the reference
      * @param resourceProxy  Resource proxy to reference
      * @return Created reference
      */
     public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy);
+    
+    /**
+     * Given a metadata component and a resource proxy, it removes the reference
+     * from the component, if it exists.
+     * @param component Metadata component from which the reference should be removed
+     * @return true if component is removed without issues
+     */
+    public boolean removeComponent(nl.mpi.metadata.cmdi.api.model.Component component)
+            throws MetadataException;
     
     /**
      * Given a metadata document and a reference in that document, checks if

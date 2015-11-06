@@ -4,7 +4,7 @@
     <parent>
         <groupId>nl.mpi</groupId>
         <artifactId>lamus2.parent</artifactId>
-        <version>1.4.0-RC3</version>
+        <version>1.4.0-RC4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -264,7 +264,7 @@
         <dependency>
             <groupId>nl.mpi</groupId>
             <artifactId>typechecker</artifactId>
-            <version>1.8.3</version>
+            <version>1.8.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>

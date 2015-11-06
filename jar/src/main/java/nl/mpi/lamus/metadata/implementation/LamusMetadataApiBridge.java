@@ -34,7 +34,6 @@ import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -295,13 +294,65 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         logger.info(message);
         return null;
     }
+
+    /**
+     * @see MetadataApiBridge#getComponent(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String, java.lang.String)
+     */
+    @Override
+    public nl.mpi.metadata.cmdi.api.model.Component getComponent(CMDIContainerMetadataElement root, String path, String refId) {
+        
+        String pathToSearch = path;
+        
+        if(pathToSearch.startsWith(root.getName())) {
+            pathToSearch = pathToSearch.replace(root.getName(), "");
+            if(pathToSearch.startsWith("/")) {
+                pathToSearch = pathToSearch.replaceFirst("/", "");
+            }
+        }
+        
+        int currentIndex = 1;
+        CMDIMetadataElement currentElement = null;
+        nl.mpi.metadata.cmdi.api.model.Component foundComponent = null;
+        
+        String suffix = "[" + currentIndex + "]";
+        currentElement = root.getChildElement(pathToSearch + suffix);
+        
+        while(currentElement != null) {
+
+            nl.mpi.metadata.cmdi.api.model.Component currentComponent;
+            
+            if(currentElement instanceof nl.mpi.metadata.cmdi.api.model.Component) {
+                currentComponent = (nl.mpi.metadata.cmdi.api.model.Component) currentElement;
+
+                boolean foundRef = false;
+                for(Reference ref : currentComponent.getReferences()) {
+                    ResourceProxy proxy = (ResourceProxy) ref;
+                    if(refId.equals(proxy.getId())) {
+                        foundRef = true;
+                        break;
+                    }
+                }
+
+                if(foundRef) {
+                    foundComponent = currentComponent;
+                    break;
+                }
+            }
+            
+            currentIndex++;
+            suffix = "[" + currentIndex + "]";
+            currentElement = root.getChildElement(pathToSearch + suffix);
+        }
+        
+        return foundComponent;
+    }
     
     /**
      * @see MetadataApiBridge#createComponentPathWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
      */
     @Override
     public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
-            throws MetadataElementException {
+            throws MetadataException {
         
         CMDIMetadataElement child;
         
@@ -343,6 +394,16 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     public ResourceProxy addReferenceInComponent(CMDIContainerMetadataElement component, ResourceProxy resourceProxy) {
         
         return component.addDocumentResourceProxyReference(resourceProxy.getId());
+    }
+
+    /**
+     * @see MetadataApiBridge#removeComponent(nl.mpi.metadata.cmdi.api.model.Component)
+     */
+    @Override
+    public boolean removeComponent(nl.mpi.metadata.cmdi.api.model.Component component)
+            throws MetadataException {
+        
+            return component.getParent().removeChildElement(component);
     }
 
     /**

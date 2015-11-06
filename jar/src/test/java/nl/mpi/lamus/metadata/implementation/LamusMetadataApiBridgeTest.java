@@ -43,6 +43,7 @@ import nl.mpi.metadata.api.MetadataDocumentException;
 import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
+import nl.mpi.metadata.api.model.MetadataContainer;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.MetadataElement;
 import nl.mpi.metadata.api.model.Reference;
@@ -52,6 +53,7 @@ import nl.mpi.metadata.cmdi.api.CMDIApi;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
 import nl.mpi.metadata.cmdi.api.model.Component;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
@@ -114,6 +116,7 @@ public class LamusMetadataApiBridgeTest {
     @Mock ResourceProxy mockResourceProxy;
     @Mock ResourceProxy mockAnotherResourceProxy;
     @Mock Component mockCollectionComponent;
+    @Mock Component mockMediaFileComponent;
     @Mock ComponentType mockComponentType;
     @Mock ComponentType mockAnotherComponentType;
     @Mock ComponentType mockYetAnotherComponentType;
@@ -122,6 +125,7 @@ public class LamusMetadataApiBridgeTest {
     @Mock CMDIContainerMetadataElement mockCmdiContainerMetadataElement;
     @Mock CMDIContainerMetadataElement mockAnotherCmdiContainerMetadataElement;
     @Mock CMDIContainerMetadataElement mockYetAnotherCmdiContainerMetadataElement;
+    @Mock MetadataContainer<CMDIMetadataElement> mockCmdiContainer;
     @Mock MetadataElement mockMetadataElement;
     @Mock MetadataElementType mockMetadataElementType;
     
@@ -815,7 +819,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_Metadata_LatCorpus() {
+    public void getComponentPathForReferenceType_Metadata_LatCorpus() {
         
         final String expectedComponentPath = "lat-corpus/CorpusLink";
         
@@ -846,7 +850,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_Info_LatCorpus() {
+    public void getComponentPathForReferenceType_Info_LatCorpus() {
         
         final String expectedComponentPath = "lat-corpus/InfoLink";
         
@@ -877,7 +881,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_Media_LatSession() {
+    public void getComponentPathForReferenceType_Media_LatSession() {
         
         final String expectedComponentPath = "lat-session/Resources/MediaFile";
         
@@ -908,7 +912,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_Written_LatSession() {
+    public void getComponentPathForReferenceType_Written_LatSession() {
         
         final String expectedComponentPath = "lat-session/Resources/WrittenResource";
         
@@ -939,7 +943,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_Info_LatSession() {
+    public void getComponentPathForReferenceType_Info_LatSession() {
         
         final String expectedComponentPath = "lat-session/InfoLink";
         
@@ -970,7 +974,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_ReferenceNotMatched() {
+    public void getComponentPathForReferenceType_ReferenceNotMatched() {
         
         final String profileId = "clarin.eu:cr1:p_1345561703620";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
@@ -1010,7 +1014,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_EmptyComponentMap() {
+    public void getComponentPathForReferenceType_EmptyComponentMap() {
         
         final String profileId = "clarin.eu:cr1:p_1345561703620";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
@@ -1048,7 +1052,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void getComponentForReferenceType_NullType() {
+    public void getComponentPathForReferenceType_NullType() {
         
         final String profileId = "clarin.eu:cr1:p_1407745712064";
         final URI profileLocation = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/" + profileId);
@@ -1063,7 +1067,82 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void createComponent_PathExists_IsRoot() throws MetadataElementException {
+    public void getComponent_Found() {
+        
+        final String rootName = "lat-session";
+        final String elementName = "MediaFile";
+        final String elementPath = "/" + rootName + "/" + elementName;
+        final String firstSuffix = "[1]";
+        final String elementPathWithFirstSuffix = elementPath + firstSuffix;
+        final String refId = "ref_12345676543234";
+        
+        final Collection<ResourceProxy> componentReferences = new ArrayList<>();
+        componentReferences.add(mockResourceProxy);
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPathWithFirstSuffix); will(returnValue(mockMediaFileComponent));
+            oneOf(mockMediaFileComponent).getReferences(); will(returnValue(componentReferences));
+            oneOf(mockResourceProxy).getId(); will(returnValue(refId));
+        }});
+        
+        Component retrievedComponent = lamusMetadataApiBridge.getComponent(mockCmdiContainerMetadataElement, elementPath, refId);
+        
+        assertEquals("Retrieved element different from expected", mockMediaFileComponent, retrievedComponent);
+    }
+    
+    @Test
+    public void getComponent_ChildForPathNotFound() {
+        
+        final String rootName = "lat-session";
+        final String elementName = "MediaFile";
+        final String elementPath = "/" + rootName + "/" + elementName;
+        final String firstSuffix = "[1]";
+        final String elementPathWithFirstSuffix = elementPath + firstSuffix;
+        final String refId = "ref_12345676543234";
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPathWithFirstSuffix); will(returnValue(null));
+        }});
+        
+        Component retrievedComponent = lamusMetadataApiBridge.getComponent(mockCmdiContainerMetadataElement, elementPath, refId);
+        
+        assertNull("Retrieved element should be null", retrievedComponent);
+    }
+    
+    @Test
+    public void getComponent_RefNotFound() {
+        
+        final String rootName = "lat-session";
+        final String elementName = "MediaFile";
+        final String elementPath = "/" + rootName + "/" + elementName;
+        final String firstSuffix = "[1]";
+        final String secondSuffix = "[2]";
+        final String elementPathWithFirstSuffix = elementPath + firstSuffix;
+        final String elementPathWithSecondSuffix = elementPath + secondSuffix;
+        final String refId = "ref_12345676543234";
+        final String otherRefId = "ref_9876523442";
+        
+        final Collection<ResourceProxy> componentReferences = new ArrayList<>();
+        componentReferences.add(mockResourceProxy);
+        
+        context.checking(new Expectations() {{
+            allowing(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPathWithFirstSuffix); will(returnValue(mockMediaFileComponent));
+            oneOf(mockMediaFileComponent).getReferences(); will(returnValue(componentReferences));
+            oneOf(mockResourceProxy).getId(); will(returnValue(otherRefId));
+            
+            oneOf(mockCmdiContainerMetadataElement).getChildElement(elementPathWithSecondSuffix); will(returnValue(null));
+        }});
+        
+        Component retrievedComponent = lamusMetadataApiBridge.getComponent(mockCmdiContainerMetadataElement, elementPath, refId);
+        
+        assertNull("Retrieved element should be null", retrievedComponent);
+    }
+    
+    @Test
+    public void createComponent_PathExists_IsRoot() throws MetadataException {
         
         final String rootName = "collection";
         final String elementPath = "/" + rootName;
@@ -1079,7 +1158,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void createComponent_PathExists_IsNotRoot() throws MetadataElementException {
+    public void createComponent_PathExists_IsNotRoot() throws MetadataException {
         
         final String rootName = "lat-session";
         final String elementName = "MediaFile";
@@ -1101,7 +1180,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void createComponent_PathDoesNotExist() throws MetadataElementException {
+    public void createComponent_PathDoesNotExist() throws MetadataException {
         
         final String rootName = "someRoot";
         final String intermediateName = "someIntermediate";
@@ -1135,13 +1214,48 @@ public class LamusMetadataApiBridgeTest {
         
         context.checking(new Expectations() {{
             oneOf(mockResourceProxy).getId(); will(returnValue(resourceProxyId));
-            oneOf(mockCollectionComponent).addDocumentResourceProxyReference(resourceProxyId); will(returnValue(mockAnotherResourceProxy));
+            oneOf(mockMediaFileComponent).addDocumentResourceProxyReference(resourceProxyId); will(returnValue(mockAnotherResourceProxy));
         }});
         
-        ResourceProxy result = lamusMetadataApiBridge.addReferenceInComponent(mockCollectionComponent, mockResourceProxy);
+        ResourceProxy result = lamusMetadataApiBridge.addReferenceInComponent(mockMediaFileComponent, mockResourceProxy);
         
         assertNotNull("Result should not be null", result);
         assertEquals("Retrieved resource proxy different from expected", mockAnotherResourceProxy, result);
+    }
+    
+    @Test
+    public void removeComponent() throws MetadataException {
+        
+        context.checking(new Expectations() {{
+            oneOf(mockMediaFileComponent).getParent(); will(returnValue(mockCmdiContainer));
+            oneOf(mockCmdiContainer).removeChildElement(mockMediaFileComponent); will(returnValue(Boolean.TRUE));
+        }});
+        
+        boolean result = lamusMetadataApiBridge.removeComponent(mockMediaFileComponent);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void removeComponent_ThrowsException() throws MetadataException {
+
+        context.checking(new Expectations() {{
+            ignoring(mockMetadataElement);
+        }});
+        
+        final MetadataElementException expectedException = new MetadataElementException(mockMetadataElement, "something went wrong");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockMediaFileComponent).getParent(); will(returnValue(mockCmdiContainer));
+            oneOf(mockCmdiContainer).removeChildElement(mockMediaFileComponent); will(throwException(expectedException));
+        }});
+        
+        try {
+            lamusMetadataApiBridge.removeComponent(mockMediaFileComponent);
+            fail("should have thrown exception");
+        } catch(MetadataException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
     }
     
     @Test

@@ -31,7 +31,7 @@ public class FeedbackPanelAwarePanel<T extends Object> extends GenericPanel<T> {
     private final FeedbackPanel feedbackPanel;
     
     public FeedbackPanelAwarePanel(String id, IModel<T> model, FeedbackPanel feedbackPanel) {
-        super(id);
+        super(id, model);
         this.feedbackPanel = feedbackPanel;
     }
     

@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
@@ -38,7 +37,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
-import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.MetadataDocument;
@@ -46,7 +44,6 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,12 +270,10 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
                 childReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(parentDocument, getNodeURI(childNode));
             }
             
+            removeComponent(parentNode, childNode, childReference, parentDocument, nodeUtil.isNodeInfoFile(childNode));
             parentDocument.removeDocumentReference(childReference);
             
-            StreamResult parentStreamResult =
-                    this.workspaceFileHandler.getStreamResultForNodeFile(FileUtils.toFile(parentNode.getWorkspaceURL()));
-                
-            this.metadataAPI.writeMetadataDocument(parentDocument, parentStreamResult);
+            metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
                 
         } catch (URISyntaxException | MetadataException | IOException | TransformerException ex) {
             String errorMessage = "Error removing reference in document with node ID " + childNode.getWorkspaceNodeID();
@@ -385,23 +380,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
             
             metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
             
-//            if(nodeUtil.isNodeMetadata(childNode)) {
-//                MetadataDocument tempChildDocument = metadataAPI.getMetadataDocument(childNode.getWorkspaceURL());
-//                HandleCarrier childHandleCarrier = null;
-//                if(tempChildDocument instanceof HandleCarrier) {
-//                    childHandleCarrier = (HandleCarrier) tempChildDocument;
-//                } else {
-//                    throw new UnsupportedOperationException("not handle carrier child document not handled yet");
-//                }
-//                childHandleCarrier.setHandle(null);
-//                metadataApiBridge.saveMetadataDocument((MetadataDocument) childHandleCarrier, childNode.getWorkspaceURL());
-//            }
-//            
-//            childNode.setArchiveURI(null);
-//            childNode.setArchiveURL(null);
-//            workspaceDao.updateNodeArchiveUri(childNode);
-//            workspaceDao.updateNodeArchiveUrl(childNode);
-            
             removeArchiveUriFromNode(childNode);
             
         } catch (IOException | MetadataException | URISyntaxException | TransformerException ex) {
@@ -436,19 +414,24 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         return nodeURI;
     }
     
+    private String getComponentName(String mimetype, URI profileSchemaURI,
+            WorkspaceNodeType childNodeType, boolean isInfoLink) {
+        if(mimetype != null) {
+            return metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    profileSchemaURI, mimetype, null, isInfoLink);
+        } else {
+            return metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    profileSchemaURI, null, childNodeType, isInfoLink);
+        }
+    }
+    
     private void addReferenceToComponent(WorkspaceNode parentNode, WorkspaceNode childNode,
                 ResourceProxy createdProxy, CMDIDocument parentDocument, boolean isInfoLink)
             throws WorkspaceException {
         
-        String componentName;
-        
-        if(createdProxy.getMimetype() != null) {
-            componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(
-                    parentNode.getProfileSchemaURI(), createdProxy.getMimetype(), null, isInfoLink);
-        } else {
-            componentName = metadataApiBridge.getComponentPathForProfileAndReferenceType(
-                    parentNode.getProfileSchemaURI(), null, childNode.getType(), isInfoLink);
-        }
+        String componentName = getComponentName(
+                createdProxy.getMimetype(), parentNode.getProfileSchemaURI(),
+                childNode.getType(), isInfoLink);
         
         if(componentName == null) {
             return;
@@ -456,11 +439,29 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         CMDIContainerMetadataElement component = null;
         try {
             component = metadataApiBridge.createComponentPathWithin(parentDocument, componentName);
-        } catch (MetadataElementException ex) {
+        } catch (MetadataException ex) {
             String errorMessage = "Error assuring existance of path [" + componentName + "] in document " + parentDocument.getName();
             throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);
         }
         metadataApiBridge.addReferenceInComponent(component, createdProxy);
+    }
+    
+    private void removeComponent(WorkspaceNode parentNode, WorkspaceNode childNode,
+            ResourceProxy proxyToRemove, CMDIDocument parentDocument, boolean isInfoLink) throws MetadataException {
+        
+        String componentName = getComponentName(
+                proxyToRemove.getMimetype(), parentNode.getProfileSchemaURI(), childNode.getType(), isInfoLink);
+        if(componentName == null) {
+            return;
+        }
+
+        nl.mpi.metadata.cmdi.api.model.Component component = 
+                metadataApiBridge.getComponent(parentDocument, componentName, proxyToRemove.getId());
+        if(component == null) {
+            return;
+        }
+        
+        metadataApiBridge.removeComponent(component);
     }
     
     
