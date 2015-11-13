@@ -204,6 +204,20 @@ public class LamusMetadataCheckerTest {
         assertTrue("Issues should be empty (2)", issues2.isEmpty());
     }
     
+    @Test
+    public void validateUploadedCorpusFile_withResourceLink() throws Exception {
+        
+        final File fileToCheck = getResourceFromLocation("cmdi_validation/testingResourceLinks_Corpus.cmdi");
+        
+        final String expectedTest = "not($profileName)"
+                + " or ($profileName != 'lat-corpus' or (current()/cmd:ResourceType != 'Resource' or /cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:InfoLink[@ref = current()/@id] ))";
+        final String expectedMessage = "[CMDI Profile Restriction] 'lat-corpus' doesn't allow referencing to resources, unless they're info links.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateUploadedFile(fileToCheck);
+        
+        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+    }
+    
     //validate submit phase
     
     @Test
@@ -381,6 +395,22 @@ public class LamusMetadataCheckerTest {
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertTrue("Issues should be empty (1)", issues.isEmpty());
+    }
+    
+    @Test
+    public void validateSubmittedCorpusFile_withResourceLink() throws Exception {
+        
+        final File fileToCheck = getResourceFromLocation("cmdi_validation/testingResourceLinks_Corpus.cmdi");
+        final Collection<File> filesToCheck = new ArrayList<>();
+        filesToCheck.add(fileToCheck);
+        
+        final String expectedTest = "not($profileName)"
+                + " or ($profileName != 'lat-corpus' or (current()/cmd:ResourceType != 'Resource' or /cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:InfoLink[@ref = current()/@id] ))";
+        final String expectedMessage = "[CMDI Profile Restriction] 'lat-corpus' doesn't allow referencing to resources, unless they're info links.";
+        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
+        
+        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test

@@ -55,6 +55,11 @@
                 [CMDI Invalid reference] Mimetype not consistent with ResourceProxy type. 
             </sch:assert>
 
+            <sch:assert id="submit-assert.reference.corpus.resource" role="error" test="not($profileName)
+                or ($profileName != 'lat-corpus' or (current()/cmd:ResourceType != 'Resource' or /cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:InfoLink[@ref = current()/@id] ))">
+                [CMDI Profile Restriction] 'lat-corpus' doesn't allow referencing to resources, unless they're info links.
+            </sch:assert>
+
             <sch:assert id="submit-assert.reference.component.present" role="error" test="not($profileName)
                         or (current()/cmd:ResourceType != 'Metadata' and current()/cmd:ResourceType != 'Resource')
                         or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id]) 

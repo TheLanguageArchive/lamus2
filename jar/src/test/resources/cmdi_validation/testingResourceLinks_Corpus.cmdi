@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CMD xmlns="http://www.clarin.eu/cmd/"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     CMDVersion="1.1"
+     xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064/xsd ">
+   <Header>
+      <MdCreator>guisil</MdCreator>
+      <MdCreationDate>2015-03-12+01:00</MdCreationDate>
+      <MdProfile>clarin.eu:cr1:p_1407745712064</MdProfile>
+   </Header>
+   <Resources>
+      <ResourceProxyList>
+         <ResourceProxy id="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
+            <ResourceRef>someOtherSession.cmdi</ResourceRef>
+         </ResourceProxy>
+         <ResourceProxy id="res_aff807d5-bb6d-4f75-895f-d5731562ebb1">
+            <ResourceType mimetype="image/jpeg">Resource</ResourceType>
+            <ResourceRef>sessionreference/someimage.jpg</ResourceRef>
+         </ResourceProxy>
+      </ResourceProxyList>
+      <JournalFileProxyList/>
+      <ResourceRelationList/>
+   </Resources>
+   <Components>
+      <lat-corpus>
+         <Name>testingReference_componentReferenceMissing</Name>
+         <Title>testingReference_componentReferenceMissing</Title>
+         <descriptions>
+            <Description xml:lang="eng">this is a beautiful description</Description>
+         </descriptions>
+         <CorpusLink ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+            <Name>someOtherSession</Name>
+         </CorpusLink>
+         <CorpusLink ref="res_aff807d5-bb6d-4f75-895f-d5731562ebb1"></CorpusLink>
+      </lat-corpus>
+   </Components>
+</CMD>
