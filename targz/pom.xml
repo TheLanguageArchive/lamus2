@@ -32,7 +32,7 @@
                 <version>2.4</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>lamus2-${version}</finalName>
+                    <finalName>lamus2-${version}_${deployTo}</finalName>
                     <descriptors>
                         <descriptor>src/main/assembly/targz.xml</descriptor>
                     </descriptors>
