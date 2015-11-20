@@ -366,4 +366,11 @@ public interface WorkspaceDao {
      * @return Collection of node replacements
      */
     public Collection<WorkspaceNodeReplacement> getAllNodeReplacements();
+    
+    /**
+     * Retrieves a collection of node replacements belonging to the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return Collection of node replacements
+     */
+    public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID);
 }

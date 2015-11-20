@@ -2395,6 +2395,80 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.isEmpty());
     }
     
+    @Test
+    public void getNodeReplacementsForWorkspace() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL1 = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, topURI1, topURL1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace1, topNode1);
+        
+        URI oldURI1_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL1_1 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode1_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, oldURI1_1, oldURL1_1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI oldURI1_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL1_2 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode1_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, oldURI1_2, oldURL1_2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI newURI1_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL1_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode1_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, newURI1_1, newURL1_1, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode1, newNode1_1);
+        
+        URI newURI1_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL1_2 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode1_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, newURI1_2, newURL1_2, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode1, newNode1_2);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode1_1, newNode1_1);
+        WorkspaceNodeReplacement replacement1_1 =
+                new LamusWorkspaceNodeReplacement(oldNode1_1.getArchiveURI(), newNode1_1.getArchiveURI());
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode1_2, newNode1_2);
+        WorkspaceNodeReplacement replacement1_2 =
+                new LamusWorkspaceNodeReplacement(oldNode1_2.getArchiveURI(), newNode1_2.getArchiveURI());
+        
+        Workspace testWorkspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL2 = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, topURI2, topURL2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace2, topNode2);
+        
+        URI oldURI2_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL2_1 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode2_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, oldURI2_1, oldURL2_1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI oldURI2_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL2_2 = new URL("file:/archive/folder/oldnode.cmdi");
+        WorkspaceNode oldNode2_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, oldURI2_2, oldURL2_2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI newURI2_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL2_1 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode2_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, newURI2_1, newURL2_1, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode2, newNode2_1);
+        
+        URI newURI2_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL2_2 = new URL("file:/archive/folder/newnode.cmdi");
+        WorkspaceNode newNode2_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, newURI2_2, newURL2_2, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode2, newNode2_2);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode2_1, newNode2_1);
+        WorkspaceNodeReplacement replacement2_1 =
+                new LamusWorkspaceNodeReplacement(oldNode2_1.getArchiveURI(), newNode2_1.getArchiveURI());
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode2_2, newNode2_2);
+        WorkspaceNodeReplacement replacement2_2 =
+                new LamusWorkspaceNodeReplacement(oldNode2_2.getArchiveURI(), newNode2_2.getArchiveURI());
+        
+        Collection<WorkspaceNodeReplacement> retrievedCollection = this.workspaceDao.getNodeReplacementsForWorkspace(testWorkspace1.getWorkspaceID());
+        
+        assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.size() == 2);
+        assertTrue("Not all expected replacements are present in the collection", retrievedCollection.contains(replacement1_1) && retrievedCollection.contains(replacement1_2));
+        assertFalse("Unexpected replacements are present in the collection", retrievedCollection.contains(replacement2_1) && retrievedCollection.contains(replacement2_2));
+    }
+    
 
     private Workspace insertTestWorkspaceWithDefaultUserIntoDB(boolean withEndDates) {
         return insertTestWorkspaceWithGivenUserIntoDB("someUser", withEndDates);

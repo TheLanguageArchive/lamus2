@@ -135,7 +135,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
@@ -187,7 +187,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(firstCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(firstCrawlerID); will(returnValue(firstCrawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(firstNodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(firstNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
@@ -208,7 +208,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace2).getCrawlerID(); will(returnValue(secondCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(secondCrawlerID); will(returnValue(secondCrawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(secondNodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_2); will(returnValue(secondNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace2).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace2).setMessage(successfulMessage);
@@ -253,7 +253,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockFailedSubmittedWorkspace).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             
             oneOf(mockFailedSubmittedWorkspace).setStatus(failedStatus);
             oneOf(mockFailedSubmittedWorkspace).setMessage(failedMessage);
@@ -297,7 +297,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements);
             
             oneOf(mockSuccessfulSubmittedWorkspace1).getUserID(); will(returnValue(userID));
@@ -353,7 +353,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements); will(throwException(expectedException));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(failedStatus);

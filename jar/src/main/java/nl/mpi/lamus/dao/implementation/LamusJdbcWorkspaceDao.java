@@ -1129,6 +1129,31 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return collectionToReturn;
     }
+
+    /**
+     * @see WorkspaceDao#getNodeReplacementsForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID) {
+        
+        logger.debug("Retrieving collection containing node replacements belonging to workspace " + workspaceID);
+        
+        String queryNodeReplacementsSql =
+                "SELECT coalesce(a.archive_uri, a.archive_url, a.origin_url) old_node_uri,"
+                + " coalesce(b.archive_uri, b.archive_url, b.origin_url) new_node_uri FROM"
+                + " (SELECT workspace_id, workspace_node_id, archive_uri, archive_url, origin_url from node) a,"
+                + " (SELECT workspace_id, workspace_node_id, archive_uri, archive_url, origin_url from node) b,"
+                + " (SELECT old_node_id, new_node_id from node_replacement) c"
+                + " WHERE c.old_node_id = a.workspace_node_id and c.new_node_id = b.workspace_node_id"
+                + " AND a.workspace_id = b.workspace_id AND a.workspace_id = :workspace_id;";
+        
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        Collection<WorkspaceNodeReplacement> collectionToReturn =
+                this.namedParameterJdbcTemplate.query(queryNodeReplacementsSql, namedParameters, new WorkspaceNodeReplacementMapper());
+        
+        return collectionToReturn;
+    }
     
     
     

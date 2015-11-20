@@ -95,7 +95,7 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         boolean versioningWasSuccessful = Boolean.TRUE;
         
         // version creation service
-        Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getAllNodeReplacements();
+        Collection<WorkspaceNodeReplacement> nodeReplacements = workspaceDao.getNodeReplacementsForWorkspace(workspace.getWorkspaceID());
         
         if(!nodeReplacements.isEmpty()) {
             

@@ -410,4 +410,12 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     public Collection<WorkspaceNodeReplacement> getAllNodeReplacements() {
         return this.getWorkspaceDao().getAllNodeReplacements();
     }
+
+    /**
+     * @see WorkspaceDao#getNodeReplacementsForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getNodeReplacementsForWorkspace(workspaceID);
+    }
 }
