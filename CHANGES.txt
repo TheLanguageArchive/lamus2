@@ -1,3 +1,13 @@
+lamus2-1.4.1-RC1 (2015-12-01)
+
+    Fixes:
+        - "_2" SUFFIXES: Prevented unnecessary addition of "_2" suffixes
+          after node replacements. (#4757)
+
+        - REPLACED NODES URL: Added a call to the corpusstructure service which
+          updates the URL of nodes that have been replaced,
+          before calling the crawler. (#4792)
+
 lamus2-1.4.0-RC4 (2015-11-06)
 
     Changes:
