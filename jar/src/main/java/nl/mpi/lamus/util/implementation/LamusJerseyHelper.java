@@ -39,10 +39,10 @@ public class LamusJerseyHelper implements JerseyHelper {
     private static final Logger logger = LoggerFactory.getLogger(JerseyHelper.class);
 
     /**
-     * @see JerseyHelper#postRequestCreateVersions(javax.json.JsonObject, java.lang.String, java.lang.String[])
+     * @see JerseyHelper#postRequestCorpusStructure(javax.json.JsonObject, java.lang.String, java.lang.String[])
      */
     @Override
-    public JsonObject postRequestCreateVersions(JsonObject requestJsonObject, String location, String... paths) {
+    public JsonObject postRequestCorpusStructure(JsonObject requestJsonObject, String location, String... paths) {
         
         WebTarget finalTarget = getTargetForService(location, paths);
         
@@ -107,5 +107,4 @@ public class LamusJerseyHelper implements JerseyHelper {
         
         return finalTarget;
     }
-
 }

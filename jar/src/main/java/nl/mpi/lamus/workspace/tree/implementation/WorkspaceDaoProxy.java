@@ -27,6 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.tree.WorkspaceDaoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -417,5 +418,13 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     @Override
     public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID) {
         return this.getWorkspaceDao().getNodeReplacementsForWorkspace(workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#getReplacedNodeUrlsToUpdateForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getReplacedNodeUrlsToUpdateForWorkspace(workspaceID);
     }
 }

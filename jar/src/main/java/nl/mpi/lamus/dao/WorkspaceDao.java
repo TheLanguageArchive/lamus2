@@ -25,6 +25,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 
 /**
  * Data access layer for the workspace data.
@@ -373,4 +374,11 @@ public interface WorkspaceDao {
      * @return Collection of node replacements
      */
     public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID);
+    
+    /**
+     * Retrieves a collection of node URL updated belonging to the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return Collection of node URL updates
+     */
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID);
 }

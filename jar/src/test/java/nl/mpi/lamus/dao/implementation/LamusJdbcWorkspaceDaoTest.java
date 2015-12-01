@@ -31,6 +31,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceReplacedNodeUrlUpdate;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -2467,6 +2468,88 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         assertTrue("Retrieved collection of replacements has different size from expected", retrievedCollection.size() == 2);
         assertTrue("Not all expected replacements are present in the collection", retrievedCollection.contains(replacement1_1) && retrievedCollection.contains(replacement1_2));
         assertFalse("Unexpected replacements are present in the collection", retrievedCollection.contains(replacement2_1) && retrievedCollection.contains(replacement2_2));
+    }
+    
+    @Test
+    public void getReplacedNodeUrlsToUpdateForWorkspace() throws MalformedURLException, URISyntaxException {
+        
+        Workspace testWorkspace1 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL1 = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, topURI1, topURL1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace1, topNode1);
+        
+        URI oldURI1_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL1_1 = new URL("file:/archive/folder/oldnode1_1.cmdi");
+        URL oldUpdatedURL1_1 = new URL("file:/archive/versioning/oldnode1_1.cmdi");
+        WorkspaceNode oldNode1_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, oldURI1_1, oldUpdatedURL1_1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI oldURI1_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL1_2 = new URL("file:/archive/folder/oldnode1_2.cmdi");
+        URL oldUpdatedURL1_2 = new URL("file:/archive/versioning/oldnode1_2.cmdi");
+        WorkspaceNode oldNode1_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, oldURI1_2, oldUpdatedURL1_2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI newURI1_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL1_1 = new URL("file:/archive/folder/newnode1_1.cmdi");
+        URL newUpdatedURL1_1 = new URL("file:/archive/versioning/newnode1_1.cmdi");
+        WorkspaceNode newNode1_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, newURI1_1, newUpdatedURL1_1, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode1, newNode1_1);
+        
+        URI newURI1_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL1_2 = new URL("file:/archive/folder/newnode1_2.cmdi");
+        URL newUpdatedURL1_2 = new URL("file:/archive/versioning/newnode1_2.cmdi");
+        WorkspaceNode newNode1_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, newURI1_2, newUpdatedURL1_2, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode1, newNode1_2);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode1_1, newNode1_1);
+        WorkspaceReplacedNodeUrlUpdate update1_1 =
+                new LamusWorkspaceReplacedNodeUrlUpdate(oldNode1_1.getArchiveURI(), oldNode1_1.getArchiveURL().toURI());
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode1_2, newNode1_2);
+        WorkspaceReplacedNodeUrlUpdate update1_2 =
+                new LamusWorkspaceReplacedNodeUrlUpdate(oldNode1_2.getArchiveURI(), oldNode1_2.getArchiveURL().toURI());
+        
+        Workspace testWorkspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
+        URI topURI2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL topURL2 = new URL("file:/archive/folder/topnode.cmdi");
+        WorkspaceNode topNode2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, topURI2, topURL2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsWorkspaceTopNodeInDB(testWorkspace2, topNode2);
+        
+        URI oldURI2_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL2_1 = new URL("file:/archive/folder/oldnode2_1.cmdi");
+        URL oldUpdatedURL2_1 = new URL("file:/archive/versioning/oldnode2_1.cmdi");
+        WorkspaceNode oldNode2_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, oldURI2_1, oldUpdatedURL2_1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI oldURI2_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL oldURL2_2 = new URL("file:/archive/folder/oldnode2_2.cmdi");
+        URL oldUpdatedURL2_2 = new URL("file:/archive/versioning/oldnode2_2.cmdi");
+        WorkspaceNode oldNode2_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, oldURI2_2, oldUpdatedURL2_2, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        
+        URI newURI2_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL2_1 = new URL("file:/archive/folder/newnode2_1.cmdi");
+        URL newUpdatedURL2_1 = new URL("file:/archive/versioning/newnode2_1.cmdi");
+        WorkspaceNode newNode2_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, newURI2_1, newUpdatedURL2_1, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode2, newNode2_1);
+        
+        URI newURI2_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL newURL2_2 = new URL("file:/archive/folder/newnode2_2.cmdi");
+        URL newUpdatedURL2_2 = new URL("file:/archive/versioning/newnode2_2.cmdi");
+        WorkspaceNode newNode2_2 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace2, newURI2_2, newUpdatedURL2_2, null, Boolean.TRUE, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE);
+        setNodeAsParentAndInsertLinkIntoDatabase(topNode2, newNode2_2);
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode2_1, newNode2_1);
+        WorkspaceReplacedNodeUrlUpdate update2_1 =
+                new LamusWorkspaceReplacedNodeUrlUpdate(oldNode2_1.getArchiveURI(), oldNode2_1.getArchiveURL().toURI());
+        
+        setNodeAsReplacedAndAddReplacementInDatabase(oldNode2_2, newNode2_2);
+        WorkspaceReplacedNodeUrlUpdate update2_2 =
+                new LamusWorkspaceReplacedNodeUrlUpdate(oldNode2_2.getArchiveURI(), oldNode2_2.getArchiveURL().toURI());
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> retrievedCollection = this.workspaceDao.getReplacedNodeUrlsToUpdateForWorkspace(testWorkspace1.getWorkspaceID());
+        
+        assertTrue("Retrieved collection of updates has different size from expected", retrievedCollection.size() == 2);
+        assertTrue("Not all expected updates are present in the collection", retrievedCollection.contains(update1_1) && retrievedCollection.contains(update1_2));
+        assertFalse("Unexpected updates are present in the collection", retrievedCollection.contains(update2_1) && retrievedCollection.contains(update2_2));
     }
     
 

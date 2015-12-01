@@ -213,6 +213,16 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Sub path for the crawler details service"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_archiveobjects_path"
+                   value="archiveobjects"
+                   description="Sub path for the archiveobjects service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_archiveobjects_updateurl_path"
+                   value="updateurl"
+                   description="Sub path for the archiveobjects updateurl service"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.translation_service.location"
                    value="https://lux16.mpi.nl/ds/TranslationService"
                    description="Location of the translation service"

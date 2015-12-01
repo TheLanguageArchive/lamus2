@@ -29,7 +29,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceReplacedNodeUrlUpdate;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -84,7 +86,7 @@ public class LamusJsonTransformationHandlerTest {
         nodeReplacementCollection.add(secondNodeReplacement);
 
         
-        JsonObject resultJsonObject = jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacementCollection);
+        JsonObject resultJsonObject = jsonTransformationHandler.createVersioningJsonObjectFromNodeReplacementCollection(nodeReplacementCollection);
         
         assertNotNull("Retrieved json object should not be null", resultJsonObject);
         assertNotNull("'list' json array should not be null", resultJsonObject.getJsonArray("list"));
@@ -285,5 +287,161 @@ public class LamusJsonTransformationHandlerTest {
         String retrievedState = jsonTransformationHandler.getCrawlerStateFromJsonObject(detailedCrawlerStateObject);
         
         assertEquals("Retrieved state different from expected", state, retrievedState);
+    }
+    
+    @Test
+    public void createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection() {
+        
+        URI firstNodeUri = URI.create(UUID.randomUUID().toString());
+        URI firstNodeUpdatedUrl = URI.create("https://archive/location/versions/firstnode.cmdi");
+        WorkspaceReplacedNodeUrlUpdate firstReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(firstNodeUri, firstNodeUpdatedUrl);
+        
+        URI secondNodeUri = URI.create(UUID.randomUUID().toString());
+        URI secondNodeUpdatedUrl = URI.create("https://archive/location/versions/secondnode.cmdi");
+        WorkspaceReplacedNodeUrlUpdate secondReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(secondNodeUri, secondNodeUpdatedUrl);
+
+        final Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodeUrlUpdateColletion = new ArrayList<>();
+        replacedNodeUrlUpdateColletion.add(firstReplacedNodeUrlUpdate);
+        replacedNodeUrlUpdateColletion.add(secondReplacedNodeUrlUpdate);
+        
+        JsonObject resultJsonObject = jsonTransformationHandler.createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection(replacedNodeUrlUpdateColletion);
+        
+        assertNotNull("Retrieved json object should not be null", resultJsonObject);
+        assertNotNull("'list' json array should not be null", resultJsonObject.getJsonArray("list"));
+        JsonArray nodesJsonArray = resultJsonObject.getJsonArray("list");
+        assertFalse("'nodes' json array should not be empty", nodesJsonArray.isEmpty());
+        assertEquals("first json object in array has different 'nodeUri' value than expected", firstNodeUri.toString(), nodesJsonArray.getJsonObject(0).getString("nodeUri"));
+        assertEquals("first json object in array has different 'updatedUrl' value than expected", firstNodeUpdatedUrl.toString(), nodesJsonArray.getJsonObject(0).getString("updatedUrl"));
+        assertEquals("second json object in array has different 'nodeUri' value than expected", secondNodeUri.toString(), nodesJsonArray.getJsonObject(1).getString("nodeUri"));
+        assertEquals("second json object in array has different 'updatedUrl' value than expected", secondNodeUpdatedUrl.toString(), nodesJsonArray.getJsonObject(1).getString("updatedUrl"));
+    }
+    
+    @Test
+    public void createReplacedNodeUrlUpdateCollectionFromMultipleJsonObjectStatusOk() throws URISyntaxException {
+        
+        URI firstNodeUri = URI.create(UUID.randomUUID().toString());
+        URI firstNodeUpdatedUrl = URI.create("https://archive/location/versions/firstnode.cmdi");
+        String firstNodeUpdateStatus = "Ok";
+        WorkspaceReplacedNodeUrlUpdate firstReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(firstNodeUri, firstNodeUpdatedUrl, firstNodeUpdateStatus.toUpperCase());
+        
+        URI secondNodeUri = URI.create(UUID.randomUUID().toString());
+        URI secondNodeUpdatedUrl = URI.create("https://archive/location/versions/secondnode.cmdi");
+        String secondNodeUpdateStatus = "oK";
+        WorkspaceReplacedNodeUrlUpdate secondReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(secondNodeUri, secondNodeUpdatedUrl, secondNodeUpdateStatus.toUpperCase());
+
+        final Collection<WorkspaceReplacedNodeUrlUpdate> expectedReplacedNodeUrlUpdateColletion = new ArrayList<>();
+        expectedReplacedNodeUrlUpdateColletion.add(firstReplacedNodeUrlUpdate);
+        expectedReplacedNodeUrlUpdateColletion.add(secondReplacedNodeUrlUpdate);
+
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder nodesArrayBuilder = Json.createArrayBuilder();
+
+        nodesArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("nodeUri", firstNodeUri.toString())
+                    .add("updatedUrl", firstNodeUpdatedUrl.toString())
+                    .add("status", firstNodeUpdateStatus));
+        nodesArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("nodeUri", secondNodeUri.toString())
+                    .add("updatedUrl", secondNodeUpdatedUrl.toString())
+                    .add("status", secondNodeUpdateStatus));
+        
+        mainObjectBuilder.add("list", nodesArrayBuilder);
+        
+        JsonObject updatedObject = mainObjectBuilder.build();
+        
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> resultReplacedNodeUrlUpdateCollection = jsonTransformationHandler.createReplacedNodeUrlUpdateCollectionFromJsonObject(updatedObject);
+        
+        assertEquals("ReplacedNodeUrlUpdate collection different from expected", expectedReplacedNodeUrlUpdateColletion, resultReplacedNodeUrlUpdateCollection);
+    }
+    
+    @Test
+    public void createReplacedNodeUrlUpdateCollectionFromSingleJsonObjectStatusOk() throws URISyntaxException {
+        
+        URI firstNodeUri = URI.create(UUID.randomUUID().toString());
+        URI firstNodeUpdatedUrl = URI.create("https://archive/location/versions/firstnode.cmdi");
+        String firstNodeUpdateStatus = "Ok";
+        WorkspaceReplacedNodeUrlUpdate firstReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(firstNodeUri, firstNodeUpdatedUrl, firstNodeUpdateStatus.toUpperCase());
+        
+        final Collection<WorkspaceReplacedNodeUrlUpdate> expectedReplacedNodeUrlUpdateColletion = new ArrayList<>();
+        expectedReplacedNodeUrlUpdateColletion.add(firstReplacedNodeUrlUpdate);
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder nodesArrayBuilder = Json.createArrayBuilder();
+
+        nodesArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("nodeUri", firstNodeUri.toString())
+                    .add("updatedUrl", firstNodeUpdatedUrl.toString())
+                    .add("status", firstNodeUpdateStatus));
+        
+        mainObjectBuilder.add("list", nodesArrayBuilder);
+        
+        JsonObject updatedObject = mainObjectBuilder.build();
+        
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> resultReplacedNodeUrlUpdateCollection = jsonTransformationHandler.createReplacedNodeUrlUpdateCollectionFromJsonObject(updatedObject);
+        
+        assertEquals("ReplacedNodeUrlUpdate collection different from expected", expectedReplacedNodeUrlUpdateColletion, resultReplacedNodeUrlUpdateCollection);
+    }
+    
+    @Test
+    public void createReplacedNodeUrlUpdateCollectionFromJsonObjectStatusFailed() throws URISyntaxException {
+        
+        URI firstNodeUri = URI.create(UUID.randomUUID().toString());
+        URI firstNodeUpdatedUrl = URI.create("https://archive/location/versions/firstnode.cmdi");
+        String firstNodeUpdateStatus = "failed";
+        String firstNodeUpdateError = "reference is invalid for ArchiveObjectDaoImpl";
+        WorkspaceReplacedNodeUrlUpdate firstReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(firstNodeUri, firstNodeUpdatedUrl, firstNodeUpdateStatus.toUpperCase(), firstNodeUpdateError);
+        
+        URI secondNodeUri = URI.create(UUID.randomUUID().toString());
+        URI secondNodeUpdatedUrl = URI.create("https://archive/location/versions/secondnode.cmdi");
+        String secondNodeUpdateStatus = "FAILED";
+        String secondNodeUpdateError = "reference is invalid for ArchiveObjectDaoImpl";
+        WorkspaceReplacedNodeUrlUpdate secondReplacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(secondNodeUri, secondNodeUpdatedUrl, secondNodeUpdateStatus.toUpperCase(), secondNodeUpdateError);
+        
+        final Collection<WorkspaceReplacedNodeUrlUpdate> expectedReplacedNodeUrlUpdateColletion = new ArrayList<>();
+        expectedReplacedNodeUrlUpdateColletion.add(firstReplacedNodeUrlUpdate);
+        expectedReplacedNodeUrlUpdateColletion.add(secondReplacedNodeUrlUpdate);
+
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder nodesArrayBuilder = Json.createArrayBuilder();
+
+        nodesArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("nodeUri", firstNodeUri.toString())
+                    .add("updatedUrl", firstNodeUpdatedUrl.toString())
+                    .add("status", firstNodeUpdateStatus)
+                    .add("error", firstNodeUpdateError));
+        nodesArrayBuilder.add(
+                Json.createObjectBuilder()
+                    .add("nodeUri", secondNodeUri.toString())
+                    .add("updatedUrl", secondNodeUpdatedUrl.toString())
+                    .add("status", secondNodeUpdateStatus)
+                    .add("error", secondNodeUpdateError));
+        
+        mainObjectBuilder.add("list", nodesArrayBuilder);
+        
+        JsonObject updatedObject = mainObjectBuilder.build();
+        
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> resultReplacedNodeUrlUpdateCollection = jsonTransformationHandler.createReplacedNodeUrlUpdateCollectionFromJsonObject(updatedObject);
+        
+        assertEquals("ReplacedNodeUrlUpdate collection different from expected", expectedReplacedNodeUrlUpdateColletion, resultReplacedNodeUrlUpdateCollection);
+    }
+    
+    @Test
+    public void createReplacedNodeUrlUpdateCollectionFromJsonObject_NullList() throws URISyntaxException {
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonObject updatedObject = mainObjectBuilder.build();
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> resultReplacedNodeUrlUpdateCollection = jsonTransformationHandler.createReplacedNodeUrlUpdateCollectionFromJsonObject(updatedObject);
+        
+        assertTrue("ReplacedNodeUrlUpdate collection should be empty", resultReplacedNodeUrlUpdateCollection.isEmpty());
     }
 }

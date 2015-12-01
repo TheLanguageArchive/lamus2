@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import javax.json.JsonObject;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 
 /**
  * Interface providing methods to handle transformations related with JSON objects.
@@ -29,10 +30,11 @@ public interface JsonTransformationHandler {
     
     /**
      * Creates a JSON object from the given collection of WorkspaceNodeReplacement objects.
+     * This object is to be used in the versioning service call.
      * @param nodeReplacementCollection collection to transform
      * @return JSON object
      */
-    public JsonObject createJsonObjectFromNodeReplacementCollection(Collection<WorkspaceNodeReplacement> nodeReplacementCollection);
+    public JsonObject createVersioningJsonObjectFromNodeReplacementCollection(Collection<WorkspaceNodeReplacement> nodeReplacementCollection);
     
     /**
      * Creates a collection of WorkspaceNodeReplacement objects from the given JSON object.
@@ -44,17 +46,32 @@ public interface JsonTransformationHandler {
     /**
      * Gets a String containing the ID of the crawler, which is included in the
      * given JsonObject (from the service response)
-     * @param crawlerStartJsonObject JSON object containing the ID
+     * @param crawlerJsonObject JSON object containing the ID
      * @return ID of the crawler
      */
-    public String getCrawlerIdFromJsonObject(JsonObject crawlerStartJsonObject);
+    public String getCrawlerIdFromJsonObject(JsonObject crawlerJsonObject);
     
     /**
      * Given the JsonObject with details about a crawler,
      * gets its state (if it's finished, and if it was successful or not)
      * 
-     * @param crawlerStateJsonObject JSON object containing the crawler details
+     * @param crawlerJsonObject JSON object containing the crawler details
      * @return String containing the crawler state
      */
-    public String getCrawlerStateFromJsonObject(JsonObject crawlerStateJsonObject);
+    public String getCrawlerStateFromJsonObject(JsonObject crawlerJsonObject);
+    
+    /**
+     * Creates a JSON object from the given collection of WorkspaceReplacedNodeUrlUpdate objects.
+     * This object is to be used in the archiveobjects updateurl service.
+     * @param replacedNodeUrlUpdates collection to transform
+     * @return JSON object
+     */
+    public JsonObject createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection(Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodeUrlUpdates);
+    
+    /**
+     * Creates a collection of WorkspaceReplacedNodeUrlUpdate objects from the given JSON object.
+     * @param updatedUrlsJsonObject JSON object to transform
+     * @return collection of WorkspaceReplacedNodeUrlUpdate
+     */
+    public Collection<WorkspaceReplacedNodeUrlUpdate> createReplacedNodeUrlUpdateCollectionFromJsonObject(JsonObject updatedUrlsJsonObject) throws URISyntaxException;
 }

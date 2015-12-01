@@ -34,7 +34,7 @@ public interface JerseyHelper {
      *              to the service location in order to call the required method
      * @return JSON object containing the response
      */
-    public JsonObject postRequestCreateVersions(JsonObject requestJsonObject, String location, String... paths);
+    public JsonObject postRequestCorpusStructure(JsonObject requestJsonObject, String location, String... paths);
     
     /**
      * Submits a POST request to the service in the given location and paths,

@@ -26,6 +26,7 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
@@ -68,6 +69,8 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private ArchiveHandleHelper archiveHandleHelper;
     @Autowired
     private NodeUtil nodeUtil;
+    @Autowired
+    private WorkspaceDao workspaceDao;
     
 
     /**
@@ -159,6 +162,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalStateException("This exporter only supports deleted or replaced nodes. Current node status: " + currentNode.getStatusAsString());
         }
         currentNode.setArchiveURL(targetArchiveURL);
+        workspaceDao.updateNodeArchiveUrl(currentNode);
         
         if(targetArchiveURL == null) {
             //TODO send some sort of notification at this point

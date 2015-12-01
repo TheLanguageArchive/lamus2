@@ -330,6 +330,17 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_crawler_details_path");
     }
     
+    @Bean
+    @Qualifier("corpusStructureServiceArchiveObjectsPath")
+    public String corpusStructureServiceArchiveObjectsPath() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_archiveobjects_path");
+    }
+    
+    @Bean
+    @Qualifier("corpusStructureServiceArchiveObjectsUpdateUrlPath")
+    public String corpusStructureServiceArchiveObjectsUpdateUrlPath() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_archiveobjects_updateurl_path");
+    }
     
     @Bean
     @Qualifier("mailServer")

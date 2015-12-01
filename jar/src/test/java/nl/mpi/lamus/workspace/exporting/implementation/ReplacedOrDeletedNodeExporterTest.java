@@ -30,6 +30,7 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -74,6 +75,7 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock ArchiveHandleHelper mockArchiveHandleHelper;
     @Mock NodeUtil mockNodeUtil;
+    @Mock WorkspaceDao mockWorkspaceDao;
     
     @Mock WorkspaceNode mockParentWsNode;
     @Mock WorkspaceNode mockChildWsNode;
@@ -100,6 +102,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "archiveHandleHelper", mockArchiveHandleHelper);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "nodeUtil", mockNodeUtil);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceDao", mockWorkspaceDao);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -217,6 +220,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
@@ -257,6 +261,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
@@ -387,6 +392,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
@@ -436,6 +442,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
@@ -522,6 +529,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
@@ -575,6 +583,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
 
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));

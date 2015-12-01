@@ -35,6 +35,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceReplacedNodeUrlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -1154,7 +1155,30 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return collectionToReturn;
     }
-    
+
+    /**
+     * @see WorkspaceDao#getReplacedNodeUrlsToUpdateForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID) {
+        
+        logger.debug("Retrieving collection containing replaced node URL updates belonging to workspace " + workspaceID);
+        
+        String queryNodeUrlUpdatesSql =
+                "SELECT coalesce(a.archive_uri, a.archive_url, a.origin_url) node_uri,"
+                + " a.archive_url updated_uri FROM"
+                + " (SELECT workspace_id, workspace_node_id, archive_uri, archive_url, origin_url from node) a,"
+                + " (SELECT old_node_id, new_node_id from node_replacement) c"
+                + " WHERE c.old_node_id = a.workspace_node_id"
+                + " AND a.workspace_id = :workspace_id;";
+        
+        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> collectionToReturn =
+                this.namedParameterJdbcTemplate.query(queryNodeUrlUpdatesSql, namedParameters, new WorkspaceReplacedNodeUrlUpdateMapper());
+        
+        return collectionToReturn;
+    }
     
     
     private void setWorkspaceNodeAsReplaced(int workspaceID, int nodeID) {
@@ -1323,6 +1347,9 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         }
     }
     
+    /**
+     * Inner class used to map rows from the node table into WorkspaceNodeReplacement objects in queries
+     */
     private static final class WorkspaceNodeReplacementMapper implements RowMapper<WorkspaceNodeReplacement> {
 
         @Override
@@ -1352,6 +1379,41 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     oldNodeURI,
                     newNodeURI);
             return nodeReplacement;
+        }
+    }
+    
+    /**
+     * Inner class used to map rows from the node table into WorkspaceReplacedNodeUrlUpdate objects in queries
+     */
+    private static final class WorkspaceReplacedNodeUrlUpdateMapper implements RowMapper<WorkspaceReplacedNodeUrlUpdate> {
+
+        @Override
+        public WorkspaceReplacedNodeUrlUpdate mapRow(ResultSet rs, int i) throws SQLException {
+            
+            String nodeUriStr = rs.getString("node_uri");
+            URI nodeUri = null;
+            if(nodeUriStr != null && !nodeUriStr.isEmpty()) {
+                try {
+                    nodeUri = new URI(nodeUriStr);
+                } catch(URISyntaxException ex) {
+                    logger.warn("Archive URI is malformed; null used instead", ex);
+                }
+            }
+            
+            String updatedUriStr = rs.getString("updated_uri");
+            URI updatedUri = null;
+            if(updatedUriStr != null && !updatedUriStr.isEmpty()) {
+                try {
+                    updatedUri = new URI(updatedUriStr);
+                } catch(URISyntaxException ex) {
+                    logger.warn("Updated URL is malformed (not a URI); null used instead", ex);
+                }
+            }
+            
+            WorkspaceReplacedNodeUrlUpdate replacedNodeUrlUpdate = new LamusWorkspaceReplacedNodeUrlUpdate(
+                    nodeUri,
+                    updatedUri);
+            return replacedNodeUrlUpdate;
         }
     }
 }
