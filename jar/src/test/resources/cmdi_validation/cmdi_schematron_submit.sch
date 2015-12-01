@@ -32,7 +32,7 @@
 
     <sch:pattern id="submit-reference.presence.check">
         <sch:rule context="/cmd:CMD/cmd:Resources/cmd:ResourceProxyList">
-            <sch:assert id="assert.reference.present" role="error" test="count(cmd:ResourceProxy) ge 1">
+            <sch:assert id="submit-assert.reference.present" role="error" test="count(cmd:ResourceProxy) ge 1">
                 [CMDI Best Practice] There should be at least one /cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy.
             </sch:assert>
         </sch:rule>
