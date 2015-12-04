@@ -119,7 +119,7 @@ public class LamusBeans {
     
     @Bean
     public HandleManager handleManager() throws FileNotFoundException, IOException {
-        return new HandleManagerImpl(handleInfoProvider(), handleUtil(), handlePrefix);
+        return new HandleManagerImpl(handleInfoProvider(), handleParser(), handleUtil(), handlePrefix);
     }
     
     @Bean
