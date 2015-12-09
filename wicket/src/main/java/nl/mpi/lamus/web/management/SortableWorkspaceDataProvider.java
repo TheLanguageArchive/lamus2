@@ -19,10 +19,10 @@ package nl.mpi.lamus.web.management;
 import java.util.Iterator;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
+import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
 /**
  *
@@ -40,13 +40,16 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
     }
     
     @Override
-    public Iterator<? extends Workspace> iterator(long l, long l1) {
+    public Iterator<? extends Workspace> iterator(long first, long count) {
         
-        //TODO NOT USING VALUES FOR THE MOMENT
+        //The signature of this method requires long, but the subList method used afterwards requires int.
+        //It should never be a problem (how many workspaces will there ever be?), but anyway will throw an exception if this assumption proves to be wrong.
+        int firstInt = (int) first;
+        assureLongAndIntHaveSameValue(first, firstInt);
+        int countInt = (int) count;
+        assureLongAndIntHaveSameValue(count, countInt);
         
-        
-        callListAllWorkspaces();
-        return allWorkspaces.iterator();
+        return getAllWorkspaces().subList(firstInt, firstInt + countInt).iterator();
     }
 
     @Override
@@ -58,22 +61,24 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
     }
 
     @Override
-    public IModel<Workspace> model(final Workspace t) {
-        return new LoadableDetachableModel<Workspace>(t) {
-            @Override
-            protected Workspace load() {
-                
-                
-                
-                return t;
-                
-                //TODO SHOULD BE CHANGED
-            }
-        };
+    public IModel<Workspace> model(final Workspace object) {
+
+        return new WorkspaceModel(object);
     }
  
     
     private void callListAllWorkspaces() {
         allWorkspaces = workspaceService.listAllWorkspaces();
+    }
+    
+    private List<Workspace> getAllWorkspaces() {
+        return workspaceService.listAllWorkspaces();
+    }
+    
+    private boolean assureLongAndIntHaveSameValue(long original, int converted) {
+        if(original != (long) converted) {
+            throw new ArithmeticException("Casting " + original + " to int cannot be done without changing its value");
+        }
+        return true;
     }
 }
