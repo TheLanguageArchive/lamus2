@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.web.model;
 
+import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.model.IModel;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkspaceModelProvider {
     
-    public WorkspaceModel getWorkspaceModel(int workspaceId) {
+    public IModel<Workspace> getWorkspaceModel(int workspaceId) {
         return new WorkspaceModel(workspaceId);
     }
 }

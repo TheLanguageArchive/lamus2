@@ -23,7 +23,6 @@ import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
-import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
@@ -33,6 +32,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListChoice;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.tester.FormTester;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -71,7 +72,13 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
     @Mock private Collection<String> mockManagerUsers;
     @Mock private WorkspaceModelProvider mockWorkspaceModelProvider;
     
-    @Mock private WorkspaceModel mockWorkspaceModel;
+    private final IModel<Workspace> mockWsModel = new Model<Workspace>(mockWs1) {
+
+        @Override
+        public Workspace getObject() {
+            return mockWs1;
+        }
+    };
 
     private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
     private final String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
@@ -84,14 +91,11 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         
         when(mockWorkspaceServiceBean.getWorkspace(wsId1)).thenReturn(mockWs1);
         
-        
-        
         when(mockWorkspaceServiceBean.listUserWorkspaces(AbstractLamusWicketTest.MOCK_USER_ID)).thenReturn(mockWsList);
         when(mockWorkspaceServiceBean.openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, 1)).thenReturn(mockWs1);
         when(mockLamusWicketPagesProviderBean.getWorkspacePage(mockWs1)).thenReturn(mockWorkspacePage);
         
-        when(mockWorkspaceModelProvider.getWorkspaceModel(wsId1)).thenReturn(mockWorkspaceModel);
-        when(mockWorkspaceModel.getObject()).thenReturn(mockWs1);
+        when(mockWorkspaceModelProvider.getWorkspaceModel(wsId1)).thenReturn(mockWsModel);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
@@ -161,7 +165,6 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         verify(mockLamusWicketPagesProviderBean).getWorkspacePage(mockWs1);
         
         verify(mockWorkspaceModelProvider).getWorkspaceModel(wsId1);
-        verify(mockWorkspaceModel, atLeast(1)).getObject();
         
         
         getTester().assertRenderedPage(WorkspacePage.class);
