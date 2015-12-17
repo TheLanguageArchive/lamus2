@@ -81,6 +81,7 @@ public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
         }
         
         if(WorkspaceNodeStatus.UPLOADED.equals(rootNodeToDelete.getStatus())) {
+            workspaceNodeLinkManager.unlinkNodeFromAllParents(rootNodeToDelete);
             workspaceDao.deleteWorkspaceNode(rootNodeToDelete.getWorkspaceID(), rootNodeToDelete.getWorkspaceNodeID());
             File nodeFile = new File(rootNodeToDelete.getWorkspaceURL().getPath());
             try {

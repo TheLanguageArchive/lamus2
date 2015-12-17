@@ -142,7 +142,7 @@ public class LamusWorkspaceNodeManagerTest {
             //no children
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(nodeID); will(returnValue(childNodes));
-            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockNode).getStatus(); will(returnValue(nodeStatus));
@@ -249,6 +249,7 @@ public class LamusWorkspaceNodeManagerTest {
             oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockOneChildNode);
 
             //back to the top node, which will be marked as deleted too
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromAllParents(mockNode);
             oneOf(mockNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(nodeID));
             oneOf(mockNode).getStatus(); will(returnValue(nodeStatus));
