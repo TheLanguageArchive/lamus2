@@ -48,7 +48,7 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
     @SpringBean(name = "manualUrl")
     private String manualUrl;
     
-    private FeedbackPanel feedbackPanel;
+    private final FeedbackPanel feedbackPanel;
     
     /**
      * edit title of the page, logo and userName
