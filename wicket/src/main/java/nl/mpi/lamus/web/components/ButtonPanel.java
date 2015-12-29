@@ -112,6 +112,8 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         boolean showInitialPage = true;
         try {
             workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
+            //forcing the model to be detached, so that it is loaded the next time it is needed
+            model.detach();
             success = true;
         } catch(WorkspaceExportException ex) {
             StringBuilder messageToShow = new StringBuilder();
@@ -146,6 +148,8 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
         try {
             workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
+            //forcing the model to be detached, so that it is loaded the next time it is needed
+            model.detach();
         } catch(WorkspaceExportException ex) {
             StringBuilder messageToShow = new StringBuilder();
             messageToShow.append(ex.getMessage());
