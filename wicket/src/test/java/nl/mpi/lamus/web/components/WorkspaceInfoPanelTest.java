@@ -21,17 +21,10 @@ import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.CompoundPropertyModel;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
@@ -71,7 +64,7 @@ public class WorkspaceInfoPanelTest extends AbstractLamusWicketTest {
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceService);
         
-        wsInfoPanel = new WorkspaceInfoPanel("workspaceInfoPanel", new WorkspaceModel(mockWorkspace));
+        wsInfoPanel = new WorkspaceInfoPanel("workspaceInfoPanel", new WorkspaceModel(mockWorkspaceID));
         getTester().startComponentInPage(wsInfoPanel);
     }
 

@@ -19,10 +19,14 @@ package nl.mpi.lamus.workspace.replace.implementation;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.handle.util.HandleParser;
+import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -33,6 +37,7 @@ import nl.mpi.lamus.workspace.replace.action.implementation.DeleteNodeReplaceAct
 import nl.mpi.lamus.workspace.replace.action.implementation.LinkNodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.ReplaceNodeReplaceAction;
+import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeFromReplacedParentReplaceAction;
 import nl.mpi.lamus.workspace.replace.action.implementation.UnlinkNodeReplaceAction;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -62,6 +67,8 @@ public class MetadataNodeReplaceCheckerTest {
     @Mock ReplaceActionManager mockReplaceActionManager;
     @Mock ReplaceActionFactory mockReplaceActionFactory;
     @Mock NodeReplaceExplorer mockNodeReplaceExplorer;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock HandleParser mockHandleParser;
     
     @Mock WorkspaceNode mockOldNode;
     @Mock WorkspaceNode mockNewNode;
@@ -69,6 +76,7 @@ public class MetadataNodeReplaceCheckerTest {
     @Mock CorpusNode mockOldCorpusNode;
     
     @Mock UnlinkNodeReplaceAction mockUnlinkAction;
+    @Mock UnlinkNodeFromReplacedParentReplaceAction mockUnlinkFromReplacedParentAction;
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock LinkNodeReplaceAction mockLinkAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
@@ -96,6 +104,8 @@ public class MetadataNodeReplaceCheckerTest {
         ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionManager", mockReplaceActionManager);
         ReflectionTestUtils.setField(nodeReplaceChecker, "replaceActionFactory", mockReplaceActionFactory);
         ReflectionTestUtils.setField(nodeReplaceChecker, "nodeReplaceExplorer", mockNodeReplaceExplorer);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(nodeReplaceChecker, "handleParser", mockHandleParser);
         
         actions = new ArrayList<>();
     }
@@ -106,7 +116,7 @@ public class MetadataNodeReplaceCheckerTest {
 
     
     @Test
-    public void decideReplaceActionsNotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException {
+    public void decideReplaceActionsNotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int oldNodeID = 100;
         final int newNodeID = 200;
@@ -116,9 +126,8 @@ public class MetadataNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
@@ -126,14 +135,13 @@ public class MetadataNodeReplaceCheckerTest {
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
             
             oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
-            
         }});
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
     
     @Test
-    public void decideReplaceActions_ProtectedNode() {
+    public void decideReplaceActions_ProtectedNode() throws IncompatibleNodesException {
         
         // if a protected node is found in the tree (a descendant of the top node to replace),
         // the replacement should not go ahead
@@ -150,15 +158,13 @@ public class MetadataNodeReplaceCheckerTest {
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            //exception
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            exactly(2).of(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
         }});
         
         try {
@@ -172,38 +178,257 @@ public class MetadataNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActions_TopNode() {
+    public void decideReplaceActions_OldNodeProtected_ButNotActuallyBeingReplaced() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
-        // NOT allowing the replacement of the workspace top node
-        //TODO Change this, but will require changes in other places as well
+        final int oldNodeID = 100;
+        final int newNodeID = 100;
+        
+        final boolean newNodeAlreadyLinked = Boolean.TRUE;
+        final boolean isOldNodeProtected = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+
+            oneOf(mockReplaceActionFactory).getUnlinkFromOldParentAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkFromReplacedParentAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockUnlinkFromReplacedParentAction, actions);
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceActions_TopNode_NodesCompatible() throws ProtectedNodeException, IncompatibleNodesException, MalformedURLException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URL oldNodeArchiveURL = new URL("file:/archive/location/node.cmdi");
+        final int newNodeID = 200;
+        final URI newNodeURI = oldNodeURI;
+        final URL newNodeWorkspaceURL = new URL("file:/workspace/location/node.cmdi");
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
+            allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
+            
+            oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, null, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
+            
+            oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceAction_TopNode_NodesIncompatible_InvalidHandle() throws MalformedURLException, ProtectedNodeException {
+        
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
         final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
         final int newNodeID = 200;
+        final URI newNodeURI = null;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
-        final String expectedExceptionMessage = "Cannot proceed with replacement because replacing the top node of the workspace is not allowed";
+        final IllegalArgumentException exceptionToThrow = new IllegalArgumentException("Invalid handle or something");
+        final String expectedExceptionMessage = "Incompatible top nodes (different handles). Old: " + oldNodeURI + "; New: " + newNodeURI;
         
         context.checking(new Expectations() {{
             
-            //logger
-            oneOf(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
-            oneOf(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
             
-            //exception
-            oneOf(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(throwException(exceptionToThrow));
         }});
         
         try {
             nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
             fail("should have thrown exception");
-        } catch(ProtectedNodeException ex) {
+        } catch(IncompatibleNodesException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-            assertEquals("Exception node URI different from expected", oldNodeURI, ex.getNodeURI());
-            assertEquals("Exception workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Exception workspaceID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Exception oldNodeID different from expected", oldNodeID, ex.getOldNodeID());
+            assertEquals("Exception newNodeID different from expected", newNodeID, ex.getNewNodeID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceAction_TopNode_NodesIncompatible_DifferentHandle() throws MalformedURLException, ProtectedNodeException {
+        
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final int newNodeID = 200;
+        final URI newNodeURI = URI.create(UUID.randomUUID().toString());
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        final String expectedExceptionMessage = "Incompatible top nodes (different handles). Old: " + oldNodeURI + "; New: " + newNodeURI;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.FALSE));
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(IncompatibleNodesException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception workspaceID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Exception oldNodeID different from expected", oldNodeID, ex.getOldNodeID());
+            assertEquals("Exception newNodeID different from expected", newNodeID, ex.getNewNodeID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceAction_TopNode_NodesIncompatible_DifferentFilename() throws MalformedURLException, ProtectedNodeException {
+        
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final String oldNodeFilename = "node.cmdi";
+        final URL oldNodeArchiveURL = new URL("file:/archive/location/" + oldNodeFilename);
+        final int newNodeID = 200;
+        final URI newNodeURI = oldNodeURI;
+        final String newNodeFilename = "other_node.cmdi";
+        final URL newNodeWorkspaceURL = new URL("file:/workspace/location/" + newNodeFilename);
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        final String expectedExceptionMessage = "Incompatible top nodes (different filename). Old: " + oldNodeFilename + "; New: " + newNodeFilename;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
+            allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(IncompatibleNodesException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception workspaceID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Exception oldNodeID different from expected", oldNodeID, ex.getOldNodeID());
+            assertEquals("Exception newNodeID different from expected", newNodeID, ex.getNewNodeID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceAction_TopNode_NodesIncompatible_NullUrl() throws MalformedURLException, ProtectedNodeException {
+        
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URL oldNodeArchiveURL = null;
+        final int newNodeID = 200;
+        final URI newNodeURI = oldNodeURI;
+        final String newNodeFilename = "other_node.cmdi";
+        final URL newNodeWorkspaceURL = new URL("file:/workspace/location/" + newNodeFilename);
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        final String expectedExceptionMessage = "Couldn't verify filename compatibility. Old node Archive URL: " + oldNodeArchiveURL + "; New node Workspace URL: " + newNodeWorkspaceURL;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            
+            allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
+            allowing(mockNewNode).getWorkspaceURL(); will(returnValue(newNodeWorkspaceURL));
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(IncompatibleNodesException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception workspaceID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Exception oldNodeID different from expected", oldNodeID, ex.getOldNodeID());
+            assertEquals("Exception newNodeID different from expected", newNodeID, ex.getNewNodeID());
+        }
+    }
+    
+    @Test
+    public void decideReplaceActions_NullParentButNotTopNode() throws ProtectedNodeException, IncompatibleNodesException {
+        
+        final int workspaceID = 10;
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        
+        final String expectedExceptionMessage = "Parent node was passed as null but node to replace is not top node of the workspace";
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            
+            oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.FALSE));
+        }});
+        
+        try {
+            nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, null, newNodeAlreadyLinked, actions);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
     }
 }

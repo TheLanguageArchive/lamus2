@@ -22,6 +22,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletContext;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -156,6 +160,18 @@ public class LamusProperties implements ServletContextAware {
     // Properties loaded from the web server context
     
     @Bean
+    @Qualifier("csdbHybridDbResource")
+    public String csdbHybridDbResource() {
+        return servletContext.getInitParameter("nl.mpi.lamus.csdb_hybrid_db_resource");
+    }
+    
+    @Bean
+    @Qualifier("lamus2DbResource")
+    public String lamus2DbResource() {
+        return servletContext.getInitParameter("nl.mpi.lamus.lamus2_db_resource");
+    }   
+    
+    @Bean
     @Qualifier("registerUrl")
     public String registerUrl() {
         return servletContext.getInitParameter("nl.mpi.rrsUrl") + servletContext.getInitParameter("nl.mpi.rrsRegister");
@@ -180,15 +196,33 @@ public class LamusProperties implements ServletContextAware {
     }
     
     @Bean
+    @Qualifier("corpusstructureDirectoryName")
+    public String corpusstructureDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure_directory_name");
+    }
+    
+    @Bean
     @Qualifier("metadataDirectoryName")
     public String metadataDirectoryName() {
         return servletContext.getInitParameter("nl.mpi.lamus.metadata_directory_name");
     }
     
     @Bean
-    @Qualifier("resourcesDirectoryName")
-    public String resourcesDirectoryName() {
-        return servletContext.getInitParameter("nl.mpi.lamus.resources_directory_name");
+    @Qualifier("annotationsDirectoryName")
+    public String annotationsDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.annotations_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("mediaDirectoryName")
+    public String mediaDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.media_directory_name");
+    }
+    
+    @Bean
+    @Qualifier("infoDirectoryName")
+    public String infoDirectoryName() {
+        return servletContext.getInitParameter("nl.mpi.lamus.info_directory_name");
     }
     
     @Bean
@@ -296,6 +330,17 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_crawler_details_path");
     }
     
+    @Bean
+    @Qualifier("corpusStructureServiceArchiveObjectsPath")
+    public String corpusStructureServiceArchiveObjectsPath() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_archiveobjects_path");
+    }
+    
+    @Bean
+    @Qualifier("corpusStructureServiceArchiveObjectsUpdateUrlPath")
+    public String corpusStructureServiceArchiveObjectsUpdateUrlPath() {
+        return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_archiveobjects_updateurl_path");
+    }
     
     @Bean
     @Qualifier("mailServer")
@@ -385,6 +430,14 @@ public class LamusProperties implements ServletContextAware {
         }
     }
     
+    // ASV
+    
+    @Bean
+    @Qualifier("asvOpenhandleBaseUrl")
+    public String asvOpenhandleBaseUrl() {
+        return servletContext.getInitParameter("nl.mpi.lamus.asv_openhandle_base_url");
+    }
+    
     // Metadata checker
     
     @Bean
@@ -393,9 +446,28 @@ public class LamusProperties implements ServletContextAware {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronValidationFile_upload"));
     }
     
+    
+    //TODO CHANGE THIS FOR THE XSLT?? OR JUST KEEP THE BEAN AND CHANGE ITS LOCATION??
+    
     @Bean
     @Qualifier("schematronFile_submit")
     public File schematronFile_submit() {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronValidationFile_submit"));
+    }
+    
+    @Bean
+    @Qualifier("allowedProfiles_File")
+    public File allowedProfiles_File() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.allowedProfilesFile"));
+    }
+    
+    @Bean
+    public AllowedCmdiProfiles allowedProfiles() throws JAXBException {
+        
+        JAXBContext jaxbContext = JAXBContext.newInstance(AllowedCmdiProfiles.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        
+        AllowedCmdiProfiles profiles = (AllowedCmdiProfiles) jaxbUnmarshaller.unmarshal(allowedProfiles_File());
+        return profiles;
     }
 }

@@ -31,6 +31,7 @@ import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
@@ -69,6 +70,7 @@ public class LamusWorkspaceUploadHelperTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceUploadReferenceHandler mockWorkspaceUploadReferenceHandler;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
@@ -99,7 +101,8 @@ public class LamusWorkspaceUploadHelperTest {
     @Before
     public void setUp() {
         
-        workspaceUploadHelper = new LamusWorkspaceUploadHelper(mockMetadataAPI, mockMetadataApiBridge, mockWorkspaceUploadReferenceHandler);
+        workspaceUploadHelper = new LamusWorkspaceUploadHelper(mockMetadataAPI,
+                mockMetadataApiBridge, mockWorkspaceUploadReferenceHandler, mockNodeUtil);
     }
     
     @After
@@ -121,21 +124,21 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockParentNode);
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - not metadata, so jumps to next iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
@@ -163,23 +166,23 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockParentNode);
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - metadata, so continues in this iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(childFileURL); will(returnValue(mockChildDocument));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
@@ -208,23 +211,23 @@ public class LamusWorkspaceUploadHelperTest {
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
         failedLinks.add(mockUploadProblem);
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - metadata, so continues in this iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(childFileURL); will(returnValue(mockChildDocument));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
@@ -253,23 +256,23 @@ public class LamusWorkspaceUploadHelperTest {
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
         failedLinks.add(mockUploadProblem);
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - metadata, so continues in this iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.TRUE));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(childFileURL); will(returnValue(mockChildDocument));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(doAll(AddEntryToMap.putElements(mockParentDocument, mockParentNode), returnValue(failedLinks)));
         }});
         
@@ -300,21 +303,21 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockParentNode);
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - not metadata, so jumps to next iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
@@ -338,21 +341,21 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockParentNode);
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - not metadata, so jumps to next iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
@@ -375,21 +378,21 @@ public class LamusWorkspaceUploadHelperTest {
         nodesToCheck.add(mockParentNode);
         
         final Collection<ImportProblem> failedLinks = new ArrayList<>();
-        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        final Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         context.checking(new Expectations() {{
             
             // loop
             
             // first iteration - not metadata, so jumps to next iteration
-            oneOf(mockChildNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildNode); will(returnValue(Boolean.FALSE));
             
             // second iteration - metadata, so continues in this iteration
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));            
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithExternalSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         

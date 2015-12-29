@@ -18,12 +18,14 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -46,13 +48,15 @@ public class DeleteNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     @Mock WorkspaceTreeNode mockTreeNodeOne;
     @Mock WorkspaceTreeNode mockTreeNodeTwo;
     
     private WsTreeNodesAction deleteNodesAction;
     
-    private String expectedActionName = "delete_node_action";
-    private String userID = "testUser";
+    private final String expectedActionName = "delete_node_action";
+    private final String userID = "testUser";
     
     
     public DeleteNodesActionTest() {
@@ -91,7 +95,7 @@ public class DeleteNodesActionTest {
         String expectedExceptionMessage = "Action for deleting nodes requires at least one tree node; currently null";
         
         try {
-            deleteNodesAction.execute(userID, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -108,7 +112,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
 
         try {
-            deleteNodesAction.execute(userID, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -126,7 +130,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
 
         try {
-            deleteNodesAction.execute(userID, null);
+            deleteNodesAction.execute(userID, null, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -146,7 +150,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         //TODO is there an advantage on passing the parent node in this particular type of action?
-        deleteNodesAction.execute(userID, mockWorkspaceService);
+        deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -164,7 +168,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         //TODO is there an advantage on passing the parent node in this particular type of action?
-        deleteNodesAction.execute(userID, mockWorkspaceService);
+        deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -184,7 +188,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            deleteNodesAction.execute(userID, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -208,7 +212,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            deleteNodesAction.execute(userID, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -232,7 +236,7 @@ public class DeleteNodesActionTest {
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
         try {
-            deleteNodesAction.execute(userID, mockWorkspaceService);
+            deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

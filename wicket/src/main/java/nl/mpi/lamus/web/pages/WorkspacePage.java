@@ -165,14 +165,18 @@ public class WorkspacePage extends LamusPage {
                 }
                 
                 wsNodeActionsPanel.setSelectedUnlinkedNodes(selectedUnlinkedNodes);
-                wsNodeActionsPanel.setModelObject(wsTreePanel.getSelectedNodes());
+                wsNodeActionsPanel.setModel(new CollectionModel<WorkspaceTreeNode>(wsTreePanel.getSelectedNodes()));
                 
                 if(linkNodesPanel != null) {
                     
                     if(selectedNode != null) {
-                        linkNodesPanel.setModelObject(selectedNode);
+                        linkNodesPanel.setModel(Model.of(selectedNode));
                     } else {
-                        linkNodesPanel.setModelObject(null);
+                        if(linkNodesPanel.getModel() == null) {
+                            linkNodesPanel.setModel(new Model<WorkspaceTreeNode>());
+                        } else {
+                            linkNodesPanel.setModelObject(null);
+                        }
                     }
                 }
                 

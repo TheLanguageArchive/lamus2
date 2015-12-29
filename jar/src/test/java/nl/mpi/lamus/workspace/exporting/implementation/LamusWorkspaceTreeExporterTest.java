@@ -102,20 +102,21 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, nodeFormat);
         
         final int childWorkspaceNodeID = 20;
         final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URI childOriginURI = URI.create("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeFormat = "";
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
-                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, childNodeFormat);
+                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE, childNodeFormat);
         
         final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
@@ -128,11 +129,11 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+        workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -150,20 +151,21 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, nodeFormat);
         
         final int childWorkspaceNodeID = 20;
         final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URI childOriginURI = URI.create("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeFormat = "";
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
-                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, childNodeFormat);
+                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE, childNodeFormat);
         
         final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
@@ -178,13 +180,13 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
                 will(throwException(expectedException));
             
         }});
         
         try {
-            workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+            workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -205,27 +207,28 @@ public class LamusWorkspaceTreeExporterTest {
         final URL nodeArchiveURL = nodeOriginURI.toURL();
         final URI nodeURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         final String nodeName = "someName";
+        final String corpusNamePathToClosestTopNode = "someName";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
         final String nodeFormat = "";
         final URI schemaLocation = URI.create("http://some.location");
         final WorkspaceNode node = new LamusWorkspaceNode(workspaceNodeID, workspaceID, schemaLocation,
-                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, nodeFormat);
+                nodeName, "", nodeType, nodeWsURL, nodeURI, nodeArchiveURL, nodeOriginURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, nodeFormat);
         
         final int childWorkspaceNodeID = 20;
         final URL childWsURL = new URL("file://workspace/folder/someOtherName.pdf");
         final URI childOriginURI = URI.create("file://some/different/local/folder/someOtherName.pdf");
         final String childNodeName = "someOtherName";
-        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String childNodeFormat = "application/pdf";
         final WorkspaceNode childNode = new LamusWorkspaceNode(childWorkspaceNodeID, workspaceID, schemaLocation,
-                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.NODE_UPLOADED, Boolean.FALSE, childNodeFormat);
+                childNodeName, "", childNodeType, childWsURL, null, null, childOriginURI, WorkspaceNodeStatus.UPLOADED, Boolean.FALSE, childNodeFormat);
         
         final int externalWorkspaceNodeID = 30;
         final String externalNodeName = "externalNode";
-        final WorkspaceNodeType externalNodeType = WorkspaceNodeType.RESOURCE;
+        final WorkspaceNodeType externalNodeType = WorkspaceNodeType.RESOURCE_IMAGE;
         final String externalNodeFormat = "image/jpeg";
         final WorkspaceNode externalNode = new LamusWorkspaceNode(externalWorkspaceNodeID, workspaceID, schemaLocation,
-                externalNodeName, "", externalNodeType, null, null, null, childOriginURI, WorkspaceNodeStatus.NODE_EXTERNAL, Boolean.FALSE, externalNodeFormat);
+                externalNodeName, "", externalNodeType, null, null, null, childOriginURI, WorkspaceNodeStatus.EXTERNAL, Boolean.FALSE, externalNodeFormat);
         
         final Collection<WorkspaceNode> children = new ArrayList<>();
         children.add(childNode);
@@ -236,13 +239,13 @@ public class LamusWorkspaceTreeExporterTest {
             oneOf(mockWorkspaceDao).getChildWorkspaceNodes(node.getWorkspaceNodeID()); will(returnValue(children));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             // should leave the loop for the second node because it's external and therefore doesn't require exporting
             never(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, childNode, exportPhase); will(returnValue(mockNodeExporter));
-            never(mockNodeExporter).exportNode(mockWorkspace, node, childNode, keepUnlinkedFiles, submissionType, exportPhase);
+            never(mockNodeExporter).exportNode(mockWorkspace, node, corpusNamePathToClosestTopNode, childNode, keepUnlinkedFiles, submissionType, exportPhase);
         }});
         
-        workspaceTreeExporter.explore(mockWorkspace, node, keepUnlinkedFiles, submissionType, exportPhase);
+        workspaceTreeExporter.explore(mockWorkspace, node, corpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
 }

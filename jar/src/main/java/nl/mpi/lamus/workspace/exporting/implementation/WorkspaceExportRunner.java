@@ -15,10 +15,12 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
+import nl.mpi.lamus.exception.NodeUrlUpdateException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -27,6 +29,7 @@ import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,7 +94,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
      * @return true if export is successful
      */
     @Override
-    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerInvocationException {
+    public Boolean call() throws WorkspaceNodeNotFoundException, WorkspaceExportException, CrawlerInvocationException, NodeUrlUpdateException {
         
         if(workspace == null) {
             throw new IllegalStateException("Workspace not set");
@@ -102,16 +105,23 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
         
         if(WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
             
-            this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
             
         } else if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
-        
+
+            unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            
+            Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodesUrlUpdates = workspaceDao.getReplacedNodeUrlsToUpdateForWorkspace(workspace.getWorkspaceID());
+            if(!replacedNodesUrlUpdates.isEmpty()) {
+                corpusStructureServiceBridge.updateReplacedNodesUrls(replacedNodesUrlUpdates);
+            }
+            
             WorkspaceNode topNode = workspaceDao.getWorkspaceTopNode(workspace.getWorkspaceID());
 
             NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode, WorkspaceExportPhase.TREE_EXPORT);
-            topNodeExporter.exportNode(workspace, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+            topNodeExporter.exportNode(workspace, null, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
 
-            this.unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            
 
             // crawler service
             String crawlerID = corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());

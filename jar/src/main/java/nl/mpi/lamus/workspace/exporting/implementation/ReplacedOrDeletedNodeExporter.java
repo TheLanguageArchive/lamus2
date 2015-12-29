@@ -25,12 +25,13 @@ import net.handle.hdllib.HandleException;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -59,30 +60,31 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     @Autowired
     private VersioningHandler versioningHandler;
     @Autowired
-    private WorkspaceDao workspaceDao;
-    @Autowired
     private HandleManager handleManager;
     @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     @Autowired
     private WorkspaceTreeExporter workspaceTreeExporter;
     @Autowired
-    private MetadataApiBridge metadataApiBridge;
-    @Autowired
     private ArchiveHandleHelper archiveHandleHelper;
+    @Autowired
+    private NodeUtil nodeUtil;
+    @Autowired
+    private WorkspaceDao workspaceDao;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
 
         if (workspace == null) {
@@ -91,30 +93,23 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throw new IllegalArgumentException(errorMessage);
 	}
         
-        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when submitting the workspace, not when deleting";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus()) &&
-                WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting the tree, not for unlinked nodes";
-            logger.error(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        }
-        
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when submitting the workspace, not when deleting";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
         
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus()) &&
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus()) &&
                 WorkspaceExportPhase.TREE_EXPORT.equals(exportPhase)) {
-            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when exporting unlinked nodes, not for the tree";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
         }
@@ -142,8 +137,8 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             return;
         }
         
-        if(currentNode.isMetadata() && WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+        if(nodeUtil.isNodeMetadata(currentNode) && WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
+            workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
         }
 
         moveNodeToAppropriateLocationInArchive(currentNode);
@@ -159,14 +154,15 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     private void moveNodeToAppropriateLocationInArchive(WorkspaceNode currentNode) {
         
         URL targetArchiveURL = null;
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
             targetArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
-        } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        } else if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
             targetArchiveURL = this.versioningHandler.moveFileToVersioningFolder(currentNode);
         } else {
             throw new IllegalStateException("This exporter only supports deleted or replaced nodes. Current node status: " + currentNode.getStatusAsString());
         }
         currentNode.setArchiveURL(targetArchiveURL);
+        workspaceDao.updateNodeArchiveUrl(currentNode);
         
         if(targetArchiveURL == null) {
             //TODO send some sort of notification at this point
@@ -179,13 +175,13 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     
     private void updateHandleLocation(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
-        if(WorkspaceNodeStatus.NODE_DELETED.equals(currentNode.getStatus())) {
+        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
             try {
                 archiveHandleHelper.deleteArchiveHandle(currentNode, currentNode.getArchiveURL());
             } catch (HandleException | IOException | TransformerException | MetadataException ex) {
                 logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
             }
-        } else if(WorkspaceNodeStatus.NODE_REPLACED.equals(currentNode.getStatus())) {
+        } else if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
             URI newTargetUri = null;
             try {
                  newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
@@ -195,11 +191,11 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             }
             try {
                 handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
-                        new URI(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
+                        URI.create(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
                 
                 //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
                 
-            } catch (HandleException | IOException | URISyntaxException ex) {
+            } catch (HandleException | IOException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }

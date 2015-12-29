@@ -20,6 +20,7 @@ import java.net.URL;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 
@@ -65,13 +66,15 @@ public interface WorkspaceNodeFactory {
      * @param archiveNodeURL archive URL of the node
      * @param resourceReference Reference to the node, in the parent metadata file
      * @param mimetype Mimetype of the file
+     * @param nodeType node type for the file
      * @param name name of the node
      * @param onSite true if node is on site (in the local archive)
      * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name, boolean onSite, boolean isProtected);
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            Reference resourceReference, String mimetype, WorkspaceNodeType nodeType,
+            String name, boolean onSite, boolean isProtected);
 
     /**
      * Creates a WorkspaceNode with the given values.
@@ -80,13 +83,18 @@ public interface WorkspaceNodeFactory {
      * @param archiveURI URI (handle) from the archive, if the node comes from there
      * @param originURI URI of the original file location (mostly for uploaded files)
      * @param workspaceURL URL of the file location in the workspace
+     * @param profileSchemaURI URI of the profile schema, in case it's a metadata file
+     * @param name Name to use as node name
      * @param mimetype Mimetype of the file
+     * @param nodeType node type for the file
      * @param status Status of the node
      * @param isProtected true if node is to be protected from changes (e.g. has multiple parents)
      * @return created WorkspaceNode object
      */
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URI originURI, URL workspaceURL,
-            String mimetype, WorkspaceNodeStatus status, boolean isProtected);
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI,
+            URI originURI, URL workspaceURL, URI profileSchemaURI, String name,
+            String mimetype, WorkspaceNodeType nodeType,
+            WorkspaceNodeStatus status, boolean isProtected);
     
     /**
      * Creates an external WorkspaceNode with the given values

@@ -35,7 +35,8 @@ public interface WorkspaceTreeExporter {
      * 
      * @param workspace Workspace being exported
      * @param node Node to be explored
-     * @param true if unlinked files are to be kept for future use
+     * @param corpusNamePathToClosestTopNode Path of corpus names up to the closest top node
+     * @param keepUnlinkedFiles true if unlinked files are to be kept for future use
      * @param submissionType indicates whether the method is being executed
      * during a workspace submission or deletion
      * @param exportPhase indicates whether the workspace export is currently in
@@ -43,9 +44,9 @@ public interface WorkspaceTreeExporter {
      * in which the unlinked nodes are exported
      */
     public void explore(
-        Workspace workspace, WorkspaceNode node,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode node,
+            String corpusNamePathToClosestTopNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException;
     
 }

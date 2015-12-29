@@ -16,16 +16,21 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -41,7 +46,13 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 public class LamusWsNodeActionsProviderTest {
     
-    @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
+    @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
+        setImposteriser(ClassImposteriser.INSTANCE);
+    }};
+    
+    @Mock NodeUtil mockNodeUtil;
+    @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
+    @Mock CmdiProfile mockCmdiProfile;
     
     @Mock WorkspaceService mockWorkspaceService;
     @Mock WorkspaceTreeNode mockWorkspaceNodeResourceOne;
@@ -55,6 +66,7 @@ public class LamusWsNodeActionsProviderTest {
     
     private List<WsTreeNodesAction> expectedResourceNodeActions;
     private List<WsTreeNodesAction> expectedMetadataNodeActions;
+    private List<WsTreeNodesAction> expectedLatMetadataNodeActions;
     private List<WsTreeNodesAction> expectedExternalNodeActions;
     private List<WsTreeNodesAction> expectedProtectedNodeActions;
     private List<WsTreeNodesAction> expectedTopNodeActions;
@@ -76,7 +88,7 @@ public class LamusWsNodeActionsProviderTest {
     
     @Before
     public void setUp() {
-        wsNodeActionsProvider = new LamusWsNodeActionsProvider();
+        wsNodeActionsProvider = new LamusWsNodeActionsProvider(mockNodeUtil, mockAllowedCmdiProfiles);
         
         expectedResourceNodeActions = new ArrayList<>();
         expectedResourceNodeActions.add(new DeleteNodesAction());
@@ -91,6 +103,14 @@ public class LamusWsNodeActionsProviderTest {
         expectedMetadataNodeActions.add(new ReplaceNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "metadataActions", expectedMetadataNodeActions);
         
+        expectedLatMetadataNodeActions = new ArrayList<>();
+        expectedLatMetadataNodeActions.add(new DeleteNodesAction());
+        expectedLatMetadataNodeActions.add(new UnlinkNodesAction());
+        expectedLatMetadataNodeActions.add(new LinkNodesAction());
+        expectedLatMetadataNodeActions.add(new LinkNodesAsInfoAction());
+        expectedLatMetadataNodeActions.add(new ReplaceNodesAction());
+        ReflectionTestUtils.setField(wsNodeActionsProvider, "latMetadataActions", expectedLatMetadataNodeActions);
+        
         //external - either resource or metadata
         expectedExternalNodeActions = new ArrayList<>();
         expectedExternalNodeActions.add(new DeleteNodesAction());
@@ -104,6 +124,7 @@ public class LamusWsNodeActionsProviderTest {
         
         expectedTopNodeActions = new ArrayList<>();
         expectedTopNodeActions.add(new LinkNodesAction());
+        expectedTopNodeActions.add(new ReplaceNodesAction());
         ReflectionTestUtils.setField(wsNodeActionsProvider, "topNodeActions", expectedTopNodeActions);
         
         expectedMultipleNodesActions = new ArrayList<>();
@@ -140,7 +161,7 @@ public class LamusWsNodeActionsProviderTest {
             oneOf(mockWorkspaceNodeResourceOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeResourceOne).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockWorkspaceNodeResourceOne).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNodeResourceOne); will(returnValue(Boolean.FALSE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
@@ -151,6 +172,8 @@ public class LamusWsNodeActionsProviderTest {
     @Test
     public void getActionsSingleMetadataNode() {
         
+        final URI profileUri = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035");
+        
         Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
         nodes.add(mockWorkspaceNodeMetadataOne);
         
@@ -158,12 +181,38 @@ public class LamusWsNodeActionsProviderTest {
             oneOf(mockWorkspaceNodeMetadataOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isProtected(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceNodeMetadataOne).isExternal(); will(returnValue(Boolean.FALSE));
-            oneOf(mockWorkspaceNodeMetadataOne).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNodeMetadataOne); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNodeMetadataOne).getProfileSchemaURI(); will(returnValue(profileUri));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileUri.toString()); will(returnValue(mockCmdiProfile));
+            oneOf(mockNodeUtil).isProfileLatCorpusOrSession(mockCmdiProfile); will(returnValue(Boolean.FALSE));
         }});
         
         List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
         
         assertEquals("Retrieved node actions different from expected", expectedMetadataNodeActions, retrievedNodeActions);
+    }
+    
+    @Test
+    public void getActionsSingleLatMetadataNode() {
+        
+        final URI profileUri = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035");
+        
+        Collection<WorkspaceTreeNode> nodes = new ArrayList<>();
+        nodes.add(mockWorkspaceNodeMetadataOne);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockWorkspaceNodeMetadataOne).isTopNodeOfWorkspace(); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceNodeMetadataOne).isProtected(); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceNodeMetadataOne).isExternal(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNodeMetadataOne); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNodeMetadataOne).getProfileSchemaURI(); will(returnValue(profileUri));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileUri.toString()); will(returnValue(mockCmdiProfile));
+            oneOf(mockNodeUtil).isProfileLatCorpusOrSession(mockCmdiProfile); will(returnValue(Boolean.TRUE));
+        }});
+        
+        List<WsTreeNodesAction> retrievedNodeActions = wsNodeActionsProvider.getActions(nodes);
+        
+        assertEquals("Retrieved node actions different from expected", expectedLatMetadataNodeActions, retrievedNodeActions);
     }
     
     @Test

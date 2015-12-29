@@ -24,10 +24,11 @@ import java.nio.file.Files;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
@@ -47,19 +48,22 @@ public class LamusVersioningHandler implements VersioningHandler {
     
     private final ArchiveFileHelper archiveFileHelper;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
-    private final HandleInfoRetriever handleInfoRetriever;
+    private final HandleParser handleParser;
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusVersioningHandler(ArchiveFileHelper fileHelper, ArchiveFileLocationProvider fileLocationProvider,
-        HandleInfoRetriever handleInfoRetriever, CorpusStructureProvider csProvider, NodeResolver resolver) {
+        HandleParser handleParser, CorpusStructureProvider csProvider, NodeResolver resolver,
+        NodeUtil nodeUtil) {
         
         this.archiveFileHelper = fileHelper;
-        this.handleInfoRetriever = handleInfoRetriever;
+        this.handleParser = handleParser;
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = resolver;
         this.archiveFileLocationProvider = fileLocationProvider;
+        this.nodeUtil = nodeUtil;
     }
 
     /**
@@ -104,7 +108,7 @@ public class LamusVersioningHandler implements VersioningHandler {
             archiveLocation = nodeResolver.getLocalFile(archiveNode);
         }
         
-        if(nodeToMove.getArchiveURI() == null || nodeToMove.isMetadata()) {
+        if(nodeToMove.getArchiveURI() == null || nodeUtil.isNodeMetadata(nodeToMove)) {
             URL orphanOldLocationUrl = nodeToMove.getWorkspaceURL();
             orphanOldLocation = new File(orphanOldLocationUrl.getPath());
             if(archiveFileLocationProvider.isFileInOrphansDirectory(orphanOldLocation)) {
@@ -177,7 +181,7 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
         
         File targetFile = archiveFileHelper.getTargetFileForReplacedOrDeletedNode(
-                targetDirectory, handleInfoRetriever.stripHandle(nodeToMove.getArchiveURI().toString()), currentFile);
+                targetDirectory, handleParser.stripAndValidateHandleIfPrefixIsKnown(nodeToMove.getArchiveURI()), currentFile);
         
         try {
             FileUtils.moveFile(currentFile, targetFile);

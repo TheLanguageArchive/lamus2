@@ -30,8 +30,9 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
@@ -52,14 +53,17 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
     
+    private IModel<Workspace> model;
+    
     
     public ButtonPanel(String id, IModel<Workspace> model, FeedbackPanel feedbackPanel) {
         super(id, model, feedbackPanel);
+        this.model = model;
         add(new WorkspaceActionsForm("workspaceActionsForm", model));
     }
     
     public ButtonPanel(String id, Workspace workspace, FeedbackPanel feedbackPanel) {
-        this(id, new WorkspaceModel(workspace), feedbackPanel);
+        this(id, new WorkspaceModel(workspace.getWorkspaceID()), feedbackPanel);
     }
 
     
@@ -69,14 +73,14 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     private class WorkspaceActionsForm extends Form<Workspace> {
         
         public WorkspaceActionsForm(String id, final IModel<Workspace> model) {
-            super(id, model);
+            super(id);
             
             final ModalWindow modalConfirmSubmit = createConfirmationModalWindow(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
             add(modalConfirmSubmit);
             final ModalWindow modalConfirmDelete = createConfirmationModalWindow(WorkspaceSubmissionType.DELETE_WORKSPACE);
             add(modalConfirmDelete);
             
-            final IndicatingAjaxButton submitWorkspaceButton = new AutoDisablingAjaxButton("submitWorkspaceButton") {
+            final Button submitWorkspaceButton = new AjaxButton("submitWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -88,7 +92,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             
             add(submitWorkspaceButton);
             
-            final IndicatingAjaxButton deleteWorkspaceButton = new AutoDisablingAjaxButton("deleteWorkspaceButton") {
+            final Button deleteWorkspaceButton = new AjaxButton("deleteWorkspaceButton") {
 
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -107,9 +111,17 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         boolean success = false;
         boolean showInitialPage = true;
         try {
-            workspaceService.submitWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
+            workspaceService.submitWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
             success = true;
-        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException ex) {
+        } catch(WorkspaceExportException ex) {
+            StringBuilder messageToShow = new StringBuilder();
+            messageToShow.append(ex.getMessage());
+            if(ex.getCause() != null) {
+                messageToShow.append("\n");
+                messageToShow.append(ex.getCause().getMessage());
+            }
+            Session.get().error(messageToShow);
+        } catch(WorkspaceNotFoundException | WorkspaceAccessException ex) {
             Session.get().error(ex.getMessage());
         } catch(MetadataValidationException ex) {
             StringBuilder errorMessage = new StringBuilder();
@@ -122,7 +134,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         }
         
         if(success) {
-            Session.get().info("Workspace successfully submitted");
+            Session.get().info(model.getObject().getMessage());
         }
         if(showInitialPage) {
             setResponsePage(pagesProvider.getIndexPage());
@@ -133,8 +145,16 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
     
     private void onDeleteConfirm(AjaxRequestTarget target, boolean keepUnlinkedFiles) {
         try {
-            workspaceService.deleteWorkspace(getModelObject().getUserID(), getModelObject().getWorkspaceID(), keepUnlinkedFiles);
-        } catch (WorkspaceNotFoundException | WorkspaceAccessException | WorkspaceExportException | IOException ex) {
+            workspaceService.deleteWorkspace(model.getObject().getUserID(), model.getObject().getWorkspaceID(), keepUnlinkedFiles);
+        } catch(WorkspaceExportException ex) {
+            StringBuilder messageToShow = new StringBuilder();
+            messageToShow.append(ex.getMessage());
+            if(ex.getCause() != null) {
+                messageToShow.append("\n");
+                messageToShow.append(ex.getCause().getMessage());
+            }
+            Session.get().error(messageToShow);
+        } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
             Session.get().error(ex.getMessage());
         }
         
@@ -199,8 +219,8 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         
         private boolean confirmed;
         private boolean keepUnlinkedFiles;
-        private WorkspaceSubmissionType submissionType;
-        private String confirmationText;
+        private final WorkspaceSubmissionType submissionType;
+        private final String confirmationText;
         
         public ConfirmationOptions(boolean confirmed, boolean keepUnlinkedFiles,
                 WorkspaceSubmissionType type, String confirmationText) {

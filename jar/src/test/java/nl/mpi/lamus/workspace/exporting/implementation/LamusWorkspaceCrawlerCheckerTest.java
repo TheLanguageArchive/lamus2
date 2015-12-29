@@ -120,7 +120,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -135,7 +135,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
@@ -172,7 +172,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         final Collection<WorkspaceNodeReplacement> firstNodeReplacements = new ArrayList<>();
         final Collection<WorkspaceNodeReplacement> secondNodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -187,7 +187,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(firstCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(firstCrawlerID); will(returnValue(firstCrawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(firstNodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(firstNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
@@ -208,7 +208,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace2).getCrawlerID(); will(returnValue(secondCrawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(secondCrawlerID); will(returnValue(secondCrawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(secondNodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_2); will(returnValue(secondNodeReplacements));
             
             oneOf(mockSuccessfulSubmittedWorkspace2).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace2).setMessage(successfulMessage);
@@ -238,7 +238,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<>();
         
-        final WorkspaceStatus failedStatus = WorkspaceStatus.CRAWLER_ERROR;
+        final WorkspaceStatus failedStatus = WorkspaceStatus.ERROR_CRAWLING;
         final String failedMessage = "Data was successfully moved to the archive but the crawler failed.";
         
         context.checking(new Expectations() {{
@@ -253,7 +253,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockFailedSubmittedWorkspace).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             
             oneOf(mockFailedSubmittedWorkspace).setStatus(failedStatus);
             oneOf(mockFailedSubmittedWorkspace).setMessage(failedMessage);
@@ -282,7 +282,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         nodeReplacements.add(mockNodeReplacement1);
         nodeReplacements.add(mockNodeReplacement2);
         
-        final WorkspaceStatus successfulStatus = WorkspaceStatus.DATA_MOVED_SUCCESS;
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
         final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
         
         context.checking(new Expectations() {{
@@ -297,7 +297,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements);
             
             oneOf(mockSuccessfulSubmittedWorkspace1).getUserID(); will(returnValue(userID));
@@ -338,7 +338,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final VersionCreationException expectedException = new VersionCreationException("some error with versioning", null);
         
-        final WorkspaceStatus failedStatus = WorkspaceStatus.VERSIONING_ERROR;
+        final WorkspaceStatus failedStatus = WorkspaceStatus.ERROR_VERSIONING;
         final String failedMessage = "Data was successfully moved to the archive, the crawler was successful but archive versioning failed.";
         
         context.checking(new Expectations() {{
@@ -353,7 +353,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
             oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
             
-            oneOf(mockWorkspaceDao).getAllNodeReplacements(); will(returnValue(nodeReplacements));
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
             oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements); will(throwException(expectedException));
             
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(failedStatus);

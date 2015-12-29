@@ -28,7 +28,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceReplacedNodeUrlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,10 +45,10 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
     private static final Logger logger = LoggerFactory.getLogger(LamusJsonTransformationHandler.class);
 
     /**
-     * @see JsonTransformationHandler#createJsonObjectFromNodeReplacementCollection(java.util.Collection)
+     * @see JsonTransformationHandler#createVersioningJsonObjectFromNodeReplacementCollection(java.util.Collection)
      */
     @Override
-    public JsonObject createJsonObjectFromNodeReplacementCollection(Collection<WorkspaceNodeReplacement> nodeReplacementCollection) {
+    public JsonObject createVersioningJsonObjectFromNodeReplacementCollection(Collection<WorkspaceNodeReplacement> nodeReplacementCollection) {
         
         JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
         JsonArrayBuilder versionsArrayBuilder = Json.createArrayBuilder();
@@ -68,13 +70,13 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
      * @see JsonTransformationHandler#createNodeReplacementCollectionFromJsonObject(javax.json.JsonObject)
      */
     @Override
-    public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject jsonObject) throws URISyntaxException {
+    public Collection<WorkspaceNodeReplacement> createNodeReplacementCollectionFromJsonObject(JsonObject versionsJsonObject) throws URISyntaxException {
         
         Collection<WorkspaceNodeReplacement> nodeReplacementCollection = new ArrayList<>();
         
         JsonArray versionsArray = null;
         try {
-            versionsArray = jsonObject.getJsonArray("list");
+            versionsArray = versionsJsonObject.getJsonArray("list");
         } catch(ClassCastException ex) {
             logger.debug("'versions' is not a JsonArray, will try to cast to JsonObject", ex);
         }
@@ -87,7 +89,7 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
                 nodeReplacementCollection.add(currentReplacement);
             }
         } else {
-            logger.warn("A JSON array could not be retrieved from the received JSON object. Will return empty collection of NoreReplacement.");
+            logger.warn("A JSON array could not be retrieved from the received JSON object. Will return empty collection of NodeReplacement.");
         }
         
         return nodeReplacementCollection;
@@ -97,20 +99,71 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
      * @see JsonTransformationHandler#getCrawlerIdFromJsonObject(javax.json.JsonObject)
      */
     @Override
-    public String getCrawlerIdFromJsonObject(JsonObject jsonObject) {
+    public String getCrawlerIdFromJsonObject(JsonObject crawlerJsonObject) {
         
-        return jsonObject.getString("id");
+        return crawlerJsonObject.getString("id");
     }
 
     /**
      * @see JsonTransformationHandler#getCrawlerStateFromJsonObject(javax.json.JsonObject)
      */
     @Override
-    public String getCrawlerStateFromJsonObject(JsonObject crawlerStateJsonObject) {
+    public String getCrawlerStateFromJsonObject(JsonObject crawlerJsonObject) {
         
-        JsonObject detailedCrawlerStateObject = crawlerStateJsonObject.getJsonObject("state");
+        JsonObject detailedCrawlerStateObject = crawlerJsonObject.getJsonObject("state");
         
         return detailedCrawlerStateObject.getString("state");
+    }
+
+    /**
+     * @see JsonTransformationHandler#createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection(java.util.Collection)
+     */
+    @Override
+    public JsonObject createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection(Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodeUrlUpdates) {
+        
+        JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder nodesArrayBuilder = Json.createArrayBuilder();
+        
+        for(WorkspaceReplacedNodeUrlUpdate urlUpdate : replacedNodeUrlUpdates) {
+            
+            nodesArrayBuilder.add(
+                    Json.createObjectBuilder()
+                        .add("nodeUri", urlUpdate.getNodeUri().toString())
+                        .add("updatedUrl", urlUpdate.getUpdatedUrl().toString()));
+        }
+        
+        mainObjectBuilder.add("list", nodesArrayBuilder);
+        
+        return mainObjectBuilder.build();
+    }
+
+    /**
+     * @see JsonTransformationHandler#createReplacedNodeUrlUpdateCollectionFromJsonObject(javax.json.JsonObject)
+     */
+    @Override
+    public Collection<WorkspaceReplacedNodeUrlUpdate> createReplacedNodeUrlUpdateCollectionFromJsonObject(JsonObject updatedUrlsJsonObject) throws URISyntaxException {
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodeUrlUpdateCollection = new ArrayList<>();
+        
+        JsonArray nodesArray = null;
+        try {
+            nodesArray = updatedUrlsJsonObject.getJsonArray("list");
+        } catch(ClassCastException ex) {
+            logger.debug("'nodes' is not a JsonArray, will try to cast to JsonObject", ex);
+        }
+        
+        if(nodesArray != null) {
+            logger.info("Creating ReplacedNodeUrlUpdate collection from received JSON array with size " + nodesArray.size());
+            for(int i = 0; i < nodesArray.size(); i++) {
+                JsonObject currentObject = nodesArray.getJsonObject(i);
+                WorkspaceReplacedNodeUrlUpdate currentUrlUpdate = getReplacedNodeUrlUpdateFromJsonObject(currentObject);
+                replacedNodeUrlUpdateCollection.add(currentUrlUpdate);
+            }
+        } else {
+            logger.warn("A JSON array could not be retrieved from the received JSON object. Will return empty collection of ReplacedNodeUrlUpdate.");
+        }
+        
+        return replacedNodeUrlUpdateCollection;
     }
     
     
@@ -129,5 +182,22 @@ public class LamusJsonTransformationHandler implements JsonTransformationHandler
         }
         
         return replacementToReturn;
+    }
+    
+        private WorkspaceReplacedNodeUrlUpdate getReplacedNodeUrlUpdateFromJsonObject(JsonObject innerObject) throws URISyntaxException {
+        
+        WorkspaceReplacedNodeUrlUpdate urlUpdateToReturn;
+        
+        URI nodeUri = new URI(innerObject.getString("nodeUri"));
+        URI updatedUrl = new URI(innerObject.getString("updatedUrl"));
+        String status = innerObject.getString("status").toUpperCase(Locale.ENGLISH);
+        if("OK".equals(status)) {
+            urlUpdateToReturn = new LamusWorkspaceReplacedNodeUrlUpdate(nodeUri, updatedUrl, status);
+        } else {
+            String error = innerObject.getString("error");
+            urlUpdateToReturn = new LamusWorkspaceReplacedNodeUrlUpdate(nodeUri, updatedUrl, status, error);
+        }
+        
+        return urlUpdateToReturn;
     }
 }

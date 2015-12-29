@@ -29,13 +29,14 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.handle.util.HandleManager;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -69,12 +70,12 @@ public class ReplacedOrDeletedNodeExporterTest {
     private Workspace testWorkspace;
     
     @Mock VersioningHandler mockVersioningHandler;
-    @Mock WorkspaceDao mockWorkspaceDao;
     @Mock HandleManager mockHandleManager;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
-    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock ArchiveHandleHelper mockArchiveHandleHelper;
+    @Mock NodeUtil mockNodeUtil;
+    @Mock WorkspaceDao mockWorkspaceDao;
     
     @Mock WorkspaceNode mockParentWsNode;
     @Mock WorkspaceNode mockChildWsNode;
@@ -96,12 +97,12 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         replacedOrDeletedNodeExporter = new ReplacedOrDeletedNodeExporter();
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "versioningHandler", mockVersioningHandler);
-        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "handleManager", mockHandleManager);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
-        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "archiveHandleHelper", mockArchiveHandleHelper);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "nodeUtil", mockNodeUtil);
+        ReflectionTestUtils.setField(replacedOrDeletedNodeExporter, "workspaceDao", mockWorkspaceDao);
         
         testWorkspace = new LamusWorkspace(1, "someUser",  -1, null, null,
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
@@ -116,44 +117,22 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportReplacedNode_SubmissionTypeDelete() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
-            assertEquals("Message different from expected", errorMessage, ex.getMessage());
-            assertNull("Cause should be null", ex.getCause());
-        }
-    }
-    
-    @Test
-    public void exportReplacedNode_ExportPhaseUnlinkedNodes() throws WorkspaceExportException {
-        
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
-        
-        final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
-        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
-        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
-        
-        context.checking(new Expectations() {{
-            allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
-        }});
-        
-        try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
-            fail("should have thrown exception");
-        } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting the tree, not for unlinked nodes";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when submitting the workspace, not when deleting";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -162,21 +141,22 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportDeletedNode_SubmissionTypeDelete() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when submitting the workspace, not when deleting";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when submitting the workspace, not when deleting";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -185,21 +165,22 @@ public class ReplacedOrDeletedNodeExporterTest {
     @Test
     public void exportDeletedNode_ExportPhaseTree() throws WorkspaceExportException {
         
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             allowing(mockChildWsNode).getStatus(); will(returnValue(nodeStatus));
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
-            String errorMessage = "This exporter (for nodes with status " + nodeStatus.toString() + ") should only be used when exporting unlinked nodes, not for the tree";
+            String errorMessage = "This exporter (for nodes with status " + nodeStatus.name() + ") should only be used when exporting unlinked nodes, not for the tree";
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertNull("Cause should be null", ex.getCause());
         }
@@ -212,8 +193,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -234,17 +216,18 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -252,9 +235,10 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -273,28 +257,30 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
     public void exportDeletedExternalNode() throws WorkspaceExportException {
         
         final int testWorkspaceNodeID = 10;
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             
@@ -306,18 +292,19 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.TRUE));
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
     public void exportDeletedNodeWithoutArchiveURI() throws WorkspaceExportException {
      
         final int testWorkspaceNodeID = 10;
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             
@@ -332,7 +319,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(null));
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -341,10 +328,11 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final boolean isNodeProtected = Boolean.TRUE;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         //TODO does it make sense a protected node which was deleted?
         
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -366,7 +354,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -375,12 +363,13 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
         final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.txt");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -399,10 +388,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
@@ -413,7 +403,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -422,12 +412,13 @@ public class ReplacedOrDeletedNodeExporterTest {
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.cmdi");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.cmdi";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
         final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -446,11 +437,12 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceTreeExporter).explore(testWorkspace, mockChildWsNode, parentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
@@ -461,7 +453,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -469,9 +461,10 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_CREATED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.CREATED;
         final boolean isNodeProtected = Boolean.FALSE;
         final String expectedExceptionMessage = "This exporter only supports deleted or replaced nodes. Current node status: " + testNodeStatus.toString();
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -490,13 +483,13 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockChildWsNode).getStatusAsString(); will(returnValue(testNodeStatus.toString()));
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(IllegalStateException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -508,9 +501,10 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
         
@@ -531,10 +525,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
@@ -543,7 +538,7 @@ public class ReplacedOrDeletedNodeExporterTest {
 
         }});
         
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -554,12 +549,13 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final URL testNodeOriginURL = new URL("file:/lat/corpora/archive/folder/" + testBaseName);
-        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/versioning/location/r_node.txt");
         final String testNodeVersionArchivePath = "/versioning/location/r_node.txt";
         final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
         final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/version_folder/r_node.txt");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final URL testNewNodeArchiveURL = testNodeOriginURL;
         
@@ -583,10 +579,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             
             oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             oneOf(mockVersioningHandler).moveFileToVersioningFolder(mockChildWsNode); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockChildWsNode).setArchiveURL(testNodeVersionArchiveURL);
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
 
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
             oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
@@ -600,7 +597,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         }});
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -614,9 +611,10 @@ public class ReplacedOrDeletedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         try {
-            replacedOrDeletedNodeExporter.exportNode(null, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            replacedOrDeletedNodeExporter.exportNode(null, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";

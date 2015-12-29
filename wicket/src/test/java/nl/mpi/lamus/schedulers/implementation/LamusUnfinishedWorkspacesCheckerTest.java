@@ -20,7 +20,7 @@ package nl.mpi.lamus.schedulers.implementation;
 
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
-import nl.mpi.lamus.schedulers.WorkspaceFinaliser;
+import nl.mpi.lamus.schedulers.UnfinishedWorkspacesChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -35,14 +35,14 @@ import org.mockito.MockitoAnnotations;
  *
  * @author guisil
  */
-public class LamusWorkspaceFinaliserTest {
+public class LamusUnfinishedWorkspacesCheckerTest {
     
     @Mock WorkspaceCrawlerChecker mockWorkspaceCrawlerChecker;
     
-    private WorkspaceFinaliser workspaceFinaliser;
+    private UnfinishedWorkspacesChecker unfinishedWorkspacesChecker;
     
     
-    public LamusWorkspaceFinaliserTest() {
+    public LamusUnfinishedWorkspacesCheckerTest() {
     }
     
     @BeforeClass
@@ -58,7 +58,7 @@ public class LamusWorkspaceFinaliserTest {
         
         MockitoAnnotations.initMocks(this);
         
-        workspaceFinaliser = new LamusWorkspaceFinaliser(mockWorkspaceCrawlerChecker);
+        unfinishedWorkspacesChecker = new LamusUnfinishedWorkspacesChecker(mockWorkspaceCrawlerChecker);
     }
     
     @After
@@ -69,7 +69,7 @@ public class LamusWorkspaceFinaliserTest {
     @Test
     public void checkAndFinaliseWorkspaces() throws CrawlerStateRetrievalException {
 
-        workspaceFinaliser.checkAndFinaliseWorkspaces();
+        unfinishedWorkspacesChecker.checkAndFinaliseWorkspaces();
         
         verify(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
     }
@@ -82,7 +82,7 @@ public class LamusWorkspaceFinaliserTest {
         doThrow(expectedException).when(mockWorkspaceCrawlerChecker).checkCrawlersForSubmittedWorkspaces();
         
         try {
-            workspaceFinaliser.checkAndFinaliseWorkspaces();
+            unfinishedWorkspacesChecker.checkAndFinaliseWorkspaces();
             fail("should have thrown exception");
         } catch(CrawlerStateRetrievalException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

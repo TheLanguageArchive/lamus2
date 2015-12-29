@@ -26,9 +26,11 @@ import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +48,22 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     private final HandleManager handleManager;
     private final WorkspaceDao workspaceDao;
     private final MetadataApiBridge metadataApiBridge;
+    private final NodeUtil nodeUtil;
+    private final HandleParser handleParser;
     
     @Autowired
     public LamusArchiveHandleHelper(
             CorpusStructureProvider provider, NodeResolver resolver,
-            HandleManager hManager, WorkspaceDao wsDao, MetadataApiBridge mApiBridge) {
+            HandleManager hManager, WorkspaceDao wsDao,
+            MetadataApiBridge mApiBridge, NodeUtil nUtil,
+            HandleParser hdlParser) {
         corpusStructureProvider = provider;
         nodeResolver = resolver;
         handleManager = hManager;
         workspaceDao = wsDao;
         metadataApiBridge = mApiBridge;
+        nodeUtil = nUtil;
+        handleParser = hdlParser;
     }
     
     /**
@@ -70,7 +78,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
             throw new NodeNotFoundException(nodeURI, message);
         }
         
-        return nodeResolver.getPID(node);
+        return handleParser.prepareAndValidateHandleWithHdlPrefix(nodeResolver.getPID(node));
     }
 
     /**
@@ -85,7 +93,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
         node.setArchiveURI(null);
         workspaceDao.updateNodeArchiveUri(node);
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);
         }
     }

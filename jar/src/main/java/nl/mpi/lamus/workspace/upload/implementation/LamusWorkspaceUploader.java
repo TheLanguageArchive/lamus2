@@ -29,7 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -46,8 +48,13 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
+import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataException;
+import nl.mpi.metadata.api.model.MetadataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,18 +75,22 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceUploadHelper workspaceUploadHelper;
+    private final MetadataAPI metadataAPI;
     private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceFileValidator workspaceFileValidator;
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final ArchiveFileHelper archiveFileHelper;
+    private final NodeUtil nodeUtil;
+    private final HandleParser handleParser;
     
     @Autowired
     public LamusWorkspaceUploader(NodeDataRetriever ndRetriever,
         WorkspaceDirectoryHandler wsDirHandler, WorkspaceFileHandler wsFileHandler,
         WorkspaceNodeFactory wsNodeFactory,
-        WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper,
+        WorkspaceDao wsDao, WorkspaceUploadHelper wsUploadHelper, MetadataAPI mdAPI,
         MetadataApiBridge mdApiBridge, WorkspaceFileValidator wsFileValidator,
-        ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper) {
+        ArchiveFileLocationProvider afLocationProvider, ArchiveFileHelper archiveFileHelper,
+        NodeUtil nodeUtil, HandleParser hdlParser) {
         
         this.nodeDataRetriever = ndRetriever;
         this.workspaceDirectoryHandler = wsDirHandler;
@@ -87,10 +98,13 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.workspaceUploadHelper = wsUploadHelper;
+        this.metadataAPI = mdAPI;
         this.metadataApiBridge = mdApiBridge;
         this.workspaceFileValidator = wsFileValidator;
         this.archiveFileLocationProvider = afLocationProvider;
         this.archiveFileHelper = archiveFileHelper;
+        this.nodeUtil = nodeUtil;
+        this.handleParser = hdlParser;
     }
 
     /**
@@ -116,23 +130,23 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        File fileToCopy = new File(workspaceUploadDirectory, filename);
         
-        File finalFile = archiveFileHelper.getFinalFile(workspaceUploadDirectory, filename);
+        workspaceFileHandler.copyInputStreamToTargetFile(inputStream, fileToCopy);
         
-        
-        workspaceFileHandler.copyInputStreamToTargetFile(inputStream, finalFile);
-        
-        return finalFile;
+        return fileToCopy;
     }
     
     /**
      * @see WorkspaceUploader#uploadZipFileIntoWorkspace(int, java.util.zip.ZipInputStream)
      */
     @Override
-    public Collection<File> uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
+    public ZipUploadResult uploadZipFileIntoWorkspace(int workspaceID, ZipInputStream zipInputStream)
             throws IOException, DisallowedPathException {
         
         File workspaceUploadDirectory = this.workspaceDirectoryHandler.getUploadDirectoryForWorkspace(workspaceID);
+        
+        ZipUploadResult uploadResults = new ZipUploadResult();
         
         Collection<File> copiedFiles = new ArrayList<>();
         Collection<File> createdDirectories = new ArrayList<>();
@@ -161,15 +175,22 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             File entryBaseDirectory = entryFile.getParentFile();
             String entryFilename = entryFile.getName();
-            File finalEntryFile = archiveFileHelper.getFinalFile(entryBaseDirectory, entryFilename);
             
-            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, finalEntryFile);
+            File fileAttempt = new File(entryBaseDirectory, entryFilename);
+            if(fileAttempt.exists()) {
+                uploadResults.addFailedUpload(new FileImportProblem(fileAttempt, "A file with the same path already exists", null));
+                nextEntry = zipInputStream.getNextEntry();
+                continue;
+            }
+            
+            workspaceFileHandler.copyInputStreamToTargetFile(zipInputStream, fileAttempt);
             
             nextEntry = zipInputStream.getNextEntry();
-            copiedFiles.add(finalEntryFile);
+            copiedFiles.add(fileAttempt);
+            uploadResults.addSuccessfulUpload(fileAttempt);
         }
         
-        return copiedFiles;
+        return uploadResults;
     }
 
     /**
@@ -234,9 +255,20 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 logger.debug(debugMessage);
             }
             
+            //to be used if the file is metadata
+            MetadataDocument mdDocument = null;
+            
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
+                
+                try {
+                    mdDocument = metadataAPI.getMetadataDocument(uploadedFileUrl);
+                } catch (IOException | MetadataException ex) {
+                    String errorMessage = "Error retrieving metadata document for file [" + currentFile.getName() + "]";
+                    failUploadForFile(currentFile, errorMessage, failedFiles);
+                    continue;
+                }
 
-                if(!metadataApiBridge.isMetadataFileValid(uploadedFileUrl)) {
+                if(!metadataApiBridge.isMetadataDocumentValid(mdDocument)) {
                     String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
                     failUploadForFile(currentFile, errorMessage, failedFiles);
                     continue;
@@ -258,18 +290,43 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             String nodeMimetype = typecheckedResults.getCheckedMimetype();
+            WorkspaceNodeType nodeType = nodeUtil.convertMimetype(nodeMimetype);
             
             URI archiveUri = null;
             if(uploadedFileUrl.toString().endsWith("cmdi")) {
-                archiveUri = metadataApiBridge.getSelfHandleFromFile(uploadedFileUrl);   
+                archiveUri = metadataApiBridge.getSelfHandleFromDocument(mdDocument);
+                if(archiveUri != null && !archiveUri.toString().trim().isEmpty()) {
+                    try {
+                    archiveUri = handleParser.prepareAndValidateHandleWithHdlPrefix(archiveUri);
+                    } catch(IllegalArgumentException ex) {
+                        try {
+                            // invalid handle - should be removed
+                            archiveUri = null;
+                            metadataApiBridge.removeSelfHandleAndSaveDocument(uploadedFileUrl);
+                        } catch (IOException | TransformerException | MetadataException ex1) {
+                            logger.error("Couldn't remove invalid self-handle from file [" + uploadedFileUrl + "]", ex1);
+                        }
+                    }
+                }
             }
             URI originUri = null;
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentFile)) {
                 originUri = uploadedFileUri;
             }
             
+            URI profileSchemaURI = mdDocument != null ? mdDocument.getDocumentType().getSchemaLocation() : null;
+            
+            String documentName = null;
+            if(mdDocument != null) {
+                documentName = metadataApiBridge.getDocumentNameForProfile(mdDocument, profileSchemaURI);
+                if(documentName == null) {
+                    documentName = mdDocument.getDisplayValue();
+                }
+            }
+            
             WorkspaceNode uploadedNode = this.workspaceNodeFactory.getNewWorkspaceNodeFromFile(
-                    workspaceID, archiveUri, originUri, uploadedFileUrl, nodeMimetype, WorkspaceNodeStatus.NODE_UPLOADED, false);
+                    workspaceID, archiveUri, originUri, uploadedFileUrl, profileSchemaURI, documentName,
+                    nodeMimetype, nodeType, WorkspaceNodeStatus.UPLOADED, false);
         
             this.workspaceDao.addWorkspaceNode(uploadedNode);
             

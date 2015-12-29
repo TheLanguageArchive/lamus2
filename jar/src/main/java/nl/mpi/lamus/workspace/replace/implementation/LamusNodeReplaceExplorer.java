@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
@@ -59,10 +60,11 @@ public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
     }
     
     /**
-     * @see NodeReplaceExplorer#exploreReplace(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     * @see NodeReplaceExplorer#exploreReplace(nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.lamus.workspace.model.WorkspaceNode, java.util.List)
      */
     @Override
-    public void exploreReplace(WorkspaceNode oldNode, WorkspaceNode newNode, List<NodeReplaceAction> actions) throws ProtectedNodeException {
+    public void exploreReplace(WorkspaceNode oldNode, WorkspaceNode newNode, List<NodeReplaceAction> actions)
+            throws ProtectedNodeException, IncompatibleNodesException {
         
         Collection<WorkspaceNode> oldNodeChildren = workspaceDao.getChildWorkspaceNodes(oldNode.getWorkspaceNodeID());
         Collection<WorkspaceNode> newNodeChildren = workspaceDao.getChildWorkspaceNodes(newNode.getWorkspaceNodeID());

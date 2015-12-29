@@ -22,9 +22,11 @@ import java.util.Collection;
 import java.util.List;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
+import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.model.mock.MockWorkspace;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
@@ -35,10 +37,13 @@ import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProvider;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.rules.TemporaryFolder;
@@ -46,6 +51,7 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
@@ -84,6 +90,8 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     }};
 
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
+    @Mock private WorkspaceDao mockWorkspaceDao;
+    @Mock private NodeUtil mockNodeUtilBean;
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     @Mock private UnlinkedNodesModelProviderFactory mockUnlinkedNodesModelProviderFactoryBean;
     @Mock private GenericTreeModelProvider mockCreateWorkspaceTreeModelProviderBean;
@@ -91,7 +99,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     @Mock private UnlinkedNodesModelProvider mockUnlinkedNodesModelProviderBean;
     @Mock private Collection<String> mockManagerUsers;
     
-//    @Mock private UnlinkedRootWorkspaceNode mockUnlinkedRootWorkspaceNode;
+    @Mock private WorkspaceModelProvider mockWorkspaceModelProvider;
     
     @Mock private LamusWicketPagesProvider mockPagesProviderBean;
     
@@ -106,11 +114,20 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     @Mock private SelectWorkspacePage mockSelectWorkspacePage;
     @Mock private WorkspacePage mockWorkspacePage;
 
+    private final IModel<Workspace> mockWsModel = new Model<Workspace>(mockWorkspace) {
+
+        @Override
+        public Workspace getObject() {
+            return mockWorkspace;
+        }
+    };
+    
     TemporaryFolder testFolder = new TemporaryFolder();
     private File mockUploadDirectory;
     
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/lamus/manual";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/lamus/manual";
+
     
     @Override
     protected void setUpTest() throws Exception {
@@ -121,9 +138,7 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         
         MockitoAnnotations.initMocks(this);
         
-        // expected calls in SelectWorkspacePage
-//        when(mockWorkspaceServiceBean.listUserWorkspaces(AbstractLamusWicketTest.MOCK_USER_ID)).thenReturn(mockWsList);
-//        when(mockWorkspaceServiceBean.openWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, 1)).thenReturn(mockWs1);
+        when(mockWorkspaceModelProvider.getWorkspaceModel(mockWorkspaceID)).thenReturn(mockWsModel);
         
         // expected calls in WorkspacePage
         when(mockWorkspace.getWorkspaceID()).thenReturn(mockWorkspaceID);
@@ -136,24 +151,29 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
         when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
         when(mockUnlinkedNodesModelProviderFactoryBean.createTreeModelProvider(mockWorkspaceServiceBean, mockWorkspaceID)).thenReturn(mockUnlinkedNodesModelProviderBean);
         
+        
         when(mockPagesProviderBean.getCreateWorkspacePage()).thenReturn(mockCreateWorkspacePage);
         when(mockPagesProviderBean.getSelectWorkspacePage()).thenReturn(mockSelectWorkspacePage);
         when(mockPagesProviderBean.getWorkspacePage(mockWorkspace)).thenReturn(mockWorkspacePage);
         
-        
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_DAO, mockWorkspaceDao);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_NODE_UTIL, mockNodeUtilBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_CREATE_WORKSPACE_TREE_PROVIDER, mockCreateWorkspaceTreeModelProviderBean);
-//        addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_ROOT_NODE, mockUnlinkedRootWorkspaceNode);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_TREE_NODE_ACTIONS_PROVIDER, mockTreeNodeActionsProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_PAGES_PROVIDER, mockPagesProviderBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANAGER_USERS, mockManagerUsers);
+        
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_MODEL_PROVIDER, mockWorkspaceModelProvider);
+        
 
         pagesProvider = new LamusWicketPagesProvider();
+        ReflectionTestUtils.setField(pagesProvider, AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_MODEL_PROVIDER, mockWorkspaceModelProvider);
     }
 
     @Override
@@ -196,6 +216,9 @@ public class LamusWicketPagesProviderTest extends AbstractLamusWicketTest {
     public void getWorkspacePage() throws WorkspaceNodeNotFoundException {
         
         WorkspacePage resultPage = pagesProvider.getWorkspacePage(mockWorkspace);
+        
+        verify(mockWorkspace).getWorkspaceID();
+        verify(mockWorkspaceModelProvider).getWorkspaceModel(mockWorkspaceID);
         
         verify(mockWorkspace).getTopNodeID();
         verify(mockWorkspaceServiceBean).getTreeNode(mockWorkspaceTopNodeID, null);

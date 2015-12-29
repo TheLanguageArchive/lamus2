@@ -16,13 +16,14 @@
  */
 package nl.mpi.lamus.web.pages.providers;
 
-import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
 import nl.mpi.lamus.web.pages.WorkspacePage;
 import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,6 +32,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusWicketPagesProvider {
+    
+    @Autowired
+    private WorkspaceModelProvider workspaceModelProvider;
     
     
     public IndexPage getIndexPage() {
@@ -46,7 +50,7 @@ public class LamusWicketPagesProvider {
     }
     
     public WorkspacePage getWorkspacePage(Workspace workspace) {
-        return new WorkspacePage(new WorkspaceModel(workspace));
+        return new WorkspacePage(workspaceModelProvider.getWorkspaceModel(workspace.getWorkspaceID()));
     }
     
     public ManageWorkspacesPage getManageWorkspacesPage() {

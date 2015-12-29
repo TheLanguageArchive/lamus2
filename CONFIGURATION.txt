@@ -5,14 +5,14 @@ LAMUS2 CONFIGURATION
 
 1.1.    JNDI Resources
 
-Lamus2 needs the 'corpusstructure3', "ams2cmdi" and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
+Lamus2 needs the 'corpusstructure3' (or another name for the hybrid corpusstructure), "ams2cmdi" and 'lamus2' databases for direct access, so these resources should be available in the web container configuration.
 
     <Resource
-            name="jdbc/CSDB2"
+            name="jdbc/CSDB_HYBRID"
             auth="Container"
             type="javax.sql.DataSource"
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://localhost:5432/corpusstructure2"
+            url="jdbc:postgresql://localhost:5432/corpusstructure3"
             username="dummy"
             password="password"
             maxActive="20"
@@ -60,6 +60,17 @@ Lamus2 needs the 'corpusstructure3', "ams2cmdi" and 'lamus2' databases for direc
 
 The other necessary properties should be defined as parameters in the web context configuration.
 
+    LAMUS 2
+
+        <Parameter name="nl.mpi.lamus.csdb_hybrid_db_resource"
+                   value="java:comp/env/jdbc/CSDB_HYBRID"
+                   description="corpusstructure (hybrid) database resource"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.lamus2_db_resource"
+                   value="java:comp/env/jdbc/LAMUS2_DB"
+                   description="lamus2 database resource"
+                   override="false"/>
 
         <Parameter name="nl.mpi.lamus.lamus2_manualUrl"
                    value="http://www.mpi.nl/corpus/html/lamus2/index.html"
@@ -77,14 +88,34 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Sub-directory for uploaded files in the workspace"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.corpusstructure_directory_name"
+                   value="Corpusstructure"
+                   description="Sub-directory for corpus in the archive domain"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.metadata_directory_name"
                    value="Metadata"
                    description="Sub-directory for metadata in the archive domain"
                    override="false"/>
 
-        <Parameter name="nl.mpi.lamus.resources_directory_name"
-                   value="Resources"
-                   description="Sub-directory for resources in the archive domain"
+        <Parameter name="nl.mpi.lamus.annotations_directory_name"
+                   value="Annotations"
+                   description="Sub-directory for text resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.media_directory_name"
+                   value="Media"
+                   description="Sub-directory for media resources in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.info_directory_name"
+                   value="Info"
+                   description="Sub-directory for info files in the archive domain"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.orphans_directory_name"
+                   value="sessions"
+                   description="Directory, under a top node, which can be used as a backdoor for large files to be loaded into a workspace"
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.trashcan_base_directory"
@@ -123,10 +154,9 @@ The other necessary properties should be defined as parameters in the web contex
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.mailAddress"
-                   value="corpman@mpi.nl"
+                   value="guisil@mpi.nl"            
                    description="the LAMUS will send messages to"         
                    override="false"/>
-
 
         <Parameter name="nl.mpi.lamus.manager.users"
                    value="corpman@mpi.nl"
@@ -135,10 +165,6 @@ The other necessary properties should be defined as parameters in the web contex
 
         <Parameter name="nl.mpi.lamus.handle.prefix"
                    value="11142"
-                   override="false"/>
-
-        <Parameter name="nl.mpi.lamus.handle.proxy"
-                   value="hdl:"
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.handle.admin_key_file"
@@ -187,27 +213,98 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Sub path for the crawler details service"
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_archiveobjects_path"
+                   value="archiveobjects"
+                   description="Sub path for the archiveobjects service"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.corpusstructure.service_archiveobjects_updateurl_path"
+                   value="updateurl"
+                   description="Sub path for the archiveobjects updateurl service"
+                   override="false"/>
+
         <Parameter name="nl.mpi.lamus.translation_service.location"
                    value="https://lux16.mpi.nl/ds/TranslationService"
                    description="Location of the translation service"
                    override="false"/>
 
-        <Parameter name="nl.mpi.lamus.schematronValidationFile"
-                   value="/lat/tomcat-corpman/conf/cmdi_schematron.sch"
-                   description="Path to a schematron file to be used in Lamus for CMDI validation"
+        <Parameter name="nl.mpi.lamus.asv_openhandle_base_url"
+                   value="https://lux16.mpi.nl/ds/asv_hybrid?openhandle="
+                   description="Base URL to open a node in ASV using the hanlde"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.schematronValidationFile_upload"
+                   value="/lat/tomcat-corpman/conf/cmdi_schematron_upload.sch"
+                   description="Path to a schematron file to be used in Lamus for CMDI validation during file upload"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.schematronValidationFile_submit"
+                   value="/lat/tomcat-corpman/conf/cmdi_schematron_submit.sch"
+                   description="Path to a schematron file to be used in Lamus for CMDI validation during workspace submission"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.allowedProfilesFile"
+                   value="/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml"
+                   description="Path to an XML file containing the CMDI profiles allowed in the archive, including some information about them that can be useful to Lamus"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.permissionConfigFile_CMDI"
+                   value="/lat/tomcat-corpman/conf/apa-permissions_cmdi.conf"
+                   description="name of a config file containing paths which require adjustments in the filesystem permissions, done by Lamus2"
+                   override="false"/>
+
+
+    RRS
+
+        <Parameter name="nl.mpi.rrsUrl"
+                   value="https://lux16.mpi.nl/ds/RRS_V1/"
+                   description="Base URL for RRS"
+                   override="false"/>
+
+        <Parameter name="nl.mpi.rrsRegister"                                    
+                   value="RrsRegistration"                              
+                   description="Name of RrsRegistration"                
+                   override="false"/>
+
+
+    AMS2
+
+        <Parameter name="nl.mpi.auth.cmdi.baseurl"
+                   value="http://127.0.0.1/am/ams2-cmdi"
+                   description=""
+                   override="false"/>
+
+        <Parameter name="nl.mpi.auth.recalc.url"
+                   value="pages/recalc.face"            
+                   description=""         
+                   override="false"/>
+                   
+        <Parameter name="nl.mpi.auth.recalc.param"
+                   value="nodeid"            
+                   description=""         
+                   override="false"/>
+                   
+        <Parameter name="nl.mpi.auth.recalc_csdb.url"
+                   value="pages/recalc_csdb.face"            
+                   description=""         
+                   override="false"/>
+
+        <Parameter name="nl.mpi.auth.recalc_webserver.url"
+                   value="pages/recalc_webserver.face"            
+                   description=""         
                    override="false"/>
 
 2. Schematron configuration
 
-In order to perform the validation of allowed profiles being introduced into the archive, a schematron is used.
-A schematron file is included in the configuration folder of tomcat-corpman (/lat/tomcat-corpman/conf/cmdi_schematron.sch). This schematron file needs an extra file which contains the list of allowed CMDI profiles (/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml).
+In order to perform the validation of allowed profiles being introduced into the archive, schematron is used.
+Two schematron files are included in the configuration folder of tomcat-corpman, one to be used during upload (/lat/tomcat-corpman/conf/cmdi_schematron_upload.sch) and the other during submission (/lat/tomcat-corpman/conf/cmdi_schematron_submit.sch).
+These schematron files need an extra file which contains the list of allowed CMDI profiles (/lat/tomcat-corpman/conf/cmdi_allowed_profiles.xml).
 
 3.  Filters
 
 When building the application, a parameter is passed, indicating the server for which it is being compiled. This loads a few more properties from the filter file regarding the given server.
 So, whenever the a new server is used to deploy the application, a new filter file should be created.
 
-log.home=/lat/tomcat-corpman/logs
 shhaa.li=https://lux16.mpi.nl/Shibboleth.sso/Login
 shhaa.lo=https://lux16.mpi.nl/Shibboleth.sso/Logout
 

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
@@ -47,16 +48,18 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceUploadHelper.class);
     
-    private MetadataAPI metadataAPI;
-    private MetadataApiBridge metadataApiBridge;
-    private WorkspaceUploadReferenceHandler workspaceUploadReferenceHandler;
+    private final MetadataAPI metadataAPI;
+    private final MetadataApiBridge metadataApiBridge;
+    private final WorkspaceUploadReferenceHandler workspaceUploadReferenceHandler;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     public LamusWorkspaceUploadHelper(MetadataAPI mdAPI, MetadataApiBridge mdApiBridge,
-            WorkspaceUploadReferenceHandler wsUploadReferenceHandler) {
+            WorkspaceUploadReferenceHandler wsUploadReferenceHandler, NodeUtil nodeUtil) {
         this.metadataAPI = mdAPI;
         this.metadataApiBridge = mdApiBridge;
         this.workspaceUploadReferenceHandler = wsUploadReferenceHandler;
+        this.nodeUtil = nodeUtil;
     }
 
     /**
@@ -66,11 +69,11 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
         Collection<ImportProblem> allFailedLinks = new ArrayList<>();
-        Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
         for(WorkspaceNode node : nodesToCheck) {
             
-            if(!node.isMetadata()) {
+            if(!nodeUtil.isNodeMetadata(node)) {
                 continue;
             }
             
@@ -90,13 +93,13 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             
             Collection<ImportProblem> failedLinks =
                     workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithExternalSelfHandles);
+                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithInvalidSelfHandles);
             
             allFailedLinks.addAll(failedLinks);
         }
         
         //remove external self-handles, if any
-        Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithExternalSelfHandles.entrySet();
+        Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithInvalidSelfHandles.entrySet();
         if(!entries.isEmpty()) {
             for(Map.Entry<MetadataDocument, WorkspaceNode> entry : entries) {
                 try {

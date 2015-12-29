@@ -33,6 +33,9 @@ The files extracted from the war file need to be readable for the UID in which t
     CONFIGURATION
 Example configuration and some explanations can be found in the file named CONFIGURATION.
 
+The schematron files are included under the 'wicket' project (src/main/resources/cmdi_validation).
+In each of the schematron files, the path to the helper XML file (cmdi_alllowed_profiles.xml) should be adjusted, if necessary.
+
 
     BOOTSTRAP
 

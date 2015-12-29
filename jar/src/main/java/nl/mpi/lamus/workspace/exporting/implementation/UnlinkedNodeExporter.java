@@ -22,12 +22,14 @@ import java.net.URL;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -64,19 +66,22 @@ public class UnlinkedNodeExporter implements NodeExporter{
     private MetadataAPI metadataAPI;
     @Autowired
     private WorkspaceDao workspaceDao;
+    @Autowired
+    private NodeUtil nodeUtil;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
 
         if (workspace == null) {
@@ -92,7 +97,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         }
         
         logger.debug("Exporting unlinked node to archive; workspaceID: " + workspace.getWorkspaceID() + "; currentNodeID: " + currentNode.getWorkspaceNodeID());
-        logger.debug("Keep unlinked files: " + keepUnlinkedFiles + "; Submission type: " + submissionType.toString() + "; Export phase: " + exportPhase.toString());
+        logger.debug("Keep unlinked files: " + keepUnlinkedFiles + "; Submission type: " + submissionType.name() + "; Export phase: " + exportPhase.toString());
 
         if(currentNode.isProtected()) { // a protected node should remain intact after the workspace submission
             logger.info("Node " + currentNode.getWorkspaceNodeID() + " is protected; skipping export of this node to keep it intact in the archive");
@@ -110,8 +115,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
             
             if(currentArchiveUri != null) {
                 
-                if(currentNode.isMetadata()) {
-                    workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+                if(nodeUtil.isNodeMetadata(currentNode)) {
+                    workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
                 }
                 
                 URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
@@ -145,8 +150,8 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 return;
             }
     
-            if(currentNode.isMetadata()) {
-                workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+            if(nodeUtil.isNodeMetadata(currentNode)) {
+                workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
             }
 
             URL orphanedNodeURL = versioningHandler.moveFileToOrphansFolder(workspace, currentNode);
@@ -181,7 +186,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         MetadataDocument document = null;
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 

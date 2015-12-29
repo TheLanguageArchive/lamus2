@@ -28,13 +28,16 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -75,24 +78,31 @@ public class AddedNodeExporter implements NodeExporter {
     @Autowired
     private HandleManager handleManager;
     @Autowired
+    private HandleParser handleParser;
+    @Autowired
     private MetadataApiBridge metadataApiBridge;
     @Autowired
     private CorpusStructureProvider corpusStructureProvider;
     @Autowired
     private NodeResolver nodeResolver;
+    @Autowired
+    private NodeUtil nodeUtil;
+    @Autowired
+    private ExporterHelper exporterHelper;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -122,10 +132,20 @@ public class AddedNodeExporter implements NodeExporter {
         
         String currentNodeFilename = FilenameUtils.getName(currentNode.getWorkspaceURL().getPath());
         
-        File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath());
         
-        if(currentNode.isMetadata()) {
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+        String currentCorpusNamePathToClosestTopNode = exporterHelper.getNamePathToUseForThisExporter(
+                currentNode, parentNode, parentCorpusNamePathToClosestTopNode, false, getClass());
+        
+        if(currentCorpusNamePathToClosestTopNode == null) {
+            String errorMessage = "Problems retrieving the corpus name path for node " + currentNode.getWorkspaceURL();
+            throwWorkspaceExportException(workspaceID, errorMessage, null);
+        }
+        
+        File nextAvailableFile = retrieveAndUpdateNewArchivePath(workspaceID, currentNode, currentNodeFilename, parentArchiveFile.getAbsolutePath(), currentCorpusNamePathToClosestTopNode);
+        
+        if(nodeUtil.isNodeMetadata(currentNode)) {
+            
+            workspaceTreeExporter.explore(workspace, currentNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
         }
         
         MetadataDocument currentDocument = retrieveMetadataDocument(workspaceID, currentNode);
@@ -134,7 +154,7 @@ public class AddedNodeExporter implements NodeExporter {
         
         assignAndUpdateNewHandle(workspaceID, currentNode);
         
-        if(currentNode.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(currentNode)) {
             updateSelfHandle(workspaceID, currentNode, currentDocument);
         }
         
@@ -175,13 +195,13 @@ public class AddedNodeExporter implements NodeExporter {
         return parentArchiveFile;
     }
     
-    private File retrieveAndUpdateNewArchivePath(int workspaceID, WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath) throws WorkspaceExportException {
+    private File retrieveAndUpdateNewArchivePath(int workspaceID, WorkspaceNode currentNode, String currentNodeFilename, String parentArchivePath, String corpusNamePathToClosestTopNode) throws WorkspaceExportException {
         
         File nextAvailableFile = null;
         URL newNodeArchiveURL = null;
         
         try {
-            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, currentNodeFilename, currentNode.getType());
+            nextAvailableFile = archiveFileLocationProvider.getAvailableFile(parentArchivePath, corpusNamePathToClosestTopNode, currentNode, currentNodeFilename);
             logger.info("Retrieved new archive file path for added node: " + nextAvailableFile.getAbsolutePath());
             newNodeArchiveURL = nextAvailableFile.toURI().toURL();
         } catch (MalformedURLException ex) {
@@ -201,7 +221,7 @@ public class AddedNodeExporter implements NodeExporter {
         
         MetadataDocument document = null;
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 
@@ -234,7 +254,7 @@ public class AddedNodeExporter implements NodeExporter {
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentNodeWorkspaceFile)) {
                 workspaceFileHandler.moveFile(currentNodeWorkspaceFile, nextAvailableFile);
             } else {
-                if(currentNode.isMetadata()) {
+                if(nodeUtil.isNodeMetadata(currentNode)) {
                     StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
                     metadataAPI.writeMetadataDocument(currentDocument, targetStreamResult);
                 } else {
@@ -252,7 +272,7 @@ public class AddedNodeExporter implements NodeExporter {
         //create self link in header, either if it is already there (will be replaced) or not (will be added)
         try {
             metadataApiBridge.addSelfHandleAndSaveDocument(document, node.getArchiveURI(), node.getWorkspaceURL());
-        } catch (MetadataException | TransformerException | IOException | URISyntaxException ex) {
+        } catch (MetadataException | TransformerException | IOException ex) {
             String errorMessage = "Error updating header information for node " + node.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
@@ -263,7 +283,7 @@ public class AddedNodeExporter implements NodeExporter {
         
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL().toURI());
-            currentReference.setURI(handleManager.prepareHandleWithHdlPrefix(currentNode.getArchiveURI()));
+            currentReference.setURI(handleParser.prepareAndValidateHandleWithHdlPrefix(currentNode.getArchiveURI()));
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
             currentReference.setLocation(currentUriRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
@@ -282,7 +302,7 @@ public class AddedNodeExporter implements NodeExporter {
             URI targetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
             
             URI newNodeArchiveHandle = handleManager.assignNewHandle(new File(currentNode.getWorkspaceURL().getPath()), targetUri);
-            currentNode.setArchiveURI(handleManager.prepareHandleWithHdlPrefix(newNodeArchiveHandle));
+            currentNode.setArchiveURI(handleParser.prepareAndValidateHandleWithHdlPrefix(newNodeArchiveHandle));
             workspaceDao.updateNodeArchiveUri(currentNode);
         } catch (URISyntaxException | HandleException | IOException ex) {
             String errorMessage = "Error assigning new handle for node " + currentNode.getWorkspaceURL();

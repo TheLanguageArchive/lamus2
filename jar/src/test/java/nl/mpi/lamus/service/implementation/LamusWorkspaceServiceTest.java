@@ -55,6 +55,7 @@ import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.workspace.replace.implementation.LamusNodeReplaceManager;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -93,6 +94,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private File mockFile;
     @Mock private Collection<File> mockUploadedFiles;
     @Mock private Collection<ImportProblem> mockFailedUploads;
+    @Mock private ZipUploadResult mockZipUploadResult;
     @Mock private TypecheckedResults mockTypecheckedResults;
     @Mock private ZipInputStream mockZipInputStream;
 
@@ -487,7 +489,7 @@ public class LamusWorkspaceServiceTest {
         Workspace workspace1 = new LamusWorkspace(1, userID, 1, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node1.cmdi"),
                 date, null, date, null, 0L, 10000000L, WorkspaceStatus.UNINITIALISED, "workspace is in good shape", "still not sure what this would be");
         Workspace workspace2 = new LamusWorkspace(2, userID, 2, new URI(UUID.randomUUID().toString()), new URL("file:/archive/folder/node2.cmdi"),
-                date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_DURING_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
+                date, null, date, null, 0L, 1000000L, WorkspaceStatus.ERROR_INITIALISATION, "workspace is in good shape", "still not sure what this would be");
         final Collection<Workspace> expectedList = new ArrayList<>();
         
         context.checking(new Expectations() {{
@@ -749,7 +751,7 @@ public class LamusWorkspaceServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
@@ -778,7 +780,7 @@ public class LamusWorkspaceServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         final WorkspaceNode nodeToRetrieve = new LamusWorkspaceNode(
@@ -806,8 +808,8 @@ public class LamusWorkspaceServiceTest {
         final int nodeID = 1;
         final Collection<WorkspaceNode> expectedChildNodes = new ArrayList<>();
         final WorkspaceNode childNode = new LamusWorkspaceNode(
-                2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE, null,
-                null, null, null, WorkspaceNodeStatus.NODE_VIRTUAL, Boolean.FALSE, "jpeg");
+                2, 1, null, "name", "title", WorkspaceNodeType.RESOURCE_IMAGE, null,
+                null, null, null, WorkspaceNodeStatus.VIRTUAL, Boolean.FALSE, "jpeg");
         expectedChildNodes.add(childNode);
         
         context.checking(new Expectations() {{
@@ -879,12 +881,12 @@ public class LamusWorkspaceServiceTest {
         context.checking(new Expectations() {{
             
             oneOf(mockWorkspaceUploader).uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
-                will(returnValue(mockUploadedFiles));
+                will(returnValue(mockZipUploadResult));
         }});
         
-        Collection<File> result = service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
+        ZipUploadResult result = service.uploadZipFileIntoWorkspace(userID, workspaceID, mockZipInputStream, filename);
         
-        assertEquals("Result different from expected", mockUploadedFiles, result);
+        assertEquals("Result different from expected", mockZipUploadResult, result);
     }
     
     @Test
@@ -1012,6 +1014,8 @@ public class LamusWorkspaceServiceTest {
         
         final int parentNodeID = 10;
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         context.checking(new Expectations() {{
             
@@ -1021,7 +1025,33 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
+        }});
+        
+        service.linkNodes(userID, mockParentNode, mockChildNode);
+    }
+    
+    @Test
+    public void linkNodesWithAccess_InfoLink() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
+        
+        final int parentNodeID = 10;
+        final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.RESOURCE_INFO;
+        final boolean isInfoLink = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
+            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
+            
+            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
         }});
         
         service.linkNodes(userID, mockParentNode, mockChildNode);
@@ -1084,6 +1114,8 @@ public class LamusWorkspaceServiceTest {
         
         final int parentNodeID = 10;
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
@@ -1095,7 +1127,9 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
         
         try {
@@ -1112,6 +1146,8 @@ public class LamusWorkspaceServiceTest {
         final int parentNodeID = 10;
         final URI parentNodeURI = new URI(UUID.randomUUID().toString());
         final int childNodeID = 20;
+        final WorkspaceNodeType childType = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         
         final ProtectedNodeException expectedException = new ProtectedNodeException("some exception message", parentNodeURI, workspaceID);
         
@@ -1123,7 +1159,9 @@ public class LamusWorkspaceServiceTest {
             
             oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode); will(throwException(expectedException));
+            oneOf(mockWorkspaceNodeLinkManager).removeArchiveUriFromUploadedNodeRecursively(mockChildNode, Boolean.TRUE);
+            oneOf(mockChildNode).getType(); will(returnValue(childType));
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink); will(throwException(expectedException));
         }});
         
         try {

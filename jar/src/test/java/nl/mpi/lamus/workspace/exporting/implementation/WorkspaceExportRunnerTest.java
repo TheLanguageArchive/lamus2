@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -25,10 +26,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
-import nl.mpi.lamus.archive.permissions.PermissionAdjuster;
-import nl.mpi.lamus.archive.permissions.implementation.PermissionAdjusterScope;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
+import nl.mpi.lamus.exception.NodeUrlUpdateException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -38,9 +38,9 @@ import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import org.jmock.Expectations;
@@ -77,7 +77,7 @@ public class WorkspaceExportRunnerTest {
     
     @Mock NodeExporter mockNodeExporter;
     
-    @Mock Collection<WorkspaceNodeReplacement> mockNodeReplacementsCollection;
+    @Mock Collection<WorkspaceReplacedNodeUrlUpdate> mockReplacedNodeUrlUpdateCollection;
     
     private WorkspaceExportRunner workspaceExportRunner;
     
@@ -139,7 +139,9 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
+        
+        final Collection<WorkspaceReplacedNodeUrlUpdate> emptyNodeUrlUpdates = new ArrayList<>();
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -152,18 +154,22 @@ public class WorkspaceExportRunnerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(exporting.isNot("finished"));
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
+                when(exporting.isNot("finished"));
+                
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
-                when(exporting.isNot("finished"));
-                
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
@@ -199,7 +205,7 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
         
         final String crawlerID = UUID.randomUUID().toString();
         
@@ -241,7 +247,9 @@ public class WorkspaceExportRunnerTest {
         final String testNodeFormat = "";
         final URI testSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
-                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, testNodeFormat);
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
+        
+        final Collection<WorkspaceReplacedNodeUrlUpdate> emptyNodeUrlUpdates = new ArrayList<>();
         
         final CrawlerInvocationException expectedCause = new CrawlerInvocationException("some exception message", null);
         
@@ -255,18 +263,22 @@ public class WorkspaceExportRunnerTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(exporting.isNot("finished"));
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
+                when(exporting.isNot("finished"));
+                
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
                 when(exporting.isNot("finished"));
             
             oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
                 when(exporting.isNot("finished"));
             
-            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
-                when(exporting.isNot("finished"));
-                
-            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
             
             oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));
@@ -282,6 +294,71 @@ public class WorkspaceExportRunnerTest {
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+    }
+    
+    @Test
+    public void callExporterForGeneralNodeWithVersions() throws MalformedURLException, WorkspaceExportException, WorkspaceNodeNotFoundException, CrawlerInvocationException, InterruptedException, ExecutionException, NodeUrlUpdateException {
+        
+        final int workspaceID = 1;
+        final int wsNodeID = 10;
+        final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
+        final URL wsNodeURL = new URL("file:/workspace/folder/someName.cmdi");
+        final URI originURI = URI.create("http://some.url/someName.cmdi");
+        final URL archiveNodeURL = originURI.toURL();
+        final String testDisplayValue = "someName";
+        final WorkspaceNodeType testNodeType = WorkspaceNodeType.METADATA;
+        final String testNodeFormat = "";
+        final URI testSchemaLocation = URI.create("http://some.location");
+        final WorkspaceNode testNode = new LamusWorkspaceNode(wsNodeID, workspaceID, testSchemaLocation,
+                testDisplayValue, "", testNodeType, wsNodeURL, archiveNodeURI, archiveNodeURL, originURI, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, testNodeFormat);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        
+        final States exporting = context.states("exporting");
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE;
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
+        workspaceExportRunner.setSubmissionType(submissionType);
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(mockReplacedNodeUrlUpdateCollection));
+                when(exporting.isNot("finished"));
+            oneOf(mockReplacedNodeUrlUpdateCollection).isEmpty(); will(returnValue(Boolean.FALSE));
+                when(exporting.isNot("finished"));
+            oneOf(mockCorpusStructureServiceBridge).updateReplacedNodesUrls(mockReplacedNodeUrlUpdateCollection);
+                when(exporting.isNot("finished"));
+                
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, testNode, WorkspaceExportPhase.TREE_EXPORT); will(returnValue(mockNodeExporter));
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
+                when(exporting.isNot("finished"));
+            
+            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspace).setCrawlerID(crawlerID);
+                when(exporting.isNot("finished"));
+            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
+                then(exporting.is("finished"));
+        }});
+        
+        boolean result = executeRunner();
+        
+        long timeoutInMs = 2000L;
+        synchroniser.waitUntil(exporting.is("finished"), timeoutInMs);
+        
+        assertTrue("Execution result should have been successful (true)", result);
     }
     
     //TODO Test exceptions

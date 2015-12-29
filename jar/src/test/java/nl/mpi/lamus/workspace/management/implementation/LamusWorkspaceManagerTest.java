@@ -177,10 +177,11 @@ public class LamusWorkspaceManagerTest {
         final IOException expectedException = new IOException(errorMessage);
         
         context.checking(new Expectations() {{
-            oneOf (mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
-            oneOf (mockWorkspaceDao).addWorkspace(newWorkspace);
-            oneOf (mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
+            oneOf(mockWorkspaceFactory).getNewWorkspace(userID, archiveNodeURI); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
+            oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(newWorkspace.getWorkspaceID());
                 will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(newWorkspace.getWorkspaceID());
         }});
         
         try {
@@ -226,7 +227,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {
@@ -271,7 +272,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {
@@ -314,7 +315,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
-            
+            oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
         try {
@@ -623,8 +624,8 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE;
-        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
+        final String successfullySubmittedMessage = "Data was successfully moved to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
@@ -718,8 +719,8 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.PENDING_ARCHIVE_DB_UPDATE;
-        final String successfullySubmittedMessage = "Data was successfully move to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
+        final WorkspaceStatus successfullySubmittedStatus = WorkspaceStatus.UPDATING_ARCHIVE;
+        final String successfullySubmittedMessage = "Data was successfully moved to the archive. It is now being updated in the database.\nAn email will be sent after this process is finished (it can take a while, depending on the size of the workspace).";
         
         final Calendar endCalendar = Calendar.getInstance();
         final Date endDate = endCalendar.getTime();
@@ -809,7 +810,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -872,7 +873,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();
@@ -935,7 +936,7 @@ public class LamusWorkspaceManagerTest {
         final WorkspaceStatus submittedStatus = WorkspaceStatus.SUBMITTED;
         final String submittedMessage = "workspace was submitted";
         
-        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.DATA_MOVED_ERROR;
+        final WorkspaceStatus errorSubmittingStatus = WorkspaceStatus.ERROR_MOVING_DATA;
         final String errorSubmittingMessage = "There were errors when submitting the workspace. Please contact the corpus management team.";
         
         final Calendar endCalendar = Calendar.getInstance();

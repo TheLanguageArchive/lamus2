@@ -16,21 +16,29 @@
  */
 package nl.mpi.lamus.web.workspace.tree;
 
-import javax.swing.ImageIcon;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreeNodeIconProvider;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Implementation of the icon provider for the trees in Lamus.
+ * @see ArchiveTreeNodeIconProvider
  * @author guisil
  */
 @Component
 public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvider<WorkspaceTreeNode> {
     
+    @Autowired
+    private WorkspaceTreeNodeProfileIconMapper profileIconMapper;
+
+    
+    /**
+     * @see ArchiveTreeNodeIconProvider#getNodeIcon(nl.mpi.archiving.tree.GenericTreeNode)
+     */
     @Override
     public ResourceReference getNodeIcon(WorkspaceTreeNode contentNode) {
 
@@ -40,13 +48,30 @@ public class WorkspaceTreeNodeIconProvider implements ArchiveTreeNodeIconProvide
         if(contentNode.isProtected()) {
             return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "al_circle_red.png");
         }
-        if(contentNode.isMetadata()) {
-            return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "clarin.png");
-        }
-        if(WorkspaceNodeType.RESOURCE.equals(contentNode.getType())) {
-            return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "file.gif");
+        
+        WorkspaceNodeType nodeType = contentNode.getType();
+        
+        if(nodeType == null) {
+            return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "unknown.png");
         }
         
-        return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "unknown.png");
+        switch(nodeType) {
+            case METADATA:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, profileIconMapper.matchProfileIdWithIconName(contentNode.getProfileSchemaURI()));
+            case RESOURCE_INFO:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "info.gif");
+            case RESOURCE_AUDIO:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "audio.gif");
+            case RESOURCE_IMAGE:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "image.gif");
+            case RESOURCE_VIDEO:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "video.gif");
+            case RESOURCE_WRITTEN:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "written.gif");
+            case RESOURCE_OTHER:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "file.gif");
+            default:
+                return new PackageResourceReference(WorkspaceTreeNodeIconProvider.class, "unknown.png");
+        }
     }
 }

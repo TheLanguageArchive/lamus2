@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
+import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.metadata.api.model.Reference;
 
 /**
@@ -29,5 +30,6 @@ public interface NodeImporterAssigner {
      * @param reference Reference of the file to be imported
      * @return NodeImporter of the appropriate type
      */
-    public NodeImporter getImporterForReference(Reference reference);
+    public NodeImporter getImporterForReference(Reference reference)
+            throws UnusableReferenceTypeException;
 }

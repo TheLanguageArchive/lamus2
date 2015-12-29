@@ -48,15 +48,15 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
     
     /**
      * @see WorkspaceTreeExporter#explore(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          boolean, nl.mpi.lamus.workspace.model.WorkspaceSubmissionType,
-     *          nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, boolean, nl.mpi.lamus.workspace.model.WorkspaceSubmissionType,
+     *  nl.mpi.lamus.workspace.model.WorkspaceExportPhase) 
      */
     @Override
     public void explore(
-        Workspace workspace, WorkspaceNode node,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode node,
+            String corpusNamePathToClosestTopNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         logger.debug("Exploring references in metadata node to export; workspaceID: " + workspace.getWorkspaceID() + "; nodeID: " + node.getWorkspaceNodeID());
@@ -67,7 +67,7 @@ public class LamusWorkspaceTreeExporter implements WorkspaceTreeExporter {
             
             if(!child.isExternal()) {
                 NodeExporter childNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, child, exportPhase);
-                childNodeExporter.exportNode(workspace, node, child, keepUnlinkedFiles, submissionType, exportPhase);
+                childNodeExporter.exportNode(workspace, node, corpusNamePathToClosestTopNode, child, keepUnlinkedFiles, submissionType, exportPhase);
             }
         }
     }

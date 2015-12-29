@@ -27,6 +27,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.tree.WorkspaceDaoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,6 +165,30 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#lockNode(java.net.URI, int)
+     */
+    @Override
+    public void lockNode(URI uriToLock, int workspaceID) {
+        this.getWorkspaceDao().lockNode(uriToLock, workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#unlockNode(java.net.URI)
+     */
+    @Override
+    public void unlockNode(URI uriToUnlock) {
+        this.getWorkspaceDao().unlockNode(uriToUnlock);
+    }
+
+    /**
+     * @see WorkspaceDao#unlockAllNodesOfWorkspace(int)
+     */
+    @Override
+    public void unlockAllNodesOfWorkspace(int workspaceID) {
+        this.getWorkspaceDao().unlockAllNodesOfWorkspace(workspaceID);
+    }
+    
+    /**
      * @see WorkspaceDao#getWorkspaceNodeByArchiveURI(java.net.URI)
      */
     @Override
@@ -188,6 +213,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#deleteWorkspaceNode(int, int)
+     */
+    @Override
+    public void deleteWorkspaceNode(int workspaceID, int nodeID) {
+        this.getWorkspaceDao().deleteWorkspaceNode(workspaceID, nodeID);
+    }
+
+    /**
      * @see WorkspaceDao#getWorkspaceNode(int)
      */
     @Override
@@ -209,6 +242,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     @Override
     public int getWorkspaceTopNodeID(int workspaceID) {
         return this.getWorkspaceDao().getWorkspaceTopNodeID(workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#isTopNodeOfWorkspace(int, int)
+     */
+    @Override
+    public boolean isTopNodeOfWorkspace(int workspaceID, int workspaceNodeID) {
+        return this.getWorkspaceDao().isTopNodeOfWorkspace(workspaceID, workspaceNodeID);
     }
     
     /**
@@ -308,6 +349,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#updateNodeType(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public void updateNodeType(WorkspaceNode node) {
+        this.getWorkspaceDao().updateNodeType(node);
+    }
+
+    /**
      * @see WorkspaceDao#addWorkspaceNodeLink(nl.mpi.lamus.workspace.model.WorkspaceNodeLink)
      */
     @Override
@@ -332,6 +381,14 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
 
     /**
+     * @see WorkspaceDao#getOlderVersionOfNode(int, int)
+     */
+    @Override
+    public WorkspaceNode getOlderVersionOfNode(int workspaceID, int workspaceNodeID) throws WorkspaceNodeNotFoundException {
+        return this.getWorkspaceDao().getOlderVersionOfNode(workspaceID, workspaceNodeID);
+    }
+
+    /**
      * @see WorkspaceDao#getNewerVersionOfNode(int, int)
      */
     @Override
@@ -353,5 +410,21 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     @Override
     public Collection<WorkspaceNodeReplacement> getAllNodeReplacements() {
         return this.getWorkspaceDao().getAllNodeReplacements();
+    }
+
+    /**
+     * @see WorkspaceDao#getNodeReplacementsForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getNodeReplacementsForWorkspace(workspaceID);
+    }
+
+    /**
+     * @see WorkspaceDao#getReplacedNodeUrlsToUpdateForWorkspace(int)
+     */
+    @Override
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID) {
+        return this.getWorkspaceDao().getReplacedNodeUrlsToUpdateForWorkspace(workspaceID);
     }
 }

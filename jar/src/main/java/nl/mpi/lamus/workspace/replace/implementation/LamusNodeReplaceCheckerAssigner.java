@@ -16,8 +16,8 @@
  */
 package nl.mpi.lamus.workspace.replace.implementation;
 
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.replace.NodeReplaceChecker;
 import nl.mpi.lamus.workspace.replace.NodeReplaceCheckerAssigner;
 import org.slf4j.Logger;
@@ -39,6 +39,8 @@ public class LamusNodeReplaceCheckerAssigner implements NodeReplaceCheckerAssign
     private NodeReplaceChecker metadataNodeReplaceChecker;
     @Autowired
     private NodeReplaceChecker resourceNodeReplaceChecker;
+    @Autowired
+    private NodeUtil nodeUtil;
     
     
     /**
@@ -47,9 +49,9 @@ public class LamusNodeReplaceCheckerAssigner implements NodeReplaceCheckerAssign
     @Override
     public NodeReplaceChecker getReplaceCheckerForNode(WorkspaceNode node) {
         
-        if(WorkspaceNodeType.RESOURCE.equals(node.getType())) {
+        if(!nodeUtil.isNodeMetadata(node)) {
             return resourceNodeReplaceChecker;
-        } else { //assuming any other node is metadata (?)
+        } else {
             return metadataNodeReplaceChecker;
         }
     }

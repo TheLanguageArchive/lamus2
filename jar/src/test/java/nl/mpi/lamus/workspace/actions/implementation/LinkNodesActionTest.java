@@ -18,12 +18,14 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -46,14 +48,16 @@ public class LinkNodesActionTest {
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery();
     
     @Mock WorkspaceService mockWorkspaceService;
+    @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     @Mock WorkspaceTreeNode mockParentNode;
     @Mock WorkspaceTreeNode mockChildNodeOne;
     @Mock WorkspaceTreeNode mockChildNodeTwo;
     
     private WsTreeNodesAction linkNodesAction;
     
-    private String expectedActionName = "link_node_action";
-    private String userID = "testUser";
+    private final String expectedActionName = "link_node_action";
+    private final String userID = "testUser";
     
     public LinkNodesActionTest() {
     }
@@ -94,7 +98,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -111,7 +115,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
 
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -130,7 +134,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -149,7 +153,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -169,7 +173,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
-            linkNodesAction.execute(userID, null);
+            linkNodesAction.execute(userID, null, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -191,7 +195,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
-        linkNodesAction.execute(userID, mockWorkspaceService);
+        linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -211,7 +215,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
-        linkNodesAction.execute(userID, mockWorkspaceService);
+        linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
     @Test
@@ -234,7 +238,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -261,7 +265,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
 
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceAccessException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -288,7 +292,7 @@ public class LinkNodesActionTest {
         linkNodesAction.setSelectedUnlinkedNodes(selectedChildNodes);
         
         try {
-            linkNodesAction.execute(userID, mockWorkspaceService);
+            linkNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

@@ -44,8 +44,9 @@ public interface WorkspaceNodeLinkManager {
      * 
      * @param parentNode WorkspaceNode object corresponding to the parent node
      * @param childNode WorkspaceNode object corresponding to the child node
+     * @param isInfoLink true if the child node is to be linked as an info file
      */
-    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode)
+    public void linkNodes(WorkspaceNode parentNode, WorkspaceNode childNode, boolean isInfoLink)
             throws WorkspaceException, ProtectedNodeException;
     
     /**
@@ -74,6 +75,15 @@ public interface WorkspaceNodeLinkManager {
             throws WorkspaceException, ProtectedNodeException;
     
     /**
+     * Unlinks the given node from its replaced
+     * (or older, if none is replaced) parent.
+     * @param childNode WorkspaceNode object corresponding to the node to be unlinked
+     * @param newParentNode WorkspaceNode object corresponding to the new parent node
+     */
+    public void unlinkNodeFromReplacedParent(WorkspaceNode childNode, WorkspaceNode newParentNode)
+            throws WorkspaceException, ProtectedNodeException;
+    
+    /**
      * Replaces, in the workspace, a node by a newer version.
      * The link in the parent has to be changed as well.
      * 
@@ -93,5 +103,15 @@ public interface WorkspaceNodeLinkManager {
      * @param childNode WorkspaceNode object corresponding to the child node
      */
     public void removeArchiveUriFromChildNode(WorkspaceNode parentNode, WorkspaceNode childNode)
+            throws WorkspaceException;
+    
+    /**
+     * Removes an existing archiveURI from an uploaded node and does the same
+     * for the children. This is meant to be used to prevent nodes containing
+     * archive handles to be linked again in some other part of the tree.
+     * @param node Node where to start the URI removal
+     * @param firstIteration true if it's the initial call
+     */
+    public void removeArchiveUriFromUploadedNodeRecursively(WorkspaceNode node, boolean firstIteration)
             throws WorkspaceException;
 }

@@ -23,7 +23,19 @@ public enum WorkspaceNodeType {
 
     METADATA,
     
-    RESOURCE,
+    RESOURCE_IMAGE,
+    RESOURCE_AUDIO,
+    RESOURCE_VIDEO,
+    RESOURCE_WRITTEN,
     
-    UNKNOWN
+    RESOURCE_INFO,
+    
+    RESOURCE_OTHER,
+    
+    UNKNOWN;
+    
+    @Override
+    public String toString() {
+        return (name().charAt(0) + name().substring(1).toLowerCase()).replace("_", " - ");
+    }
 }

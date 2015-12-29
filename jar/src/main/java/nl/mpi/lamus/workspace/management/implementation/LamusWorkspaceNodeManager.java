@@ -16,13 +16,19 @@
  */
 package nl.mpi.lamus.workspace.management.implementation;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,17 +39,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
 
-    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private WorkspaceDao workspaceDao;
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeManager.class);
+    
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private final WorkspaceDao workspaceDao;
+    private final WorkspaceFileHandler workspaceFileHandler;
     
     @Autowired
     public LamusWorkspaceNodeManager(WorkspaceNodeLinkManager wsNodeLinkManager,
-            WorkspaceDao wsDao) {
+            WorkspaceDao wsDao, WorkspaceFileHandler wsFileHandler) {
         
         this.workspaceNodeLinkManager = wsNodeLinkManager;
         this.workspaceDao = wsDao;
+        this.workspaceFileHandler = wsFileHandler;
     }
     
+    /**
+     * @see WorkspaceNodeManager#deleteNodesRecursively(nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
     @Override
     public void deleteNodesRecursively(WorkspaceNode rootNodeToDelete) throws WorkspaceException, ProtectedNodeException {
         
@@ -67,12 +80,22 @@ public class LamusWorkspaceNodeManager implements WorkspaceNodeManager {
             }
         }
         
-        workspaceDao.setWorkspaceNodeAsDeleted(
-                rootNodeToDelete.getWorkspaceID(),
-                rootNodeToDelete.getWorkspaceNodeID(),
-                rootNodeToDelete.isExternal());
-        
-        workspaceNodeLinkManager.unlinkNodeFromAllParents(rootNodeToDelete);
+        if(WorkspaceNodeStatus.UPLOADED.equals(rootNodeToDelete.getStatus())) {
+            workspaceNodeLinkManager.unlinkNodeFromAllParents(rootNodeToDelete);
+            workspaceDao.deleteWorkspaceNode(rootNodeToDelete.getWorkspaceID(), rootNodeToDelete.getWorkspaceNodeID());
+            File nodeFile = new File(rootNodeToDelete.getWorkspaceURL().getPath());
+            try {
+                workspaceFileHandler.deleteFile(nodeFile);
+            } catch (IOException ex) {
+                logger.warn("Error deleting uploaded file (" + nodeFile.getAbsolutePath() + ")", ex);
+            }
+        } else {
+            workspaceDao.setWorkspaceNodeAsDeleted(
+                    rootNodeToDelete.getWorkspaceID(),
+                    rootNodeToDelete.getWorkspaceNodeID(),
+                    rootNodeToDelete.isExternal());
+            workspaceNodeLinkManager.unlinkNodeFromAllParents(rootNodeToDelete);
+        }
     }
     
 }

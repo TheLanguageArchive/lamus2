@@ -73,14 +73,14 @@ public class LamusWorkspaceTreeNodeTest {
         parentTreeNode = new LamusWorkspaceTreeNode(1, 1, URI.create("file:/parent.uri"),
                 "parentName", "parent title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/parent/fake1.url"), parentNodeURI, new URL("file:/some/fake3.url"), URI.create("file:/parent/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown",
                 null, mockWorkspaceDao);
         
         URI nodeURI = URI.create(UUID.randomUUID().toString());
         treeNode = new LamusWorkspaceTreeNode(10, 1, URI.create("file:/some.uri"),
                 "nodeName", "node title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/some/fake1.url"), nodeURI, new URL("file:/some/fake3.url"), URI.create("file:/some/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown",
                 parentTreeNode, mockWorkspaceDao);
         
         nodeChildren = new ArrayList<>();
@@ -90,12 +90,12 @@ public class LamusWorkspaceTreeNodeTest {
         child1 = new LamusWorkspaceNode(20, 1, URI.create("file:/child1.uri"),
                 "child1Name", "child1 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child1/fake1.url"), child1URI, new URL("file:/some/fake3.url"), URI.create("file:/child1/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown");
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown");
         nodeChildren.add(child1);
         childTreeNode1 = new LamusWorkspaceTreeNode(20, 1, URI.create("file:/child1.uri"),
                 "child1Name", "child1 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child1/fake1.url"), child1URI, new URL("file:/some/fake3.url"), URI.create("file:/child1/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown",
                 treeNode, mockWorkspaceDao);
         treeNodeChildren.add(childTreeNode1);
         
@@ -103,12 +103,12 @@ public class LamusWorkspaceTreeNodeTest {
         child2 = new LamusWorkspaceNode(21, 1, URI.create("file:/child2.uri"),
                 "child2Name", "child2 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child2/fake1.url"), child2URI, new URL("file:/some/fake3.url"), URI.create("file:/child2/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown");
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown");
         nodeChildren.add(child2);
         childTreeNode2 = new LamusWorkspaceTreeNode(21, 1, URI.create("file:/child2.uri"),
                 "child2Name", "child2 title", WorkspaceNodeType.UNKNOWN, 
                 new URL("file:/child2/fake1.url"), child2URI, new URL("file:/some/fake3.url"), URI.create("file:/child2/fake3.url"),
-                WorkspaceNodeStatus.NODE_CREATED, Boolean.FALSE, "unknown",
+                WorkspaceNodeStatus.CREATED, Boolean.FALSE, "unknown",
                 treeNode, mockWorkspaceDao);
         treeNodeChildren.add(childTreeNode2);
     }

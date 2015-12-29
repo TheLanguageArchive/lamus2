@@ -27,8 +27,11 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -38,6 +41,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +62,8 @@ public class GeneralNodeExporter implements NodeExporter {
     @Autowired
     private MetadataAPI metadataAPI;
     @Autowired
+    private MetadataApiBridge metadataApiBridge;
+    @Autowired
     private WorkspaceFileHandler workspaceFileHandler;
     @Autowired
     private WorkspaceTreeExporter workspaceTreeExporter;
@@ -67,19 +73,24 @@ public class GeneralNodeExporter implements NodeExporter {
     private NodeResolver nodeResolver;
     @Autowired
     private ArchiveFileLocationProvider archiveFileLocationProvider;
+    @Autowired
+    private NodeUtil nodeUtil;
+    @Autowired
+    private ExporterHelper exporterHelper;
     
 
     /**
      * @see NodeExporter#exportNode(
-     *          nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     *          nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
-     *          nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
+     *  nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, boolean,
+     *  nl.mpi.lamus.workspace.model.WorkspaceSubmissionType, nl.mpi.lamus.workspace.model.WorkspaceExportPhase)
      */
     @Override
     public void exportNode(
-        Workspace workspace, WorkspaceNode parentNode, WorkspaceNode currentNode,
-        boolean keepUnlinkedFiles,
-        WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
+            Workspace workspace, WorkspaceNode parentNode,
+            String parentCorpusNamePathToClosestTopNode,
+            WorkspaceNode currentNode, boolean keepUnlinkedFiles,
+            WorkspaceSubmissionType submissionType, WorkspaceExportPhase exportPhase)
             throws WorkspaceExportException {
         
         if (workspace == null) {
@@ -118,10 +129,19 @@ public class GeneralNodeExporter implements NodeExporter {
         }
         
         File nodeArchiveFile = nodeResolver.getLocalFile(corpusNode);
+      
         
-        if(currentNode.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(currentNode)) {
             
-            workspaceTreeExporter.explore(workspace, currentNode, keepUnlinkedFiles, submissionType, exportPhase);
+            String currentCorpusNamePathToClosestTopNode = exporterHelper.getNamePathToUseForThisExporter(
+                    currentNode, parentNode, parentCorpusNamePathToClosestTopNode, true, getClass());
+            
+            if(currentCorpusNamePathToClosestTopNode == null) {
+                String errorMessage = "Problems retrieving the corpus name path for node " + currentNode.getArchiveURI();
+                throwWorkspaceExportException(workspaceID, errorMessage, null);
+            }
+            
+            workspaceTreeExporter.explore(workspace, currentNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             // assuming that the metadata always changes (due to the localURI attribute being edited during the import)
                 // so a file size or checksum check wouldn't work in this case
@@ -150,6 +170,10 @@ public class GeneralNodeExporter implements NodeExporter {
         } else {
             
             // resources were not copied from the archive to the workspace, so should not be copied back
+            
+            if(parentNode == null) { // a resource node can't be the top node
+                throw new IllegalArgumentException("The top node has to be a metadata node");
+            }
         }
         
         CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());
@@ -160,11 +184,11 @@ public class GeneralNodeExporter implements NodeExporter {
         File parentNodeArchiveFile = nodeResolver.getLocalFile(parentCorpusNode);
         
         
-        ReferencingMetadataDocument referencingParentDocument = retrieveReferencingMetadataDocument(workspaceID, parentNode);
+        CMDIDocument cmdiDocument = retrieveCmdiDocument(workspaceID, parentNode);
         String currentPathRelativeToParent = 
                 archiveFileLocationProvider.getChildPathRelativeToParent(parentNodeArchiveFile, nodeArchiveFile);
         
-        updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
+        updateReferenceInParent(workspaceID, currentNode, parentNode, cmdiDocument, currentPathRelativeToParent);
     }
     
     
@@ -172,7 +196,7 @@ public class GeneralNodeExporter implements NodeExporter {
         
         MetadataDocument document = null;
         
-        if(node.isMetadata()) {
+        if(nodeUtil.isNodeMetadata(node)) {
             try {
                 document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
                 
@@ -185,25 +209,25 @@ public class GeneralNodeExporter implements NodeExporter {
         return document;
     }
     
-    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
+    private CMDIDocument retrieveCmdiDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
         
         MetadataDocument document = retrieveMetadataDocument(workspaceID, node);
-        ReferencingMetadataDocument referencingParentDocument = null;
+        CMDIDocument cmdiDocument = null;
         if(document instanceof ReferencingMetadataDocument) {
-            referencingParentDocument = (ReferencingMetadataDocument) document;
+            cmdiDocument = (CMDIDocument) document;
         } else {
             String errorMessage = "Error retrieving child reference in file " + node.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
         
-        return referencingParentDocument;
+        return cmdiDocument;
     }
     
     private void updateReferenceInParent(int workspaceID, WorkspaceNode currentNode, WorkspaceNode parentNode,
-            ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
+            CMDIDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {
-            Reference currentReference = referencingParentDocument.getDocumentReferenceByURI(currentNode.getArchiveURI());
+            Reference currentReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI(referencingParentDocument, currentNode.getArchiveURI());
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
             currentReference.setLocation(currentUriRelativeToParent);
             StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));

@@ -22,12 +22,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleInfoProvider;
 import nl.mpi.handle.util.HandleManager;
-import nl.mpi.handle.util.implementation.HandleInfoRetrieverImpl;
+import nl.mpi.handle.util.HandleParser;
+import nl.mpi.handle.util.implementation.HandleInfoProviderImpl;
 import nl.mpi.handle.util.implementation.HandleManagerImpl;
+import nl.mpi.handle.util.implementation.HandleParserImpl;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.cmdi.api.CMDIApi;
+import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
+import nl.mpi.metadata.cmdi.api.model.impl.CMDIMetadataElementFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -81,6 +85,11 @@ public class LamusBeans {
     }
     
     @Bean
+    public CMDIMetadataElementFactory metadataElementFactory() {
+        return new CMDIMetadataElementFactoryImpl();
+    }
+    
+    @Bean
     public FileType typechecker() {
         return new FileType();
     }
@@ -99,13 +108,18 @@ public class LamusBeans {
 //    
     
     @Bean
-    public HandleInfoRetriever handleInfoRetriever() {
-        return new HandleInfoRetrieverImpl(handlePrefix);
+    public HandleInfoProvider handleInfoProvider() {
+        return new HandleInfoProviderImpl(handlePrefix);
+    }
+    
+    @Bean
+    public HandleParser handleParser() {
+        return new HandleParserImpl(handlePrefix);
     }
     
     @Bean
     public HandleManager handleManager() throws FileNotFoundException, IOException {
-        return new HandleManagerImpl(handleInfoRetriever(), handleUtil(), handlePrefix);
+        return new HandleManagerImpl(handleInfoProvider(), handleParser(), handleUtil(), handlePrefix);
     }
     
     @Bean

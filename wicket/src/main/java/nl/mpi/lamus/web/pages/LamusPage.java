@@ -17,8 +17,10 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.components.AboutPanel;
+import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.IAjaxIndicatorAware;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.WebPage;
@@ -27,6 +29,7 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.SharedResourceReference;
@@ -38,7 +41,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author guisil
  */
-public class LamusPage extends WebPage {
+public class LamusPage extends WebPage implements IAjaxIndicatorAware{
 
     @SpringBean(name = "registerUrl")
     private String registerUrl;
@@ -57,7 +60,27 @@ public class LamusPage extends WebPage {
         
         feedbackPanel = new FeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
-	add(feedbackPanel);
+        feedbackPanel.setOutputMarkupPlaceholderTag(true);
+        
+//        Panel expandableFeedback = new ExpandableFeedbackPanel("expandablePanel", Model.of("panel"), true) {
+//            
+//            @Override
+//            protected FeedbackPanel getInnerFeedbackPanel() {
+//                return feedbackPanel;
+//            }
+//        };
+        
+//        innerPanel.setVisible(visibleByDefault);
+//        innerPanel.setOutputMarkupId(true);
+//        innerPanel.setOutputMarkupPlaceholderTag(true);
+//        add(innerPanel);
+        
+//	expandableFeedback.add(feedbackPanel);
+//        add(expandableFeedback);
+        
+        add(feedbackPanel);
+        
+        
         add(new Image("header_tla_logo", new SharedResourceReference("tlaLogoImage")));
         add(new Label("header_appname", appName));
         add(new Image("header_clarin_logo", new SharedResourceReference("clarinInvertedImage")));
@@ -93,9 +116,6 @@ public class LamusPage extends WebPage {
         } else {
             add(new ExternalLink("loginOrLogoutLink", "logout", getLocalizer().getString("header_logout_label", this)));
         }
-        
-        //TODO THE URLs IN THESE LINKS ARE NOT VALID AT THE MOMENT...
-
     }
     
     protected FeedbackPanel getFeedbackPanel() {
@@ -122,6 +142,11 @@ public class LamusPage extends WebPage {
         }));
         
         return modalAbout;
+    }
+
+    @Override
+    public String getAjaxIndicatorMarkupId() {
+        return "ajaxveil";
     }
     
     

@@ -21,6 +21,7 @@ import java.net.URL;
 import nl.mpi.lamus.web.components.ButtonPanel;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreePanel;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.components.WsNodeActionsPanel;
@@ -30,6 +31,7 @@ import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import nl.mpi.lamus.workspace.tree.implementation.WorkspaceTreeModelProviderFactory;
@@ -49,6 +51,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     private WorkspacePage wsPage;
     
     @Mock private WorkspaceTreeService mockWorkspaceServiceBean;
+    @Mock private WorkspaceDao mockWorkspaceDao;
+    @Mock private NodeUtil mockNodeUtilBean;
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     @Mock private UnlinkedNodesModelProviderFactory mockUnlinkedNodesModelProviderFactory;
     
@@ -60,21 +64,21 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
-    private MockWorkspace mockWorkspace = new MockWorkspace() {{
+    private final MockWorkspace mockWorkspace = new MockWorkspace() {{
         setUserID(AbstractLamusWicketTest.MOCK_USER_ID);
         setWorkspaceID(mockWorkspaceID);
         setStatus(WorkspaceStatus.INITIALISED);
         setTopNodeID(mockWorkspaceTopNodeID);
     }};
-    private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
         setName("topNode");
         setType(WorkspaceNodeType.METADATA);
     }};
 
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/lamus/manusl";
     
 
     @Override
@@ -92,6 +96,8 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         when(mockTreeModelProvider.getRoot()).thenReturn(mockWorkspaceTopNode);
         
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_SERVICE, mockWorkspaceServiceBean);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_DAO, mockWorkspaceDao);
+        addMock(AbstractLamusWicketTest.BEAN_NAME_NODE_UTIL, mockNodeUtilBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY, mockWorkspaceTreeModelProviderFactoryBean);
         addMock(AbstractLamusWicketTest.BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY, mockUnlinkedNodesModelProviderFactory);
         
@@ -102,7 +108,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         addMock(AbstractLamusWicketTest.BEAN_NAME_REGISTER_URL, mockRegisterUrl);
         addMock(AbstractLamusWicketTest.BEAN_NAME_MANUAL_URL, mockManualUrl);
         
-        wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspace));
+        wsPage = new WorkspacePage(new WorkspaceModel(mockWorkspaceID));
         getTester().startPage(wsPage);
     }
 
@@ -140,7 +146,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
 //        
 //        getTester().assertComponent("workspaceInfo:status", Label.class);
 //        getTester().assertEnabled("workspaceInfo:status");
-//        getTester().assertLabel("workspaceInfo:status", mockWorkspace.getStatus().toString());
+//        getTester().assertLabel("workspaceInfo:status", mockWorkspace.getStatus().name());
         
 //        getTester().assertComponent("workspaceInfoPanel", Panel.class);
 //        getTester().assertEnabled("workspaceInfoPanel");

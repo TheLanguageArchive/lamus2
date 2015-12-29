@@ -16,9 +16,12 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
@@ -87,8 +90,8 @@ public class LamusWorkspaceNodeExplorerTest {
 
         final int nodeID = 10;
         
-        final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
-        final URI resourceURI = new URI("https://testURL.mpi.nl/test.jpg");
+        final URI metadataURI = URI.create("https://testURL.mpi.nl/test.cmdi");
+        final URI resourceURI = URI.create("https://testURL.mpi.nl/test.jpg");
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
         final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
         
@@ -120,50 +123,48 @@ public class LamusWorkspaceNodeExplorerTest {
         
         nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
     }
-    
-//    @Test
-//    public void exploreSuccessfullyRelativeLink() throws Exception {
-//
-//        final URI metadataURI = new URI("https://testURL.mpi.nl/test.cmdi");
-//        final URI resourceURI = new URI("test/test.jpg");
-//        final Reference metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
-//        final Reference resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
-//        final Collection<Reference> testLinks = new ArrayList<Reference>();
-//        testLinks.add(metadataLink);
-//        testLinks.add(resourceLink);
-//        
-//        final String metadataLink_archiveIDStr = "MPI123#";
-//        final String resourceLink_archiveIDStr = "MPI456#";
-//        final String[] testLinksArchiveIDs = new String[testLinks.size()];
-//        testLinksArchiveIDs[0] = (metadataLink_archiveIDStr);
-//        testLinksArchiveIDs[1] = (resourceLink_archiveIDStr);
-//        
-//        final Class metadataNodeImporterType = MetadataNodeImporter.class;
-//        final Class resourceNodeImporterType = ResourceNodeImporter.class;
-//        final Class[] testLinksNodeImporterTypes = new Class[testLinks.size()];
-//        testLinksNodeImporterTypes[0] = metadataNodeImporterType;
-//        testLinksNodeImporterTypes[1] = resourceNodeImporterType;
-//        
-//        context.checking(new Expectations() {{
-//            
-//            int current = 0;
-//            for(Reference currentLink : testLinks) {
-//                
-//                oneOf (mockNodeImporterFactoryBean).setNodeImporterTypeForReference(currentLink);
-//                oneOf (mockNodeImporterFactoryBean).getObject(); will(returnValue(mockNodeImporter));
-//                oneOf (mockNodeImporter).setWorkspace(mockWorkspace);
-//                oneOf (mockNodeImporter).importNode(mockNodeToExplore, mockNodeDocument, currentLink, NodeIdUtils.TOINT(testLinksArchiveIDs[current]));
-//                
-//                current++;
-//            }
-//            
-//        }});
-//
-//        
-//        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
-//        
-//    }
-    
+
+    @Test
+    public void explore_UnusableReferenceType() throws UnusableReferenceTypeException, WorkspaceImportException {
+        
+        final int nodeID = 10;
+        
+        final URI usableURI = URI.create("https://testURL.mpi.nl/test.jpg");
+        final URI unusableURI = URI.create("https://testURL.mpi.nl/search.html");
+        final ResourceProxy usableLink = new DataResourceProxy("1", usableURI, "SearchPage", "text/html");
+        final ResourceProxy unusableLink = new DataResourceProxy("2", unusableURI, "Resource", "jpg");
+        
+        final URI usableLinkHandle = URI.create("hdl:3492/2932");
+        usableLink.setHandle(usableLinkHandle);
+        final URI resourceLinkHandle = URI.create("hdl:3492/2933");
+        unusableLink.setHandle(resourceLinkHandle);
+        
+        final Collection<Reference> testLinks = new ArrayList<>();
+        testLinks.add(unusableLink);
+        testLinks.add(usableLink);
+        
+        final Iterator<Reference> linkIterator = testLinks.iterator();
+        
+        final UnusableReferenceTypeException expectedException = new UnusableReferenceTypeException("some message", "SomeOtherType", null);
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            
+            Reference currentLink = linkIterator.next();
+            oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(throwException(expectedException));
+                
+            // even with the exception, the loop continues
+            currentLink = linkIterator.next();
+            oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(returnValue(mockNodeImporter));
+            oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
+            
+        }});
+
+            nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+    }
     
     @Test
     public void exploreThrowsException() throws Exception {

@@ -34,6 +34,7 @@ body{
     font-family: Verdana, Arial, Helv, Helvetica, sans-serif;
 }
 
+
 /* header */
 
 header {
@@ -108,20 +109,47 @@ header > ul#header_info_container > li > a:hover {
 }
 
 
+/* Child page content */
+
+.childPageContent {
+    
+    width: 100%;
+    height: 70%;
+}
+
+
 /* Feedback panel */
 
-.feedbackPanel {
-    /*float: right;*/
+.expandablePanel {
+    
+    clear: both;
+    float: right;
+    
+    border: thin;
+    border-color: #eee;
+    border-style: solid;
+    margin-bottom:5px;
+    
+    width: 100%;
+    height: 20%;
 }
 
-.feedbackPanel ul {
+.feedbackPanelContainer {
+    
+    clear: both;
     float: right;
+    
+    border: thin;
+    border-color: #eee;
+    border-style: solid;
+    margin-bottom:5px;
+    
+    width: 100%;
+    height: 20%;
+    
+    overflow: scroll;
 }
 
-.feedbackPanel li span {
-    float: right;
-    padding-right: 20px;
-}
 
 /* Navigation menu */
 
@@ -177,7 +205,7 @@ ul.navigationMenu li {
 }
 
 select#workspaceSelection {
-    width: 750px;
+    width: auto;
     overflow: auto;
 }
 
@@ -192,16 +220,10 @@ div.archiveTreePanelContainer {
 div.archiveTreePanelContainer div.treePanel {
     width: 100%;
     height: 70%;
-    
     clear: both;
-    
     overflow: auto;
-    
     bottom: 0;
-    
     border-left: 3px solid #1b324f;
-    /*border-top: 3px solid #1b324f;*/
-    /*border-right: 3px solid #1b324f;*/
     border-bottom: 3px solid #1b324f;
     
     box-sizing: border-box;
@@ -210,157 +232,76 @@ div.archiveTreePanelContainer div.treePanel {
 
 div.archiveTreeFormContainer {
     clear: both;
-    /*float: left;*/
-    /*height: 20%;*/
-    /*min-height: 100px;*/
 }
 
-
-/*
-a#loginOrLogoutLink {
-    color: #c51c29;
-    font-size: 12px;
-    font-family: verdana, arial;
-    text-decoration: none;
-}
-a#loginOrLogoutLink:visited {
-    color: #c51c29;
-    font-size: 12px;
-    font-family: verdana, arial;
-    text-decoration: none;
-}
-a#loginOrLogoutLink:hover {
-    color: #c51c29;
-    font-size: 12px;
-    font-family: verdana, arial;
-    text-decoration: underline;
-}*/
-
-/* Create Workspace */
-
-/*div#createWorkspaceHelp {
-    float: left;
-}*/
-
-
-
-/* feedback panel */
-
-.feedbackPanel {
-    width: 100%;
-}
 
 /* workspace buttons panel */
 
 .buttonPanel {
     float: left;
-    width: 54%;
-    margin-left: 10px;
+    text-align: right;
+    width: 35%;
+    height: 10%;
+    margin-left: 0px;
     margin-top: 10px;
     margin-right: 0px;
     margin-bottom: 10px;
 }
 
 #workspaceActionsForm > ul {
-/*    list-style: none;
-    margin: 0;*/
-    
     overflow: hidden;
-    margin-top: 5px;
-    margin-bottom: 5px;
     padding: 0px;
 }
 
 #workspaceActionsForm > ul > li {
-    /*float: left;*/
-    
     width: 100%;
     display: inline;
 }
 
-/*#workspaceActionsForm > ul > li > button {
-    background: #404853;
-    background: linear-gradient(#687587, #404853);
-    border-left: 1px solid rgba(0, 0, 0, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
-    display: block;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0 20px;
-    line-height: 38px;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
-    text-transform: uppercase;
-}
-
-#workspaceActionsForm > ul > li > button:hover {
-    background: #454d59;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
-    border-right: 1px solid rgba(0, 0, 0, 0.2);
-    color: #d0d2d5;
-}
-
-#workspaceActionsForm > ul > li:first-child button {
-    border-left: none;
-    border-radius: 4px 0 0 4px;
-}
-
-#workspaceActionsForm > ul > li:last-child button {
-    border-right: none;
-    border-radius: 0 4px 4px 0;
-}*/
-
-
-
 
 /* Workspace buttons */
 .ws_button {
-	border: none;
-	font-family: inherit;
-	font-size: 0.8em;
-	color: inherit;
-	background: none;
-	cursor: pointer;
-	padding: 15px 20px;
-	display: inline-block;
-	margin: 5px 0px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	outline: none;
-	position: relative;
-	-webkit-transition: all 0.3s;
-	-moz-transition: all 0.3s;
-	transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+    font-size: 0.8em;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+    padding: 15px 20px;
+    display: inline-block;
+    margin: 5px 0px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    outline: none;
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
 }
 
 .ws_button:after {
-	content: '';
-	position: absolute;
-	z-index: -1;
-	-webkit-transition: all 0.3s;
-	-moz-transition: all 0.3s;
-	transition: all 0.3s;
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
 }
 
 /* Pseudo elements for icons */
 .ws_button:before {
-/*.icon-heart:after,
-.icon-star:after,
-.icon-plus:after,
-.icon-file:before {*/
-	/*font-family: 'lamus_icon_font';*/
-        font-family: 'icomoon';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
-	position: relative;
-	
-        /* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    position: relative;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 
@@ -443,6 +384,7 @@ a#loginOrLogoutLink:hover {
 	width: 40px;
 }
 
+
 /* Button 3b */
 .ws_button-3b {
 	padding: 10px 15px 10px 55px;
@@ -452,7 +394,6 @@ a#loginOrLogoutLink:hover {
 .ws_button-3b:before {
 	border-right: 2px solid rgba(255,255,255,0.5);
 }
-
 
 @font-face {
         font-family: 'icomoon';
@@ -466,96 +407,52 @@ a#loginOrLogoutLink:hover {
 }
 
 
-
 .ws_create_warning_message {
     color: red;
 }
 
 
-
-/* node action buttons */
-
-/*#nodeActionsPanelContainer {
-    position: relative;
-    float: right;
-    width: 40%;
-}*/
-
 div#wsNodeActionsPanel {
     float: right;
-    width: 44%;
+    text-align: left;
+    width: 60%;
+    height: 10%;
+    margin-left: 0px;
     margin-top: 10px;
+    margin-right: 0px;
     margin-bottom: 10px;
 }
 
 #wsNodeActionsForm > span {
     overflow: hidden;
-    margin-top: 5px;
-    margin-bottom: 5px;
     padding: 0px;
-    
     width: 100%;
 }
 
 
-
-
 /* workspace tree */
-
 
 div.treePanelContainer {
     clear: both;
     float: left;
     
-    width: 30%;
+    width: 35%;
     height: 100%;
 }
 
 div.treePanelContainer div.treePanel {
     width: 100%;
     height: 100%;
-    
     clear: both;
-    
     overflow: auto;
-    
     bottom: 0;
     
-    /*border-left: 3px solid #1b324f;*/
-    border-top: 3px solid #1b324f;
-    border-right: 3px solid #1b324f;
-    /*border-bottom: 3px solid #1b324f;*/
-    
-    box-sizing: border-box;
-}
-
-/*div.treePanel {
-    clear: both;
-    float: left;
-    
-    height: 100%;
-    overflow: auto;
-    float: left;
-    bottom: 0;
-    width: 30%;
-    
-    
-    
-    overflow: auto; 
-    width: 100%;
-    height: 80%;
-    min-width: 300px;
-    min-height: 600px;
-    bottom:0;
-    border-left: 3px solid #1b324f;
     border-top: 3px solid #1b324f;
     border-right: 3px solid #1b324f;
     border-bottom: 3px solid #1b324f;
-}*/
-
-/*div.treePanel > div.archiveTree{
-    margin-right: 0px;
-}*/
+    
+    box-sizing: border-box;
+}
 
 #nodeInfoPanel {
     overflow: auto;
@@ -565,15 +462,12 @@ div.treePanelContainer div.treePanel {
     float: right;
     overflow: auto;
     width: 60%;
-    /*min-width: 400px;*/
     height: 100%;
-    /*min-height: 600px;*/
-    /*border: 1px solid #000;*/
 }
 
 .tabpanel > .tab-row > ul {
-    /*border: 1px solid #000;*/
     padding: 0px;
+    margin: 0px;
 }
 
 .tabpanel > .tab-row > ul > li {
@@ -583,35 +477,11 @@ div.treePanelContainer div.treePanel {
     background: #1c3655;
     padding: 1px 4px;
     margin-right: 2px;
-    /*border: solid 1px #1c3655;*/
     border-radius: 5px 5px 0px 0px;
 }
 
 .tabpanel > .tab-row > ul > li > a {
-/*    background: #edebeb;
-    background: linear-gradient(#dbdbdb, #d1d1d1);*/
-    
-/*    border-left: 1px solid rgba(0, 0, 0, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);*/
-    
-/*    color: #000;
-    display: block;
-    
-    padding: 0 10px;
-    line-height: 20px;
-    
-    text-transform: uppercase;
-    text-decoration: none;
-    
-    border: 1px solid #000;*/
-    
-    
-    
-/*  background-color: #1c3655;
-  padding: 1px 4px;
-  border: solid 1px #1c3655;*/
-  color: white;
-  /*border-radius: 5px 5px 0px 0px;*/
+    color: white;
 }
 
 .tabpanel > .tab-row > ul > li:hover {
@@ -619,14 +489,19 @@ div.treePanelContainer div.treePanel {
 }
 
 .tabpanel > .tab-row > ul > li:selected {
-    /*border-bottom: none;*/
     background: #4f6d92;
+}
+
+.tabpanel > .tab-panel {
+    height: 100%;
+}
+
+#linkNodesPanel {
+    height: 95%;
 }
 
 .infoContainer{
     clear: both;
-    
-    margin-top: 20px;
     
     border-collapse:collapse;
     background-color: #F2F2F2;
@@ -636,17 +511,59 @@ div.treePanelContainer div.treePanel {
     border-bottom: solid 1px #B0B0B0;
 }
 
+#unlinkedNodesPanel {
+    height: 60%;
+}
+
+#externalNodesPanel {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    height: 20%;
+}
+
+#externalNodesPanel .urlInputField {
+    width: 300px;
+}
+
+
 .tableTree {
     width: 100%;
-    /*min-height: 200px;*/
+    height: 90%;
+    
+    overflow: scroll;
 }
 
-.tableTree > table {
+.tableTree > table, .simpleTable {
     width: 100%;
-    height: 100%;
+    border: 1px solid #DDDDDD;
 }
 
+.tableTree > table > tbody, .simpleTable > tbody {
+    width: 100%;
+}
 
+.tableTree > table > tbody > tr.even, .simpleTable > tbody > tr.even {
+    background-color: #FFFFFF;
+}
+.tableTree > table > tbody > tr.odd, .simpleTable > tbody > tr.odd {
+    background-color: #EEEEEE;
+}
+.tableTree > table > tbody > tr.number > .simpleTable > tbody > tr.number {
+    text-align: right;
+    padding-right: 1em;
+}
+
+.tableTreeLinks {
+    width: 100%;
+    height: 10%;
+    
+    padding-top: 5px;
+}
+
+.tableTreeLinks > a {
+    padding-left: 5px;
+    padding-right: 5px;
+}
 
 
 .tableActionLink {
@@ -667,4 +584,69 @@ div.treePanelContainer div.treePanel {
 .tableActionLink:active {
     color: #ff0000;
     text-decoration: underline;
+}
+
+
+/* AJAX Activity indicator */
+
+div#mainPageChild {
+    position:relative;
+}
+
+div#ajaxveil {
+    display:none;
+    position:absolute;
+    top:40%;
+    left:35%;
+    z-index:99999;
+}
+
+
+.small-triangle-1 {
+    -webkit-animation: small-triangle-1 2s ease infinite;
+    animation: small-triangle-1 2s ease infinite;
+}
+
+.small-triangle-2 {
+    -webkit-animation: small-triangle-2 2s ease infinite;
+    animation: small-triangle-2 2s ease infinite;
+}
+
+.small-triangle-3 {
+    -webkit-animation: small-triangle-3 2s ease infinite;
+    animation: small-triangle-3 2s ease infinite;
+}
+
+@-webkit-keyframes small-triangle-1 {
+    0%  { opacity: 0; }
+    33.3%   { opacity: 1; }
+    66.7%, 100%  { opacity: 0; }
+}
+
+@keyframes small-triangle-1 {
+    0%  { opacity: 0; }
+    33.3%   { opacity: 1; }
+    66.7%, 100%  { opacity: 0; }
+}
+
+@-webkit-keyframes small-triangle-2 {
+    0%, 33.3%    { opacity: 0; }
+    66.7%                 { opacity: 1; }
+    100%  { opacity: 0; }
+}
+
+@keyframes small-triangle-2 {
+    0%, 33.3%    { opacity: 0; }
+    66.7%                 { opacity: 1; }
+    100%  { opacity: 0; }
+}
+
+@-webkit-keyframes small-triangle-3 {
+    0%, 100% { opacity: 1; }
+    33.3%, 66.7%    { opacity: 0; }
+}
+
+@keyframes small-triangle-3 {
+    0%, 100% { opacity: 1; }
+    33.3%, 66.7%    { opacity: 0; }
 }

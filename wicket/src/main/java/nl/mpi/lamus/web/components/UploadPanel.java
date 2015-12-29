@@ -28,11 +28,12 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
-import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
+import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.LinkImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.MatchImportProblem;
-import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.form.upload.UploadProgressBar;
 import org.apache.wicket.markup.html.form.Form;
@@ -105,6 +106,9 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                         File uploadDirectory = workspaceService.getWorkspaceUploadDirectory(model.getObject().getWorkspaceID());
 
                         Collection<File> copiedFiles = new ArrayList<>();
+                        
+                        Collection<ImportProblem> uploadProblems = new ArrayList<>();
+                        int failedUploadsCount = 0;
 
                         for (FileUpload upload : uploads) {
                             // Create a new file
@@ -119,10 +123,13 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                 try {
                                     InputStream newInputStream = upload.getInputStream();
                                     try (ZipInputStream zipInputStream = new ZipInputStream(newInputStream)) {
-
-                                        Collection<File> tempCopiedFiles =
+                                        
+                                        ZipUploadResult zipUploadResults =
                                                 workspaceService.uploadZipFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), zipInputStream, newFile.getName());
-                                        copiedFiles.addAll(tempCopiedFiles);
+                                        
+                                        copiedFiles.addAll(zipUploadResults.getSuccessfulUploads());
+                                        uploadProblems.addAll(zipUploadResults.getFailedUploads());
+                                        failedUploadsCount += uploadProblems.size();
                                     }
 
                                 } catch (IOException | DisallowedPathException ex) {
@@ -131,6 +138,12 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             } else {
 
                                 try {
+                                    if(newFile.exists()) {
+                                        uploadProblems.add(new FileImportProblem(newFile, "Uploaded file with the same path already exists.", null));
+                                        failedUploadsCount++;
+                                        continue;
+                                    }
+                                    
                                     File tempCopiedFile =
                                             workspaceService.uploadFileIntoWorkspace(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), upload.getInputStream(), newFile.getName());
                                     
@@ -148,55 +161,45 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                         }
                         
                         try {
-                            Collection<ImportProblem> uploadProblems = workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles);
+                            uploadProblems.addAll(workspaceService.processUploadedFiles(LamusSession.get().getUserId(), model.getObject().getWorkspaceID(), copiedFiles));
 
+                            int failedLinksCount = 0;
+                            
                             for (ImportProblem problem : uploadProblems) {
-
-                                if (problem instanceof FileImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
+                                UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
+                                if(problem instanceof FileImportProblem) {
+                                    failedUploadsCount++;
+                                } else if(problem instanceof LinkImportProblem || problem instanceof MatchImportProblem) {
+                                    failedLinksCount++;
                                 }
-                                if (problem instanceof LinkImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-                                if (problem instanceof MatchImportProblem) {
-
-                                    UploadPanel.this.error("Problem with upload: " + problem.getErrorMessage());
-
-
-                                    //TODO MORE COMPLETE MESSAGE OR GROUP ALL MESSAGES IN ONE
-
-                                    continue;
-                                }
-
-                                //TODO COMPLETE EXCEPTION
-                                throw new IllegalStateException();
                             }
 
-                            //TODO IF THERE WERE ERRORS, THE SUCCESSFUL FILES SHOULD BE MENTIONED ANYWAY
-
-
+                            
+                            StringBuilder feedbackMessage = new StringBuilder();
+                            
                             if (uploadProblems.isEmpty() && !copiedFiles.isEmpty()) {
-                                UploadPanel.this.info(getLocalizer().getString("upload_panel_success_message", this) + copiedFiles.toString());
-
-
-
-                                //TODO PRINT A LIST OF THE FILES? - might be a problem if they're too many
-
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_success_message", this));
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_total_successful_files", this));
+                                feedbackMessage.append(copiedFiles.size());
+                                UploadPanel.this.info(feedbackMessage.toString());
                             }
                             
-                            
+                            if (!uploadProblems.isEmpty()) {
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_fail_message", this));
+                                if(failedUploadsCount != 0) {
+                                    feedbackMessage.append(getLocalizer().getString("upload_panel_total_failed_files", this));
+                                    feedbackMessage.append(failedUploadsCount);
+                                    feedbackMessage.append("; ");
+                                }
+                                if(failedLinksCount != 0) {
+                                    feedbackMessage.append(getLocalizer().getString("upload_panel_total_failed_links", this));
+                                    feedbackMessage.append(failedLinksCount);
+                                    feedbackMessage.append("; ");
+                                }
+                                feedbackMessage.append(getLocalizer().getString("upload_panel_total_successful_files", this));
+                                feedbackMessage.append(copiedFiles.size() - failedUploadsCount);
+                                UploadPanel.this.error(feedbackMessage.toString());
+                            }
 
                         } catch (WorkspaceException ex) {
                             UploadPanel.this.error(ex.getMessage());

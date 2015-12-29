@@ -36,7 +36,7 @@ public class UnlinkedRootWorkspaceNode extends UnlinkedWorkspaceNode {
     }
     
     public UnlinkedRootWorkspaceNode(int workspaceID, WorkspaceDao dao) {
-        super(-1, workspaceID, null, "UnlinkedRootNode", "", WorkspaceNodeType.UNKNOWN, null, null, null, null, WorkspaceNodeStatus.NODE_CREATED, false, "", null, dao);
+        super(-1, workspaceID, null, "UnlinkedRootNode", "", WorkspaceNodeType.UNKNOWN, null, null, null, null, WorkspaceNodeStatus.CREATED, false, "", null, dao);
     }
     
     @Override

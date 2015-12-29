@@ -25,6 +25,9 @@ import java.util.Calendar;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
@@ -68,17 +71,30 @@ public class LamusArchiveFileHelperTest {
     @Mock File mockChildAbsoluteFile;
     @Mock File mockParentFile;
     
+    @Mock WorkspaceNode mockNode;
+    
     @Mock FileInfo mockArchiveFileInfo;
     @Mock File mockWorkspaceFile;
     
+    @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
+    @Mock CmdiProfile mockCmdiProfile;
+    
     private final int maxDirectoryNameLength = 50;
-    private long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
+    private final long typeRecheckSizeLimitInBytes = 8L * 1024 * 1024;
     
+    private final String corpusstructureDirectoryName = "Corpusstructure";
     private final String metadataDirectoryName = "Metadata";
-    private final String resourcesDirectoryName = "Resources";
+    private final String annotationsDirectoryName = "Annotations";
+    private final String mediaDirectoryName = "Media";
+    private final String infoDirectoryName = "Info";
     
-    private File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
-    private File versioningBaseDirectory = new File("/lat/corpora/versioning/");
+    private final File trashCanBaseDirectory = new File("/lat/corpora/trashcan/");
+    private final File versioningBaseDirectory = new File("/lat/corpora/versioning/");
+    
+    private File existingTempFile;
+    private File existingTempDirectory;
+    private File existingNonWritableTempDirectory;
+    private File nonExistingTempDirectory;
     
     public LamusArchiveFileHelperTest() {
     }
@@ -97,15 +113,20 @@ public class LamusArchiveFileHelperTest {
         ReflectionTestUtils.setField(testArchiveFileHelper, "maxDirectoryNameLength", maxDirectoryNameLength);
         ReflectionTestUtils.setField(testArchiveFileHelper, "typeRecheckSizeLimitInBytes", typeRecheckSizeLimitInBytes);
         
+        ReflectionTestUtils.setField(testArchiveFileHelper, "corpusstructureDirectoryName", corpusstructureDirectoryName);
         ReflectionTestUtils.setField(testArchiveFileHelper, "metadataDirectoryName", metadataDirectoryName);
-        ReflectionTestUtils.setField(testArchiveFileHelper, "resourcesDirectoryName", resourcesDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "annotationsDirectoryName", annotationsDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "mediaDirectoryName", mediaDirectoryName);
+        ReflectionTestUtils.setField(testArchiveFileHelper, "infoDirectoryName", infoDirectoryName);
         
         ReflectionTestUtils.setField(testArchiveFileHelper, "trashCanBaseDirectory", trashCanBaseDirectory);
         ReflectionTestUtils.setField(testArchiveFileHelper, "versioningBaseDirectory", versioningBaseDirectory);
+        
+        ReflectionTestUtils.setField(testArchiveFileHelper, "allowedCmdiProfiles", mockAllowedCmdiProfiles);
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
     }
 
     @Test
@@ -277,15 +298,14 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getFinalFileNonExistingName() {
+    public void getFinalFileNonExistingName() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        File dir = testFolder.newFolder(dirPath);
-        File expectedFile = new File(dir, fileName);
+        File expectedFile = new File(existingTempDirectory, fileName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -293,17 +313,15 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingOneName() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
         final String expectedName = "file_2.cmdi";
+        prepareExistingTempDirectory();
         
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
-        File expectedFile = new File(dir, expectedName);
+        File expectedFile = new File(existingTempDirectory, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -311,23 +329,22 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingSeveralNames() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        prepareExistingTempDirectory();
+        
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         for(int suffix = 1; suffix < 11; suffix++) {
             String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
-            File currentFile = new File(dir, currentFileName);
+            File currentFile = new File(existingTempDirectory, currentFileName);
             FileUtils.touch(currentFile);
         }
         
         String expectedName = "file_11.cmdi";
-        File expectedFile = new File(dir, expectedName);
+        File expectedFile = new File(existingTempDirectory, expectedName);
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
@@ -337,20 +354,19 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void getFinalFileExistingAllNames() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
-        File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        File file = new File(dir, fileName);
+        prepareExistingTempDirectory();
+        
+        File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         for(int suffix = 1; suffix < 10000; suffix++) {
             String currentFileName = FilenameUtils.getBaseName(fileName) + "_" + suffix + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(fileName);
-            File currentFile = new File(dir, currentFileName);
+            File currentFile = new File(existingTempDirectory, currentFileName);
             FileUtils.touch(currentFile);
         }
         
-        File retrievedFile = testArchiveFileHelper.getFinalFile(dir, fileName);
+        File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
         
         //TODO Some Exception instead?
         
@@ -360,28 +376,24 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesBothNonExistingYet() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
-        assertTrue("Directory should have been created", dir.exists());
+        assertTrue("Directory should have been created", existingTempDirectory.exists());
         assertTrue("File should have been created", file.exists());
     }
     
     @Test
     public void createFileAndDirectoriesFileNonExistingYet() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
@@ -391,13 +403,10 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesDirectoryExistingAlready() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         
         testArchiveFileHelper.createFileAndDirectories(file);
         
@@ -407,13 +416,10 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void createFileAndDirectoriesBothExistingAlready() throws IOException {
         
-        final String dirPath = "/some/path";
         final String fileName = "file.cmdi";
+        prepareExistingTempDirectory();
         
-        final File dir = testFolder.newFolder(dirPath);
-        FileUtils.forceMkdir(dir);
-        assertTrue("Directory should have been created", dir.exists());
-        final File file = new File(dir, fileName);
+        final File file = new File(existingTempDirectory, fileName);
         FileUtils.touch(file);
         
         testArchiveFileHelper.createFileAndDirectories(file);
@@ -422,53 +428,220 @@ public class LamusArchiveFileHelperTest {
     }
     
     @Test
-    public void getDirectoryForResourceWithTopParent() {
+    public void getDirectoryForCorpus() {
         
-        final String parentpath = "/archive/root/root.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
-        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
+        // Since the functionality to add a top node is still not in place,
+            // this means always a corpus node which is not a top node,
+                // which in turn will always have its location in the same folder as the parent (Corpusstructure)
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
-        
-        assertEquals("Returned directory different from expected", expectedDirectory, result);
-    }
-    
-    @Test
-    public void getDirectoryForMetadataWithTopParent() {
-        
-        final String parentPath = "/archive/root/root.cmdi";
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/Parent";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
+        final String expectedDirectory = "/archive/root/TopNode/" + corpusstructureDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712064/xsd"); //lat-corpus
+        final String translateType = "corpus";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
         
-        assertEquals("Returned directory different from expected", expectedDirectory, result);
-    }
-    
-    @Test
-    public void getDirectoryForResource() {
-        
-        final String parentpath = "/archive/root/Metadata/parent.cmdi";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
-        final String expectedDirectory = "/archive/root/" + resourcesDirectoryName;
-        
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentpath, nodeType);
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
     
     @Test
-    public void getDirectoryForMetadata() {
+    public void getDirectoryForSession_ChildOfTopNode() {
         
-        final String parentPath = "/archive/root/Metadata/parent.cmdi";
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/topnode.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "";
         final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
-        final String expectedDirectory = "/archive/root/" + metadataDirectoryName;
+        final String expectedDirectory = "/archive/root/TopNode/" + metadataDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd"); //lat-session
+        final String translateType = "session";
         
-        String result = testArchiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
         
         assertEquals("Returned directory different from expected", expectedDirectory, result);
     }
+    
+    @Test
+    public void getDirectoryForSession_ChildOfNormalNode() {
+        
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/normalnode.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/NormalNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/archive/root/TopNode/NormalNode/" + metadataDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd"); //lat-session
+        final String translateType = "session";
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForSession_ChildOfNormalNode_SeveralLevels() {
+        
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/normalnode.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/ChildNode/AnotherChildNode/YetAnotherChildNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/archive/root/TopNode/ChildNode/AnotherChildNode/YetAnotherChildNode/" + metadataDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd"); //lat-session
+        final String translateType = "session";
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForSession_ChildOfNormalNode_WithSpaces() {
+        
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/normalnodewithspaces.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/Normal_Node_With_Spaces";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.METADATA;
+        final String expectedDirectory = "/archive/root/TopNode/Normal_Node_With_Spaces/" + metadataDirectoryName;
+        final URI profileSchemaURI = URI.create("http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1407745712035/xsd"); //lat-session
+        final String translateType = "session";
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+            oneOf(mockNode).getProfileSchemaURI(); will(returnValue(profileSchemaURI));
+            oneOf(mockAllowedCmdiProfiles).getProfile(profileSchemaURI.toString()); will(returnValue(mockCmdiProfile));
+            allowing(mockCmdiProfile).getTranslateType(); will(returnValue(translateType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForWrittenResource_WithinTopFolder() {
+        
+        final String parentPath = "/archive/root/TopNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        final String expectedDirectory = "/archive/root/TopNode/" + annotationsDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForWrittenResource_WithinOtherFolder() {
 
+        final String parentPath = "/archive/root/TopNode/OtherNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/OtherNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
+        final String expectedDirectory = "/archive/root/TopNode/OtherNode/" + annotationsDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForMediaResource_WithinTopFolder() {
+        
+        final String parentPath = "/archive/root/TopNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_VIDEO;
+        final String expectedDirectory = "/archive/root/TopNode/" + mediaDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForMediaResource_WithinOtherFolder() {
+        
+        final String parentPath = "/archive/root/TopNode/OtherNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/OtherNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_VIDEO;
+        final String expectedDirectory = "/archive/root/TopNode/OtherNode/" + mediaDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForInfoFile_WithinTopFolder() {
+        
+        final String parentPath = "/archive/root/TopNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_INFO;
+        final String expectedDirectory = "/archive/root/TopNode/" + infoDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
+    
+    @Test
+    public void getDirectoryForInfoFile_WithinOtherFolder() {
+        
+        final String parentPath = "/archive/root/TopNode/OtherNode/Metadata/parent.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/OtherNode";
+        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE_INFO;
+        final String expectedDirectory = "/archive/root/TopNode/OtherNode/" + infoDirectoryName;
+        
+        context.checking(new Expectations() {{
+            allowing(mockNode).getType(); will(returnValue(nodeType));
+        }});
+        
+        String result = testArchiveFileHelper.getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode);
+        
+        assertEquals("Returned directory different from expected", expectedDirectory, result);
+    }
     
     @Test
     public void fileChangedDifferentSize() {
@@ -617,10 +790,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void canWriteExistingTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
-        targetDirectory.mkdirs();
+        prepareExistingTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingTempDirectory);
         
         assertTrue("Target directory should be writable", result);
     }
@@ -628,9 +800,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void canWriteNonExistingTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
+        prepareNonExistingTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(nonExistingTempDirectory);
         
         assertTrue("Target directory should have been created and be writable", result);
     }
@@ -638,11 +810,9 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void cannotWriteTargetDirectory() throws IOException {
         
-        File targetDirectory = testFolder.newFolder("/lat/corpora/versions/trash/2013-05/1644");
-        targetDirectory.mkdirs();
-        targetDirectory.setReadOnly();
+        prepareExistingNonWritableTempDirectory();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(targetDirectory);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingNonWritableTempDirectory);
         
         assertFalse("Target directory should not be writable", result);
     }
@@ -650,11 +820,34 @@ public class LamusArchiveFileHelperTest {
     @Test
     public void targetDirectoryIsNotDirectory() throws IOException {
         
-        File someFile = testFolder.newFile("someFile");
-        someFile.createNewFile();
+        prepareExistingTempFile();
         
-        boolean result = testArchiveFileHelper.canWriteTargetDirectory(someFile);
+        boolean result = testArchiveFileHelper.canWriteTargetDirectory(existingTempFile);
         
         assertFalse("Target directory is not a directory, therefore it should fail", result);
+    }
+    
+    
+    private void prepareExistingTempFile() throws IOException {
+        existingTempFile = testFolder.newFile();
+        assertTrue("Temp file wasn't created.", existingTempFile.exists());
+    }
+    
+    private void prepareExistingTempDirectory() throws IOException {
+        existingTempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory wasn't created.", existingTempDirectory.exists());
+    }
+    
+    private void prepareExistingNonWritableTempDirectory() throws IOException {
+        existingNonWritableTempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory (non-writable) wasn't created.", existingNonWritableTempDirectory.exists());
+        existingNonWritableTempDirectory.setWritable(Boolean.FALSE);
+        assertFalse("Temp directory (non-writable) wasn't set as non-writable", existingNonWritableTempDirectory.canWrite());
+    }
+    
+    private void prepareNonExistingTempDirectory() throws IOException {
+        File someDirectory = testFolder.newFolder();
+        nonExistingTempDirectory = new File(someDirectory, "nonExistingFolder");
+        assertFalse("Temp directory shouldn't have been created.", nonExistingTempDirectory.exists());
     }
 }

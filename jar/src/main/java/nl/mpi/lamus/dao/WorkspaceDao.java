@@ -25,6 +25,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 
 /**
  * Data access layer for the workspace data.
@@ -130,6 +131,25 @@ public interface WorkspaceDao {
     public boolean isNodeLocked(URI archiveNodeURI);
     
     /**
+     * Adds a lock on the given node.
+     * @param uriToLock Archive URI of the node to lock
+     * @param workspaceID ID of the workspace where the node is being locked
+     */
+    public void lockNode(URI uriToLock, int workspaceID);
+    
+    /**
+     * Removes a lock on the given node.
+     * @param uriToUnlock Archive URI of the node to be unlocked
+     */
+    public void unlockNode(URI uriToUnlock);
+    
+    /**
+     * Removes all locks on nodes of the given workspace.
+     * @param workspaceID ID of the workspace from which to unlock the nodes
+     */
+    public void unlockAllNodesOfWorkspace(int workspaceID);
+    
+    /**
      * Gets a list of workspace nodes with the given URI.
      * There should be only one, but in case of failed workspaces
      * that weren't deleted it could be possible to have more.
@@ -144,7 +164,7 @@ public interface WorkspaceDao {
      * @param node WorkspaceNode object to insert into the database
      */
     public void addWorkspaceNode(WorkspaceNode node);
-    
+
     /**
      * Sets a node as deleted in the database
      * @param workspaceID ID of the workspace
@@ -152,6 +172,13 @@ public interface WorkspaceDao {
      * @param isExternal true if node is external
      */
     public void setWorkspaceNodeAsDeleted(int workspaceID, int nodeID, boolean isExternal);
+    
+    /**
+     * Completely deletes a node from the workspace.
+     * @param workspaceID ID of the workspace
+     * @param nodeID ID of the node
+     */
+    public void deleteWorkspaceNode(int workspaceID, int nodeID);
     
     /**
      * Retrieves the node with the given ID.
@@ -178,6 +205,13 @@ public interface WorkspaceDao {
      * @return ID of the top node of the workspace
      */
     public int getWorkspaceTopNodeID(int workspaceID);
+    
+    /**
+     * @param workspaceID ID of the workspace
+     * @param workspaceNodeID ID of the node
+     * @return true if the given node is the top node of the given workspace
+     */
+    public boolean isTopNodeOfWorkspace(int workspaceID, int workspaceNodeID);
     
     /**
      * Retrieves a collection containing all the nodes
@@ -277,8 +311,14 @@ public interface WorkspaceDao {
     public void updateNodeArchiveUrl(WorkspaceNode node);
     
     /**
+     * Updates the type of the given node.
+     * @param node  WorkspaceNode object to be updated
+     */
+    public void updateNodeType(WorkspaceNode node);
+    
+    /**
      * Inserts a link between two nodes (parent and child) into the database.
-     * @param link WorkspaceNodeLink object to insert into the database
+     * @param nodeLink WorkspaceNodeLink object to insert into the database
      */
     public void addWorkspaceNodeLink(WorkspaceNodeLink nodeLink);
     
@@ -295,6 +335,15 @@ public interface WorkspaceDao {
      * @param workspace 
      */
     public void cleanWorkspaceNodesAndLinks(Workspace workspace);
+    
+    /**
+     * Retrieves the node which was replaced by the given node.
+     * @param workspaceID ID of the workspace
+     * @param workspaceNodeID ID of the node which replaced the one to retrieve
+     * @return WorkspaceNode object corresponding to the older version
+     */
+    public WorkspaceNode getOlderVersionOfNode(int workspaceID, int workspaceNodeID)
+            throws WorkspaceNodeNotFoundException;
     
     /**
      * Retrieves the node which replaced the given node.
@@ -318,4 +367,18 @@ public interface WorkspaceDao {
      * @return Collection of node replacements
      */
     public Collection<WorkspaceNodeReplacement> getAllNodeReplacements();
+    
+    /**
+     * Retrieves a collection of node replacements belonging to the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return Collection of node replacements
+     */
+    public Collection<WorkspaceNodeReplacement> getNodeReplacementsForWorkspace(int workspaceID);
+    
+    /**
+     * Retrieves a collection of node URL updated belonging to the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return Collection of node URL updates
+     */
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID);
 }

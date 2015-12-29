@@ -273,7 +273,7 @@ public class WorkspaceStepsHelper {
         
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
         insertWorkspaceNode(insertString, template, map, -1, topWsNodeID, topNodeArchiveURL, topNodeArchiveURI, topNodeArchiveURL,
-                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
+                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.ARCHIVE_COPY,
                 topNodeFormat, "testNode",
                 workspaceID, testFile);
         
@@ -328,7 +328,7 @@ public class WorkspaceStepsHelper {
             childNodeFormat = "application/pdf";
             childFile = new File(workspaceDirectory, childWsNodeID + ".pdf");
             childOriginFile = new File("/some/directory/" + childWsNodeID + ".pdf");
-            childNodeType = WorkspaceNodeType.RESOURCE;
+            childNodeType = WorkspaceNodeType.RESOURCE_WRITTEN;
         } else if("metadata".equals(type)) {
             childNodeFormat = "text/x-cmdi+xml";
             childFile = new File(workspaceDirectory, childWsNodeID + ".cmdi");
@@ -342,11 +342,11 @@ public class WorkspaceStepsHelper {
 
         insertWorkspace(insertString, template, map, workspaceID, userID, currentDate);
         insertWorkspaceNode(insertString, template, map, -1, topNodeWsID, topNodeArchiveURL, topNodeArchiveURI, topNodeArchiveURL,
-                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.NODE_ISCOPY,
+                WorkspaceNodeType.METADATA, WorkspaceNodeStatus.ARCHIVE_COPY,
                 topNodeFormat, "testNode",
                 workspaceID, topNodeFile);
         insertWorkspaceNode(insertString, template, map, topNodeWsID, childWsNodeID, null, null, childOriginFile.toURI().toURL(),
-                childNodeType, WorkspaceNodeStatus.NODE_UPLOADED,
+                childNodeType, WorkspaceNodeStatus.UPLOADED,
                 childNodeFormat, "testNode",
                 workspaceID, childFile);
         
@@ -375,7 +375,7 @@ public class WorkspaceStepsHelper {
         map.put("user_id", userID);
         map.put("start_date", currentDate);
         map.put("session_start_date", currentDate);
-        map.put("status", WorkspaceStatus.INITIALISED.toString());
+        map.put("status", WorkspaceStatus.INITIALISED.name());
         map.put("message", "some message");
         template.update(insertString, map);
     }
@@ -399,9 +399,9 @@ public class WorkspaceStepsHelper {
         map.put("archive_uri", (nodeArchiveURI != null ? nodeArchiveURI.toString() : ""));
         map.put("origin_url", (nodeOriginURL != null ? nodeOriginURL.toString() : ""));
         map.put("name", "testNode");
-        map.put("type", nodeType.toString());
+        map.put("type", nodeType.name());
         map.put("workspace_url", nodeFile.toURI().toURL().toString());
-        map.put("status", nodeStatus.toString());
+        map.put("status", nodeStatus.name());
         map.put("format", nodeFormat);
         template.update(insertString, map);
         

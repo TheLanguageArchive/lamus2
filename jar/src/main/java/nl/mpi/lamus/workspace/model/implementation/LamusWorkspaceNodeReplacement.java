@@ -38,15 +38,12 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
     }
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI, String replacementStatus) {
-        this.oldNodeURI = oldArchiveNodeURI;
-        this.newNodeURI = newArchiveNodeURI;
+        this(oldArchiveNodeURI, newArchiveNodeURI);
         this.replacementStatus = replacementStatus;
     }
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI, String replacementStatus, String replacementError) {
-        this.oldNodeURI = oldArchiveNodeURI;
-        this.newNodeURI = newArchiveNodeURI;
-        this.replacementStatus = replacementStatus;
+        this(oldArchiveNodeURI, newArchiveNodeURI, replacementStatus);
         this.replacementError = replacementError;
     }
     
@@ -103,7 +100,6 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
                 
         return hashCodeB.toHashCode();
     }
-
     
     @Override
     public boolean equals(Object obj) {
@@ -121,7 +117,7 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
                 .append(this.oldNodeURI, other.getOldNodeURI())
                 .append(this.newNodeURI, other.getNewNodeURI())
                 .append(this.replacementStatus, other.getReplacementStatus())
-                .append(this.replacementError, other.replacementError);
+                .append(this.replacementError, other.getReplacementError());
         
         return equalsB.isEquals();
     }

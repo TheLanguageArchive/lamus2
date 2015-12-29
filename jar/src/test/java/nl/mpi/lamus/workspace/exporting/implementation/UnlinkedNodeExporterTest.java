@@ -26,12 +26,14 @@ import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.VersioningHandler;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -68,6 +70,7 @@ public class UnlinkedNodeExporterTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock Workspace mockWorkspace;
     @Mock WorkspaceNode mockNode;
@@ -101,6 +104,7 @@ public class UnlinkedNodeExporterTest {
         ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataAPI", mockMetadataAPI);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "workspaceDao", mockWorkspaceDao);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "nodeUtil", mockNodeUtil);
     }
     
     @After
@@ -115,9 +119,10 @@ public class UnlinkedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         try {
-            unlinkedNodeExporter.exportNode(null, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            unlinkedNodeExporter.exportNode(null, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -133,9 +138,10 @@ public class UnlinkedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         try {
-            unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "This exporter should only be used when exporting unlinked nodes, not for the tree";
@@ -152,10 +158,11 @@ public class UnlinkedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         initialExpectations(isNodeProtected);
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -167,12 +174,13 @@ public class UnlinkedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
 
         initialExpectations(isNodeProtected);
             
         //do nothing else - given that the workspace is being deleted, a node cannot be moved or copied from the archive to the "sessions" folder
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -184,12 +192,13 @@ public class UnlinkedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         initialExpectations(isNodeProtected);
         
         //do nothing else - given that the workspace is being deleted, a node cannot be moved or copied from the archive to the "sessions" folder
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -201,6 +210,7 @@ public class UnlinkedNodeExporterTest {
         final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
         final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
         final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -215,14 +225,14 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
         }});
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -239,6 +249,7 @@ public class UnlinkedNodeExporterTest {
         final URI nodeVersionArchiveFileUri = URI.create(nodeVersionArchiveFile);
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -253,7 +264,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
@@ -262,7 +273,7 @@ public class UnlinkedNodeExporterTest {
         
         updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeVersionArchivePathURI, nodeVersionArchiveFileUri, null);
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -274,6 +285,8 @@ public class UnlinkedNodeExporterTest {
         final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
         final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
         final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
+        final String currentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.TRUE;
@@ -288,15 +301,15 @@ public class UnlinkedNodeExporterTest {
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
-            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
         }});
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -305,6 +318,7 @@ public class UnlinkedNodeExporterTest {
         
         final String nodeFilename = "node.txt";
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -319,14 +333,14 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
         }});
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -342,6 +356,7 @@ public class UnlinkedNodeExporterTest {
         final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -356,7 +371,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -367,7 +382,7 @@ public class UnlinkedNodeExporterTest {
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -381,8 +396,10 @@ public class UnlinkedNodeExporterTest {
         final URI nodeWsLocationUri = URI.create(nodeWsLocation.toString());
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
         final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        final String currentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.TRUE;
@@ -397,8 +414,8 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
-            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -409,7 +426,7 @@ public class UnlinkedNodeExporterTest {
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -421,6 +438,7 @@ public class UnlinkedNodeExporterTest {
         
         final String nodeFilename = "node.txt";
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -435,7 +453,7 @@ public class UnlinkedNodeExporterTest {
         
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -444,7 +462,7 @@ public class UnlinkedNodeExporterTest {
 
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -453,6 +471,7 @@ public class UnlinkedNodeExporterTest {
         
         final String nodeFilename = "node.txt";
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -466,14 +485,14 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
         }});
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -487,8 +506,10 @@ public class UnlinkedNodeExporterTest {
         final URI nodeWsLocationUri = URI.create(nodeWsLocation.toString());
         final URL newNodeLocation = new URL("file:/archive/some/location/sessions/" + nodeFilename);
         final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
+        final String currentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.TRUE;
@@ -503,8 +524,8 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
-            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
@@ -514,7 +535,7 @@ public class UnlinkedNodeExporterTest {
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -523,6 +544,7 @@ public class UnlinkedNodeExporterTest {
             IOException, TransformerException, MetadataException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -537,7 +559,7 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
         }});
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -548,6 +570,7 @@ public class UnlinkedNodeExporterTest {
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -564,7 +587,7 @@ public class UnlinkedNodeExporterTest {
         
         updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeArchiveURI, null, null);
 
-        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+        unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -576,6 +599,8 @@ public class UnlinkedNodeExporterTest {
         final String nodeVersionArchivePath = "file:/trash/location/r_node.txt";
         final URI nodeVersionArchivePathURI = URI.create(nodeVersionArchivePath);
         final URL nodeVersionArchiveURL = nodeVersionArchivePathURI.toURL();
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
+        final String currentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.TRUE;
@@ -592,13 +617,13 @@ public class UnlinkedNodeExporterTest {
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
-            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
+            oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
                 will(throwException(expectedException));
         }});
 
         try {
-            unlinkedNodeExporter.exportNode(mockWorkspace, null, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -618,6 +643,7 @@ public class UnlinkedNodeExporterTest {
         final URI newNodeLocationUri = URI.create(newNodeLocation.toString());
         
         final URL parentWsUrl = new URL("file:/location/workspace/parent.cmdi");
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         final boolean isNodeProtected = Boolean.FALSE;
         final boolean isNodeMetadata = Boolean.FALSE;
@@ -635,7 +661,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(null));
             
-            oneOf(mockNode).isMetadata(); will(returnValue(isNodeMetadata));
+            oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
             
@@ -645,7 +671,7 @@ public class UnlinkedNodeExporterTest {
         updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, expectedCause);
 
         try {
-            unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
+            unlinkedNodeExporter.exportNode(mockWorkspace, mockParentNode, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown an exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
@@ -669,7 +695,7 @@ public class UnlinkedNodeExporterTest {
                 throws IOException, MetadataException, TransformerException {
         context.checking(new Expectations() {{
             allowing(mockParentNode).getWorkspaceURL(); will(returnValue(parentWsUrl));
-            oneOf(mockParentNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataAPI).getMetadataDocument(parentWsUrl); will(returnValue(mockParentDocument));
             oneOf(mockParentDocument).getDocumentReferenceByLocation(oldNodeLocationUri); will(returnValue(mockReference));
             

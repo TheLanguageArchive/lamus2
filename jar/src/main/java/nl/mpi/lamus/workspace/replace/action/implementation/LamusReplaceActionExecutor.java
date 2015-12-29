@@ -20,6 +20,7 @@ import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,8 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusReplaceActionExecutor.class);
 
-    private WorkspaceNodeLinkManager workspaceNodeLinkManager;
-    private WorkspaceNodeManager workspaceNodeManager;
+    private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
+    private final WorkspaceNodeManager workspaceNodeManager;
     
     
     @Autowired
@@ -56,17 +57,19 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing action: " + action.toString());
 
         if(action instanceof ReplaceNodeReplaceAction) {
-            executeReplaceAction((ReplaceNodeReplaceAction) action); //(ir, ws, tag, (ReplaceNodeAction) currentAction, error);
+            executeReplaceAction((ReplaceNodeReplaceAction) action);
         } else if(action instanceof DeleteNodeReplaceAction) {
-            executeDeleteAction((DeleteNodeReplaceAction) action); //(ws, tag, (DeleteNodeAction) currentAction, error);
+            executeDeleteAction((DeleteNodeReplaceAction) action);
         } else if(action instanceof UnlinkNodeReplaceAction) {
-            executeUnlinkAction((UnlinkNodeReplaceAction) action); //(ws, tag, (UnlinkNodeAction) currentAction, error);
+            executeUnlinkAction((UnlinkNodeReplaceAction) action);
         } else if(action instanceof LinkNodeReplaceAction) {
-            executeLinkAction((LinkNodeReplaceAction) action); //(ws, tag, (LinkNodeAction) currentAction, error);
+            executeLinkAction((LinkNodeReplaceAction) action);
         } else if(action instanceof MoveLinkLocationNodeReplaceAction) {
-            executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action); //(ws, tag, (MoveLinkLocationAction) currentAction, error);
+            executeMoveLinkLocationAction((MoveLinkLocationNodeReplaceAction) action);
         } else if(action instanceof RemoveArchiveUriReplaceAction) {
             executeRemoveArchiveUriAction((RemoveArchiveUriReplaceAction) action);
+        } else if(action instanceof UnlinkNodeFromReplacedParentReplaceAction) {
+            executeUnlinkFromReplacedParentAction((UnlinkNodeFromReplacedParentReplaceAction) action);
         }
     }
     
@@ -96,7 +99,7 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         
         logger.debug("Executing Link Action: " + action.toString());
 
-        workspaceNodeLinkManager.linkNodes(action.getParentNode(), action.getAffectedNode());
+        workspaceNodeLinkManager.linkNodes(action.getParentNode(), action.getAffectedNode(), WorkspaceNodeType.RESOURCE_INFO.equals(action.getAffectedNode().getType()));
     }
     
     private void executeMoveLinkLocationAction(MoveLinkLocationNodeReplaceAction action) {
@@ -108,5 +111,12 @@ public class LamusReplaceActionExecutor implements ReplaceActionExecutor {
         logger.debug("Executing Remove Archive URI Action: " + action.toString());
         
         workspaceNodeLinkManager.removeArchiveUriFromChildNode(action.getParentNode(), action.getAffectedNode());
+    }
+    
+    private void executeUnlinkFromReplacedParentAction(UnlinkNodeFromReplacedParentReplaceAction action) throws WorkspaceException, ProtectedNodeException {
+        
+        logger.debug("Executing Unlink from replaced parent Action: " + action.toString());
+        
+        workspaceNodeLinkManager.unlinkNodeFromReplacedParent(action.getAffectedNode(), action.getNewParentNode());
     }
 }

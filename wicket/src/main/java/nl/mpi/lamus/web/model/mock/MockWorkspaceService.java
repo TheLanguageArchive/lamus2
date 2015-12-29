@@ -33,6 +33,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,7 +231,7 @@ public class MockWorkspaceService implements WorkspaceTreeService {
     }
 
     @Override
-    public Collection<File> uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename) throws IOException {
+    public ZipUploadResult uploadZipFileIntoWorkspace(String userID, int workspaceID, ZipInputStream zipInputStream, String filename) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -29,6 +29,7 @@ import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -78,7 +79,12 @@ public class LamusNodeReplaceManagerTest {
     @Test
     public void replace() throws WorkspaceException, ProtectedNodeException {
         
+        final int workspaceID = 1;
+        
         context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockNewNode).getWorkspaceID(); will(returnValue(workspaceID));
             
             oneOf(mockNodeReplaceCheckerFactory).getReplaceCheckerForNode(mockOldNode);
                 will(returnValue(mockNodeReplaceChecker));
@@ -97,6 +103,27 @@ public class LamusNodeReplaceManagerTest {
         //TODO TEST CALLING OF ACTIONS IN THE LIST... RETURN LIST INSTEAD?
         
     }
+    
+    @Test
+    public void replace_differentWorkspaces() throws WorkspaceException, ProtectedNodeException {
+        
+        final int oldWorkspaceID = 1;
+        final int newWorkspaceID = 2;
+        final String expectedMessage = "Old node and new node belong to different workspaces.";
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceID(); will(returnValue(oldWorkspaceID));
+            allowing(mockNewNode).getWorkspaceID(); will(returnValue(newWorkspaceID));
+        }});
+        
+        try {
+            nodeReplaceManager.replaceTree(mockOldNode, mockNewNode, mockParentNode);
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+        }
+    }
+    
     
     //TODO exceptional cases?
 }

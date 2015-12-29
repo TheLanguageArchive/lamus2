@@ -16,12 +16,14 @@
  */
 package nl.mpi.lamus.workspace.actions.implementation;
 
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -43,10 +45,13 @@ public class ReplaceNodesAction extends WsTreeNodesAction {
     }
     
     /**
-     * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService)
+     * @see WsTreeNodesAction#execute(java.lang.String, nl.mpi.lamus.service.WorkspaceService,
+     *  nl.mpi.lamus.dao.WorkspaceDao, nl.mpi.lamus.workspace.model.NodeUtil) 
      */
     @Override
-    public void execute(String userID, WorkspaceService wsService) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
+    public void execute(String userID, WorkspaceService wsService,
+            WorkspaceDao wsDao, NodeUtil nodeUtil)
+                throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         
         if(wsService == null) {
             throw new IllegalArgumentException("WorkspaceService should have been set");

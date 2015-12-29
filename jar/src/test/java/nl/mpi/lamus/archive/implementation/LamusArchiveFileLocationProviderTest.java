@@ -22,7 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -57,13 +57,18 @@ public class LamusArchiveFileLocationProviderTest {
     private final String dbHttpRoot = "http://some.server/archive/";
     private final String dbLocalRoot = "file:/some/loca/folder/archive/";
     
-    private final String metadataDirectoryName = "Metadata";
-    private String orphansDirectoryName = "sessions";
+    private final String corpusstructureDirectoryName = "Corpusstructure";
+    private final String orphansDirectoryName = "sessions";
     
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     @Mock ArchiveFileHelper mockArchiveFileHelper;
     @Mock File mockFile;
+    
+    @Mock WorkspaceNode mockNode;
+    
+    private File tempDirectory;
+    
     
     public LamusArchiveFileLocationProviderTest() {
     }
@@ -83,7 +88,7 @@ public class LamusArchiveFileLocationProviderTest {
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbHttpRoot", dbHttpRoot);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "dbLocalRoot", dbLocalRoot);
         
-        ReflectionTestUtils.setField(archiveFileLocationProvider, "metadataDirectoryName", metadataDirectoryName);
+        ReflectionTestUtils.setField(archiveFileLocationProvider, "corpusstructureDirectoryName", corpusstructureDirectoryName);
         ReflectionTestUtils.setField(archiveFileLocationProvider, "orphansDirectoryName", orphansDirectoryName);
     }
     
@@ -95,11 +100,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getAvailableFile() throws IOException {
         
-        final String parentPath = "/archive/some/url/parent.cmdi";
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/normalnode.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/NormalNode";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
-        final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
+        final String baseDirectoryForFileType = "/archive/root/TopNode/NormalNode/Annotations";
         final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         
@@ -107,7 +112,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile);
             
@@ -119,7 +124,7 @@ public class LamusArchiveFileLocationProviderTest {
         //create directories if necessary, and empty file
         }});
         
-        File retrievedFile = archiveFileLocationProvider.getAvailableFile(parentPath, filenameAttempt, nodeType);
+        File retrievedFile = archiveFileLocationProvider.getAvailableFile(parentPath, parentCorpusNamePathToClosestTopNode, mockNode, filenameAttempt);
         
         assertEquals("Retrieved file different from expected", mockFile, retrievedFile);
     }
@@ -127,11 +132,11 @@ public class LamusArchiveFileLocationProviderTest {
     @Test
     public void getAvailableFile_ThrowsException() throws IOException {
         
-        final String parentPath = "/archive/some/url/parent.cmdi";
+        final String parentPath = "/archive/root/TopNode/Corpusstructure/normalnode.cmdi";
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/NormalNode";
         final String parentDirname = FilenameUtils.getFullPath(parentPath);
         final String filenameAttempt = "resource.pdf";
-        final WorkspaceNodeType nodeType = WorkspaceNodeType.RESOURCE;
-        final String baseDirectoryForFileType = parentDirname + File.separator + "Annotations";
+        final String baseDirectoryForFileType = "/archive/root/TopNode/NormalNode/Annotations";
         final File baseDirectoryForFileTypeFile = new File(baseDirectoryForFileType);
         final String filePathAttempt = parentDirname + File.separator + filenameAttempt;
         
@@ -141,7 +146,7 @@ public class LamusArchiveFileLocationProviderTest {
             
             oneOf(mockArchiveFileHelper).correctPathElement(FilenameUtils.getName(filenameAttempt), "getAvailableFile");
                 will(returnValue(filenameAttempt));
-            oneOf(mockArchiveFileHelper).getDirectoryForFileType(parentPath, nodeType); will(returnValue(baseDirectoryForFileType));
+            oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile); will(throwException(ioException));
             
@@ -154,7 +159,7 @@ public class LamusArchiveFileLocationProviderTest {
         }});
         
         try {
-            archiveFileLocationProvider.getAvailableFile(parentPath, filenameAttempt, nodeType);
+            archiveFileLocationProvider.getAvailableFile(parentPath, parentCorpusNamePathToClosestTopNode, mockNode, filenameAttempt);
             fail("An exception should have been thrown");
         } catch(IOException ex) {
             assertNotNull(ex);
@@ -297,16 +302,13 @@ public class LamusArchiveFileLocationProviderTest {
         
         assertEquals("Retrieved file different from expected", expectedLocation, retrievedFile);
     }
-
-    /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
+    
     @Test
-    public void getOrphansDirectoryWithMetadataDirectory() throws MalformedURLException {
+    public void getOrphansDirectory_WsTopNodeInCorpusstructureDirectory() throws MalformedURLException {
         
         File pathPrefix = new File("/some/url/with/");
-        File metadataDirectoryFullPath = new File(pathPrefix, metadataDirectoryName);
-        File fullPath = new File(metadataDirectoryFullPath, "blabla.cmdi");
+        File corpusstructureDirectoryFullPath = new File(pathPrefix, corpusstructureDirectoryName);
+        File fullPath = new File(corpusstructureDirectoryFullPath, "blabla.cmdi");
         
         URI testURI = fullPath.toURI();
         
@@ -316,23 +318,37 @@ public class LamusArchiveFileLocationProviderTest {
         assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
     }
     
-    /**
-     * Test of getOrphansDirectory method, of class LamusArchiveFileHelper.
-     */
     @Test
-    public void getOrphansDirectoryWithoutCorpusDirectory() throws MalformedURLException, IOException {
+    public void getOrphansDirectory_WsTopNodeInMetadataDirectoryInSameLevel() throws MalformedURLException, IOException {
         
-        String pathPrefix = "/some/url/with/";
-        File pathPrefixFile = testFolder.newFolder(pathPrefix);
-        File metadataFolder = testFolder.newFolder(pathPrefix + metadataDirectoryName);
-        FileUtils.forceMkdir(metadataFolder);
-        assertTrue(metadataFolder.exists());
+        prepareExistingTempDirectory();
+        File corpusstructureFolder = new File(tempDirectory, corpusstructureDirectoryName);
+        FileUtils.forceMkdir(corpusstructureFolder);
+        assertTrue(corpusstructureFolder.exists());
 
-        File fullFilePath = new File(pathPrefixFile, "blabla.cmdi");
+        File fullFilePath = new File(tempDirectory, "Metadata/blabla.cmdi");
         
         URI testURI = fullFilePath.toURI();
         
-        File expectedOrphansDirectory = new File(pathPrefixFile, orphansDirectoryName);
+        File expectedOrphansDirectory = new File(tempDirectory, orphansDirectoryName);
+        File retrievedOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(testURI);
+        
+        assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
+    }
+    
+    @Test
+    public void getOrphansDirectory_WsTopNodeInMetadataDirectoryInDifferentLevel() throws MalformedURLException, IOException {
+        
+        prepareExistingTempDirectory();
+        File corpusstructureFolder = new File(tempDirectory, corpusstructureDirectoryName);
+        FileUtils.forceMkdir(corpusstructureFolder);
+        assertTrue(corpusstructureFolder.exists());
+
+        File fullFilePath = new File(tempDirectory, "SomeNode/Metadata/blabla.cmdi");
+        
+        URI testURI = fullFilePath.toURI();
+        
+        File expectedOrphansDirectory = new File(tempDirectory, orphansDirectoryName);
         File retrievedOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(testURI);
         
         assertEquals("Retrieved orphans directory different from expected", expectedOrphansDirectory.getAbsolutePath(), retrievedOrphansDirectory.getAbsolutePath());
@@ -352,5 +368,11 @@ public class LamusArchiveFileLocationProviderTest {
         
         boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
         assertFalse("Result should be false", isFileInOrphansDirectory);
+    }
+    
+    
+    private void prepareExistingTempDirectory() throws IOException {
+        tempDirectory = testFolder.newFolder();
+        assertTrue("Temp directory wasn't created.", tempDirectory.exists());
     }
 }

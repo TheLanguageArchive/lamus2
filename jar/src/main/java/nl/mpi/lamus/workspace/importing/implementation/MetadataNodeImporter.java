@@ -27,6 +27,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
@@ -76,6 +77,8 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private WorkspaceNodeExplorer workspaceNodeExplorer;
     @Autowired
     private NodeDataRetriever nodeDataRetriever;
+    @Autowired
+    private HandleParser handleParser;
 
     
     /**
@@ -87,23 +90,35 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     public void importNode(Workspace workspace, WorkspaceNode parentNode, ReferencingMetadataDocument parentDocument,
 	    Reference referenceFromParent) throws WorkspaceImportException {
 
-		if (workspace == null) {
-		    String errorMessage = "Workspace not set";
-		    logger.error(errorMessage);
-	            throw new IllegalArgumentException(errorMessage);
-		}
+        if (workspace == null) {
+            String errorMessage = "Workspace not set";
+            logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
         
         int workspaceID = workspace.getWorkspaceID();
 
-        URI childArchiveURI;
+        URI childArchiveURI = null;
         
         //TODO another way of doing this?
         if(referenceFromParent == null) { // top node
             childArchiveURI = workspace.getTopNodeArchiveURI();
         } else {
             if(referenceFromParent instanceof HandleCarrier) {
-                childArchiveURI = ((HandleCarrier) referenceFromParent).getHandle();
-            } else {
+                URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
+                if(handleInFile != null) {
+                    childArchiveURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
+                    if(!handleInFile.equals(childArchiveURI)) {
+                        try {
+                            ((HandleCarrier) referenceFromParent).setHandle(childArchiveURI);
+                        } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
+                            logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                        }
+                    }
+                }
+            }
+            
+            if(childArchiveURI == null) {
                 childArchiveURI = referenceFromParent.getURI();
             }
         }
@@ -153,6 +168,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         WorkspaceNode childNode =
                 workspaceNodeFactory.getNewWorkspaceMetadataNode(workspaceID, childArchiveURI, childArchiveURL, childDocument, childName, childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
+        if(!childToBeProtected) {
+            workspaceDao.lockNode(childArchiveURI, workspaceID);
+        }
         
         workspaceNodeLinkManager.linkNodesWithReference(workspace, parentNode, childNode, referenceFromParent);
         
@@ -172,18 +190,10 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             String errorMessage = "Failed to set URL for node " + childNode.getArchiveURI()
 		    + " in workspace " + workspaceID;
 	    throwWorkspaceImportException(workspaceID, errorMessage, muex);
-        } catch (IOException ioex) {
+        } catch (IOException | TransformerException | MetadataException ioex) {
             String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
 		    + " in workspace " + workspaceID;
 	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
-        } catch (TransformerException trex) {
-            String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspaceID;
-	    throwWorkspaceImportException(workspaceID, errorMessage, trex);
-        } catch (MetadataException mdex) {
-            String errorMessage = "Failed to create file for node " + childNode.getArchiveURI()
-		    + " in workspace " + workspaceID;
-	    throwWorkspaceImportException(workspaceID, errorMessage, mdex);
         } catch (URISyntaxException usex) {
             String errorMessage = "Failed to set location for node " + childNode.getArchiveURI()
                     + " in workspace " + workspaceID;

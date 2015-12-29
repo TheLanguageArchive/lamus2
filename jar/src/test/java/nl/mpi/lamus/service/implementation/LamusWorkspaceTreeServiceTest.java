@@ -101,7 +101,7 @@ public class LamusWorkspaceTreeServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
         
@@ -144,7 +144,7 @@ public class LamusWorkspaceTreeServiceTest {
         URI archiveURI = null;
         URL archiveURL = null;
         URI originURI = null;
-        WorkspaceNodeStatus status = WorkspaceNodeStatus.NODE_ISCOPY;
+        WorkspaceNodeStatus status = WorkspaceNodeStatus.ARCHIVE_COPY;
         boolean isProtected = Boolean.FALSE;
         String format = "cmdi";
 

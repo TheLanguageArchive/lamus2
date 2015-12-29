@@ -17,11 +17,13 @@
 package nl.mpi.lamus.workspace.actions;
 
 import java.util.Collection;
+import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
@@ -43,8 +45,11 @@ public abstract class WsTreeNodesAction implements WsNodesAction {
      * 
      * @param userID ID of the user to execute the action
      * @param wsService WorkspaceService to be used to execute the actions
+     * @param wsDao WorkspaceDaol to be used for necessary database updates
+     * @param nodeUtil NodeUtil object to be used for some node checks
      */
-    public abstract void execute(String userID, WorkspaceService wsService)
+    public abstract void execute(String userID, WorkspaceService wsService,
+            WorkspaceDao wsDao, NodeUtil nodeUtil)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
     
     /**
@@ -63,7 +68,7 @@ public abstract class WsTreeNodesAction implements WsNodesAction {
      * 
      * @param selectedUnlinkedNodes Nodes currently selected as child nodes
      */
-    public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedChildNodes) {
-        this.selectedUnlinkedNodes = selectedChildNodes;
+    public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
+        this.selectedUnlinkedNodes = selectedUnlinkedNodes;
     }
 }

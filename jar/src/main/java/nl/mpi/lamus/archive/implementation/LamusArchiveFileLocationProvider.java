@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
-import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +53,8 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     private String dbLocalRoot;
     
     @Autowired
-    @Qualifier("metadataDirectoryName")
-    private String metadataDirectoryName;
+    @Qualifier("corpusstructureDirectoryName")
+    private String corpusstructureDirectoryName;
     @Autowired
     @Qualifier("orphansDirectoryName")
     private String orphansDirectoryName;
@@ -66,13 +66,14 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     }
 
     /**
-     * @see ArchiveFileLocationProvider#getAvailableFile(java.lang.String, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     * @see ArchiveFileLocationProvider#getAvailableFile(java.lang.String,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode, java.lang.String)
      */
     @Override
-    public File getAvailableFile(String parentPath, String filenameAttempt, WorkspaceNodeType nodeType) throws IOException {
+    public File getAvailableFile(String parentNodePath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node, String filenameAttempt) throws IOException {
         
         String correctedFilename = archiveFileHelper.correctPathElement(filenameAttempt, "getAvailableFile");
-        String baseDirectoryForFileType = archiveFileHelper.getDirectoryForFileType(parentPath, nodeType);
+        String baseDirectoryForFileType = archiveFileHelper.getDirectoryForNode(parentNodePath, parentCorpusNamePathToClosestTopNode, node);
         File finalFile = archiveFileHelper.getFinalFile(new File(baseDirectoryForFileType), correctedFilename);
         
         archiveFileHelper.createFileAndDirectories(finalFile);
@@ -133,14 +134,14 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
     @Override
     public File getOrphansDirectory(URI topNodeLocation) {
         String topNodePath = topNodeLocation.getPath();
-        int index=topNodePath.indexOf(File.separator + metadataDirectoryName + File.separator);
+        int index=topNodePath.indexOf(File.separator + corpusstructureDirectoryName + File.separator);
         File orphansFolder = null;
         if(index > -1) {
             orphansFolder = new File(topNodePath.substring(0, index + 1) + orphansDirectoryName);
         } else {
             File temp=new File(topNodePath);
             while((orphansFolder == null) && (temp != null)) {
-                File cs = new File (temp, metadataDirectoryName);
+                File cs = new File (temp, corpusstructureDirectoryName);
                 if(cs.exists() && cs.isDirectory()) {
                     orphansFolder = new File(temp, orphansDirectoryName);
                 }

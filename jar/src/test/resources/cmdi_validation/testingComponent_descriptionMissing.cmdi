@@ -11,11 +11,11 @@
    <Resources>
       <ResourceProxyList>
          <ResourceProxy id="res_52365370-b01d-421e-a682-8779429ee897">
-            <ResourceType>Metadata</ResourceType>
+            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
             <ResourceRef>someSession.cmdi</ResourceRef>
          </ResourceProxy>
          <ResourceProxy id="res_2e042594-92b5-4b64-a367-670ed74d77b3">
-            <ResourceType>Metadata</ResourceType>
+            <ResourceType mimetype="text/x-cmdi+xml">Metadata</ResourceType>
             <ResourceRef>someOtherSession.cmdi</ResourceRef>
          </ResourceProxy>
       </ResourceProxyList>
@@ -23,11 +23,14 @@
       <ResourceRelationList/>
    </Resources>
    <Components>
-      <lat-corpus ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+      <lat-corpus>
          <Name>testingReference_componentReferenceMissing</Name>
          <Title>testingReference_componentReferenceMissing</Title>
          <descriptions>
          </descriptions>
+         <CorpusLink ref="res_2e042594-92b5-4b64-a367-670ed74d77b3">
+            <Name>someOtherSession</Name>
+         </CorpusLink>
       </lat-corpus>
    </Components>
 </CMD>

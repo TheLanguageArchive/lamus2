@@ -21,6 +21,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeManager;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.replace.action.ReplaceActionExecutor;
 import org.jmock.Expectations;
 import static org.jmock.Expectations.returnValue;
@@ -55,6 +56,7 @@ public class LamusReplaceActionExecutorTest {
     @Mock DeleteNodeReplaceAction mockDeleteAction;
     @Mock ReplaceNodeReplaceAction mockReplaceAction;
     @Mock RemoveArchiveUriReplaceAction mockRemoveArchiveUriAction;
+    @Mock UnlinkNodeFromReplacedParentReplaceAction mockUnlinkFromReplacedParentAction;
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
     @Mock WorkspaceNode mockNewChildNode;
@@ -86,12 +88,34 @@ public class LamusReplaceActionExecutorTest {
     @Test
     public void executeLinkActionSuccessful() throws WorkspaceException, ProtectedNodeException {
         
+        final WorkspaceNodeType type = WorkspaceNodeType.RESOURCE_AUDIO;
+        final boolean isInfoLink = Boolean.FALSE;
+        
         context.checking(new Expectations() {{
             
             oneOf(mockLinkAction).getParentNode(); will(returnValue(mockParentNode));
-            oneOf(mockLinkAction).getAffectedNode(); will(returnValue(mockChildNode));
+            allowing(mockLinkAction).getAffectedNode(); will(returnValue(mockChildNode));
+            oneOf(mockChildNode).getType(); will(returnValue(type));
             
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
+        }});
+        
+        replaceActionExecutor.execute(mockLinkAction);
+    }
+    
+    @Test
+    public void executeLinkActionSuccessful_InfoLink() throws WorkspaceException, ProtectedNodeException {
+        
+        final WorkspaceNodeType type = WorkspaceNodeType.RESOURCE_INFO;
+        final boolean isInfoLink = Boolean.TRUE;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockLinkAction).getParentNode(); will(returnValue(mockParentNode));
+            allowing(mockLinkAction).getAffectedNode(); will(returnValue(mockChildNode));
+            oneOf(mockChildNode).getType(); will(returnValue(type));
+            
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
         }});
         
         replaceActionExecutor.execute(mockLinkAction);
@@ -101,14 +125,17 @@ public class LamusReplaceActionExecutorTest {
     public void executeLinkActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
         
         final int workspaceID = 10;
+        final WorkspaceNodeType type = WorkspaceNodeType.METADATA;
+        final boolean isInfoLink = Boolean.FALSE;
         final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
         
         context.checking(new Expectations() {{
             
             oneOf(mockLinkAction).getParentNode(); will(returnValue(mockParentNode));
-            oneOf(mockLinkAction).getAffectedNode(); will(returnValue(mockChildNode));
+            allowing(mockLinkAction).getAffectedNode(); will(returnValue(mockChildNode));
+            oneOf(mockChildNode).getType(); will(returnValue(type));
             
-            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode);
+            oneOf(mockWorkspaceNodeLinkManager).linkNodes(mockParentNode, mockChildNode, isInfoLink);
                 will(throwException(expectedException));
         }});
         
@@ -266,6 +293,43 @@ public class LamusReplaceActionExecutorTest {
         
         try {
             replaceActionExecutor.execute(mockRemoveArchiveUriAction);
+            fail("should have thrown exception");
+        } catch(WorkspaceException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void executeUnlinkFromReplacedParentActionSuccessful() throws WorkspaceException, ProtectedNodeException {
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockUnlinkFromReplacedParentAction).getNewParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockUnlinkFromReplacedParentAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
+        }});
+        
+        replaceActionExecutor.execute(mockUnlinkFromReplacedParentAction);
+    }
+    
+    @Test
+    public void executeUnlinkFromOldParentActionUnsuccessful() throws WorkspaceException, ProtectedNodeException {
+        
+        final int workspaceID = 10;
+        final WorkspaceException expectedException = new WorkspaceException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockUnlinkFromReplacedParentAction).getNewParentNode(); will(returnValue(mockParentNode));
+            oneOf(mockUnlinkFromReplacedParentAction).getAffectedNode(); will(returnValue(mockChildNode));
+            
+            oneOf(mockWorkspaceNodeLinkManager).unlinkNodeFromReplacedParent(mockChildNode, mockParentNode);
+                will(throwException(expectedException));
+        }});
+        
+        try {
+            replaceActionExecutor.execute(mockUnlinkFromReplacedParentAction);
             fail("should have thrown exception");
         } catch(WorkspaceException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

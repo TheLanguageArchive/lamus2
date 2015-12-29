@@ -28,12 +28,11 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.web.components.AutoDisablingAjaxButton;
 import nl.mpi.lamus.web.components.NavigationPanel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -155,7 +154,7 @@ public class CreateWorkspacePage extends LamusPage {
 	createWsForm.add(new Label("nodeURI"));
         createWsForm.add(new Label("type"));
 
-	createWorkspaceButton = new AutoDisablingAjaxButton("createWorkspace") {
+	createWorkspaceButton = new AjaxButton("createWorkspace") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -168,8 +167,16 @@ public class CreateWorkspacePage extends LamusPage {
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
-                } catch (NodeNotFoundException | NodeAccessException | WorkspaceImportException ex) {
+                } catch (NodeNotFoundException | NodeAccessException ex) {
                     Session.get().error(ex.getMessage());
+                } catch (WorkspaceImportException ex) {
+                    StringBuilder messageToShow = new StringBuilder();
+                    messageToShow.append(ex.getMessage());
+                    if(ex.getCause() != null) {
+                        messageToShow.append("\n");
+                        messageToShow.append(ex.getCause().getMessage());
+                    }
+                    Session.get().error(messageToShow);
                 }
             }
 	};
@@ -183,7 +190,7 @@ public class CreateWorkspacePage extends LamusPage {
         createWsForm.add(warningMessage);
 
         
-        addTopNodeButton = new IndicatingAjaxButton("addTopNode") {
+        addTopNodeButton = new AjaxButton("addTopNode") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

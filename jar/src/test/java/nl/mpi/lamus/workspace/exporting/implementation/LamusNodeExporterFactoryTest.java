@@ -120,7 +120,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         
         context.checking(new Expectations() {{
             
@@ -143,7 +143,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         
         context.checking(new Expectations() {{
             
@@ -166,7 +166,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_UPLOADED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.UPLOADED;
         
         context.checking(new Expectations() {{
             
@@ -189,7 +189,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_CREATED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.CREATED;
         
         context.checking(new Expectations() {{
             
@@ -212,7 +212,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.DELETED;
         
         context.checking(new Expectations() {{
             
@@ -235,7 +235,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_EXTERNAL_DELETED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.EXTERNAL_DELETED;
         
         context.checking(new Expectations() {{
             
@@ -258,7 +258,7 @@ public class LamusNodeExporterFactoryTest {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_REPLACED;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
         
         context.checking(new Expectations() {{
             
@@ -277,11 +277,34 @@ public class LamusNodeExporterFactoryTest {
     }
     
     @Test
+    public void getNodeExporterForReplacedNode_UnlinkPhase() throws MalformedURLException {
+        
+        final int topNodeID = 1;
+        final int workspaceNodeID = 10;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.REPLACED;
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspace).getTopNodeID(); will(returnValue(topNodeID));
+            allowing(mockNode).getWorkspaceNodeID(); will(returnValue(workspaceNodeID));
+            oneOf(mockWorkspaceDao).getParentWorkspaceNodes(workspaceNodeID); will(returnValue(mockParentNodes));
+            oneOf(mockParentNodes).isEmpty(); will(returnValue(Boolean.TRUE));
+            allowing(mockNode).getStatus(); will(returnValue(nodeStatus));
+        }});
+        
+        NodeExporter retrievedExporter = exporterFactory.getNodeExporterForNode(mockWorkspace, mockNode, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
+        
+        assertNotNull(retrievedExporter);
+        assertTrue("Retrieved node exporter has a different type from expected", retrievedExporter instanceof ReplacedOrDeletedNodeExporter);
+        assertEquals("Retrieved node exporter different from expected", mockReplacedOrDeletedNodeExporter, retrievedExporter);
+    }
+    
+    @Test
     public void getNodeExporterForChangedNode() throws MalformedURLException {
         
         final int topNodeID = 1;
         final int workspaceNodeID = 10;
-        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.NODE_ISCOPY;
+        final WorkspaceNodeStatus nodeStatus = WorkspaceNodeStatus.ARCHIVE_COPY;
         
         context.checking(new Expectations() {{
             

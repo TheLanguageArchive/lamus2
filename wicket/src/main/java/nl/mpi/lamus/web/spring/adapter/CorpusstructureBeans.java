@@ -22,7 +22,7 @@ import nl.mpi.archiving.corpusstructure.adapter.CorpusStructureDBImplFactory;
 import nl.mpi.archiving.corpusstructure.adapter.NodeUriUtils;
 import nl.mpi.archiving.corpusstructure.adapter.TranslationService;
 import nl.mpi.archiving.corpusstructure.adapter.VersioningAPIImplFactory;
-import nl.mpi.archiving.corpusstructure.adapter.crawler.FilePathTranslatorAdapter;
+import nl.mpi.archiving.corpusstructure.adapter.utils.FilePathTranslatorAdapter;
 import nl.mpi.archiving.corpusstructure.adapter.servlet.ThreadLocalCSDBContainer;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBFactory;
 import nl.mpi.archiving.corpusstructure.adapter.db.proxy.ArchiveObjectsDBProxy;
@@ -56,12 +56,16 @@ import org.springframework.context.annotation.Profile;
 public class CorpusstructureBeans {
     
     @Autowired
+    @Qualifier("csdbHybridDbResource")
+    private String csdbHybridDbResource;
+    
+    @Autowired
     @Qualifier("translationServiceLocation")
     private String translationServiceLocation;
     
     @Bean
     public CorpusStructureDBFactory csdbImplFactory() {
-        return new CorpusStructureDBImplFactory("java:comp/env/jdbc/CSDB3");
+        return new CorpusStructureDBImplFactory(csdbHybridDbResource);
     }
     
     @Bean
@@ -77,7 +81,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public ArchiveObjectsDBFactory aoImplFactory() {
-        return new ArchiveObjectsDBImplFactory("java:comp/env/jdbc/CSDB3");
+        return new ArchiveObjectsDBImplFactory(csdbHybridDbResource);
     }
     
     @Bean(name = "adapterAO")
@@ -88,7 +92,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public VersioningAPIFactory versioningApiFactory() {
-        return new VersioningAPIImplFactory("java:comp/env/jdbc/CSDB3");
+        return new VersioningAPIImplFactory(csdbHybridDbResource);
     }
     
     @Bean
@@ -133,7 +137,7 @@ public class CorpusstructureBeans {
     
     @Bean
     public FilePathTranslator filePathTranslator() {
-        return new FilePathTranslatorAdapter(aoProxy(), translationService(), handleResolver());
+        return new FilePathTranslatorAdapter(aoProxy(), handleResolver());
     }
     
     @Bean

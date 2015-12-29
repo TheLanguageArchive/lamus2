@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -70,6 +71,7 @@ public class LamusWorkspace implements Workspace {
      * 
      * @param workspaceID
      * @param userID
+     * @param topNodeID
      * @param topNodeArchiveURI
      * @param topNodeArchiveURL
      * @param startDate
@@ -280,7 +282,7 @@ public class LamusWorkspace implements Workspace {
 
     @Override
     public void setStatusMessageErrorDuringInitialisation() {
-        setStatus(WorkspaceStatus.ERROR_DURING_INITIALISATION);
+        setStatus(WorkspaceStatus.ERROR_INITIALISATION);
         setMessage("Error during initialisation");
         //TODO Change message, move to properties file
     }
@@ -306,9 +308,8 @@ public class LamusWorkspace implements Workspace {
     public String getWorkspaceSelectionDisplayString() {
         
         String stringResult = "ID: " + this.workspaceID + 
-//                ", Top Node Archive URI: " + this.topNodeArchiveURI +
-                ", Start Date: " + this.startDate +
-                ", Session End Date: " + this.sessionEndDate;
+                ", Top Node: " + this.topNodeArchiveURI + " (" + FilenameUtils.getName(this.topNodeArchiveURL.toString()) + ")" +
+                ", Start Date: " + this.startDate;
         
         return stringResult;
     }

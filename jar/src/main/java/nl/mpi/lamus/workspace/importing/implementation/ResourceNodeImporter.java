@@ -22,9 +22,9 @@ import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
-import nl.mpi.archiving.corpusstructure.core.OutputFormat;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
+import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
 import nl.mpi.lamus.exception.WorkspaceImportException;
@@ -70,6 +70,10 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
     private WorkspaceNodeFactory workspaceNodeFactory;
     @Autowired
     private WorkspaceNodeLinkFactory workspaceNodeLinkFactory;
+    @Autowired
+    private NodeUtil nodeUtil;
+    @Autowired
+    private HandleParser handleParser;
 
     
     /**
@@ -91,12 +95,24 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
    
         URI childURI = null;
         if(referenceFromParent instanceof HandleCarrier) {
-            childURI = ((HandleCarrier) referenceFromParent).getHandle();
+            URI handleInFile = ((HandleCarrier) referenceFromParent).getHandle();
+            if(handleInFile != null) {
+                childURI = handleParser.prepareAndValidateHandleWithHdlPrefix(handleInFile);
+                if(!handleInFile.equals(childURI)) {
+                    try {
+                        ((HandleCarrier) referenceFromParent).setHandle(childURI);
+                    } catch (MetadataException | UnsupportedOperationException | IllegalArgumentException ex) {
+                        logger.info("Couldn't update handle in parent reference. Current handle is: " + handleInFile);
+                    }
+                }
+            }
         }
         
         if(childURI == null) {
             childURI = referenceFromParent.getURI();
         }
+        
+        logger.debug("Importing node into new workspace; workspaceID: " + workspaceID + "; nodeURI: " + childURI);
             
         CorpusNode childCorpusNode = corpusStructureProvider.getNode(childURI);
         if(childCorpusNode == null) {
@@ -110,19 +126,21 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         URL childArchiveURL = null;
         
         try {
-	        if(childOnSite) {
-	            childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
-	            if(childLocalFile == null) {
-	            	String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
-	            	logger.error(errorMessage);
-	            	throw new IllegalArgumentException(errorMessage);
-            	}
-	            childArchiveURL = childLocalFile.toURI().toURL();
-	        } else {
-	        	childArchiveURL = nodeResolver.getUrl(childCorpusNode);
-	        }
+            if(childOnSite) {
+                childLocalFile = nodeResolver.getLocalFile(childCorpusNode);
+                if(childLocalFile == null) {
+                    String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+                    logger.error(errorMessage);
+                    throw new IllegalArgumentException(errorMessage);
+                }
+                childArchiveURL = childLocalFile.toURI().toURL();
+            } else {
+                    childArchiveURL = nodeResolver.getUrl(childCorpusNode);
+            }
         } catch(MalformedURLException ex) {
-        	throw new UnsupportedOperationException("not handled yet");
+            String errorMessage = "ResourceNodeImporter.importNode: error getting URL for link " + childURI;
+            logger.error(errorMessage, ex);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         String childMimetype = referenceFromParent.getMimetype();
@@ -142,12 +160,20 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
             childMimetype = typecheckedResults.getCheckedMimetype();
         }
         
+        WorkspaceNodeType childNodeType = nodeUtil.convertMimetype(childMimetype);
         boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childURI);
+        
+        if(metadataApiBridge.isReferenceAnInfoLink(parentDocument, referenceFromParent)) {
+            childNodeType = WorkspaceNodeType.RESOURCE_INFO;
+        }
 
-        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceResourceNode(
+        WorkspaceNode childNode = workspaceNodeFactory.getNewWorkspaceNode(
                 workspaceID, childURI, childArchiveURL, referenceFromParent,
-                childMimetype, childCorpusNode.getName(), childOnSite, childToBeProtected);
+                childMimetype, childNodeType, childCorpusNode.getName(), childOnSite, childToBeProtected);
         workspaceDao.addWorkspaceNode(childNode);
+        if(!childToBeProtected) {
+            workspaceDao.lockNode(childURI, workspaceID);
+        }
         
         WorkspaceNodeLink nodeLink = workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
                 parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());

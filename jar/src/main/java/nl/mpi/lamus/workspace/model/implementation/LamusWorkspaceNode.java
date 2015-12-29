@@ -129,11 +129,6 @@ public class LamusWorkspaceNode implements WorkspaceNode {
     }
     
     @Override
-    public boolean isMetadata() {
-        return WorkspaceNodeType.METADATA.equals(this.type);
-    }
-    
-    @Override
     public void setType(WorkspaceNodeType type) {
         this.type = type;
     }
@@ -190,8 +185,8 @@ public class LamusWorkspaceNode implements WorkspaceNode {
 
     @Override
     public boolean isExternal() {
-        return WorkspaceNodeStatus.NODE_EXTERNAL.equals(this.status) ||
-                WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(this.status);
+        return WorkspaceNodeStatus.EXTERNAL.equals(this.status) ||
+                WorkspaceNodeStatus.EXTERNAL_DELETED.equals(this.status);
     }
     
     @Override
@@ -279,7 +274,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
                 ", Name: " + this.name + ", Title: " + this.title +
                 ", Type: " + this.type + ", Workspace URL: " + this.workspaceURL +
                 ", Archive URI: " + this.archiveURI + ", Archive URL: " + this.archiveURL + ", Origin URL: " + this.originURI +
-                ", Status: " + this.status + ", Protected: " + this.isProtected + ", Format: " + this.format;
+                ", Status: " + this.status.name() + ", Protected: " + this.isProtected + ", Format: " + this.format;
         
         return stringResult;
     }

@@ -33,8 +33,11 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceTreeExporter;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -43,7 +46,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
-import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
@@ -72,14 +75,17 @@ public class GeneralNodeExporterTest {
     }};
     
     @Mock MetadataAPI mockMetadataAPI;
+    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
     @Mock CorpusStructureProvider mockCorpusStructureProvider;
     @Mock NodeResolver mockNodeResolver;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
+    @Mock NodeUtil mockNodeUtil;
+    @Mock ExporterHelper mockExporterHelper;
     
-    @Mock ReferencingMetadataDocument mockChildCmdiDocument;
-    @Mock ReferencingMetadataDocument mockParentCmdiDocument;
+    @Mock CMDIDocument mockChildCmdiDocument;
+    @Mock CMDIDocument mockParentCmdiDocument;
     @Mock ResourceProxy mockResourceProxy;
     @Mock StreamResult mockStreamResult;
     @Mock CorpusNode mockCorpusNode;
@@ -112,11 +118,14 @@ public class GeneralNodeExporterTest {
 
         generalNodeExporter = new GeneralNodeExporter();
         ReflectionTestUtils.setField(generalNodeExporter, "metadataAPI", mockMetadataAPI);
+        ReflectionTestUtils.setField(generalNodeExporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(generalNodeExporter, "workspaceFileHandler", mockWorkspaceFileHandler);
         ReflectionTestUtils.setField(generalNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
         ReflectionTestUtils.setField(generalNodeExporter, "corpusStructureProvider", mockCorpusStructureProvider);
         ReflectionTestUtils.setField(generalNodeExporter, "nodeResolver", mockNodeResolver);
         ReflectionTestUtils.setField(generalNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
+        ReflectionTestUtils.setField(generalNodeExporter, "nodeUtil", mockNodeUtil);
+        ReflectionTestUtils.setField(generalNodeExporter, "exporterHelper", mockExporterHelper);
     }
     
     @After
@@ -130,9 +139,10 @@ public class GeneralNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "This exporter should only be used when submitting the workspace, not when deleting";
@@ -147,9 +157,10 @@ public class GeneralNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "This exporter should only be used when exporting the tree, not for unlinked nodes";
@@ -174,14 +185,15 @@ public class GeneralNodeExporterTest {
          */
         
         final int nodeWsID = 10;
-        final String nodeFilename = "someNode.cmdi";
+        final String nodeFilename = "topnode.cmdi";
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final String nodeArchivePath = "https://archive/location/" + nodeFilename;
+        final String nodeArchivePath = "https://archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final URL nodeArchiveURL = new URL(nodeArchivePath);
-        final String nodeArchiveLocalPath = "file:/archive/location/" + nodeFilename;
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
+        final String currentCorpusNamePathToClosestTopNode = ""; // top node
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -201,8 +213,13 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, null, null, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(currentCorpusNamePathToClosestTopNode));
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
@@ -212,7 +229,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
         }});
         
-        generalNodeExporter.exportNode(workspace, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        generalNodeExporter.exportNode(workspace, null, null, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     @Test
@@ -231,31 +248,30 @@ public class GeneralNodeExporterTest {
          */
         
         final int parentNodeWsID = 1;
-        final String parentNodeName = "parentNode";
+        final String parentNodeName = "TopNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
         final String parentNodeWsPath = "file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename;
         final URL parentNodeWsURL = new URL(parentNodeWsPath);
         final File parentNodeWsFile = new File(URI.create(parentNodeWsPath));
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final String parentNodeArchivePath = "https:/archive/location/" + parentFilename;
-        final URL parentNodeArchiveURL = new URL(parentNodeArchivePath);
-        final String parentNodeArchiveLocalPath = "file:/archive/location/" + parentFilename;
+        final String parentNodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + parentFilename;
         final File parentNodeArchiveLocalFile = new File(URI.create(parentNodeArchiveLocalPath));
-        final URL parentNodeArchiveLocalURL = new URL(parentNodeArchiveLocalPath);
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final String nodeArchivePath = "https:/archive/location/child/" + nodeFilename;
+        final String nodeArchivePath = "https:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final URL nodeArchiveURL = new URL(nodeArchivePath);
-        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
+        final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
-        final String nodePathRelativeToParent = "child/" + nodeFilename;
+        final String nodePathRelativeToParent = nodeFilename;
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -275,8 +291,13 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(currentCorpusNamePathToClosestTopNode));
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
@@ -289,7 +310,7 @@ public class GeneralNodeExporterTest {
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
                 parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
-        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     
@@ -355,15 +376,14 @@ public class GeneralNodeExporterTest {
     public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
-        final String parentNodeName = "parentNode";
         final String metadataExtension = "cmdi";
-        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final String nodeArchivePath = "https:/archive/location/" + nodeFilename;
+        final String nodeArchivePath = "https:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final URL nodeArchiveURL = new URL(nodeArchivePath);
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -390,7 +410,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -401,20 +421,78 @@ public class GeneralNodeExporterTest {
     
     //TODO TEST WHEN NODE RESOLVER RETURNS NULL
     
+    @Test
+    public void export_ProblemsRetrievingCorpusNamePath() throws MalformedURLException, URISyntaxException {
+        
+        
+        
+        final int parentNodeWsID = 1;
+        final String metadataExtension = "cmdi";
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
+        
+        final int nodeWsID = 10;
+        final String nodeName = "SomeNode";
+        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final String nodeArchivePath = "https:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
+        final URL nodeArchiveURL = new URL(nodeArchivePath);
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
+        final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
+        final boolean isNodeProtected = Boolean.FALSE;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        final String expectedExceptionMessage = "Problems retrieving the corpus name path for node " + nodeArchiveURI;
+        
+        workspace.setTopNodeID(nodeWsID);
+        workspace.setTopNodeArchiveURI(nodeArchiveURI);
+        workspace.setTopNodeArchiveURL(nodeArchiveURL);
+        
+        checkLoggerInvocations(parentNodeWsID, nodeWsID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockChildWsNode).isProtected(); will(returnValue(isNodeProtected));
+            
+            allowing(mockChildWsNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
+            
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(null));
+        }});
+        
+        try {
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            fail("should have thrown exception");
+        } catch(WorkspaceExportException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspace.getWorkspaceID(), ex.getWorkspaceID());
+            assertNull("Cause should be null", ex.getCause());
+        }
+    }
+    
     
     @Test
     public void exportProtectedNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
         final int parentNodeWsID = 1;
-        final String parentNodeName = "parentNode";
+        final String parentNodeName = "TopNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final String nodeArchivePath = "https:/archive/location/" + nodeFilename;
+        final String nodeArchivePath = "https:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final URL nodeArchiveURL = new URL(nodeArchivePath);
         final boolean isNodeProtected = Boolean.TRUE;
         
@@ -435,7 +513,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(nodeWsID));
         }});
         
-        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     
@@ -445,11 +523,13 @@ public class GeneralNodeExporterTest {
         
         final String metadataExtension = "cmdi";
         
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
+        
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
+        final URL nodeArchiveURL = new URL("http:/archive/location/TopNode/Corpusstructure/" + nodeFilename);
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -460,7 +540,7 @@ public class GeneralNodeExporterTest {
         workspace.setTopNodeArchiveURL(nodeArchiveURL);
         
         try {
-            generalNodeExporter.exportNode(null, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(null, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch (IllegalArgumentException ex) {
             String errorMessage = "Workspace not set";
@@ -475,16 +555,19 @@ public class GeneralNodeExporterTest {
         final String metadataExtension = "cmdi";
         
         final int parentNodeWsID = 1;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
-        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
+        final URL nodeArchiveURL = new URL("http:/archive/location/TopNode/Corpusstructure/" + nodeFilename);
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
+        final String parentNodeName = "TopNode";
+        final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -507,8 +590,13 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(currentCorpusNamePathToClosestTopNode));
+                
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
@@ -518,7 +606,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -533,16 +621,19 @@ public class GeneralNodeExporterTest {
         final String metadataExtension = "cmdi";
         
         final int parentNodeWsID = 1;
+        final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
-        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
+        final URL nodeArchiveURL = new URL("http:/archive/location/TopNode/Corpusstructure/" + nodeFilename);
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
+        final String parentNodeName = "TopNode";
+        final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -565,8 +656,12 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(currentCorpusNamePathToClosestTopNode));
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(throwException(expectedException));
@@ -575,7 +670,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -590,16 +685,19 @@ public class GeneralNodeExporterTest {
         final String metadataExtension = "cmdi";
         
         final int parentNodeWsID = 1;
+        final String parentCorpusNamePathToClosestTopNode = "";
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeNode";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
         final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
-        final String nodeArchiveLocalPath = "file:/archive/location/" + nodeFilename;
+        final URL nodeArchiveURL = new URL("http:/archive/location/TopNode/Corpusstructure/" + nodeFilename);
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
+        final String parentNodeName = "TopNode";
+        final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
@@ -622,8 +720,13 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockExporterHelper).getNamePathToUseForThisExporter(
+                    mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.TRUE, generalNodeExporter.getClass());
+                will(returnValue(currentCorpusNamePathToClosestTopNode));
+            
+            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
             oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(nodeWsURL); will(returnValue(mockChildCmdiDocument));
@@ -637,7 +740,7 @@ public class GeneralNodeExporterTest {
         }});
         
         try {
-            generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+            generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
             fail("should have thrown exception");
         } catch(WorkspaceExportException ex) {
             assertEquals("Message different from expected", expectedErrorMessage, ex.getMessage());
@@ -660,22 +763,23 @@ public class GeneralNodeExporterTest {
          */
         
         final int parentNodeWsID = 1;
-        final String parentNodeName = "parentNode";
+        final String parentNodeName = "ParentNode";
         final String metadataExtension = "cmdi";
         final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
         final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
-        final String parentNodeArchiveLocalPath = "file:/archive/location/" + parentFilename;
+        final String parentNodeArchiveLocalPath = "file:/archive/location/TopNode/SomeNode/Metadata/" + parentFilename;
         final File parentNodeArchiveLocalFile = new File(URI.create(parentNodeArchiveLocalPath));
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/SomeNode";
         
         final int nodeWsID = 10;
-        final String nodeName = "someNode";
+        final String nodeName = "SomeResource";
         final String pdfExtension = "pdf";
         final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + pdfExtension;
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
-        final String nodeArchiveLocalPath = "file:/archive/location/child/" + nodeFilename;
+        final URL nodeArchiveURL = new URL("http:/archive/location/TopNode/SomeNode/Annotations/" + nodeFilename);
+        final String nodeArchiveLocalPath = "file:/archive/location/TopNode/SomeNode/Annotations/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
         
@@ -683,7 +787,7 @@ public class GeneralNodeExporterTest {
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
         
-        final String nodePathRelativeToParent = "child/" + nodeFilename;
+        final String nodePathRelativeToParent = "../Annotations/" + nodeFilename;
         
         workspace.setTopNodeID(nodeWsID);
         workspace.setTopNodeArchiveURI(nodeArchiveURI);
@@ -699,7 +803,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
-            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.FALSE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
             
             //TODO what to expect here?
                 // resources are not copied to the workspace, so if they need to be copied back, it means they are replacements,
@@ -709,7 +813,7 @@ public class GeneralNodeExporterTest {
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
                 parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
-        generalNodeExporter.exportNode(workspace, mockParentWsNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
     
@@ -738,7 +842,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
             oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentArchiveLocalFile));
             
-            oneOf(mockParentWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
+            oneOf(mockNodeUtil).isNodeMetadata(mockParentWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentWsURL);
                 will(returnValue(mockParentCmdiDocument));
@@ -747,7 +851,7 @@ public class GeneralNodeExporterTest {
                 will(returnValue(childPathRelativeToParent));
             
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(childArchiveURI));
-            oneOf(mockParentCmdiDocument).getDocumentReferenceByURI(childArchiveURI);
+            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentCmdiDocument, childArchiveURI);
                 will(returnValue(mockResourceProxy));
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             

@@ -37,6 +37,8 @@ public abstract class AbstractLamusWicketTest {
     
     protected static final String BEAN_NAME_WORKSPACE_SERVICE = "workspaceService";
     protected static final String BEAN_NAME_WORKSPACE_TREE_SERVICE = "workspaceTreeService";
+    protected static final String BEAN_NAME_WORKSPACE_DAO = "workspaceDao";
+    protected static final String BEAN_NAME_NODE_UTIL = "nodeUtil";
     protected static final String BEAN_NAME_SESSION_FACTORY = "sessionFactory";
     protected static final String BEAN_NAME_WORKSPACE_TREE_MODEL_PROVIDER_FACTORY = "workspaceTreeProviderFactory";
     protected static final String BEAN_NAME_UNLINKED_NODES_MODEL_PROVIDER_FACTORY = "unlinkedNodesProviderFactory";
@@ -46,6 +48,9 @@ public abstract class AbstractLamusWicketTest {
     protected static final String BEAN_NAME_REGISTER_URL = "registerUrl";
     protected static final String BEAN_NAME_MANUAL_URL = "manualUrl";
     protected static final String BEAN_NAME_MANAGER_USERS = "managerUsers";
+    
+    protected static final String BEAN_NAME_WORKSPACE_MODEL_PROVIDER = "workspaceModelProvider";
+    protected static final String BEAN_NAME_WORKSPACE_MODEL = "workspaceModel";
     
     protected static final String MOCK_USER_ID = "testUser";
     protected static final String MOCK_LAMUS_PAGE_TITLE = "The Language Archive - LAMUS 2";

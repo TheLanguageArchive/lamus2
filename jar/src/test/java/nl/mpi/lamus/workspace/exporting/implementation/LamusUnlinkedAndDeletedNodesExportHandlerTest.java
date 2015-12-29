@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
@@ -124,7 +125,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
                 firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, firstNodeFormat);
         
         final int secondNodeID = 10;
         final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
@@ -137,7 +138,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
                 secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, secondNodeFormat);
         
         unlinkedAndDeletedTopNodes.add(firstNode);
         unlinkedAndDeletedTopNodes.add(secondNode);
@@ -156,7 +157,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, CorpusStructureBridge.IGNORE_CORPUS_PATH, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
             }});
         }
     
@@ -185,7 +186,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
                 firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, firstNodeFormat);
         
         final int secondNodeID = 10;
         final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
@@ -198,7 +199,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
                 secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, secondNodeFormat);
         
         unlinkedTopNodes.add(firstNode);
         unlinkedTopNodes.add(secondNode);
@@ -217,7 +218,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, CorpusStructureBridge.IGNORE_CORPUS_PATH, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
             }});
         }
     
@@ -246,7 +247,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI firstNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode firstNode = new LamusWorkspaceNode(firstNodeID, workspaceID, firstNodeSchemaLocation,
                 firstNodeDisplayValue, "", firstNodeType, firstNodeWsURL, firstNodeURI, firstNodeArchiveURL, firstNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, firstNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, firstNodeFormat);
         
         final int secondNodeID = 10;
         final URL secondNodeWsURL = new URL("file:/workspace/folder/node.cmdi");
@@ -259,7 +260,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
         final URI secondNodeSchemaLocation = URI.create("http://some.location");
         final WorkspaceNode secondNode = new LamusWorkspaceNode(secondNodeID, workspaceID, secondNodeSchemaLocation,
                 secondNodeDisplayValue, "", secondNodeType, secondNodeWsURL, secondNodeURI, secondNodeArchiveURL, secondNodeOriginURI,
-                WorkspaceNodeStatus.NODE_ISCOPY, Boolean.FALSE, secondNodeFormat);
+                WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE, secondNodeFormat);
         
         unlinkedAndDeletedTopNodes.add(firstNode);
         unlinkedAndDeletedTopNodes.add(secondNode);
@@ -280,7 +281,7 @@ public class LamusUnlinkedAndDeletedNodesExportHandlerTest {
             
             context.checking(new Expectations() {{
                 oneOf(mockNodeExporterFactory).getNodeExporterForNode(mockWorkspace, deletedNode, exportPhase); will(returnValue(mockNodeExporter));
-                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
+                oneOf(mockNodeExporter).exportNode(mockWorkspace, null, CorpusStructureBridge.IGNORE_CORPUS_PATH, deletedNode, keepUnlinkedFiles, submissionType, exportPhase);
                     will(throwException(expectedException));
             }});
             

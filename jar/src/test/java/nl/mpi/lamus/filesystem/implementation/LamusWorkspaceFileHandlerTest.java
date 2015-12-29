@@ -395,8 +395,9 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan1.cmdi");
-        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan1.cmdi");
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan2.cmdi");
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
@@ -409,6 +410,10 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
+            //logger
+            oneOf(mockOrphansDirectory).getAbsolutePath(); will(returnValue(orphansDirectoryPath));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -440,9 +445,9 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.FALSE));
         }});
-        
-        stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(null);
         
         Collection<File> retrivedFiles = workspaceFileHandler.getFilesInOrphanDirectory(mockWorkspace);
         
@@ -456,6 +461,8 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        
         final Collection<File> fileCollection = new ArrayList<>();
         
         final Collection<File> expectedFiles = new ArrayList<>();
@@ -463,6 +470,10 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
+            //logger
+            oneOf(mockOrphansDirectory).getAbsolutePath(); will(returnValue(orphansDirectoryPath));
         }});
         
         stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
@@ -479,6 +490,8 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        
         //file is directory, so it shouldn't be added to the resulting list
         
         final Collection<File> fileCollection = new ArrayList<>();
@@ -489,6 +502,10 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
+            //logger
+            oneOf(mockOrphansDirectory).getAbsolutePath(); will(returnValue(orphansDirectoryPath));
             
             //first iteration
             oneOf(mockInnerDirectory).isFile(); will(returnValue(Boolean.FALSE)); //it's a directory, so it doesn't go further
@@ -508,9 +525,10 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
         final String orphan1Filename = "orphan1.cmdi";
-        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan1Filename);
-        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/orphan2.cmdi");
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan1Filename);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan2.cmdi");
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
@@ -524,6 +542,10 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
+            //logger
+            oneOf(mockOrphansDirectory).getAbsolutePath(); will(returnValue(orphansDirectoryPath));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -550,10 +572,11 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
         final String orphan1Filename = "orphan1.cmdi";
-        final URI orphan1_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan1Filename);
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan1Filename);
         final String orphan2Filename = "orphan2.cmdi";
-        final URI orphan2_Uri = URI.create("file:/somewhere/in/the/archive/sessions/" + orphan2Filename);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan2Filename);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
@@ -565,6 +588,10 @@ public class LamusWorkspaceFileHandlerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
             oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            
+            oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
+            //logger
+            oneOf(mockOrphansDirectory).getAbsolutePath(); will(returnValue(orphansDirectoryPath));
             
             //first iteration
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
@@ -624,7 +651,7 @@ public class LamusWorkspaceFileHandlerTest {
         node.setName(filename);
         node.setType(WorkspaceNodeType.METADATA);
         node.setFormat("someFormat");
-        node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        node.setStatus(WorkspaceNodeStatus.CREATED);
 
         return node;
     }
@@ -639,19 +666,19 @@ public class LamusWorkspaceFileHandlerTest {
         workspaceNodeFile.createNewFile();
         node.setWorkspaceURL(workspaceNodeFile.toURI().toURL());
         node.setName(filename);
-        node.setType(WorkspaceNodeType.RESOURCE);
+        node.setType(WorkspaceNodeType.RESOURCE_OTHER);
         node.setFormat("someFormat");
-        node.setStatus(WorkspaceNodeStatus.NODE_CREATED);
+        node.setStatus(WorkspaceNodeStatus.CREATED);
 
         return node;
     }
     
-    private void prepareTempDirectory() {
+    private void prepareTempDirectory() throws IOException {
         tempDirectory = testFolder.newFolder("temp_directory");
         assertTrue("Temp directory wasn't created.", tempDirectory.exists());
     }
     
-    private void prepareAnotherTempDirectory() {
+    private void prepareAnotherTempDirectory() throws IOException {
         anotherTempDirectory = testFolder.newFolder("another_temp_directory");
         assertTrue("Another temp directory wasn't created.", anotherTempDirectory.exists());
     }
@@ -690,7 +717,7 @@ public class LamusWorkspaceFileHandlerTest {
         return tempFile;
     }
     
-    private File createTargetDirectory_retrieveTargetFileLocation() {
+    private File createTargetDirectory_retrieveTargetFileLocation() throws IOException {
         prepareAnotherTempDirectory();
         
         File targetLocation = new File(anotherTempDirectory, "target_temp_file.txt");
@@ -698,7 +725,7 @@ public class LamusWorkspaceFileHandlerTest {
         return targetLocation;
     }
     
-    private File doNotCreateTargetDirectory_retrieveTargetFileLocation() {
+    private File doNotCreateTargetDirectory_retrieveTargetFileLocation() throws IOException {
         prepareAnotherTempDirectory();
         
         File targetDirectory = new File(anotherTempDirectory, "nonexistingfolder");

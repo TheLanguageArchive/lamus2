@@ -18,7 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.net.URI;
 import java.util.Collection;
 import javax.annotation.Resource;
-import nl.mpi.archiving.corpusstructure.adapter.AdapterUtils;
+import nl.mpi.archiving.corpusstructure.adapter.utils.AdapterUtils;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.CorpusNodeType;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
@@ -101,8 +101,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         logger.debug("Ensuring that node '{}' is accessible to user {}", archiveNodeURI, userID);
         ensureWriteAccessToNode(userID, nodeID_URI);
         
-        logger.debug("Ensuring that node '{}' is not locked", archiveNodeURI);
-        ensureNodeIsNotLocked(archiveNodeURI);
+        URI nodePID = nodeResolver.getPID(node);
+        logger.debug("Ensuring that node '{}' is not locked", nodePID);
+        ensureNodeIsNotLocked(nodePID);
         
         Collection<CorpusNode> descendants = corpusStructureProvider.getDescendantNodes(archiveNodeURI);
         

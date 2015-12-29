@@ -47,8 +47,6 @@ public interface WorkspaceNode extends Serializable {
     
     public WorkspaceNodeType getType();
     
-    public boolean isMetadata();
-    
     public void setType(WorkspaceNodeType type);
     
     public URL getWorkspaceURL();

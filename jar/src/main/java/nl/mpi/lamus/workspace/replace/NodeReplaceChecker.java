@@ -19,6 +19,7 @@ package nl.mpi.lamus.workspace.replace;
 import nl.mpi.lamus.workspace.replace.action.implementation.NodeReplaceAction;
 import java.util.List;
 import nl.mpi.lamus.exception.ProtectedNodeException;
+import nl.mpi.lamus.exception.IncompatibleNodesException;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -40,5 +41,5 @@ public interface NodeReplaceChecker {
      * @param actions list of actions
      */
     public void decideReplaceActions(WorkspaceNode oldNode, WorkspaceNode newNode, WorkspaceNode parentNode, boolean newNodeAlreadyLinked, List<NodeReplaceAction> actions)
-            throws ProtectedNodeException;
+            throws ProtectedNodeException, IncompatibleNodesException;
 }

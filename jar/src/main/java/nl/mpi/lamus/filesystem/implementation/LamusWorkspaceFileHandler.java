@@ -143,22 +143,25 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         try {
             orphansDirectory = archiveFileLocationProvider.getOrphansDirectory(workspace.getTopNodeArchiveURL().toURI());
         } catch (URISyntaxException ex) {
-            throw new UnsupportedOperationException("not handled yet");
+            logger.warn("Problem while trying to get the location of the orphans directory: " + ex.getMessage());
+            return new ArrayList<>();
         }
         
-        Collection<File> allFiles = FileUtils.listFiles(orphansDirectory, null, true);
+        Collection<File> allFiles = new ArrayList<>();
+        if(orphansDirectory.exists()) {
+            logger.debug("Listing files for orphans directory: " + orphansDirectory.getAbsolutePath());
+            allFiles = FileUtils.listFiles(orphansDirectory, null, true);
+        }
         Collection<File> fileAvailableForWorkspace = new ArrayList<>();
         
-        if(allFiles != null) {
-            for(File currentFile : allFiles) {
-                try {
-                    if(currentFile.isFile()) {
-                        workspaceAccessChecker.ensureNodeIsNotLocked(currentFile.toURI());
-                        fileAvailableForWorkspace.add(currentFile);
-                    }
-                } catch (NodeAccessException ex) {
-                    //do nothing, let the loop continue
+        for(File currentFile : allFiles) {
+            try {
+                if(currentFile.isFile()) {
+                    workspaceAccessChecker.ensureNodeIsNotLocked(currentFile.toURI());
+                    fileAvailableForWorkspace.add(currentFile);
                 }
+            } catch (NodeAccessException ex) {
+                //do nothing, let the loop continue
             }
         }
         

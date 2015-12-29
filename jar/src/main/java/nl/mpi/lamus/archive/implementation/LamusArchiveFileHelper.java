@@ -22,6 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.mpi.archiving.corpusstructure.core.FileInfo;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
+import nl.mpi.lamus.cmdi.profile.CmdiProfile;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.util.Checksum;
 import nl.mpi.util.OurURL;
@@ -50,11 +53,20 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     private long typeRecheckSizeLimitInBytes;
     
     @Autowired
+    @Qualifier("corpusstructureDirectoryName")
+    private String corpusstructureDirectoryName;
+    @Autowired
     @Qualifier("metadataDirectoryName")
     private String metadataDirectoryName;
     @Autowired
-    @Qualifier("resourcesDirectoryName")
-    private String resourcesDirectoryName;
+    @Qualifier("annotationsDirectoryName")
+    private String annotationsDirectoryName;
+    @Autowired
+    @Qualifier("mediaDirectoryName")
+    private String mediaDirectoryName;
+    @Autowired
+    @Qualifier("infoDirectoryName")
+    private String infoDirectoryName;
     
     @Autowired
     @Qualifier("trashCanBaseDirectory")
@@ -62,6 +74,10 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Autowired
     @Qualifier("versioningBaseDirectory")
     private File versioningBaseDirectory;
+    
+    @Autowired
+    private AllowedCmdiProfiles allowedCmdiProfiles;
+    
     
     /**
      * 
@@ -218,25 +234,58 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         FileUtils.forceMkdir(parentFile);
         FileUtils.touch(fileToCreate);
     }
-    
+
     /**
-     * @see ArchiveFileHelper#getDirectoryForFileType(java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType)
+     * @see ArchiveFileHelper#getDirectoryForNode(java.lang.String, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNode)
      */
     @Override
-    public String getDirectoryForFileType(String parentPath, WorkspaceNodeType nodeType) {
+    public String getDirectoryForNode(String parentPath, String parentCorpusNamePathToClosestTopNode, WorkspaceNode node) { // Not for top nodes
         
-        String metadataFolderPlusFilename = this.metadataDirectoryName + File.separator + FilenameUtils.getName(parentPath);
-        String parentBaseDirectory;
-        if(parentPath.endsWith(metadataFolderPlusFilename)) {
-            parentBaseDirectory = parentPath.replace(metadataFolderPlusFilename, "");
-        } else {
-            parentBaseDirectory = FilenameUtils.getFullPathNoEndSeparator(parentPath);
+        logger.debug("Getting directory for node. parentPath: '" + parentPath + "'; parentCorpusNamePathToClosestTopNode: '" + parentCorpusNamePathToClosestTopNode + "'; node: " + node.toString());
+        
+        String corpusstructureFolderPlusFilename = corpusstructureDirectoryName + File.separator + FilenameUtils.getName(parentPath);
+        
+        String closestTopNodeName = parentCorpusNamePathToClosestTopNode;
+        if(closestTopNodeName.contains(File.separator)) {
+            closestTopNodeName = parentCorpusNamePathToClosestTopNode.substring(0, parentCorpusNamePathToClosestTopNode.indexOf(File.separator));
         }
         
-        if(WorkspaceNodeType.METADATA.equals(nodeType)) {
-            return FilenameUtils.concat(parentBaseDirectory, this.metadataDirectoryName);
+        String topNodeBaseDirectory;
+        String topNodeBaseDirectoryPlusAncestorFolders;
+                
+        if(closestTopNodeName.isEmpty()) { // parent is top node
+            
+            topNodeBaseDirectory = parentPath.replace(corpusstructureFolderPlusFilename, "");
+            topNodeBaseDirectoryPlusAncestorFolders = topNodeBaseDirectory;
+            
         } else {
-            return FilenameUtils.concat(parentBaseDirectory, this.resourcesDirectoryName);
+        
+            topNodeBaseDirectory = findTopNodeBaseDirectory(parentPath, closestTopNodeName);
+            topNodeBaseDirectoryPlusAncestorFolders = topNodeBaseDirectory.replace(closestTopNodeName, parentCorpusNamePathToClosestTopNode);
+        }
+
+        if(WorkspaceNodeType.METADATA.equals(node.getType())) {
+            
+            CmdiProfile nodeProfile = allowedCmdiProfiles.getProfile(node.getProfileSchemaURI().toString());
+
+            if("corpus".equals(nodeProfile.getTranslateType())) {
+                return FilenameUtils.concat(topNodeBaseDirectory, corpusstructureDirectoryName);
+            } else if("session".equals(nodeProfile.getTranslateType())) {
+                return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, metadataDirectoryName);
+            } else {
+                throw new IllegalArgumentException("Metadata should be translated to either corpus or session");
+            }
+            
+        } else if(WorkspaceNodeType.RESOURCE_WRITTEN.equals(node.getType())) {
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, annotationsDirectoryName);
+        } else if(WorkspaceNodeType.RESOURCE_AUDIO.equals(node.getType()) ||
+                WorkspaceNodeType.RESOURCE_IMAGE.equals(node.getType()) ||
+                WorkspaceNodeType.RESOURCE_VIDEO.equals(node.getType())) {
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, mediaDirectoryName);
+        } else if(WorkspaceNodeType.RESOURCE_INFO.equals(node.getType())) {
+            return FilenameUtils.concat(topNodeBaseDirectoryPlusAncestorFolders, infoDirectoryName);
+        } else {
+            throw new IllegalStateException("Not supported node type");
         }
     }
 
@@ -340,5 +389,25 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         File subSubDirectory = new File(subDirectory, "" + workspaceID);
         
         return subSubDirectory;
+    }
+    
+    private String findTopNodeBaseDirectory(String directoryToCheck, String topNodeName) {
+        
+        String topNodeBaseDirectory = directoryToCheck;
+        
+        while(!topNodeBaseDirectory.endsWith(topNodeName)) {
+            topNodeBaseDirectory = topNodeBaseDirectory.substring(0, topNodeBaseDirectory.lastIndexOf(File.separator));
+        }
+        
+        
+        //TODO DOES THIS MAKE ANY SENSE????
+        
+        if(topNodeBaseDirectory.isEmpty()) {
+            throw new UnsupportedOperationException("not handled yet");
+        }
+        
+        
+        return topNodeBaseDirectory;
+        
     }
 }

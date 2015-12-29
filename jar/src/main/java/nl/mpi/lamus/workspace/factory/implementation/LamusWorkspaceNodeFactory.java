@@ -15,6 +15,7 @@
  */
 package nl.mpi.lamus.workspace.factory.implementation;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -69,10 +70,6 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
             MetadataDocument document, String name, boolean onSite, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        
-        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
-        
-//        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
         node.setName(name);
         node.setTitle(name);
         node.setType(WorkspaceNodeType.METADATA);
@@ -80,9 +77,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
         if(onSite) {
-            node.setStatus(WorkspaceNodeStatus.NODE_ISCOPY);
+            node.setStatus(WorkspaceNodeStatus.ARCHIVE_COPY);
         } else {
-            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+            node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         }
         
         node.setProtected(isProtected);
@@ -91,27 +88,26 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
     
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceResourceNode(int, java.net.URI, java.net.URL,
-     *      nl.mpi.metadata.api.model.Reference, java.lang.String, java.lang.String, boolean, boolean)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNode(int, java.net.URI, java.net.URL,
+     *          nl.mpi.metadata.api.model.Reference, java.lang.String,
+     *          nl.mpi.lamus.workspace.model.WorkspaceNodeType, java.lang.String, boolean, boolean) 
      */
     @Override
-    public WorkspaceNode getNewWorkspaceResourceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
-            Reference resourceReference, String mimetype, String name, boolean onSite, boolean isProtected) {
+    public WorkspaceNode getNewWorkspaceNode(int workspaceID, URI archiveNodeURI, URL archiveNodeURL,
+            Reference resourceReference, String mimetype, WorkspaceNodeType nodeType,
+            String name, boolean onSite, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode(workspaceID, archiveNodeURI, archiveNodeURL);
-        
-        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
-        
-        String displayValue = FilenameUtils.getName(archiveNodeURL.getPath());
-        node.setName(displayValue);
-        node.setTitle(displayValue);
-        node.setType(WorkspaceNodeType.RESOURCE);
+        String nameToUse = name != null ? name : FilenameUtils.getName(archiveNodeURL.getPath());
+        node.setName(nameToUse);
+        node.setTitle(nameToUse);
+        node.setType(nodeType);
         node.setFormat(mimetype);
         
         if(onSite) {
-            node.setStatus(WorkspaceNodeStatus.NODE_VIRTUAL);
+            node.setStatus(WorkspaceNodeStatus.VIRTUAL);
         } else {
-            node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+            node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         }
         
         node.setProtected(isProtected);
@@ -120,28 +116,27 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(int, java.net.URI, java.net.URL, java.net.URL, java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
+     * @see WorkspaceNodeFactory#getNewWorkspaceNodeFromFile(
+     *  int, java.net.URI, java.net.URI, java.net.URL, java.net.URI, java.lang.String,
+     *  java.lang.String, nl.mpi.lamus.workspace.model.WorkspaceNodeType,
+     *  nl.mpi.lamus.workspace.model.WorkspaceNodeStatus, boolean)
      */
     @Override
-    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI, URI originURI, URL workspaceURL,
-        String mimetype, WorkspaceNodeStatus status, boolean isProtected) {
+    public WorkspaceNode getNewWorkspaceNodeFromFile(int workspaceID, URI archiveURI,
+            URI originURI, URL workspaceURL, URI profileSchemaURI, String name,
+            String mimetype, WorkspaceNodeType nodeType,
+            WorkspaceNodeStatus status, boolean isProtected) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
-        String displayValue = FilenameUtils.getName(workspaceURL.getPath());
-        node.setName(displayValue);
-        node.setTitle(displayValue);
+        String nameToUse = name != null ? name : FilenameUtils.getName(workspaceURL.getPath());
+        node.setName(nameToUse);
+        node.setTitle(nameToUse);
         node.setOriginURI(originURI);
         node.setWorkspaceURL(workspaceURL);
+        node.setProfileSchemaURI(profileSchemaURI);
         node.setFormat(mimetype);
-        
-//        if("text/x-cmdi+xml".equals(mimetype)) { //TODO get this based on what? typechecker?
-        if(workspaceURL.toString().endsWith("cmdi")) {
-            node.setType(WorkspaceNodeType.METADATA);
-        } else {
-            node.setType(WorkspaceNodeType.RESOURCE);
-        }
-        
+        node.setType(nodeType);
         node.setArchiveURI(archiveURI);
         
         node.setStatus(status);
@@ -152,16 +147,22 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
     }
 
     /**
-     * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URL)
+     * @see WorkspaceNodeFactory#getNewExternalNode(int, java.net.URI)
      */
     @Override
     public WorkspaceNode getNewExternalNode(int workpaceID, URI originURI) {
         
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workpaceID);
-        String displayValue = FilenameUtils.getName(originURI.getSchemeSpecificPart());
-        node.setName(displayValue);
-        node.setTitle(displayValue);
+        String uriSchemeSpecificPart = originURI.getSchemeSpecificPart();
+        String nameToUse;
+        if(!uriSchemeSpecificPart.endsWith(File.separator)) {
+            nameToUse = FilenameUtils.getName(uriSchemeSpecificPart);
+        } else {
+            nameToUse = FilenameUtils.getName(uriSchemeSpecificPart.substring(0, uriSchemeSpecificPart.length() - 1));
+        }
+        node.setName(nameToUse);
+        node.setTitle(nameToUse);
         node.setOriginURI(originURI);
 //        if(originURI.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
 //            node.setType(WorkspaceNodeType.METADATA);
@@ -169,7 +170,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
 //            node.setType(WorkspaceNodeType.RESOURCE);
 //        }
         node.setType(WorkspaceNodeType.UNKNOWN);
-        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
         node.setProtected(Boolean.FALSE);
         
@@ -185,11 +186,9 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         WorkspaceNode node = new LamusWorkspaceNode();
         node.setWorkspaceID(workspaceID);
         
-        //TODO Use name instead? Was showing weird values for CMDI (e.g. "collection")
-        
-        String displayValue = FilenameUtils.getName(archiveURL.getPath());
-        node.setName(displayValue);
-        node.setTitle(displayValue);
+        String nameToUse = FilenameUtils.getName(archiveURL.getPath());
+        node.setName(nameToUse);
+        node.setTitle(nameToUse);
         
         if(archivePID != null) {
             node.setArchiveURI(archivePID);
@@ -203,12 +202,8 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         } catch (URISyntaxException ex) {
             logger.warn("URL (" + archiveURL + ") couldn't be converted to URI. OriginURI not set.");
         }
-        if(archiveURL.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
-            node.setType(WorkspaceNodeType.METADATA);
-        } else {
-            node.setType(WorkspaceNodeType.RESOURCE);
-        }
-        node.setStatus(WorkspaceNodeStatus.NODE_EXTERNAL);
+        node.setType(WorkspaceNodeType.UNKNOWN);
+        node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
         node.setProtected(Boolean.FALSE);
         

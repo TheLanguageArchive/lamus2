@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.metadata.api.model.Reference;
@@ -78,8 +79,8 @@ public class LamusNodeImporterAssignerTest {
 
     
     @Test
-    public void getMetadataImporter() throws URISyntaxException {
-        Reference metadataReference = new MetadataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
+    public void getMetadataImporter() throws URISyntaxException, UnusableReferenceTypeException {
+        Reference metadataReference = new MetadataResourceProxy("id", URI.create("http:/some/path/metadata.cmdi"), "text/x-cmdi+xml");
         
         NodeImporter retrievedNodeImporter = nodeImporterAssigner.getImporterForReference(metadataReference);
         
@@ -88,8 +89,8 @@ public class LamusNodeImporterAssignerTest {
     }
 
     @Test
-    public void getResourceImporter() throws URISyntaxException {
-        Reference resourceReference = new DataResourceProxy("id", new URI("htto:/lalala.la"), "mimetype");
+    public void getResourceImporter() throws URISyntaxException, UnusableReferenceTypeException {
+        Reference resourceReference = new DataResourceProxy("id", URI.create("http:/some/path/resource.txt"), "text/plain");
         
         NodeImporter retrievedNodeImporter = nodeImporterAssigner.getImporterForReference(resourceReference);
         
@@ -98,7 +99,32 @@ public class LamusNodeImporterAssignerTest {
     }
     
     @Test
-    public void getImporterForDifferentType() throws URISyntaxException {
+    public void getResourceImporter_ignoreCase() throws URISyntaxException, UnusableReferenceTypeException {
+        Reference resourceReference = new DataResourceProxy("id", URI.create("http:/some/path/resource.txt"), "RESOURCE", "text/plain");
+        
+        NodeImporter retrievedNodeImporter = nodeImporterAssigner.getImporterForReference(resourceReference);
+        
+        assertNotNull(retrievedNodeImporter);
+        assertTrue(retrievedNodeImporter instanceof ResourceNodeImporter);
+    }
+    
+    @Test
+    public void getImporterForOtherResourceType() {
+        Reference resourceReferenceSearchPage = new DataResourceProxy("id", URI.create("http:/some/path/search.html"), "SearchPage", "text/html");
+        
+        String expectedExceptionMessage = "Reference of type [" + resourceReferenceSearchPage.getType() + "] cannot be imported.";
+        
+        try {
+            nodeImporterAssigner.getImporterForReference(resourceReferenceSearchPage);
+            fail("should have thrown exception");
+        } catch(UnusableReferenceTypeException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+            assertEquals("Exception reference type different from expected", resourceReferenceSearchPage.getType(), ex.getReferenceType());
+        }
+    }
+    
+    @Test
+    public void getImporterForDifferentType() throws URISyntaxException, UnusableReferenceTypeException {
         Reference otherReference = new SomeOtherReference();
         
         String expectedExceptionMessage = "Unexpected reference type";

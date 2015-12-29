@@ -21,15 +21,15 @@ import java.util.List;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
-import nl.mpi.lamus.web.components.AutoDisablingAjaxButton;
 import nl.mpi.lamus.web.components.NavigationPanel;
-import nl.mpi.lamus.web.model.WorkspaceModel;
+import nl.mpi.lamus.web.model.WorkspaceModelProvider;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
@@ -52,6 +52,9 @@ public class SelectWorkspacePage extends LamusPage {
     
     @SpringBean
     private LamusWicketPagesProvider pagesProvider;
+    
+    @SpringBean
+    private WorkspaceModelProvider workspaceModelProvider;
     
     final String currentUserId = LamusSession.get().getUserId();
 
@@ -89,7 +92,13 @@ public class SelectWorkspacePage extends LamusPage {
         } else {
             showPanel = false;
         }
-        IModel<Workspace> workspaceModel = new WorkspaceModel(defaultSelectedWs);
+        
+        IModel<Workspace> workspaceModel;
+        if(!showPanel) {
+            workspaceModel = null;
+        } else {
+            workspaceModel = workspaceModelProvider.getWorkspaceModel(defaultSelectedWs.getWorkspaceID());
+        }
         
         ListChoice<Workspace> listWorkspaces = new ListChoice<>("workspaceSelection", workspaceModel, myWSList, new ChoiceRenderer<Workspace>("workspaceSelectionDisplayString"));
         listWorkspaces.setMaxRows(5);
@@ -97,7 +106,7 @@ public class SelectWorkspacePage extends LamusPage {
         listWorkspaces.setRequired(true);
         final Form<Workspace> openWsForm = new Form<>(id, workspaceModel);
 
-        Button submitButton = new AutoDisablingAjaxButton("openWorkspace") {
+        Button submitButton = new AjaxButton("openWorkspace") {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
@@ -106,7 +115,7 @@ public class SelectWorkspacePage extends LamusPage {
                 
                 try {
                     if(form.getModelObject() != null) {
-                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, openWsForm.getModelObject().getWorkspaceID());
+                        Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, ((Workspace)form.getModelObject()).getWorkspaceID());
                         setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
                     } else {
                         //TODO MESSAGE IN FEEDBACK PANEL?

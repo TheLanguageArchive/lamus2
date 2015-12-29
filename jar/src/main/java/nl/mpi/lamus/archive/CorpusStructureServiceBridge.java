@@ -20,8 +20,10 @@ import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
+import nl.mpi.lamus.exception.NodeUrlUpdateException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 
 /**
  * Interface providing methods which interact with the
@@ -49,4 +51,10 @@ public interface CorpusStructureServiceBridge {
      * @return String containing the state of the crawler
      */
     public String getCrawlerState(String crawlerID) throws CrawlerStateRetrievalException;
+    
+    /**
+     * Triggers the update of the URLs belonging to the replaced nodes in the archive.
+     * @param replacedNodesUrlUpdates Collection containing the node URL updates that should be applied in the corpusstructure database
+     */
+    public void updateReplacedNodesUrls(Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodesUrlUpdates) throws NodeUrlUpdateException;
 }

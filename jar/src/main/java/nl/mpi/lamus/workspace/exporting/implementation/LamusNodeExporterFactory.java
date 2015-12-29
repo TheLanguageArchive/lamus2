@@ -57,20 +57,21 @@ public class LamusNodeExporterFactory implements NodeExporterFactory {
             boolean hasParents = !workspaceDao.getParentWorkspaceNodes(node.getWorkspaceNodeID()).isEmpty();
             
             if(WorkspaceExportPhase.UNLINKED_NODES_EXPORT.equals(exportPhase) &&
-                    !WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus()) &&
-                    !WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus())) {
+                    !WorkspaceNodeStatus.DELETED.equals(node.getStatus()) &&
+                    !WorkspaceNodeStatus.EXTERNAL_DELETED.equals(node.getStatus()) &&
+                    !WorkspaceNodeStatus.REPLACED.equals(node.getStatus())) {
                 return unlinkedNodeExporter;
             }
 
-            if(WorkspaceNodeStatus.NODE_UPLOADED.equals(node.getStatus())) {
+            if(WorkspaceNodeStatus.UPLOADED.equals(node.getStatus())) {
                 return addedNodeExporter;
             }
-            if(WorkspaceNodeStatus.NODE_CREATED.equals(node.getStatus())) {
+            if(WorkspaceNodeStatus.CREATED.equals(node.getStatus())) {
                 return addedNodeExporter;
             }
-            if(WorkspaceNodeStatus.NODE_DELETED.equals(node.getStatus()) ||
-                    WorkspaceNodeStatus.NODE_EXTERNAL_DELETED.equals(node.getStatus()) ||
-                    WorkspaceNodeStatus.NODE_REPLACED.equals(node.getStatus())) {
+            if(WorkspaceNodeStatus.DELETED.equals(node.getStatus()) ||
+                    WorkspaceNodeStatus.EXTERNAL_DELETED.equals(node.getStatus()) ||
+                    WorkspaceNodeStatus.REPLACED.equals(node.getStatus())) {
                 return replacedOrDeletedNodeExporter;
             }
         }

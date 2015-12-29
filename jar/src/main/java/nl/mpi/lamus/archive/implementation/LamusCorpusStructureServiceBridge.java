@@ -25,9 +25,11 @@ import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.archive.JsonTransformationHandler;
 import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
+import nl.mpi.lamus.exception.NodeUrlUpdateException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.util.JerseyHelper;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
+import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,13 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Autowired
     @Qualifier("corpusStructureServiceCrawlerDetailsPath")
     private String corpusStructureServiceCrawlerDetailsPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceArchiveObjectsPath")
+    private String corpusStructureServiceArchiveObjectsPath;
+    @Autowired
+    @Qualifier("corpusStructureServiceArchiveObjectsUpdateUrlPath")
+    private String corpusStructureServiceArchiveObjectsUpdateUrlPath;
+    
     
     @Autowired
     public LamusCorpusStructureServiceBridge(JsonTransformationHandler jsonTransformationHandler, JerseyHelper jerseyHelper) {
@@ -78,14 +87,14 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     public void createVersions(Collection<WorkspaceNodeReplacement> nodeReplacements) throws VersionCreationException {
         
         JsonObject requestJsonObject =
-                jsonTransformationHandler.createJsonObjectFromNodeReplacementCollection(nodeReplacements);
+                jsonTransformationHandler.createVersioningJsonObjectFromNodeReplacementCollection(nodeReplacements);
         
         logger.debug("JSON objects to pass to the version creating service were successfully generated");
         
         JsonObject responseJsonObject;
         try {
             responseJsonObject =
-                jerseyHelper.postRequestCreateVersions(
+                jerseyHelper.postRequestCorpusStructure(
                     requestJsonObject,
                     corpusStructureServiceLocation,
                     corpusStructureServiceVersioningPath,
@@ -127,6 +136,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
     @Override
     public String callCrawler(URI nodeUri) throws CrawlerInvocationException {
         
+        logger.debug("Calling crawler for URI " + nodeUri);
+        
         JsonObject responseJsonObject;
         try {
             responseJsonObject =
@@ -141,6 +152,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
             throw new CrawlerInvocationException(errorMessage, ex);
         }
         
+        logger.debug("Getting crawler ID after invocation");
+        
         String crawlerId = jsonTransformationHandler.getCrawlerIdFromJsonObject(responseJsonObject);
         
         return crawlerId;
@@ -151,6 +164,8 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
      */
     @Override
     public String getCrawlerState(String crawlerID) throws CrawlerStateRetrievalException {
+        
+        logger.debug("Getting state of crawler with ID " + crawlerID);
         
         JsonObject responseJsonObject;
         try {
@@ -170,5 +185,54 @@ public class LamusCorpusStructureServiceBridge implements CorpusStructureService
         
         return crawlerState;
     }
-    
+
+    /**
+     * @see CorpusStructureServiceBridge#updateReplacedNodesUrls(java.util.Collection)
+     */
+    @Override
+    public void updateReplacedNodesUrls(Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodesUrlUpdates) throws NodeUrlUpdateException {
+        
+        JsonObject requestJsonObject =
+            jsonTransformationHandler.createUrlUpdateJsonObjectFromReplacedNodeUrlUpdateCollection(replacedNodesUrlUpdates);
+        
+        logger.debug("JSON objects to pass to the node URL updating service were successfully generated");
+        
+        JsonObject responseJsonObject;
+        try {
+            responseJsonObject =
+                jerseyHelper.postRequestCorpusStructure(
+                    requestJsonObject,
+                    corpusStructureServiceLocation,
+                    corpusStructureServiceArchiveObjectsPath,
+                    corpusStructureServiceArchiveObjectsUpdateUrlPath);
+        } catch (Exception ex) {
+            String errorMessage = "Error with a URI during node URL update";
+            logger.error(errorMessage, ex);
+            throw new NodeUrlUpdateException(errorMessage, ex);
+        }
+        
+        logger.debug("Node URL update service was called and a response JSON object was retrieved");
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> responseReplacedNodeUrlUpdates;
+        try {
+            
+            responseReplacedNodeUrlUpdates =
+                    jsonTransformationHandler.createReplacedNodeUrlUpdateCollectionFromJsonObject(responseJsonObject);
+        } catch (URISyntaxException ex) {
+            String errorMessage = "Error with a URI during node URL update";
+            logger.error(errorMessage, ex);
+            throw new NodeUrlUpdateException(errorMessage, ex);
+        }
+        
+        logger.debug("JSON object containing the response was parsed");
+        
+        for(WorkspaceReplacedNodeUrlUpdate urlUpdate : responseReplacedNodeUrlUpdates) {
+            logger.debug("Retrieving result of URL update. Node URI: " + urlUpdate.getNodeUri().toString() + " ; Updated URL: " + urlUpdate.getUpdatedUrl().toString());
+            if(!"OK".equals(urlUpdate.getUpdateStatus().toUpperCase(Locale.ENGLISH))) {
+                String errorMessage = "Error during node URL update. Status: " + urlUpdate.getUpdateStatus() + "; error: " + urlUpdate.getUpdateError();
+                logger.error(errorMessage);
+                throw new NodeUrlUpdateException(errorMessage, null);
+            }
+        }
+    }
 }

@@ -171,6 +171,7 @@ public class LamusPermissionAdjusterTest {
             //loop - first iteration
             oneOf(mockUnlinkedNode1).isExternal(); will(returnValue(Boolean.FALSE));
             allowing(mockUnlinkedNode1).getArchiveURI(); will(returnValue(null));
+            allowing(mockUnlinkedNode1).getArchiveURL(); will(returnValue(null));
             oneOf(mockUnlinkedNode1).getWorkspaceURL(); will(returnValue(localURL_UnlinkedNode1));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(localFile_UnlinkedNode1); will(returnValue(Boolean.TRUE));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_UnlinkedNode1); will(returnValue(mockCurrentPermissions1));
@@ -180,6 +181,7 @@ public class LamusPermissionAdjusterTest {
             //loop - second iteration
             oneOf(mockUnlinkedNodeChild1).isExternal(); will(returnValue(Boolean.FALSE));
             allowing(mockUnlinkedNodeChild1).getArchiveURI(); will(returnValue(null));
+            allowing(mockUnlinkedNodeChild1).getArchiveURL(); will(returnValue(null));
             oneOf(mockUnlinkedNodeChild1).getWorkspaceURL(); will(returnValue(localURL_UnlinkedNodeChild1));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(localFile_UnlinkedNodeChild1); will(returnValue(Boolean.TRUE));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_UnlinkedNodeChild1); will(returnValue(mockCurrentPermissionsChild1));
@@ -189,6 +191,7 @@ public class LamusPermissionAdjusterTest {
             //loop - third iteration
             oneOf(mockUnlinkedNode2).isExternal(); will(returnValue(Boolean.FALSE));
             allowing(mockUnlinkedNode2).getArchiveURI(); will(returnValue(null));
+            allowing(mockUnlinkedNode2).getArchiveURL(); will(returnValue(null));
             oneOf(mockUnlinkedNode2).getWorkspaceURL(); will(returnValue(localURL_UnlnkedNode2));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(localFile_UnlinkedNode2); will(returnValue(Boolean.TRUE));
             oneOf(mockPermissionAdjusterHelper).getCurrentPermissionsForPath(localPath_UnlinkedNode2); will(returnValue(mockCurrentPermissions2));
@@ -259,6 +262,7 @@ public class LamusPermissionAdjusterTest {
             //loop - first iteration
             oneOf(mockNode1).isExternal(); will(returnValue(Boolean.FALSE));
             allowing(mockNode1).getArchiveURI(); will(returnValue(null));
+            allowing(mockNode1).getArchiveURL(); will(returnValue(null));
             oneOf(mockNode1).getWorkspaceURL(); will(returnValue(localURL_Node1));
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(localFile_Node1); will(returnValue(Boolean.FALSE));
             //node was uploaded and deleted, so it never got an archive URL

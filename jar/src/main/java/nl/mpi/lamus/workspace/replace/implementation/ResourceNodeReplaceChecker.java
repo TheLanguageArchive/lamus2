@@ -60,16 +60,18 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
             throws ProtectedNodeException {
         
         logger.debug("Deciding which actions should take place to perform the replacement of resource node " + oldNode.getWorkspaceNodeID() + " by node " + newNode.getWorkspaceNodeID());
-
+        
+        // not actually replacing this one, so this check should be done before anything else can block the action
+        if(oldNode.getWorkspaceNodeID() == newNode.getWorkspaceNodeID()) {
+            logger.debug("Old Node and New Node are the same. Unlinking from old parent.");
+            replaceActionManager.addActionToList(replaceActionFactory.getUnlinkFromOldParentAction(oldNode, parentNode), actions);
+            return;
+        }
+        
         // if the node to replace is protected, the replace action should not go ahead
         if(oldNode.isProtected()) {
             String message = "Cannot proceed with replacement because old node (ID = " + oldNode.getWorkspaceNodeID() + ") is protected (WS ID = " + oldNode.getWorkspaceID() + ").";
             throw new ProtectedNodeException(message, oldNode.getArchiveURI(), oldNode.getWorkspaceID());
-        }
-        
-        if(oldNode.getWorkspaceNodeID() == newNode.getWorkspaceNodeID()) {
-            logger.debug("Old Node and New Node are the same.");
-            return;
         }
         
         if(oldNode.isExternal() || !oldNode.getFormat().equals(newNode.getFormat())) {
