@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.web.components;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -127,6 +128,9 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                             //tell the unlinked nodes panel to clear the selected unlinked nodes
                             send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
 
+                            //clear also the variable stored in the panel
+                            clearSelectedUnlinkedNodes();
+
                         } catch(WorkspaceException | IllegalArgumentException | ProtectedNodeException ex) {
                             error(ex.getMessage());
                         }
@@ -157,7 +161,11 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
     public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
         this.selectedUnlinkedNodes = selectedUnlinkedNodes;
     }
-    
+
+
+    private void clearSelectedUnlinkedNodes() {
+        setSelectedUnlinkedNodes(new ArrayList<WorkspaceTreeNode>());
+    }
     
     private String getIconNameForNodeAction(WsTreeNodesAction action) {
         
