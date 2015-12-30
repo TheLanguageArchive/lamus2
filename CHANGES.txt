@@ -1,3 +1,21 @@
+lamus2-1.5.0-RC1 (2015-12-30)
+
+    Changes:
+        - HANDLE-UTILS: Updated version of the handle-utils library.
+        - SCHEMATRON: Updated version of the schematron library.
+
+    Fixes:
+        - MANAGEMENT TABLE: Fixed the issue with the workspace management table,
+          in which different pages would display the same workspaces (#4781).
+        - DELETE UPLOADED NODE: Fixed the issue with deleting uploaded nodes after
+          linked in the tree (the references wouldn't be removed from the parent) (#4802).
+        - FEEDBACK PANEL: Fixed the issue with the feedback panel not displaying the
+          correct message after the workspace submission (#4799).
+        - LINK BUTTON: Fixed the issue with the link button. After pressing it,
+          the selected unlinked node was not being cleared, so every time it was
+          pressed after that an error message would be displayed (#4800).
+
+
 lamus2-1.4.1-RC1 (2015-12-01)
 
     Fixes:
