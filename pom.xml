@@ -11,7 +11,7 @@
         
     <groupId>nl.mpi</groupId>
     <artifactId>lamus2.parent</artifactId>
-    <version>1.5.0-RC1</version>
+    <version>1.5.0-RC2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Lamus2 (Parent project)</name>
     <description>Parent pom for Lamus2 web app</description>
@@ -26,7 +26,7 @@
     </organization>
     
     <scm>
-	<developerConnection>scm:svn:https://svn.mpi.nl/LAT/lamus2/tags/lamus2-1.5.0-RC1</developerConnection>
+	<developerConnection>scm:svn:https://svn.mpi.nl/LAT/lamus2/trunk/</developerConnection>
     </scm>
 
     <modules>
