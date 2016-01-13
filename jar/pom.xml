@@ -284,6 +284,12 @@
             <groupId>nl.mpi.annot</groupId>
             <artifactId>annot-tools</artifactId>
             <version>1.1.14</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
