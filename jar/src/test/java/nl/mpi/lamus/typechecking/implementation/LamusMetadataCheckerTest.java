@@ -106,7 +106,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateUploadedFile(fileToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -145,15 +145,19 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_missingMimetype.cmdi");
+        final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetypeTwice.cmdi");
         final String expectedTest = "current()/cmd:ResourceType/@mimetype";
         final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
         
         Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
         Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
+        Collection<MetadataValidationIssue> issues3 = metadataChecker.validateUploadedFile(fileToCheck3);
         
-        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
-        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues3, fileToCheck3, expectedTest, expectedMessage, expectedLevel);
+        assertTrue("Number of issues different from expected", issues3.size() == 2);
     }
     
     @Test
@@ -171,8 +175,8 @@ public class LamusMetadataCheckerTest {
         Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
         Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
         
-        assertAtLeastOneIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
-        assertAtLeastOneIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues1, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues2, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -215,7 +219,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateUploadedFile(fileToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     //validate submit phase
@@ -233,7 +237,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -248,7 +252,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -263,7 +267,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -285,9 +289,11 @@ public class LamusMetadataCheckerTest {
         
         final File fileToCheck1 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetype.cmdi");
         final File fileToCheck2 = getResourceFromLocation("cmdi_validation/testingReference_Resource_missingMimetype.cmdi");
+        final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetypeTwice.cmdi");
         final Collection<File> filesToCheck = new ArrayList<>();
         filesToCheck.add(fileToCheck1);
         filesToCheck.add(fileToCheck2);
+        filesToCheck.add(fileToCheck3);
         
         final String expectedTest = "current()/cmd:ResourceType/@mimetype";
         final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
@@ -295,7 +301,10 @@ public class LamusMetadataCheckerTest {
         
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertTrue("Number of issues different from expected", issues.size() == 4);
+        assertCollectionContainsIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck2, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck3, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -316,7 +325,7 @@ public class LamusMetadataCheckerTest {
         
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck1, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -350,7 +359,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -365,7 +374,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -380,7 +389,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -410,7 +419,7 @@ public class LamusMetadataCheckerTest {
         final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
-        assertAtLeastOneIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
+        assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
     }
     
     @Test
@@ -430,21 +439,8 @@ public class LamusMetadataCheckerTest {
         return new File(URLDecoder.decode(getClass().getClassLoader().getResource(location).getFile()));
     }
    
-    private void assertAtLeastOneIssue(Collection<MetadataValidationIssue> issues, File fileToCheck, String expectedTest, String expectedMessage, MetadataValidationIssueLevel expectedLevel) {
+    private void assertCollectionContainsIssue(Collection<MetadataValidationIssue> issues, File fileToCheck, String expectedTest, String expectedMessage, MetadataValidationIssueLevel expectedLevel) {
         assertFalse("Issues collection should not be empty", issues.isEmpty());
-        
-        MetadataValidationIssue found = null;
-        for(MetadataValidationIssue issue : issues) {
-            if(expectedTest.equals(issue.getAssertionTest())) {
-                found = issue;
-                break;
-            }
-        }
-        
-        assertNotNull("Expected issue not found", found);
-        
-        assertEquals("File different from expected", fileToCheck, found.getMetadataFile());
-        assertEquals("Message different from expected", expectedMessage, found.getAssertionErrorMessage());
-        assertEquals("Level different from expected", expectedLevel, found.getAssertionErrorLevel());
+        assertTrue("Expected issue not found in issues collection", issues.contains(new MetadataValidationIssue(fileToCheck, expectedTest, expectedMessage, expectedLevel.name())));
     }
 }
