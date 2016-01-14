@@ -122,6 +122,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     public File uploadFileIntoWorkspace(int workspaceID, InputStream inputStream, String filename)
             throws IOException, DisallowedPathException {
         
+        
+        assureFilenameIsValid(filename);
+        
         try {
             workspaceDirectoryHandler.ensurePathIsAllowed(filename);
         } catch(DisallowedPathException ex) {
@@ -156,6 +159,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             String entryName = nextEntry.getName();
 
+            assureFilenameIsValid(entryName);
+            
             try {
                 workspaceDirectoryHandler.ensurePathIsAllowed(entryName);
             } catch(DisallowedPathException ex) {
@@ -378,6 +383,16 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             logger.warn("Couldn't delete created directory (" + fileOrDir + ") because it's not empty");
         } catch(IOException ex) {
             logger.warn("Couldn't delete uploaded file (" + fileOrDir + ")");
+        }
+    }
+    
+    private void assureFilenameIsValid(String filename) throws DisallowedPathException {
+        
+        String correctedFilename = archiveFileHelper.correctPathElement(filename, "Uploading file");
+        if(!filename.equals(correctedFilename)) {
+            String message = "Filename '" + filename + "' is not valid. It should not contain special characters.";
+            logger.warn(message);
+            throw new DisallowedPathException(filename, message);
         }
     }
 }

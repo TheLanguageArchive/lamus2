@@ -84,8 +84,6 @@ import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
-import static org.hamcrest.Matchers.*;
-
 import org.jmock.lib.concurrent.Synchroniser;
 
 /**
@@ -203,6 +201,25 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
+    public void uploadFile_nameNotValid() throws IOException, DisallowedPathException {
+        
+        final String filename = "file with spaces.txt";
+        final String correctedFilename = "file_with_spaces.txt";
+        
+        context.checking(new Expectations() {{
+        
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(filename)), with(any(String.class))); will(returnValue(correctedFilename));
+        }});
+        
+        try {
+            uploader.uploadFileIntoWorkspace(workspaceID, mockInputStream, filename);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Problematic filename different from expected", filename, ex.getProblematicPath());
+        }
+    }
+    
+    @Test
     public void uploadFile_nameNotAllowed() throws IOException, DisallowedPathException {
         
         final String filename = "temp";
@@ -210,6 +227,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
         
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(filename)), with(any(String.class))); will(returnValue(filename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename); will(throwException(expectedException));
         }});
         
@@ -229,6 +247,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(filename)), with(any(String.class))); will(returnValue(filename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile);
@@ -247,6 +266,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(filename)), with(any(String.class))); will(returnValue(filename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile);
@@ -267,6 +287,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(filename)), with(any(String.class))); will(returnValue(filename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(filename);
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockInputStream, expectedFile); will(throwException(expectedException));
@@ -292,6 +313,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
@@ -318,6 +340,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
@@ -343,6 +366,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
@@ -370,6 +394,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
@@ -379,6 +404,7 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
@@ -410,6 +436,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
@@ -419,6 +446,7 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
@@ -452,6 +480,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
@@ -461,6 +490,7 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockThirdZipEntry));
@@ -468,6 +498,7 @@ public class LamusWorkspaceUploaderTest {
             // third loop iteration
             
             allowing(mockThirdZipEntry).getName(); will(returnValue(thirdEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thirdEntryName)), with(any(String.class))); will(returnValue(thirdEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(thirdEntryName);
             oneOf(mockThirdZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
@@ -477,6 +508,30 @@ public class LamusWorkspaceUploaderTest {
         ZipUploadResult result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
         
         assertEquals("Result different from expected", expectedResult, result);
+    }
+    
+    @Test
+    public void uploadZipFile_File_NameNotValid() throws IOException, DisallowedPathException {
+        
+        final String firstEntryName = "file with spaces.txt";
+        final String correctedEntryName = "file_with_spaces.txt";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(correctedEntryName));
+            
+            // nothing was created, so nothing has to be deleted
+        }});
+        
+        try {
+            uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+            fail("should have thrown exception");
+        } catch(DisallowedPathException ex) {
+            assertEquals("Problematic filename different from expected", firstEntryName, ex.getProblematicPath());
+        }
     }
     
     @Test
@@ -491,6 +546,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName); will(throwException(expectedException));
             
             // nothing was created, so nothing has to be deleted
@@ -520,6 +576,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
@@ -529,6 +586,7 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
@@ -537,6 +595,7 @@ public class LamusWorkspaceUploaderTest {
             // third loop iteration
             
             allowing(mockThirdZipEntry).getName(); will(returnValue(thirdEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thirdEntryName)), with(any(String.class))); will(returnValue(thirdEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(thirdEntryName); will(throwException(expectedException));
             
             // folder and file were created, so will have to be deleted in this case
