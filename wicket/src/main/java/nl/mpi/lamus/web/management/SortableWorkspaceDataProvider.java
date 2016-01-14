@@ -21,6 +21,7 @@ import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
+import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 
@@ -30,13 +31,13 @@ import org.apache.wicket.model.IModel;
  */
 public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspace, String> {
     
-    private WorkspaceService workspaceService;
-    
-    private List<Workspace> allWorkspaces;
+    private final WorkspaceService workspaceService;
             
 
     public SortableWorkspaceDataProvider(WorkspaceService wsService) {
         this.workspaceService = wsService;
+        
+        setSort("workspaceID", SortOrder.ASCENDING);
     }
     
     @Override
@@ -54,10 +55,7 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
 
     @Override
     public long size() {
-        if(allWorkspaces == null) {
-            callListAllWorkspaces();
-        }
-        return allWorkspaces.size();
+        return getAllWorkspaces().size();
     }
 
     @Override
@@ -66,10 +64,6 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
         return new WorkspaceModel(object);
     }
  
-    
-    private void callListAllWorkspaces() {
-        allWorkspaces = workspaceService.listAllWorkspaces();
-    }
     
     private List<Workspace> getAllWorkspaces() {
         return workspaceService.listAllWorkspaces();
