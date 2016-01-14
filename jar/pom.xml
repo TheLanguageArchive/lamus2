@@ -200,7 +200,7 @@
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-provider</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.openejb</groupId>
@@ -212,7 +212,7 @@
         <dependency>
             <groupId>nl.mpi.corpusstructure</groupId>
             <artifactId>corpus-structure-2-adapter</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>net.handle</groupId>
