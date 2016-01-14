@@ -18,6 +18,7 @@ package nl.mpi.lamus.typechecking.implementation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
@@ -98,7 +99,21 @@ public class LamusTypecheckHandlerTest {
         
         assertEquals("Retrieved result is different from expected", expectedResult, retrievedResult);
     }
-    
+
+    @Test
+    public void reallyTypecheck() throws URISyntaxException, IOException {
+
+        String filename = "some_text_file.txt";
+        URL fileURL = getClass().getClassLoader().getResource("nl/mpi/lamus/typechecking/implementation/" + filename).toURI().toURL();
+        
+        TypecheckHandler handler = new LamusTypecheckHandler(mockTypechecker, new DeepFileType());
+
+        String retrievedResult = handler.deepTypecheck(fileURL, filename);
+
+        System.out.println(retrievedResult);
+        assertTrue("Retrieved result is different from expected", retrievedResult.contains("true") && retrievedResult.contains("GOOD"));
+    }
+
     /**
      * Test of isFileArchivable method, of class LamusTypecheckHandler.
      * 
