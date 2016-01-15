@@ -315,7 +315,33 @@ public class LamusWorkspaceUploaderTest {
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+        }});
+        
+        ZipUploadResult result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+        
+        assertEquals("Result different from expected", expectedResult, result);
+    }
+    
+    @Test
+    public void uploadZipFile_IsDirectory_EndingWithSlash() throws IOException, DisallowedPathException {
+        
+        final String firstEntryName = "directory/";
+        final String firstEntryNameWithoutSlash = "directory";
+        
+        final ZipUploadResult expectedResult = new ZipUploadResult();
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+            allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(firstEntryNameWithoutSlash));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
@@ -342,7 +368,7 @@ public class LamusWorkspaceUploaderTest {
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -368,7 +394,7 @@ public class LamusWorkspaceUploaderTest {
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, firstEntryFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -382,8 +408,10 @@ public class LamusWorkspaceUploaderTest {
     public void uploadZipFile_DirectoryAndFile() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "directory/";
+        final String firstEntryNameWithoutSlash = "directory";
         final File createdDirectory = new File(workspaceUploadDirectory, firstEntryName);
         final String secondEntryName = "directory/file.cmdi";
+        final String secondEntryFilename = "file.cmdi";
         final File createdFile = new File(workspaceUploadDirectory, secondEntryName);
         
         final ZipUploadResult expectedResult = new ZipUploadResult();
@@ -394,9 +422,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(firstEntryNameWithoutSlash));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
@@ -404,9 +432,9 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryFilename)), with(any(String.class))); will(returnValue(secondEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
-            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -422,9 +450,11 @@ public class LamusWorkspaceUploaderTest {
         
         
         final String firstEntryName = "directory/";
+        final String firstEntryNameWithoutSlash = "directory";
         final File existingDirectory = new File(workspaceUploadDirectory, firstEntryName);
         existingDirectory.mkdirs();
         final String secondEntryName = "directory/file.cmdi";
+        final String secondEntryFilename = "file.cmdi";
         final File existingFile = new File(workspaceUploadDirectory, secondEntryName);
         existingFile.createNewFile();
         
@@ -436,9 +466,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(firstEntryNameWithoutSlash));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(existingDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
@@ -446,9 +476,9 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryFilename)), with(any(String.class))); will(returnValue(secondEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
-            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
         
@@ -463,12 +493,15 @@ public class LamusWorkspaceUploaderTest {
         
         
         final String firstEntryName = "directory/";
+        final String firstEntryNameWithoutSlash = "directory";
         final File existingDirectory = new File(workspaceUploadDirectory, firstEntryName);
         existingDirectory.mkdirs();
         final String secondEntryName = "directory/file1.cmdi";
+        final String secondEntryFilename = "file1.cmdi";
         final File existingFile = new File(workspaceUploadDirectory, secondEntryName);
         existingFile.createNewFile();
         final String thirdEntryName = "directory/file2.cmdi";
+        final String thirdEntryFilename = "file2.cmdi";
         final File createdFile = new File(workspaceUploadDirectory, thirdEntryName);
         
         final ZipUploadResult expectedResult = new ZipUploadResult();
@@ -480,9 +513,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(firstEntryNameWithoutSlash));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(existingDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
@@ -490,17 +523,17 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryFilename)), with(any(String.class))); will(returnValue(secondEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
-            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockThirdZipEntry));
             
             // third loop iteration
             
             allowing(mockThirdZipEntry).getName(); will(returnValue(thirdEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thirdEntryName)), with(any(String.class))); will(returnValue(thirdEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thirdEntryFilename)), with(any(String.class))); will(returnValue(thirdEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(thirdEntryName);
-            oneOf(mockThirdZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockThirdZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -522,7 +555,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(correctedEntryName));
-            
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             // nothing was created, so nothing has to be deleted
         }});
         
@@ -538,6 +571,7 @@ public class LamusWorkspaceUploaderTest {
     public void uploadZipFile_DirectoryAndFile_NameNotAllowed() throws IOException, DisallowedPathException {
         
         final String firstEntryName = "temp/";
+        final String firstEntryNameWithoutSlash = "temp";
         
         final DisallowedPathException expectedException = new DisallowedPathException(firstEntryName, "Path not allowed and so on...");
         
@@ -546,9 +580,9 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(firstEntryNameWithoutSlash));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName); will(throwException(expectedException));
-            
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             // nothing was created, so nothing has to be deleted
         }});
         
@@ -566,8 +600,10 @@ public class LamusWorkspaceUploaderTest {
         final String firstEntryName = "dir";
         final File createdDirectory = new File(workspaceUploadDirectory, firstEntryName);
         final String secondEntryName = "dir/file.cmdi";
+        final String secondEntryFilename = "file.cmdi";
         final File createdFile = new File(workspaceUploadDirectory, secondEntryName);
         final String thirdEntryName = "temp/";
+        final String thindEntryNameWithoutSlash = "temp";
         
         final DisallowedPathException expectedException = new DisallowedPathException(firstEntryName, "Path not allowed and so on...");
         
@@ -578,7 +614,7 @@ public class LamusWorkspaceUploaderTest {
             allowing(mockFirstZipEntry).getName(); will(returnValue(firstEntryName));
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(firstEntryName)), with(any(String.class))); will(returnValue(firstEntryName));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
-            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
+            allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
@@ -586,17 +622,18 @@ public class LamusWorkspaceUploaderTest {
             // second loop iteration
             
             allowing(mockSecondZipEntry).getName(); will(returnValue(secondEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryName)), with(any(String.class))); will(returnValue(secondEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryFilename)), with(any(String.class))); will(returnValue(secondEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
-            oneOf(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            allowing(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockThirdZipEntry));
             
             // third loop iteration
             
             allowing(mockThirdZipEntry).getName(); will(returnValue(thirdEntryName));
-            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thirdEntryName)), with(any(String.class))); will(returnValue(thirdEntryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(thindEntryNameWithoutSlash)), with(any(String.class))); will(returnValue(thindEntryNameWithoutSlash));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(thirdEntryName); will(throwException(expectedException));
+            allowing(mockThirdZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
             // folder and file were created, so will have to be deleted in this case
             oneOf(mockWorkspaceFileHandler).deleteFile(createdFile);

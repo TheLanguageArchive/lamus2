@@ -388,11 +388,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     
     private void assureFilenameIsValid(String filename) throws DisallowedPathException {
         
-        String correctedFilename = archiveFileHelper.correctPathElement(filename, "Uploading file");
-        if(!filename.equals(correctedFilename)) {
-            String message = "Filename '" + filename + "' is not valid. It should not contain special characters.";
+        String[] pathNames = filename.split(File.separator);
+        String filenameToUse = pathNames[pathNames.length - 1];
+        
+        String correctedFilename = archiveFileHelper.correctPathElement(filenameToUse, "Uploading file");
+        if(!filenameToUse.equals(correctedFilename)) {
+            String message = "Filename '" + filenameToUse + "' is not valid. It should not contain special characters.";
             logger.warn(message);
-            throw new DisallowedPathException(filename, message);
+            throw new DisallowedPathException(filenameToUse, message);
         }
     }
 }
