@@ -31,6 +31,7 @@ import nl.mpi.lamus.web.components.UploadPanel;
 import nl.mpi.lamus.web.components.WorkspaceInfoPanel;
 import nl.mpi.lamus.web.components.WsNodeActionsPanel;
 import nl.mpi.lamus.web.model.ClearSelectedTreeNodes;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearAllSelectedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -255,21 +256,39 @@ public class WorkspacePage extends LamusPage {
     public void onEvent(IEvent<?> event) {
         
         if(event.getPayload() instanceof SelectedUnlinkedNodesWrapper) {
-            selectedUnlinkedNodes = ((SelectedUnlinkedNodesWrapper)event.getPayload()).getSelectedUnlinkedNodes();
-            send(wsNodeActionsPanel, Broadcast.BREADTH, event.getPayload());
+            changeSelectedUnlinkedNodes((SelectedUnlinkedNodesWrapper) event.getPayload());
         }
+        
         if(event.getPayload() instanceof ClearSelectedUnlinkedNodes) {
-            selectedUnlinkedNodes = new ArrayList<>();
-            send(linkNodesPanel, Broadcast.BREADTH, event.getPayload());
+            clearSelectedUnlinkedNodes((ClearSelectedUnlinkedNodes) event.getPayload());
         }
         
         if(event.getPayload() instanceof ClearSelectedTreeNodes) {
-
-            for(Object node : wsTreePanel.getTree().getTreeState().getSelectedNodes()) {
-                wsTreePanel.getTree().getTreeState().selectNode(node, false);
-            }
-            
-            wsNodeActionsPanel.setModelObject(new ArrayList<WorkspaceTreeNode>());
+            clearSelectedTreeNodes();
         }
+        
+        if(event.getPayload() instanceof ClearAllSelectedNodes) {
+            clearSelectedTreeNodes();
+            clearSelectedUnlinkedNodes(new ClearSelectedUnlinkedNodes());
+        }
+    }
+    
+    
+    private void changeSelectedUnlinkedNodes(SelectedUnlinkedNodesWrapper eventPayload) {
+        selectedUnlinkedNodes = eventPayload.getSelectedUnlinkedNodes();
+            send(wsNodeActionsPanel, Broadcast.BREADTH, eventPayload);
+    }
+    
+    private void clearSelectedUnlinkedNodes(ClearSelectedUnlinkedNodes eventPayload) {
+        selectedUnlinkedNodes = new ArrayList<>();
+        send(linkNodesPanel, Broadcast.BREADTH, eventPayload);
+    }
+    
+    private void clearSelectedTreeNodes() {
+        for(Object node : wsTreePanel.getTree().getTreeState().getSelectedNodes()) {
+            wsTreePanel.getTree().getTreeState().selectNode(node, false);
+        }
+
+        wsNodeActionsPanel.setModelObject(new ArrayList<WorkspaceTreeNode>());
     }
 }

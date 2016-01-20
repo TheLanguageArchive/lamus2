@@ -25,6 +25,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.ClearSelectedTreeNodes;
 import nl.mpi.lamus.web.session.LamusSession;
+import nl.mpi.lamus.web.unlinkednodes.model.ClearAllSelectedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.ClearSelectedUnlinkedNodes;
 import nl.mpi.lamus.web.unlinkednodes.model.SelectedUnlinkedNodesWrapper;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
@@ -118,7 +119,7 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                             
                             setActionParameters(WsNodeActionsPanel.this.getModelObject(), selectedUnlinkedNodes);
 
-                            if(getAction() instanceof UnlinkNodesAction || getAction() instanceof DeleteNodesAction || getAction() instanceof ReplaceNodesAction) {
+                            if(getAction() instanceof UnlinkNodesAction || getAction() instanceof DeleteNodesAction) {
                                 //tell the page to clear the selected nodes from the tree
                                 send(this, Broadcast.BUBBLE, new ClearSelectedTreeNodes());
                             }
@@ -126,7 +127,11 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
                             executeAction(currentUserId);
 
                             //tell the unlinked nodes panel to clear the selected unlinked nodes
-                            send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
+                            if(getAction() instanceof ReplaceNodesAction) {
+                                send(this, Broadcast.BUBBLE, new ClearAllSelectedNodes());
+                            } else {
+                                send(this, Broadcast.BUBBLE, new ClearSelectedUnlinkedNodes());
+                            }
 
                             //clear also the variable stored in the panel
                             clearSelectedUnlinkedNodes();
