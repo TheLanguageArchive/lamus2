@@ -48,6 +48,7 @@ import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -60,13 +61,20 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
  * @author guisil
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({FileUtils.class})
 public class GeneralNodeExporterTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -256,6 +264,7 @@ public class GeneralNodeExporterTest {
         final File parentNodeWsFile = new File(URI.create(parentNodeWsPath));
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final String parentNodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + parentFilename;
+        final URL parentNodeArchiveLocalURL = new URL(parentNodeArchiveLocalPath);
         final File parentNodeArchiveLocalFile = new File(URI.create(parentNodeArchiveLocalPath));
         final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
@@ -308,7 +317,7 @@ public class GeneralNodeExporterTest {
         }});
         
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
-                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
+                parentNodeArchiveLocalURL, parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
         generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
@@ -770,6 +779,7 @@ public class GeneralNodeExporterTest {
         final URI parentNodeArchiveURI = new URI(UUID.randomUUID().toString());
         final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
         final String parentNodeArchiveLocalPath = "file:/archive/location/TopNode/SomeNode/Metadata/" + parentFilename;
+        final URL parentNodeArchiveLocalUrl = new URL(parentNodeArchiveLocalPath);
         final File parentNodeArchiveLocalFile = new File(URI.create(parentNodeArchiveLocalPath));
         final String parentCorpusNamePathToClosestTopNode = "TopNode/SomeNode";
         
@@ -811,7 +821,7 @@ public class GeneralNodeExporterTest {
         }});
         
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
-                parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
+                parentNodeArchiveLocalUrl, parentNodeArchiveLocalFile, nodeArchiveLocalFile, nodePathRelativeToParent, null);
         
         generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
@@ -830,7 +840,7 @@ public class GeneralNodeExporterTest {
     
     private void checkParentReferenceUpdateInvocations(
             final URI childArchiveURI, final URI parentArchiveURI, final URL parentWsURL, final File parentWsFile,
-            final File parentArchiveLocalFile, final File childArchiveLocalFile,
+            final URL parentArchiveLocalUrl, final File parentArchiveLocalFile, final File childArchiveLocalFile,
             final String childPathRelativeToParent,
             final Exception expectedException) throws IOException, MetadataException, TransformerException, URISyntaxException {
         
@@ -840,7 +850,7 @@ public class GeneralNodeExporterTest {
             
             oneOf(mockParentWsNode).getArchiveURI(); will(returnValue(parentArchiveURI));
             oneOf(mockCorpusStructureProvider).getNode(parentArchiveURI); will(returnValue(mockParentCorpusNode));
-            oneOf(mockNodeResolver).getLocalFile(mockParentCorpusNode); will(returnValue(parentArchiveLocalFile));
+            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(parentArchiveLocalUrl));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockParentWsNode); will(returnValue(Boolean.TRUE));
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));
@@ -860,6 +870,8 @@ public class GeneralNodeExporterTest {
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentWsFile);
                 will(returnValue(mockStreamResult));
         }});
+        
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(parentArchiveLocalFile);
         
         if(expectedException != null) {
             context.checking(new Expectations() {{

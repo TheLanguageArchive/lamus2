@@ -42,6 +42,7 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,8 +182,8 @@ public class GeneralNodeExporter implements NodeExporter {
             String errorMessage = "Parent node not found in archive database for URI " + parentNode.getArchiveURI();
             throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
-        File parentNodeArchiveFile = nodeResolver.getLocalFile(parentCorpusNode);
         
+        File parentNodeArchiveFile = FileUtils.toFile(parentNode.getArchiveURL());
         
         CMDIDocument cmdiDocument = retrieveCmdiDocument(workspaceID, parentNode);
         String currentPathRelativeToParent = 
