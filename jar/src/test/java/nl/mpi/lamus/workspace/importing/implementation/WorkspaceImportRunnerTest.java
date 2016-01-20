@@ -56,7 +56,8 @@ public class WorkspaceImportRunnerTest {
     private final TopNodeImporter mockTopNodeImporter = context.mock(TopNodeImporter.class);
     private final OrphanNodesImportHandler mockOrphanNodesImportHandler = context.mock(OrphanNodesImportHandler.class);
     
-    private final Workspace mockWorkspace = context.mock(Workspace.class);
+    private final Workspace mockWorkspace = context.mock(Workspace.class, "initialWorkspace");
+    private final Workspace mockUpdatedWorkspace = context.mock(Workspace.class, "updatedWorkspace");
     private final URI topNodeArchiveURI;
     private final int workspaceID = 1;
 
@@ -124,7 +125,7 @@ public class WorkspaceImportRunnerTest {
         
         context.checking(new Expectations() {{
 
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 when(importing.isNot("finished"));
             
             oneOf(mockTopNodeImporter).importNode(mockWorkspace, topNodeArchiveURI);
@@ -133,7 +134,9 @@ public class WorkspaceImportRunnerTest {
                 when(importing.isNot("finished"));
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
                 when(importing.isNot("finished"));
-            oneOf(mockOrphanNodesImportHandler).exploreOrphanNodes(mockWorkspace); will(returnValue(problems));
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockUpdatedWorkspace));
+                when(importing.isNot("finished"));
+            oneOf(mockOrphanNodesImportHandler).exploreOrphanNodes(mockUpdatedWorkspace); will(returnValue(problems));
                 then(importing.is("finished"));
         }});
         

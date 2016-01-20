@@ -105,7 +105,8 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
         
-        Collection<ImportProblem> orphanImportProblems = orphanNodesImportHandler.exploreOrphanNodes(workspace);
+        Workspace updatedWorkspace = workspaceDao.getWorkspace(workspace.getWorkspaceID());
+        Collection<ImportProblem> orphanImportProblems = orphanNodesImportHandler.exploreOrphanNodes(updatedWorkspace);
         
         if(!orphanImportProblems.isEmpty()) {
         
