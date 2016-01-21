@@ -33,8 +33,10 @@ import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
+import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
+import nl.mpi.lamus.workspace.importing.WorkspaceImportRunnerFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -59,29 +61,34 @@ public class LamusWorkspaceManager implements WorkspaceManager {
     private final WorkspaceFactory workspaceFactory;
     private final WorkspaceDao workspaceDao;
     private final WorkspaceDirectoryHandler workspaceDirectoryHandler;
-    private final WorkspaceImportRunner workspaceImportRunner;
-    private final WorkspaceExportRunner workspaceExportRunner;
     private final CalendarHelper calendarHelper;
     private final WorkspaceFileValidator workspaceFileValidator;
     private final PermissionAdjuster permissionAdjuster;
+    
+    private final WorkspaceImportRunnerFactory workspaceImportRunnerFactory;
+    private final WorkspaceExportRunnerFactory workspaceExportRunnerFactory;
     
     @Autowired
     @Qualifier("numberOfDaysOfInactivityAllowedSinceLastSession")
     private int numberOfDaysOfInactivityAllowedSinceLastSession;
 
     @Autowired
-    public LamusWorkspaceManager(@Qualifier("WorkspaceExecutorService") ExecutorService executorService, WorkspaceFactory factory, WorkspaceDao dao,
-        WorkspaceDirectoryHandler directoryHandler, WorkspaceImportRunner wsImportRunner, WorkspaceExportRunner wsExportRunner,
-        CalendarHelper calendarHelper, WorkspaceFileValidator wsFileValidator, PermissionAdjuster permAdjuster) {
+    public LamusWorkspaceManager(
+            @Qualifier("WorkspaceExecutorService") ExecutorService executorService,
+            WorkspaceFactory factory, WorkspaceDao dao,
+            WorkspaceDirectoryHandler directoryHandler, CalendarHelper calendarHelper,
+            WorkspaceFileValidator wsFileValidator, PermissionAdjuster permAdjuster,
+            WorkspaceImportRunnerFactory wsImportRunnerFactory, WorkspaceExportRunnerFactory wsExportRunnerFactory) {
         this.executorService = executorService;
         this.workspaceFactory = factory;
         this.workspaceDao = dao;
         this.workspaceDirectoryHandler = directoryHandler;
-        this.workspaceImportRunner = wsImportRunner;
-        this.workspaceExportRunner = wsExportRunner;
         this.calendarHelper = calendarHelper;
         this.workspaceFileValidator = wsFileValidator;
         this.permissionAdjuster = permAdjuster;
+        
+        this.workspaceImportRunnerFactory = wsImportRunnerFactory;
+        this.workspaceExportRunnerFactory = wsExportRunnerFactory;
     }
     
     /**
@@ -102,6 +109,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             failWorkspaceImport(newWorkspace, errorMessage, ex);
         }
         
+        WorkspaceImportRunner workspaceImportRunner = workspaceImportRunnerFactory.getNewImportRunner();
         workspaceImportRunner.setWorkspace(newWorkspace);
         workspaceImportRunner.setTopNodeArchiveURI(topArchiveNodeURI);
         
@@ -152,6 +160,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.DELETE_WORKSPACE;
         
+        WorkspaceExportRunner workspaceExportRunner = workspaceExportRunnerFactory.getNewExportRunner();
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         workspaceExportRunner.setSubmissionType(submissionType);
@@ -217,6 +226,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspace.setMessage("workspace was submitted");
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
+        WorkspaceExportRunner workspaceExportRunner = workspaceExportRunnerFactory.getNewExportRunner();
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         workspaceExportRunner.setSubmissionType(submissionType);

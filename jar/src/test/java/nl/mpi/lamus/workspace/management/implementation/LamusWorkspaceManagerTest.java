@@ -41,8 +41,10 @@ import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
 import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.util.CalendarHelper;
+import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
+import nl.mpi.lamus.workspace.importing.WorkspaceImportRunnerFactory;
 import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -81,6 +83,9 @@ public class LamusWorkspaceManagerTest {
     @Mock private WorkspaceFileValidator mockWorkspaceFileValidator;
     @Mock private PermissionAdjuster mockPermissionAdjuster;
     
+    @Mock private WorkspaceImportRunnerFactory mockWorkspaceImportRunnerFactory;
+    @Mock private WorkspaceExportRunnerFactory mockWorkspaceExportRunnerFactory;
+    
     @Mock private Future<Boolean> mockFuture;
     @Mock private Workspace mockWorkspace;
     @Mock private Workspace mockSubmittedWorkspace;
@@ -109,9 +114,9 @@ public class LamusWorkspaceManagerTest {
     public void setUp() {
         this.manager = new LamusWorkspaceManager(
                 mockExecutorService, mockWorkspaceFactory, mockWorkspaceDao,
-                mockWorkspaceDirectoryHandler, mockWorkspaceImportRunner,
-                mockWorkspaceExportRunner, mockCalendarHelper,
-                mockWorkspaceFileValidator, mockPermissionAdjuster);
+                mockWorkspaceDirectoryHandler, mockCalendarHelper,
+                mockWorkspaceFileValidator, mockPermissionAdjuster,
+                mockWorkspaceImportRunnerFactory, mockWorkspaceExportRunnerFactory);
         
         ReflectionTestUtils.setField(manager, "numberOfDaysOfInactivityAllowedSinceLastSession", numberOfDaysOfInactivityAllowedSinceLastSession);
     }
@@ -147,19 +152,16 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+            oneOf(mockWorkspaceImportRunnerFactory).getNewImportRunner(); will(returnValue(mockWorkspaceImportRunner));
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(expectedWorkspace));
         }});
         
         Workspace result = manager.createWorkspace(userID, archiveNodeURI);
         assertNotNull("Returned workspace should not be null when object, database and directory are successfully created.", result);
-        
-//        assertEquals("Workspace status different from expected", expectedStatus, result.getStatus());
-//        assertEquals("Workspace message different from expected", expectedMessage, result.getMessage());
     }
     
     /**
@@ -223,6 +225,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+            oneOf(mockWorkspaceImportRunnerFactory).getNewImportRunner(); will(returnValue(mockWorkspaceImportRunner));
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -268,6 +271,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+            oneOf(mockWorkspaceImportRunnerFactory).getNewImportRunner(); will(returnValue(mockWorkspaceImportRunner));
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -311,6 +315,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+            oneOf(mockWorkspaceImportRunnerFactory).getNewImportRunner(); will(returnValue(mockWorkspaceImportRunner));
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
@@ -356,11 +361,11 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceDao).addWorkspace(newWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).createWorkspaceDirectory(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).createUploadDirectoryForWorkspace(workspaceID);
+            oneOf(mockWorkspaceImportRunnerFactory).getNewImportRunner(); will(returnValue(mockWorkspaceImportRunner));
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
         }});
         
@@ -381,22 +386,17 @@ public class LamusWorkspaceManagerTest {
         final boolean keepUnlinkedFiles = Boolean.FALSE;
         
         context.checking(new Expectations() {{
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
-            
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
-            
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
-            
             oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
-            
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});
-        
         
         manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
     }
@@ -412,7 +412,6 @@ public class LamusWorkspaceManagerTest {
         context.checking(new Expectations() {{
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
         }});
-        
         
         try {
             manager.deleteWorkspace(workspaceID, keepUnlinkedFiles);
@@ -432,13 +431,11 @@ public class LamusWorkspaceManagerTest {
         final InterruptedException expectedException = new InterruptedException("some exception message");
         
         context.checking(new Expectations() {{
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
-            
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
-            
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
@@ -464,13 +461,11 @@ public class LamusWorkspaceManagerTest {
         final ExecutionException expectedException = new ExecutionException("some exception message", null);
         
         context.checking(new Expectations() {{
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
-            
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
-            
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(throwException(expectedException));
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
@@ -495,13 +490,11 @@ public class LamusWorkspaceManagerTest {
         final String expectedErrorMessage = "Workspace deletion failed for workspace " + workspaceID;
         
         context.checking(new Expectations() {{
-            
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
-            
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
-            
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
@@ -641,7 +634,8 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
-            
+
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
@@ -750,10 +744,11 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
-            
+
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
@@ -831,10 +826,11 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
-            
+
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(throwException(expectedException));
@@ -894,10 +890,11 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
-            
+
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(throwException(expectedException));
@@ -956,10 +953,11 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setMessage(submittedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
             
+            oneOf(mockWorkspaceExportRunnerFactory).getNewExportRunner(); will(returnValue(mockWorkspaceExportRunner));
             oneOf(mockWorkspaceExportRunner).setWorkspace(mockWorkspace);
             oneOf(mockWorkspaceExportRunner).setKeepUnlinkedFiles(keepUnlinkedFiles);
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.SUBMIT_WORKSPACE);
-            
+
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockSubmittedWorkspace));
             oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));

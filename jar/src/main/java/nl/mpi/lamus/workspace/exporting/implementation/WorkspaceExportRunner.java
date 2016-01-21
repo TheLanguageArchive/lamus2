@@ -31,8 +31,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Runner that will trigger a thread that performs
@@ -40,10 +38,9 @@ import org.springframework.stereotype.Component;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Component
 public class WorkspaceExportRunner implements Callable<Boolean> {
 
-    private final  WorkspaceDao workspaceDao;
+    private final WorkspaceDao workspaceDao;
     private final NodeExporterFactory nodeExporterFactory;
     private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
@@ -52,7 +49,6 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private boolean keepUnlinkedFiles;
     private WorkspaceSubmissionType submissionType;
     
-    @Autowired
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
             UnlinkedAndDeletedNodesExportHandler dnExportHandler,
             CorpusStructureServiceBridge csServiceBridge) {

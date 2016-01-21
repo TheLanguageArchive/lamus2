@@ -25,8 +25,6 @@ import nl.mpi.lamus.workspace.importing.OrphanNodesImportHandler;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Runner that will trigger a thread that performs
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Component;
  * 
  * @author Guilherme Silva <guilherme.silva@mpi.nl>
  */
-@Component
 public class WorkspaceImportRunner implements Callable<Boolean>{
 
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
@@ -46,7 +43,6 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
     private Workspace workspace = null;
     private URI topNodeArchiveURI = null;
     
-    @Autowired
     public WorkspaceImportRunner(WorkspaceDao workspaceDao,
             TopNodeImporter topNodeImporter, OrphanNodesImportHandler orphanNodesImportHandler) {
         this.workspaceDao = workspaceDao;
