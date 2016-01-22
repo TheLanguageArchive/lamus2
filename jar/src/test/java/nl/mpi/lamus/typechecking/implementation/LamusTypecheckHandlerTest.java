@@ -15,11 +15,13 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import nl.mpi.bcarchive.typecheck.DeepFileType;
 import nl.mpi.bcarchive.typecheck.FileType;
 import nl.mpi.lamus.typechecking.TypecheckHandler;
@@ -104,7 +106,7 @@ public class LamusTypecheckHandlerTest {
     public void reallyTypecheck() throws URISyntaxException, IOException {
 
         String filename = "some_text_file.txt";
-        URL fileURL = getClass().getClassLoader().getResource("test_files/typechecking/" + filename);
+        URL fileURL = new File(URLDecoder.decode(getClass().getClassLoader().getResource("test_files/typechecking/" + filename).getFile())).toURI().toURL();
         
         TypecheckHandler handler = new LamusTypecheckHandler(mockTypechecker, new DeepFileType());
 
