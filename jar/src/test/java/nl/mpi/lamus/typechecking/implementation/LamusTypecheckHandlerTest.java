@@ -104,7 +104,7 @@ public class LamusTypecheckHandlerTest {
     public void reallyTypecheck() throws URISyntaxException, IOException {
 
         String filename = "some_text_file.txt";
-        URL fileURL = getClass().getClassLoader().getResource("nl/mpi/lamus/typechecking/implementation/" + filename).toURI().toURL();
+        URL fileURL = getClass().getClassLoader().getResource("test_files/typechecking/" + filename);
         
         TypecheckHandler handler = new LamusTypecheckHandler(mockTypechecker, new DeepFileType());
 
