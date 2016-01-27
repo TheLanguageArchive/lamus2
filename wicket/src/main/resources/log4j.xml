@@ -65,18 +65,8 @@
     <logger name="org.springframework">
         <level value="info" />
     </logger>
-    
-    <logger name="org.hibernate">
-        <level value="info" />
-    </logger>
 
-<!--    <logger name="org.hibernate.sql">
-        <level value="trace" />
-    </logger>
-    <logger name="org.hibernate.type">
-        <level value="trace" />
-    </logger>-->
-
+    <!-- ROOT -->
     <root> 
 	<priority value ="info" /> 
 	<!--<appender-ref ref="console" />--> 
