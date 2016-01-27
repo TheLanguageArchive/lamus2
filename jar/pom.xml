@@ -3,7 +3,7 @@
     <parent>
         <groupId>nl.mpi</groupId>
         <artifactId>lamus2.parent</artifactId>
-        <version>1.5.0-RC2</version>
+        <version>1.5.0-RC3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
