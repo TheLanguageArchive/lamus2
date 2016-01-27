@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -106,11 +105,12 @@ public class LamusTypecheckHandlerTest {
     public void reallyTypecheck() throws URISyntaxException, IOException {
 
         String filename = "some_text_file.txt";
-        URL fileURL = new File(URLDecoder.decode(getClass().getClassLoader().getResource("test_files/typechecking/" + filename).getFile())).toURI().toURL();
+        URL fileURL = getClass().getClassLoader().getResource("test_files/typechecking/" + filename);
+        URL decodedFileURL = new URL(URLDecoder.decode(fileURL.toString()));
         
         TypecheckHandler handler = new LamusTypecheckHandler(mockTypechecker, new DeepFileType());
 
-        String retrievedResult = handler.deepTypecheck(fileURL, filename);
+        String retrievedResult = handler.deepTypecheck(decodedFileURL, filename);
 
         System.out.println(retrievedResult);
         assertTrue("Retrieved result is different from expected", retrievedResult.contains("true") && retrievedResult.contains("GOOD"));
