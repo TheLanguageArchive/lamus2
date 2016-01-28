@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -60,6 +61,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private SimpleJdbcInsert insertWorkspace;
+    private SimpleJdbcInsert insertPreLock;
     private SimpleJdbcInsert insertWorkspaceNode;
     private SimpleJdbcInsert insertWorkspaceNodeLock;
     private SimpleJdbcInsert insertWorkspaceNodeLink;
@@ -94,6 +96,10 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                     "status",
                     "message",
                     "crawler_id");
+        
+        this.insertPreLock = new SimpleJdbcInsert(datasource)
+                .withTableName("pre_lock")
+                .usingColumns("archive_uri");
         
         this.insertWorkspaceNode = new SimpleJdbcInsert(datasource)
                 .withTableName("node")
@@ -180,26 +186,30 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
     
     /**
-     * @see WorkspaceDao#deleteWorkspace(int)
+     * @see WorkspaceDao#deleteWorkspace(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
-    public void deleteWorkspace(int workspaceID) {
+    public void deleteWorkspace(Workspace workspace) {
         
-        logger.debug("Deleting workspace with ID " + workspaceID);
+        logger.debug("Deleting workspace with ID " + workspace.getWorkspaceID());
         
         String deleteNodeReplacementSql = "DELETE FROM node_replacement WHERE old_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeLinkSql = "DELETE FROM node_link WHERE parent_workspace_node_id IN (SELECT workspace_node_id FROM node WHERE workspace_id = :workspace_id);";
         String deleteNodeLockSql = "DELETE FROM node_lock WHERE workspace_id = :workspace_id";
         String deleteNodeSql = "DELETE FROM node WHERE workspace_ID = :workspace_id;";
+        String deletePreLockSql = "DELETE FROM pre_lock WHERE archive_uri = :archive_uri";
         String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id;";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("workspace_id", workspace.getWorkspaceID())
+                .addValue("archive_uri", workspace.getTopNodeArchiveURI().toString());
         this.namedParameterJdbcTemplate.update(deleteNodeReplacementSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLockSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeSql, namedParameters);
+        this.namedParameterJdbcTemplate.update(deletePreLockSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteWorkspaceSql, namedParameters);
         
-        logger.info("Workspace with ID " + workspaceID + " deleted");
+        logger.info("Workspace with ID " + workspace.getWorkspaceID() + " deleted");
     }
     
     /**
@@ -425,6 +435,83 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
 //        namedParameterJdbcTemplate.update(updateWorkspaceSql, parameters);
 //    }
 
+    /**
+     * @see WorkspaceDao#preLockNode(java.net.URI)
+     */
+    @Override
+    public void preLockNode(URI nodeURI) {
+        
+        logger.debug("Adding to the database a pre lock for node " + nodeURI);
+        
+        if(nodeURI == null) {
+            throw new IllegalArgumentException("Archive URI to pre lock should not be null");
+        }
+        
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("archive_uri", nodeURI.toString());
+        this.insertPreLock.execute(parameters);
+
+        logger.info("Pre Lock added to the database. Archive URI: " + nodeURI);
+    }
+
+    /**
+     * @see WorkspaceDao#removeNodePreLock(java.net.URI)
+     */
+    @Override
+    public void removeNodePreLock(URI nodeURI) {
+
+        logger.debug("Deleting pre lock on node " + nodeURI);
+        
+        if(nodeURI == null) {
+            throw new IllegalArgumentException("Archive URI to unlock should not be null");
+        }
+        
+        String deleteNodePreLockSql =
+                "DELETE FROM pre_lock WHERE archive_uri = :archive_uri;";
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+                .addValue("archive_uri", nodeURI.toString());
+        this.namedParameterJdbcTemplate.update(deleteNodePreLockSql, namedParameters);
+        
+        logger.info("Pre Lock on node " + nodeURI + " was deleted");
+    }
+
+    /**
+     * @see WorkspaceDao#isAnyOfNodesPreLocked(java.util.List)
+     */
+    @Override
+    public boolean isAnyOfNodesPreLocked(List<String> nodeURIs) {
+
+        logger.debug("Checking if any of the nodes in the collection is locked");
+        
+        if(nodeURIs == null || nodeURIs.isEmpty()) {
+            return false;
+        }
+        
+        String queryPreLockSql = "SELECT * FROM pre_lock WHERE archive_uri in (:uris)";
+        SqlParameterSource namedParameters;
+        
+        int from = 0;
+        int to = nodeURIs.size() <= 100 ? nodeURIs.size() : 100;
+        
+        while(from < nodeURIs.size()) {
+            
+            System.out.println("from: " + from + "; to: " + to);
+            
+            List<String> someURIs = nodeURIs.subList(from, to);
+            namedParameters = new MapSqlParameterSource().addValue("uris", someURIs);
+            List<Map<String, Object>> list = this.namedParameterJdbcTemplate.queryForList(queryPreLockSql, namedParameters);
+
+            if(!list.isEmpty()) {
+                return true;
+            }
+            from = to;
+            to = nodeURIs.size() <= from + 100 ? nodeURIs.size() : from + 100;
+        }
+
+        logger.info("None of the nodes in the collection is pre locked (there is no workspace being created in any of the nodes).");
+        return false;
+    }
+    
     /**
      * @see WorkspaceDao#isNodeLocked(java.net.URI)
      */

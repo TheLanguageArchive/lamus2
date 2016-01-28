@@ -190,7 +190,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
             throw new WorkspaceExportException(errorMessage, workspaceID, null);
         }
         
-        workspaceDao.deleteWorkspace(workspaceID);
+        workspaceDao.deleteWorkspace(workspace);
         workspaceDirectoryHandler.deleteWorkspaceDirectory(workspaceID);
         adjustPermissionsInArchive(workspaceID, submissionType);
     }

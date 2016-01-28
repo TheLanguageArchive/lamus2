@@ -187,8 +187,10 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockWorkspaceDao).preLockNode(archiveNodePid);
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
                 will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).removeNodePreLock(archiveNodePid);
         }});
         
         try {
@@ -209,9 +211,11 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockWorkspaceDao).preLockNode(archiveNodePid);
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
             oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).removeNodePreLock(archiveNodePid);
         }});
         
         try {
@@ -234,9 +238,11 @@ public class LamusWorkspaceServiceTest {
         
         context.checking(new Expectations() {{
             oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockWorkspaceDao).preLockNode(archiveNodePid);
             oneOf(mockNodeAccessChecker).ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             //allow other calls
             oneOf(mockWorkspaceManager).createWorkspace(userID, archiveNodePid); will(returnValue(newWorkspace));
+            oneOf(mockWorkspaceDao).removeNodePreLock(archiveNodePid);
         }});
         
         Workspace result = service.createWorkspace(userID, archiveNodeURI);

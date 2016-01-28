@@ -69,11 +69,11 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
     }
     
     /**
-     * @see WorkspaceDao#deleteWorkspace(int)
+     * @see WorkspaceDao#deleteWorkspace(nl.mpi.lamus.workspace.model.Workspace)
      */
     @Override
-    public void deleteWorkspace(int workspaceID) {
-        this.getWorkspaceDao().deleteWorkspace(workspaceID);
+    public void deleteWorkspace(Workspace workspace) {
+        this.getWorkspaceDao().deleteWorkspace(workspace);
     }
 
     /**
@@ -156,6 +156,30 @@ public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {
         return this.getWorkspaceDao().getAllWorkspaces();
     }
 
+    /**
+     * @see WorkspaceDao#preLockNode(java.net.URI)
+     */
+    @Override
+    public void preLockNode(URI nodeURI) {
+        this.getWorkspaceDao().preLockNode(nodeURI);
+    }
+
+    /**
+     * @see WorkspaceDao#removeNodePreLock(java.net.URI)
+     */
+    @Override
+    public void removeNodePreLock(URI nodeURI) {
+        this.getWorkspaceDao().removeNodePreLock(nodeURI);
+    }
+
+    /**
+     * @see WorkspaceDao#isAnyOfNodesPreLocked(java.util.List)
+     */
+    @Override
+    public boolean isAnyOfNodesPreLocked(List<String> nodeURIs) {
+        return this.getWorkspaceDao().isAnyOfNodesPreLocked(nodeURIs);
+    }
+    
     /**
      * @see WorkspaceDao#isNodeLocked(java.net.URI)
      */

@@ -85,4 +85,9 @@ public class WorkspaceStepsNodeResolver extends BaseNodeResolver implements Seri
     public URI getUrl(CorpusNode node, OutputFormat format) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public URI getPID(URI uri) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

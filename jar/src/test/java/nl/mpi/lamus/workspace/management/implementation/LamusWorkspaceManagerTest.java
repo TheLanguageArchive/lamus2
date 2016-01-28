@@ -393,7 +393,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceExportRunner).setSubmissionType(WorkspaceSubmissionType.DELETE_WORKSPACE);
             oneOf(mockExecutorService).submit(mockWorkspaceExportRunner); will(returnValue(mockFuture));
             oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
-            oneOf(mockWorkspaceDao).deleteWorkspace(workspaceID);
+            oneOf(mockWorkspaceDao).deleteWorkspace(mockWorkspace);
             oneOf(mockWorkspaceDirectoryHandler).deleteWorkspaceDirectory(workspaceID);
             oneOf(mockPermissionAdjuster).adjustPermissions(workspaceID, PermissionAdjusterScope.UNLINKED_NODES_ONLY);
         }});

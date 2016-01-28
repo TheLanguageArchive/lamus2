@@ -44,9 +44,9 @@ public interface WorkspaceDao {
     /**
      * Deletes a workspace from the database
      * 
-     * @param workspaceID ID of the workspace to delete
+     * @param workspace workspace to delete
      */
-    public void deleteWorkspace(int workspaceID);
+    public void deleteWorkspace(Workspace workspace);
     
     /**
      * Updates the top node of the given workspace.
@@ -120,6 +120,25 @@ public interface WorkspaceDao {
      * @return List with all the workspaces
      */
     public List<Workspace> getAllWorkspaces();
+    
+    /**
+     * Pre-locks a node.
+     * @param nodeURI URI of the node to pre-lock
+     */
+    public void preLockNode(URI nodeURI);
+    
+    /**
+     * Removes the pre-lock from a node
+     * @param nodeURI URI of the node to remove the pre-lock from
+     */
+    public void removeNodePreLock(URI nodeURI);
+    
+    /**
+     * Checks if any of the given nodes is pre-locked
+     * @param nodeURIs list of URIs (as strings) of the nodes to check
+     * @return true if any of the nodes in the list is pre-locked
+     */
+    public boolean isAnyOfNodesPreLocked(List<String> nodeURIs);
     
     /**
      * Checks if the archive node with the given ID is locked

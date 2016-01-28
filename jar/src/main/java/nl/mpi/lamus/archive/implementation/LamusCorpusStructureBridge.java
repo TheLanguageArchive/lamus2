@@ -18,6 +18,9 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -136,6 +139,33 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         }
         
         return pathSoFar.toString();
+    }
+
+    /**
+     * @see CorpusStructureBridge#getURIsOfAncestorsAndDescendants(java.net.URI)
+     */
+    @Override
+    public List<String> getURIsOfAncestorsAndDescendants(URI nodeURI) {
+        
+        List<String> collectionToReturn = new ArrayList<>();
+        
+        URI ancestorURI = corpusStructureProvider.getCanonicalParent(nodeURI);
+        while(ancestorURI != null) {
+            URI ancestorPID = nodeResolver.getPID(ancestorURI);
+            if(ancestorPID == null) {
+                collectionToReturn.add(ancestorURI.toString());
+            } else {
+                collectionToReturn.add(ancestorPID.toString());
+            }
+            ancestorURI = corpusStructureProvider.getCanonicalParent(ancestorURI);
+        }
+        
+        Collection<URI> descendants = corpusStructureProvider.getDescendants(nodeURI);
+        for(URI descendantUri : descendants) {
+            collectionToReturn.add(descendantUri.toString());
+        }
+        
+        return collectionToReturn;
     }
     
     

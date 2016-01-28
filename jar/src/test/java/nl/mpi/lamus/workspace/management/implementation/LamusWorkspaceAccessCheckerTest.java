@@ -34,9 +34,11 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.ExternalNodeException;
 import nl.mpi.lamus.exception.LockedNodeException;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.PreLockedNodeException;
 import nl.mpi.lamus.exception.UnauthorizedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.workspace.management.PreLockChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -68,6 +70,7 @@ public class LamusWorkspaceAccessCheckerTest {
     @Mock private NodeResolver mockNodeResolver;
     @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private CorpusStructureAccessChecker mockCorpusStructureAccessChecker;
+    @Mock private PreLockChecker mockPreLockChecker;
     
     @Mock private CorpusNode mockCorpusNode;
     @Mock private CorpusNode mockCorpusNode_Descendant_1;
@@ -98,7 +101,8 @@ public class LamusWorkspaceAccessCheckerTest {
         
         nodeAccessChecker = new LamusWorkspaceAccessChecker(
                 mockCorpusStructureProvider, mockNodeResolver,
-                mockWorkspaceDao, mockCorpusStructureAccessChecker);
+                mockWorkspaceDao, mockCorpusStructureAccessChecker,
+                mockPreLockChecker);
         
         ReflectionTestUtils.setField(nodeAccessChecker, "managerUsers", managerUsers);
     }
@@ -227,7 +231,38 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
+    public void cannotCreateWorkspaceIfNodeInPathIsPreLocked() throws NodeNotFoundException, PreLockedNodeException {
+        
+        final String userID = "someUser";
+        final URI archiveNodeURI = URI.create("hdl:" + UUID.randomUUID().toString());
+        final String archiveNodeID = "12";
+        final URI archiveNodeID_URI = URI.create("node:" + archiveNodeID);
+        final int workspaceID = 10;
+        final String expectedMessage = "There is currently a workspace being created in the path of node with URI '" + archiveNodeURI;
+        final PreLockedNodeException expectedException = new PreLockedNodeException(userID, archiveNodeURI);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(archiveNodeURI); will(returnValue(mockCorpusNode));
+            oneOf(mockCorpusNode).isOnSite(); will(returnValue(Boolean.TRUE));
+            exactly(2).of(mockCorpusNode).getType(); will(returnValue(CorpusNodeType.METADATA));
+            oneOf(mockNodeResolver).getId(mockCorpusNode); will(returnValue(archiveNodeID));
+            oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
+            
+            oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI); will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(NodeAccessException ex) {
+            assertTrue("Exception has a type different from expected", ex instanceof PreLockedNodeException);
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void cannotCreateWorkspaceIfNodeIsLocked() throws URISyntaxException, NodeNotFoundException, PreLockedNodeException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = URI.create("hdl:" + UUID.randomUUID().toString());
@@ -247,6 +282,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -265,7 +301,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException {
+    public void cannotCreateWorkspaceIfNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException, PreLockedNodeException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = URI.create("hdl:" + UUID.randomUUID().toString());
@@ -285,6 +321,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(archiveNodeURI); will(returnValue(lockedNodes));
@@ -325,6 +362,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -347,7 +385,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
+    public void cannotCreateWorkspaceIfDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException, PreLockedNodeException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
@@ -374,6 +412,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -401,7 +440,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfSecondDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException {
+    public void cannotCreateWorkspaceIfSecondDescendantNodeIsLocked() throws URISyntaxException, NodeNotFoundException, PreLockedNodeException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
@@ -432,6 +471,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -465,7 +505,7 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
-    public void cannotCreateWorkspaceIfDescendantNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException {
+    public void cannotCreateWorkspaceIfDescendantNodeIsLockedMultipleTimes() throws URISyntaxException, NodeNotFoundException, PreLockedNodeException {
         
         final String userID = "someUser";
         final URI archiveNodeURI = URI.create(UUID.randomUUID().toString());
@@ -492,6 +532,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));
@@ -535,6 +576,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(noDescendants));
@@ -561,6 +603,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeID_URI); will(returnValue(noDescendants));
@@ -593,6 +636,7 @@ public class LamusWorkspaceAccessCheckerTest {
             oneOf(mockCorpusStructureAccessChecker).hasWriteAccess(userID, archiveNodeID_URI); will(returnValue(Boolean.TRUE));
             
             oneOf(mockNodeResolver).getPID(mockCorpusNode); will(returnValue(archiveNodeURI));
+            oneOf(mockPreLockChecker).ensureNoNodesInPathArePreLocked(archiveNodeURI);
             oneOf(mockWorkspaceDao).isNodeLocked(archiveNodeURI); will(returnValue(Boolean.FALSE));
             
             oneOf(mockCorpusStructureProvider).getDescendantNodes(archiveNodeURI); will(returnValue(descendants));

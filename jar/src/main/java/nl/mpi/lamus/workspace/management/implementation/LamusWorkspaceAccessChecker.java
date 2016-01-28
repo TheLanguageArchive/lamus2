@@ -32,6 +32,7 @@ import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.exception.UnauthorizedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
+import nl.mpi.lamus.workspace.management.PreLockChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -56,18 +57,21 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
     private final NodeResolver nodeResolver;
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureAccessChecker corpusStructureAccessChecker;
+    private final PreLockChecker preLockChecker;
     
     @Resource(name = "managerUsers")
     private Collection<String> managerUsers;
     
     
     @Autowired
-    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider, NodeResolver nodeResolver,
-            WorkspaceDao workspaceDao, CorpusStructureAccessChecker csAccessChecker) {
+    public LamusWorkspaceAccessChecker(CorpusStructureProvider csProvider,
+            NodeResolver nodeResolver, WorkspaceDao workspaceDao,
+            CorpusStructureAccessChecker csAccessChecker, PreLockChecker preLockChecker) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.workspaceDao = workspaceDao;
         this.corpusStructureAccessChecker = csAccessChecker;
+        this.preLockChecker = preLockChecker;
     }
 
     /**
@@ -94,7 +98,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
             throw new IllegalArgumentException("Selected node should be Metadata: " + archiveNodeURI);
             
         }
-
+        
         String nodeID = nodeResolver.getId(node);
         URI nodeID_URI = AdapterUtils.toNodeUri(Integer.parseInt(nodeID));
         
@@ -102,6 +106,9 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         ensureWriteAccessToNode(userID, nodeID_URI);
         
         URI nodePID = nodeResolver.getPID(node);
+        
+        preLockChecker.ensureNoNodesInPathArePreLocked(nodePID);
+        
         logger.debug("Ensuring that node '{}' is not locked", nodePID);
         ensureNodeIsNotLocked(nodePID);
         

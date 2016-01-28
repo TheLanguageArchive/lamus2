@@ -18,6 +18,9 @@ package nl.mpi.lamus.archive.implementation;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -523,5 +526,135 @@ public class LamusCorpusStructureBridgeTest {
         String result = corpusStructureBridge.getCorpusNamePathToClosestTopNode(mockNode);
         
         assertNull("Result should be null", result);
+    }
+    
+    @Test
+    public void getPIDsOfAncestorsAndDescendants_Root() {
+        
+        final List<String> ancestorsAndDescendants = new ArrayList<>();
+        
+        final URI nodePID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        final Collection<URI> justDescendants = new ArrayList<>();
+        final URI childPID_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI childPID_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandChildPID_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandChildPID_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        justDescendants.add(childPID_1);
+        justDescendants.add(childPID_2);
+        justDescendants.add(grandChildPID_1);
+        justDescendants.add(grandChildPID_2);
+        
+        ancestorsAndDescendants.add(childPID_1.toString());
+        ancestorsAndDescendants.add(childPID_2.toString());
+        ancestorsAndDescendants.add(grandChildPID_1.toString());
+        ancestorsAndDescendants.add(grandChildPID_2.toString());
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodePID); will(returnValue(null));
+            
+            oneOf(mockCorpusStructureProvider).getDescendants(nodePID); will(returnValue(justDescendants));
+        }});
+        
+        List<String> retrievedCollection = corpusStructureBridge.getURIsOfAncestorsAndDescendants(nodePID);
+        
+        assertEquals("Retrieved collection different from expected", ancestorsAndDescendants, retrievedCollection);
+    }
+    
+    @Test
+    public void getPIDsOfAncestorsAndDescendants_Leaf() {
+        
+        final List<String> ancestorsAndDescendants = new ArrayList<>();
+        
+        final URI nodePID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI parentURI = URI.create("https://somewhere/in/the/archive/node.cmdi");
+        final URI parentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI greatGrandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        ancestorsAndDescendants.add(parentPID.toString());
+        ancestorsAndDescendants.add(grandParentPID.toString());
+        ancestorsAndDescendants.add(greatGrandParentPID.toString());
+        
+        final Collection<URI> justDescendants = new ArrayList<>();
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodePID); will(returnValue(parentURI));
+            //making sure the returned PID is the used one
+            oneOf(mockNodeResolver).getPID(parentURI); will(returnValue(parentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(parentURI); will(returnValue(grandParentPID));
+            //making sure the existing URI is used if the returned PID is null
+            oneOf(mockNodeResolver).getPID(grandParentPID); will(returnValue(null));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(grandParentPID); will(returnValue(greatGrandParentPID));
+            oneOf(mockNodeResolver).getPID(greatGrandParentPID); will(returnValue(greatGrandParentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(greatGrandParentPID); will(returnValue(null));
+            
+            oneOf(mockCorpusStructureProvider).getDescendants(nodePID); will(returnValue(justDescendants));
+        }});
+        
+        List<String> retrievedCollection = corpusStructureBridge.getURIsOfAncestorsAndDescendants(nodePID);
+        
+        assertEquals("Retrieved collection different from expected", ancestorsAndDescendants, retrievedCollection);
+    }
+    
+    @Test
+    public void getPIDsOfAncestorsAndDescendants() {
+        
+        final List<String> ancestorsAndDescendants = new ArrayList<>();
+        
+        final URI nodePID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI parentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI greatGrandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        ancestorsAndDescendants.add(parentPID.toString());
+        ancestorsAndDescendants.add(grandParentPID.toString());
+        ancestorsAndDescendants.add(greatGrandParentPID.toString());
+        
+        final Collection<URI> justDescendants = new ArrayList<>();
+        final URI childPID_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI childPID_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandChildPID_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandChildPID_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        justDescendants.add(childPID_1);
+        justDescendants.add(childPID_2);
+        justDescendants.add(grandChildPID_1);
+        justDescendants.add(grandChildPID_2);
+        
+        ancestorsAndDescendants.add(childPID_1.toString());
+        ancestorsAndDescendants.add(childPID_2.toString());
+        ancestorsAndDescendants.add(grandChildPID_1.toString());
+        ancestorsAndDescendants.add(grandChildPID_2.toString());
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodePID); will(returnValue(parentPID));
+            oneOf(mockNodeResolver).getPID(parentPID); will(returnValue(parentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(parentPID); will(returnValue(grandParentPID));
+            oneOf(mockNodeResolver).getPID(grandParentPID); will(returnValue(grandParentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(grandParentPID); will(returnValue(greatGrandParentPID));
+            oneOf(mockNodeResolver).getPID(greatGrandParentPID); will(returnValue(greatGrandParentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(greatGrandParentPID); will(returnValue(null));
+            
+            oneOf(mockCorpusStructureProvider).getDescendants(nodePID); will(returnValue(justDescendants));
+        }});
+        
+        List<String> retrievedCollection = corpusStructureBridge.getURIsOfAncestorsAndDescendants(nodePID);
+        
+        assertEquals("Retrieved collection different from expected", ancestorsAndDescendants, retrievedCollection);
     }
 }

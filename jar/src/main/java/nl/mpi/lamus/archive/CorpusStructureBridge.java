@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.archive;
 
+import java.net.URI;
+import java.util.List;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -38,4 +40,12 @@ public interface CorpusStructureBridge {
      * @return String containing the path to the closest top node
      */
     public String getCorpusNamePathToClosestTopNode(WorkspaceNode node);
+    
+    /**
+     * Retrieves a list containing the URIs (as strings)
+     * of both the ancestors and descendants of the given node.
+     * @param nodeURI URI of the node
+     * @return list with URIs (as strings) containing ancestors and descendants
+     */
+    public List<String> getURIsOfAncestorsAndDescendants(URI nodeURI);
 }

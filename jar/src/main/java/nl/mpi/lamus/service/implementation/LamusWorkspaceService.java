@@ -100,10 +100,14 @@ public class LamusWorkspaceService implements WorkspaceService {
         if(archiveUriToUse == null) {
             archiveUriToUse = archiveNodeURI;
         }
-
-        this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
         
-        return this.workspaceManager.createWorkspace(userID, archiveUriToUse);
+        try {
+            workspaceDao.preLockNode(archiveUriToUse);
+            this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
+            return this.workspaceManager.createWorkspace(userID, archiveUriToUse);
+        } finally {
+            workspaceDao.removeNodePreLock(archiveUriToUse);
+        }
     }
     
     /**

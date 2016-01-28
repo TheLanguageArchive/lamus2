@@ -14,6 +14,10 @@ CREATE TABLE workspace (
         message                     varchar(255)                    NOT NULL,
         crawler_id                  varchar(255),
 	PRIMARY KEY (workspace_id));
+
+CREATE TABLE pre_lock (
+        archive_uri                 varchar(255),
+        PRIMARY KEY (archive_uri));
 	
 CREATE TABLE node (
 	workspace_node_id           SERIAL                          NOT NULL,

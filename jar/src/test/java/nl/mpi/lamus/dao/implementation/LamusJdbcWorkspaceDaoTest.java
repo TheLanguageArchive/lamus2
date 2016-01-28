@@ -168,10 +168,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         int initialNumberOfRows = countRowsInTable("workspace");
         
         Workspace insertedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
+        URI firstNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        insertedWorkspace.setTopNodeArchiveURI(firstNodeURI);
         
         assertTrue("Workspace was not inserted into the database", countRowsInTable("workspace") == initialNumberOfRows + 1);
         
-        workspaceDao.deleteWorkspace(insertedWorkspace.getWorkspaceID());
+        workspaceDao.deleteWorkspace(insertedWorkspace);
         
         assertTrue("Workspace was not deleted from the database", countRowsInTable("workspace") == initialNumberOfRows);
     }
@@ -180,6 +182,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     public void deleteWorkspaceIncludingDataInOtherTables() throws URISyntaxException, MalformedURLException {
         
         int initialNumberOfWorkspaceRows = countRowsInTable("workspace");
+        int initialNumberOfPreLockRows = countRowsInTable("pre_lock");
         int initialNumberOfNodeRows = countRowsInTable("node");
         int initialNumberOfNodeLocks = countRowsInTable("node_lock");
         int initialNumberOfLinkRows = countRowsInTable("node_link");
@@ -187,6 +190,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         Workspace insertedWorkspace = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.FALSE);
         URI firstNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        insertedWorkspace.setTopNodeArchiveURI(firstNodeURI);
+        addPreLockToDb(firstNodeURI.toString());
         URL firstNodeURL = new URL("https://archive/location/firstNode.cmdi");
         WorkspaceNode firstNode = insertTestWorkspaceNodeWithUriIntoDB(insertedWorkspace, firstNodeURI, firstNodeURL, firstNodeURL.toURI(), Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
         addNodeLockToDb(firstNode);
@@ -206,17 +211,19 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         setNodeAsReplacedAndAddReplacementInDatabase(thirdNode, fourthNode);
         
         assertTrue("Workspace was not inserted into the database", countRowsInTable("workspace") == initialNumberOfWorkspaceRows + 1);
+        assertTrue("Pre Lock was not inserted into the database", countRowsInTable("pre_lock") == initialNumberOfPreLockRows + 1);
         assertTrue("Nodes were not inserted into the database", countRowsInTable("node") == initialNumberOfNodeRows + 4);
         assertTrue("Node locks were not inserted into the database", countRowsInTable("node_lock") == initialNumberOfNodeLocks + 4);
         assertTrue("Link was not inserted into the database", countRowsInTable("node_link") == initialNumberOfLinkRows + 1);
         assertTrue("Replacement was not inserted into the database", countRowsInTable("node_replacement") == initialNumberOfReplacementRows + 1);
         
-        workspaceDao.deleteWorkspace(insertedWorkspace.getWorkspaceID());
+        workspaceDao.deleteWorkspace(insertedWorkspace);
         
         assertTrue("Replacement was not deleted from the database", countRowsInTable("node_replacement") == initialNumberOfReplacementRows);
         assertTrue("Link was not deleted from the database", countRowsInTable("node_link") == initialNumberOfLinkRows);
         assertTrue("Node locks were not deleted from the database", countRowsInTable("node_lock") == initialNumberOfNodeLocks);
         assertTrue("Nodes were not deleted from the database", countRowsInTable("node") == initialNumberOfNodeRows);
+        assertTrue("Pre Locks were not deleted from the database", countRowsInTable("pre_lock") == initialNumberOfPreLockRows);
         assertTrue("Workspace was not deleted from the database", countRowsInTable("workspace") == initialNumberOfWorkspaceRows);
     }
     
@@ -776,6 +783,93 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         
         assertTrue("Retrieved list should be empty", retrievedList.isEmpty());
     }
+    
+    
+    @Test
+    public void someNodesInListArePreLocked() {
+        
+        URI archiveNodeUriToCheck_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URI archiveNodeUriToCheck_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        addPreLockToDb(archiveNodeUriToCheck_1.toString());
+        
+        List<String> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(archiveNodeUriToCheck_1.toString());
+        nodesToCheck.add(archiveNodeUriToCheck_2.toString());
+        
+        boolean result = this.workspaceDao.isAnyOfNodesPreLocked(nodesToCheck);
+        
+        assertTrue("There should be nodes in the collection with pre_lock entries in the database", result);
+    }
+    
+    @Test
+    public void noneOfTheNodesInListArePreLocked() {
+        
+        URI archiveNodeUriToCheck_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URI archiveNodeUriToCheck_2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        List<String> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(archiveNodeUriToCheck_1.toString());
+        nodesToCheck.add(archiveNodeUriToCheck_2.toString());
+        
+        boolean result = this.workspaceDao.isAnyOfNodesPreLocked(nodesToCheck);
+        
+        assertFalse("There should not be nodes in the collection with pre_lock entries in the database", result);
+    }
+    
+    @Test
+    public void noPreLockedNodes_NullOrEmptyList() {
+        
+        List<String> emptyList = new ArrayList<>();
+        
+        boolean result = this.workspaceDao.isAnyOfNodesPreLocked(emptyList);
+        
+        assertFalse("Result should be false", result);
+        
+        
+        result = this.workspaceDao.isAnyOfNodesPreLocked(null);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void preLockedNodes_queryWithMoreThan100URIs() {
+        
+        List<String> nodesToCheck = new ArrayList<>();
+        for(int i = 0; i < 168; i++) {
+            URI uri = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+            nodesToCheck.add(uri.toString());
+        }
+        
+        boolean result = this.workspaceDao.isAnyOfNodesPreLocked(nodesToCheck);
+        
+        assertFalse("There should not be nodes in the collection with pre_lock entries in the database", result);
+        
+        
+        nodesToCheck = new ArrayList<>();
+        for(int i = 0; i < 1329; i++) {
+            URI uri = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+            if(i == 1216) {
+                addPreLockToDb(uri.toString());
+            }
+            nodesToCheck.add(uri.toString());
+        }
+        
+        result = this.workspaceDao.isAnyOfNodesPreLocked(nodesToCheck);
+        
+        assertTrue("There should be nodes in the collection with pre_lock entries in the database", result);
+        
+        
+        nodesToCheck = new ArrayList<>();
+        for(int i = 0; i < 12952; i++) {
+            URI uri = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+            nodesToCheck.add(uri.toString());
+        }
+        
+        result = this.workspaceDao.isAnyOfNodesPreLocked(nodesToCheck);
+        
+        assertFalse("There should not be nodes in the collection with pre_lock entries in the database", result);
+    }
 
     @Test
     public void nodeIsLocked() throws MalformedURLException, URISyntaxException {
@@ -912,6 +1006,35 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         }
         
         assertEquals("Column was added to the node table.", initialNumberOfRows, countRowsInTable("node"));
+    }
+    
+    @Test
+    public void preLockNode() {
+        
+        URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        int initialNumberOfPreLocks = countRowsInTable("pre_lock");
+        
+        workspaceDao.preLockNode(nodeURI);
+        
+        int finalNumberOfPreLocks = countRowsInTable("pre_lock");
+        
+        assertEquals("Pre Lock wasn't created", finalNumberOfPreLocks, initialNumberOfPreLocks + 1);
+    }
+    
+    @Test
+    public void removeNodePreLock() {
+        
+        URI nodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        addPreLockToDb(nodeURI.toString());
+        
+        int initialNumberOfPreLocks = countRowsInTable("pre_lock");
+        
+        workspaceDao.removeNodePreLock(nodeURI);
+        
+        int finalNumberOfPreLocks = countRowsInTable("pre_lock");
+        
+        assertEquals("Pre lock wasn't removed", finalNumberOfPreLocks, initialNumberOfPreLocks - 1);
     }
     
     @Test
@@ -2809,6 +2932,12 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         String insertLockSql = "INSERT INTO node_lock (archive_uri, workspace_id) "
                 + "VALUES (?, ?)";
         jdbcTemplate.update(insertLockSql, node.getArchiveURI().toString(), node.getWorkspaceID());
+    }
+    
+    private void addPreLockToDb(String archiveUri) {
+        
+        String insertPreLockSql = "INSERT INTO pre_lock VALUES (?)";
+        jdbcTemplate.update(insertPreLockSql, archiveUri.toString());
     }
 }
 
