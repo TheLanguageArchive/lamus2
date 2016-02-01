@@ -358,11 +358,11 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node doesn't match the given reference URI, so it will continue the loop
-            oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
+            allowing(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
             
             //second iteration
             //second node matches the given reference URI, so it will return this node
-            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            allowing(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencePath);
@@ -391,11 +391,11 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node doesn't match the given reference URI, so it will continue the loop
-            oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
+            allowing(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
             
             //second iteration
             //second node matches the given reference URI, so it will return this node
-            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            allowing(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
         }});
         
         WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencePath);
@@ -426,11 +426,44 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             
             //loop
             //first node doesn't match the given reference URI, so it will continue the loop
-            oneOf(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
+            allowing(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
             
             //second iteration
             //second node doesn't match the given reference URI, so it will continue the loop (in this case it will finish)
-            oneOf(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+            allowing(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
+        }});
+        
+        //no match was found, so a null value will be returned
+        WorkspaceNode retrievedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, referencepath);
+        
+        assertNull("Matching node should be null", retrievedNode);
+    }
+    
+    @Test
+    public void findNodeForPath_EndingMatches_ButFilenameDoesntMatch() throws MalformedURLException {
+        
+        final int workspaceID = 10;
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "parent.cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "different_child.txt");
+        
+        //reference will match the second node
+        final String referencepath = "child.txt";
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            //first node doesn't match the given reference URI, so it will continue the loop
+            allowing(mockFirstNode).getWorkspaceURL(); will(returnValue(firstNodeWorkspaceURL));
+            
+            //second iteration
+            //second node doesn't match the given reference URI, so it will continue the loop (in this case it will finish)
+            allowing(mockSecondNode).getWorkspaceURL(); will(returnValue(secondNodeWorkspaceURL));
         }});
         
         //no match was found, so a null value will be returned

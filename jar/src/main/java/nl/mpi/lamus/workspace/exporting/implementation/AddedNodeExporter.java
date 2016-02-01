@@ -22,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -47,6 +46,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -255,8 +255,7 @@ public class AddedNodeExporter implements NodeExporter {
                 workspaceFileHandler.moveFile(currentNodeWorkspaceFile, nextAvailableFile);
             } else {
                 if(nodeUtil.isNodeMetadata(currentNode)) {
-                    StreamResult targetStreamResult = workspaceFileHandler.getStreamResultForNodeFile(nextAvailableFile);
-                    metadataAPI.writeMetadataDocument(currentDocument, targetStreamResult);
+                    metadataApiBridge.saveMetadataDocument(currentDocument, nextAvailableFile.toURI().toURL());
                 } else {
                     workspaceFileHandler.copyFile(currentNodeWorkspaceFile, nextAvailableFile);
                 }
@@ -282,13 +281,20 @@ public class AddedNodeExporter implements NodeExporter {
             ReferencingMetadataDocument referencingParentDocument, String currentPathRelativeToParent) throws WorkspaceExportException {
         
         try {
+            logger.debug("Updating reference for node '{}' in parent '{}'", currentNode.getWorkspaceURL().toString(), parentNode.getWorkspaceURL().toString());
+            
             Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNode.getWorkspaceURL().toURI());
             currentReference.setURI(handleParser.prepareAndValidateHandleWithHdlPrefix(currentNode.getArchiveURI()));
+            
+            logger.debug("Updated ResourceRef '{}' for node '{}' to '{}'", ((ResourceProxy)currentReference).getId(), currentNode.getWorkspaceURL().toString(), currentReference.getURI().toString());
+            
             URI currentUriRelativeToParent = URI.create(currentPathRelativeToParent);
             currentReference.setLocation(currentUriRelativeToParent);
-            StreamResult targetParentStreamResult = workspaceFileHandler.getStreamResultForNodeFile(new File(parentNode.getWorkspaceURL().getPath()));
-            metadataAPI.writeMetadataDocument(referencingParentDocument, targetParentStreamResult);
             
+            logger.debug("Updated localURI for node '{}' to '{}'", currentNode.getWorkspaceURL().toString(), currentReference.getLocation().toString());
+            
+            metadataApiBridge.saveMetadataDocument(referencingParentDocument, parentNode.getWorkspaceURL());
+         
         } catch (IOException | MetadataException | URISyntaxException | TransformerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentNode.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);

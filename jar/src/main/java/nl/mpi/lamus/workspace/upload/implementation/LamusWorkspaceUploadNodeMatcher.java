@@ -20,6 +20,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -154,11 +156,15 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             
             String referencePathEnding = referencePath;
             if(referencePathEnding.startsWith(".")) {
-                referencePathEnding = referencePathEnding.substring(referencePathEnding.indexOf(File.separator));
+                referencePathEnding = referencePathEnding.substring(referencePathEnding.indexOf(File.separator) + 1);
             }
             
             for(WorkspaceNode innerNode : nodesToCheck) {
-                if(innerNode.getWorkspaceURL().toString().endsWith(referencePathEnding)) { //check if the node URL contains the relative path that comes in the link reference
+                    
+                Path refPath = Paths.get(referencePathEnding);
+                Path nodePath = Paths.get(innerNode.getWorkspaceURL().toString());
+
+                if(nodePath.endsWith(refPath)) { //check if the node URL contains the relative path that comes in the link reference
                     return innerNode;
                 }
             }

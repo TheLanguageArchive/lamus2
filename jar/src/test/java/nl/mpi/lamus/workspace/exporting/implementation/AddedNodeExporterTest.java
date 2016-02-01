@@ -97,7 +97,6 @@ public class AddedNodeExporterTest {
     // but the expectations were not being properly matched after the cast (to ReferencingMetadataObject) was made in the code to be tested
     @Mock ReferencingMetadataDocument mockChildCmdiDocument;
     @Mock ReferencingMetadataDocument mockParentCmdiDocument;
-    @Mock StreamResult mockStreamResult;
     @Mock ResourceProxy mockResourceProxy;
     
     @Mock CorpusNode mockParentCorpusNode;
@@ -1212,8 +1211,7 @@ public class AddedNodeExporterTest {
                 oneOf(mockWorkspaceFileHandler).moveFile(nodeWsFile, nextAvailableFile);
             } else {
                 if(isMetadata) {
-                    oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(nextAvailableFile); will(returnValue(mockStreamResult));
-                    oneOf(mockMetadataAPI).writeMetadataDocument(mockChildCmdiDocument, mockStreamResult);
+                    oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, nextAvailableFile.toURI().toURL());
                 } else {
                     oneOf(mockWorkspaceFileHandler).copyFile(nodeWsFile, nextAvailableFile);
                 }
@@ -1270,18 +1268,19 @@ public class AddedNodeExporterTest {
             oneOf(mockResourceProxy).setURI(preparedNewArchiveHandle);
             oneOf(mockResourceProxy).setLocation(childUriRelativeToParent);
             
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentNodeWsFile);
-                will(returnValue(mockStreamResult));
+            allowing(mockResourceProxy).getId(); will(returnValue("someID"));
+            allowing(mockResourceProxy).getURI(); will(returnValue(preparedNewArchiveHandle));
+            allowing(mockResourceProxy).getLocation(); will(returnValue(childUriRelativeToParent));
         }});
         
         if(expectedException != null) {
             context.checking(new Expectations() {{
-                oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+                oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentCmdiDocument, parentNodeWsURL);
                     will(throwException(expectedException));
             }});
         } else {
             context.checking(new Expectations() {{
-                oneOf(mockMetadataAPI).writeMetadataDocument(mockParentCmdiDocument, mockStreamResult);
+                oneOf(mockMetadataApiBridge).saveMetadataDocument(mockParentCmdiDocument, parentNodeWsURL);
             }});
         }
     }
