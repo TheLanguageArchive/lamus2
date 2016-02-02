@@ -107,7 +107,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
 
             unlinkedAndDeletedNodesExportHandler.exploreUnlinkedAndDeletedNodes(workspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
             
-            Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodesUrlUpdates = workspaceDao.getReplacedNodeUrlsToUpdateForWorkspace(workspace.getWorkspaceID());
+            Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodesUrlUpdates = workspaceDao.getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspace.getWorkspaceID());
             if(!replacedNodesUrlUpdates.isEmpty()) {
                 corpusStructureServiceBridge.updateReplacedNodesUrls(replacedNodesUrlUpdates);
             }

@@ -160,7 +160,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
                 when(exporting.isNot("finished"));
             
-            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
+            oneOf(mockWorkspaceDao).getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
                 when(exporting.isNot("finished"));
                 
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
@@ -269,7 +269,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
                 when(exporting.isNot("finished"));
                 
-            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
+            oneOf(mockWorkspaceDao).getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(emptyNodeUrlUpdates));
                 when(exporting.isNot("finished"));
                 
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(testNode));
@@ -329,7 +329,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockUnlinkedAndDeletedNodesExportHandler).exploreUnlinkedAndDeletedNodes(mockWorkspace, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.UNLINKED_NODES_EXPORT);
                 when(exporting.isNot("finished"));
             
-            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(mockReplacedNodeUrlUpdateCollection));
+            oneOf(mockWorkspaceDao).getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(mockReplacedNodeUrlUpdateCollection));
                 when(exporting.isNot("finished"));
             oneOf(mockReplacedNodeUrlUpdateCollection).isEmpty(); will(returnValue(Boolean.FALSE));
                 when(exporting.isNot("finished"));

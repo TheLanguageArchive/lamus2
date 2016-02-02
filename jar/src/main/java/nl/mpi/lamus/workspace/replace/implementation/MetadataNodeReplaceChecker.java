@@ -89,7 +89,23 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
             throw new ProtectedNodeException(message, oldNode.getArchiveURI(), oldNode.getWorkspaceID());
         }
         
-        replaceActionManager.addActionToList(replaceActionFactory.getReplaceAction(oldNode, parentNode, newNode, newNodeAlreadyLinked), actions);
+        boolean handlesAreEquivalent = true;
+        if(parentNode != null) { // if this is the top node, then the handle compatibility has already been checked
+            try {
+                handlesAreEquivalent = handleParser.areHandlesEquivalent(oldNode.getArchiveURI(), newNode.getArchiveURI());
+            } catch(IllegalArgumentException ex) {
+                // new handle is not a valid handle, so they're not compatible
+                logger.info("Handle of new node not compatible with the old one. Old node ({}) will be deleted instead of versioned.", oldNode.getWorkspaceNodeID());
+                handlesAreEquivalent = false;
+            }
+        }
+        
+        if(handlesAreEquivalent) {
+            replaceActionManager.addActionToList(replaceActionFactory.getReplaceAction(oldNode, parentNode, newNode, newNodeAlreadyLinked), actions);
+        } else {
+            replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(oldNode), actions);
+            replaceActionManager.addActionToList(replaceActionFactory.getLinkAction(newNode, parentNode), actions);
+        }
         
 
         //TODO CHECK CIRCULAR LINKS

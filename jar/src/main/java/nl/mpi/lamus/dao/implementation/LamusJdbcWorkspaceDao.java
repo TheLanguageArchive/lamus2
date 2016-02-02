@@ -1244,14 +1244,14 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     }
 
     /**
-     * @see WorkspaceDao#getReplacedNodeUrlsToUpdateForWorkspace(int)
+     * @see WorkspaceDao#getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(int)
      */
     @Override
-    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID) {
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(int workspaceID) {
         
-        logger.debug("Retrieving collection containing replaced node URL updates belonging to workspace " + workspaceID);
+        logger.debug("Retrieving collection containing replaced and deleted node URL updates belonging to workspace " + workspaceID);
         
-        String queryNodeUrlUpdatesSql =
+        String queryReplacedNodeUrlUpdatesSql =
                 "SELECT coalesce(a.archive_uri, a.archive_url, a.origin_url) node_uri,"
                 + " a.archive_url updated_uri FROM"
                 + " (SELECT workspace_id, workspace_node_id, archive_uri, archive_url, origin_url from node) a,"
@@ -1260,9 +1260,26 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
                 + " AND a.workspace_id = :workspace_id;";
         
         SqlParameterSource namedParameters = new MapSqlParameterSource("workspace_id", workspaceID);
+        Collection<WorkspaceReplacedNodeUrlUpdate> replacedNodes =
+                this.namedParameterJdbcTemplate.query(queryReplacedNodeUrlUpdatesSql, namedParameters, new WorkspaceReplacedNodeUrlUpdateMapper());
         
-        Collection<WorkspaceReplacedNodeUrlUpdate> collectionToReturn =
-                this.namedParameterJdbcTemplate.query(queryNodeUrlUpdatesSql, namedParameters, new WorkspaceReplacedNodeUrlUpdateMapper());
+        String queryDeletedNodeUrlUpdatedSql =
+                "SELECT coalesce(archive_uri, archive_url, origin_url) node_uri,"
+                + " archive_url updated_uri FROM node"
+                + " WHERE status LIKE :status_deleted"
+                + " AND (archive_uri IS NOT NULL OR archive_url IS NOT NULL)"
+                + " AND workspace_id = :workspace_id;";
+        
+        namedParameters = new MapSqlParameterSource()
+                .addValue("workspace_id", workspaceID)
+                .addValue("status_deleted", WorkspaceNodeStatus.DELETED.name());
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> deletedNodes =
+                this.namedParameterJdbcTemplate.query(queryDeletedNodeUrlUpdatedSql, namedParameters, new WorkspaceReplacedNodeUrlUpdateMapper());
+        
+        Collection<WorkspaceReplacedNodeUrlUpdate> collectionToReturn = new ArrayList<>();
+        collectionToReturn.addAll(replacedNodes);
+        collectionToReturn.addAll(deletedNodes);
         
         return collectionToReturn;
     }

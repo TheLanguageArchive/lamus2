@@ -116,10 +116,13 @@ public class MetadataNodeReplaceCheckerTest {
 
     
     @Test
-    public void decideReplaceActionsNotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
+    public void decideReplaceActions_NotLinked() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
         
         final int oldNodeID = 100;
         final int newNodeID = 200;
+        
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final URI newNodeURI = oldNodeURI;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         final boolean isOldNodeProtected = Boolean.FALSE;
@@ -128,11 +131,49 @@ public class MetadataNodeReplaceCheckerTest {
             
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
             
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
+            
             oneOf(mockReplaceActionFactory).getReplaceAction(mockOldNode, mockParentNode, mockNewNode, newNodeAlreadyLinked); will(returnValue(mockReplaceAction));
             oneOf(mockReplaceActionManager).addActionToList(mockReplaceAction, actions);
+            
+            oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
+        }});
+        
+        nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
+    }
+    
+    @Test
+    public void decideReplaceActions_NotLinked_DifferentHandles() throws URISyntaxException, MalformedURLException, ProtectedNodeException, IncompatibleNodesException {
+        
+        final int oldNodeID = 100;
+        final int newNodeID = 200;
+        
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final URI newNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        
+        final boolean newNodeAlreadyLinked = Boolean.FALSE;
+        final boolean isOldNodeProtected = Boolean.FALSE;
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
+            allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
+            
+            oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
+            
+            oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.FALSE));
+            
+            oneOf(mockReplaceActionFactory).getDeleteAction(mockOldNode); will(returnValue(mockDeleteAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockDeleteAction, actions);
+            oneOf(mockReplaceActionFactory).getLinkAction(mockNewNode, mockParentNode); will(returnValue(mockLinkAction));
+            oneOf(mockReplaceActionManager).addActionToList(mockLinkAction, actions);
             
             oneOf(mockNodeReplaceExplorer).exploreReplace(mockOldNode, mockNewNode, actions);
         }});
@@ -148,8 +189,9 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final int newNodeID = 200;
+        final URI newNodeURI = oldNodeURI;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         final boolean isOldNodeProtected = Boolean.TRUE;
@@ -161,10 +203,10 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockOldNode).isProtected(); will(returnValue(isOldNodeProtected));
-            
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
         }});
         
         try {
@@ -178,18 +220,21 @@ public class MetadataNodeReplaceCheckerTest {
     }
     
     @Test
-    public void decideReplaceActions_OldNodeProtected_ButNotActuallyBeingReplaced() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
+    public void decideReplaceActions_SameNode() throws MalformedURLException, URISyntaxException, ProtectedNodeException, IncompatibleNodesException {
         
         final int oldNodeID = 100;
         final int newNodeID = 100;
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final URI newNodeURI = oldNodeURI;
         
         final boolean newNodeAlreadyLinked = Boolean.TRUE;
-        final boolean isOldNodeProtected = Boolean.TRUE;
         
         context.checking(new Expectations() {{
             
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
 
             oneOf(mockReplaceActionFactory).getUnlinkFromOldParentAction(mockOldNode, mockParentNode); will(returnValue(mockUnlinkFromReplacedParentAction));
             oneOf(mockReplaceActionManager).addActionToList(mockUnlinkFromReplacedParentAction, actions);
@@ -203,7 +248,7 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final URL oldNodeArchiveURL = new URL("file:/archive/location/node.cmdi");
         final int newNodeID = 200;
         final URI newNodeURI = oldNodeURI;
@@ -217,11 +262,11 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
             
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
-            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
@@ -244,7 +289,7 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final int newNodeID = 200;
         final URI newNodeURI = null;
         
@@ -258,11 +303,11 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
             
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
-            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(throwException(exceptionToThrow));
         }});
         
@@ -283,9 +328,9 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final int newNodeID = 200;
-        final URI newNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI newNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
@@ -296,11 +341,11 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
             
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
-            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.FALSE));
         }});
         
@@ -321,7 +366,7 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final String oldNodeFilename = "node.cmdi";
         final URL oldNodeArchiveURL = new URL("file:/archive/location/" + oldNodeFilename);
         final int newNodeID = 200;
@@ -338,11 +383,11 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
             
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
-            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
@@ -366,7 +411,7 @@ public class MetadataNodeReplaceCheckerTest {
         
         final int workspaceID = 10;
         final int oldNodeID = 100;
-        final URI oldNodeURI = URI.create(UUID.randomUUID().toString());
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
         final URL oldNodeArchiveURL = null;
         final int newNodeID = 200;
         final URI newNodeURI = oldNodeURI;
@@ -382,11 +427,11 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.TRUE));
             
-            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
-            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             oneOf(mockHandleParser).areHandlesEquivalent(oldNodeURI, newNodeURI); will(returnValue(Boolean.TRUE));
             
             allowing(mockOldNode).getArchiveURL(); will(returnValue(oldNodeArchiveURL));
@@ -410,6 +455,8 @@ public class MetadataNodeReplaceCheckerTest {
         final int workspaceID = 10;
         final int oldNodeID = 100;
         final int newNodeID = 200;
+        final URI oldNodeURI = URI.create("hdl:11111/" + UUID.randomUUID().toString());
+        final URI newNodeURI = oldNodeURI;
         
         final boolean newNodeAlreadyLinked = Boolean.FALSE;
         
@@ -420,6 +467,8 @@ public class MetadataNodeReplaceCheckerTest {
             allowing(mockOldNode).getWorkspaceID(); will(returnValue(workspaceID));
             allowing(mockOldNode).getWorkspaceNodeID(); will(returnValue(oldNodeID));
             allowing(mockNewNode).getWorkspaceNodeID(); will(returnValue(newNodeID));
+            allowing(mockOldNode).getArchiveURI(); will(returnValue(oldNodeURI));
+            allowing(mockNewNode).getArchiveURI(); will(returnValue(newNodeURI));
             
             oneOf(mockWorkspaceDao).isTopNodeOfWorkspace(workspaceID, oldNodeID); will(returnValue(Boolean.FALSE));
         }});

@@ -90,8 +90,7 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
         
         handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
         
-        node.setArchiveURI(null);
-        workspaceDao.updateNodeArchiveUri(node);
+        //the handle is not deleted from the database because it will still be needed
         
         if(nodeUtil.isNodeMetadata(node)) {
             metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);

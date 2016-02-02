@@ -399,5 +399,5 @@ public interface WorkspaceDao {
      * @param workspaceID ID of the workspace
      * @return Collection of node URL updates
      */
-    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedNodeUrlsToUpdateForWorkspace(int workspaceID);
+    public Collection<WorkspaceReplacedNodeUrlUpdate> getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(int workspaceID);
 }

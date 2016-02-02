@@ -2602,6 +2602,8 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceNode topNode1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, topURI1, topURL1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
         setNodeAsWorkspaceTopNodeInDB(testWorkspace1, topNode1);
         
+        // replaced nodes
+        
         URI oldURI1_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         URL oldURL1_1 = new URL("file:/archive/folder/oldnode1_1.cmdi");
         URL oldUpdatedURL1_1 = new URL("file:/archive/versioning/oldnode1_1.cmdi");
@@ -2631,6 +2633,19 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         setNodeAsReplacedAndAddReplacementInDatabase(oldNode1_2, newNode1_2);
         WorkspaceReplacedNodeUrlUpdate update1_2 =
                 new LamusWorkspaceReplacedNodeUrlUpdate(oldNode1_2.getArchiveURI(), oldNode1_2.getArchiveURL().toURI());
+        
+        // deleted nodes
+        
+        URI deletedURI_1 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        URL deletedURL_1 = new URL("file:/archive/folder/deletednode_1.cmdi");
+        URL deletedUpdatedURL_1 = new URL("file:/archive/trash/deletednode1_1.cmdi");
+        WorkspaceNode deletedNode_1 = insertTestWorkspaceNodeWithUriIntoDB(testWorkspace1, deletedURI_1, deletedUpdatedURL_1, null, Boolean.TRUE, WorkspaceNodeStatus.ARCHIVE_COPY, Boolean.FALSE);
+        setNodeAsDeleted(deletedNode_1);
+        WorkspaceReplacedNodeUrlUpdate update_3 =
+                new LamusWorkspaceReplacedNodeUrlUpdate(deletedNode_1.getArchiveURI(), deletedNode_1.getArchiveURL().toURI());
+        
+        
+        // another workspace
         
         Workspace testWorkspace2 = insertTestWorkspaceWithDefaultUserIntoDB(Boolean.TRUE);
         URI topURI2 = URI.create("hdl:11142/" + UUID.randomUUID().toString());
@@ -2668,10 +2683,11 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
         WorkspaceReplacedNodeUrlUpdate update2_2 =
                 new LamusWorkspaceReplacedNodeUrlUpdate(oldNode2_2.getArchiveURI(), oldNode2_2.getArchiveURL().toURI());
         
-        Collection<WorkspaceReplacedNodeUrlUpdate> retrievedCollection = this.workspaceDao.getReplacedNodeUrlsToUpdateForWorkspace(testWorkspace1.getWorkspaceID());
         
-        assertTrue("Retrieved collection of updates has different size from expected", retrievedCollection.size() == 2);
-        assertTrue("Not all expected updates are present in the collection", retrievedCollection.contains(update1_1) && retrievedCollection.contains(update1_2));
+        Collection<WorkspaceReplacedNodeUrlUpdate> retrievedCollection = this.workspaceDao.getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(testWorkspace1.getWorkspaceID());
+        
+        assertTrue("Retrieved collection of updates has different size from expected", retrievedCollection.size() == 3);
+        assertTrue("Not all expected updates are present in the collection", retrievedCollection.contains(update1_1) && retrievedCollection.contains(update1_2) && retrievedCollection.contains(update_3));
         assertFalse("Unexpected updates are present in the collection", retrievedCollection.contains(update2_1) && retrievedCollection.contains(update2_2));
     }
     

@@ -569,9 +569,9 @@ public class WorkspaceDaoProxyTest {
         final int workspaceID = 10;
         allowCallToDaoFactory();
         context.checking(new Expectations() {{
-            oneOf(mockWorkspaceDao).getReplacedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(mockWorkspaceReplacedNodeUrlUpdateCollection));
+            oneOf(mockWorkspaceDao).getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspaceID); will(returnValue(mockWorkspaceReplacedNodeUrlUpdateCollection));
         }});
-        assertEquals(mockWorkspaceReplacedNodeUrlUpdateCollection, workspaceDaoProxy.getReplacedNodeUrlsToUpdateForWorkspace(workspaceID));
+        assertEquals(mockWorkspaceReplacedNodeUrlUpdateCollection, workspaceDaoProxy.getReplacedAndDeletedNodeUrlsToUpdateForWorkspace(workspaceID));
     }
     
     
