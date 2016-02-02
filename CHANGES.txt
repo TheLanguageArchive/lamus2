@@ -1,3 +1,43 @@
+lamus2-1.5.0-RC3 (2016-02-02)
+
+    Changes:
+        - PRE-LOCKS: Added the concept of pre-locks, in order to prevent
+          simultaneous attempts of creating workspaces in the same branch (#4814).
+
+    Fixes:
+        - LINK MATCHING: During upload, there were some situations in which the
+          child node matched to a specific link was not correct, leading to
+          other issues later on (#4834).
+        - DELETED URL: Now updating also the URL for deleted nodes in the
+          corpusstructure DB, which was preventing potential new nodes from being
+          moved to the location where those nodes used to be (#4817).
+        - TREE REPLACE: When the handle in the old tree and new tree are not
+          equivalent, the old tree is simply deleted instead of replaced,
+          since there is no relation between the two.
+
+
+lamus2-1.5.0-RC2 (2016-01-27)
+
+    Changes:
+        - SPECIAL CHARACTERS: Now rejecting uploads containing special characters
+          in the filename (#4798).
+        - CORPUS STRUCTURE: Updated the corpus structure libraries.
+
+    Fixes:
+        - DEPENDENCIES: Excluded some redundant dependencies (#4807).
+        - SCHEMATRON: Fixed the schematron files in order to prevent a parsing error
+          which was causing validation problems (#4780).
+        - MANAGEMENT CONSOLE: Fixed some issues with the management console (#4812).
+        - RELATIVE PATH: Fixed issues with the retrieval of the relative path between
+          parent and child in case the parent has a new version (#4816).
+        - WORKSPACE CREATION: Issues during the workspace creation were being
+          caused by the fact that some fields were not up-to-date (#4818).
+        - BUTTON MODEL: In some cases the button model was not being refreshed
+          after the action (link, for instance) was performed (#4800).
+        - CRAWLER ID: Some workspaces were having trouble getting back the crawler ID
+          because the workspace variable in the exporter was shared by different
+          workspaces, leading to inconsistencies (#4821).
+
 lamus2-1.5.0-RC1 (2015-12-30)
 
     Changes:
