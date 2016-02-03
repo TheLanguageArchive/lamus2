@@ -414,7 +414,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.5</version>
                 <configuration>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                     <!--<compilerArgument>-javaagent:${user.home}/.m2/repository/org/apache/openjpa/openjpa-all/2.3.0/openjpa-all-2.3.0.jar</compilerArgument>-->
