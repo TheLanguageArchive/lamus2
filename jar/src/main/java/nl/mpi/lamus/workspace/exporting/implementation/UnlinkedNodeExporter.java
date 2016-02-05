@@ -16,7 +16,9 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
@@ -118,17 +120,20 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 if(nodeUtil.isNodeMetadata(currentNode)) {
                     workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
                 }
-                
-                URL trashedNodeArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
-                currentNode.setArchiveURL(trashedNodeArchiveURL);
-                workspaceDao.updateNodeArchiveUrl(currentNode);
+                URL trashedNodeArchiveURL = moveNodeToTrashcan(currentNode);
                 URI trashedNodeArchiveUri = URI.create(trashedNodeArchiveURL.toString());
                 
                 if(parentNode != null) {
                     ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
                     updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, trashedNodeArchiveUri, parentNode.getWorkspaceURL(), parentDocument, trashedNodeArchiveURL.getFile());
                 }
+                
                 logger.debug("Node " + currentArchiveUri + " not to be kept, but moved to the trashcan.");
+                
+                updateHandleLocation(currentNode);
+                
+                workspaceDao.setWorkspaceNodeAsDeleted(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID(), currentNode.isExternal());
+                
                 return;
             } else {
                 logger.debug("Node " + currentNode.getWorkspaceURL() + " not to be kept and not from the archive. Nothing to do here.");
@@ -160,9 +165,9 @@ public class UnlinkedNodeExporter implements NodeExporter{
             if(currentArchiveUri != null) {
 
                 try {
-                    archiveHandleHelper.deleteArchiveHandle(currentNode, orphanedNodeURL);
+                    archiveHandleHelper.deleteArchiveHandleFromServerAndFile(currentNode, orphanedNodeURL);
                 } catch (HandleException | IOException | TransformerException | MetadataException ex) {
-                    logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
+                    logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL(), ex);
                 }
             }
 
@@ -175,6 +180,16 @@ public class UnlinkedNodeExporter implements NodeExporter{
             //this will be used later for adjusting file permissions
             currentNode.setWorkspaceURL(orphanedNodeURL);
             workspaceDao.updateNodeWorkspaceURL(currentNode);
+            
+            if(currentArchiveUri != null) {
+                //use mock URL, since the node has been moved to the orphans folder
+                    // there might be, later on, a file in the exact same spot, which would clash with this one in the corpusstructure database
+                URL mockArchiveURL = getMockArchiveURL(currentNode);
+                currentNode.setArchiveURL(mockArchiveURL);
+                workspaceDao.updateNodeArchiveUrl(currentNode);
+
+                workspaceDao.setWorkspaceNodeAsDeleted(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID(), currentNode.isExternal());
+            }
         }
         
         //TODO is this necessary?
@@ -233,6 +248,44 @@ public class UnlinkedNodeExporter implements NodeExporter{
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
+    
+    
+    
+    private URL moveNodeToTrashcan(WorkspaceNode currentNode) {
+        
+        URL targetArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
+        currentNode.setArchiveURL(targetArchiveURL);
+        workspaceDao.updateNodeArchiveUrl(currentNode);
+        
+        if(targetArchiveURL == null) {
+            logger.warn("Problem moving file to its target location");
+        }
+        
+        return targetArchiveURL;
+    }
+    
+    private void updateHandleLocation(WorkspaceNode currentNode) throws WorkspaceExportException {
+        
+        try {
+            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(currentNode, currentNode.getArchiveURL());
+        } catch (HandleException | IOException | TransformerException | MetadataException ex) {
+            logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
+        }
+    }
+    
+    private URL getMockArchiveURL(WorkspaceNode currentNode) {
+        
+        String urlCompletePath = currentNode.getWorkspaceURL().getPath();
+        String pathToUse = FilenameUtils.getFullPathNoEndSeparator(urlCompletePath);
+        String filename = currentNode.getWorkspaceNodeID() + "_" + FilenameUtils.getName(urlCompletePath);
+        
+        try {
+            return new File(pathToUse, filename).toURI().toURL();
+        } catch (MalformedURLException ex) {
+            throw new UnsupportedOperationException("not handled yet");
+        }
+    }
+    
     
     private void throwWorkspaceExportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceExportException {
         logger.error(errorMessage, cause);

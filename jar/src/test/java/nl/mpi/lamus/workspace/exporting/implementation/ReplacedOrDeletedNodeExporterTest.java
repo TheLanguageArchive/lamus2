@@ -223,7 +223,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
@@ -264,7 +264,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL);
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL);
             
         }});
         
@@ -532,7 +532,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandle(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
+            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
             //logger
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
 

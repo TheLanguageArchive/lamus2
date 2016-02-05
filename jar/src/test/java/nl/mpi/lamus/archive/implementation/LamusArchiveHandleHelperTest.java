@@ -164,7 +164,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.FALSE));
         }});
         
-        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+        archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
     }
     
     @Test
@@ -183,7 +183,7 @@ public class LamusArchiveHandleHelperTest {
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location);
         }});
         
-        archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+        archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
     }
     
     @Test
@@ -203,7 +203,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(HandleException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -227,7 +227,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(IOException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -253,7 +253,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(TransformerException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
@@ -279,7 +279,7 @@ public class LamusArchiveHandleHelperTest {
         }});
         
         try {
-            archiveHandleHelper.deleteArchiveHandle(mockWorkspaceNode, location);
+            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(mockWorkspaceNode, location);
             fail("should have thrown an exception");
         } catch(MetadataException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

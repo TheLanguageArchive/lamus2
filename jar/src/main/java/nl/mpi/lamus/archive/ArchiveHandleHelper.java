@@ -39,7 +39,8 @@ public interface ArchiveHandleHelper {
     public URI getArchiveHandleForNode(URI nodeURI) throws NodeNotFoundException;
 
     /**
-     * Deletes the handle for a given node.
+     * Deletes the handle for a given node, but only in the handle server and
+     * the file. The database keeps that information.
      * This includes deleting the handle from the handle server, the self-handle
      * (if this is a metadata node) from the metadata document and from the
      * lamus2 database.
@@ -47,6 +48,6 @@ public interface ArchiveHandleHelper {
      * @param node Node to have the archive handle deleted
      * @param currenLocation current location of the node
      */
-    public void deleteArchiveHandle(WorkspaceNode node, URL currenLocation)
+    public void deleteArchiveHandleFromServerAndFile(WorkspaceNode node, URL currenLocation)
             throws HandleException, IOException, TransformerException, MetadataException;
 }

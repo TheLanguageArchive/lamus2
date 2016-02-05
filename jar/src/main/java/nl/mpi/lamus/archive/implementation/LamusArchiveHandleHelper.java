@@ -82,10 +82,10 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     }
 
     /**
-     * @see ArchiveHandleHelper#deleteArchiveHandle(nl.mpi.lamus.workspace.model.WorkspaceNode, java.net.URL)
+     * @see ArchiveHandleHelper#deleteArchiveHandleFromServerAndFile(nl.mpi.lamus.workspace.model.WorkspaceNode, java.net.URL)
      */
     @Override
-    public void deleteArchiveHandle(WorkspaceNode node, URL currentLocation)
+    public void deleteArchiveHandleFromServerAndFile(WorkspaceNode node, URL currentLocation)
             throws HandleException, IOException, TransformerException, MetadataException {
         
         handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
