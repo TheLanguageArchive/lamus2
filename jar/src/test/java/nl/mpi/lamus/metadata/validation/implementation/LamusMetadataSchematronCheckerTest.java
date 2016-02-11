@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
+package nl.mpi.lamus.metadata.validation.implementation;
 
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import nl.mpi.lamus.typechecking.MetadataChecker;
+import nl.mpi.lamus.metadata.validation.MetadataSchematronChecker;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -39,7 +39,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
-public class LamusMetadataCheckerTest {
+public class LamusMetadataSchematronCheckerTest {
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setThreadingPolicy(new Synchroniser());
@@ -48,10 +48,10 @@ public class LamusMetadataCheckerTest {
     
     @Mock File mockSchematronFile;
     
-    private MetadataChecker metadataChecker;
+    private MetadataSchematronChecker metadataChecker;
 
     
-    public LamusMetadataCheckerTest() {
+    public LamusMetadataSchematronCheckerTest() {
     }
     
     @BeforeClass
@@ -64,11 +64,11 @@ public class LamusMetadataCheckerTest {
     
     @Before
     public void setUp() {
-        metadataChecker = new LamusMetadataChecker();
-        ReflectionTestUtils.setField(metadataChecker, "schematronFile_upload",
-                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_upload.sch").getFile())));
-        ReflectionTestUtils.setField(metadataChecker, "schematronFile_submit",
-                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_submit.sch").getFile())));
+        metadataChecker = new LamusMetadataSchematronChecker();
+        ReflectionTestUtils.setField(metadataChecker, "schematronXsltFile_upload",
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_upload.xsl").getFile())));
+        ReflectionTestUtils.setField(metadataChecker, "schematronXsltFile_submit",
+                new File(URLDecoder.decode(getClass().getClassLoader().getResource("cmdi_validation/cmdi_schematron_submit.xsl").getFile())));
     }
     
     @After
@@ -79,7 +79,7 @@ public class LamusMetadataCheckerTest {
     @Test
     public void invalidSchematron() throws Exception {
         
-        ReflectionTestUtils.setField(metadataChecker, "schematronFile_upload", mockSchematronFile);
+        ReflectionTestUtils.setField(metadataChecker, "schematronXsltFile_upload", mockSchematronFile);
         final File fileToCheck = getResourceFromLocation("cmdi_validation/testingProfile_allowed.cmdi");
         
         context.checking(new Expectations() {{
@@ -103,7 +103,7 @@ public class LamusMetadataCheckerTest {
         final String expectedTest = "$allowedProfilesDocument//profile[@id = normalize-space(current()/cmd:Header/cmd:MdProfile)]"
                             + " or $allowedProfilesDocument//profile[@id = tokenize(normalize-space(current()/@xsi:schemaLocation), '/')[last() - 1]]";
         final String expectedMessage = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateUploadedFile(fileToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -148,7 +148,7 @@ public class LamusMetadataCheckerTest {
         final File fileToCheck3 = getResourceFromLocation("cmdi_validation/testingReference_Metadata_missingMimetypeTwice.cmdi");
         final String expectedTest = "current()/cmd:ResourceType/@mimetype";
         final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.WARN;
         
         Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
         Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
@@ -170,7 +170,7 @@ public class LamusMetadataCheckerTest {
                 + " or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml')"
                 + " or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
         final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         
         Collection<MetadataValidationIssue> issues1 = metadataChecker.validateUploadedFile(fileToCheck1);
         Collection<MetadataValidationIssue> issues2 = metadataChecker.validateUploadedFile(fileToCheck2);
@@ -216,7 +216,7 @@ public class LamusMetadataCheckerTest {
         final String expectedTest = "not($profileName)"
                 + " or ($profileName != 'lat-corpus' or (current()/cmd:ResourceType != 'Resource' or /cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:InfoLink[@ref = current()/@id] ))";
         final String expectedMessage = "[CMDI Profile Restriction] 'lat-corpus' doesn't allow referencing to resources, unless they're info links.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateUploadedFile(fileToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -234,7 +234,7 @@ public class LamusMetadataCheckerTest {
         final String expectedTest = "$allowedProfilesDocument//profile[@id = normalize-space(current()/cmd:Header/cmd:MdProfile)]"
                             + " or $allowedProfilesDocument//profile[@id = tokenize(normalize-space(current()/@xsi:schemaLocation), '/')[last() - 1]]";
         final String expectedMessage = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -249,7 +249,7 @@ public class LamusMetadataCheckerTest {
         
         final String expectedTest = "count(cmd:ResourceProxy) ge 1";
         final String expectedMessage = "[CMDI Best Practice] There should be at least one /cmd:CMD/cmd:Resources/cmd:ResourceProxyList/cmd:ResourceProxy.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -264,7 +264,7 @@ public class LamusMetadataCheckerTest {
         
         final String expectedTest = "not($profileName) or $profileAllowedReferenceTypes/allowedReferenceType[text() = current()/cmd:ResourceType]";
         final String expectedMessage = "[CMDI Profile Restriction] the CMD profile of this record doesn't allow for this resource type.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -297,7 +297,7 @@ public class LamusMetadataCheckerTest {
         
         final String expectedTest = "current()/cmd:ResourceType/@mimetype";
         final String expectedMessage = "[CMDI Best Practice] Mimetype not present in ResourceProxy.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.WARN;
         
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
@@ -321,7 +321,7 @@ public class LamusMetadataCheckerTest {
                 + " or (current()/cmd:ResourceType = 'Metadata' and current()/cmd:ResourceType/@mimetype = 'text/x-cmdi+xml')"
                 + " or (current()/cmd:ResourceType = 'Resource' and current()/cmd:ResourceType/@mimetype != 'text/x-cmdi+xml')";
         final String expectedMessage = "[CMDI Invalid reference] Mimetype not consistent with ResourceProxy type.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
@@ -356,7 +356,7 @@ public class LamusMetadataCheckerTest {
                 + " or ($profileName != 'lat-corpus' or /cmd:CMD/cmd:Components/cmd:lat-corpus/*[@ref = current()/@id])"
                 + " and ($profileName != 'lat-session' or /cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*[@ref = current()/@id] or /cmd:CMD/cmd:Components/cmd:lat-session/*[@ref = current()/@id])";
         final String expectedMessage = "[CMDI Profile Restriction] There should be a 'ref' attribute for each resource proxy ('/cmd:CMD/cmd:Components/cmd:lat-corpus/*/@ref' for 'lat-corpus' and '/cmd:CMD/cmd:Components/cmd:lat-session/cmd:Resources/*/@ref' for 'lat-session'.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -371,7 +371,7 @@ public class LamusMetadataCheckerTest {
         
         final String expectedTest = "current()/*[normalize-space(cmd:Title) != '']";
         final String expectedMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:Title shouldn't be empty.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.WARN;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -386,7 +386,7 @@ public class LamusMetadataCheckerTest {
         
         final String expectedTest = "current()/*/cmd:descriptions[normalize-space(cmd:Description) != '']";
         final String expectedMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:descriptions/cmd:Description shouldn't be empty.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.WARN;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.WARN;
         final Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -416,7 +416,7 @@ public class LamusMetadataCheckerTest {
         final String expectedTest = "not($profileName)"
                 + " or ($profileName != 'lat-corpus' or (current()/cmd:ResourceType != 'Resource' or /cmd:CMD/cmd:Components/cmd:lat-corpus/cmd:InfoLink[@ref = current()/@id] ))";
         final String expectedMessage = "[CMDI Profile Restriction] 'lat-corpus' doesn't allow referencing to resources, unless they're info links.";
-        final MetadataValidationIssueLevel expectedLevel = MetadataValidationIssueLevel.ERROR;
+        final MetadataValidationIssueSeverity expectedLevel = MetadataValidationIssueSeverity.ERROR;
         Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(filesToCheck);
         
         assertCollectionContainsIssue(issues, fileToCheck, expectedTest, expectedMessage, expectedLevel);
@@ -439,7 +439,7 @@ public class LamusMetadataCheckerTest {
         return new File(URLDecoder.decode(getClass().getClassLoader().getResource(location).getFile()));
     }
    
-    private void assertCollectionContainsIssue(Collection<MetadataValidationIssue> issues, File fileToCheck, String expectedTest, String expectedMessage, MetadataValidationIssueLevel expectedLevel) {
+    private void assertCollectionContainsIssue(Collection<MetadataValidationIssue> issues, File fileToCheck, String expectedTest, String expectedMessage, MetadataValidationIssueSeverity expectedLevel) {
         assertFalse("Issues collection should not be empty", issues.isEmpty());
         assertTrue("Expected issue not found in issues collection", issues.contains(new MetadataValidationIssue(fileToCheck, expectedTest, expectedMessage, expectedLevel.name())));
     }

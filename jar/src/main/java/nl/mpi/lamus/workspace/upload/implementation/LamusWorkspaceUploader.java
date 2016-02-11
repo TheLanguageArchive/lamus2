@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import eu.clarin.cmdi.validator.CMDIValidatorException;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import java.io.File;
@@ -47,7 +49,7 @@ import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
@@ -224,7 +226,6 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             throw new WorkspaceException(errorMessage, workspaceID, ex);
         }
         
-        
         for(File currentFile : uploadedFiles) {
             
             URI uploadedFileUri;
@@ -244,7 +245,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 typecheckedResults = this.nodeDataRetriever.triggerResourceFileCheck(uploadedFileUrl, currentFile.getName());
             } catch(TypeCheckerException ex) {
                 String errorMessage = "Error while typechecking file [" + currentFile.getName() + "]";
-                failUploadForFile(currentFile, errorMessage, failedFiles);
+                failUploadForFile(currentFile, errorMessage, null, failedFiles);
                 continue;
             }
             
@@ -253,7 +254,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             
             if(!isArchivable) {
                 String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;
-                failUploadForFile(currentFile, errorMessage, failedFiles);
+                failUploadForFile(currentFile, errorMessage, null, failedFiles);
                 continue;
             } else {
                 String debugMessage = "File [" + currentFile.getName() + "] archivable: " + message;
@@ -269,24 +270,30 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                     mdDocument = metadataAPI.getMetadataDocument(uploadedFileUrl);
                 } catch (IOException | MetadataException ex) {
                     String errorMessage = "Error retrieving metadata document for file [" + currentFile.getName() + "]";
-                    failUploadForFile(currentFile, errorMessage, failedFiles);
+                    failUploadForFile(currentFile, errorMessage, null, failedFiles);
                     continue;
                 }
-
-                if(!metadataApiBridge.isMetadataDocumentValid(mdDocument)) {
+                
+                try {
+                    workspaceFileValidator.triggerSchemaValidationForFile(workspaceID, currentFile);
+                } catch(MetadataValidationException ex) {
                     String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
-                    failUploadForFile(currentFile, errorMessage, failedFiles);
+                    failUploadForFile(currentFile, errorMessage, null, failedFiles);
+                    continue;
+                } catch(CMDIValidatorInitException | CMDIValidatorException ex) {
+                    String errorMessage = "Problems with the metadata validation when processing [" + currentFile.getName() + "]";
+                    failUploadForFile(currentFile, errorMessage, ex, failedFiles);
                     continue;
                 }
                 
                 logger.debug("Metadata API validation successful for file " + currentFile.getName());
                 
                 try{
-                    workspaceFileValidator.validateMetadataFile(workspaceID, currentFile);
+                    workspaceFileValidator.triggerSchematronValidationForFile(workspaceID, currentFile);
                 } catch(MetadataValidationException ex) {
                     String issuesMessage = workspaceFileValidator.validationIssuesToString(ex.getValidationIssues());
                     if(workspaceFileValidator.validationIssuesContainErrors(ex.getValidationIssues())) {
-                        failUploadForFile(currentFile, issuesMessage, failedFiles);
+                        failUploadForFile(currentFile, issuesMessage, null, failedFiles);
                         continue;
                     } else {
                         logger.warn(issuesMessage);
@@ -348,9 +355,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     }
 
     
-    private void failUploadForFile(File file, String errorMessage, Collection<ImportProblem> failedFiles) {
+    private void failUploadForFile(File file, String errorMessage, Exception cause, Collection<ImportProblem> failedFiles) {
         logger.error(errorMessage);
-        failedFiles.add(new FileImportProblem(file, errorMessage, null));
+        failedFiles.add(new FileImportProblem(file, errorMessage, cause));
         try {
             //remove unarchivable file after adding it to the collection of failed uploads
                 // but only if it was an uploaded file

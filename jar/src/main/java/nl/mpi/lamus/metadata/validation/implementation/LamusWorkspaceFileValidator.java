@@ -14,15 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
+package nl.mpi.lamus.metadata.validation.implementation;
 
+import eu.clarin.cmdi.validator.CMDIValidator;
+import eu.clarin.cmdi.validator.CMDIValidatorConfig;
+import eu.clarin.cmdi.validator.CMDIValidatorException;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
+import eu.clarin.cmdi.validator.CMDIValidatorProcessor;
+import eu.clarin.cmdi.validator.SimpleCMDIValidatorProcessor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.MetadataValidationException;
-import nl.mpi.lamus.typechecking.MetadataChecker;
-import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.metadata.validation.MetadataSchematronChecker;
+import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,19 +45,19 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileValidator.class);
     
     private final WorkspaceDao workspaceDao;
-    private final MetadataChecker metadataChecker;
+    private final MetadataSchematronChecker metadataChecker;
     
     @Autowired
-    public LamusWorkspaceFileValidator(WorkspaceDao wsDao, MetadataChecker mdChecker) {
+    public LamusWorkspaceFileValidator(WorkspaceDao wsDao, MetadataSchematronChecker mdChecker) {
         workspaceDao = wsDao;
         metadataChecker = mdChecker;
     }
     
     /**
-     * @see WorkspaceFileValidator#validateMetadataFilesInWorkspace(int)
+     * @see WorkspaceFileValidator#triggerSchematronValidationForMetadataFilesInWorkspace(int)
      */
     @Override
-    public void validateMetadataFilesInWorkspace(int workspaceID) throws MetadataValidationException {
+    public void triggerSchematronValidationForMetadataFilesInWorkspace(int workspaceID) throws MetadataValidationException {
         
         logger.debug("Performing schematron validation for metadata files in the tree of workspace " + workspaceID);
         
@@ -69,21 +75,25 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
                 validationIssues.addAll(issues);
             
         } catch(Exception ex) {
-            throwMetadataValidationException(workspaceID, ex, validationIssues);
+            throwMetadataValidationException(
+                    workspaceID, ex, "Problems with schematron metadata validation",
+                    validationIssues);
         }
         
         if(!validationIssues.isEmpty()) {
-            throwMetadataValidationException(workspaceID, null, validationIssues);
+            throwMetadataValidationException(
+                    workspaceID, null, "Problems with schematron metadata validation",
+                    validationIssues);
         }
         
         logger.debug("Schematron metadata validation for workspace " + workspaceID + "  was performed without any issues");
     }
 
     /**
-     * @see WorkspaceFileValidator#validateMetadataFile(int, java.io.File)
+     * @see WorkspaceFileValidator#triggerSchematronValidationForFile(int, java.io.File)
      */
     @Override
-    public void validateMetadataFile(int workspaceID, File file) throws MetadataValidationException {
+    public void triggerSchematronValidationForFile(int workspaceID, File file) throws MetadataValidationException {
         
         logger.debug("Performing schematron validation for metadata file " + file.getName() + " in workspace " + workspaceID);
         
@@ -92,14 +102,42 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         try {
             validationIssues = metadataChecker.validateUploadedFile(file);
         } catch(Exception ex) {
-            throwMetadataValidationException(workspaceID, ex, validationIssues);
+            throwMetadataValidationException(
+                    workspaceID, ex, "Problems with schematron metadata validation",
+                    validationIssues);
         }
         
         if(!validationIssues.isEmpty()) {
-            throwMetadataValidationException(workspaceID, null, validationIssues);
+            throwMetadataValidationException(
+                    workspaceID, null, "Problems with schematron metadata validation",
+                    validationIssues);
         }
         
         logger.debug("Schematron validation for metadata file " + file.getName() + " in workspace " + workspaceID + " was performed without any issues");
+    }
+
+    /**
+     * @see WorkspaceFileValidator#triggerSchemaValidationForFile(int, java.io.File)
+     */
+    @Override
+    public void triggerSchemaValidationForFile(int workspaceID, File file)
+            throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException {
+        
+        LamusMetadataValidationHandler handler = new LamusMetadataValidationHandler(workspaceID);
+        
+        CMDIValidatorConfig.Builder builder = new CMDIValidatorConfig.Builder(file, handler);
+        builder.disableSchematron();
+        
+        CMDIValidator validator = new CMDIValidator(builder.build());
+        CMDIValidatorProcessor processor = new SimpleCMDIValidatorProcessor();
+        
+        try {
+            processor.process(validator);
+        } catch(CMDIValidatorException ex) {
+            throwMetadataValidationException(
+                    workspaceID, ex, "Problems with schema validation",
+                    new ArrayList<MetadataValidationIssue>());
+        }
     }
 
     /**
@@ -109,7 +147,7 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
     public boolean validationIssuesContainErrors(Collection<MetadataValidationIssue> issues) {
         
         for(MetadataValidationIssue issue : issues) {
-            if(MetadataValidationIssueLevel.ERROR.equals(issue.getAssertionErrorLevel())) {
+            if(MetadataValidationIssueSeverity.ERROR.equals(issue.getSeverity())) {
                 return true;
             }
         }
@@ -130,11 +168,10 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
     }
     
     
-    private void throwMetadataValidationException(int workspaceID, Exception cause, Collection<MetadataValidationIssue> issues)
+    private void throwMetadataValidationException(int workspaceID, Exception cause, String message, Collection<MetadataValidationIssue> issues)
                 throws MetadataValidationException {
         
-        String errorMessage = "Problems with schematron metadata validation";
-        MetadataValidationException exceptionToThrow = new MetadataValidationException(errorMessage, workspaceID, cause);
+        MetadataValidationException exceptionToThrow = new MetadataValidationException(message, workspaceID, cause);
         if(issues != null) {
             exceptionToThrow.addValidationIssues(issues);
         }

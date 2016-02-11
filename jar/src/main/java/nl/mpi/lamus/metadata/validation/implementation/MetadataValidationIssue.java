@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
+package nl.mpi.lamus.metadata.validation.implementation;
 
 import java.io.File;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -28,24 +28,26 @@ public class MetadataValidationIssue {
     
     private File metadataFile;
     private String assertionTest;
-    private String assertionErrorMessage;
-    private MetadataValidationIssueLevel assertionErrorLevel;
+    private String message;
+    private MetadataValidationIssueSeverity severity;
     
-    public MetadataValidationIssue(File file, String assertionTest, String errorMessage, String errorLevel) {
-        
+    public MetadataValidationIssue(File file, String message, String severity) {
         this.metadataFile = file;
+        this.message = message;
+        if("error".equalsIgnoreCase(severity) || "fatal".equalsIgnoreCase(severity)) {
+            this.severity = MetadataValidationIssueSeverity.ERROR;
+        }
+        if("warn".equalsIgnoreCase(severity) || "warning".equalsIgnoreCase(severity)) {
+            this.severity = MetadataValidationIssueSeverity.WARN;
+        }
+        if("info".equalsIgnoreCase(severity) || "information".equalsIgnoreCase(severity)) {
+            this.severity = MetadataValidationIssueSeverity.INFO;
+        }
+    }
+    
+    public MetadataValidationIssue(File file, String assertionTest, String message, String severity) {
+        this(file, message, severity);
         this.assertionTest = assertionTest;
-        this.assertionErrorMessage = errorMessage;
-        
-        if("error".equalsIgnoreCase(errorLevel) || "fatal".equalsIgnoreCase(errorLevel)) {
-            this.assertionErrorLevel = MetadataValidationIssueLevel.ERROR;
-        }
-        if("warn".equalsIgnoreCase(errorLevel) || "warning".equalsIgnoreCase(errorLevel)) {
-            this.assertionErrorLevel = MetadataValidationIssueLevel.WARN;
-        }
-        if("info".equalsIgnoreCase(errorLevel) || "information".equalsIgnoreCase(errorLevel)) {
-            this.assertionErrorLevel = MetadataValidationIssueLevel.INFO;
-        }
     }
     
     
@@ -57,12 +59,12 @@ public class MetadataValidationIssue {
         return assertionTest;
     }
     
-    public String getAssertionErrorMessage() {
-        return assertionErrorMessage;
+    public String getMessage() {
+        return message;
     }
     
-    public MetadataValidationIssueLevel getAssertionErrorLevel() {
-        return assertionErrorLevel;
+    public MetadataValidationIssueSeverity getSeverity() {
+        return severity;
     }
 
     @Override
@@ -71,8 +73,8 @@ public class MetadataValidationIssue {
         HashCodeBuilder hashCodeB = new HashCodeBuilder()
                 .append(this.metadataFile)
                 .append(this.assertionTest)
-                .append(this.assertionErrorMessage)
-                .append(this.assertionErrorLevel);
+                .append(this.message)
+                .append(this.severity);
         
         return hashCodeB.toHashCode();
     }
@@ -91,14 +93,14 @@ public class MetadataValidationIssue {
         EqualsBuilder equalsB = new EqualsBuilder()
                 .append(this.metadataFile, other.getMetadataFile())
                 .append(this.assertionTest, other.getAssertionTest())
-                .append(this.assertionErrorMessage, other.getAssertionErrorMessage())
-                .append(this.assertionErrorLevel, other.getAssertionErrorLevel());
+                .append(this.message, other.getMessage())
+                .append(this.severity, other.getSeverity());
         
         return equalsB.isEquals();
     }
 
     @Override
     public String toString() {
-        return "Validation issue for file '" + metadataFile.getName() + "' - " + assertionErrorLevel.toString() + ": " + assertionErrorMessage + ".";
+        return "Validation issue for file '" + metadataFile.getName() + "' - " + severity.toString() + ": " + message + ".";
     }
 }

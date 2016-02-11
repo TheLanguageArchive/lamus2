@@ -36,9 +36,9 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
+import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssueSeverity;
 import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
@@ -629,7 +629,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -676,8 +676,8 @@ public class LamusWorkspaceManagerTest {
         
         final String assertionErrorMessage1 = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
         final String assertionErrorMessage2 = "[CMDI Archive Restriction] Something completely different went wrong.";
-        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage1 + ".\n" +
-                "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage2 + ".\n";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.ERROR.toString() + ": " + assertionErrorMessage1 + ".\n" +
+                "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.ERROR.toString() + ": " + assertionErrorMessage2 + ".\n";
         
         final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
         expectedException.addValidationIssues(issues);
@@ -687,7 +687,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
         }});
@@ -727,7 +727,7 @@ public class LamusWorkspaceManagerTest {
         issues.add(mockValidationIssue1);
         
         final String assertionErrorMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:Title shouldn't be empty.";
-        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.WARN.toString() + ": " + assertionErrorMessage + ".\n";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.WARN.toString() + ": " + assertionErrorMessage + ".\n";
         
         final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
         expectedException.addValidationIssues(issues);
@@ -736,7 +736,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.FALSE));
             
@@ -820,7 +820,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -884,7 +884,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);
@@ -947,7 +947,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFilesInWorkspace(workspaceID);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
             oneOf(mockWorkspace).setMessage(submittedMessage);

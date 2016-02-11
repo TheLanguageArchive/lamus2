@@ -14,39 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
+package nl.mpi.lamus.metadata.validation.implementation;
 
 import com.helger.commons.io.resource.FileSystemResource;
 import com.helger.schematron.ISchematronResource;
 import com.helger.schematron.svrl.SVRLFailedAssert;
 import com.helger.schematron.svrl.SVRLHelper;
-import com.helger.schematron.xslt.SchematronResourceSCH;
+import com.helger.schematron.xslt.SchematronResourceXSLT;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.xml.transform.stream.StreamSource;
-import nl.mpi.lamus.typechecking.MetadataChecker;
+import nl.mpi.lamus.metadata.validation.MetadataSchematronChecker;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- * @see MetadataChecker
+ * @see MetadataSchematronChecker
  * @author guisil
  */
 @Component
-public class LamusMetadataChecker implements MetadataChecker {
+public class LamusMetadataSchematronChecker implements MetadataSchematronChecker {
 
     @Autowired
-    @Qualifier("schematronFile_upload")
-    private File schematronFile_upload;
+    @Qualifier("schematronXsltFile_upload")
+    private File schematronXsltFile_upload;
     @Autowired
-    @Qualifier("schematronFile_submit")
-    private File schematronFile_submit;
-    private static final String uploadPhase = "upload.phase";
-    private static final String submitPhase = "submit.phase";
+    @Qualifier("schematronXsltFile_submit")
+    private File schematronXsltFile_submit;
 
     /**
      * @see MetadataChecker#validateUploadedFile(java.io.File)
@@ -54,7 +52,7 @@ public class LamusMetadataChecker implements MetadataChecker {
     @Override
     public Collection<MetadataValidationIssue> validateUploadedFile(File metadataFile) throws Exception {
 
-        final ISchematronResource schRes = getSchematronResource(schematronFile_upload, uploadPhase);
+        final ISchematronResource schRes = getSchematronResource(schematronXsltFile_upload);
 
         return validateFile(schRes, metadataFile);
     }
@@ -65,7 +63,7 @@ public class LamusMetadataChecker implements MetadataChecker {
     @Override
     public Collection<MetadataValidationIssue> validateSubmittedFile(Collection<File> metadataFiles) throws Exception {
 
-        final ISchematronResource schRes = getSchematronResource(schematronFile_submit, submitPhase);
+        final ISchematronResource schRes = getSchematronResource(schematronXsltFile_submit);
 
         Collection<MetadataValidationIssue> issuesToReturn = new ArrayList<>();
         for(File mdFile : metadataFiles) {
@@ -74,9 +72,10 @@ public class LamusMetadataChecker implements MetadataChecker {
         return issuesToReturn;
     }
 
-    private ISchematronResource getSchematronResource(File schFile, String phase) {
+    
+    private ISchematronResource getSchematronResource(File schXsltFile) {
 
-        final ISchematronResource schRes = new SchematronResourceSCH(new FileSystemResource(schFile));
+        final ISchematronResource schRes = new SchematronResourceXSLT(new FileSystemResource(schXsltFile));
 
         if (!schRes.isValidSchematron()) {
             throw new IllegalArgumentException("Invalid Schematron");

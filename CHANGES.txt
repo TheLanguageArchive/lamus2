@@ -1,3 +1,12 @@
+lamus2-1.6.0-RC1
+
+    Changes:
+        - SCHEMATRON: Started using an XSLT file, based on the original schematron,
+          for the schematron validation (#4801).
+        - SCHEMA VALIDATION: Replaced the call to the validation provided by the
+          Metadata API by a call to the CMDIValidator class, from the
+          cmdi-validator-core dependency (#4835).
+
 lamus2-1.5.0-RC4 (2016-02-05)
 
     Fixes:

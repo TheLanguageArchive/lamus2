@@ -16,6 +16,8 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
+import eu.clarin.cmdi.validator.CMDIValidatorException;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 
@@ -54,9 +56,9 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspaceNode;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssueLevel;
+import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssueSeverity;
 import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
@@ -135,6 +137,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock MetadataValidationIssue mockValidationIssue1;
     @Mock MetadataValidationIssue mockValidationIssue2;
     @Mock MetadataValidationException mockValidationException;
+    @Mock CMDIValidatorException mockCMDIValidatorException;
     @Mock ImportProblem mockUploadProblem;
     
     @Factory
@@ -864,9 +867,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
                 
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
@@ -955,9 +958,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
                 
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
@@ -1047,9 +1050,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
                 
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1);
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1);
             
             oneOf(mockTypecheckedResults).getCheckedMimetype(); will(returnValue(fileMimetype));
             oneOf(mockNodeUtil).convertMimetype(fileMimetype); will(returnValue(fileNodeType));
@@ -1109,7 +1112,7 @@ public class LamusWorkspaceUploaderTest {
         issues.add(mockValidationIssue1);
         
         final String assertionErrorMessage = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
-        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage + ".\n";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.ERROR.toString() + ": " + assertionErrorMessage + ".\n";
         
         final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
         expectedException.addValidationIssues(issues);
@@ -1139,9 +1142,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
             
@@ -1197,8 +1200,8 @@ public class LamusWorkspaceUploaderTest {
         
         final String assertionErrorMessage1 = "[CMDI Archive Restriction] the CMD profile of this record is not allowed in the archive.";
         final String assertionErrorMessage2 = "[CMDI Archive Restriction] Something completely different went wrong.";
-        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage1 + ".\n" +
-                "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.ERROR.toString() + ": " + assertionErrorMessage2 + ".\n";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.ERROR.toString() + ": " + assertionErrorMessage1 + ".\n" +
+                "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.ERROR.toString() + ": " + assertionErrorMessage2 + ".\n";
         
         final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
         expectedException.addValidationIssues(issues);
@@ -1225,9 +1228,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
             
@@ -1252,7 +1255,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException {
+    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException, CMDIValidatorInitException, CMDIValidatorException {
         
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
@@ -1283,7 +1286,7 @@ public class LamusWorkspaceUploaderTest {
         issues.add(mockValidationIssue1);
         
         final String assertionErrorMessage = "[CMDI Best Practice] /cmd:CMD/cmd:Components/*/cmd:Title shouldn't be empty.";
-        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueLevel.WARN.toString() + ": " + assertionErrorMessage + ".\n";
+        final String validationIssuesString = "Validation issue for file '" + filename + "' - " + MetadataValidationIssueSeverity.WARN.toString() + ": " + assertionErrorMessage + ".\n";
         
         final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
         expectedException.addValidationIssues(issues);
@@ -1314,9 +1317,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1);
             
-            oneOf(mockWorkspaceFileValidator).validateMetadataFile(workspaceID, mockFile1); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForFile(workspaceID, mockFile1); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.FALSE));
             
@@ -1399,7 +1402,82 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockMetadataApiBridge).isMetadataDocumentValid(mockMetadataDocument); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(mockValidationException));
+            ignoring(mockValidationException);
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceFileHandler).deleteFile(mockFile1);
+            
+            
+            //still calls method to process links
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+        }});
+        
+        Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
+        
+        assertNotNull("Collection with failed uploads should not be null", result);
+        assertTrue("Collection with failed uploads should be empty", result.size() == 1);
+
+        ImportProblem problem = result.iterator().next();
+        
+        assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
+        assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
+        assertEquals("Reason for failure of file upload is different from expected", expectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
+    }
+    
+    @Test
+    public void processOneUploadedMetadataFile_ValidatorException() throws MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, IOException, MetadataException, CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException, WorkspaceException {
+        
+        final String filename = "someFile.cmdi";
+        final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
+        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File uploadedFile = new File(workspaceUploadDirectory, filename);
+        final URI uploadedFileURI = uploadedFile.toURI();
+        final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
+        final URL uploadedFileURL = uploadedFileURI.toURL();
+        final WorkspaceNodeType fileType = WorkspaceNodeType.METADATA;
+        final String fileMimetype = "text/x-cmdi-xml";
+        
+        final WorkspaceNode uploadedNode = new LamusWorkspaceNode(workspaceID, null, null);
+        uploadedNode.setName(filename);
+        uploadedNode.setStatus(WorkspaceNodeStatus.UPLOADED);
+        uploadedNode.setType(fileType);
+        uploadedNode.setFormat(fileMimetype);
+        uploadedNode.setWorkspaceURL(uploadedFileURL);
+        uploadedNode.setArchiveURI(uploadedFileArchiveURI);
+        
+        final Collection<File> uploadedFiles = new ArrayList<>();
+        uploadedFiles.add(mockFile1);
+        
+        final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
+        
+        final String expectedErrorMessage = "Problems with the metadata validation when processing [" + filename + "]";
+        
+        //only one file in the collection, so only one loop cycle
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
+            oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
+            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveURL));
+            
+            //loop
+
+            oneOf(mockFile1).toURI(); will(returnValue(uploadedFileURI));
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
+                will(returnValue(mockTypecheckedResults));
+            
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+                will(returnValue(Boolean.TRUE));
+            oneOf(mockFile1).getName(); will(returnValue(filename));
+            
+            oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
+            
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(mockCMDIValidatorException));
+            ignoring(mockCMDIValidatorException);
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));

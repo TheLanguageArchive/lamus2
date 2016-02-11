@@ -221,7 +221,8 @@ public class LamusMetadataApiBridgeTest {
     public void setUp() {
         lamusMetadataApiBridge = new LamusMetadataApiBridge(mockMetadataAPI,
                 mockWorkspaceFileHandler, mockHandleParser,
-                mockMetadataElementFactory, mockAllowedCmdiProfiles);
+                mockMetadataElementFactory,
+                mockAllowedCmdiProfiles);
     }
     
     @After
@@ -614,7 +615,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataFileIsValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
+    public void metadataFileIsValid_Url() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
         
         final URL fileURL = new URL("file:/some/location/file.cmdi");
         
@@ -630,7 +631,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataFileIsNotValid() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
+    public void metadataFileIsNotValid_Url() throws MalformedURLException, IOException, MetadataException, SAXException, URISyntaxException {
         
         final URL fileURL = new URL("file:/some/location/file.cmdi");
         
@@ -648,7 +649,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataValidationThrowsException() throws MalformedURLException, IOException, MetadataException {
+    public void metadataValidationThrowsException_Url() throws MalformedURLException, IOException, MetadataException {
         
         final URL fileURL = new URL("file:/some/location/file.cmdi");
         
@@ -664,7 +665,7 @@ public class LamusMetadataApiBridgeTest {
     }
     
     @Test
-    public void metadataValid_ActuallyReadFile() throws MalformedURLException, UnsupportedEncodingException {
+    public void metadataValid_ActuallyReadFile_Url() throws MalformedURLException, UnsupportedEncodingException {
         
         final URL metadataFileToCheck = LamusMetadataApiBridgeTest.class.getResource("/folder with spaces/orphanCollection.cmdi");
         

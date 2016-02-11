@@ -4,7 +4,7 @@
     <parent>
 	<groupId>nl.mpi</groupId>
 	<artifactId>lamus2.parent</artifactId>
-	<version>1.5.0-RC5-SNAPSHOT</version>
+	<version>1.6.0-RC1-SNAPSHOT</version>
     </parent>
             
     <modelVersion>4.0.0</modelVersion>
@@ -262,6 +262,40 @@
                         <item>timestamp</item>
                     </items>
                 </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>com.helger.maven</groupId>
+                <artifactId>ph-sch2xslt-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>upload_schematron</id>
+                        <goals>
+                            <goal>convert</goal>
+                        </goals>
+                        <configuration>
+                            <schematronDirectory>${basedir}/src/main/resources/cmdi_validation/schematron</schematronDirectory>
+                            <xsltDirectory>${basedir}/src/main/resources/cmdi_validation/xslt/upload</xsltDirectory>
+                            <xsltExtension>.xsl</xsltExtension>
+                            <phaseName>upload.phase</phaseName>
+                            <overwriteWithoutQuestion>false</overwriteWithoutQuestion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>submit_schematron</id>
+                        <goals>
+                            <goal>convert</goal>
+                        </goals>
+                        <configuration>
+                            <schematronDirectory>${basedir}/src/main/resources/cmdi_validation/schematron</schematronDirectory>
+                            <xsltDirectory>${basedir}/src/main/resources/cmdi_validation/xslt/submit</xsltDirectory>
+                            <xsltExtension>.xsl</xsltExtension>
+                            <phaseName>submit.phase</phaseName>
+                            <overwriteWithoutQuestion>false</overwriteWithoutQuestion>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             
 	</plugins>

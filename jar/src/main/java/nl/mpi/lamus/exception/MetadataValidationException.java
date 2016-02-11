@@ -19,7 +19,7 @@ package nl.mpi.lamus.exception;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
 
 /**
  *
@@ -27,7 +27,7 @@ import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
  */
 public class MetadataValidationException extends WorkspaceException {
     
-    private Collection<MetadataValidationIssue> validationIssues;
+    private final Collection<MetadataValidationIssue> validationIssues;
  
     public MetadataValidationException(String message, int workspaceID, Throwable cause) {
         super(message, workspaceID, cause);

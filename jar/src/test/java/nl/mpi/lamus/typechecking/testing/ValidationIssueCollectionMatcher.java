@@ -18,7 +18,7 @@ package nl.mpi.lamus.typechecking.testing;
 
 import java.util.Collection;
 import java.util.Iterator;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -28,7 +28,7 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class ValidationIssueCollectionMatcher extends TypeSafeMatcher<Collection<MetadataValidationIssue>> {
     
-    private Collection<MetadataValidationIssue> collection;
+    private final Collection<MetadataValidationIssue> collection;
 
     public ValidationIssueCollectionMatcher(Collection<MetadataValidationIssue> collection) {
         this.collection = collection;

@@ -453,6 +453,18 @@ public class LamusProperties implements ServletContextAware {
     }
     
     @Bean
+    @Qualifier("schematronsltFile_upload")
+    public File schematronXsltFile_upload() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronXsltValidationFile_upload"));
+    }
+    
+    @Bean
+    @Qualifier("schematronXsltFile_submit")
+    public File schematronXsltFile_submit() {
+        return new File(servletContext.getInitParameter("nl.mpi.lamus.schematronXsltValidationFile_submit"));
+    }
+    
+    @Bean
     @Qualifier("allowedProfiles_File")
     public File allowedProfiles_File() {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.allowedProfilesFile"));

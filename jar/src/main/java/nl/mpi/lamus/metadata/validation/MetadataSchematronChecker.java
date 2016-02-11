@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking;
+package nl.mpi.lamus.metadata.validation;
 
 import java.io.File;
 import java.util.Collection;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
 
 /**
- * Class used to perform validation checks in metadata files.
+ * Class used to perform schematron validation checks in metadata files.
  * @author guisil
  */
-public interface MetadataChecker {
+public interface MetadataSchematronChecker {
     
     /**
      * Performs the appropriate validation checks for the given uploaded file.

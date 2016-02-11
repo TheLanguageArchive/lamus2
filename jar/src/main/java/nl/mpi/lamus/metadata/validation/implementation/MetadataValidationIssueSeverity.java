@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking.implementation;
+package nl.mpi.lamus.metadata.validation.implementation;
 
 /**
- * Enumeration for the possible levels of validation issues.
+ * Enumeration for the possible severity of validation issues.
  * @author guisil
  */
-public enum MetadataValidationIssueLevel {
+public enum MetadataValidationIssueSeverity {
     
     ERROR,
     WARN,

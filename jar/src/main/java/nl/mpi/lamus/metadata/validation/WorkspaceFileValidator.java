@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.mpi.lamus.typechecking;
+package nl.mpi.lamus.metadata.validation;
 
+import eu.clarin.cmdi.validator.CMDIValidatorException;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import java.io.File;
 import java.util.Collection;
 import nl.mpi.lamus.exception.MetadataValidationException;
-import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
 
 /**
  * Validator for metadata files in the workspace.
@@ -28,17 +30,27 @@ import nl.mpi.lamus.typechecking.implementation.MetadataValidationIssue;
 public interface WorkspaceFileValidator {
     
     /**
-     * Given a workspace, it gets the relevant metadata files and validates them.
+     * Given a workspace, it gets the relevant metadata files and
+     * performs a schematron validation on them.
      * @param workspaceID ID of the workspace to validate
      */
-    public void validateMetadataFilesInWorkspace(int workspaceID) throws MetadataValidationException;
+    public void triggerSchematronValidationForMetadataFilesInWorkspace(int workspaceID) throws MetadataValidationException;
     
     /**
-     * Validates the given metadata file.
+     * Performs a schematron validation on the given metadata file.
      * @param workspaceID ID of the workspace associated with file
      * @param file File to validate
      */
-    public void validateMetadataFile(int workspaceID, File file) throws MetadataValidationException;
+    public void triggerSchematronValidationForFile(int workspaceID, File file) throws MetadataValidationException;
+    
+    /**
+     * Triggers a validation against the schema for the give file.
+     * @param workspaceID ID of the workspace associated with the file
+     * @param file File to validate
+     * @throws MetadataValidationException 
+     */
+    public void triggerSchemaValidationForFile(int workspaceID, File file)
+            throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException;
     
     /**
      * Checks if the given collection of issues contains any error.

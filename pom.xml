@@ -11,7 +11,7 @@
         
     <groupId>nl.mpi</groupId>
     <artifactId>lamus2.parent</artifactId>
-    <version>1.5.0-RC5-SNAPSHOT</version>
+    <version>1.6.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Lamus2 (Parent project)</name>
     <description>Parent pom for Lamus2 web app</description>
@@ -48,7 +48,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19.1</version>
+                    <version>2.18.1</version>
                     <configuration>
                         <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
                     </configuration>
@@ -79,7 +79,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>2.18.1</version>
                 <configuration>
                     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
                 </configuration>
@@ -116,6 +116,17 @@
             <id>MPI-Snapshot</id>
             <name>MPI LAT Repository/</name>
             <url>http://lux15.mpi.nl/nexus/content/repositories/MPI-Snapshots</url>
+        </repository>
+        
+        <repository>
+           <id>CLARIN</id>
+           <name>CLARIN Repository</name>
+           <url>https://nexus.clarin.eu/content/repositories/Clarin</url>
+        </repository>
+        <repository>
+           <id>CLARIN-Snapshot</id>
+           <name>CLARIN Snapshot Repository</name>
+           <url>https://nexus.clarin.eu/content/repositories/clarin-snapshot</url>
         </repository>
     </repositories>
     

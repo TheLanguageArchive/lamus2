@@ -77,7 +77,8 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Autowired
     public LamusMetadataApiBridge(MetadataAPI mdApi,
             WorkspaceFileHandler wsFileHandler, HandleParser hdlParser,
-            CMDIMetadataElementFactory mdElementFactory, AllowedCmdiProfiles profiles) {
+            CMDIMetadataElementFactory mdElementFactory,
+            AllowedCmdiProfiles profiles) {
         this.metadataAPI = mdApi;
         this.workspaceFileHandler = wsFileHandler;
         this.handleParser = hdlParser;
@@ -192,7 +193,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isMetadataFileValid(URL fileURL) {
         
-        logger.debug("Validating metadata file [" + fileURL + "]");
+//        logger.debug("Validating metadata file [" + fileURL + "]");
         
         MetadataDocument document;
         try {
@@ -210,6 +211,8 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
      */
     @Override
     public boolean isMetadataDocumentValid(MetadataDocument document) {
+
+        logger.debug("Validating metadata file [" + document.getFileLocation() + "]");
         
         try {
             metadataAPI.validateMetadataDocument(document, new DefaultHandler());

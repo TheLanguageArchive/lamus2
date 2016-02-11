@@ -30,7 +30,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.typechecking.WorkspaceFileValidator;
+import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
 import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
@@ -206,7 +206,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         
         try{
-            workspaceFileValidator.validateMetadataFilesInWorkspace(workspaceID);
+            workspaceFileValidator.triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
         } catch(MetadataValidationException ex) {
             String issuesMessage = workspaceFileValidator.validationIssuesToString(ex.getValidationIssues());
             if(workspaceFileValidator.validationIssuesContainErrors(ex.getValidationIssues())) {
