@@ -1,4 +1,8 @@
-lamus2-1.6.0-RC1
+lamus2-1.6.0-RC1 (2016-02-12)
+
+    Additions:
+        - MANAGEMENT CONSOLE: Added sorting and filtering in the management console,
+          as well as a button to re-crawl a stuck workspace (#4158).
 
     Changes:
         - SCHEMATRON: Started using an XSLT file, based on the original schematron,
