@@ -21,6 +21,7 @@ import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
@@ -61,6 +62,7 @@ public class LamusWorkspaceTreeServiceTest {
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
     @Mock private LamusNodeReplaceManager mockTopNodeReplaceManager;
+    @Mock private WorkspaceCorpusStructureExporter mockWorkspaceCorpusStructureExporter;
     
     public LamusWorkspaceTreeServiceTest() {
     }
@@ -78,7 +80,8 @@ public class LamusWorkspaceTreeServiceTest {
         service = new LamusWorkspaceTreeService(
                 mockNodeAccessChecker, mockArchivePidHelper, mockWorkspaceManager, mockWorkspaceDao,
                 mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
-                mockWorkspaceNodeManager, mockTopNodeReplaceManager);
+                mockWorkspaceNodeManager, mockTopNodeReplaceManager,
+                mockWorkspaceCorpusStructureExporter);
     }
     
     @After

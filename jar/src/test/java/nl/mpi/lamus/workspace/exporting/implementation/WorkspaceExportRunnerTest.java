@@ -35,6 +35,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -74,6 +75,7 @@ public class WorkspaceExportRunnerTest {
     @Mock NodeExporterFactory mockNodeExporterFactory;
     @Mock UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
+    @Mock WorkspaceCorpusStructureExporter mockWorkspaceCorpusStructureExporter;
     
     @Mock NodeExporter mockNodeExporter;
     
@@ -97,7 +99,8 @@ public class WorkspaceExportRunnerTest {
         workspaceExportRunner = new WorkspaceExportRunner(
                 mockWorkspaceDao, mockNodeExporterFactory,
                 mockUnlinkedAndDeletedNodesExportHandler,
-                mockCorpusStructureServiceBridge);
+                mockCorpusStructureServiceBridge,
+                mockWorkspaceCorpusStructureExporter);
         workspaceExportRunner.setWorkspace(mockWorkspace);
     }
     
@@ -172,11 +175,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
             
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspace).setCrawlerID(crawlerID);
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
+            oneOf(mockWorkspaceCorpusStructureExporter).triggerWorkspaceCrawl(mockWorkspace);
                 then(exporting.is("finished"));
         }});
         
@@ -281,7 +280,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
             
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(throwException(expectedCause));
+            oneOf(mockWorkspaceCorpusStructureExporter).triggerWorkspaceCrawl(mockWorkspace); will(throwException(expectedCause));
                 then(exporting.is("finished"));
         }});
         
@@ -345,11 +344,7 @@ public class WorkspaceExportRunnerTest {
             oneOf(mockNodeExporter).exportNode(mockWorkspace, null, null, testNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
                 when(exporting.isNot("finished"));
             
-            oneOf(mockCorpusStructureServiceBridge).callCrawler(archiveNodeURI); will(returnValue(crawlerID));
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspace).setCrawlerID(crawlerID);
-                when(exporting.isNot("finished"));
-            oneOf(mockWorkspaceDao).updateWorkspaceCrawlerID(mockWorkspace);
+            oneOf(mockWorkspaceCorpusStructureExporter).triggerWorkspaceCrawl(mockWorkspace);
                 then(exporting.is("finished"));
         }});
         

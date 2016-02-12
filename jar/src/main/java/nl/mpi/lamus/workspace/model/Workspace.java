@@ -48,34 +48,35 @@ public interface Workspace extends Serializable {
     
     public Date getStartDate();
     
+    public String getStartDateStr();
+    
     public void setStartDate(Date startDate);
     
     public Date getEndDate();
+    
+    public String getEndDateStr();
     
     public void setEndDate(Date endDate);
     
     public Date getSessionStartDate();
     
+    public String getSessionStartDateStr();
+    
     public void setSessionStartDate(Date sessionStartDate);
     
     public Date getSessionEndDate();
     
-    public void setSessionEndDate(Date sessionEndDate);
+    public String getSessionEndDateStr();
     
-//    public void updateStartDates();
-//    
-//    public void updateEndDates();
+    public void setSessionEndDate(Date sessionEndDate);
     
     public long getUsedStorageSpace();
     
-    //
     public void setUsedStorageSpace(long usedStorageSpace);
-    
     
     public long getMaxStorageSpace();
     
     public void setMaxStorageSpace(long maxStorageSpace);
-
     
     public WorkspaceStatus getStatus();
     

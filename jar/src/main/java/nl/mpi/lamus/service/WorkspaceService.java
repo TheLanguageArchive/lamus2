@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -113,6 +114,14 @@ public interface WorkspaceService {
     public void submitWorkspace(String userID, int workspaceID, boolean keepUnlinkedFiles)
             throws WorkspaceNotFoundException, WorkspaceAccessException,
             WorkspaceExportException, MetadataValidationException;
+    
+    /**
+     * Triggers a crawl of the branch changed by the given workspace.
+     * @param userID ID of the user
+     * @param workspaceID ID of the workspace
+     */
+    public void triggerCrawlForWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException;
     
     /**
      * Retrieves a workspace node with the given ID.

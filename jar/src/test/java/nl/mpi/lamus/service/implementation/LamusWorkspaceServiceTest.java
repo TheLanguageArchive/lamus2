@@ -32,6 +32,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -45,6 +46,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.typechecking.TypecheckedResults;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -83,6 +85,7 @@ public class LamusWorkspaceServiceTest {
     @Mock private WorkspaceNodeLinkManager mockWorkspaceNodeLinkManager;
     @Mock private WorkspaceNodeManager mockWorkspaceNodeManager;
     @Mock private LamusNodeReplaceManager mockNodeReplaceManager;
+    @Mock private WorkspaceCorpusStructureExporter mockWorkspaceCorpusStructureExporter;
     
     @Mock private WorkspaceNode mockParentNode;
     @Mock private WorkspaceNode mockChildNode;
@@ -119,7 +122,8 @@ public class LamusWorkspaceServiceTest {
                 mockNodeAccessChecker, mockArchiveHandleHelper,
                 mockWorkspaceManager, mockWorkspaceDao,
                 mockWorkspaceUploader, mockWorkspaceNodeLinkManager,
-                mockWorkspaceNodeManager, mockNodeReplaceManager);
+                mockWorkspaceNodeManager, mockNodeReplaceManager,
+                mockWorkspaceCorpusStructureExporter);
     }
     
     @After
@@ -744,6 +748,94 @@ public class LamusWorkspaceServiceTest {
         service.submitWorkspace(userID, workspaceID, keepUnlinkedFiles);
     }
     
+    @Test
+    public void triggerReCrawl() throws WorkspaceNotFoundException, WorkspaceAccessException, URISyntaxException, MalformedURLException, CrawlerInvocationException {
+        
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI("hdl:11111/" + UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace someWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(someWorkspace));
+            oneOf(mockWorkspaceCorpusStructureExporter).triggerWorkspaceCrawl(someWorkspace);
+        }});
+        
+        service.triggerCrawlForWorkspace(userID, workspaceID);
+    }
+    
+    @Test
+    public void triggerReCrawl_WorkspaceNotFound() throws WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException {
+        
+        final WorkspaceNotFoundException expectedException = new WorkspaceNotFoundException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.triggerCrawlForWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceNotFoundException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void triggerReCrawl_NoAccess() throws WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException {
+
+        final WorkspaceAccessException expectedException = new WorkspaceAccessException("some exception message", workspaceID, null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.triggerCrawlForWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(WorkspaceAccessException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void triggerReCrawl_CrawlerException() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException {
+
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI("hdl:11111/" + UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace someWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        final CrawlerInvocationException expectedException = new CrawlerInvocationException("some exception message", null);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeAccessChecker).ensureUserHasAccessToWorkspace(userID, workspaceID);
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(someWorkspace));
+            oneOf(mockWorkspaceCorpusStructureExporter).triggerWorkspaceCrawl(someWorkspace); will(throwException(expectedException));
+        }});
+        
+        try {
+            service.triggerCrawlForWorkspace(userID, workspaceID);
+            fail("should have thrown exception");
+        } catch(CrawlerInvocationException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
     
     @Test
     public void getExistingNode() throws URISyntaxException, WorkspaceNodeNotFoundException {

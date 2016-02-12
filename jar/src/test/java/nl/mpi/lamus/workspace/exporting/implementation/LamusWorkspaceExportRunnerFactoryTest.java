@@ -20,6 +20,7 @@ import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -49,6 +50,7 @@ public class LamusWorkspaceExportRunnerFactoryTest {
     @Mock private NodeExporterFactory mockNodeExporterFactory;
     @Mock private UnlinkedAndDeletedNodesExportHandler mockUnlinkedAndDeletedNodesExportHandler;
     @Mock private CorpusStructureServiceBridge mockCorpusStructureServiceBridge;
+    @Mock private WorkspaceCorpusStructureExporter mockWorkspaceCorpusStructureExporter;
     
     private WorkspaceExportRunnerFactory workspaceExportRunnerFactory;
     
@@ -67,7 +69,11 @@ public class LamusWorkspaceExportRunnerFactoryTest {
     @Before
     public void setUp() {
         
-        workspaceExportRunnerFactory = new LamusWorkspaceExportRunnerFactory(mockWorkspaceDao, mockNodeExporterFactory, mockUnlinkedAndDeletedNodesExportHandler, mockCorpusStructureServiceBridge);
+        workspaceExportRunnerFactory = new LamusWorkspaceExportRunnerFactory(
+                mockWorkspaceDao, mockNodeExporterFactory,
+                mockUnlinkedAndDeletedNodesExportHandler,
+                mockCorpusStructureServiceBridge,
+                mockWorkspaceCorpusStructureExporter);
     }
     
     @After

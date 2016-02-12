@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceException;
@@ -242,6 +243,11 @@ public class MockWorkspaceService implements WorkspaceTreeService {
 
     @Override
     public File uploadFileIntoWorkspace(String userID, int workspaceID, InputStream inputStream, String filename) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void triggerCrawlForWorkspace(String userID, int workspaceID) throws WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -19,14 +19,17 @@ package nl.mpi.lamus.web.pages.management;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.management.SortableWorkspaceDataProvider;
+import nl.mpi.lamus.web.management.WorkspaceFilter;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxFallbackDefaultDataTable;
@@ -35,11 +38,16 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
@@ -55,9 +63,17 @@ public class ManageWorkspacesPage extends LamusPage {
     public ManageWorkspacesPage() {
         
         List<IColumn<Workspace, String>> columns = createColumns();
+        
+        SortableWorkspaceDataProvider provider = new SortableWorkspaceDataProvider(workspaceService);
 
-        DataTable<Workspace, String> dataTable = createDataTable(columns);
-        add(dataTable);
+        DataTable<Workspace, String> dataTable = createDataTable(columns, provider);
+        
+        FilterForm<WorkspaceFilter> filterForm = createFilterForm(provider);
+        FilterToolbar filterToolbar = new FilterToolbar(dataTable, filterForm, provider);
+        
+        dataTable.addTopToolbar(filterToolbar);
+        
+        filterForm.add(dataTable);
     }
     
     
@@ -70,7 +86,7 @@ public class ManageWorkspacesPage extends LamusPage {
             @Override
             public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId, IModel<Workspace> model) {
                 
-                Link<Workspace> deleteLink =new Link<Workspace>(componentId, model) {
+                Link<Workspace> deleteLink = new Link<Workspace>(componentId, model) {
 
                     @Override
                     public void onClick() {
@@ -92,26 +108,51 @@ public class ManageWorkspacesPage extends LamusPage {
                 cellItem.add(deleteLink);
             }
         });
+        
+        columns.add(new AbstractColumn<Workspace, String>(new Model<>("")) {
 
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID"/*, "workspaceID"*/));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_user_id", this)), "userID"));
+            @Override
+            public void populateItem(Item<ICellPopulator<Workspace>> cellItem, String componentId, IModel<Workspace> model) {
+                
+                if(WorkspaceStatus.UPDATING_ARCHIVE.equals(model.getObject().getStatus())) {
+                    
+                    Link<Workspace> reCrawlLink = new Link<Workspace>(componentId, model) {
+
+                        @Override
+                        public void onClick() {
+                            
+                            try {
+                                workspaceService.triggerCrawlForWorkspace(LamusSession.get().getUserId(), getModelObject().getWorkspaceID());
+                            } catch (WorkspaceNotFoundException | WorkspaceAccessException | CrawlerInvocationException ex) {
+                                Session.get().error(ex.getMessage());
+                            }
+                        }
+                    };
+                    reCrawlLink.setBody(Model.of(getLocalizer().getString("management_table_recrawl_button", ManageWorkspacesPage.this)));
+                    reCrawlLink.add(AttributeModifier.append("class", new Model<>("tableActionLink")));
+                    cellItem.add(reCrawlLink);
+                } else {
+                    cellItem.add(new Label(componentId));
+                }
+            }
+        });
+
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID", "workspaceID"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_user_id", this)), "userID", "userID"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_start_date", this)), "startDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_end_date", this)), "endDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_end_date", this)), "sessionEndDate"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_used_storage", this)), "usedStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_max_storage", this)), "maxStorageSpace"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_status", this)), "status"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_start_date", this)), "startDate", "startDateStr"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_end_date", this)), "endDateStr"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDateStr"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_end_date", this)), "sessionEndDateStr"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_status", this)), "status", "status"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_message", this)), "message"));
         
         return columns;
     }
     
-    private DataTable<Workspace, String> createDataTable(List<IColumn<Workspace, String>> columns) {
+    private DataTable<Workspace, String> createDataTable(List<IColumn<Workspace, String>> columns, SortableWorkspaceDataProvider provider) {
         
-        DataTable<Workspace, String> dataTable = new AjaxFallbackDefaultDataTable<Workspace, String>("table", columns,
-            new SortableWorkspaceDataProvider(workspaceService), 8) {
+        DataTable<Workspace, String> dataTable = new AjaxFallbackDefaultDataTable<Workspace, String>("table", columns, provider, 13) {
 
             @Override
             protected Item<Workspace> newRowItem(String id, int index, IModel<Workspace> model) {
@@ -121,6 +162,21 @@ public class ManageWorkspacesPage extends LamusPage {
         dataTable.setOutputMarkupId(true);
         
         return dataTable;
+    }
+    
+    private FilterForm<WorkspaceFilter> createFilterForm(SortableWorkspaceDataProvider provider) {
+        
+        FilterForm<WorkspaceFilter> filterForm = new FilterForm<>("filterForm", provider);
+        
+        filterForm.add(new TextField("workspaceID", PropertyModel.of(provider, "filterState.workspaceID")));
+        filterForm.add(new TextField("userID", PropertyModel.of(provider, "filterState.userID")));
+        filterForm.add(new TextField("topNodeURI", PropertyModel.of(provider, "filterState.topNodeURI")));
+        filterForm.add(new TextField("startDate", PropertyModel.of(provider, "filterState.startDate")));
+        filterForm.add(new TextField("status", PropertyModel.of(provider, "filterState.status")));
+        
+        add(filterForm);
+        
+        return filterForm;
     }
     
     private void refreshDataView() {

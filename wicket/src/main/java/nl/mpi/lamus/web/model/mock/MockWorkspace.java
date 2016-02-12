@@ -18,6 +18,7 @@ package nl.mpi.lamus.web.model.mock;
 
 import java.net.URI;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
@@ -64,6 +65,15 @@ public class MockWorkspace implements Workspace {
     }
 
     @Override
+    public String getEndDateStr() {
+        Date date = getEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+    
+    @Override
     public void setEndDate(Date endDate) {
 	Date toSet = null;
         if(endDate != null) {
@@ -102,6 +112,15 @@ public class MockWorkspace implements Workspace {
     }
 
     @Override
+    public String getSessionEndDateStr() {
+        Date date = getSessionEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+    
+    @Override
     public void setSessionEndDate(Date sessionEndDate) {
 	Date toSet = null;
         if(sessionEndDate != null) {
@@ -120,6 +139,15 @@ public class MockWorkspace implements Workspace {
     }
 
     @Override
+    public String getSessionStartDateStr() {
+        Date date = getSessionStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
+    @Override
     public void setSessionStartDate(Date sessionStartDate) {
 	Date toSet = null;
         if(sessionStartDate != null) {
@@ -135,6 +163,15 @@ public class MockWorkspace implements Workspace {
             toReturn = (Date) this.startDate.clone();
         }
         return toReturn;
+    }
+    
+    @Override
+    public String getStartDateStr() {
+        Date date = getStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
     @Override

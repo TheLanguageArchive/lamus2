@@ -25,6 +25,7 @@ import java.util.zip.ZipInputStream;
 import nl.mpi.archiving.corpusstructure.core.NodeNotFoundException;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
@@ -36,6 +37,7 @@ import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -67,11 +69,12 @@ public class LamusWorkspaceService implements WorkspaceService {
     private final WorkspaceNodeLinkManager workspaceNodeLinkManager;
     private final WorkspaceNodeManager workspaceNodeManager;
     private final LamusNodeReplaceManager nodeReplaceManager;
+    private final WorkspaceCorpusStructureExporter workspaceCorpusStructureExporter;
 
     public LamusWorkspaceService(WorkspaceAccessChecker aChecker, ArchiveHandleHelper aHandleHelper,
             WorkspaceManager wsManager, WorkspaceDao wsDao, WorkspaceUploader wsUploader,
             WorkspaceNodeLinkManager wsnLinkManager, WorkspaceNodeManager wsNodeManager,
-            LamusNodeReplaceManager topNodeReplaceManager) {
+            LamusNodeReplaceManager topNodeReplaceManager, WorkspaceCorpusStructureExporter wsCsExporter) {
         this.nodeAccessChecker = aChecker;
         this.archiveHandleHelper = aHandleHelper;
         this.workspaceManager = wsManager;
@@ -80,6 +83,7 @@ public class LamusWorkspaceService implements WorkspaceService {
         this.workspaceNodeLinkManager = wsnLinkManager;
         this.workspaceNodeManager = wsNodeManager;
         this.nodeReplaceManager = topNodeReplaceManager;
+        this.workspaceCorpusStructureExporter = wsCsExporter;
     }
     
     
@@ -132,11 +136,25 @@ public class LamusWorkspaceService implements WorkspaceService {
             throws WorkspaceNotFoundException, WorkspaceAccessException,
             WorkspaceExportException, MetadataValidationException {
         
-        logger.debug("Triggered submission of workspace; userID " + userID + "; workspaceID: " + workspaceID);
+        logger.debug("Triggered submission of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
         
         this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
         
         this.workspaceManager.submitWorkspace(workspaceID, keepUnlinkedFiles);
+    }
+
+    /**
+     * @see WorkspaceService#triggerCrawlForWorkspace(java.lang.String, int)
+     */
+    @Override
+    public void triggerCrawlForWorkspace(String userID, int workspaceID)
+            throws WorkspaceNotFoundException, WorkspaceAccessException, CrawlerInvocationException {
+        
+        logger.debug("Triggered crawl of workspace; userID: " + userID + "; workspaceID: " + workspaceID);
+        
+        this.nodeAccessChecker.ensureUserHasAccessToWorkspace(userID, workspaceID);
+        
+        this.workspaceCorpusStructureExporter.triggerWorkspaceCrawl(this.workspaceDao.getWorkspace(workspaceID));
     }
 
     /**

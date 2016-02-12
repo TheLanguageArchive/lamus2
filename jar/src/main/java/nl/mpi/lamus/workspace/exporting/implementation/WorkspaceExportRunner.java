@@ -26,6 +26,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceExportPhase;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -44,6 +45,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     private final NodeExporterFactory nodeExporterFactory;
     private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
+    private final WorkspaceCorpusStructureExporter workspaceCorpusStructureExporter;
     
     private Workspace workspace;
     private boolean keepUnlinkedFiles;
@@ -51,11 +53,13 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
     
     public WorkspaceExportRunner(WorkspaceDao wsDao, NodeExporterFactory exporterFactory,
             UnlinkedAndDeletedNodesExportHandler dnExportHandler,
-            CorpusStructureServiceBridge csServiceBridge) {
+            CorpusStructureServiceBridge csServiceBridge,
+            WorkspaceCorpusStructureExporter wsCsExporter) {
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = exporterFactory;
         this.unlinkedAndDeletedNodesExportHandler = dnExportHandler;
         this.corpusStructureServiceBridge = csServiceBridge;
+        this.workspaceCorpusStructureExporter = wsCsExporter;
     }
     
     /**
@@ -117,12 +121,7 @@ public class WorkspaceExportRunner implements Callable<Boolean> {
             NodeExporter topNodeExporter = nodeExporterFactory.getNodeExporterForNode(workspace, topNode, WorkspaceExportPhase.TREE_EXPORT);
             topNodeExporter.exportNode(workspace, null, null, topNode, keepUnlinkedFiles, submissionType, WorkspaceExportPhase.TREE_EXPORT);
 
-            
-
-            // crawler service
-            String crawlerID = corpusStructureServiceBridge.callCrawler(topNode.getArchiveURI());
-            workspace.setCrawlerID(crawlerID);
-            workspaceDao.updateWorkspaceCrawlerID(workspace);
+            workspaceCorpusStructureExporter.triggerWorkspaceCrawl(workspace);
         
         } else {
             throw new UnsupportedOperationException("Type of submission not supported");

@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -582,6 +583,15 @@ class SomeOtherWorkspace implements Workspace {
     }
     
     @Override
+    public String getStartDateStr() {
+        Date date = getStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+    
+    @Override
     public void setStartDate(Date startDate) {
         Date toSet = null;
         if(startDate != null) {
@@ -597,6 +607,15 @@ class SomeOtherWorkspace implements Workspace {
             toReturn = (Date) this.endDate.clone();
         }
         return toReturn;
+    }
+    
+    @Override
+    public String getEndDateStr() {
+        Date date = getEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
     
     @Override
@@ -618,6 +637,15 @@ class SomeOtherWorkspace implements Workspace {
     }
     
     @Override
+    public String getSessionStartDateStr() {
+        Date date = getSessionStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+    
+    @Override
     public void setSessionStartDate(Date sessionStartDate) {
         Date toSet = null;
         if(sessionStartDate != null) {
@@ -636,6 +664,15 @@ class SomeOtherWorkspace implements Workspace {
     }
     
     @Override
+    public String getSessionEndDateStr() {
+        Date date = getSessionEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+    
+    @Override
     public void setSessionEndDate(Date sessionEndDate) {
         Date toSet = null;
         if(sessionEndDate != null) {
@@ -643,14 +680,6 @@ class SomeOtherWorkspace implements Workspace {
         }
         this.sessionEndDate = toSet;
     }
-    
-//    public void updateStartDates() {
-//        throw new UnsupportedOperationException("not yet implemented");
-//    }
-//    
-//    public void updateEndDates() {
-//        throw new UnsupportedOperationException("not yet implemented");
-//    }
     
     @Override
     public long getUsedStorageSpace() {

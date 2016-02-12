@@ -26,6 +26,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
@@ -48,8 +49,8 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
     @Autowired
     public LamusWorkspaceTreeService(WorkspaceAccessChecker aChecker, ArchiveHandleHelper aPidHelper, WorkspaceManager wsManager,
             WorkspaceDao wsDao, WorkspaceUploader wsUploader, WorkspaceNodeLinkManager wsnLinkManager,
-            WorkspaceNodeManager wsnManager, LamusNodeReplaceManager topNodeReplaceManager) {
-        super(aChecker, aPidHelper, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager, topNodeReplaceManager);
+            WorkspaceNodeManager wsnManager, LamusNodeReplaceManager topNodeReplaceManager, WorkspaceCorpusStructureExporter wsCsExporter) {
+        super(aChecker, aPidHelper, wsManager, wsDao, wsUploader, wsnLinkManager, wsnManager, topNodeReplaceManager, wsCsExporter);
     }
     
     /**

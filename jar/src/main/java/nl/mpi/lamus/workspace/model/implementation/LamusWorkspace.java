@@ -17,6 +17,7 @@ package nl.mpi.lamus.workspace.model.implementation;
 
 import java.net.URI;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -169,6 +170,15 @@ public class LamusWorkspace implements Workspace {
         }
         return toReturn;
     }
+
+    @Override
+    public String getStartDateStr() {
+        Date date = getStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
     
     @Override
     public void setStartDate(Date startDate) {
@@ -186,6 +196,15 @@ public class LamusWorkspace implements Workspace {
             toReturn = (Date) this.endDate.clone();
         }
         return toReturn;
+    }
+
+    @Override
+    public String getEndDateStr() {
+        Date date = getEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
     
     @Override
@@ -205,6 +224,15 @@ public class LamusWorkspace implements Workspace {
         }
         return toReturn;
     }
+
+    @Override
+    public String getSessionStartDateStr() {
+        Date date = getSessionStartDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
     
     @Override
     public void setSessionStartDate(Date sessionStartDate) {
@@ -222,6 +250,15 @@ public class LamusWorkspace implements Workspace {
             toReturn = (Date) this.sessionEndDate.clone();
         }
         return toReturn;
+    }
+
+    @Override
+    public String getSessionEndDateStr() {
+        Date date = getSessionEndDate();
+        if(date == null) {
+            return "";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
     
     @Override

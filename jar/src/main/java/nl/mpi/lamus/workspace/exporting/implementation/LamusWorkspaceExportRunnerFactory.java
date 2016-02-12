@@ -20,6 +20,7 @@ import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.exporting.NodeExporterFactory;
 import nl.mpi.lamus.workspace.exporting.UnlinkedAndDeletedNodesExportHandler;
+import nl.mpi.lamus.workspace.exporting.WorkspaceCorpusStructureExporter;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,17 +36,20 @@ public class LamusWorkspaceExportRunnerFactory implements WorkspaceExportRunnerF
     private final NodeExporterFactory nodeExporterFactory;
     private final UnlinkedAndDeletedNodesExportHandler unlinkedAndDeletedNodesExportHandler;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
+    private final WorkspaceCorpusStructureExporter workspaceCorpusStructureExporter;
     
     @Autowired
     public LamusWorkspaceExportRunnerFactory(WorkspaceDao wsDao,
             NodeExporterFactory nExporterFactory,
             UnlinkedAndDeletedNodesExportHandler udNodesExportHandler,
-            CorpusStructureServiceBridge csServiceBridge) {
+            CorpusStructureServiceBridge csServiceBridge,
+            WorkspaceCorpusStructureExporter wsCsExporter) {
         
         this.workspaceDao = wsDao;
         this.nodeExporterFactory = nExporterFactory;
         this.unlinkedAndDeletedNodesExportHandler = udNodesExportHandler;
         this.corpusStructureServiceBridge = csServiceBridge;
+        this.workspaceCorpusStructureExporter = wsCsExporter;
     }
     
     /**
@@ -53,7 +57,9 @@ public class LamusWorkspaceExportRunnerFactory implements WorkspaceExportRunnerF
      */
     @Override
     public WorkspaceExportRunner getNewExportRunner() {
-        return new WorkspaceExportRunner(workspaceDao, nodeExporterFactory, unlinkedAndDeletedNodesExportHandler, corpusStructureServiceBridge);
+        return new WorkspaceExportRunner(workspaceDao, nodeExporterFactory,
+                unlinkedAndDeletedNodesExportHandler, corpusStructureServiceBridge,
+                workspaceCorpusStructureExporter);
     }
     
 }

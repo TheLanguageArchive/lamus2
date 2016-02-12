@@ -16,23 +16,30 @@
  */
 package nl.mpi.lamus.web.management;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.IFilterStateLocator;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.PropertyModel;
 
 /**
  *
  * @author guisil
  */
-public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspace, String> {
-    
+public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspace, String> implements IFilterStateLocator<WorkspaceFilter> {
+
     private final WorkspaceService workspaceService;
-            
+    private SortableDataProviderComparator comparator = new SortableDataProviderComparator();
+    private WorkspaceFilter workspaceFilter = new WorkspaceFilter();
 
     public SortableWorkspaceDataProvider(WorkspaceService wsService) {
         this.workspaceService = wsService;
@@ -50,18 +57,33 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
         int countInt = (int) count;
         assureLongAndIntHaveSameValue(count, countInt);
         
-        return getAllWorkspaces().subList(firstInt, firstInt + countInt).iterator();
+        List<Workspace> allWs = getAllWorkspaces();
+        List<Workspace> filteredWs = filterWorkspaces(allWs);
+        Collections.sort(filteredWs, comparator);
+        
+        return filteredWs.subList(firstInt, firstInt + countInt).iterator();
     }
 
     @Override
     public long size() {
-        return getAllWorkspaces().size();
+        return filterWorkspaces(getAllWorkspaces()).size();
     }
 
     @Override
     public IModel<Workspace> model(final Workspace object) {
 
         return new WorkspaceModel(object);
+    }
+    
+    
+    @Override
+    public WorkspaceFilter getFilterState() {
+        return workspaceFilter;
+    }
+
+    @Override
+    public void setFilterState(WorkspaceFilter state) {
+        workspaceFilter = state;
     }
  
     
@@ -74,5 +96,47 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
             throw new ArithmeticException("Casting " + original + " to int cannot be done without changing its value");
         }
         return true;
+    }
+    
+    private List<Workspace> filterWorkspaces(List<Workspace> initialList) {
+        
+        List<Workspace> result = new ArrayList<>();
+        
+        for(Workspace ws : initialList) {
+            if(includeInFilteredResults(ws)) {
+                result.add(ws);
+            }
+        }
+        
+        return result;
+    }
+    
+    private boolean includeInFilteredResults(Workspace ws) {
+        
+        boolean matchesWorkspaceIDFilter = workspaceFilter.getWorkspaceID() == null || Integer.toString(ws.getWorkspaceID()).toLowerCase().contains(workspaceFilter.getWorkspaceID().toLowerCase());
+        boolean matchesUserIDFilter = workspaceFilter.getUserID() == null || ws.getUserID().toLowerCase().contains(workspaceFilter.getUserID().toLowerCase());
+        boolean matchesTopNodeUriFilter = workspaceFilter.getTopNodeURI() == null || ws.getTopNodeArchiveURI().toString().toLowerCase().contains(workspaceFilter.getTopNodeURI().toLowerCase());
+        boolean matchesStartDateFilter = workspaceFilter.getStartDate() == null || ws.getStartDateStr().toLowerCase().contains(workspaceFilter.getStartDate().toLowerCase());
+        boolean matchesStatusFilter = workspaceFilter.getStatus() == null || ws.getStatus().toString().toLowerCase().contains(workspaceFilter.getStatus().toLowerCase());
+        
+        return matchesWorkspaceIDFilter && matchesUserIDFilter && matchesTopNodeUriFilter && matchesStartDateFilter && matchesStatusFilter;
+    }
+    
+    
+    class SortableDataProviderComparator implements Comparator<Workspace>, Serializable {
+        
+        @Override
+        public int compare(final Workspace o1, final Workspace o2) {
+            PropertyModel<Comparable> model1 = new PropertyModel<>(o1, getSort().getProperty());
+            PropertyModel<Comparable> model2 = new PropertyModel<>(o2, getSort().getProperty());
+ 
+            int result = model1.getObject().compareTo(model2.getObject());
+ 
+            if (!getSort().isAscending()) {
+                result = -result;
+            }
+ 
+            return result;
+        }
     }
 }

@@ -681,6 +681,32 @@ public class LamusWorkspaceAccessCheckerTest {
     }
     
     @Test
+    public void hasAccessToWorkpaceIfUserIsManager()
+            throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException, WorkspaceAccessException {
+        
+        final int workspaceID = 1;
+        final String userID = "someUser";
+        final int topNodeID = 1;
+        final URI topNodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final URL topNodeArchiveURL = new URL("file:/archive/folder/someNode.cmdi");
+        final Date startDate = Calendar.getInstance().getTime();
+        final long usedStorageSpace = 0L;
+        final long maxStorageSpace = 10000000L;
+        final WorkspaceStatus status = WorkspaceStatus.INITIALISED;
+        final String message = "workspace is in good shape";
+        final String crawlerID = "";
+        final Workspace testWorkspace = new LamusWorkspace(workspaceID, userID, topNodeID, topNodeArchiveURI, topNodeArchiveURL,
+                startDate, null, startDate, null, usedStorageSpace, maxStorageSpace, status, message, crawlerID);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(testWorkspace));
+        }});
+        
+        nodeAccessChecker.ensureUserHasAccessToWorkspace(managerUserID, workspaceID);
+    }
+    
+    @Test
     public void doesNotHaveAccessToWorkspaceThrowsExceptionIfUserIsNotTheSame() throws URISyntaxException, MalformedURLException, WorkspaceNotFoundException {
         
         final int workspaceID = 1;

@@ -150,7 +150,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         
-        if(!userID.equals(workspace.getUserID())) {
+        if(!userID.equals(workspace.getUserID()) && !managerUsers.contains(userID)) {
             String errorMessage = "User with ID " + userID + " does not have access to workspace with ID " + workspaceID;
             logger.error(errorMessage);
             throw new WorkspaceAccessException(errorMessage, workspaceID, null);
