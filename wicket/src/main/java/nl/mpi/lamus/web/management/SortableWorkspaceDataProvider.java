@@ -25,6 +25,7 @@ import java.util.List;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.SortOrder;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.IFilterStateLocator;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
@@ -113,13 +114,13 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
     
     private boolean includeInFilteredResults(Workspace ws) {
         
-        boolean matchesWorkspaceIDFilter = workspaceFilter.getWorkspaceID() == null || Integer.toString(ws.getWorkspaceID()).toLowerCase().contains(workspaceFilter.getWorkspaceID().toLowerCase());
         boolean matchesUserIDFilter = workspaceFilter.getUserID() == null || ws.getUserID().toLowerCase().contains(workspaceFilter.getUserID().toLowerCase());
         boolean matchesTopNodeUriFilter = workspaceFilter.getTopNodeURI() == null || ws.getTopNodeArchiveURI().toString().toLowerCase().contains(workspaceFilter.getTopNodeURI().toLowerCase());
-        boolean matchesStartDateFilter = workspaceFilter.getStartDate() == null || ws.getStartDateStr().toLowerCase().contains(workspaceFilter.getStartDate().toLowerCase());
+        boolean matchesTopNodeUrlFilter = workspaceFilter.getTopNodeURL() == null || ws.getTopNodeArchiveURL().toString().toLowerCase().contains(workspaceFilter.getTopNodeURL().toLowerCase());
         boolean matchesStatusFilter = workspaceFilter.getStatus() == null || ws.getStatus().toString().toLowerCase().contains(workspaceFilter.getStatus().toLowerCase());
+        boolean matchesExcludeSuccessfulFilter = !workspaceFilter.getExcludeSuccessful() || (workspaceFilter.getExcludeSuccessful() && !WorkspaceStatus.SUCCESS.equals(ws.getStatus()));
         
-        return matchesWorkspaceIDFilter && matchesUserIDFilter && matchesTopNodeUriFilter && matchesStartDateFilter && matchesStatusFilter;
+        return matchesUserIDFilter && matchesTopNodeUriFilter && matchesTopNodeUrlFilter && matchesStatusFilter && matchesExcludeSuccessfulFilter;
     }
     
     

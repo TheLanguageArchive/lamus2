@@ -41,6 +41,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterForm;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.FilterToolbar;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.Item;
@@ -140,6 +141,7 @@ public class ManageWorkspacesPage extends LamusPage {
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID", "workspaceID"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_user_id", this)), "userID", "userID"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_url", this)), "topNodeArchiveURL"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_start_date", this)), "startDate", "startDateStr"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_end_date", this)), "endDateStr"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDateStr"));
@@ -168,11 +170,11 @@ public class ManageWorkspacesPage extends LamusPage {
         
         FilterForm<WorkspaceFilter> filterForm = new FilterForm<>("filterForm", provider);
         
-        filterForm.add(new TextField("workspaceID", PropertyModel.of(provider, "filterState.workspaceID")));
-        filterForm.add(new TextField("userID", PropertyModel.of(provider, "filterState.userID")));
-        filterForm.add(new TextField("topNodeURI", PropertyModel.of(provider, "filterState.topNodeURI")));
-        filterForm.add(new TextField("startDate", PropertyModel.of(provider, "filterState.startDate")));
-        filterForm.add(new TextField("status", PropertyModel.of(provider, "filterState.status")));
+        filterForm.add(new TextField("userID", new PropertyModel<String>(provider, "filterState.userID")));
+        filterForm.add(new TextField("topNodeURI", new PropertyModel<String>(provider, "filterState.topNodeURI")));
+        filterForm.add(new TextField("topNodeURL", new PropertyModel<String>(provider, "filterState.topNodeURL")));
+        filterForm.add(new TextField("status", new PropertyModel<String>(provider, "filterState.status")));
+        filterForm.add(new CheckBox("excludeSuccessful", new PropertyModel<Boolean>(provider, "filterState.excludeSuccessful")));
         
         add(filterForm);
         

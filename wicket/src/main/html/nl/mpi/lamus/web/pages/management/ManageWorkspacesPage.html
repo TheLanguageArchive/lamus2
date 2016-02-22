@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <body>
         <wicket:extend>
             <form wicket:id="filterForm">
-                <span><wicket:message key="management_table_filter_workspace_id"></wicket:message><input wicket:id="workspaceID"/></span>
-                <span><wicket:message key="management_table_filter_user"></wicket:message><input wicket:id="userID"/></span>
-                <span><wicket:message key="management_table_filter_uri"></wicket:message><input wicket:id="topNodeURI"/></span>
-                <span><wicket:message key="management_table_filter_start_date"></wicket:message><input wicket:id="startDate"/></span>
-                <span><wicket:message key="management_table_filter_status"></wicket:message><input wicket:id="status"/></span>
+                <span><wicket:message key="management_table_filter_user"></wicket:message><input type="text" wicket:id="userID"/></span>
+                <span><wicket:message key="management_table_filter_uri"></wicket:message><input type="text" wicket:id="topNodeURI"/></span>
+                <span><wicket:message key="management_table_filter_url"></wicket:message><input type="text" wicket:id="topNodeURL"/></span>
+                <span><wicket:message key="management_table_filter_status"></wicket:message><input type="text" wicket:id="status"/></span>
+                <span><wicket:message key="management_table_filter_exclude_successful"></wicket:message><input type="checkbox" wicket:id="excludeSuccessful" /></span>
                 <table class="simpleTable" wicket:id="table"></table>
             </form>
         </wicket:extend>

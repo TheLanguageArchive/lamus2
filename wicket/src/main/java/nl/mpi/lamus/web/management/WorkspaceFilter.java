@@ -24,18 +24,11 @@ import java.io.Serializable;
  */
 public class WorkspaceFilter implements Serializable {
     
-    private String workspaceID;
     private String userID;
     private String topNodeURI;
-    private String startDate;
+    private String topNodeURL;
     private String status;
-    
-    public String getWorkspaceID() {
-        return workspaceID;
-    }
-    public void setWorkspaceID(String wsID) {
-        workspaceID = wsID;
-    }
+    private boolean excludeSuccessful;
     
     public String getUserID() {
         return userID;
@@ -51,11 +44,11 @@ public class WorkspaceFilter implements Serializable {
         topNodeURI = uri;
     }
     
-    public String getStartDate() {
-        return startDate;
+    public String getTopNodeURL() {
+        return topNodeURL;
     }
-    public void setStartDate(String sDate) {
-        startDate = sDate;
+    public void setTopNodeURL(String url) {
+        topNodeURL = url;
     }
     
     public String getStatus() {
@@ -63,5 +56,12 @@ public class WorkspaceFilter implements Serializable {
     }
     public void setStatus(String stt) {
         status = stt;
+    }
+    
+    public boolean getExcludeSuccessful() {
+        return excludeSuccessful;
+    }
+    public void setExcludeSuccessful(boolean excSuc) {
+        excludeSuccessful = excSuc;
     }
 }
