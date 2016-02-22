@@ -108,34 +108,6 @@ public class LamusProperties implements ServletContextAware {
         return maxDirectoryNameLength;
     }
     
-    
-    @Value("${custom_typechecker_config_files_and_folders}")
-    private String customTypecheckerFoldersAndConfigFiles;
-    @Bean
-    @Qualifier("customTypecheckerFolderToConfigFileMap")
-    public Map<String, String> customTypecheckerFolderToConfigFileMap() {
-        
-        //TODO Check the validity of the string (with regular expressions, for instance)
-        
-        Map<String, String> mapToReturn = new HashMap<>();
-        
-        String[] foldersAndConfigFilesArray = customTypecheckerFoldersAndConfigFiles.split(";");
-        for(String foldersAndConfigFile : foldersAndConfigFilesArray) {
-            String[] foldersAndConfigFileSeparated = foldersAndConfigFile.split("=");
-            if(foldersAndConfigFileSeparated.length == 2) {
-                String configFileValue = foldersAndConfigFileSeparated[1];
-                String[] foldersKey = foldersAndConfigFileSeparated[0].split(",");
-                if(foldersKey.length > 0) {
-                    for(String folderKey : foldersKey) {
-                        mapToReturn.put(folderKey, configFileValue);
-                    }
-                }
-            }
-        }
-        
-        return mapToReturn;
-    }
-    
     @Value("${disallowed_folder_names_workspace}")
     private String disallowedFolderNamesWorkspace;
     @Bean
@@ -143,19 +115,6 @@ public class LamusProperties implements ServletContextAware {
     public Collection<String> disallowedFolderNamesWorkspace() {
         return splitStringIntoCollectionOfStrings(disallowedFolderNamesWorkspace);
     }
-    
-    private Collection<String> splitStringIntoCollectionOfStrings(String stringToSplit) {
-        Collection<String> collectionOfStrings = new ArrayList<>();
-        
-        String[] stringsArray = stringToSplit.split(",");
-        for(String string : stringsArray) {
-            if(!string.isEmpty()) {
-                collectionOfStrings.add(string);
-            }
-        }
-        return collectionOfStrings;
-    }
-
     
     // Properties loaded from the web server context
     
@@ -478,5 +437,31 @@ public class LamusProperties implements ServletContextAware {
         
         AllowedCmdiProfiles profiles = (AllowedCmdiProfiles) jaxbUnmarshaller.unmarshal(allowedProfiles_File());
         return profiles;
+    }
+    
+    // Typechecker
+    
+    @Bean
+    @Qualifier("customTypecheckerSpecialConfigFolders")
+    public Collection<String> customTypecheckerSpecialConfigFolders() {
+        String configFolders = servletContext.getInitParameter("nl.mpi.lamus.typecheckerSpecialConfigFolders");
+        if(configFolders != null) {
+            return splitStringIntoCollectionOfStrings(configFolders);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+    
+    
+    private Collection<String> splitStringIntoCollectionOfStrings(String stringToSplit) {
+        Collection<String> collectionOfStrings = new ArrayList<>();
+        
+        String[] stringsArray = stringToSplit.split(",");
+        for(String string : stringsArray) {
+            if(!string.isEmpty()) {
+                collectionOfStrings.add(string);
+            }
+        }
+        return collectionOfStrings;
     }
 }

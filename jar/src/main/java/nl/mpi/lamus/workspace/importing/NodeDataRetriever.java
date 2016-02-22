@@ -40,6 +40,13 @@ public interface NodeDataRetriever {
     public URL getNodeArchiveURL(URI nodeArchiveURI) throws NodeNotFoundException;
     
     /**
+     * Retrieves the location (in the archive) for the given URI (probably an archive handle)
+     * @param nodeArchiveURI URI of the node in the archive
+     * @return File object for the node location
+     */
+    public File getNodeLocalFile(URI nodeArchiveURI) throws NodeNotFoundException;
+    
+    /**
      * Decides if a resource should be typechecked (depending on its location and size).
      * @param resourceReference Reference to the resource, from the parent metadata file
      * @param resourceFile File object referring to the actual location of the resource
@@ -67,11 +74,11 @@ public interface NodeDataRetriever {
     
     /**
      * @param typecheckedResults Object containing the result of the typecheck
-     * @param urlToCheckInConfiguration URL of the archive branch for which the configuration has to be checked (top node of the workspace)
+     * @param fileToCheckInConfiguration URL of the archive branch for which the configuration has to be checked (top node of the workspace)
      * @param message Message from the typechecker
      * @return true if the previously checked resource is archivable, according to the configuration
      */
-    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, URL urlToCheckInConfiguration, StringBuilder message);
+    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, File fileToCheckInConfiguration, StringBuilder message);
     
     /**
      * @param archiveNodeUri URI of the node in the archive

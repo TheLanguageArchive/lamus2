@@ -18,9 +18,8 @@ package nl.mpi.lamus.typechecking.implementation;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
 import org.junit.After;
@@ -39,14 +38,13 @@ public class LamusTypecheckerConfigurationTest {
     
 private TypecheckerConfiguration typecheckerConfiguration;
     
-    private Map<String, String> customTypecheckerFolderToConfigFileMap;
-    private String specialConfigIncludedFolder = "/included_folder";
-    private String specialConfigFile = "/specialConfigFile.txt";
+    private final Collection<String> customTypecheckerSpecialConfigFolders;
+    private final String specialConfigIncludedFolder = "/archive/location/included_folder";
     
     public LamusTypecheckerConfigurationTest() {
         
-        this.customTypecheckerFolderToConfigFileMap = new HashMap<String, String>();
-        this.customTypecheckerFolderToConfigFileMap.put(this.specialConfigIncludedFolder, this.specialConfigFile);
+        this.customTypecheckerSpecialConfigFolders = new ArrayList<>();
+        this.customTypecheckerSpecialConfigFolders.add(this.specialConfigIncludedFolder);
     }
     
     @BeforeClass
@@ -61,7 +59,7 @@ private TypecheckerConfiguration typecheckerConfiguration;
     public void setUp() {
         this.typecheckerConfiguration = new LamusTypecheckerConfiguration();
         
-        ReflectionTestUtils.setField(this.typecheckerConfiguration, "customTypecheckerFolderToConfigFileMap", this.customTypecheckerFolderToConfigFileMap);
+        ReflectionTestUtils.setField(this.typecheckerConfiguration, "customTypecheckerSpecialConfigFolders", this.customTypecheckerSpecialConfigFolders);
     }
     
     @After
@@ -72,25 +70,51 @@ private TypecheckerConfiguration typecheckerConfiguration;
     @Test
     public void getAcceptableJudgementForNormalLocation() throws MalformedURLException {
         
-        //TODO change this in order to support multiple configurations
         TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
-        URL location = new URL("http://someServer/random_folder");
+        File location = new File("/archive/location/some_other_folder/some_random_file.cmdi");
         
         TypecheckerJudgement retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
+        
+        
+        location = new File("/archive/location/some_other_random_file.cmdi");
+        
+        retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
+        
+        
+        location = new File("/archive/location");
+        
+        retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
         
         assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
     }
 
     
-//    @Test
-//    public void getAcceptableJudgementForSpecialLocation() {
-//        
-//        //TODO change this in order to support multiple configurations
-//        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
-//        File location = new File(this.specialConfigIncludedFolder);
-//        
-//        TypecheckerJudgement retrivedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
-//        
-//        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrivedJudgement);
-//    }
+    @Test
+    public void getAcceptableJudgementForSpecialLocation() throws MalformedURLException {
+        
+        TypecheckerJudgement expectedJudgement = TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
+        File location = new File("/archive/location/included_folder/file.cmdi");
+        
+        TypecheckerJudgement retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
+        
+        
+        location = new File("/archive/location/included_folder/sub_folder/another_file.cmdi");
+        
+        retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
+        
+        
+        location = new File("/archive/location/included_folder");
+        
+        retrievedJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(location);
+        
+        assertEquals("Retrieved judgement different from expected", expectedJudgement, retrievedJudgement);
+    }
 }

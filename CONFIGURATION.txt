@@ -252,6 +252,11 @@ The other necessary properties should be defined as parameters in the web contex
                    value="/lat/tomcat-corpman/conf/apa-permissions_cmdi.conf"
                    description="name of a config file containing paths which require adjustments in the filesystem permissions, done by Lamus2"
                    override="false"/>
+                   
+        <Parameter name="nl.mpi.lamus.typecheckerSpecialConfigFolders"
+                   value="/lat/corpora/cmdi/TestRoot"
+                   description="Comma separated list of paths (top nodes) where the typechecker special configuraiton should be applied (ARCHIVABLE_SHORTTERM becom acceptable within those folders)."
+                   override="false"/>
 
 
     RRS

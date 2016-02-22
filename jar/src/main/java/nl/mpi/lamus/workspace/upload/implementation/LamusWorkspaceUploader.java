@@ -217,9 +217,9 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
         WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
-        URL topNodeArchiveURL;
+        File topNodeArchiveLocalFile;
         try {
-            topNodeArchiveURL = this.nodeDataRetriever.getNodeArchiveURL(topNode.getArchiveURI());
+            topNodeArchiveLocalFile = this.nodeDataRetriever.getNodeLocalFile(topNode.getArchiveURI());
         } catch (NodeNotFoundException ex) {
             String errorMessage = "Error retrieving archive URL from the top node of workspace " + workspaceID;
             logger.error(errorMessage, ex);
@@ -250,7 +250,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             StringBuilder message = new StringBuilder();
-            boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveURL, message);
+            boolean isArchivable = nodeDataRetriever.isCheckedResourceArchivable(typecheckedResults, topNodeArchiveLocalFile, message);
             
             if(!isArchivable) {
                 String errorMessage = "File [" + currentFile.getName() + "] not archivable: " + message;

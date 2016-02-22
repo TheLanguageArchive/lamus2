@@ -675,7 +675,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -703,8 +703,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -713,7 +713,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
                 
@@ -745,7 +745,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -773,8 +773,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -783,7 +783,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
                 
@@ -816,7 +816,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -851,8 +851,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -862,7 +862,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -907,7 +907,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -942,8 +942,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -953,7 +953,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -1000,7 +1000,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -1034,8 +1034,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1045,7 +1045,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -1089,7 +1089,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1126,8 +1126,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1137,7 +1137,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -1173,7 +1173,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1212,8 +1212,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1223,7 +1223,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -1260,7 +1260,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -1301,8 +1301,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1312,7 +1312,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
@@ -1357,7 +1357,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1386,8 +1386,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1396,7 +1396,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
@@ -1431,7 +1431,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1460,8 +1460,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1470,7 +1470,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
@@ -1504,7 +1504,7 @@ public class LamusWorkspaceUploaderTest {
     public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
         final URI uploadedFileURI1 = uploadedFile1.toURI();
@@ -1549,8 +1549,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //first loop cycle
 
@@ -1559,7 +1559,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL1, filename1);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
                 
@@ -1581,7 +1581,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL2, filename2);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
                 
@@ -1612,7 +1612,7 @@ public class LamusWorkspaceUploaderTest {
     public void processTwoUploadedFiles_LinkingFailed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
         final URI uploadedFileURI1 = uploadedFile1.toURI();
@@ -1658,8 +1658,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //first loop cycle
 
@@ -1668,7 +1668,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL1, filename1);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile1).getName(); will(returnValue(filename1));
                 
@@ -1690,7 +1690,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL2, filename2);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.TRUE));
             oneOf(mockFile2).getName(); will(returnValue(filename2));
                 
@@ -1748,7 +1748,7 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
                 will(throwException(expectedException));
         }});
         
@@ -1767,7 +1767,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String fileMimetype = "text/plain";
@@ -1796,8 +1796,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1828,7 +1828,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -1856,8 +1856,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1866,7 +1866,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
@@ -1895,7 +1895,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final URL workspaceTopNodeArchiveURL = new URL("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -1923,8 +1923,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
-            oneOf(mockNodeDataRetriever).getNodeArchiveURL(workspaceTopNodeArchiveURI);
-                will(returnValue(workspaceTopNodeArchiveURL));
+            oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
+                will(returnValue(workspaceTopNodeArchiveFile));
             
             //loop
 
@@ -1933,7 +1933,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockNodeDataRetriever).triggerResourceFileCheck(uploadedFileURL, filename);
                 will(returnValue(mockTypecheckedResults));
             
-            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveURL)), with(any(StringBuilder.class)));
+            oneOf(mockNodeDataRetriever).isCheckedResourceArchivable(with(same(mockTypecheckedResults)), with(same(workspaceTopNodeArchiveFile)), with(any(StringBuilder.class)));
                 will(returnValue(Boolean.FALSE));
             oneOf(mockFile1).getName(); will(returnValue(filename));
             

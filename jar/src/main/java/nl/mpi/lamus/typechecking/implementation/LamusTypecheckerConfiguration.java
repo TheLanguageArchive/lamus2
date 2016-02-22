@@ -16,11 +16,15 @@
  */
 package nl.mpi.lamus.typechecking.implementation;
 
-import java.net.URL;
-import java.util.Map;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import javax.annotation.Resource;
 import nl.mpi.lamus.typechecking.TypecheckerConfiguration;
 import nl.mpi.lamus.typechecking.TypecheckerJudgement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -32,26 +36,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusTypecheckerConfiguration implements TypecheckerConfiguration {
     
+    Logger logger = LoggerFactory.getLogger(LamusTypecheckerConfiguration.class);
+    
     @Resource
-    @Qualifier("customTypecheckerFolderToConfigFileMap")
-    private Map<String, String> customTypecheckerFolderToConfigFileMap;
+    @Qualifier("customTypecheckerSpecialConfigFolders")
+    private Collection<String> customTypecheckerSpecialConfigFolders;
 
     /**
-     * @see TypecheckerConfiguration#getAcceptableJudgementForLocation(java.net.URL)
+     * @see TypecheckerConfiguration#getAcceptableJudgementForLocation(java.io.File)
      */
     @Override
-    public TypecheckerJudgement getAcceptableJudgementForLocation(URL urlToCheck) {
+    public TypecheckerJudgement getAcceptableJudgementForLocation(File fileToCheck) {
         
-        if(customTypecheckerFolderToConfigFileMap.containsKey(urlToCheck.getPath())) {
-            
-            //TODO this must be changed/improved
-                // use something similar to the old LAMUS
-                // OR implement something more complex, with several configuration files
-                    // and more flexible in terms of judgements
+        if(isChildOfAnyPathInCollection(Paths.get(fileToCheck.toURI()))) {
             return TypecheckerJudgement.ARCHIVABLE_SHORTTERM;
         }
         
         return TypecheckerJudgement.ARCHIVABLE_LONGTERM;
     }
     
+
+    private boolean isChildOfAnyPathInCollection(Path pathToCheck) {
+        for(String folder : customTypecheckerSpecialConfigFolders) {
+            if(pathToCheck.startsWith(folder)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

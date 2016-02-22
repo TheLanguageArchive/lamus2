@@ -62,6 +62,10 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         this.archiveFileHelper = archiveFileHelper;
     }
 
+    
+    /**
+     * @see NodeDataRetriever#getNodeArchiveURL(java.net.URI)
+     */
     @Override
     public URL getNodeArchiveURL(URI nodeArchiveURI) throws NodeNotFoundException {
         
@@ -74,6 +78,23 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         }
         URL nodeArchiveURL = nodeResolver.getUrl(archiveNode);
         return nodeArchiveURL;
+    }
+
+    /**
+     * @see NodeDataRetriever#getNodeLocalFile(java.net.URI)
+     */
+    @Override
+    public File getNodeLocalFile(URI nodeArchiveURI) throws NodeNotFoundException {
+
+        CorpusNode archiveNode = corpusStructureProvider.getNode(nodeArchiveURI);
+        if(archiveNode == null) {
+            String message = "Archive node not found: " + nodeArchiveURI;
+            NodeNotFoundException ex = new NodeNotFoundException(nodeArchiveURI, message);
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+        File nodeArchiveLocalFile = nodeResolver.getLocalFile(archiveNode);
+        return nodeArchiveLocalFile;
     }
     
     /**
@@ -155,12 +176,12 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     }
     
     /**
-     * @see NodeDataRetriever#isCheckedResourceArchivable(nl.mpi.lamus.typechecking.TypecheckedResults, java.net.URL, java.lang.StringBuilder)
+     * @see NodeDataRetriever#isCheckedResourceArchivable(nl.mpi.lamus.typechecking.TypecheckedResults, java.io.File, java.lang.StringBuilder)
      */
     @Override
-    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, URL urlToCheckInConfiguration, StringBuilder message) {
+    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, File fileToCheckInConfiguration, StringBuilder message) {
         
-        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(urlToCheckInConfiguration);
+        TypecheckerJudgement acceptableJudgement = this.typecheckerConfiguration.getAcceptableJudgementForLocation(fileToCheckInConfiguration);
         return this.fileTypeHandler.isCheckedResourceArchivable(typecheckedResults, acceptableJudgement, message);
     }
     

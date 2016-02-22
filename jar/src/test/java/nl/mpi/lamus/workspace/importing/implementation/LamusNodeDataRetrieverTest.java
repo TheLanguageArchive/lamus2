@@ -110,7 +110,7 @@ public class LamusNodeDataRetrieverTest {
     public void getArchiveURL() throws URISyntaxException, MalformedURLException, NodeNotFoundException {
         
         final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-        final URL expectedURL = new URL("file:/somewhere/in/the/archive/node.cmdi");
+        final URL expectedURL = new URL("https://somewhere/in/the/archive/node.cmdi");
         
         context.checking(new Expectations() {{
             oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
@@ -134,6 +134,41 @@ public class LamusNodeDataRetrieverTest {
         
         try {
             nodeDataRetriever.getNodeArchiveURL(nodeArchiveURI);
+            fail("should have thrown exception");
+        } catch(NodeNotFoundException ex) {
+            assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
+            assertEquals("Exception node URI different from expected", nodeArchiveURI, ex.getNode());
+        }
+    }
+    
+    @Test
+    public void getLocalURL() throws URISyntaxException, MalformedURLException, NodeNotFoundException {
+        
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final File expectedFile = new File("/somewhere/in/the/archive/node.cmdi");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
+            oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(expectedFile));
+        }});
+        
+        File retrievedFile = nodeDataRetriever.getNodeLocalFile(nodeArchiveURI);
+        
+        assertEquals("Retrieved URL different from expected", expectedFile, retrievedFile);
+    }
+    
+    @Test
+    public void getLocalURLThrowsArchiveNodeNotFoundException() throws URISyntaxException, MalformedURLException, NodeNotFoundException {
+        
+        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
+        final String expectedMessage = "Archive node not found: " + nodeArchiveURI;
+        
+        context.checking(new Expectations() {{
+            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(null));
+        }});
+        
+        try {
+            nodeDataRetriever.getNodeLocalFile(nodeArchiveURI);
             fail("should have thrown exception");
         } catch(NodeNotFoundException ex) {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
@@ -253,16 +288,16 @@ public class LamusNodeDataRetrieverTest {
         
         final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
         final StringBuilder message = new StringBuilder();
-        final URL topWsArchiveURL = new URL("http://someServer/location");
+        final File topWsArchiveFile = new File("/someServer/location");
         
         context.checking(new Expectations() {{
-            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
+            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveFile);
                 will(returnValue(acceptableJudgement));
             oneOf(mockFileTypeHandler).isCheckedResourceArchivable(mockTypecheckedResults, acceptableJudgement, message);
                 will(returnValue(Boolean.TRUE));
         }});
         
-        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveFile, message);
         
         assertTrue("Result should be true", result);
     }
@@ -272,16 +307,16 @@ public class LamusNodeDataRetrieverTest {
         
         final TypecheckerJudgement acceptableJudgement = TypecheckerJudgement.ARCHIVABLE_LONGTERM;
         final StringBuilder message = new StringBuilder();
-        final URL topWsArchiveURL = new URL("http://someServer/location");
+        final File topWsArchiveFile = new File("/someServer/location");
         
         context.checking(new Expectations() {{
-            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveURL);
+            oneOf(mockTypecheckerConfiguration).getAcceptableJudgementForLocation(topWsArchiveFile);
                 will(returnValue(acceptableJudgement));
             oneOf(mockFileTypeHandler).isCheckedResourceArchivable(mockTypecheckedResults, acceptableJudgement, message);
                 will(returnValue(Boolean.FALSE));
         }});
         
-        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveURL, message);
+        boolean result = nodeDataRetriever.isCheckedResourceArchivable(mockTypecheckedResults, topWsArchiveFile, message);
         
         assertFalse("Result should be false", result);
     }
