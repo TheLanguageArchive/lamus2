@@ -101,6 +101,6 @@ public class MetadataValidationIssue {
 
     @Override
     public String toString() {
-        return "Validation issue for file '" + metadataFile.getName() + "' - " + severity.toString() + ": " + message + ".";
+        return "'" + metadataFile.getName() + "' - " + severity.toString() + ": " + message;
     }
 }

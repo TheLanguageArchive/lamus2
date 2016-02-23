@@ -24,6 +24,7 @@ import nl.mpi.lamus.exception.WorkspaceExportException;
 import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.service.WorkspaceService;
 import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
+import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssueSeverity;
 import nl.mpi.lamus.web.model.WorkspaceModel;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -37,6 +38,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Button page that allows navigation
@@ -47,6 +50,8 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 
 public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ButtonPanel.class);
+    
     @SpringBean
     private WorkspaceService workspaceService;
     
@@ -127,10 +132,23 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             Session.get().error(ex.getMessage());
         } catch(MetadataValidationException ex) {
             StringBuilder errorMessage = new StringBuilder();
+            StringBuilder warnMessage = new StringBuilder();
+            StringBuilder logMessage = new StringBuilder();
             for(MetadataValidationIssue issue : ex.getValidationIssues()) {
-                errorMessage.append(issue.toString()).append(" ");
+
+                // the errors are shown in the top of the list, followed by the warnings
+                if(MetadataValidationIssueSeverity.ERROR.equals(issue.getSeverity())) {
+                    errorMessage.append(issue.toString()).append(" ");
+                } else {
+                    warnMessage.append(issue.toString()).append(" ");
+                }
+                
+                logMessage.append(issue.toString()).append(" ");
             }
-            Session.get().error(errorMessage);
+            
+            Session.get().error("Validation errors: " + errorMessage);
+            Session.get().warn("Validation warnings: " + warnMessage);
+            logger.error("Validation errors/warnings: " + logMessage);
             
             showInitialPage = false;
         }
