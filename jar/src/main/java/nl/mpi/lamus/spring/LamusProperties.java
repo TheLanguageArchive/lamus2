@@ -92,31 +92,10 @@ public class LamusProperties implements ServletContextAware {
         return numberOfDaysOfInactivityAllowedSinceLastWarningEmail;
     }
     
-    @Value("${type_recheck_size_limit_in_megabytes}")
-    private long typeRecheckSizeLimitInMegabytes;
-    @Bean
-    @Qualifier("typeRecheckSizeLimitInBytes")
-    public long typeRecheckSizeLimitInBytes() {
-        return typeRecheckSizeLimitInMegabytes * 1024 * 1024;
-    }
-    
-    @Value("${max_directory_name_length}")
-    private int maxDirectoryNameLength;
-    @Bean
-    @Qualifier("maxDirectoryNameLength")
-    public int maxDirectoryNameLength() {
-        return maxDirectoryNameLength;
-    }
-    
-    @Value("${disallowed_folder_names_workspace}")
-    private String disallowedFolderNamesWorkspace;
-    @Bean
-    @Qualifier("disallowedFolderNamesWorkspace")
-    public Collection<String> disallowedFolderNamesWorkspace() {
-        return splitStringIntoCollectionOfStrings(disallowedFolderNamesWorkspace);
-    }
     
     // Properties loaded from the web server context
+    
+    // Databases
     
     @Bean
     @Qualifier("csdbHybridDbResource")
@@ -130,6 +109,8 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.lamus2_db_resource");
     }   
     
+    // URLs
+    
     @Bean
     @Qualifier("registerUrl")
     public String registerUrl() {
@@ -141,6 +122,8 @@ public class LamusProperties implements ServletContextAware {
     public String manualUrl() {
         return servletContext.getInitParameter("nl.mpi.lamus.lamus2_manualUrl");
     }
+    
+    // Folder names
     
     @Bean
     @Qualifier("workspaceBaseDirectory")
@@ -202,6 +185,19 @@ public class LamusProperties implements ServletContextAware {
         return new File(servletContext.getInitParameter("nl.mpi.lamus.versioning_base_directory"));
     }
     
+    @Bean
+    @Qualifier("maxDirectoryNameLength")
+    public int maxDirectoryNameLength() {
+        return Integer.parseInt(servletContext.getInitParameter("nl.mpi.lamus.max_directory_name_length"));
+    }
+    
+    @Bean
+    @Qualifier("disallowedFolderNamesWorkspace")
+    public Collection<String> disallowedFolderNamesWorkspace() {
+        return splitStringIntoCollectionOfStrings(servletContext.getInitParameter("nl.mpi.lamus.disallowed_folder_names_workspace"));
+    }
+    
+    // Roots
     
     @Bean
     @Qualifier("dbHttpRoot")
@@ -221,6 +217,7 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.db.localroot");
     }
     
+    // Handle
     
     @Bean
     @Qualifier("handlePrefix")
@@ -252,6 +249,7 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.handle.admin_handle_password");
     }
     
+    // CS Services
     
     @Bean
     @Qualifier("corpusStructureServiceLocation")
@@ -301,6 +299,8 @@ public class LamusProperties implements ServletContextAware {
         return servletContext.getInitParameter("nl.mpi.lamus.corpusstructure.service_archiveobjects_updateurl_path");
     }
     
+    // Email
+    
     @Bean
     @Qualifier("mailServer")
     public String mailServer() {
@@ -318,6 +318,8 @@ public class LamusProperties implements ServletContextAware {
     public String mailBccAddress() {
         return servletContext.getInitParameter("nl.mpi.lamus.mailAddress");
     }
+    
+    // Users
     
     @Bean
     @Qualifier("managerUsers")
@@ -450,6 +452,12 @@ public class LamusProperties implements ServletContextAware {
         } else {
             return new ArrayList<>();
         }
+    }
+    
+    @Bean
+    @Qualifier("typeRecheckSizeLimitInBytes")
+    public long typeRecheckSizeLimitInBytes() {
+        return Long.parseLong(servletContext.getInitParameter("nl.mpi.lamus.type_recheck_size_limit_in_megabytes")) * 1024 * 1024;
     }
     
     

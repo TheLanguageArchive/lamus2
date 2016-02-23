@@ -36,6 +36,7 @@ import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.PreLockedNodeException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -65,6 +66,7 @@ import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.springframework.dao.DuplicateKeyException;
 
 /**
  *
@@ -178,6 +180,30 @@ public class LamusWorkspaceServiceTest {
             fail("should have thrown exception");
         } catch(NodeNotFoundException ex) {
             assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void createWorkspaceThrowsPreLockException()
+            throws MalformedURLException, URISyntaxException, NodeAccessException, WorkspaceImportException, NodeNotFoundException {
+        
+        final URI archiveNodeURI = new URI("node:001");
+        final URI archiveNodePid = new URI("hdl:" + UUID.randomUUID().toString());
+        
+        final DuplicateKeyException expectedException = new DuplicateKeyException("record already exists");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockArchiveHandleHelper).getArchiveHandleForNode(archiveNodeURI); will(returnValue(archiveNodePid));
+            oneOf(mockWorkspaceDao).preLockNode(archiveNodePid); will(throwException(expectedException));
+            oneOf(mockWorkspaceDao).removeNodePreLock(archiveNodePid);
+        }});
+        
+        try {
+            service.createWorkspace(userID, archiveNodeURI);
+            fail("should have thrown exception");
+        } catch(PreLockedNodeException ex) {
+            assertEquals("Message different from expected", "Node " + archiveNodePid + " already pre-locked", ex.getMessage());
+            assertEquals("Pre-locked nodeURI different from expected", archiveNodePid, ex.getNodeURI());
         }
     }
     

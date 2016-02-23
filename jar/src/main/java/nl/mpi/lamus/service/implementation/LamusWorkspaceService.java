@@ -29,6 +29,7 @@ import nl.mpi.lamus.exception.CrawlerInvocationException;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.NodeAccessException;
+import nl.mpi.lamus.exception.PreLockedNodeException;
 import nl.mpi.lamus.exception.ProtectedNodeException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceNodeNotFoundException;
@@ -51,6 +52,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 
 /**
  * @see WorkspaceService
@@ -109,6 +111,8 @@ public class LamusWorkspaceService implements WorkspaceService {
             workspaceDao.preLockNode(archiveUriToUse);
             this.nodeAccessChecker.ensureWorkspaceCanBeCreated(userID, archiveNodeURI);
             return this.workspaceManager.createWorkspace(userID, archiveUriToUse);
+        } catch(DuplicateKeyException ex) {
+            throw new PreLockedNodeException("Node " + archiveUriToUse + " already pre-locked", archiveUriToUse);
         } finally {
             workspaceDao.removeNodePreLock(archiveUriToUse);
         }

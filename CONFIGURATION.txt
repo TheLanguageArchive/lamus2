@@ -258,6 +258,21 @@ The other necessary properties should be defined as parameters in the web contex
                    description="Comma separated list of paths (top nodes) where the typechecker special configuraiton should be applied (ARCHIVABLE_SHORTTERM becom acceptable within those folders)."
                    override="false"/>
 
+        <Parameter name="nl.mpi.lamus.type_recheck_size_limit_in_megabytes"
+                   value="8"
+                   description="File size limit for which the typechecker should check a file again (when importing from the archive)."
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.max_directory_name_length"
+                   value="100"
+                   description="Used by ArchiveFileHelper.correctPathElement to truncate unreasonably long names."
+                   override="false"/>
+
+        <Parameter name="nl.mpi.lamus.disallowed_folder_names_workspace"
+                   value="Folder names which are not allowed (reserved due to filesystem restrictions, for instance), defined as regular expressions."
+                   description="^tmp$,^temp$,^DesktopFolderDB$,^\.svn$"
+                   override="false"/>
+
 
     RRS
 
