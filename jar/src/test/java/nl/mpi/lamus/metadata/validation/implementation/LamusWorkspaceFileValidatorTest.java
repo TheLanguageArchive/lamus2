@@ -383,7 +383,7 @@ public class LamusWorkspaceFileValidatorTest {
         final MetadataValidationIssue issue_2 = new MetadataValidationIssue(nodeFile_1, "some assertion test 2", "something wrong happened 2", MetadataValidationIssueSeverity.WARN.toString());
         issues.add(issue_2);
         
-        final String expectedResult = "Validation issue for file 'node_1.cmdi' - ERROR: something wrong happened 1.\nValidation issue for file 'node_1.cmdi' - WARN: something wrong happened 2.\n";
+        final String expectedResult = "'node_1.cmdi' - ERROR: something wrong happened 1\n'node_1.cmdi' - WARN: something wrong happened 2\n";
         
         String result = workspaceFileValidator.validationIssuesToString(issues);
         
