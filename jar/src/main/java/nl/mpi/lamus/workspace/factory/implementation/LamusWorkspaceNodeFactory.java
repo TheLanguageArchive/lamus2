@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceNodeFactory
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
@@ -73,7 +73,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setName(name);
         node.setTitle(name);
         node.setType(WorkspaceNodeType.METADATA);
-        node.setFormat("text/x-cmdi+xml"); //TODO get this based on what? typechecker?
+        node.setFormat("text/x-cmdi+xml");
         node.setProfileSchemaURI(document.getDocumentType().getSchemaLocation());
 
         if(onSite) {
@@ -164,15 +164,10 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setName(nameToUse);
         node.setTitle(nameToUse);
         node.setOriginURI(originURI);
-//        if(originURI.getPath().endsWith("cmdi")) { // Try to guess type or leave as unknown?
-//            node.setType(WorkspaceNodeType.METADATA);
-//        } else {
-//            node.setType(WorkspaceNodeType.RESOURCE);
-//        }
         node.setType(WorkspaceNodeType.UNKNOWN);
         node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
-        node.setProtected(Boolean.FALSE);
+        node.setProtected(false);
         
         return node;
     }
@@ -205,7 +200,7 @@ public class LamusWorkspaceNodeFactory implements WorkspaceNodeFactory {
         node.setType(WorkspaceNodeType.UNKNOWN);
         node.setStatus(WorkspaceNodeStatus.EXTERNAL);
         
-        node.setProtected(Boolean.FALSE);
+        node.setProtected(false);
         
         return node;
    }

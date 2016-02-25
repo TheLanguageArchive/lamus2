@@ -17,7 +17,6 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.components.AboutPanel;
-import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import nl.mpi.lamus.web.session.LamusSession;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
@@ -29,7 +28,6 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.SharedResourceReference;
@@ -53,6 +51,7 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
     /**
      * edit title of the page, logo and userName
      */
+    @SuppressWarnings("LeakingThisInConstructor")
     public LamusPage() {
         super();
         
@@ -61,22 +60,6 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
         feedbackPanel = new FeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         feedbackPanel.setOutputMarkupPlaceholderTag(true);
-        
-//        Panel expandableFeedback = new ExpandableFeedbackPanel("expandablePanel", Model.of("panel"), true) {
-//            
-//            @Override
-//            protected FeedbackPanel getInnerFeedbackPanel() {
-//                return feedbackPanel;
-//            }
-//        };
-        
-//        innerPanel.setVisible(visibleByDefault);
-//        innerPanel.setOutputMarkupId(true);
-//        innerPanel.setOutputMarkupPlaceholderTag(true);
-//        add(innerPanel);
-        
-//	expandableFeedback.add(feedbackPanel);
-//        add(expandableFeedback);
         
         add(feedbackPanel);
         
@@ -144,6 +127,9 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
         return modalAbout;
     }
 
+    /**
+     * @see IAjaxIndicatorAware#getAjaxIndicatorMarkupId()
+     */
     @Override
     public String getAjaxIndicatorMarkupId() {
         return "ajaxveil";
@@ -152,7 +138,7 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
     
     private static class HeaderUsernameModel extends AbstractReadOnlyModel<String> {
 
-        public HeaderUsernameModel() {
+        HeaderUsernameModel() {
         }
 
         @Override

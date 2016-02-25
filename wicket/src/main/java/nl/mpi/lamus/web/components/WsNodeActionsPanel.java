@@ -50,7 +50,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Panel containing the workspace node action buttons.
  * @author guisil
  */
 public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<WorkspaceTreeNode>> {
@@ -71,12 +71,14 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
 	super(id, model, feedbackPanel);
 	form = new Form<>("wsNodeActionsForm", model);
         
-        //TODO should this also be part of the services?
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
         
 	add(form);
     }
 
+    /**
+     * @see FeedbackPanelAwarePanel#onModelChanged()
+     */
     @Override
     protected void onModelChanged() {
         super.onModelChanged(); //To change body of generated methods, choose Tools | Templates.
@@ -156,13 +158,22 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
         };
     }
     
-    
+    /**
+     * To override from the page where the panel is included.
+     */
     public void refreshTreeAndPanels() {
     }
     
+    /**
+    * To override from the page where the panel is included.
+    */
     public void refreshSelectedUnlinkedNodes() {
     }
     
+    /**
+     * Sets the currently selected unlinked nodes.
+     * @param selectedUnlinkedNodes Collection of selected unlinked nodes
+     */
     public void setSelectedUnlinkedNodes(Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
         this.selectedUnlinkedNodes = selectedUnlinkedNodes;
     }
@@ -193,7 +204,9 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
         return "";
     }
     
-    
+    /**
+     * @see FeedbackPanelAwarePanel#onEvent(org.apache.wicket.event.IEvent)
+     */
     @Override
     public void onEvent(IEvent<?> event) {
         

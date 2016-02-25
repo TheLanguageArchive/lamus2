@@ -24,8 +24,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @see WorkspaceNode
+ * @author guisil
  */
 public class LamusWorkspaceNode implements WorkspaceNode {
     
@@ -72,6 +72,7 @@ public class LamusWorkspaceNode implements WorkspaceNode {
         this.isProtected = isProtected;
         this.format = format;
     }
+    
 
     @Override
     public int getWorkspaceNodeID() {

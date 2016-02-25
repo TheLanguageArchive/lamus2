@@ -20,8 +20,8 @@ import java.net.URI;
 import java.net.URL;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Represents a node within a workspace.
+ * @author guisil
  */
 public interface WorkspaceNode extends Serializable {
     

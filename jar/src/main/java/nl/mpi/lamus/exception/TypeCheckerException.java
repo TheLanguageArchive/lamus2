@@ -19,11 +19,11 @@ import nl.mpi.lamus.typechecking.TypecheckedResults;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class TypeCheckerException extends Exception {
     
-    private TypecheckedResults typecheckedResults;
+    private final TypecheckedResults typecheckedResults;
     
     public TypeCheckerException(TypecheckedResults results, String message, Throwable cause) {
         super(message, cause);

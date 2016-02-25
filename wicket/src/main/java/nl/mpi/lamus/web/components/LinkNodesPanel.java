@@ -28,7 +28,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Panel where the actions related with nodes to be linked will take place.
  * @author guisil
  */
 public class LinkNodesPanel extends FeedbackPanelAwarePanel<WorkspaceTreeNode> {
@@ -39,12 +39,12 @@ public class LinkNodesPanel extends FeedbackPanelAwarePanel<WorkspaceTreeNode> {
     @SpringBean(name = "unlinkedNodesProviderFactory")
     private UnlinkedNodesModelProviderFactory providerFactory;
     
-    private IModel<WorkspaceTreeNode> model;
+    private final IModel<WorkspaceTreeNode> model;
     
     private UnlinkedNodesPanel unlinkedNodesPanel;
-    private ExternalNodesPanel externalNodesPanel;
+    private final ExternalNodesPanel externalNodesPanel;
     
-    private Workspace currentWorkspace;
+    private final Workspace currentWorkspace;
     
     
     public LinkNodesPanel(String id, IModel<WorkspaceTreeNode> model, Workspace currentWs, FeedbackPanel feedbackPanel) {
@@ -71,11 +71,16 @@ public class LinkNodesPanel extends FeedbackPanelAwarePanel<WorkspaceTreeNode> {
     }
     
     
-    // to override from the page where the panel is included
+    /**
+     * To override from the page where the panel is included.
+     */
     protected void refreshTreeAndPanels() {
 
     }
     
+    /**
+     * @return The currently selected unlinked nodes.
+     */
     public Collection<WorkspaceTreeNode> getSelectedUnlinkedNodes() {
         return unlinkedNodesPanel.getSelectedUnlinkedNodes();
     }

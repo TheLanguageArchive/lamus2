@@ -52,7 +52,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Page for the management related actions.
  * @author guisil
  */
 public class ManageWorkspacesPage extends LamusPage {
@@ -92,8 +92,6 @@ public class ManageWorkspacesPage extends LamusPage {
                     @Override
                     public void onClick() {
                         try {
-                            //TODO Add confirmation dialog
-                            
                             workspaceService.deleteWorkspace(LamusSession.get().getUserId(), getModelObject().getWorkspaceID(), false);
                             
                             refreshDataView();

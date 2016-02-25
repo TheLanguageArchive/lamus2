@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Panel where the file upload activity will take place.
  * @author guisil
  */
 public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
@@ -81,9 +81,8 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
     private class FileUploadForm extends Form<Void> {
 
         FileUploadField fileUploadField;
-
         
-        public FileUploadForm(String name) {
+        FileUploadForm(String name) {
             super(name);
 
             // set this form to multipart mode (allways needed for uploads!)
@@ -91,10 +90,6 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
 
             // Add one file input field
             add(fileUploadField = new FileUploadField("fileInput"));
-
-            // Set maximum size to 100K for demo purposes
-            //setMaxSize(Bytes.kilobytes(100));
-            
             
             add(new AutoDisablingAjaxButton("uploadButton", this) {
                 @Override
@@ -173,7 +168,6 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                                     failedLinksCount++;
                                 }
                             }
-
                             
                             StringBuilder feedbackMessage = new StringBuilder();
                             

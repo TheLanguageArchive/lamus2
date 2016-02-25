@@ -17,7 +17,7 @@ package nl.mpi.lamus.workspace.model;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public enum WorkspaceNodeStatus {
 

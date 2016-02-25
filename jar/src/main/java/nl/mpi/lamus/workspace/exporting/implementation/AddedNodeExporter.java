@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
  * and are supposed to get a new location in the archive.
  * @see NodeExporter
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class AddedNodeExporter implements NodeExporter {
@@ -165,11 +165,6 @@ public class AddedNodeExporter implements NodeExporter {
         String currentPathRelativeToParent = archiveFileLocationProvider.getChildPathRelativeToParent(parentArchiveFile, nextAvailableFile);
             
         updateReferenceInParent(workspaceID, currentNode, parentNode, referencingParentDocument, currentPathRelativeToParent);
-        
-        //TODO is this necessary?
-//        if(searchClientBridge.isFormatSearchable(currentNode.getFormat())) {
-//            searchClientBridge.addNode(currentNode.getArchiveURI());
-//        }
     }
     
     private File retrieveParentArchiveLocation(int workspaceID, WorkspaceNode parentNode) throws WorkspaceExportException {

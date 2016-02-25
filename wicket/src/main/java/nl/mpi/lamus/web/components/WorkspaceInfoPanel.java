@@ -25,7 +25,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 
 /**
- *
+ * Panel containing information regarding the current workspace.
  * @author guisil
  */
 public class WorkspaceInfoPanel extends Panel {
@@ -35,7 +35,7 @@ public class WorkspaceInfoPanel extends Panel {
     public WorkspaceInfoPanel(String id, IModel<Workspace> model) {
         super(id, model);
         
-        WebMarkupContainer container = new WebMarkupContainer("workspaceInfoContainer", new CompoundPropertyModel<Workspace>(model));
+        WebMarkupContainer container = new WebMarkupContainer("workspaceInfoContainer", new CompoundPropertyModel<>(model));
 	container.add(new Label("userID"));
 	container.add(new Label("workspaceID"));
 	container.add(new Label("status"));
@@ -47,10 +47,18 @@ public class WorkspaceInfoPanel extends Panel {
         add(nodeInfoPanel);
     }
     
+    /**
+     * Retrieves the panel containing information about the selected node.
+     * @return Node information panel
+     */
     public NodeInfoPanel getNodeInfoPanel() {
         return nodeInfoPanel;
     }
     
+    /**
+     * Sets the model of the node information panel.
+     * @param model 
+     */
     public void setNodeInfoPanelModel(IModel<WorkspaceTreeNode> model) {
         nodeInfoPanel.setNodeInfoModel(model);
     }

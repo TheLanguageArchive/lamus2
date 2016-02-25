@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see WorkspaceFileImporter
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
@@ -55,10 +55,10 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
 
     /**
      * @see WorkspaceFileImporter#importMetadataFileToWorkspace(java.io.File,
-     *      nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
+     *  nl.mpi.lamus.workspace.model.WorkspaceNode, nl.mpi.metadata.api.model.MetadataDocument)
      */
     @Override
-    public void importMetadataFileToWorkspace(File archiveFile, WorkspaceNode workspaceNode, MetadataDocument metadataDocument)
+    public void importMetadataFileToWorkspace(File archiveFile, WorkspaceNode workspaceNode, MetadataDocument document)
             throws MalformedURLException, IOException, TransformerException, MetadataException {
         
         logger.debug("Importing file into workspace; archive file: " + archiveFile.getAbsolutePath() + "; workspaceID: " + workspaceNode.getWorkspaceID());
@@ -66,7 +66,7 @@ public class LamusWorkspaceFileImporter implements WorkspaceFileImporter {
 	File workspaceFile = workspaceFileHandler.getFileForImportedWorkspaceNode(archiveFile, workspaceNode);
 	StreamResult streamResult = workspaceFileHandler.getStreamResultForNodeFile(workspaceFile);
 
-        metadataAPI.writeMetadataDocument(metadataDocument, streamResult);
+        metadataAPI.writeMetadataDocument(document, streamResult);
         
         workspaceNode.setWorkspaceURL(workspaceFile.toURI().toURL());
         this.workspaceDao.updateNodeWorkspaceURL(workspaceNode);

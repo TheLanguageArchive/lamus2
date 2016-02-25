@@ -114,6 +114,7 @@ public class SelectWorkspacePageTest extends AbstractLamusWicketTest {
         
     }
 
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext

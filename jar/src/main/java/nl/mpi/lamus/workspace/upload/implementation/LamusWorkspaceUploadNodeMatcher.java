@@ -115,8 +115,6 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             return newNode;
         }
         
-        
-        //TODO Should this return null? It's not good that there was a handle and it was not even found in the archive...
         return null;
     }
     

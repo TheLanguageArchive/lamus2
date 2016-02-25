@@ -48,7 +48,7 @@ import org.junit.Rule;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceFileImporterTest {
     
@@ -239,7 +239,4 @@ public class LamusWorkspaceFileImporterTest {
             assertNotNull(ex);
         }
     }
-    
-        
-    //TODO MalformedURLException
 }

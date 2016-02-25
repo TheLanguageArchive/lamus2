@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Panel for the "About" option.
  * @author guisil
  */
 public class AboutPanel extends Panel {

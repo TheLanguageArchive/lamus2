@@ -149,7 +149,6 @@ public class DeleteNodesActionTest {
 
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
-        //TODO is there an advantage on passing the parent node in this particular type of action?
         deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     
@@ -167,7 +166,6 @@ public class DeleteNodesActionTest {
 
         deleteNodesAction.setSelectedTreeNodes(selectedTreeNodes);
         
-        //TODO is there an advantage on passing the parent node in this particular type of action?
         deleteNodesAction.execute(userID, mockWorkspaceService, mockWorkspaceDao, mockNodeUtil);
     }
     

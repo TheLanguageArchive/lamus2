@@ -22,7 +22,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 /**
- *
+ * More specific session class.
  * @author guisil
  */
 public class ProductionLamusSession extends LamusSession {

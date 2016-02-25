@@ -55,7 +55,7 @@ import org.junit.Rule;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusNodeDataRetrieverTest {
         

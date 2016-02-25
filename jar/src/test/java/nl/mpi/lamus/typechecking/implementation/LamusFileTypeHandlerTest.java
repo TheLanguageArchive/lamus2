@@ -35,7 +35,7 @@ import org.junit.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusFileTypeHandlerTest {
     

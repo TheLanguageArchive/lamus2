@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceManager
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceManager implements WorkspaceManager {
@@ -113,14 +113,7 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceImportRunner.setWorkspace(newWorkspace);
         workspaceImportRunner.setTopNodeArchiveURI(topArchiveNodeURI);
         
-        //TODO use Callable and Future instead of Runnable, in order to get the result of the thread
-        
         Future<Boolean> importResult = executorService.submit(workspaceImportRunner);
-        
-//        executorService.execute(workspaceImportRunner);
-
-            // TODO implement some notification mechanism to let the caller know when this is ready
-                // OR just have some different way of filling up the tree
         
         Boolean isSuccessful = false;
         
@@ -230,9 +223,6 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceExportRunner.setWorkspace(workspace);
         workspaceExportRunner.setKeepUnlinkedFiles(keepUnlinkedFiles);
         workspaceExportRunner.setSubmissionType(submissionType);
-        
-        //TODO workspaceDirectoryHandler - move workspace to "submitted workspaces" directory
-            // this should be part of the export thread?
         
         Future<Boolean> exportResult = executorService.submit(workspaceExportRunner);
         

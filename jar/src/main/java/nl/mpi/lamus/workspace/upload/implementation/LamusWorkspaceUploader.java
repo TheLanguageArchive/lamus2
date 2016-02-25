@@ -27,6 +27,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
@@ -395,8 +397,8 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
     
     private void assureFilenameIsValid(String filename) throws DisallowedPathException {
         
-        String[] pathNames = filename.split(File.separator);
-        String filenameToUse = pathNames[pathNames.length - 1];
+        Path filePath = Paths.get(filename);
+        String filenameToUse = filePath.getName(filePath.getNameCount() - 1).toString();
         
         String correctedFilename = archiveFileHelper.correctPathElement(filenameToUse, "Uploading file");
         if(!filenameToUse.equals(correctedFilename)) {

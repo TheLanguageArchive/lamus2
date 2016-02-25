@@ -33,7 +33,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 /**
  * @see WorkspaceTreeNode
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceTreeNode extends LamusWorkspaceNode implements WorkspaceTreeNode {
 

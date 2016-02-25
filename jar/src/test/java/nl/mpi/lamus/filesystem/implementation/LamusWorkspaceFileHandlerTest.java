@@ -51,8 +51,6 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -71,7 +69,7 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(SpringJUnit4ClassRunner.class)
@@ -96,8 +94,6 @@ public class LamusWorkspaceFileHandlerTest {
             return mockWorkspaceAccessChecker;
         }
     }
-    
-    private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
         setThreadingPolicy(new Synchroniser());

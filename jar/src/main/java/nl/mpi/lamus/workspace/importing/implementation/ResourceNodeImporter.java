@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
  * Node importer specific for resource files.
  * @see NodeImporter
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class ResourceNodeImporter implements NodeImporter<ResourceReference> {

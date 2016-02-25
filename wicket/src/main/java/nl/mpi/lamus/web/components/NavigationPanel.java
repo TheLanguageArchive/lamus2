@@ -24,7 +24,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Side navigation panel.
  * @author guisil
  */
 public class NavigationPanel extends Panel {
@@ -35,9 +35,7 @@ public class NavigationPanel extends Panel {
     @SpringBean(name = "managerUsers")
     private Collection<String> managerUsers;
     
-    /**
-     * Constructor.
-     */
+    
     public NavigationPanel(String id) {
         super(id);
         

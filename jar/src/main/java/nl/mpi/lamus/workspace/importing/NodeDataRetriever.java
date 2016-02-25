@@ -28,7 +28,7 @@ import nl.mpi.metadata.api.model.Reference;
  * Helper interface that provides methods for retrieving information
  * regarding a given node.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface NodeDataRetriever {
     
@@ -51,7 +51,6 @@ public interface NodeDataRetriever {
      * @param resourceReference Reference to the resource, from the parent metadata file
      * @param resourceFile File object referring to the actual location of the resource
      * @param resourceNode CorpusNode object referring to the resource in the corpus structure database
-     * @param alreadyInArchive true if file already in archive
      * @return true if resource should be typechecked
      */
     public boolean shouldResourceBeTypechecked(Reference resourceReference, File resourceFile, CorpusNode resourceNode);

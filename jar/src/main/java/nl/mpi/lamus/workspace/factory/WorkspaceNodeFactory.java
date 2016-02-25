@@ -27,7 +27,7 @@ import nl.mpi.metadata.api.model.Reference;
 /**
  * Factory for WorkspaceNode objects.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceNodeFactory {
     

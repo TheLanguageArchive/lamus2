@@ -29,8 +29,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.model.Model;
 
 /**
- * Based on the NodeActionButton class of the Metadata Browser
- * 
+ * Button with an associated workspace node action that can be triggered from here.
  * @author guisil
  */
 public class WsNodeActionButton extends AutoDisablingAjaxButton {
@@ -50,23 +49,42 @@ public class WsNodeActionButton extends AutoDisablingAjaxButton {
         this.nodeUtil = nodeUtil;
     }
 
+    /**
+     * To override from the page where the panel is included.
+     */
     public void refreshStuff() {
         
     }
     
+    /**
+     * To override from the page where the panel is included.
+     */
     public void refreshSelectedUnlinkedNodes() {
         
     }
 
+    /**
+     * Retrieves the action associated with this button.
+     * @return Action
+     */
     public WsTreeNodesAction getAction() {
         return action;
     }
     
+    /**
+     * Sets the parameters used to perform the action associated with this button.
+     * @param selectedTreeNodes Currently selected tree nodes
+     * @param selectedUnlinkedNodes Currently selected unlinked nodes
+     */
     public void setActionParameters(Collection<WorkspaceTreeNode> selectedTreeNodes, Collection<WorkspaceTreeNode> selectedUnlinkedNodes) {
         action.setSelectedTreeNodes(selectedTreeNodes);
         action.setSelectedUnlinkedNodes(selectedUnlinkedNodes);
     }
     
+    /**
+     * Executes the action associated with this button
+     * @param currentUserId ID of the user
+     */
     public void executeAction(String currentUserId) throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
         action.execute(currentUserId, workspaceService, workspaceDao, nodeUtil);
     }

@@ -21,7 +21,7 @@ import nl.mpi.lamus.dao.WorkspaceDao;
 /**
  * Factory for WorkspaceDao objects.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceDaoFactory extends Serializable {
     

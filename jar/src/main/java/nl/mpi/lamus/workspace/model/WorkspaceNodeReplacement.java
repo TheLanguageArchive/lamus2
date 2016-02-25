@@ -19,7 +19,7 @@ package nl.mpi.lamus.workspace.model;
 import java.net.URI;
 
 /**
- * 
+ * Represents a node replacement within a workspace.
  * @author guisil
  */
 public interface WorkspaceNodeReplacement {

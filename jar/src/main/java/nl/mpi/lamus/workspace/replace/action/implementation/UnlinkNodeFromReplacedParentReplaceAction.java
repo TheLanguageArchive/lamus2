@@ -67,14 +67,14 @@ public class UnlinkNodeFromReplacedParentReplaceAction extends NodeReplaceAction
         if (this == obj) {
                 return true;
         }
-        if (!(obj instanceof UnlinkNodeReplaceAction)) {
+        if (!(obj instanceof UnlinkNodeFromReplacedParentReplaceAction)) {
                 return false;
         }
-        UnlinkNodeReplaceAction other = (UnlinkNodeReplaceAction) obj;
+        UnlinkNodeFromReplacedParentReplaceAction other = (UnlinkNodeFromReplacedParentReplaceAction) obj;
 
         return new EqualsBuilder().
                 appendSuper(super.equals(other)).
-                append(this.newParentNode, other.getParentNode()).
+                append(this.newParentNode, other.getNewParentNode()).
                 isEquals();
     }
     

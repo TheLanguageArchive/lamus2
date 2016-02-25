@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- *
+ * Session related beans.
  * @author guisil
  */
 @Configuration

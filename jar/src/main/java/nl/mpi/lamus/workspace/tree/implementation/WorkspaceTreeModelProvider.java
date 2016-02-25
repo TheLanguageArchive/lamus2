@@ -15,14 +15,13 @@
  */
 package nl.mpi.lamus.workspace.tree.implementation;
 
-import java.io.Serializable;
 import nl.mpi.archiving.tree.LinkedTreeModelProvider;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
  * @see LinkedTreeModelProvider
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceTreeModelProvider extends LinkedTreeModelProvider {
     

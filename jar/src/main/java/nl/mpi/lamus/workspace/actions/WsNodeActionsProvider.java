@@ -21,11 +21,18 @@ import java.util.List;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 
 /**
- * Based on the WsNodeActionsProvider interface in the Metadata Browser
+ * Provides the available actions for different types of nodes.
+ * Based on the WsNodeActionsProvider interface in the Metadata Browser.
  * 
  * @author guisil
  */
 public interface WsNodeActionsProvider {
 
+    /**
+     * Given the collection of nodes, returns the appropriate list of actions
+     * that can be performed on them.
+     * @param nodes Collection of nodes
+     * @return List of actions
+     */
     public List<WsTreeNodesAction> getActions(Collection<WorkspaceTreeNode> nodes);
 }

@@ -19,7 +19,7 @@ package nl.mpi.lamus.web.pages;
 import org.apache.wicket.markup.html.WebPage;
 
 /**
- *
+ * Page to be used as an intermediate step during Shibboleth login.
  * @author guisil
  */
 public class LoginInfoPage extends WebPage {

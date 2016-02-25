@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.model.implementation;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import org.junit.*;
@@ -23,12 +22,12 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceNodeLinkTest {
     
-    private int parentWorkspaceNodeID = 1;
-    private int childWorkspaceNodeID = 2;
+    private final int parentWorkspaceNodeID = 1;
+    private final int childWorkspaceNodeID = 2;
     
     public LamusWorkspaceNodeLinkTest() {
     }
@@ -120,8 +119,8 @@ public class LamusWorkspaceNodeLinkTest {
 
 class SomeOtherWorkspaceNodeLink implements WorkspaceNodeLink {
 
-    private int parentWorkspaceNodeID;
-    private int childWorkspaceNodeID;
+    private final int parentWorkspaceNodeID;
+    private final int childWorkspaceNodeID;
     
     public SomeOtherWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID) {
         this.parentWorkspaceNodeID = parentWorkspaceNodeID;

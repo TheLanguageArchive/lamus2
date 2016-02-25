@@ -21,12 +21,17 @@ import org.apache.wicket.model.IModel;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Provider for the workspace model.
  * @author guisil
  */
 @Component
 public class WorkspaceModelProvider {
     
+    /**
+     * Retrieves the workspace model
+     * @param workspaceId ID of the workspace
+     * @return WorkspaceModel for the given workspace ID
+     */
     public IModel<Workspace> getWorkspaceModel(int workspaceId) {
         return new WorkspaceModel(workspaceId);
     }

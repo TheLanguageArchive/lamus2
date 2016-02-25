@@ -24,7 +24,7 @@ import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 /**
  * Interface for the archive node access checking.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceAccessChecker {
 

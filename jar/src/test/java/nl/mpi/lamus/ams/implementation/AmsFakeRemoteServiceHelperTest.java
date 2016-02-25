@@ -69,11 +69,11 @@ public class AmsFakeRemoteServiceHelperTest {
     @Mock MockableURL mockUrl;
     @Mock HttpURLConnection mockUrlConnection;
     
-    private String authBaseUrl = "http://server/ams-cmdi";
-    private String authRecalcUrl = "recalc/page";
-    private String authRecalcCsdbUrl = "recalc_csdb/page";
-    private String authRecalcWebserverUrl = "recalc_webserver/page";
-    private String authRecalcParam = "nodeid";
+    private final String authBaseUrl = "http://server/ams-cmdi";
+    private final String authRecalcUrl = "recalc/page";
+    private final String authRecalcCsdbUrl = "recalc_csdb/page";
+    private final String authRecalcWebserverUrl = "recalc_webserver/page";
+    private final String authRecalcParam = "nodeid";
     
     
     private AmsFakeRemoteServiceHelper amsFakeRemoteServiceHelper;

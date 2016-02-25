@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Page provider class.
  * @author guisil
  */
 @Component
@@ -37,22 +37,43 @@ public class LamusWicketPagesProvider {
     private WorkspaceModelProvider workspaceModelProvider;
     
     
+    /**
+     * Retrieves an Index Page.
+     * @return IndexPage instance
+     */
     public IndexPage getIndexPage() {
         return new IndexPage();
     }
     
+    /**
+     * Retrieves a Create Workspace Page.
+     * @return CreateWorkspace instance
+     */
     public CreateWorkspacePage getCreateWorkspacePage() {
         return new CreateWorkspacePage();
     }
     
+    /**
+     * Retrieves a Select Workspace Page.
+     * @return SelectWorkspacePage instance
+     */
     public SelectWorkspacePage getSelectWorkspacePage() {
         return new SelectWorkspacePage();
     }
     
+    /**
+     * Retrieves a Workspace Page.
+     * @param workspace Workspace to use in the model
+     * @return WorkspacePage instance
+     */
     public WorkspacePage getWorkspacePage(Workspace workspace) {
         return new WorkspacePage(workspaceModelProvider.getWorkspaceModel(workspace.getWorkspaceID()));
     }
     
+    /**
+     * Retrieves a Manage Workspace Page.
+     * @return ManageWorkspacePage instance
+     */
     public ManageWorkspacesPage getManageWorkspacesPage() {
         return new ManageWorkspacesPage();
     }

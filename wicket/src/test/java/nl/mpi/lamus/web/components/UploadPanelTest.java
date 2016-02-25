@@ -88,6 +88,7 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -103,26 +104,4 @@ public class UploadPanelTest extends AbstractLamusWicketTest {
         getTester().assertComponent("uploadPanel:progressUpload:progress", UploadProgressBar.class);
         getTester().assertEnabled("uploadPanel:progressUpload:progress");
     }
-    
-    
-    //TODO couldn't test this; the "getFileUploads" method of the upload field always seems to return null and couldn't find a way to mock it...
-    
-//    @Test
-//    @DirtiesContext
-//    public void submitUpload() throws IOException, TypeCheckerException {
-//        
-//        FormTester formTester = getTester().newFormTester("progressUpload", false);
-//        org.apache.wicket.util.file.File mockFileToSet = new org.apache.wicket.util.file.File(mockFileToUpload);
-//        formTester.setFile("fileInput", mockFileToSet, "image/jpeg");
-////        FileUploadField uploadField = (FileUploadField) getTester().getComponentFromLastRenderedPage("progressUpload:fileInput");
-////        uploadField.setModel(new ListModel<FileUpload>(mockFileUploads));
-////        Form uploadForm = (Form) getTester().getComponentFromLastRenderedPage("progressUpload");
-////        uploadForm.addOrReplace(mockFileUploadField);
-//        
-//        formTester.submit();
-//        
-//        verify(mockWorkspaceServiceBean).uploadFileIntoWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWorkspaceID, mockFileInputStream, mockFilename);
-//    }
-    
-    //TODO test exceptions
 }

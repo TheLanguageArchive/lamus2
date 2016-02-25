@@ -22,7 +22,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
+ * @see WorkspaceNodeReplacement
  * @author guisil
  */
 public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
@@ -31,6 +31,7 @@ public class LamusWorkspaceNodeReplacement implements WorkspaceNodeReplacement {
     private URI newNodeURI;
     private String replacementStatus = "";
     private String replacementError = "";
+    
     
     public LamusWorkspaceNodeReplacement(URI oldArchiveNodeURI, URI newArchiveNodeURI) {
         this.oldNodeURI = oldArchiveNodeURI;

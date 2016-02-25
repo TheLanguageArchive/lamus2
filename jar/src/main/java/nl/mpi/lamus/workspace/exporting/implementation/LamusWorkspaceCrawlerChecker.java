@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     
-    private static Logger logger = LoggerFactory.getLogger(LamusWorkspaceCrawlerChecker.class);
+    private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceCrawlerChecker.class);
 
     private final WorkspaceDao workspaceDao;
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
@@ -133,17 +133,12 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
             
             logger.debug("Triggering access rigths recalculation for workspace " + workspace.getWorkspaceID());
             
-//            amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
-            
             if(!nodeReplacements.isEmpty()) {
-//                amsBridge.triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, workspace.getTopNodeArchiveURI());
                 amsBridge.triggerAccessRightsRecalculationWithVersionedNodes(workspace.getTopNodeArchiveURI(), nodeReplacements);
             } else {
                 amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
             }
         }
-        
-        //TODO some more details about the situation (especially in case of failure)
         
         logger.debug("Sending email to owner of workspace " + workspace.getWorkspaceID());
         

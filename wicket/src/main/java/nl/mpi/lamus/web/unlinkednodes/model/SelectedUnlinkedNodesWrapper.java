@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  */
 public class SelectedUnlinkedNodesWrapper {
     
-    private Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
+    private final Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
     
     public SelectedUnlinkedNodesWrapper(Collection<WorkspaceTreeNode> nodes) {
         this.selectedUnlinkedNodes = nodes;

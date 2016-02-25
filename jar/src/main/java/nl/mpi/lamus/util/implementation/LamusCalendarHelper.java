@@ -21,13 +21,15 @@ import nl.mpi.lamus.util.CalendarHelper;
 import org.springframework.stereotype.Component;
 
 /**
- * Utility class used to improve testability of operations involving Calendar and Date.
- * 
+ * @see CalendarHelper
  * @author guisil
  */
 @Component
 public class LamusCalendarHelper implements CalendarHelper {
 
+    /**
+     * @see CalendarHelper#getCalendarInstance()
+     */
     @Override
     public Calendar getCalendarInstance() {
         return Calendar.getInstance();

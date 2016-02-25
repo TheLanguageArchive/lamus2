@@ -81,7 +81,6 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         
         mockTreeModelProviderBean = new LinkedTreeModelProvider(mockArchiveRootNode());
         
-        //TODO expected calls to the mocks ...
         when(mockWorkspaceServiceBean.createWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, expectedSelectedNode.getNodeURI())).thenReturn(mockWorkspace);
         when(mockPagesProviderBean.getWorkspacePage(mockWorkspace)).thenReturn(mockWorkspacePage);
         
@@ -101,7 +100,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         
     }
     
-    
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -117,45 +116,20 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertComponent("archiveTree", ArchiveTreePanel.class);
         getTester().assertEnabled("archiveTree");
         
-//        getTester().assertComponent("formContainer", WebMarkupContainer.class);
-//        getTester().assertEnabled("formContainer");
-        
         getTester().assertComponent("nodeIdForm", Form.class);
         getTester().assertEnabled("nodeIdForm");
 
         getTester().assertComponent("nodeIdForm:name", Label.class);
         getTester().assertEnabled("nodeIdForm:name");
-        getTester().assertLabel("nodeIdForm:name", ""); //TODO test when node selection changes
+        getTester().assertLabel("nodeIdForm:name", "");
         
         getTester().assertComponent("nodeIdForm:nodeURI", Label.class);
         getTester().assertEnabled("nodeIdForm:nodeURI");
-        getTester().assertLabel("nodeIdForm:nodeURI", ""); //TODO test when node selection changes
+        getTester().assertLabel("nodeIdForm:nodeURI", "");
         
         getTester().assertComponent("nodeIdForm:createWorkspace", AjaxButton.class);
         getTester().assertDisabled("nodeIdForm:createWorkspace"); //initially disabled
-        
-        
-        //TODO other tests
     }
-    
-    @Test
-    @DirtiesContext
-    public void changeSelectedNode() {
-        
-//        ArchiveTreePanel treePanel =
-//                (ArchiveTreePanel) getTester().getComponentFromLastRenderedPage("archiveTree");
-//        Tree tree = treePanel.getTree();
-//        tree.getTreeState().selectNode(mockArchiveRootNode, true);
-        
-//        getTester().assertLabel("formContainer:nodeIdForm:name", mockArchiveRootNodeName);
-//        getTester().assertLabel("formContainer:nodeIdForm:nodeURI", mockArchiveRootNodeURI.toString());
-        
-        
-        
-        //TODO How to trigger the "node selection" event in the tree?
-    }
-    
-    
     
     @Test
     @DirtiesContext
@@ -174,12 +148,7 @@ public class CreateWorkspacePageTest extends AbstractLamusWicketTest {
         verify(mockPagesProviderBean).getWorkspacePage(mockWorkspace);
 
         getTester().assertRenderedPage(WorkspacePage.class);
-        
-        
-        //TODO Trigger the form submission on the SELECTED node and create a workspace based on that node
     }
-    
-    //TODO test exceptions thrown
     
     
     private LinkedTreeNode mockArchiveRootNode() throws URISyntaxException {

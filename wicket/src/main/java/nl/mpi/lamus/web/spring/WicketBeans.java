@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- *
+ * Wicket application related beans.
  * @author guisil
  */
 @Configuration

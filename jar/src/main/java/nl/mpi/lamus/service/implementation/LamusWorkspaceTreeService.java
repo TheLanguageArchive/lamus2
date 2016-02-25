@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Service
 public class LamusWorkspaceTreeService extends LamusWorkspaceService implements WorkspaceTreeService {
@@ -54,7 +54,7 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
     }
     
     /**
-     * @see WorkspaceTreeService#getTreeNode(int, int)
+     * @see WorkspaceTreeService#getTreeNode(int, nl.mpi.lamus.workspace.tree.WorkspaceTreeNode)
      */
     @Override
     public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentTreeNode)
@@ -82,8 +82,6 @@ public class LamusWorkspaceTreeService extends LamusWorkspaceService implements 
         List<WorkspaceTreeNode> treeNodes = new ArrayList<>();
         
         for(WorkspaceNode node : nodes) {
-            
-            //TODO assume null parent... should it be changed in this case?
             treeNodes.add(new LamusWorkspaceTreeNode(node, null, workspaceDao));
         }
         

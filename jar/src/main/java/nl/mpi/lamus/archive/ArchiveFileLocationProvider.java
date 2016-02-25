@@ -24,7 +24,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 /**
  * Interface providing methods that deal with the location of files in the archive.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface ArchiveFileLocationProvider {
     
@@ -75,7 +75,7 @@ public interface ArchiveFileLocationProvider {
     /**
      * finds the physical place of a directory in the archive
      * where orphans (unlinked files) are/should be stored
-     * @param topNodeURL the archive-URL of the topNode of the workspace
+     * @param topNodeLocation the archive-URL of the topNode of the workspace
      * @return the directory where orphans are/should be stored (when it doesn't exist it is not created)
      */
     public File getOrphansDirectory(URI topNodeLocation);

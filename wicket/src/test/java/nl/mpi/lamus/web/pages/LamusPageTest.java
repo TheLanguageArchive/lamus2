@@ -17,7 +17,6 @@
 package nl.mpi.lamus.web.pages;
 
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
-import nl.mpi.lamus.web.components.ExpandableFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -30,8 +29,8 @@ import org.springframework.test.annotation.DirtiesContext;
  */
 public class LamusPageTest extends AbstractLamusWicketTest {
     
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/manualUrl";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/manualUrl";
     
     @Override
     protected void setUpTest() {
@@ -48,6 +47,7 @@ public class LamusPageTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -76,18 +76,5 @@ public class LamusPageTest extends AbstractLamusWicketTest {
         
         getTester().assertComponent("feedbackPanel", FeedbackPanel.class);
         getTester().assertEnabled("feedbackPanel");
-//        getTester().assertComponent("expandablePanel", ExpandableFeedbackPanel.class);
-//        getTester().assertEnabled("expandablePanel");
-//        getTester().assertComponent("expandablePanel:feedbackPanel", FeedbackPanel.class);
-//        getTester().assertEnabled("expandablePanel:feedbackPanel");
     }
-    
-    @Test
-    @DirtiesContext
-    public void headRendersSuccessfully() {
-        
-        //TODO test head content?
-//        fail("not tested yet");
-    }
-
 }

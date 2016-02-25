@@ -27,8 +27,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @see Workspace
+ * @author guisil
  */
 public class LamusWorkspace implements Workspace {
     
@@ -47,13 +47,7 @@ public class LamusWorkspace implements Workspace {
     private String message;
     private String crawlerID;
     
-    /**
-     * Constructor to be used when creating a new workspace.
-     * 
-     * @param userID
-     * @param usedStorageSpace
-     * @param maxStorageSpace 
-     */
+    
     public LamusWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
         this.userID = userID;
         this.usedStorageSpace = usedStorageSpace;
@@ -64,27 +58,8 @@ public class LamusWorkspace implements Workspace {
         this.status = WorkspaceStatus.UNINITIALISED;
         this.message = "Workspace uninitialised";
         this.crawlerID = "";
-        //TODO Change message, move to properties file
     }
     
-    /**
-     * Constructor to be used when loading a workspace from the database.
-     * 
-     * @param workspaceID
-     * @param userID
-     * @param topNodeID
-     * @param topNodeArchiveURI
-     * @param topNodeArchiveURL
-     * @param startDate
-     * @param endDate
-     * @param sessionStartDate
-     * @param sessionEndDate
-     * @param usedStorageSpace
-     * @param maxStorageSpace
-     * @param status
-     * @param message
-     * @param crawlerID 
-     */
     public LamusWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String crawlerID) {
@@ -111,6 +86,7 @@ public class LamusWorkspace implements Workspace {
         this.message = message;
         this.crawlerID = crawlerID;
     }
+    
     
     @Override
     public int getWorkspaceID() {
@@ -314,21 +290,18 @@ public class LamusWorkspace implements Workspace {
     public void setStatusMessageInitialising() {
         setStatus(WorkspaceStatus.INITIALISING);
         setMessage("Workspace initialising");
-        //TODO Change message, move to properties file
     }
 
     @Override
     public void setStatusMessageErrorDuringInitialisation() {
         setStatus(WorkspaceStatus.ERROR_INITIALISATION);
         setMessage("Error during initialisation");
-        //TODO Change message, move to properties file
     }
     
     @Override
     public void setStatusMessageInitialised() {
         setStatus(WorkspaceStatus.INITIALISED);
         setMessage("Workspace successfully initialised");
-        //TODO Change message, move to properties file
     }
 
     @Override

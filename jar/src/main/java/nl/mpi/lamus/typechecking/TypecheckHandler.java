@@ -21,7 +21,7 @@ import java.net.URL;
 
 /**
  * Interface that provides a bridge to interact with the typechecker.
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface TypecheckHandler {
     

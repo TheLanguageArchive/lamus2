@@ -26,7 +26,7 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.exception.WorkspaceFilesystemException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -40,7 +40,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {LamusFilesystemTestProperties.class, LamusFilesystemTestBeans.class},
@@ -171,8 +171,6 @@ public class LamusWorkspaceDirectoryHandlerTest {
         assertFalse("Workspace inner directory wasn't deleted", innerDirectory.exists());
         assertFalse("Workspace directory wasn't deleted", workspaceDirectory.exists());
     }
-    
-    //TODO add more tests to the deleteWorkspaceDirectory method
     
     @Test
     public void workspaceDirectoryExists() {
@@ -312,7 +310,7 @@ public class LamusWorkspaceDirectoryHandlerTest {
         
         assertDisallowedPathException(".svn", ".svn");
         
-        assertDisallowedPathException("DesktopFolderDB", "DesktopFolderDB");;
+        assertDisallowedPathException("DesktopFolderDB", "DesktopFolderDB");
         
         assertDisallowedPathException("temp", "temp");
         

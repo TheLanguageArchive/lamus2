@@ -95,10 +95,6 @@ public class ResourceNodeReplaceChecker implements NodeReplaceChecker {
                 replaceActionManager.addActionToList(replaceActionFactory.getUnlinkAction(newNode, parentNode), actions);
                 replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(newNode), actions);
                 replaceActionManager.addActionToList(replaceActionFactory.getLinkAction(oldNode, parentNode), actions);
-            } else {
-                
-                
-                //TODO do nothing? add some action? DELETE action?
             }
         }
     }

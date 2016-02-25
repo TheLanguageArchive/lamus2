@@ -21,7 +21,7 @@ import nl.mpi.lamus.exception.TypeCheckerException;
 /**
  * Class used to retrieved and analyse the results from the typechecker.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface FileTypeHandler {
     
@@ -38,9 +38,9 @@ public interface FileTypeHandler {
      * Checks if the resource is archivable by comparing a given acceptable judgement
      * for the archive location where it would be archived and the previously typecheck results.
      * @param typecheckedResults Result of the typecheck to compare with the acceptable judgement
-     * @param acceptableJudgementForNode Acceptable judgement for the archive location
+     * @param acceptableJudgementForCorpus Acceptable judgement for the archive location
      * @param message Message to be built according to the results of the method
      * @return true if the judgement for the given resource is within the acceptable values
      */
-    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, TypecheckerJudgement acceptableJudgementForNode, StringBuilder message);
+    public boolean isCheckedResourceArchivable(TypecheckedResults typecheckedResults, TypecheckerJudgement acceptableJudgementForCorpus, StringBuilder message);
 }

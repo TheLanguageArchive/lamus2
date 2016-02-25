@@ -35,6 +35,7 @@ public interface NodeReplaceExplorer {
      * 
      * @param oldNode node to be replaced
      * @param newNode new version od the node
+     * @param actions List where the actions to be performed should be added
      */
     public void exploreReplace(WorkspaceNode oldNode, WorkspaceNode newNode, List<NodeReplaceAction> actions)
             throws ProtectedNodeException, IncompatibleNodesException;

@@ -34,7 +34,11 @@ public class FeedbackPanelAwarePanel<T extends Object> extends GenericPanel<T> {
         super(id, model);
         this.feedbackPanel = feedbackPanel;
     }
-    
+
+    /**
+     * Retrieves the feedback panel.
+     * @return the FeedbackPanel instance of the page
+     */
     protected FeedbackPanel getFeedbackPanel() {
         return this.feedbackPanel;
     }

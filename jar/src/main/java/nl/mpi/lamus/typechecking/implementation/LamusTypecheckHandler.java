@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusTypecheckHandler implements TypecheckHandler {

@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.exception;
 
-import nl.mpi.lamus.exception.WorkspaceImportException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

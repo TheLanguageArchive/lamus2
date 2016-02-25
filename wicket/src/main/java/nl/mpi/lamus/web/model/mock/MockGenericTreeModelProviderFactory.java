@@ -31,5 +31,4 @@ public class MockGenericTreeModelProviderFactory extends WorkspaceTreeModelProvi
     public LinkedTreeModelProvider createTreeModelProvider(WorkspaceTreeNode rootNode) {
         return new WorkspaceTreeModelProvider(rootNode);
     }
-    
 }

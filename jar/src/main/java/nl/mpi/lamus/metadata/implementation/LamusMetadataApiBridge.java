@@ -193,8 +193,6 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     @Override
     public boolean isMetadataFileValid(URL fileURL) {
         
-//        logger.debug("Validating metadata file [" + fileURL + "]");
-        
         MetadataDocument document;
         try {
             document = metadataAPI.getMetadataDocument(fileURL);

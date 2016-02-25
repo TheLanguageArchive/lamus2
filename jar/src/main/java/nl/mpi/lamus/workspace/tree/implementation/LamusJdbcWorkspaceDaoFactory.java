@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceDaoFactory
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusJdbcWorkspaceDaoFactory implements WorkspaceDaoFactory {

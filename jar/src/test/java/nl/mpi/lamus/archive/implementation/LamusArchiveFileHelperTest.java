@@ -51,7 +51,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Checksum.class})
@@ -349,8 +349,6 @@ public class LamusArchiveFileHelperTest {
         assertEquals("Retrieved file different from expected", expectedFile, retrievedFile);
     }
     
-    
-    //TODO Does it make sense to have this 10000 sufix limit? How likely is it to happen?
     @Test
     public void getFinalFileExistingAllNames() throws IOException {
         
@@ -367,8 +365,6 @@ public class LamusArchiveFileHelperTest {
         }
         
         File retrievedFile = testArchiveFileHelper.getFinalFile(existingTempDirectory, fileName);
-        
-        //TODO Some Exception instead?
         
         assertNull("Retrieved file should be null when all suffixes exist already", retrievedFile);
     }

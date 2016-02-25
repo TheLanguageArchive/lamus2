@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceFactory
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceFactory implements WorkspaceFactory {

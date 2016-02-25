@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter {
     
-    private static Logger logger = LoggerFactory.getLogger(LamusMetadataValidationHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(LamusMetadataValidationHandler.class);
     
     private final int workspaceID;
     
@@ -39,6 +39,9 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
         this.workspaceID = workspaceID;
     }
     
+    /**
+     * @see CMDIValidationHandlerAdapter#onValidationReport(eu.clarin.cmdi.validator.CMDIValidationReport)
+     */
     @Override
     public void onValidationReport(final CMDIValidationReport report)
             throws CMDIValidatorException {
@@ -85,7 +88,8 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
             throw new CMDIValidatorException("unexpected severity: " +
                     report.getHighestSeverity());
         } // switch
-        if (skip>0)
+        if (skip>0) {
             logger.warn("WRN: skipped ["+skip+"] warnings due to lax validation of foreign namespaces");
+        }
     }
 }

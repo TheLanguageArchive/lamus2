@@ -21,8 +21,8 @@ import java.net.URL;
 import java.util.Date;
 
 /**
- * A Lamus workspace. Since this extends {@link Serializable}, <em>all implementations should be serializable!</em>
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Represents a workspace.
+ * @author guisil
  */
 public interface Workspace extends Serializable {
     

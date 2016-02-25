@@ -425,6 +425,4 @@ public class ResourceNodeReplaceCheckerTest {
         
         nodeReplaceChecker.decideReplaceActions(mockOldNode, mockNewNode, mockParentNode, newNodeAlreadyLinked, actions);
     }
-    
-    //TODO other tests
 }

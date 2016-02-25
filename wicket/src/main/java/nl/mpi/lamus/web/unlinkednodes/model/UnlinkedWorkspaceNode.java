@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import nl.mpi.lamus.workspace.tree.implementation.LamusWorkspaceTreeNode;
 
 /**
- *
+ * Representation of an unlinked node to be used in the unlinked nodes tree.
  * @author guisil
  */
 public class UnlinkedWorkspaceNode extends LamusWorkspaceTreeNode {

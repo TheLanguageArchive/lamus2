@@ -117,8 +117,6 @@ public class SelectWorkspacePage extends LamusPage {
                     if(form.getModelObject() != null) {
                         Workspace openSelectedWorkspace = workspaceService.openWorkspace(currentUserId, ((Workspace)form.getModelObject()).getWorkspaceID());
                         setResponsePage(pagesProvider.getWorkspacePage(openSelectedWorkspace));
-                    } else {
-                        //TODO MESSAGE IN FEEDBACK PANEL?
                     }
                 } catch (WorkspaceNotFoundException | WorkspaceAccessException | IOException ex) {
                     Session.get().error(ex.getMessage());

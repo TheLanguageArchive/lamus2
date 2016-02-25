@@ -19,11 +19,15 @@ package nl.mpi.lamus.util;
 import java.util.Calendar;
 
 /**
- *
+ * Used to improve testability of operations involving Calendar and Date.
  * @author guisil
  */
 public interface CalendarHelper {
     
+    /**
+     * Returns an instance of Calendar.
+     * @return Calendar instance
+     */
     public Calendar getCalendarInstance();
     
 }

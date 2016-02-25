@@ -42,7 +42,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusArchiveFileLocationProviderTest {
     
@@ -115,13 +115,6 @@ public class LamusArchiveFileLocationProviderTest {
             oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile);
-            
-        
-        //correct path element
-        
-        //if filename in that path already exists, rename it (_0001?) until filename is new (up to count = 10000 ??)
-        
-        //create directories if necessary, and empty file
         }});
         
         File retrievedFile = archiveFileLocationProvider.getAvailableFile(parentPath, parentCorpusNamePathToClosestTopNode, mockNode, filenameAttempt);
@@ -149,13 +142,6 @@ public class LamusArchiveFileLocationProviderTest {
             oneOf(mockArchiveFileHelper).getDirectoryForNode(parentPath, parentCorpusNamePathToClosestTopNode, mockNode); will(returnValue(baseDirectoryForFileType));
             oneOf(mockArchiveFileHelper).getFinalFile(baseDirectoryForFileTypeFile, filenameAttempt); will(returnValue(mockFile));
             oneOf(mockArchiveFileHelper).createFileAndDirectories(mockFile); will(throwException(ioException));
-            
-        
-        //correct path element
-        
-        //if filename in that path already exists, rename it (_0001?) until filename is new (up to count = 10000 ??)
-        
-        //create directories if necessary, and empty file
         }});
         
         try {
@@ -244,7 +230,7 @@ public class LamusArchiveFileLocationProviderTest {
     }
     
     @Test
-    public void getHttpUriContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
+    public void getHttpUriContainingDifferentRoot() throws URISyntaxException {
         
         String fileAbsolutePath = "https://alternative/root/anotherFolder/file.cmdi";
         URI initialLocation = new URI(fileAbsolutePath);
@@ -292,7 +278,7 @@ public class LamusArchiveFileLocationProviderTest {
     }
     
     @Test
-    public void getLocalUriContainingDifferentRoot() throws URISyntaxException { //TODO Just return the same file? Or throw some error? What could cause this?
+    public void getLocalUriContainingDifferentRoot() throws URISyntaxException {
         
         String fileAbsolutePath = "http://alternative/root/anotherFolder/file.cmdi";
         URI initialLocation = new URI(fileAbsolutePath);

@@ -106,7 +106,6 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
                     metadataApiBridge.removeSelfHandleAndSaveDocument(entry.getKey(), entry.getValue().getWorkspaceURL());
                 } catch (IOException | TransformerException | MetadataException ex) {
                     logger.error("Invalid self-handle could not be removed from document " + entry.getValue().getWorkspaceURL(), ex);
-                    continue;
                 }
             }
         }

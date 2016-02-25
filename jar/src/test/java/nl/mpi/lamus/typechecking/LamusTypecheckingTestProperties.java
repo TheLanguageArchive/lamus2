@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.typechecking;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.Profile;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @Profile("testing")
@@ -35,7 +34,7 @@ public class LamusTypecheckingTestProperties {
     @Qualifier("customTypecheckerFolderToConfigFileMap")
     public Map<String, String> customTypecheckerFolderToConfigFileMap() {
         
-        Map<String, String> mapToReturn = new HashMap<String, String>();
+        Map<String, String> mapToReturn = new HashMap<>();
         mapToReturn.put("folder1", "config_file1");
         mapToReturn.put("folder2", "config_file2");
         mapToReturn.put("folder3", "config_file3");

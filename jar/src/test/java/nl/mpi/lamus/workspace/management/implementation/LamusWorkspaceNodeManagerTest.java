@@ -449,7 +449,4 @@ public class LamusWorkspaceNodeManagerTest {
         
         workspaceNodeManager.deleteNodesRecursively(mockNode);
     }
-    
-    
-    //TODO ERRORS / EXCEPTIONS
 }

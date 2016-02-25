@@ -41,7 +41,7 @@ import nl.mpi.lamus.workspace.upload.implementation.ZipUploadResult;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceService {
     
@@ -98,6 +98,7 @@ public interface WorkspaceService {
      * Opens a workspace, retrieving the corresponding object from the database.
      * While doing so, it also updates the session start date of the workspace.
      * 
+     * @param userID ID of the user
      * @param workspaceID ID of the workspace to open
      * @return Retrieved workspace object
      */

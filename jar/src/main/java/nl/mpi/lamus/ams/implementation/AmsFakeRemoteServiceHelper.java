@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Helper class for the AMS service implementation.
  * @author guisil
  */
 @Component
@@ -69,7 +69,12 @@ public class AmsFakeRemoteServiceHelper {
     @Qualifier("authRecalcParam")
     private String authRecalcParam;
     
-    
+
+    /**
+     * Given a node URI, retrieves the corresponding node ID.
+     * @param nodeURIs node URI
+     * @return node ID, as a string
+     */
     public String getTargetNodeIDsAsString(Collection<URI> nodeURIs) {
         
         StringBuilder targetNodeIDs = new StringBuilder();
@@ -85,6 +90,16 @@ public class AmsFakeRemoteServiceHelper {
         return targetNodeIDs.toString();
     }
     
+    /**
+     * Retrieves the appropriate URL to trigger the AMS recalculation.
+     * @param triggerCorpusStructureTranscription true if transcription of the
+     *  access rights to the corpusstructure database should take place
+     * @param triggerWebServerTranscription true if the transcription of the
+     *  access rights to the apache htaccess should take place
+     * @param targetNodeIDs string containing the node IDs for which the
+     *  recalculation should be triggered
+     * @return URL to be used to trigger the recalculation
+     */
     public MockableURL getRecalcUrl(boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription, String targetNodeIDs)
             throws UnsupportedEncodingException, MalformedURLException {
         
@@ -106,6 +121,10 @@ public class AmsFakeRemoteServiceHelper {
         return new MockableURL(new URL(urlToReturn.toString()));
     }
     
+    /**
+     * Triggers the AMS recalculation with the given URL.
+     * @param amsUrl URL to use to trigger the recalculation
+     */
     public void sendCallToAccessRightsManagementSystem(MockableURL amsUrl)
             throws IOException {
         
@@ -128,8 +147,9 @@ public class AmsFakeRemoteServiceHelper {
         } finally {
             reader.close();
         }
-        if (servletConnection instanceof HttpURLConnection)
+        if (servletConnection instanceof HttpURLConnection) {
             ((HttpURLConnection)servletConnection).disconnect();
+        }
         logger.info(reply.toString());
     }
 }

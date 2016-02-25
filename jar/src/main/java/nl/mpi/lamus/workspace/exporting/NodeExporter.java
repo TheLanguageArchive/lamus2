@@ -24,7 +24,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 /**
  * Generic interface for a node exporter.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface NodeExporter {
     

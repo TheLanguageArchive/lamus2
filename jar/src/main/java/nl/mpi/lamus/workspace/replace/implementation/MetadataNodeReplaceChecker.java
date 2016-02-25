@@ -67,7 +67,6 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
         // if the node to replace is the top node of the workspace, the replace action should not go ahead
         if(parentNode == null) {
             
-            //TODO If the oldNode is the top node of the workspace, its compatibility with the new node should be checked (same archive handle and filename)
             if(workspaceDao.isTopNodeOfWorkspace(oldNode.getWorkspaceID(), oldNode.getWorkspaceNodeID())) {
                 ensureWsTopNodesAreCompatible(oldNode, newNode);
             } else {
@@ -106,9 +105,6 @@ public class MetadataNodeReplaceChecker implements NodeReplaceChecker {
             replaceActionManager.addActionToList(replaceActionFactory.getDeleteAction(oldNode), actions);
             replaceActionManager.addActionToList(replaceActionFactory.getLinkAction(newNode, parentNode), actions);
         }
-        
-
-        //TODO CHECK CIRCULAR LINKS
         
         nodeReplaceExplorer.exploreReplace(oldNode, newNode, actions);
     }

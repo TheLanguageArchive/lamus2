@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.actions.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
@@ -29,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * @see WsNodeActionsProvider
  * @author guisil
  */
 @Component
@@ -92,6 +93,9 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
         emptyActions = new ArrayList<>();
     }
     
+    /**
+     * @see WsNodeActionsProvider#getActions(java.util.Collection)
+     */
     @Override
     public List<WsTreeNodesAction> getActions(Collection<WorkspaceTreeNode> nodes) {
         
@@ -101,29 +105,29 @@ public class LamusWsNodeActionsProvider implements WsNodeActionsProvider {
             WorkspaceTreeNode next = nodes.iterator().next();
             
             if(next.isTopNodeOfWorkspace()) {
-                return topNodeActions;
+                return Collections.unmodifiableList(topNodeActions);
             } else if(next.isProtected()) {
-                return protectedActions;
+                return Collections.unmodifiableList(protectedActions);
             } else if(next.isExternal()) {
-                return externalActions;
+                return Collections.unmodifiableList(externalActions);
             } else if(!nodeUtil.isNodeMetadata(next)) {
-                return resourcesActions;
+                return Collections.unmodifiableList(resourcesActions);
             } else {
                 CmdiProfile nextProfile = allowedCmdiProfiles.getProfile(next.getProfileSchemaURI().toString());
                 if(nodeUtil.isProfileLatCorpusOrSession(nextProfile)) {
-                    return latMetadataActions;
+                    return Collections.unmodifiableList(latMetadataActions);
                 }
-                return metadataActions;
+                return Collections.unmodifiableList(metadataActions);
             }
         } else {
             
             for(WorkspaceTreeNode node : nodes) {
                 if(node.isTopNodeOfWorkspace()) {
-                    return emptyActions;
+                    return Collections.unmodifiableList(emptyActions);
                 }
             }
             
-            return multipleNodesActions;
+            return Collections.unmodifiableList(multipleNodesActions);
         }
     }
     

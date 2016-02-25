@@ -40,9 +40,9 @@ public class LamusMailHelper implements MailHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusMailHelper.class);
 
-    private String mailServer;
-    private String mailFromAddress;
-    private String mailBccAddress;
+    private final String mailServer;
+    private final String mailFromAddress;
+    private final String mailBccAddress;
     
     @Autowired
     public LamusMailHelper(

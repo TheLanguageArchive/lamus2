@@ -33,17 +33,25 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+/**
+ * Implementation of WebApplication for the LAMUS Wicket based UI.
+ * @see WebApplication
+ * @author guisil
+ */
 public class LamusWicketApplication extends WebApplication implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
     
     @SpringBean
-    private LamusSessionFactory lamusSessionFactory;
+    private final LamusSessionFactory lamusSessionFactory;
 
     public LamusWicketApplication(LamusSessionFactory sessionFactory) {
 	this.lamusSessionFactory = sessionFactory;
     }
 
+    /**
+     * @see WebApplication#getHomePage()
+     */
     @Override
     public Class getHomePage() {
         
@@ -54,6 +62,9 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         }
     }
 
+    /**
+     * @see WebApplication#init()
+     */
     @Override
     protected void init() {
 	super.init();	
@@ -75,11 +86,17 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         getSharedResources().add("clarinInvertedImage", clarinInvertedImageReference.getResource());
     }
 
+    /**
+     * @see WebApplication#newSession(org.apache.wicket.request.Request, org.apache.wicket.request.Response)
+     */
     @Override
     public LamusSession newSession(Request request, Response response) {
 	return lamusSessionFactory.createSession(this, request, response);
     }
     
+    /**
+     * @see ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
+     */
     @Override
     public void setApplicationContext(ApplicationContext ac) throws BeansException {
         this.applicationContext = ac;

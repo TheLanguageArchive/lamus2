@@ -19,7 +19,7 @@ package nl.mpi.lamus.web.unlinkednodes.providers;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 
 /**
- *
+ * Factory for the unlinked nodes model provider.
  * @author guisil
  */
 public class UnlinkedNodesModelProviderFactory {
@@ -32,5 +32,4 @@ public class UnlinkedNodesModelProviderFactory {
     public UnlinkedNodesModelProvider createTreeModelProvider(WorkspaceTreeService workspaceService, int workspaceID) {
         return new UnlinkedNodesModelProvider(workspaceService, workspaceID);
     }
-    
 }

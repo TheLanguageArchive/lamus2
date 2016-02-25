@@ -22,7 +22,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
+ * @see WorkspaceReplacedNodeUrlUpdate
  * @author guisil
  */
 public class LamusWorkspaceReplacedNodeUrlUpdate implements WorkspaceReplacedNodeUrlUpdate {
@@ -48,6 +48,7 @@ public class LamusWorkspaceReplacedNodeUrlUpdate implements WorkspaceReplacedNod
         this.updateError = updateError;
     }
    
+    
     @Override
     public URI getNodeUri() {
         return nodeUri;

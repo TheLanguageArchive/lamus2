@@ -18,43 +18,18 @@ package nl.mpi.lamus.web.pages;
 
 import java.util.Collection;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
-import nl.mpi.lamus.web.LamusWicketApplication;
 import nl.mpi.lamus.web.pages.providers.LamusWicketPagesProvider;
-import nl.mpi.lamus.web.spring.LamusWicketApplicationTestBeans;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.util.tester.WicketTester;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
  * @author guisil
  */
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(
-//        classes = LamusWicketApplicationTestBeans.class,
-//        loader = AnnotationConfigContextLoader.class)
-//@ActiveProfiles("testing")
 public class IndexPageTest extends AbstractLamusWicketTest {
-    
-//    private WicketTester tester;
-//    
-//    @Autowired
-//    private LamusWicketApplication lamusWicketApplication;
-    
     
     private IndexPage indexPage;
     
@@ -63,8 +38,8 @@ public class IndexPageTest extends AbstractLamusWicketTest {
     @Mock private CreateWorkspacePage mockCreateWorkspacePage;
     @Mock private SelectWorkspacePage mockSelectWorkspacePage;
     @Mock private Collection<String> mockManagerUsers;
-    private String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
-    private String mockManualUrl = "http://test.mpi.nl/lamus/manual";
+    private final String mockRegisterUrl = "https://test.mpi.nl/registerUrl";
+    private final String mockManualUrl = "http://test.mpi.nl/lamus/manual";
     
     
     @Override
@@ -89,6 +64,7 @@ public class IndexPageTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
 
     @Test
     @DirtiesContext
@@ -96,44 +72,4 @@ public class IndexPageTest extends AbstractLamusWicketTest {
         
         getTester().assertRenderedPage(IndexPage.class);
     }
-    
-//    @Test
-//    @DirtiesContext
-//    public void linksRenderSuccessfully() {
-//        
-//        getTester().assertComponent("createWorkspaceLink", Link.class);
-//        getTester().assertEnabled("createWorkspaceLink");
-//        
-//        getTester().assertComponent("selectWorkspaceLink", Link.class);
-//        getTester().assertEnabled("selectWorkspaceLink");
-//        
-//        getTester().assertComponent("requestStorageSpaceLink", Link.class);
-//        getTester().assertEnabled("requestStorageSpaceLink");
-//    }
-//    
-//    @Test
-//    @DirtiesContext
-//    public void createWorkspaceLinkClick() {
-//        
-//        getTester().clickLink("createWorkspaceLink");
-//        
-//        verify(mockPagesProviderBean).getCreateWorkspacePage();
-//        
-//        getTester().assertRenderedPage(CreateWorkspacePage.class);
-//    }
-//    
-//    @Test
-//    @DirtiesContext
-//    public void selectWorkspaceLinkClick() {
-//        
-//        getTester().clickLink("selectWorkspaceLink");
-//        
-//        verify(mockPagesProviderBean).getSelectWorkspacePage();
-//        
-//        getTester().assertRenderedPage(SelectWorkspacePage.class);
-//    }
-    
-    //TODO test other links
-
-
 }

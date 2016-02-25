@@ -23,8 +23,9 @@ import org.apache.wicket.model.IDetachable;
 import org.apache.wicket.model.IModel;
 
 /**
- *
- * based on the example class from Wicket
+ * Content to be used as base in the unlinked nodes tree.
+ * 
+ * Based on the example class from Wicket
  * @author Sven Meier
  */
 public abstract class Content implements IDetachable {
@@ -36,6 +37,10 @@ public abstract class Content implements IDetachable {
     public abstract Component newContentComponent(String id, AbstractTree<WorkspaceTreeNode> tree,
             IModel<WorkspaceTreeNode> model);
     
+    
+    /**
+     * @see IDetachable#detach()
+     */
     @Override
     public void detach() {
         

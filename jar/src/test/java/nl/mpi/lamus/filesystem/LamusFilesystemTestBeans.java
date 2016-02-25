@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Profile;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @ComponentScan(basePackages = {"nl.mpi.lamus.filesystem"})

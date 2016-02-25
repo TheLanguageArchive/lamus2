@@ -22,7 +22,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 /**
  * Factory for node exporters.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface NodeExporterFactory {
     

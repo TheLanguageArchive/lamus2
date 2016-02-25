@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Profile;
  * Configuration class containing some beans related with databases. To be used
  * in production, connecting to the real databases.
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @Profile(value = {"production", "demoserver"})

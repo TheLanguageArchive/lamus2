@@ -20,7 +20,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 /**
  * Factory for WorkspaceNodeLink objects.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceNodeLinkFactory {
     

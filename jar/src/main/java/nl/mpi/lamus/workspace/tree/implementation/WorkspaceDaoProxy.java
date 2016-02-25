@@ -39,7 +39,7 @@ import org.springframework.stereotype.Repository;
  * to get the appropriate DAO object.
  * @see WorkspaceDao
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Repository
 public class WorkspaceDaoProxy implements WorkspaceDao, Serializable {

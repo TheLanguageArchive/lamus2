@@ -43,13 +43,13 @@ public class WorkspaceInfoPanelTest extends AbstractLamusWicketTest {
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
-    private MockWorkspace mockWorkspace = new MockWorkspace() {{
+    private final MockWorkspace mockWorkspace = new MockWorkspace() {{
         setUserID(AbstractLamusWicketTest.MOCK_USER_ID);
         setWorkspaceID(mockWorkspaceID);
         setStatus(WorkspaceStatus.INITIALISED);
         setTopNodeID(mockWorkspaceTopNodeID);
     }};
-    private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
     }};
@@ -73,6 +73,7 @@ public class WorkspaceInfoPanelTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext

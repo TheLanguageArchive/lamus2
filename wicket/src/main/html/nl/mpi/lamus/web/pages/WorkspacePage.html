@@ -20,47 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>Workspace</title>
-        <!--<link rel="stylesheet" type="text/css" href="style.css"/>-->
     </head>
     <body>
         <wicket:extend>
             <div wicket:id="buttonPanel" class="buttonPanel" />
-            
-            <!--<div id="nodeActionsPanelContainer">-->
-
-                
-                    <div id="wsNodeActionsPanel" wicket:id="wsNodeActionsPanel">[node actions panel]</div>
-                    
-                <!--<wicket:child />-->
-                
-            <!--</div>-->  
-            
+            <div id="wsNodeActionsPanel" wicket:id="wsNodeActionsPanel">[node actions panel]</div>
             <div class="treePanelContainer">
-                
-<!--                <table>
-                    <tr>
-                        <td wicket:id="workspaceInfoPanel">
-                        </td>
-                        <td wicket:id="nodeInfoPanel">
-                            <form wicket:id="nodeInfoForm">
-                                <p>Selected node: <span wicket:id="name">Node name</span></p>
-                                <p>Archive node URI: <span wicket:id="archiveURI">Archive node URI</span></p>
-                                <p>Archive node URL: <span wicket:id="archiveURL">Archive node URL</span></p>
-                                <p>Workspace ID: <span wicket:id="workspaceID">workspace Id</span></p>
-                                <p>Type: <span wicket:id="type">Type</span></p>
-                            </form>
-                        </td>
-                    </tr>
-                </table>-->
-                    
                 <div id="workspaceTree" wicket:id="workspaceTree" class="treePanel">[WORKSPACE TREE]</div>
-                
-<!--                <div id="nodeInfoPanel" wicket:id="nodeInfoPanel">[NODE INFO PANEL]</div>-->
-                
             </div>
             <div wicket:id="workspaceTabs" class="tabpanel">[tabbed panel]</div>
-            
-            
         </wicket:extend>
     </body>
 </html>

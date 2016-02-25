@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see NodeDataRetriever
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusNodeDataRetriever implements NodeDataRetriever {
@@ -48,7 +48,7 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
     private final FileTypeHandler fileTypeHandler;
-    private TypecheckerConfiguration typecheckerConfiguration;
+    private final TypecheckerConfiguration typecheckerConfiguration;
     private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
@@ -142,8 +142,6 @@ public class LamusNodeDataRetriever implements NodeDataRetriever {
         
         return fileTypeHandler.checkType(resourceFileUrl, resourceFilename);
     }
-    
-    //TODO TEST this method
     
     /**
      * @see NodeDataRetriever#verifyTypecheckedResults(java.io.File,

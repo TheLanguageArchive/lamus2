@@ -23,7 +23,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 /**
  * Handler for operations related with the lamus directories.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceDirectoryHandler {
     

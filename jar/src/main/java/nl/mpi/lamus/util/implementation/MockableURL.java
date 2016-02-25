@@ -23,21 +23,27 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
+ * Class used to help in the testability of methods involving URL instances.
  * @author guisil
  */
 public class MockableURL {
     
-    private URL url;
+    private final URL url;
     
     public MockableURL(URL url) {
         this.url = url;
     }
     
+    /**
+     * @see URL#openConnection()
+     */
     public URLConnection openConnection() throws IOException {
         return url.openConnection();
     }
     
+    /**
+     * @return URL field
+     */
     public URL getURL() {
         return url;
     }

@@ -52,7 +52,7 @@ import org.apache.wicket.model.util.CollectionModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Main page for the workspace activities.
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author guisil
  */
@@ -252,6 +252,9 @@ public class WorkspacePage extends LamusPage {
         }
     }
 
+    /**
+     * @see LamusPage#onEvent(org.apache.wicket.event.IEvent)
+     */
     @Override
     public void onEvent(IEvent<?> event) {
         

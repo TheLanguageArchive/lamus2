@@ -37,8 +37,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class LamusNodeReplaceManager implements NodeReplaceManager {
 
-    private NodeReplaceCheckerAssigner nodeReplaceCheckerFactory;
-    private ReplaceActionManager replaceActionManager;
+    private final NodeReplaceCheckerAssigner nodeReplaceCheckerFactory;
+    private final ReplaceActionManager replaceActionManager;
     
     @Autowired
     public LamusNodeReplaceManager(NodeReplaceCheckerAssigner nodeReplaceManagerFactory, ReplaceActionManager replaceActionManager) {

@@ -20,18 +20,19 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @see WorkspaceNodeLink
+ * @author guisil
  */
 public class LamusWorkspaceNodeLink implements WorkspaceNodeLink {
 
-    private int parentWorkspaceNodeID;
-    private int childWorkspaceNodeID;
+    private final int parentWorkspaceNodeID;
+    private final int childWorkspaceNodeID;
     
     public LamusWorkspaceNodeLink(int parentWorkspaceNodeID, int childWorkspaceNodeID) {
         this.parentWorkspaceNodeID = parentWorkspaceNodeID;
         this.childWorkspaceNodeID = childWorkspaceNodeID;
     }
+    
     
     @Override
     public int getParentWorkspaceNodeID() {

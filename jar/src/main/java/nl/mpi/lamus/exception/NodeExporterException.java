@@ -24,7 +24,7 @@ import nl.mpi.lamus.workspace.exporting.NodeExporter;
  */
 public class NodeExporterException extends WorkspaceException {
     
-    private Class<? extends NodeExporter> nodeExporterType;
+    private final Class<? extends NodeExporter> nodeExporterType;
     
     public NodeExporterException(String message, int workspaceID, Class<? extends NodeExporter> nodeExporterType,
             Throwable cause) {

@@ -53,9 +53,6 @@ public class LamusJerseyHelper implements JerseyHelper {
         JsonObject responseJsonObject = invocationBuilder.post(jsonObjectEntity, JsonObject.class);
         
         return responseJsonObject;
-        
-        
-        //TODO how to unit test this? most of these objects from javax.ws.rs cannot be mocked
     }
 
     /**

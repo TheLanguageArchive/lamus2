@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see NodeExporterFactory
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusNodeExporterFactory implements NodeExporterFactory {

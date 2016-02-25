@@ -21,16 +21,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import nl.mpi.lamus.dao.WorkspaceDao;
-import nl.mpi.lamus.exception.ProtectedNodeException;
-import nl.mpi.lamus.exception.WorkspaceAccessException;
-import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.web.AbstractLamusWicketTest;
 import nl.mpi.lamus.web.model.mock.MockWorkspaceTreeNode;
 import nl.mpi.lamus.workspace.actions.WsNodeActionsProvider;
 import nl.mpi.lamus.workspace.actions.WsTreeNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.DeleteNodesAction;
 import nl.mpi.lamus.workspace.actions.implementation.UnlinkNodesAction;
-import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceTreeService;
 import nl.mpi.lamus.web.unlinkednodes.providers.UnlinkedNodesModelProviderFactory;
 import nl.mpi.lamus.workspace.actions.implementation.LinkNodesAction;
@@ -82,12 +78,12 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         setName("topNode");
         setType(WorkspaceNodeType.METADATA);
     }};
-    private Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>() {{
+    private final Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>() {{
         add(mockWorkspaceNode);
     }};
     
     
-    private List<WsTreeNodesAction> expectedActionsList = new ArrayList<>();
+    private final List<WsTreeNodesAction> expectedActionsList = new ArrayList<>();
 
     private boolean refreshStuffCalled = false;
     
@@ -135,9 +131,7 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
         
     }
     
-    
-    //TODO FIX THESE TESTS
-    
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -164,30 +158,5 @@ public class WsNodeActionsPanelTest extends AbstractLamusWicketTest {
             }
             assertTrue("Number of buttons different from expected", i != 2);
         }
-    }
-    
-    @Test
-    @DirtiesContext
-    public void clickButton() throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException {
-        
-//        ListView<WsTreeNodesAction> nodesActionList = (ListView<WsTreeNodesAction>) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel:wsNodeActionsForm:wsNodeActions");
-//        Iterator<Component> listItems = nodesActionList.iterator();
-//
-//        ListItem<WsTreeNodesAction> item = (ListItem<WsTreeNodesAction>) listItems.next();
-//        Iterator<Component> itemButtons =  item.iterator();
-//            
-//        Component button = itemButtons.next();
-//        assertEquals("Not the expected button", "delete_node_action", (String) button.getDefaultModelObject());
-//        FormTester formTester = getTester().newFormTester("wsNodeActionsPanel:wsNodeActionsForm", false);
-//        formTester.submit(button);
-//        
-//        //for some reason the actual WorkspaceService object that is used in the call is not the same as expected
-//            // - something to do with the object proxy created by Mockito and passed on?
-//        verify(mockDeleteAction).setSelectedTreeNodes(selectedNodes);
-//        verify(mockDeleteAction).setSelectedUnlinkedNodes(any(Collection.class));
-//        verify(mockDeleteAction).execute(eq(AbstractLamusWicketTest.MOCK_USER_ID), any(WorkspaceService.class));
-//        assertTrue("refreshStuff not called", refreshStuffCalled);
-        
-        //TODO testing involving UI interactions and Ajax calls... maybe some other testing framework like Selenium should be used...
     }
 }

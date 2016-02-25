@@ -29,12 +29,8 @@ import nl.mpi.archiving.corpusstructure.provider.db.AccessInfoProviderImpl;
 import nl.mpi.archiving.corpusstructure.provider.db.CorpusStructureProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 
-//@Component
 public class CorpusStructureProviderFactoryImpl implements CorpusStructureProviderFactory, AccessInfoProviderFactory {
 
     private final static Logger logger = LoggerFactory.getLogger(CorpusStructureProviderFactoryImpl.class);
@@ -42,9 +38,7 @@ public class CorpusStructureProviderFactoryImpl implements CorpusStructureProvid
     private final ArchivePropertyDao archiveDao;
     private final CorpusStructureDao csDao;
 
-//    @Autowired
     public CorpusStructureProviderFactoryImpl(ArchiveObjectDao aoDao, ArchivePropertyDao archiveDao, CorpusStructureDao csDao) {
-//	logger.debug("Creating cs provider factory with {}, {}, {}", aoDao, archiveDao, csDao);
 	this.aoDao = aoDao;
 	this.archiveDao = archiveDao;
 	this.csDao = csDao;

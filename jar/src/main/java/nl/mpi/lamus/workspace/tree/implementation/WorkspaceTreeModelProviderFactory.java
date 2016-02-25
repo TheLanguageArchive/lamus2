@@ -22,12 +22,12 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 /**
  * @see GenericTreeModelProviderFactory
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceTreeModelProviderFactory implements GenericTreeModelProviderFactory<WorkspaceTreeNode> {
 
     /**
-     * @see GenericTreeModelProviderFactory#createTreeModelProvider(nl.mpi.archiving.tree.WorkspaceTreeNode)
+     * @see GenericTreeModelProviderFactory#createTreeModelProvider(nl.mpi.archiving.tree.GenericTreeNode)
      */
     @Override
     public LinkedTreeModelProvider createTreeModelProvider(WorkspaceTreeNode rootNode) {

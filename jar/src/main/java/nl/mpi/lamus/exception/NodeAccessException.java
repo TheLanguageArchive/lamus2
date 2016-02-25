@@ -24,7 +24,7 @@ import java.net.URI;
  */
 public class NodeAccessException extends Exception {
     
-    private URI nodeURI;
+    private final URI nodeURI;
     
     public NodeAccessException(String message, URI nodeURI, Throwable cause) {
         super(message, cause);

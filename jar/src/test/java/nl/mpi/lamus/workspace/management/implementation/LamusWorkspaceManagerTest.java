@@ -64,7 +64,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceManagerTest {
     
@@ -531,7 +531,6 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspace).setSessionEndDate(secondDate);
             
             oneOf(mockWorkspaceDao).updateWorkspaceSessionDates(mockWorkspace);
-            //update as well status?
 
         }});
         

@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceImportRunnerTest {
     
@@ -172,8 +172,6 @@ public class WorkspaceImportRunnerTest {
                 when(importing.isNot("finished"));
             oneOf (mockWorkspaceDao).updateWorkspaceStatusMessage(mockWorkspace);
                 then(importing.is("finished"));
-            
-            //TODO expect a call to a listener indicating failure
         }});
         
         try {

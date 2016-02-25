@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
 /**
  * Handler for operations related with the lamus files.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceFileHandler {
 

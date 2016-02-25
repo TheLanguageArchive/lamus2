@@ -24,25 +24,27 @@ import nl.mpi.util.OurURL;
 /**
  * Contains some helper methods regarding some archive operations.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface ArchiveFileHelper {
     
-//    public int lastSlashPos(String fullname);
     
     /**
-     * 
-     * @param fullname
+     * Retrieves the base name for the given path.
+     * @param fullname path to the file
      * @return the part of fullname after the last slash
      */
     public String getFileBasename(String fullname);
-    
-//    public String getFileSystemId(String fullname);
-    
+
+    /**
+     * Retrieves the base name for the given path, without the extension.
+     * @param fullname path to the file
+     * @return the part of fullname after the last slash, with the extension excluded
+     */
     public String getFileBasenameWithoutExtension(String fullname);
     
     /**
-     * 
+     * Retrieves the file title.
      * @param fullname
      * @return the part of fullname after but excluding the last slash,
      * or if the file name ends in a slash, derive a name from the full

@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusTypecheckHandlerTest {
     
@@ -112,7 +112,6 @@ public class LamusTypecheckHandlerTest {
 
         String retrievedResult = handler.deepTypecheck(decodedFileURL, filename);
 
-        System.out.println(retrievedResult);
         assertTrue("Retrieved result is different from expected", retrievedResult.contains("true") && retrievedResult.contains("GOOD"));
     }
 

@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
  * archive in order to create a workspace, this is the class to use.
  * @see WorkspaceAccessChecker
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
@@ -182,6 +182,7 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
      */
     @Override
     public void ensureWriteAccessToNode(String userID, URI archiveNodeURI) throws NodeAccessException, NodeNotFoundException {
+        
         if(!this.corpusStructureAccessChecker.hasWriteAccess(userID, archiveNodeURI)) {
             NodeAccessException ex = new UnauthorizedNodeException(archiveNodeURI, userID);
             logger.error(ex.getMessage(), ex);
@@ -193,14 +194,16 @@ public class LamusWorkspaceAccessChecker implements WorkspaceAccessChecker {
      * @see WorkspaceAccessChecker#ensureNodeIsNotLocked(java.net.URI)
      */
     @Override
-    public void ensureNodeIsNotLocked(URI archiveNodeURI) throws NodeAccessException {
-        if(this.workspaceDao.isNodeLocked(archiveNodeURI)) {
-            Collection<WorkspaceNode> lockedNodes = workspaceDao.getWorkspaceNodeByArchiveURI(archiveNodeURI);
+    public void ensureNodeIsNotLocked(URI nodeURI) throws NodeAccessException {
+        
+        if(this.workspaceDao.isNodeLocked(nodeURI)) {
+            
+            Collection<WorkspaceNode> lockedNodes = workspaceDao.getWorkspaceNodeByArchiveURI(nodeURI);
             int workspaceID = -1;
             if(lockedNodes.size() == 1) {
                 workspaceID = lockedNodes.iterator().next().getWorkspaceID();
             }
-            NodeAccessException ex = new LockedNodeException(archiveNodeURI, workspaceID);
+            NodeAccessException ex = new LockedNodeException(nodeURI, workspaceID);
             logger.error(ex.getMessage(), ex);
             throw ex;
         }

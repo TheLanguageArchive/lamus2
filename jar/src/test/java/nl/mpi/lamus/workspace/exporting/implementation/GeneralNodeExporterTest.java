@@ -181,16 +181,6 @@ public class GeneralNodeExporterTest {
     public void exportChangedTopNode()
             throws MalformedURLException, URISyntaxException, IOException,
             MetadataException, TransformerException, WorkspaceExportException {
-    
-        /*
-         * File already exists in the archive.
-         * Should it be copied anyway?
-         * If not, there should be some indication about it being unchanged.
-         * But maybe there is a risk that afterwards the file will be moved (because of something changing in the parent, for instance) - but still the file can be moved as it is...
-         * 
-         * option 1 - copy always in any case
-         * option 2 - find a way of checking efficiently for differences, and copy only if they exist
-         */
         
         final int nodeWsID = 10;
         final String nodeFilename = "topnode.cmdi";
@@ -244,16 +234,6 @@ public class GeneralNodeExporterTest {
     public void exportChangedMetadataNode()
             throws MalformedURLException, URISyntaxException, IOException,
             MetadataException, TransformerException, WorkspaceExportException {
-        
-        /*
-         * File already exists in the archive.
-         * Should it be copied anyway?
-         * If not, there should be some indication about it being unchanged.
-         * But maybe there is a risk that afterwards the file will be moved (because of something changing in the parent, for instance) - but still the file can be moved as it is...
-         * 
-         * option 1 - copy always in any case
-         * option 2 - find a way of checking efficiently for differences, and copy only if they exist
-         */
         
         final int parentNodeWsID = 1;
         final String parentNodeName = "TopNode";
@@ -322,65 +302,6 @@ public class GeneralNodeExporterTest {
         generalNodeExporter.exportNode(workspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
     
-    
-    
-    //AT THE MOMENT (due to the localURI being edited in the import process),
-        // METADATA FILES END UP ALWAYS BEING CHANGED
-    
-//    @Test
-//    public void exportUnchangedMetadataNode()
-//            throws MalformedURLException, URISyntaxException, WorkspaceExportException,
-//            IOException, MetadataException, TransformerException {
-//        
-//        final String parentNodeName = "parentNode";
-//        final String metadataExtension = "cmdi";
-//        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
-//        final URL parentNodeWsURL = new URL("file:/workspace" + workspace.getWorkspaceID() + File.separator + parentFilename);
-//        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
-//        final URL parentNodeArchiveURL = new URL("http:/archive/root/somenode/" + parentFilename);
-//        final URL parentNodeArchiveLocalURL = new URL("file:/archive/location/" + parentFilename);
-//        final String parentNodeArchiveLocalPath = parentNodeArchiveLocalURL.toURI().getSchemeSpecificPart();
-//        
-//        final int nodeWsID = 10;
-//        final String nodeName = "someNode";
-//        final String nodeFilename = nodeName + FilenameUtils.EXTENSION_SEPARATOR_STR  + metadataExtension;
-//        final URL nodeWsURL = new URL("file:/workspace/" + workspace.getWorkspaceID() + File.separator + nodeFilename);
-//        final File nodeWsFile = new File(nodeWsURL.getPath());
-//        final URI nodeArchiveURI = new URI(UUID.randomUUID().toString());
-//        final URL nodeArchiveURL = new URL("http:/archive/location/" + nodeFilename);
-//        final URL nodeArchiveLocalURL = new URL("file:/archive/location/child/" + nodeFilename);
-//        final String nodeArchiveLocalPath = nodeArchiveLocalURL.toURI().getSchemeSpecificPart();
-//        final File nodeArchiveLocalFile = new File(nodeArchiveLocalPath);
-//        
-//        final String nodePathRelativeToParent = "child/" + nodeFilename;
-//        final URL nodeUrlRelativeToParent = new URL(parentNodeArchiveLocalURL, nodePathRelativeToParent);
-//        
-//        workspace.setTopNodeID(nodeWsID);
-//        workspace.setTopNodeArchiveURI(nodeArchiveURI);
-//        workspace.setTopNodeArchiveURL(nodeArchiveURL);
-//        
-//        
-//        context.checking(new Expectations() {{
-//            
-//            oneOf(mockChildWsNode).isMetadata(); will(returnValue(Boolean.TRUE));
-//            oneOf(mockWorkspaceTreeExporter).explore(workspace, mockChildWsNode);
-//            
-//            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
-//            oneOf(mockCorpusStructureProvider).getNode(nodeArchiveURI); will(returnValue(mockCorpusNode));
-//            oneOf(mockCorpusNode).getFileInfo(); will(returnValue(mockFileInfo));
-//            // Files are similar, so export will return
-//            oneOf(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
-//            oneOf(mockArchiveFileHelper).hasArchiveFileChanged(mockFileInfo, nodeWsFile); will(returnValue(Boolean.FALSE));
-//            
-//        }});
-//        
-//        checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeWsURL, parentNodeWsFile,
-//                parentNodeArchiveURL, parentNodeArchiveLocalURL, parentNodeArchiveLocalPath,
-//                nodeArchiveLocalPath, nodePathRelativeToParent, nodeUrlRelativeToParent, null);
-//        
-//        generalNodeExporter.exportNode(mockParentWsNode, mockChildWsNode);
-//    }
-    
     @Test
     public void exportUnknownMetadataNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException {
         
@@ -428,12 +349,8 @@ public class GeneralNodeExporterTest {
         }
     }
     
-    //TODO TEST WHEN NODE RESOLVER RETURNS NULL
-    
     @Test
     public void export_ProblemsRetrievingCorpusNamePath() throws MalformedURLException, URISyntaxException {
-        
-        
         
         final int parentNodeWsID = 1;
         final String metadataExtension = "cmdi";
@@ -494,7 +411,6 @@ public class GeneralNodeExporterTest {
         final int parentNodeWsID = 1;
         final String parentNodeName = "TopNode";
         final String metadataExtension = "cmdi";
-        final String parentFilename = parentNodeName + FilenameUtils.EXTENSION_SEPARATOR_STR + metadataExtension;
         final String parentCorpusNamePathToClosestTopNode = ""; // top node
         
         final int nodeWsID = 10;
@@ -575,7 +491,6 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
-        final String parentNodeName = "TopNode";
         final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
@@ -641,7 +556,6 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
-        final String parentNodeName = "TopNode";
         final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
@@ -705,7 +619,6 @@ public class GeneralNodeExporterTest {
         final String nodeArchiveLocalPath = "file:/archive/location/TopNode/Corpusstructure/" + nodeFilename;
         final File nodeArchiveLocalFile = new File(URI.create(nodeArchiveLocalPath));
         final boolean isNodeProtected = Boolean.FALSE;
-        final String parentNodeName = "TopNode";
         final String currentCorpusNamePathToClosestTopNode = "TopNode";
         
         final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
@@ -761,16 +674,6 @@ public class GeneralNodeExporterTest {
     @Test
     public void exportResourceNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException, IOException, MetadataException, TransformerException {
         
-        /*
-         * File already exists in the archive.
-         * Should it be copied anyway?
-         * If not, there should be some indication about it being unchanged.
-         * But maybe there is a risk that afterwards the file will be moved (because of something changing in the parent, for instance) - but still the file can be moved as it is...
-         * 
-         * option 1 - copy always in any case
-         * option 2 - find a way of checking efficiently for differences, and copy only if they exist
-         */
-        
         final int parentNodeWsID = 1;
         final String parentNodeName = "ParentNode";
         final String metadataExtension = "cmdi";
@@ -814,10 +717,6 @@ public class GeneralNodeExporterTest {
             oneOf(mockNodeResolver).getLocalFile(mockCorpusNode); will(returnValue(nodeArchiveLocalFile));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(Boolean.FALSE));
-            
-            //TODO what to expect here?
-                // resources are not copied to the workspace, so if they need to be copied back, it means they are replacements,
-                    // and therefore don't belong in this exporter...
         }});
         
         checkParentReferenceUpdateInvocations(nodeArchiveURI, parentNodeArchiveURI, parentNodeWsURL, parentNodeWsFile,

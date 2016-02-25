@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceNodeTest {
     
@@ -243,11 +243,11 @@ class SomeOtherWorkspaceNode implements WorkspaceNode {
     private boolean isProtected;
     private String format;
     
-    public SomeOtherWorkspaceNode() {
+    SomeOtherWorkspaceNode() {
         
     }
     
-    public SomeOtherWorkspaceNode(int workspaceNodeID, int workspaceID,
+    SomeOtherWorkspaceNode(int workspaceNodeID, int workspaceID,
             URI profileSchemaURI, String name, String title, WorkspaceNodeType type,
             URL workspaceURL, URI archiveURI, URL archiveURL, URI originURI,
             WorkspaceNodeStatus status, boolean isProtected, String format) {

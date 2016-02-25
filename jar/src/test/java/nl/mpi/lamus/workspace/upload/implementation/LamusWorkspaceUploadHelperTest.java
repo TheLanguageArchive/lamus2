@@ -400,8 +400,4 @@ public class LamusWorkspaceUploadHelperTest {
         
         assertTrue("Result different from expected", result.isEmpty());
     }
-    
-    
-    //TODO Exception situations
-    //TODO Exception situations
 }

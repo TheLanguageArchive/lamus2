@@ -29,7 +29,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
  * intent of representing them graphically (using a WorkspaceTreeNode instead of
  * just a WorkspaceNode)
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceTreeService extends WorkspaceService {
     
@@ -37,10 +37,10 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * Retrieves a workspace tree node with the given ID.
      * 
      * @param nodeID ID of the node to retrieve
-     * @param parentNode WorkspaceTreeNode object of the parent node
+     * @param parentTreeNode WorkspaceTreeNode object of the parent node
      * @return corresponding workspace tree node
      */
-    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentNode)
+    public WorkspaceTreeNode getTreeNode(int nodeID, WorkspaceTreeNode parentTreeNode)
             throws WorkspaceNodeNotFoundException;
     
     /**
@@ -56,8 +56,8 @@ public interface WorkspaceTreeService extends WorkspaceService {
      * Deletes the given collection of nodes.
      * 
      * @param userID ID of the user
-     * @param nodes Collection of nodes to delete
+     * @param nodesToDelete Collection of nodes to delete
      */
-    public void deleteTreeNodes(String userID, Collection<WorkspaceTreeNode> nodes)
+    public void deleteTreeNodes(String userID, Collection<WorkspaceTreeNode> nodesToDelete)
             throws WorkspaceNotFoundException, WorkspaceAccessException, WorkspaceException, ProtectedNodeException;
 }

@@ -57,7 +57,7 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, Files.class})

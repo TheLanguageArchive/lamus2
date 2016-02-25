@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceTreeServiceTest {
     
@@ -88,9 +88,6 @@ public class LamusWorkspaceTreeServiceTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of getTreeNode method, of class LamusWorkspaceTreeService.
-     */
     @Test
     public void testGetTreeNodeWithoutParent() throws WorkspaceNodeNotFoundException {
 
@@ -127,9 +124,6 @@ public class LamusWorkspaceTreeServiceTest {
         assertNull("Returned tree node should have a null parent tree node.", result.getParent());
     }
     
-    /**
-     * Test of getTreeNode method, of class LamusWorkspaceTreeService.
-     */
     @Test
     public void testGetTreeNodeWithParent() throws WorkspaceNodeNotFoundException {
 
@@ -175,6 +169,4 @@ public class LamusWorkspaceTreeServiceTest {
         assertNotNull("Returned tree node should have a null parent tree node.", result.getParent());
         assertEquals("The parent tree node of the returned tree node is different from expected", parentTreeNode, result.getParent());
     }
-    
-    //TODO test exception possibilities and other methods
 }

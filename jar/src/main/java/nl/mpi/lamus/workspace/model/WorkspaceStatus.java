@@ -16,8 +16,8 @@
 package nl.mpi.lamus.workspace.model;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Enumeration for the different status values a workspace can have during its lifetime.
+ * @author guisil
  */
 public enum WorkspaceStatus {
     

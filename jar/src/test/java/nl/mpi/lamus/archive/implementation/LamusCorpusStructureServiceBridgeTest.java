@@ -251,8 +251,6 @@ public class LamusCorpusStructureServiceBridgeTest {
                 
             oneOf(mockJsonTransformationHandler).getCrawlerIdFromJsonObject(mockResponseJsonObject);
                 will(returnValue(crawlerId));
-                
-                //CHECK get ID of the crawler and get the details (succeded? failed?)
         }});
         
         String retrievedCrawlerID = csServiceBridge.callCrawler(uriToCrawl);
@@ -273,8 +271,6 @@ public class LamusCorpusStructureServiceBridgeTest {
                 will(throwException(mockWebApplicationException));
             
             ignoring(mockWebApplicationException);
-                
-                //CHECK get ID of the crawler and get the details (succeded? failed?)
         }});
         
         try {

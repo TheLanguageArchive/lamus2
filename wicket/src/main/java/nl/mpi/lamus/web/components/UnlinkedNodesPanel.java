@@ -59,7 +59,7 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Panel containing the list of unlinked nodes within the workspace.
  * @author guisil
  */
 public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
@@ -69,11 +69,11 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
     @SpringBean
     private WorkspaceTreeService workspaceService;
     
-    private AbstractTree<WorkspaceTreeNode> unlinkedNodesTree;
+    private final AbstractTree<WorkspaceTreeNode> unlinkedNodesTree;
     
     private Collection<WorkspaceTreeNode> checked;
     
-    private UnlinkedNodesModelProvider unlinkedNodesProvider;
+    private final UnlinkedNodesModelProvider unlinkedNodesProvider;
     
     
     public UnlinkedNodesPanel(String id, IModel<Workspace> model, UnlinkedNodesModelProvider provider, FeedbackPanel feedbackPanel) {
@@ -188,7 +188,6 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
                     public void onClick(AjaxRequestTarget target) {
                         
                         try {
-                            //TODO Add confirmation dialog
                             workspaceService.deleteNode(LamusSession.get().getUserId(), getModelObject());
 
                             target.add(UnlinkedNodesPanel.this);
@@ -208,12 +207,17 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         return columns;
     }
 
-    
+    /**
+     * Retrieves the list of currently selected unlinked nodes.
+     * @return List of selected unlinked nodes
+     */
     public Collection<WorkspaceTreeNode> getSelectedUnlinkedNodes() {
         return checked;
     }
     
-    
+    /**
+     * Clears the list of currently selected unlinked nodes.
+     */
     public void clearSelectedUnlinkedNodes() {
         checked = new ArrayList<>();
     }
@@ -256,7 +260,9 @@ public class UnlinkedNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         }
     }
     
-
+    /**
+     * @see FeedbackPanelAwarePanel#onEvent(org.apache.wicket.event.IEvent)
+     */
     @Override
     public void onEvent(IEvent<?> event) {
         

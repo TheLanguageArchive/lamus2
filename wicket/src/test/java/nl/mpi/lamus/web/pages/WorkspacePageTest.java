@@ -117,6 +117,7 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         
     }
 
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -133,56 +134,6 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         getTester().assertEnabled("buttonPanel");
         
         
-//        getTester().assertComponent("workspaceInfo", WebMarkupContainer.class);
-//        getTester().assertEnabled("workspaceInfo");
-//        
-//        getTester().assertComponent("workspaceInfo:userID", Label.class);
-//        getTester().assertEnabled("workspaceInfo:userID");
-//        getTester().assertLabel("workspaceInfo:userID", mockWorkspace.getUserID());
-//
-//        getTester().assertComponent("workspaceInfo:workspaceID", Label.class);
-//        getTester().assertEnabled("workspaceInfo:workspaceID");
-//        getTester().assertLabel("workspaceInfo:workspaceID", "" + mockWorkspace.getWorkspaceID());
-//        
-//        getTester().assertComponent("workspaceInfo:status", Label.class);
-//        getTester().assertEnabled("workspaceInfo:status");
-//        getTester().assertLabel("workspaceInfo:status", mockWorkspace.getStatus().name());
-        
-//        getTester().assertComponent("workspaceInfoPanel", Panel.class);
-//        getTester().assertEnabled("workspaceInfoPanel");
-        
-        
-//        getTester().assertComponent("nodeInfoContainer", WebMarkupContainer.class);
-//        getTester().assertEnabled("nodeInfoContainer");
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm", Form.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm");
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm:name", Label.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:name");
-//        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:name", ""); //TODO test when node selection changes
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm:archiveURI", Label.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:archiveURI");
-//        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:archiveURI", ""); //TODO test when node selection changes
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm:archiveURL", Label.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:archiveURL");
-//        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:archiveURL", ""); //TODO test when node selection changes
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm:workspaceID", Label.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:workspaceID");
-//        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:workspaceID", ""); //TODO test when node selection changes
-//        
-//        getTester().assertComponent("nodeInfoContainer:nodeInfoForm:type", Label.class);
-//        getTester().assertEnabled("nodeInfoContainer:nodeInfoForm:type");
-//        getTester().assertLabel("nodeInfoContainer:nodeInfoForm:type", ""); //TODO test when node selection changes
-        
-//        getTester().assertComponent("nodeInfoPanel", Panel.class);
-//        getTester().assertEnabled("nodeInfoPanel");
-        
-        
-        
         getTester().assertComponent("workspaceTree", ArchiveTreePanel.class);
         getTester().assertEnabled("workspaceTree");
         
@@ -193,35 +144,5 @@ public class WorkspacePageTest extends AbstractLamusWicketTest {
         
         getTester().assertComponent("workspaceTabs", TabbedPanel.class);
         getTester().assertEnabled("workspaceTabs");
-        
-        //TODO assert individual tabs?
     }
-
-    @Test
-    @DirtiesContext
-    public void changeSelectedNode() {
-        
-        
-        //TODO How to trigger the "node selection" event in the tree?
-    }
-    
-    @Test
-    @DirtiesContext
-    public void testRefreshStuff() {
-        
-        //TODO ...
-    }
-    
-//    @Test
-//    @DirtiesContext
-//    public void updateModelNodeActionsPanel() {
-//        
-//        Collection<WorkspaceTreeNode> selectedNodes = new ArrayList<WorkspaceTreeNode>();
-//        selectedNodes.add(mockWorkspaceTopNode);
-//        
-//        WsNodeActionsPanel nodeActionsPanel = (WsNodeActionsPanel) getTester().getComponentFromLastRenderedPage("wsNodeActionsPanel");
-//        nodeActionsPanel.setModelObject(selectedNodes);
-//        
-//        //TODO THIS SHOULD BE TESTED IN THE PANEL TESTS...
-//    }
 }

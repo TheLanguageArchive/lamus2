@@ -30,14 +30,14 @@ import org.springframework.stereotype.Component;
 /**
  * @see FileTypeHandler
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusFileTypeHandler implements FileTypeHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusFileTypeHandler.class);
     
-    private TypecheckHandler typecheckHandler;
+    private final TypecheckHandler typecheckHandler;
     
 
     @Autowired

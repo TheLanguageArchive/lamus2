@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Profile;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @ComponentScan({"nl.mpi.lamus.typechecking", "nl.mpi.lamus.workspace.model"})

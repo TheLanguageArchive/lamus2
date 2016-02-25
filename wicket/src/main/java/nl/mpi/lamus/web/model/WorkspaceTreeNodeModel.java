@@ -25,7 +25,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
 /**
- *
+ * Model for the workpace tree nodes.
  * @author guisil
  */
 public class WorkspaceTreeNodeModel extends LoadableDetachableModel<WorkspaceTreeNode> {
@@ -36,6 +36,7 @@ public class WorkspaceTreeNodeModel extends LoadableDetachableModel<WorkspaceTre
     // Workspace identifier
     private final Integer workspaceNodeId;
     private final WorkspaceTreeNode parentNode;
+    
     
     @SuppressWarnings("LeakingThisInConstructor")
     public WorkspaceTreeNodeModel(WorkspaceTreeNode node, WorkspaceTreeNode nodeParent) {
@@ -61,6 +62,9 @@ public class WorkspaceTreeNodeModel extends LoadableDetachableModel<WorkspaceTre
         Injector.get().inject(this);
     }
     
+    /**
+     * @see LoadableDetachableModel#load()
+     */
     @Override
     protected WorkspaceTreeNode load() {
         if (this.workspaceNodeId == null) {

@@ -17,7 +17,6 @@
 package nl.mpi.lamus.web.test.helpers;
 
 import java.io.Serializable;
-import java.util.Collection;
 import nl.mpi.archiving.tree.GenericTreeModelProvider;
 import nl.mpi.archiving.tree.GenericTreeNode;
 import nl.mpi.archiving.tree.wicket.components.ArchiveTreeNodeIconProvider;

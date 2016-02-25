@@ -235,7 +235,9 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         return modalConfirm;
     }
     
-    
+    /**
+     * Class representing the possible options for the submission and delete buttons.
+     */
     public class ConfirmationOptions implements Serializable {
         
         

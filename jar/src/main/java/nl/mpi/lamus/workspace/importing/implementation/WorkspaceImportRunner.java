@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * Runner that will trigger a thread that performs
  * the import of the nodes into the workspace.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceImportRunner implements Callable<Boolean>{
 
@@ -82,12 +82,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
         }
         
         try {
-            //TODO create some other method that takes something else than a Reference
-            // or have a separate method for importing the top node
             topNodeImporter.importNode(workspace, topNodeArchiveURI);
-            
-            //TODO import successful? notify main thread, change workspace status, etc...
-            // no exceptions, so it was successful ?
             
             workspace.setStatusMessageInitialised();
             workspaceDao.updateWorkspaceStatusMessage(workspace);
@@ -97,8 +92,6 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             workspaceDao.updateWorkspaceStatusMessage(workspace);
             
             throw fiex;
-            
-            //TODO use Callable/Future instead and notify the calling thread when this one is finished?
         }
         
         Workspace updatedWorkspace = workspaceDao.getWorkspace(workspace.getWorkspaceID());

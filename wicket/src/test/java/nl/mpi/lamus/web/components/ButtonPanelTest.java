@@ -50,7 +50,6 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     @Mock private WorkspaceTreeModelProviderFactory mockWorkspaceTreeModelProviderFactoryBean;
     
-    //TODO request storage
     @Mock private IndexPage mockIndexPage;
     
     @Mock private FeedbackPanel mockFeedbackPanel;
@@ -61,13 +60,13 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceTopNodeID = 10;
-    private MockWorkspace mockWorkspace = new MockWorkspace() {{
+    private final MockWorkspace mockWorkspace = new MockWorkspace() {{
         setUserID(AbstractLamusWicketTest.MOCK_USER_ID);
         setWorkspaceID(mockWorkspaceID);
         setStatus(WorkspaceStatus.INITIALISED);
         setTopNodeID(mockWorkspaceTopNodeID);
     }};
-    private MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceTopNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceTopNodeID);
     }};
@@ -94,6 +93,7 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext
@@ -102,34 +102,9 @@ public class ButtonPanelTest extends AbstractLamusWicketTest {
         getTester().assertComponent("buttonpanel:workspaceActionsForm", Form.class);
         getTester().assertEnabled("buttonpanel:workspaceActionsForm");
         
-//        getTester().assertComponent("buttonpanel:workspaceActionsForm:requestStorageButton", Button.class);
-//        getTester().assertEnabled("buttonpanel:workspaceActionsForm:requestStorageButton");
-        
-        //TODO other buttons
-        
         getTester().assertComponent("buttonpanel:workspaceActionsForm:deleteWorkspaceButton", Button.class);
         getTester().assertEnabled("buttonpanel:workspaceActionsForm:deleteWorkspaceButton");
-        
-        //TODO other buttons
     }
-    
-    //TODO handle request storage
-    
-    
-    
-    //TODO these tests have to be improved
-    
-//    @Test
-//    @DirtiesContext
-//    public void deleteWorkspaceButtonClicked() throws WorkspaceNotFoundException, WorkspaceAccessException, IOException {
-//        
-//        getFormTester().submit("deleteWorkspaceButton");
-//        verify(mockWorkspaceServiceBean).deleteWorkspace(AbstractLamusWicketTest.MOCK_USER_ID, mockWorkspaceID);
-//        verify(mockPagesProviderBean).getIndexPage();
-//        getTester().assertRenderedPage(IndexPage.class);
-//    }
-    
-    //TODO test exceptions thrown
     
     
     private FormTester getFormTester() {

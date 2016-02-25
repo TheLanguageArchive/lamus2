@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * @see GenericTreeNode
  * @see WorkspaceNode
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceTreeNode extends LinkedTreeNode, WorkspaceNode {
     

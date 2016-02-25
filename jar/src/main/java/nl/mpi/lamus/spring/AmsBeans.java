@@ -37,7 +37,7 @@ import org.springframework.web.context.ServletContextAware;
  * and injected into the Lamus2 context.
  * To be used in production environment.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @Profile(value = {"production","cmdi-adapter-csdb","ams-hybrid"})

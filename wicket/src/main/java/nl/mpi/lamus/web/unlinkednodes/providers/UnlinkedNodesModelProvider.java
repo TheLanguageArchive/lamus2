@@ -29,7 +29,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 
 /**
- *
+ * Model provider for the unlinked nodes tree.
  * @author guisil
  */
 public class UnlinkedNodesModelProvider implements MultiRootTreeModelProvider<WorkspaceTreeNode> {
@@ -46,7 +46,7 @@ public class UnlinkedNodesModelProvider implements MultiRootTreeModelProvider<Wo
     
     public UnlinkedNodesModelProvider(WorkspaceTreeService wsService, int wsID) {
         this.workspaceService = wsService;
-        this.treeModelListeners = new CopyOnWriteArraySet<GenericTreeModelListener>();
+        this.treeModelListeners = new CopyOnWriteArraySet<>();
         this.workspaceID = wsID;
     }
     
@@ -90,7 +90,6 @@ public class UnlinkedNodesModelProvider implements MultiRootTreeModelProvider<Wo
     @Override
     public Iterator<? extends WorkspaceTreeNode> getRoots() {
         
-        //TODO USER???
         return this.workspaceService.listUnlinkedTreeNodes("", workspaceID).iterator();
     }
 
@@ -106,7 +105,7 @@ public class UnlinkedNodesModelProvider implements MultiRootTreeModelProvider<Wo
 
     @Override
     public IModel<WorkspaceTreeNode> model(WorkspaceTreeNode t) {
-        return new CompoundPropertyModel<WorkspaceTreeNode>(t);
+        return new CompoundPropertyModel<>(t);
     }
 
     @Override
@@ -117,9 +116,7 @@ public class UnlinkedNodesModelProvider implements MultiRootTreeModelProvider<Wo
     @Override
     public ISortState<String> getSortState() {
         
-        return new SingleSortState<String>();
-        
-        //TODO What else?
+        return new SingleSortState<>();
     }
 
 

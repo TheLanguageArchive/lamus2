@@ -26,7 +26,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 /**
  * Interface for some managing operations in a workspace.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceManager {
     
@@ -45,7 +45,6 @@ public interface WorkspaceManager {
      * Triggers the deletion of a workspace
      * (removing the data both from the database and the filesystem).
      * 
-     * @param userID ID of the user who is deleting the workspace
      * @param workspaceID  ID of the workspace to be deleted
      * @param keepUnlinkedFiles true if the unlinked files are to be kept for future use
      */

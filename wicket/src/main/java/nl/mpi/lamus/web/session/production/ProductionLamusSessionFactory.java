@@ -23,7 +23,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 
 /**
- *
+ * Factory for the ProductionLamusSession class.
  * @author guisil
  */
 public class ProductionLamusSessionFactory implements LamusSessionFactory {
@@ -32,5 +32,4 @@ public class ProductionLamusSessionFactory implements LamusSessionFactory {
     public LamusSession createSession(Application application, Request request, Response response) {
         return new ProductionLamusSession(request);
     }
-    
 }

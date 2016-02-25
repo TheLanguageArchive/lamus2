@@ -14,7 +14,7 @@ public interface AmsServiceBridge {
     /**
      * provides the used-storage-space of the given user(uid) on the given archive node
      * @param uid destined user's uid
-     * @param archiveURI URI of the archive ndoe
+     * @param archiveNodeURI URI of the archive ndoe
      * @return  the used-storage-space of the given user(uid) on the given resource(nodeIdStr)
      */
     public long getUsedStorageSpace(String uid, URI archiveNodeURI);

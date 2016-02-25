@@ -41,7 +41,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.validation.validator.UrlValidator;
 
 /**
- * 
+ * Panel used for the insertion of external nodes.
  * @author guisil
  */
 public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
@@ -102,13 +102,15 @@ public class ExternalNodesPanel extends FeedbackPanelAwarePanel<Workspace> {
         
     }
     
-
+    /**
+     * Form to perform the insertion.
+     */
     private final class AddExternalNodeForm extends Form<Void> {
 
         TextField<String> externalUrlField;
         DropDownChoice<WorkspaceNodeType> externalType;
 
-        public AddExternalNodeForm(String id) {
+        AddExternalNodeForm(String id) {
             super(id);
 
             setOutputMarkupId(true);

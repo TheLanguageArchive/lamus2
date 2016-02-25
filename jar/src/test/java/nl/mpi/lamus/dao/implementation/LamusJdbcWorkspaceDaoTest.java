@@ -58,7 +58,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(/*classes = {LamusJdbcWorkspaceDao.class, EmbeddedDatabaseBeans.classLamusJdbcWorkspaceDaoTestBeans.class}, */
@@ -2953,7 +2953,7 @@ public class LamusJdbcWorkspaceDaoTest extends AbstractTransactionalJUnit4Spring
     private void addPreLockToDb(String archiveUri) {
         
         String insertPreLockSql = "INSERT INTO pre_lock VALUES (?)";
-        jdbcTemplate.update(insertPreLockSql, archiveUri.toString());
+        jdbcTemplate.update(insertPreLockSql, archiveUri);
     }
 }
 

@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see WorkspaceNodeLinkManager
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
@@ -84,7 +84,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
     @Override
     public void linkNodesWithReference(Workspace workspace, WorkspaceNode parentNode, WorkspaceNode childNode, Reference childLink) {
         
-	if(parentNode == null && childLink == null) { //TODO find a better way of checking for the top node
+	if(parentNode == null && childLink == null) {
             
         logger.debug("Setting top node of workspace; workspaceID: " + workspace.getWorkspaceID() + "; topNodeID: " + childNode.getWorkspaceNodeID());
 
@@ -92,7 +92,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
 	    workspace.setTopNodeArchiveURI(childNode.getArchiveURI());
         workspace.setTopNodeArchiveURL(childNode.getArchiveURL());
         this.workspaceDao.updateWorkspaceTopNode(workspace);
-	} else if(parentNode != null && childLink != null) { //TODO Is there a situation when this would be different?
+	} else if(parentNode != null && childLink != null) {
             
             if(!nodeUtil.isNodeMetadata(parentNode)) {
                 throw new IllegalArgumentException("Unable to create link. Parent node (" + parentNode.getWorkspaceNodeID() + ") is not metadata.");
@@ -103,7 +103,6 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
 	    WorkspaceNodeLink nodeLink = this.workspaceNodeLinkFactory.getNewWorkspaceNodeLink(
 	    parentNode.getWorkspaceNodeID(), childNode.getWorkspaceNodeID());
 	    this.workspaceDao.addWorkspaceNodeLink(nodeLink);
-	    //TODO possible problems with adding the link? if the link already exists?
 	} else {
             throw new IllegalArgumentException("Unable to create link (parent node: " + parentNode + "; child link: " + childLink);
         }

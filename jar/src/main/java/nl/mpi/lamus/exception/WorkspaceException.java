@@ -17,7 +17,7 @@ package nl.mpi.lamus.exception;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceException extends Exception {
     

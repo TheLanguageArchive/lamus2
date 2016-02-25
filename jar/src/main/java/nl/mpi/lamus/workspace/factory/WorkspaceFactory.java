@@ -21,7 +21,7 @@ import nl.mpi.lamus.workspace.model.Workspace;
 /**
  * Factory for Workspace objects.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceFactory {
     

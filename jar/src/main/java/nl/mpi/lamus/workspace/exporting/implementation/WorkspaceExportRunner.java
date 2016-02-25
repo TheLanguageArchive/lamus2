@@ -37,7 +37,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
  * Runner that will trigger a thread that performs
  * the export of the nodes from the workspace back into the archive.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceExportRunner implements Callable<Boolean> {
 

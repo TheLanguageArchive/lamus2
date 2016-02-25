@@ -53,7 +53,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * 
  * @see WorkspaceDao
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusJdbcWorkspaceDao implements WorkspaceDao {
     
@@ -415,25 +415,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         
         return listToReturn;
     }
-    
-//    public void updateWorkspaceEndDates(Workspace workspace) {
-//
-//        Timestamp endDateTimestamp = null;
-//        if (workspace.getEndDate() != null) {
-//            endDateTimestamp = new Timestamp(workspace.getEndDate().getTime());
-//        }
-//        Date sessionEndDateTimestamp = null;
-//        if (workspace.getSessionEndDate() != null) {
-//            sessionEndDateTimestamp = new Timestamp(workspace.getSessionEndDate().getTime());
-//        }
-//
-//        String updateWorkspaceSql = "update workspace set end_date = :end_date, session_end_date = :session_end_date "
-//                + "where workspace_id = " + workspace.getWorkspaceID();
-//
-//        SqlParameterSource parameters = new MapSqlParameterSource().addValue("end_date", endDateTimestamp).addValue("session_end_date", sessionEndDateTimestamp);
-//
-//        namedParameterJdbcTemplate.update(updateWorkspaceSql, parameters);
-//    }
 
     /**
      * @see WorkspaceDao#preLockNode(java.net.URI)
@@ -494,8 +475,6 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         int to = nodeURIs.size() <= 100 ? nodeURIs.size() : 100;
         
         while(from < nodeURIs.size()) {
-            
-            System.out.println("from: " + from + "; to: " + to);
             
             List<String> someURIs = nodeURIs.subList(from, to);
             namedParameters = new MapSqlParameterSource().addValue("uris", someURIs);

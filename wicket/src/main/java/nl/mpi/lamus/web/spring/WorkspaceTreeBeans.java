@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- *
+ * Workspace Tree related beans.
  * @author guisil
  */
 @Configuration

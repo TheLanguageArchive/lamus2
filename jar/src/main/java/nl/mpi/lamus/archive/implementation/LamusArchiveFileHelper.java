@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see ArchiveFileHelper
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusArchiveFileHelper implements ArchiveFileHelper {
@@ -186,11 +186,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
     @Override
     public boolean isUrlLocal(OurURL urlToCheck) {
         
-        //TODO Should this check be done in some different way?
-            // currently the CS database indicates if a file is local or not,
-            // but that's not always correct
-        //TODO check if protocol is "file" and if there is no host...?
-        
         if("file".equals(urlToCheck.getProtocol())) {
             return true;
         }
@@ -217,7 +212,6 @@ public class LamusArchiveFileHelper implements ArchiveFileHelper {
         }
         if (suffix >= 10000) {
             return null;
-            //TODO Throw some exception instead? does it make sense to stop here?
         } // give up
 
         

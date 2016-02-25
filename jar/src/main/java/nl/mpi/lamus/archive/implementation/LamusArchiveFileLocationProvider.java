@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see ArchiveFileLocationProvider
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProvider {
@@ -156,11 +156,6 @@ public class LamusArchiveFileLocationProvider implements ArchiveFileLocationProv
      */
     @Override
     public boolean isFileInOrphansDirectory(File fileToCheck) {
-        
-        //TODO This method should be more robust
-            // it should not only check if the file's path contains the directory name
-            // it should check if the path is actually the same as the complete path for the orphans of that workspace
-
         
         if (orphansDirectoryName != null &&
             fileToCheck.getAbsolutePath().contains(orphansDirectoryName)) {

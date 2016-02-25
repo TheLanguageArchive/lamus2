@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- *
+ * Class to represent the result of the upload of zip files.
  * @author guisil
  */
 public class ZipUploadResult {

@@ -22,7 +22,7 @@ import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ISortableTreeProvider;
 
 /**
- *
+ * Base for a multi-root tree model provider.
  * @author guisil
  */
 public interface MultiRootTreeModelProvider<T extends WorkspaceTreeNode> extends ISortableTreeProvider<WorkspaceTreeNode, String>, Serializable {

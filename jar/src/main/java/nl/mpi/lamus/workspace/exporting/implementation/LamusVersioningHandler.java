@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @see VersioningHandler
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusVersioningHandler implements VersioningHandler {

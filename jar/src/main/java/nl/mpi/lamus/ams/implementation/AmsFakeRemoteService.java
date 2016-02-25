@@ -41,11 +41,12 @@ import nl.mpi.lat.auth.principal.PrincipalService;
 import nl.mpi.lat.fabric.FabricService;
 import nl.mpi.lat.fabric.NodeID;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * Implementation of the AMS service interface to be used within LAMUS2.
  * @author guisil
  */
 @Component
@@ -68,6 +69,9 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
     private AmsFakeRemoteServiceHelper remoteServiceHelper;
     
     
+    /**
+     * @see IAmsRemoteService#getLicenseAcceptance(java.lang.String)
+     */
     @Override
     public List<AmsLicense> getLicenseAcceptance(String nodeid) {
         
@@ -81,19 +85,25 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
                 BeanUtils.copyProperties(amsLicense, license);
                 amsLicense.setLinkToLicense(licenseService.getLicenseLink(license));
                 amsLicenses.add(amsLicense);
-            } catch (Exception e) {
+            } catch (BeansException e) {
                 throw new RuntimeException(e);
             }
         }
         return amsLicenses;
     }
 
+    /**
+     * @see IAmsRemoteService#getUserEmailAddress(java.lang.String)
+     */
     @Override
     public String getUserEmailAddress(String userid) {
         LatUser user = principalService.getUser(userid);
         return user.getEmail();
     }
 
+    /**
+     * @see IAmsRemoteService#replaceNodesWithDefaultAccessRules(java.util.Map, java.lang.String)
+     */
     @Override
     public void replaceNodesWithDefaultAccessRules(Map<URI, URI> replacements, String userid) {
         
@@ -114,19 +124,21 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
             
                 authorizationService.performReplaceActionsOnNode(oldNodeID, newNodeID, user);
                 
-            } catch (RuntimeException e) {
+            } catch (NumberFormatException e) {
                 throw new RuntimeException(e.getMessage());
             }
         }
     }
 
+    /**
+     * @see IAmsRemoteService#triggerRightsRecalculation(java.util.Collection, boolean, boolean)
+     */
     @Override
     public void triggerRightsRecalculation(Collection<URI> nodeURIs, boolean triggerCorpusStructureTranscription, boolean triggerWebServerTranscription) {
         
         // converting the URI collection into a string with appended node IDs
         String targetNodeIDs = remoteServiceHelper.getTargetNodeIDsAsString(nodeURIs);
         
-        //TODO force recalculation?
         try {
             MockableURL urlToTriggerRecalc = remoteServiceHelper.getRecalcUrl(triggerCorpusStructureTranscription, triggerWebServerTranscription, targetNodeIDs);
             remoteServiceHelper.sendCallToAccessRightsManagementSystem(urlToTriggerRecalc);
@@ -136,9 +148,4 @@ public class AmsFakeRemoteService implements IAmsRemoteService {
             throw new RuntimeException("Error invoking AMS rights recalculation", ex);
         }
     }
-    
-    
-    
-    
-    
 }

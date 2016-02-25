@@ -26,13 +26,12 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 /**
  * Handles the import of files from the archive to the workspace.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceFileImporter {
     
     /**
      * Imports metadata files from the archive to the workspace
-     * @param archiveNodeURL URL of the node in the archive
      * @param archiveFile File corresponding to the archive node to be imported
      * @param workspaceNode WorkspaceNode object corresponding to the node being imported
      * @param document MetadataDocument object corresponding to the node being imported

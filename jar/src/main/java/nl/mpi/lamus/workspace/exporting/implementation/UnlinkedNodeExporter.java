@@ -191,9 +191,6 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 workspaceDao.setWorkspaceNodeAsDeleted(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID(), currentNode.isExternal());
             }
         }
-        
-        //TODO is this necessary?
-//        searchClientBridge.removeNode(currentNode.getArchiveURI());
     }
     
     
@@ -282,7 +279,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
         try {
             return new File(pathToUse, filename).toURI().toURL();
         } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("not handled yet");
+            return null;
         }
     }
     

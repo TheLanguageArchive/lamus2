@@ -32,8 +32,6 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
     @Override
     public long getUsedStorageSpace(String uid, URI archiveNodeURI) {
         
-        //TODO does it make sense to still use this?
-        
         return 0;
     }
 
@@ -42,8 +40,6 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
      */
     @Override
     public long getMaxStorageSpace(String uid, URI archiveNodeURI) {
-        
-        //TODO does it make sense to still use this?
         
         return 1024 * 1024 * 1024;
     }
@@ -88,8 +84,6 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
             versionedNodes.add(replacement.getOldNodeURI());
         }
         
-        
-        //TODO for the versioned nodes, do it like this? or separate the recalculations (CSDB and Apache)?
         amsRemoteService.triggerRightsRecalculation(versionedNodes, true, true);
     }
 

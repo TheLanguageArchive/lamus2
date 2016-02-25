@@ -26,19 +26,19 @@ import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.Session;
 
 /**
- *
+ * Class that deals with the node expansion in the unlinked nodes tree.
  * @author guisil
  */
 public class WorkspaceTreeNodeExpansion implements Set<WorkspaceTreeNode>, Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private static MetaDataKey<WorkspaceTreeNodeExpansion> KEY = new MetaDataKey<WorkspaceTreeNodeExpansion>()
+    private static final MetaDataKey<WorkspaceTreeNodeExpansion> KEY = new MetaDataKey<WorkspaceTreeNodeExpansion>()
     {
         private static final long serialVersionUID = 1L;
     };
     
-    private Set<Integer> wsNodeIDs = new HashSet<Integer>();
+    private final Set<Integer> wsNodeIDs = new HashSet<Integer>();
 
     private boolean inverse;
     

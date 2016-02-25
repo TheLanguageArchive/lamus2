@@ -39,7 +39,7 @@ public class NodeInfoPanelTest extends AbstractLamusWicketTest {
     
     private int mockWorkspaceID = 1;
     private int mockWorkspaceNodeID = 10;
-    private MockWorkspaceTreeNode mockWorkspaceNode = new MockWorkspaceTreeNode() {{
+    private final MockWorkspaceTreeNode mockWorkspaceNode = new MockWorkspaceTreeNode() {{
         setWorkspaceID(mockWorkspaceID);
         setWorkspaceNodeID(mockWorkspaceNodeID);
         setName("topNode");
@@ -61,6 +61,7 @@ public class NodeInfoPanelTest extends AbstractLamusWicketTest {
         
     }
     
+    //TODO Tests are still very incomplete
     
     @Test
     @DirtiesContext

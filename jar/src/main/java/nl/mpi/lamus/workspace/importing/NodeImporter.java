@@ -15,7 +15,6 @@
  */
 package nl.mpi.lamus.workspace.importing;
 
-import java.net.URI;
 import nl.mpi.lamus.exception.WorkspaceImportException;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
@@ -26,7 +25,7 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
  * Generic node importer.
  * The correct implementation should be chosen in the workspace file explorer
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface NodeImporter<R extends Reference> {
     

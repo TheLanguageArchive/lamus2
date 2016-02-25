@@ -60,7 +60,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class ReplacedOrDeletedNodeExporterTest {
     
@@ -329,8 +329,6 @@ public class ReplacedOrDeletedNodeExporterTest {
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
         final boolean isNodeProtected = Boolean.TRUE;
         final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
-        
-        //TODO does it make sense a protected node which was deleted?
         
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         

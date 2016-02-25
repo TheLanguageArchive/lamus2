@@ -24,7 +24,6 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -71,7 +70,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class AddedNodeExporterTest {
     

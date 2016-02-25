@@ -97,11 +97,6 @@ public class LamusNodeReplaceManagerTest {
         }});
         
         nodeReplaceManager.replaceTree(mockOldNode, mockNewNode, mockParentNode);
-        
-        
-        
-        //TODO TEST CALLING OF ACTIONS IN THE LIST... RETURN LIST INSTEAD?
-        
     }
     
     @Test
@@ -123,7 +118,4 @@ public class LamusNodeReplaceManagerTest {
             assertEquals("Exception message different from expected", expectedMessage, ex.getMessage());
         }
     }
-    
-    
-    //TODO exceptional cases?
 }

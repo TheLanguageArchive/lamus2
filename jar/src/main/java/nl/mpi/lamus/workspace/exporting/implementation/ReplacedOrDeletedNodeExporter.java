@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
  * their record in the database updated accordingly.
  * @see NodeExporter
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class ReplacedOrDeletedNodeExporter implements NodeExporter {
@@ -143,11 +143,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
 
         moveNodeToAppropriateLocationInArchive(currentNode);
         
-        //TODO is this necessary?
-//        searchClientBridge.removeNode(currentNode.getArchiveURI());
-        
         updateHandleLocation(workspaceID, currentNode);
-        
     }
     
     
@@ -165,10 +161,6 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
         workspaceDao.updateNodeArchiveUrl(currentNode);
         
         if(targetArchiveURL == null) {
-            //TODO send some sort of notification at this point
-                //the fact that the file didn't make it to the trash or versioning archive shouldn't cause the export to stop
-            //TODO have exceptions thrown instead of returning null from the move method?
-            
             logger.warn("Problem moving file to its target location");
         }
     }
@@ -192,8 +184,6 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             try {
                 handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
                         URI.create(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
-                
-                //TODO Should these exceptions cause the export to stop? Maybe a notification would be enough...
                 
             } catch (HandleException | IOException ex) {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();

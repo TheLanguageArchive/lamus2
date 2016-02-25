@@ -34,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Factory for the corpusstructure provider.
  * Copied from the Metadata browser.
+ * @see CorpusStructureProviderFactory
+ * @see AccessInfoProviderFactory
  * @author guisil
  */
 @Transactional
@@ -52,6 +54,9 @@ public class ProductionCorpusStructureProviderFactory implements CorpusStructure
 	this.csDao = csDao;
     }
 
+    /**
+     * @see CorpusStructureProviderFactory#createCorpusStructureProvider()
+     */
     @Override
     public CorpusStructureProvider createCorpusStructureProvider() {
 	logger.debug("Constructing new CorpusStructureProviderImpl");
@@ -60,6 +65,9 @@ public class ProductionCorpusStructureProviderFactory implements CorpusStructure
         return provider;
     }
 
+    /**
+     * @see AccessInfoProviderFactory#createAccessInfoProvider()
+     */
     @Override
     public AccessInfoProvider createAccessInfoProvider() {
 	logger.debug("Constructing new CorpusStructureProviderImpl");

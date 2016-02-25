@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceFileHandler
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {

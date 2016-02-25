@@ -23,13 +23,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * @see TypecheckedResults
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusTypecheckedResults implements TypecheckedResults {
 
-    private String checkedMimetype;
-    private String analysis;
-    private TypecheckerJudgement typecheckerJudgement;
+    private final String checkedMimetype;
+    private final String analysis;
+    private final TypecheckerJudgement typecheckerJudgement;
     
     public LamusTypecheckedResults(String mimetype, String analysis, TypecheckerJudgement judgement) {
         this.checkedMimetype = mimetype;
@@ -77,7 +77,7 @@ public class LamusTypecheckedResults implements TypecheckedResults {
      */
     @Override
     public boolean isTypeUnspecified() {
-        if(checkedMimetype.startsWith("Un")) { //TODO use a better way to identify these cases
+        if(checkedMimetype.startsWith("Un")) {
             return true;
         }
         return false;

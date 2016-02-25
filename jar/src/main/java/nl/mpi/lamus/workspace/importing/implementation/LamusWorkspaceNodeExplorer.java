@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 /**
  * @see WorkspaceNodeExplorer
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
@@ -66,7 +66,7 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             } catch(UnusableReferenceTypeException ex) {
                 logger.warn(ex.getMessage());
                 continue;
-            } catch(Exception ex) {
+            } catch(IllegalArgumentException ex) {
                 String errorMessage = "Error getting file importer";
                 throw new WorkspaceImportException(errorMessage, workspace.getWorkspaceID(), ex);
             }

@@ -19,7 +19,6 @@ package nl.mpi.lamus.workspace.upload;
 import java.net.URI;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
-import nl.mpi.metadata.api.model.Reference;
 
 /**
  * Provides methods that aid in the matching of references with nodes

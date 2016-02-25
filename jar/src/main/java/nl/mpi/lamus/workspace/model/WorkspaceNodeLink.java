@@ -16,8 +16,8 @@
 package nl.mpi.lamus.workspace.model;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Represents a link between two nodes within a workspace.
+ * @author guisil
  */
 public interface WorkspaceNodeLink {
     

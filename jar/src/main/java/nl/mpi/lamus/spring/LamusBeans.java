@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Profile;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Configuration
 @ImportResource("classpath:nl/mpi/lamus/spring/amsService.xml")
@@ -99,14 +99,6 @@ public class LamusBeans {
         return new DeepFileType();
     }
     
-    
-    //TODO Load beans from AMS
-//    @Bean
-//    public AmsBridge amsBridge() {
-//        return new Ams2Bridge();
-//    }
-//    
-    
     @Bean
     public HandleInfoProvider handleInfoProvider() {
         return new HandleInfoProviderImpl(handlePrefix);
@@ -131,13 +123,4 @@ public class LamusBeans {
     public nl.mpi.metadata.api.util.HandleUtil metadataApiHandleUtil() {
         return new nl.mpi.metadata.api.util.HandleUtil();
     }
-    
-//    @Bean
-//    public IAmsRemoteService amsRemoteService() {
-//        HttpInvokerProxyFactoryBean proxy = new HttpInvokerProxyFactoryBean();
-//        proxy.setServiceInterface(IAmsRemoteService.class);
-//        proxy.setServiceUrl("http://lux16.mpi.nl/am/ams2-cmdi/api/v1/httpinvoker/AmsRemoteService");
-//        IAmsRemoteService service = (IAmsRemoteService) proxy.getObject();
-//        return service;
-//    }
 }

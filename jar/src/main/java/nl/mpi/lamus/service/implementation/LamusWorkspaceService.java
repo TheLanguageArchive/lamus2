@@ -57,7 +57,7 @@ import org.springframework.dao.DuplicateKeyException;
 /**
  * @see WorkspaceService
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceService implements WorkspaceService {
     

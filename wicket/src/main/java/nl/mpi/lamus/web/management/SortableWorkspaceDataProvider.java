@@ -33,13 +33,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
 /**
- *
+ * Data provider to be used by the management table listing workspaces.
  * @author guisil
  */
 public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspace, String> implements IFilterStateLocator<WorkspaceFilter> {
 
     private final WorkspaceService workspaceService;
-    private SortableDataProviderComparator comparator = new SortableDataProviderComparator();
+    private final SortableDataProviderComparator comparator = new SortableDataProviderComparator();
     private WorkspaceFilter workspaceFilter = new WorkspaceFilter();
 
     public SortableWorkspaceDataProvider(WorkspaceService wsService) {
@@ -48,6 +48,9 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
         setSort("workspaceID", SortOrder.ASCENDING);
     }
     
+    /**
+     * @see SortableDataProvider#iterator(long, long)
+     */
     @Override
     public Iterator<? extends Workspace> iterator(long first, long count) {
         
@@ -65,23 +68,34 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
         return filteredWs.subList(firstInt, firstInt + countInt).iterator();
     }
 
+    /**
+     * @see SortableDataProvider#size()
+     */
     @Override
     public long size() {
         return filterWorkspaces(getAllWorkspaces()).size();
     }
 
+    /**
+     * @see SortableDataProvider#model(java.lang.Object)
+     */
     @Override
     public IModel<Workspace> model(final Workspace object) {
 
         return new WorkspaceModel(object);
     }
     
-    
+    /**
+     * @see IFilterStateLocator#getFilterState()
+     */
     @Override
     public WorkspaceFilter getFilterState() {
         return workspaceFilter;
     }
 
+    /**
+     * @see IFilterStateLocator#setFilterState(java.lang.Object)
+     */
     @Override
     public void setFilterState(WorkspaceFilter state) {
         workspaceFilter = state;
@@ -123,7 +137,9 @@ public class SortableWorkspaceDataProvider extends SortableDataProvider<Workspac
         return matchesUserIDFilter && matchesTopNodeUriFilter && matchesTopNodeUrlFilter && matchesStatusFilter && matchesExcludeSuccessfulFilter;
     }
     
-    
+    /**
+     * Comparator for the data provider, to be used in the sorting of the data.
+     */
     class SortableDataProviderComparator implements Comparator<Workspace>, Serializable {
         
         @Override

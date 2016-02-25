@@ -36,7 +36,7 @@ public class LamusReplaceActionManager implements ReplaceActionManager {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusReplaceActionManager.class);
     
-    private ReplaceActionExecutor replaceActionExecutor;
+    private final ReplaceActionExecutor replaceActionExecutor;
     
     @Autowired
     public LamusReplaceActionManager(ReplaceActionExecutor actionExecutor) {

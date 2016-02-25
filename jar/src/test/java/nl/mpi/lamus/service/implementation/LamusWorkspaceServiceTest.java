@@ -70,7 +70,7 @@ import org.springframework.dao.DuplicateKeyException;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceServiceTest {
     

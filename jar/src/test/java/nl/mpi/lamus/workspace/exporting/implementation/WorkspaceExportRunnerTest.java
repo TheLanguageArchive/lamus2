@@ -60,7 +60,7 @@ import org.junit.Rule;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class WorkspaceExportRunnerTest {
     
@@ -355,8 +355,6 @@ public class WorkspaceExportRunnerTest {
         
         assertTrue("Execution result should have been successful (true)", result);
     }
-    
-    //TODO Test exceptions
     
     
     private boolean executeRunner() throws InterruptedException, ExecutionException, CrawlerInvocationException {

@@ -76,11 +76,6 @@ public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
             
             WorkspaceNode currentMatch = null;
             
-            
-//            if(oldChild.getArchiveURI() == null) {
-//                throw new UnsupportedOperationException("null archiveURI not handled");
-//            }
-            
             for(WorkspaceNode newChild : newNodeChildren) {
                 
                 if(oldChild.getArchiveURI().equals(newChild.getArchiveURI())) {
@@ -111,8 +106,5 @@ public class LamusNodeReplaceExplorer implements NodeReplaceExplorer {
         } else {
             //do nothing in this case? - nodes already matched...
         }
-        
-        
     }
-    
 }

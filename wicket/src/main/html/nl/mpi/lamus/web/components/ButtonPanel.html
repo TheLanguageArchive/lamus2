@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <wicket:panel>
             <form id="workspaceActionsForm" wicket:id="workspaceActionsForm">
                 <ul>
-                    <!--<li><button wicket:id="requestStorageButton" type="submit">Request storage</button></li>-->
                     <li>
                         <div wicket:id="modalConfirmSubmit" class="modalWindow"></div>
                         <div wicket:id="modalConfirmDelete" class="modalWindow"></div>
@@ -34,15 +33,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <wicket:message key="submit_workspace_action"></wicket:message>
                         </button>
                     </li>
-                    <!--<li><button type="submit">Save and Logout</button></li>-->
                     <li>
                         <button class="ws_button ws_button-3 ws_button-3b icon-delete_ws" wicket:id="deleteWorkspaceButton" type="submit">
                             <wicket:message key="delete_workspace_action"></wicket:message>
                         </button>
                     </li>
-                    <!--<li><button type="submit">Help</button></li>-->
-                    <!--<li><button type="submit">Report a Bug</button></li>-->
-                    <!--<li><button type="submit">About</button></li>-->
                 </ul>
             </form>
         </wicket:panel>

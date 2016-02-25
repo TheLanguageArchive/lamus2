@@ -48,9 +48,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MockWorkspaceService implements WorkspaceTreeService {
 
-//@SpringBean(name = "workspaceTreeNode")
-    private WorkspaceTreeNode workspaceTreeNode;
-    private static Logger logger = LoggerFactory.getLogger(MockWorkspaceService.class);
+    private final WorkspaceTreeNode workspaceTreeNode;
+    private static final Logger logger = LoggerFactory.getLogger(MockWorkspaceService.class);
     private final Workspace workspace;
 
     public MockWorkspaceService(Workspace workspace, WorkspaceTreeNode workspaceTreeNode) {

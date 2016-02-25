@@ -25,17 +25,18 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
 /**
- *
+ * Panel containing information regarding the currently selected node.
  * @author guisil
  */
 public class NodeInfoPanel extends Panel {
     
     private final Form<WorkspaceTreeNode> form;
     
+    
     public NodeInfoPanel(String id) {
         super(id);
         
-        form = new Form<WorkspaceTreeNode>("nodeInfoForm");
+        form = new Form<>("nodeInfoForm");
         form.add(new Label("name"));
 	form.add(new Label("archiveURI"));
 	form.add(new Label("archiveURL"));
@@ -48,6 +49,10 @@ public class NodeInfoPanel extends Panel {
 	add(formContainer);
     }
     
+    /**
+     * Sets the model for the node information.
+     * @param model 
+     */
     public void setNodeInfoModel(IModel<WorkspaceTreeNode> model) {
         form.setModel(model);
     }

@@ -30,7 +30,7 @@ import org.junit.*;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public class LamusWorkspaceTest {
     
@@ -67,9 +67,7 @@ public class LamusWorkspaceTest {
     public void tearDown() {
     }
 
-    /**
-     * Test for one of the constructors
-     */
+    
     @Test
     public void constructorProperlyInitialisesWorkspace() {
         
@@ -82,12 +80,8 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'startDate' is not the expected one.", testWorkspace.getStartDate(), testWorkspace.getSessionStartDate());
         assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.UNINITIALISED, testWorkspace.getStatus());
         assertEquals("Value for 'message' is not the expected one.", "Workspace uninitialised", testWorkspace.getMessage());
-        //TODO move message to properties file
     }
 
-    /**
-     * Test for one of the constructors
-     */
     @Test
     public void constructorWithAllParametersProperlyCreatesWorkspace() {
 
@@ -112,9 +106,6 @@ public class LamusWorkspaceTest {
         assertEquals("Value for 'crawlerID' is not the expected one.", this.crawlerID, testWorkspace.getCrawlerID());
     }
     
-    /**
-     * 
-     */
     @Test
     public void constructorWithAllParametersReceivesNullDates() {
         
@@ -130,9 +121,6 @@ public class LamusWorkspaceTest {
         assertNull("Value retrieved for 'sessionEndDate' should be null.", testWorkspace.getSessionEndDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void constructorWithAllParametersClonesDateObjects() {
         
@@ -158,9 +146,6 @@ public class LamusWorkspaceTest {
                 localTestDate.equals(testWorkspace.getSessionEndDate()));
     }
 
-    /**
-     * Test of equals method, of class LamusWorkspace.
-     */
     @Test
     public void workspacesAreEqual() {
 
@@ -197,9 +182,6 @@ public class LamusWorkspaceTest {
         assertEquals("Workspace objects don't have the same hashcode.", testWorkspace1.hashCode(), testWorkspace2.hashCode());
     }
     
-    /**
-     * Test of equals method, of class LamusWorkspace.
-     */
     @Test
     public void workspacesAreNotEqual() {
         
@@ -262,9 +244,6 @@ public class LamusWorkspaceTest {
         assertFalse("Workspace objects should not be equal.", testWorkspace1.equals(testWorkspace2));
     }
     
-    /**
-     * 
-     */
     @Test
     public void getStartDateReturnsEqualButNotSameObject() {
         
@@ -279,9 +258,6 @@ public class LamusWorkspaceTest {
                 this.testDate, testWorkspace.getStartDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void setStartDateSetsProperlyEqualButNotSameObject() {
         
@@ -302,9 +278,6 @@ public class LamusWorkspaceTest {
                 newDate, testWorkspace.getStartDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void getEndDateReturnsEqualButNotSameObject() {
         
@@ -319,9 +292,6 @@ public class LamusWorkspaceTest {
                 this.testDate, testWorkspace.getEndDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void setEndDateSetsProperlyEqualButNotSameObject() {
         
@@ -342,9 +312,6 @@ public class LamusWorkspaceTest {
                 newDate, testWorkspace.getEndDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void getSessionStartDateReturnsEqualButNotSameObject() {
         
@@ -359,9 +326,6 @@ public class LamusWorkspaceTest {
                 this.testDate, testWorkspace.getSessionStartDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void setSessionStartDateSetsProperlyEqualButNotSameObject() {
         
@@ -382,9 +346,6 @@ public class LamusWorkspaceTest {
                 newDate, testWorkspace.getSessionStartDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void getSessionEndDateReturnsEqualButNotSameObject() {
         
@@ -399,9 +360,6 @@ public class LamusWorkspaceTest {
                 this.testDate, testWorkspace.getSessionEndDate());
     }
     
-    /**
-     * 
-     */
     @Test
     public void setSessionEndDateSetsProperlyEqualButNotSameObject() {
         
@@ -456,7 +414,6 @@ public class LamusWorkspaceTest {
         testWorkspace.setStatusMessageInitialising();
         assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.INITIALISING, testWorkspace.getStatus());
         assertEquals("Value for 'message' is not the expected one.", "Workspace initialising", testWorkspace.getMessage());
-        //TODO move message to properties file
     }
     
     @Test
@@ -465,7 +422,6 @@ public class LamusWorkspaceTest {
         testWorkspace.setStatusMessageErrorDuringInitialisation();
         assertEquals("Value for 'status' is not the expected one.", WorkspaceStatus.ERROR_INITIALISATION, testWorkspace.getStatus());
         assertEquals("Value for 'message' is not the expected one.", "Error during initialisation", testWorkspace.getMessage());
-        //TODO move message to properties file
     }
 }
 
@@ -486,7 +442,7 @@ class SomeOtherWorkspace implements Workspace {
     private String message;
     private String crawlerID;
     
-    public SomeOtherWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
+    SomeOtherWorkspace(String userID, long usedStorageSpace, long maxStorageSpace) {
         this.userID = userID;
         this.usedStorageSpace = usedStorageSpace;
         this.maxStorageSpace = maxStorageSpace;
@@ -496,7 +452,7 @@ class SomeOtherWorkspace implements Workspace {
         this.status = WorkspaceStatus.INITIALISING;
     }
     
-    public SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
+    SomeOtherWorkspace(int workspaceID, String userID, int topNodeID, URI topNodeArchiveURI, URL topNodeArchiveURL,
             Date startDate, Date endDate, Date sessionStartDate, Date sessionEndDate,
             long usedStorageSpace, long maxStorageSpace, WorkspaceStatus status, String message, String crawlerID) {
         this.workspaceID = workspaceID;

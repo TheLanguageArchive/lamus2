@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
  * Node importer specific for metadata files.
  * @see NodeImporter
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @Component
 public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
@@ -100,7 +100,6 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
 
         URI childArchiveURI = null;
         
-        //TODO another way of doing this?
         if(referenceFromParent == null) { // top node
             childArchiveURI = workspace.getTopNodeArchiveURI();
         } else {
@@ -200,16 +199,11 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             throwWorkspaceImportException(workspaceID, errorMessage, usex);
         }
 
-		if (parentDocument != null) {
-		    //TODO how to change the child link/element (of the new document) using the MetadataAPI?
-		    //TODO change link of the copied document to have a different handle when it is null, for instance
-		}
-	
-		if (childDocument instanceof ReferencingMetadataDocument) {
-		    ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
-	            List<Reference> links = childReferencingDocument.getDocumentReferences();
-		    workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
-		}
+        if (childDocument instanceof ReferencingMetadataDocument) {
+            ReferencingMetadataDocument childReferencingDocument = (ReferencingMetadataDocument) childDocument;
+            List<Reference> links = childReferencingDocument.getDocumentReferences();
+            workspaceNodeExplorer.explore(workspace, childNode, childReferencingDocument, links);
+        }
     }
     
     private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {

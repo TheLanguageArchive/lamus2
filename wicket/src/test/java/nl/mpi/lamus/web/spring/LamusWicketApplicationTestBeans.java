@@ -29,7 +29,6 @@ import nl.mpi.lamus.web.session.mock.MockLamusSessionFactory;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.tree.WorkspaceTreeNode;
 import org.apache.wicket.Application;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -45,7 +44,6 @@ import org.springframework.context.annotation.Profile;
 @Profile("testing")
 public class LamusWicketApplicationTestBeans {
     
-//    @Autowired
     private MockLamusSessionFactory lamusSessionFactory;
     
     private LamusWicketApplication wicketApplication;

@@ -1498,7 +1498,7 @@ class HeaderInfoMatcher extends TypeSafeMatcher<HeaderInfo> {
     private final String headerInfoName;
     private final String headerInfoValue;
 
-    public HeaderInfoMatcher(HeaderInfo hInfo) {
+    HeaderInfoMatcher(HeaderInfo hInfo) {
         headerInfoName = hInfo.getName();
         headerInfoValue = hInfo.getValue();
     }

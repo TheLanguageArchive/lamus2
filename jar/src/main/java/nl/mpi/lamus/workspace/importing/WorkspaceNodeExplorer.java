@@ -26,7 +26,7 @@ import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
  * Explorer of the tree/branch containing the nodes that
  * will be imported into the workspace.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceNodeExplorer {
     

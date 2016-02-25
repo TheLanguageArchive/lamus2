@@ -23,12 +23,12 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.CheckedFolder;
 import org.apache.wicket.extensions.markup.html.repeater.util.ProviderSubset;
-import org.apache.wicket.model.IDetachable;
 import org.apache.wicket.model.IModel;
 
 /**
- *
- * based on the example class from Wicket
+ * Content extension to be used in the unlinked nodes tree.
+ * 
+ * Based on the example class from Wicket
  * @author Sven Meier
  * 
  * @author guisil
@@ -36,13 +36,16 @@ import org.apache.wicket.model.IModel;
 public class CheckedFolderContent extends Content {
    
     
-    private ProviderSubset<WorkspaceTreeNode> checked;
+    private final ProviderSubset<WorkspaceTreeNode> checked;
 
     public CheckedFolderContent(ITreeProvider<WorkspaceTreeNode> provider)
     {
-        checked = new ProviderSubset<WorkspaceTreeNode>(provider, false);
+        checked = new ProviderSubset<>(provider, false);
     }
 
+    /**
+     * @see Content#detach()
+     */
     @Override
     public void detach()
     {
@@ -70,7 +73,9 @@ public class CheckedFolderContent extends Content {
         }
     }
 
-    
+    /**
+     * @see Content#newContentComponent(java.lang.String, org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree, org.apache.wicket.model.IModel)
+     */
     @Override
     public Component newContentComponent(String id, final AbstractTree<WorkspaceTreeNode> tree, IModel<WorkspaceTreeNode> model)
     {

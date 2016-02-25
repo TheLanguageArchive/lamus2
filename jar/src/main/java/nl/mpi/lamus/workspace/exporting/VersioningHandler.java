@@ -23,7 +23,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNode;
  * Provides methods related either with the trashcan folder
  * or the versioning folder.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface VersioningHandler {
 

@@ -24,7 +24,7 @@ import nl.mpi.metadata.api.model.Reference;
 /**
  * Provides a way to link or unlink nodes in a workspace.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceNodeLinkManager {
     

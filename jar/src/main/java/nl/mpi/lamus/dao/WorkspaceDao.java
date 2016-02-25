@@ -30,7 +30,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceReplacedNodeUrlUpdate;
 /**
  * Data access layer for the workspace data.
  * 
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface WorkspaceDao {
     
@@ -287,10 +287,10 @@ public interface WorkspaceDao {
     /**
      * Retrieves a collection containing the nodes that were unlinked or deleted
      * and have no parent (except the top node of the workspace).
-     * @param workspaceNodeID ID of the workspace
+     * @param workspaceID ID of the workspace
      * @return Collection of unlinked or deleted nodes that have no parent
      */
-    public Collection<WorkspaceNode> getUnlinkedAndDeletedTopNodes(int workspaceNodeID);
+    public Collection<WorkspaceNode> getUnlinkedAndDeletedTopNodes(int workspaceID);
     
     /**
      * Retrieves a collection containing the nodes that have no parent

@@ -72,7 +72,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class})
@@ -216,8 +216,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
     }
-    
-    //TODO top node -> UnknownNodeException
     
     @Test
     public void linkNodes_ParentNotMetadata() throws WorkspaceException, ProtectedNodeException {
@@ -1122,8 +1120,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }
     }
     
-    //TODO URISyntaxException
-    
     @Test
     public void linkNodesOnlyInDb() throws MalformedURLException, WorkspaceException {
         
@@ -1145,12 +1141,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
         
         nodeLinkManager.linkNodesOnlyInDb(mockParentNode, mockChildNode);
     }
-    
-    
-    
-    //TODO URISyntaxException
-    
-    
     
     @Test
     public void unlinkNodesWithLocationWithHandle() throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceException, WorkspaceException, ProtectedNodeException {
@@ -1199,9 +1189,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
-        
-//        checkUnlinkNodeExpectations(workspaceID, childURL, parentURL, childURI, parentNodeID, childNodeID);
-        
         
         nodeLinkManager.unlinkNodes(mockParentNode, mockChildNode);
     }
@@ -1256,9 +1243,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
-        
-//        checkUnlinkNodeExpectations(workspaceID, childURL, parentURL, childURI, parentNodeID, childNodeID);
-        
         
         nodeLinkManager.unlinkNodes(mockParentNode, mockChildNode);
     }
@@ -1989,7 +1973,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
         final String childMimetype = "text/plain";
         final String childRefId = "ref_1234546u75645";
         final String componentPath = "/lat-session/WrittenResource";
-        //TODO SHOULD THIS BE JUST THE ELEMENT OR THE WHOLE PATH INTO THE ELEMENT???
         
         final Collection<WorkspaceNode> emptyParentNodes = new ArrayList<>();
         
@@ -2161,7 +2144,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childArchiveURI); will(returnValue(mockChildDataResourceProxy));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -2204,7 +2186,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childArchiveURI); will(returnValue(mockChildMetadataResourceProxy));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -2303,7 +2284,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childArchiveURI); will(returnValue(mockChildDataResourceProxy));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -2355,7 +2335,6 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
             
-            // NOT SURE YET IF THE URI WILL CONTAIN THE HANDLE IN THIS CASE...
             oneOf(mockChildNode).getArchiveURI(); will(returnValue(childArchiveURI));
             oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childArchiveURI); will(returnValue(mockChildMetadataResourceProxy));
             oneOf(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
@@ -2678,47 +2657,5 @@ public class LamusWorkspaceNodeLinkManagerTest {
         }});
         
         nodeLinkManager.removeArchiveUriFromUploadedNodeRecursively(mockParentNode, Boolean.TRUE);
-    }
-    
-    
-    
-    
-    //TODO ANY MORE TESTS????
-    
-    
-
-    
-    private void checkUnlinkNodeExpectations(
-            final int workspaceID, final URL childURL,
-            final URL parentURL, final URI childURI,
-            final int parentNodeID, final int childNodeID)
-                throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException {
-        
-        context.checking(new Expectations() {{
-            
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            
-            exactly(2).of(mockChildNode).getWorkspaceURL(); will(returnValue(childURL));
-            
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
-            oneOf(mockMetadataAPI).getMetadataDocument(parentURL); will(returnValue(mockParentDocument));
-            
-            oneOf(mockChildNode).getArchiveURI(); will(returnValue(childURI));
-            
-            oneOf(mockMetadataApiBridge).getDocumentReferenceByDoubleCheckingURI(mockParentDocument, childURI); will(returnValue(mockChildReferenceWithHandle));
-            oneOf(mockParentDocument).removeDocumentReference(mockChildReferenceWithHandle); will(returnValue(mockChildReferenceWithHandle));
-            
-            oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentURL));
-            oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(mockParentFile); will(returnValue(mockParentStreamResult));
-            oneOf(mockMetadataAPI).writeMetadataDocument(mockParentDocument, mockParentStreamResult);
-            
-            oneOf(mockParentNode).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockParentNode).getWorkspaceNodeID(); will(returnValue(parentNodeID));
-            oneOf(mockChildNode).getWorkspaceNodeID(); will(returnValue(childNodeID));
-            
-            oneOf(mockWorkspaceDao).deleteWorkspaceNodeLink(workspaceID, parentNodeID, childNodeID);
-        }});
-        
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
     }
 }

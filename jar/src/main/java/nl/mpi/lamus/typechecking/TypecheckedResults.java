@@ -17,7 +17,7 @@ package nl.mpi.lamus.typechecking;
 
 /**
  * Container for the results of the typechecker regarding a resource.
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  */
 public interface TypecheckedResults {
     

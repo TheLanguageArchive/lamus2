@@ -16,8 +16,8 @@
 package nl.mpi.lamus.workspace.model;
 
 /**
- *
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * Enumeration for the different possible types of nodes within a workspace.
+ * @author guisil
  */
 public enum WorkspaceNodeType {
 
