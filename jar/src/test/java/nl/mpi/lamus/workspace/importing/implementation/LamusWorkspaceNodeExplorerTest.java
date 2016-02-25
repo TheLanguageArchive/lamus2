@@ -15,19 +15,23 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import nl.mpi.lamus.dao.WorkspaceDao;
+import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.cmdi.api.model.DataResourceProxy;
@@ -53,8 +57,8 @@ public class LamusWorkspaceNodeExplorerTest {
         setImposteriser(ClassImposteriser.INSTANCE);
     }};
     private WorkspaceNodeExplorer nodeExplorer;
-    @Mock private WorkspaceDao mockWorkspaceDao;
     @Mock private NodeImporterAssigner mockNodeImporterAssigner;
+    @Mock private MetadataApiBridge mockMetadataApiBridge;
     @Mock private NodeImporter mockNodeImporter;
     @Mock private WorkspaceNode mockNodeToExplore;
     @Mock private ReferencingMetadataDocument mockNodeDocument;
@@ -77,8 +81,8 @@ public class LamusWorkspaceNodeExplorerTest {
     @Before
     public void setUp() {
         nodeExplorer = new LamusWorkspaceNodeExplorer();
-        ReflectionTestUtils.setField(nodeExplorer, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(nodeExplorer, "nodeImporterAssigner", mockNodeImporterAssigner);
+        ReflectionTestUtils.setField(nodeExplorer, "metadataApiBridge", mockMetadataApiBridge);
     }
     
     @After
@@ -86,18 +90,22 @@ public class LamusWorkspaceNodeExplorerTest {
     }
 
     @Test
-    public void exploreSuccessfullyLinkWithHandle() throws Exception {
+    public void exploreSuccessfullyLinkWithHandle() throws MalformedURLException,
+            UnusableReferenceTypeException, WorkspaceImportException, IOException,
+            TransformerException, MetadataException {
 
         final int nodeID = 10;
+        
+        final URL nodeURL = new URL("file:/workspace/location/parentTest.cmdi");
         
         final URI metadataURI = URI.create("https://testURL.mpi.nl/test.cmdi");
         final URI resourceURI = URI.create("https://testURL.mpi.nl/test.jpg");
         final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
         final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
         
-        final URI metadataLinkHandle = new URI("hdl:3492/2932");
+        final URI metadataLinkHandle = URI.create("hdl:3492/2932");
         metadataLink.setHandle(metadataLinkHandle);
-        final URI resourceLinkHandle = new URI("hdl:3492/2933");
+        final URI resourceLinkHandle = URI.create("hdl:3492/2933");
         resourceLink.setHandle(resourceLinkHandle);
         
         final Collection<Reference> testLinks = new ArrayList<>();
@@ -107,27 +115,28 @@ public class LamusWorkspaceNodeExplorerTest {
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockNodeToExplore).getWorkspaceURL(); will(returnValue(nodeURL));
             
-            int current = 0;
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
                 
                 oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(returnValue(mockNodeImporter));
                 oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
-                
-                current++;
             }
             
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockNodeDocument, nodeURL);
         }});
         
         nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
     }
 
     @Test
-    public void explore_UnusableReferenceType() throws UnusableReferenceTypeException, WorkspaceImportException {
+    public void explore_UnusableReferenceType() throws MalformedURLException, UnusableReferenceTypeException, WorkspaceImportException, IOException, TransformerException, MetadataException {
         
         final int nodeID = 10;
+        
+        final URL nodeURL = new URL("file:/workspace/location/parentTest.cmdi");
         
         final URI usableURI = URI.create("https://testURL.mpi.nl/test.jpg");
         final URI unusableURI = URI.create("https://testURL.mpi.nl/search.html");
@@ -150,8 +159,9 @@ public class LamusWorkspaceNodeExplorerTest {
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockNodeToExplore).getWorkspaceURL(); will(returnValue(nodeURL));
             
             Reference currentLink = linkIterator.next();
             oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(throwException(expectedException));
@@ -161,9 +171,10 @@ public class LamusWorkspaceNodeExplorerTest {
             oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(returnValue(mockNodeImporter));
             oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
             
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockNodeDocument, nodeURL);
         }});
 
-            nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+        nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
     }
     
     @Test
@@ -190,14 +201,12 @@ public class LamusWorkspaceNodeExplorerTest {
         context.checking(new Expectations() {{
             
             //logger
-            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
-            oneOf(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
             
             for(Reference currentLink : testLinks) { //instances of HandleCarrier
 
                 oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(throwException(expectedException));
-                
-                oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
                 
                 break; // due to the exception, the loop doesn't continue
             }
@@ -209,6 +218,60 @@ public class LamusWorkspaceNodeExplorerTest {
             fail("should have thrown exception");
         } catch(WorkspaceImportException ex) {
             String errorMessage = "Error getting file importer";
+            assertEquals("Message different from expected", errorMessage, ex.getMessage());
+            assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
+            assertEquals("Cause different from expected", expectedException, ex.getCause());
+        }
+    }
+    
+    @Test
+    public void saveMetadataThrowsException() throws Exception {
+
+        final int nodeID = 10;
+        
+        final URL nodeURL = new URL("file:/workspace/location/parentTest.cmdi");
+        
+        final URI metadataURI = URI.create("https://testURL.mpi.nl/test.cmdi");
+        final URI resourceURI = URI.create("https://testURL.mpi.nl/test.jpg");
+        final ResourceProxy metadataLink = new MetadataResourceProxy("1", metadataURI, "cmdi");
+        final ResourceProxy resourceLink = new DataResourceProxy("2", resourceURI, "jpg");
+        
+        final URI metadataLinkHandle = URI.create("hdl:3492/2932");
+        metadataLink.setHandle(metadataLinkHandle);
+        final URI resourceLinkHandle = URI.create("hdl:3492/2933");
+        resourceLink.setHandle(resourceLinkHandle);
+        
+        final Collection<Reference> testLinks = new ArrayList<>();
+        testLinks.add(metadataLink);
+        testLinks.add(resourceLink);
+        
+        final MetadataException expectedException = new MetadataException("some error saving the metadata document");
+        
+        context.checking(new Expectations() {{
+            
+            //logger
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            allowing(mockNodeToExplore).getWorkspaceNodeID(); will(returnValue(nodeID));
+            allowing(mockNodeToExplore).getWorkspaceURL(); will(returnValue(nodeURL));
+            
+            int current = 0;
+            for(Reference currentLink : testLinks) { //instances of HandleCarrier
+                
+                oneOf(mockNodeImporterAssigner).getImporterForReference(currentLink); will(returnValue(mockNodeImporter));
+                oneOf(mockNodeImporter).importNode(mockWorkspace, mockNodeToExplore, mockNodeDocument, currentLink);
+                
+                current++;
+            }
+            
+            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockNodeDocument, nodeURL); will(throwException(expectedException));
+        }});
+        
+        try {
+            nodeExplorer.explore(mockWorkspace, mockNodeToExplore, mockNodeDocument, testLinks);
+            fail("should have thrown exception");
+        } catch(WorkspaceImportException ex) {
+            String errorMessage = "Failed to save file " + nodeURL
+		    + " in workspace " + workspaceID;
             assertEquals("Message different from expected", errorMessage, ex.getMessage());
             assertEquals("Workspace ID different from expected", workspaceID, ex.getWorkspaceID());
             assertEquals("Cause different from expected", expectedException, ex.getCause());

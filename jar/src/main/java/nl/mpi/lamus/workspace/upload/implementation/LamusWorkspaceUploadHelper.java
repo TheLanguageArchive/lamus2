@@ -68,6 +68,8 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     @Override
     public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
         
+        logger.debug("Assuring links in workspace.");
+        
         Collection<ImportProblem> allFailedLinks = new ArrayList<>();
         Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles = new HashMap<>();
         
@@ -101,6 +103,7 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
         //remove external self-handles, if any
         Set<Map.Entry<MetadataDocument, WorkspaceNode>> entries = documentsWithInvalidSelfHandles.entrySet();
         if(!entries.isEmpty()) {
+            logger.debug("Removing invalid self-handles");
             for(Map.Entry<MetadataDocument, WorkspaceNode> entry : entries) {
                 try {
                     metadataApiBridge.removeSelfHandleAndSaveDocument(entry.getKey(), entry.getValue().getWorkspaceURL());

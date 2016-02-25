@@ -17,7 +17,6 @@ package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.net.URI;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.model.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +33,6 @@ public class TopNodeImporter {
     
     private static final Logger logger = LoggerFactory.getLogger(TopNodeImporter.class);
     
-    @Autowired
-    private NodeDataRetriever nodeDataRetriever;
     @Autowired
     private MetadataNodeImporter metadataNodeImporter;
     

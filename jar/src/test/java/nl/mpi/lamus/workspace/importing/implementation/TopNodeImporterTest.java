@@ -18,18 +18,8 @@ package nl.mpi.lamus.workspace.importing.implementation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
-import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
-import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
-import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
-import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
-import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
-import nl.mpi.lamus.workspace.importing.WorkspaceFileImporter;
-import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
-import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
 import nl.mpi.lamus.workspace.model.Workspace;
-import nl.mpi.metadata.api.MetadataAPI;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -58,17 +48,6 @@ public class TopNodeImporterTest {
     
     @Mock MetadataNodeImporter mockMetadataNodeImporter;
     
-    @Mock CorpusStructureProvider mockCsProvider;
-    @Mock NodeResolver mockNodeResolver;
-    @Mock WorkspaceDao mockWsDao;
-    @Mock MetadataAPI mockMetadataAPI;
-    @Mock MetadataApiBridge mockMetadataApiBridge;
-    @Mock WorkspaceNodeLinkManager mockNodeLinkManager;
-    @Mock WorkspaceFileImporter mockFileImporter;
-    @Mock WorkspaceNodeFactory mockNodeFactory;
-    @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
-    @Mock NodeDataRetriever mockNodeDataRetriever;
-    
     @Mock Workspace mockWorkspace;
     
     
@@ -87,7 +66,6 @@ public class TopNodeImporterTest {
     public void setUp() {
         
         topNodeImporter = new TopNodeImporter();
-        ReflectionTestUtils.setField(topNodeImporter, "nodeDataRetriever", mockNodeDataRetriever);
         ReflectionTestUtils.setField(topNodeImporter, "metadataNodeImporter", mockMetadataNodeImporter);
     }
     

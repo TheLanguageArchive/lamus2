@@ -15,15 +15,18 @@
  */
 package nl.mpi.lamus.workspace.importing.implementation;
 
+import java.io.IOException;
 import java.util.Collection;
-import nl.mpi.lamus.dao.WorkspaceDao;
+import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.exception.UnusableReferenceTypeException;
 import nl.mpi.lamus.exception.WorkspaceImportException;
+import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
 import nl.mpi.lamus.workspace.importing.NodeImporterAssigner;
 import nl.mpi.lamus.workspace.importing.WorkspaceNodeExplorer;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
+import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import org.slf4j.Logger;
@@ -42,9 +45,9 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceNodeExplorer.class);
     
     @Autowired
-    private WorkspaceDao workspaceDao;
-    @Autowired
     private NodeImporterAssigner nodeImporterAssigner;
+    @Autowired
+    private MetadataApiBridge metadataApiBridge;
 
     
     /**
@@ -73,5 +76,21 @@ public class LamusWorkspaceNodeExplorer implements WorkspaceNodeExplorer {
             
             linkImporterToUse.importNode(workspace, nodeToExplore, nodeDocument, currentLink);
         }
+        
+        try {
+            metadataApiBridge.saveMetadataDocument(nodeDocument, nodeToExplore.getWorkspaceURL());
+        } catch (IOException | TransformerException | MetadataException ioex) {
+            String errorMessage = "Failed to save file " + nodeToExplore.getWorkspaceURL()
+		    + " in workspace " + workspace.getWorkspaceID();
+	    throwWorkspaceImportException(workspace.getWorkspaceID(), errorMessage, ioex);
+        }
     }
+    
+    
+    private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {
+        logger.error(errorMessage, cause);
+        throw new WorkspaceImportException(errorMessage, workspaceID, cause);
+    }
+    
+    
 }

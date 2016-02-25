@@ -66,8 +66,6 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     @Autowired
     private MetadataAPI metadataAPI;
     @Autowired
-    private MetadataApiBridge metadataApiBridge;
-    @Autowired
     private WorkspaceNodeLinkManager workspaceNodeLinkManager;
     @Autowired
     private WorkspaceFileImporter workspaceFileImporter;
@@ -182,7 +180,6 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
             
             if(referenceFromParent != null) {
                 referenceFromParent.setLocation(childNode.getWorkspaceURL().toURI());
-                metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
             }
             
 	} catch (MalformedURLException muex) {

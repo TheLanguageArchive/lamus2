@@ -34,7 +34,6 @@ import nl.mpi.handle.util.HandleParser;
 import nl.mpi.handle.util.implementation.HandleConstants;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceImportException;
-import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.importing.NodeDataRetriever;
 import nl.mpi.lamus.workspace.importing.NodeImporter;
@@ -81,7 +80,6 @@ public class MetadataNodeImporterTest {
     @Mock NodeResolver mockNodeResolver;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock MetadataAPI mockMetadataAPI;
-    @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceNodeFactory mockWorkspaceNodeFactory;
     @Mock WorkspaceNodeExplorer mockWorkspaceNodeExplorer;
     @Mock NodeDataRetriever mockNodeDataRetriever;
@@ -131,7 +129,6 @@ public class MetadataNodeImporterTest {
         ReflectionTestUtils.setField(nodeImporter, "nodeResolver", mockNodeResolver);
         ReflectionTestUtils.setField(nodeImporter, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(nodeImporter, "metadataAPI", mockMetadataAPI);
-        ReflectionTestUtils.setField(nodeImporter, "metadataApiBridge", mockMetadataApiBridge);
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeLinkManager", mockWorkspaceNodeLinkManager);
         ReflectionTestUtils.setField(nodeImporter, "workspaceFileImporter", mockWorkspaceFileImporter);
         ReflectionTestUtils.setField(nodeImporter, "workspaceNodeFactory", mockWorkspaceNodeFactory);
@@ -422,7 +419,6 @@ public class MetadataNodeImporterTest {
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestReferencingMetadataDocumentWithHandle);
             
             oneOf(mockMetadataResourceProxy).setLocation(testChildWsURI);
-            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
             
             oneOf (mockTestReferencingMetadataDocumentWithHandle).getDocumentReferences(); will(returnValue(mockReferenceList));
             oneOf (mockWorkspaceNodeExplorer).explore(testWorkspace, testChildNode, mockTestReferencingMetadataDocumentWithHandle, mockReferenceList);
@@ -492,7 +488,6 @@ public class MetadataNodeImporterTest {
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
             
             oneOf(mockMetadataResourceProxy).setLocation(testChildWsURI);
-            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
         nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockMetadataResourceProxy);
@@ -555,7 +550,6 @@ public class MetadataNodeImporterTest {
             oneOf(mockWorkspaceFileImporter).importMetadataFileToWorkspace(mockArchiveFile, testChildNode, mockTestNonReferencingMetadataDocumentWithHandle);
             
             oneOf(mockReferenceWithoutHandle).setLocation(testChildWsURI);
-            oneOf(mockMetadataApiBridge).saveMetadataDocument(mockReferencingMetadataDocument, parentWsURL);
         }});
         
         nodeImporter.importNode(testWorkspace, testParentNode, mockReferencingMetadataDocument, mockReferenceWithoutHandle);

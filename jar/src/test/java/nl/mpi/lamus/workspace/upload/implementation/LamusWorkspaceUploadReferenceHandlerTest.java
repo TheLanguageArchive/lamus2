@@ -177,7 +177,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
@@ -203,6 +203,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
+        final URI firstRefURI = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
         final URI secondRefURI = URI.create("");
         final URI secondRefLocalUri = URI.create("file://absolute/path/to/resource.txt");
         
@@ -225,9 +227,9 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsAPage(mockFirstReference);
+        reference_IsAPage(mockFirstReference, firstRefURI);
         
-        reference_IsNotAPage(mockSecondReference);
+        reference_IsNotAPage(mockSecondReference, secondRefURI);
         reference_WithLocalUri_MatchesNode(mockSecondReference, mockSecondNode, secondRefLocalUri, secondRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, secondDocumentLocation, secondDocumentLocationFile, mockSecondReference, secondRefURI, Boolean.FALSE);
@@ -272,7 +274,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, null, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
@@ -322,7 +324,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.FALSE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //empty URI, so it will be set with the value of the location URL
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, Boolean.FALSE);
@@ -371,7 +373,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
@@ -420,7 +422,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
@@ -471,7 +473,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUriButNoMatchThere_WithHandle_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, Boolean.TRUE, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
         
         //change the reference URI to the workspace URL and save the document in the same location
@@ -521,7 +523,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefURI, nodesToCheck);
         //URI is a handle, so URI in DB should be updated
         updateReferenceDbUri_refHasLocalUri(firstRefURI, mockSecondNode, Boolean.TRUE);
@@ -579,7 +581,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithLocalUri_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, firstRefLocalUri, nodesToCheck);
         //URI is not a handle, so it should be cleared (since the local URL is already present in the localURI attribute)
         clearReferenceUri(mockMetadataDocument, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefLocalUri, Boolean.TRUE);
@@ -629,7 +631,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode,
@@ -679,7 +681,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.FALSE, mockSecondNode,
@@ -726,7 +728,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.TRUE, Boolean.TRUE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
@@ -768,7 +770,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.FALSE, Boolean.FALSE, firstRefURI, null, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.FALSE, mockSecondNode,
@@ -807,7 +809,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.FALSE, Boolean.TRUE, firstRefURI, null, nodesToCheck, workspaceID);
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
@@ -852,7 +854,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode, secondNodeURL, null, null, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
@@ -915,7 +917,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode,
@@ -926,7 +928,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         dealWithMatchedNode(mockSecondNode, secondNodeID, existingSecondNodeParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
-        reference_IsNotAPage(mockSecondReference);
+        reference_IsNotAPage(mockSecondReference, secondRefURI);
         reference_WithoutLocalUri_MatchesNode(mockSecondReference, mockThirdNode, Boolean.FALSE, Boolean.FALSE, secondRefURI, null, nodesToCheck, workspaceID);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockSecondReference, secondRefURI, Boolean.FALSE, Boolean.FALSE, mockThirdNode,
@@ -966,7 +968,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation,
@@ -1010,7 +1012,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutMatch(mockFirstReference, Boolean.TRUE, firstRefURI, nodesToCheck, workspaceID);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
@@ -1052,7 +1054,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
-        reference_IsNotAPage(mockFirstReference);
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
         reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, null, null, mockFirstReference, firstRefURI, expectedException);
@@ -1083,16 +1085,18 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         }});
     }
     
-    private void reference_IsAPage(final Reference mockReference) {
+    private void reference_IsAPage(final Reference mockReference, final URI refURI) {
         
         context.checking(new Expectations() {{
+            oneOf(mockReference).getURI(); will(returnValue(refURI));
             oneOf(mockMetadataApiBridge).isReferenceTypeAPage(mockReference); will(returnValue(Boolean.TRUE));
         }});
     }
     
-    private void reference_IsNotAPage(final Reference mockReference) {
+    private void reference_IsNotAPage(final Reference mockReference, final URI refURI) {
         
         context.checking(new Expectations() {{
+            oneOf(mockReference).getURI(); will(returnValue(refURI));
             oneOf(mockMetadataApiBridge).isReferenceTypeAPage(mockReference); will(returnValue(Boolean.FALSE));
         }});
     }
@@ -1330,7 +1334,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         context.checking(new Expectations() {{
 
             //check if the matched node already has parents
-            oneOf(mockMatchedNode).getWorkspaceNodeID(); will(returnValue(mockMatchedNodeID));
+            exactly(2).of(mockMatchedNode).getWorkspaceNodeID(); will(returnValue(mockMatchedNodeID));
             oneOf(mockWorkspaceDao).getParentWorkspaceNodes(mockMatchedNodeID); will(returnValue(existingParents));
         }});
         

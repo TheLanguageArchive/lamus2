@@ -16,11 +16,9 @@
 package nl.mpi.lamus.workspace.importing.implementation;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import javax.xml.transform.TransformerException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
@@ -180,18 +178,5 @@ public class ResourceNodeImporter implements NodeImporter<ResourceReference> {
         workspaceDao.addWorkspaceNodeLink(nodeLink);
         
         referenceFromParent.setLocation(null);
-        try {
-            metadataApiBridge.saveMetadataDocument(parentDocument, parentNode.getWorkspaceURL());
-        } catch (IOException | TransformerException | MetadataException ioex) {
-            String errorMessage = "Failed to save file " + parentNode.getWorkspaceURL()
-		    + " in workspace " + workspaceID;
-	    throwWorkspaceImportException(workspaceID, errorMessage, ioex);
-        }
-    }
-    
-    
-    private void throwWorkspaceImportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceImportException {
-        logger.error(errorMessage, cause);
-        throw new WorkspaceImportException(errorMessage, workspaceID, cause);
     }
 }

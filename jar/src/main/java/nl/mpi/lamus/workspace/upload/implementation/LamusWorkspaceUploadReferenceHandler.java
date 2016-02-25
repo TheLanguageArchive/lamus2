@@ -94,6 +94,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
             Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles) {
         
+        logger.debug("Trying to match references with nodes in the database");
+        
         Collection<ImportProblem> failedLinks = new ArrayList<>();
         
         //check if document has external self-handle
@@ -107,6 +109,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         
         for(Reference ref : references) {
             
+            logger.debug("Searching match for reference " + ref.getURI());
+            
             if(metadataApiBridge.isReferenceTypeAPage(ref)) {
                 continue;
             }
@@ -118,6 +122,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
 
             if(refLocalURI != null) {
                 
+                logger.debug("Reference has localURI " + refLocalURI);
+                
                 matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
                 
                 if(matchedNode != null) {
@@ -127,14 +133,15 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     } else {
                         clearReferenceUri(currentDocument, ref, matchedNode);
                     }
-                    
                 }
-                
             }
             
             if(matchedNode == null) {
                 
                 if(handleParser.isHandleUriWithKnownPrefix(refURI)) {
+                    
+                    logger.debug("Match not found yet. Trying to find it using handle " + refURI);
+                    
                     URI preparedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(refURI);
                     matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, preparedHandle);
                     
@@ -149,11 +156,17 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                         }
                     }
                 } else {
+                    
+                    logger.debug("Match not found yet. Trying to find it using URI " + refURI);
+                    
                     matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refURI.toString());
                 }
                 
                 //check if it's an external reference
                 if(matchedNode == null) {
+                    
+                    logger.debug("Match not found yet. Trying to find external match for URI " + refURI);
+                    
                     matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
                     if(matchedNode != null) {
                         externalNode = true;
@@ -162,6 +175,8 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             }
 
             if(matchedNode != null) {
+                
+                logger.debug("Node " + matchedNode.getWorkspaceNodeID() + " matched. Updating parent file and linking nodes in the database");
                 
                 // update localURI, even if it was present already, since it could be a relative path and not matching the later calls using the absolute path
                 if(!externalNode) {
